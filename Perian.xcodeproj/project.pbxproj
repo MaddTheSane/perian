@@ -1,0 +1,404 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
+		11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA10A3CE8C10066D45F /* libavcodec.a */; };
+		11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA20A3CE8C10066D45F /* libavutil.a */; };
+		11A70AD10A3D0131002058D4 /* libpostproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA30A3CE8C10066D45F /* libpostproc.a */; };
+		11A70AD20A3D0131002058D4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1156DBD80A3CE9F500963B0E /* libz.dylib */; };
+		11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EED50A3CE7EC0066D45F /* QuickTime.framework */; };
+		11A70AD70A3D013E002058D4 /* FFusionCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F560DF0003D61D0101ABA332 /* FFusionCodec.c */; };
+		11A70AD80A3D0149002058D4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
+		11A70AD90A3D0149002058D4 /* FFusion.icns in Resources */ = {isa = PBXBuildFile; fileRef = F50D440703EAD8DF01B1D299 /* FFusion.icns */; };
+		11A70ADA0A3D0149002058D4 /* main.nib in Resources */ = {isa = PBXBuildFile; fileRef = 02B4991D040D596C0049362E /* main.nib */; };
+		11A70ADB0A3D0149002058D4 /* PostProcessing.strings in Resources */ = {isa = PBXBuildFile; fileRef = 02B499DE040D7A180049362E /* PostProcessing.strings */; };
+		11A70AE00A3D015A002058D4 /* FFusionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = F560DF0203D622D001ABA332 /* FFusionCodec.r */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		02B4991E040D596C0049362E /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
+		02B499DF040D7A180049362E /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/PostProcessing.strings; sourceTree = "<group>"; };
+		02CA1BD00513A37900D00256 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/main.nib; sourceTree = "<group>"; };
+		02CA1BD10513A38400D00256 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/PostProcessing.strings; sourceTree = "<group>"; };
+		02CA1BD20513A38D00D00256 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1156DBD80A3CE9F500963B0E /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
+		11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Perian-Info.plist"; sourceTree = "<group>"; };
+		11A70AC10A3D0105002058D4 /* Perian.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.component; sourceTree = BUILT_PRODUCTS_DIR; };
+		11D4EED50A3CE7EC0066D45F /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
+		11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = staticLibs/libavcodec.a; sourceTree = "<group>"; };
+		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = staticLibs/libavutil.a; sourceTree = "<group>"; };
+		11D4EFA30A3CE8C10066D45F /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpostproc.a; path = staticLibs/libpostproc.a; sourceTree = "<group>"; };
+		F50D440703EAD8DF01B1D299 /* FFusion.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = FFusion.icns; sourceTree = "<group>"; };
+		F560DECD03D61B6101ABA332 /* Components.k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Components.k.h; sourceTree = "<group>"; };
+		F560DEFC03D61BE301ABA332 /* FFusionCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodec.h; sourceTree = "<group>"; };
+		F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodecDispatch.h; sourceTree = "<group>"; };
+		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFusionCodec.c; sourceTree = "<group>"; };
+		F560DF0203D622D001ABA332 /* FFusionCodec.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = FFusionCodec.r; sourceTree = "<group>"; };
+		F560DF0403D623F301ABA332 /* EI_Image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EI_Image.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		11A70ABF0A3D0105002058D4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */,
+				11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */,
+				11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */,
+				11A70AD10A3D0131002058D4 /* libpostproc.a in Frameworks */,
+				11A70AD20A3D0131002058D4 /* libz.dylib in Frameworks */,
+				11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		089C166AFE841209C02AAC07 /* ffmpeg DivX */ = {
+			isa = PBXGroup;
+			children = (
+				08FB77ADFE841716C02AAC07 /* Source */,
+				089C167CFE841241C02AAC07 /* Resources */,
+				089C1671FE841209C02AAC07 /* External Frameworks and Libraries */,
+				19C28FB4FE9D528D11CA2CBB /* Products */,
+				11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */,
+			);
+			name = "ffmpeg DivX";
+			sourceTree = "<group>";
+		};
+		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				1156DBD80A3CE9F500963B0E /* libz.dylib */,
+				11D4EFA10A3CE8C10066D45F /* libavcodec.a */,
+				11D4EFA20A3CE8C10066D45F /* libavutil.a */,
+				11D4EFA30A3CE8C10066D45F /* libpostproc.a */,
+				11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */,
+				11D4EED50A3CE7EC0066D45F /* QuickTime.framework */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		089C167CFE841241C02AAC07 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				089C167DFE841241C02AAC07 /* InfoPlist.strings */,
+				02B499DE040D7A180049362E /* PostProcessing.strings */,
+				02B4991D040D596C0049362E /* main.nib */,
+				F560DF0203D622D001ABA332 /* FFusionCodec.r */,
+				F50D440903EAD8E701B1D299 /* Images */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		08FB77ADFE841716C02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				F560DF0403D623F301ABA332 /* EI_Image.h */,
+				F560DECD03D61B6101ABA332 /* Components.k.h */,
+				F560DEFC03D61BE301ABA332 /* FFusionCodec.h */,
+				F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */,
+				F560DF0003D61D0101ABA332 /* FFusionCodec.c */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		19C28FB4FE9D528D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				11A70AC10A3D0105002058D4 /* Perian.component */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F50D440903EAD8E701B1D299 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				F50D440703EAD8DF01B1D299 /* FFusion.icns */,
+			);
+			name = Images;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		11A70AC00A3D0105002058D4 /* Perian */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */;
+			buildPhases = (
+				11A70ABD0A3D0105002058D4 /* Resources */,
+				11A70ABE0A3D0105002058D4 /* Sources */,
+				11A70ABF0A3D0105002058D4 /* Frameworks */,
+				11A70ADC0A3D0156002058D4 /* Rez */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Perian;
+			productName = Perian;
+			productReference = 11A70AC10A3D0105002058D4 /* Perian.component */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		089C1669FE841209C02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 11D4ED470A3CE59A0066D45F /* Build configuration list for PBXProject "Perian" */;
+			hasScannedForEncodings = 1;
+			mainGroup = 089C166AFE841209C02AAC07 /* ffmpeg DivX */;
+			projectDirPath = "";
+			targets = (
+				11A70AC00A3D0105002058D4 /* Perian */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		11A70ABD0A3D0105002058D4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11A70AD80A3D0149002058D4 /* InfoPlist.strings in Resources */,
+				11A70AD90A3D0149002058D4 /* FFusion.icns in Resources */,
+				11A70ADA0A3D0149002058D4 /* main.nib in Resources */,
+				11A70ADB0A3D0149002058D4 /* PostProcessing.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXRezBuildPhase section */
+		11A70ADC0A3D0156002058D4 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11A70AE00A3D015A002058D4 /* FFusionCodec.r in Rez */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXRezBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		11A70ABE0A3D0105002058D4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11A70AD70A3D013E002058D4 /* FFusionCodec.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		02B4991D040D596C0049362E /* main.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				02B4991E040D596C0049362E /* English */,
+				02CA1BD00513A37900D00256 /* French */,
+			);
+			name = main.nib;
+			sourceTree = "<group>";
+		};
+		02B499DE040D7A180049362E /* PostProcessing.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				02B499DF040D7A180049362E /* English */,
+				02CA1BD10513A38400D00256 /* French */,
+			);
+			name = PostProcessing.strings;
+			sourceTree = "<group>";
+		};
+		089C167DFE841241C02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C167EFE841241C02AAC07 /* English */,
+				02CA1BD20513A38D00D00256 /* French */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		11A70AC90A3D0111002058D4 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					i386,
+					ppc,
+				);
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = stabs;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G4;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG_BUILD;
+				HEADER_SEARCH_PATHS = (
+					ffmpeg/libavcodec,
+					ffmpeg/libavutil,
+					ffmpeg/libpostproc,
+				);
+				INFOPLIST_FILE = "Perian-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = staticLibs;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+					"-read_only_relocs",
+					suppress,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Perian;
+				REZ_PREPROCESSOR_DEFINITIONS = "";
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				WRAPPER_EXTENSION = component;
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		11A70ACA0A3D0111002058D4 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					i386,
+					ppc,
+				);
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = stabs;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G4;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				HEADER_SEARCH_PATHS = (
+					ffmpeg/libavcodec,
+					ffmpeg/libavutil,
+					ffmpeg/libpostproc,
+				);
+				INFOPLIST_FILE = "Perian-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = staticLibs;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+					"-read_only_relocs",
+					suppress,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Perian;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				WRAPPER_EXTENSION = component;
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		11A70ACB0A3D0111002058D4 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					i386,
+					ppc,
+				);
+				DEBUG_INFORMATION_FORMAT = stabs;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G4;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				HEADER_SEARCH_PATHS = (
+					ffmpeg/libavcodec,
+					ffmpeg/libavutil,
+					ffmpeg/libpostproc,
+				);
+				INFOPLIST_FILE = "Perian-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				LIBRARY_SEARCH_PATHS = staticLibs;
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+					"-read_only_relocs",
+					suppress,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Perian;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				WRAPPER_EXTENSION = component;
+				ZERO_LINK = NO;
+			};
+			name = Default;
+		};
+		11D4ED480A3CE59A0066D45F /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = include;
+				LIBRARY_SEARCH_PATHS = staticLibs;
+			};
+			name = Development;
+		};
+		11D4ED490A3CE59A0066D45F /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Deployment;
+		};
+		11D4ED4A0A3CE59A0066D45F /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Default;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11A70AC90A3D0111002058D4 /* Development */,
+				11A70ACA0A3D0111002058D4 /* Deployment */,
+				11A70ACB0A3D0111002058D4 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		11D4ED470A3CE59A0066D45F /* Build configuration list for PBXProject "Perian" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11D4ED480A3CE59A0066D45F /* Development */,
+				11D4ED490A3CE59A0066D45F /* Deployment */,
+				11D4ED4A0A3CE59A0066D45F /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 089C1669FE841209C02AAC07 /* Project object */;
+}
