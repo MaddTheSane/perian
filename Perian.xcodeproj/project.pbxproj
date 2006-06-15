@@ -64,21 +64,21 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8F9B11390A41CFC400083569 /* Build PPC Static Libs */;
+			remoteGlobalIDString = 8F9B11390A41CFC400083569;
 			remoteInfo = "Build PPC Static Libs";
 		};
 		8F9B114F0A41D11700083569 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8F78AC730A41C73C005622AB /* Build Intel Static Libs */;
+			remoteGlobalIDString = 8F78AC730A41C73C005622AB;
 			remoteInfo = "Build Intel Static Libs";
 		};
 		8F9B11760A41D3AA00083569 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8F9B11480A41D10F00083569 /* Lipo Static Libs */;
+			remoteGlobalIDString = 8F9B11480A41D10F00083569;
 			remoteInfo = "Lipo Static Libs";
 		};
 /* End PBXContainerItemProxy section */
@@ -266,7 +266,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "BUILDDIR=\"$SYMROOT/intel\"\nmkdir \"$BUILDDIR\"\n\ncd \"$SRCROOT/ffmpeg\"\npatch -p0 < ../ffmpeg-svn-mactel.patch\n\ncd \"$BUILDDIR\"\n\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl --enable-memalign-hack --cpu=i686  --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386'\n\n#construct the \"fake\" config.mak and config.h files to work around the brokenness of cross-compiles\nrm \"$BUILDDIR/config.h\"\ncp \"$SRCROOT/i386-configured/config.h\" \"$BUILDDIR\"\nrm \"$BUILDDIR/config.mak\"\ncp \"$SRCROOT/i386-configured/config.mak\" \"$BUILDDIR\"\nmake\n\ncd \"$SRCROOT/ffmpeg\"\npatch -R -p0 < ../ffmpeg-svn-mactel.patch\n\n";
+			shellScript = "BUILDDIR=\"$SYMROOT/intel\"\nmkdir \"$BUILDDIR\"\n\ncd \"$SRCROOT/ffmpeg\"\npatch -p0 < ../ffmpeg-svn-mactel.patch\n\ncd \"$BUILDDIR\"\nif [ `arch` != i386 ] ; then\n\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl --enable-memalign-hack --cpu=i686  --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386'\n\n\t#construct the \"fake\" config.mak and config.h files to work around the brokenness of cross-compiles\n\trm \"$BUILDDIR/config.h\"\n\tcp \"$SRCROOT/i386-configured/config.h\" \"$BUILDDIR\"\n\trm \"$BUILDDIR/config.mak\"\n\tcp \"$SRCROOT/i386-configured/config.mak\" \"$BUILDDIR\"\nelse\n\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl --enable-memalign-hack\nfi\nmake\n\ncd \"$SRCROOT/ffmpeg\"\npatch -R -p0 < ../ffmpeg-svn-mactel.patch\n\n";
 		};
 		8F9B11380A41CFC400083569 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -279,7 +279,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "BUILDDIR=\"$SYMROOT/ppc\"\nmkdir \"$BUILDDIR\"\n\ncd \"$BUILDDIR\"\n\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl\n\nmake\n\n";
+			shellScript = "BUILDDIR=\"$SYMROOT/ppc\"\nmkdir \"$BUILDDIR\"\n\ncd \"$BUILDDIR\"\nif [ `arch` = ppc ] ; then\n\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl\nelse\n\t../ffmpeg/configure --enable-pp --enable-gpl --cpu=ppc  --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc'\n\n\t#construct the \"fake\" config.mak and config.h files to work around the brokenness of cross-compiles\n\trm \"$BUILDDIR/config.h\"\n\tcp \"$SRCROOT/ppc-configured/config.h\" \"$BUILDDIR\"\n\trm \"$BUILDDIR/config.mak\"\n\tcp \"$SRCROOT/ppc-configured/config.mak\" \"$BUILDDIR\"\nfi\nmake\n\n";
 		};
 		8F9B11470A41D10F00083569 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -292,7 +292,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "BUILDDIR=\"$SYMROOT/Universal\"\nINTEL=\"$SYMROOT/intel\"\nPPC=\"$SYMROOT/ppc\"\nrm -r \"$BUILDDIR\"\nmkdir \"$BUILDDIR\"\nfor aa in \"$INTEL\"/*/*.a ; do\n\techo lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\\/.*\\//Universal\\//'`\n\tlipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\\/.*\\//Universal\\//'`\ndone\n";
+			shellScript = "BUILDDIR=\"$SYMROOT/Universal\"\nINTEL=\"$SYMROOT/intel\"\nPPC=\"$SYMROOT/ppc\"\nrm -rf \"$BUILDDIR\"\nmkdir \"$BUILDDIR\"\nfor aa in \"$INTEL\"/*/*.a ; do\n\techo lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\\/.*\\//Universal\\//'`\n\tlipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\\/.*\\//Universal\\//'`\ndone\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
