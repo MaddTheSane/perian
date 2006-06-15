@@ -6,6 +6,44 @@
 	objectVersion = 42;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		8F78AC730A41C73C005622AB /* Build Intel Static Libs */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 8F78AC760A41C75B005622AB /* Build configuration list for PBXAggregateTarget "Build Intel Static Libs" */;
+			buildPhases = (
+				8F78AC720A41C73C005622AB /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Build Intel Static Libs";
+			productName = "Build Intel Static Libs";
+		};
+		8F9B11390A41CFC400083569 /* Build PPC Static Libs */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 8F9B113C0A41CFE200083569 /* Build configuration list for PBXAggregateTarget "Build PPC Static Libs" */;
+			buildPhases = (
+				8F9B11380A41CFC400083569 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Build PPC Static Libs";
+			productName = "Build PPC Static Libs";
+		};
+		8F9B11480A41D10F00083569 /* Lipo Static Libs */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 8F9B11530A41D13500083569 /* Build configuration list for PBXAggregateTarget "Lipo Static Libs" */;
+			buildPhases = (
+				8F9B11470A41D10F00083569 /* ShellScript */,
+			);
+			dependencies = (
+				8F9B114E0A41D11600083569 /* PBXTargetDependency */,
+				8F9B11500A41D11700083569 /* PBXTargetDependency */,
+			);
+			name = "Lipo Static Libs";
+			productName = "Lipo Static Libs";
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA10A3CE8C10066D45F /* libavcodec.a */; };
@@ -21,6 +59,30 @@
 		11A70AE00A3D015A002058D4 /* FFusionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = F560DF0203D622D001ABA332 /* FFusionCodec.r */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		8F9B114D0A41D11600083569 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8F9B11390A41CFC400083569 /* Build PPC Static Libs */;
+			remoteInfo = "Build PPC Static Libs";
+		};
+		8F9B114F0A41D11700083569 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8F78AC730A41C73C005622AB /* Build Intel Static Libs */;
+			remoteInfo = "Build Intel Static Libs";
+		};
+		8F9B11760A41D3AA00083569 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8F9B11480A41D10F00083569 /* Lipo Static Libs */;
+			remoteInfo = "Lipo Static Libs";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		02B4991E040D596C0049362E /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
 		02B499DF040D7A180049362E /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/PostProcessing.strings; sourceTree = "<group>"; };
@@ -33,9 +95,9 @@
 		11A70AC10A3D0105002058D4 /* Perian.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.component; sourceTree = BUILT_PRODUCTS_DIR; };
 		11D4EED50A3CE7EC0066D45F /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
 		11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
-		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = staticLibs/libavcodec.a; sourceTree = "<group>"; };
-		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = staticLibs/libavutil.a; sourceTree = "<group>"; };
-		11D4EFA30A3CE8C10066D45F /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpostproc.a; path = staticLibs/libpostproc.a; sourceTree = "<group>"; };
+		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = build/Universal/libavcodec.a; sourceTree = "<group>"; };
+		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = build/Universal/libavutil.a; sourceTree = "<group>"; };
+		11D4EFA30A3CE8C10066D45F /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpostproc.a; path = build/Universal/libpostproc.a; sourceTree = "<group>"; };
 		F50D440703EAD8DF01B1D299 /* FFusion.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = FFusion.icns; sourceTree = "<group>"; };
 		F560DECD03D61B6101ABA332 /* Components.k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Components.k.h; sourceTree = "<group>"; };
 		F560DEFC03D61BE301ABA332 /* FFusionCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodec.h; sourceTree = "<group>"; };
@@ -142,6 +204,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				8F9B11770A41D3AA00083569 /* PBXTargetDependency */,
 			);
 			name = Perian;
 			productName = Perian;
@@ -159,6 +222,9 @@
 			projectDirPath = "";
 			targets = (
 				11A70AC00A3D0105002058D4 /* Perian */,
+				8F9B11480A41D10F00083569 /* Lipo Static Libs */,
+				8F9B11390A41CFC400083569 /* Build PPC Static Libs */,
+				8F78AC730A41C73C005622AB /* Build Intel Static Libs */,
 			);
 		};
 /* End PBXProject section */
@@ -188,6 +254,48 @@
 		};
 /* End PBXRezBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		8F78AC720A41C73C005622AB /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 12;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "BUILDDIR=\"$SYMROOT/intel\"\nmkdir \"$BUILDDIR\"\n\ncd \"$SRCROOT/ffmpeg\"\npatch -p0 < ../ffmpeg-svn-mactel.patch\n\ncd \"$BUILDDIR\"\n\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl --enable-memalign-hack --cpu=i686  --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386'\n\n#construct the \"fake\" config.mak and config.h files to work around the brokenness of cross-compiles\nrm \"$BUILDDIR/config.h\"\ncp \"$SRCROOT/i386-configured/config.h\" \"$BUILDDIR\"\nrm \"$BUILDDIR/config.mak\"\ncp \"$SRCROOT/i386-configured/config.mak\" \"$BUILDDIR\"\nmake\n\ncd \"$SRCROOT/ffmpeg\"\npatch -R -p0 < ../ffmpeg-svn-mactel.patch\n\n";
+		};
+		8F9B11380A41CFC400083569 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "BUILDDIR=\"$SYMROOT/ppc\"\nmkdir \"$BUILDDIR\"\n\ncd \"$BUILDDIR\"\n\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl\n\nmake\n\n";
+		};
+		8F9B11470A41D10F00083569 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "BUILDDIR=\"$SYMROOT/Universal\"\nINTEL=\"$SYMROOT/intel\"\nPPC=\"$SYMROOT/ppc\"\nrm -r \"$BUILDDIR\"\nmkdir \"$BUILDDIR\"\nfor aa in \"$INTEL\"/*/*.a ; do\n\techo lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\\/.*\\//Universal\\//'`\n\tlipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\\/.*\\//Universal\\//'`\ndone\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		11A70ABE0A3D0105002058D4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -198,6 +306,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8F9B114E0A41D11600083569 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8F9B11390A41CFC400083569 /* Build PPC Static Libs */;
+			targetProxy = 8F9B114D0A41D11600083569 /* PBXContainerItemProxy */;
+		};
+		8F9B11500A41D11700083569 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8F78AC730A41C73C005622AB /* Build Intel Static Libs */;
+			targetProxy = 8F9B114F0A41D11700083569 /* PBXContainerItemProxy */;
+		};
+		8F9B11770A41D3AA00083569 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8F9B11480A41D10F00083569 /* Lipo Static Libs */;
+			targetProxy = 8F9B11760A41D3AA00083569 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		02B4991D040D596C0049362E /* main.nib */ = {
@@ -259,7 +385,7 @@
 				);
 				INFOPLIST_FILE = "Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LIBRARY_SEARCH_PATHS = staticLibs;
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -301,7 +427,7 @@
 				);
 				INFOPLIST_FILE = "Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LIBRARY_SEARCH_PATHS = staticLibs;
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -340,7 +466,7 @@
 				);
 				INFOPLIST_FILE = "Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LIBRARY_SEARCH_PATHS = staticLibs;
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -375,6 +501,93 @@
 			};
 			name = Default;
 		};
+		8F78AC770A41C75B005622AB /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Build Intel Static Libs";
+			};
+			name = Development;
+		};
+		8F78AC780A41C75B005622AB /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Build Intel Static Libs";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		8F78AC790A41C75B005622AB /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Build Intel Static Libs";
+			};
+			name = Default;
+		};
+		8F9B113D0A41CFE200083569 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Build PPC Static Libs";
+			};
+			name = Development;
+		};
+		8F9B113E0A41CFE200083569 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Build PPC Static Libs";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		8F9B113F0A41CFE200083569 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Build PPC Static Libs";
+			};
+			name = Default;
+		};
+		8F9B11540A41D13500083569 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Lipo Static Libs";
+			};
+			name = Development;
+		};
+		8F9B11550A41D13500083569 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Lipo Static Libs";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		8F9B11560A41D13500083569 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Lipo Static Libs";
+			};
+			name = Default;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -394,6 +607,36 @@
 				11D4ED480A3CE59A0066D45F /* Development */,
 				11D4ED490A3CE59A0066D45F /* Deployment */,
 				11D4ED4A0A3CE59A0066D45F /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		8F78AC760A41C75B005622AB /* Build configuration list for PBXAggregateTarget "Build Intel Static Libs" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F78AC770A41C75B005622AB /* Development */,
+				8F78AC780A41C75B005622AB /* Deployment */,
+				8F78AC790A41C75B005622AB /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		8F9B113C0A41CFE200083569 /* Build configuration list for PBXAggregateTarget "Build PPC Static Libs" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F9B113D0A41CFE200083569 /* Development */,
+				8F9B113E0A41CFE200083569 /* Deployment */,
+				8F9B113F0A41CFE200083569 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		8F9B11530A41D13500083569 /* Build configuration list for PBXAggregateTarget "Lipo Static Libs" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F9B11540A41D13500083569 /* Development */,
+				8F9B11550A41D13500083569 /* Deployment */,
+				8F9B11560A41D13500083569 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
