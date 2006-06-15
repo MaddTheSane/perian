@@ -35,6 +35,7 @@
 #include "EI_Image.h"
 #include "avcodec.h"
 #include "postprocess.h"
+#include "bswap.h"
 
 //---------------------------------------------------------------------------
 // Types
@@ -1102,17 +1103,18 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
         dataPtr += len;
     }
 
+	/*From Docs: PixMap baseAddr points to a big-endian PlanarPixmapInfoYUV420 struct; see ImageCodec.i. */
     planar = (PlanarPixmapInfoYUV420 *) baseAddr;
     
     // if ya can't set da poiners, set da offsets
-    planar->componentInfoY.offset = picture->data[0] - baseAddr;
-    planar->componentInfoCb.offset =  picture->data[1] - baseAddr;
-    planar->componentInfoCr.offset =  picture->data[2] - baseAddr;
+    planar->componentInfoY.offset = bswap_32(picture->data[0] - baseAddr);
+    planar->componentInfoCb.offset =  bswap_32(picture->data[1] - baseAddr);
+    planar->componentInfoCr.offset =  bswap_32(picture->data[2] - baseAddr);
     
     // for the 16/32 add look at EDGE in mpegvideo.c
-    planar->componentInfoY.rowBytes = picture->linesize[0];
-    planar->componentInfoCb.rowBytes = picture->linesize[1];
-    planar->componentInfoCr.rowBytes = picture->linesize[2];
+    planar->componentInfoY.rowBytes = bswap_32(picture->linesize[0]);
+    planar->componentInfoCb.rowBytes = bswap_32(picture->linesize[1]);
+    planar->componentInfoCr.rowBytes = bswap_32(picture->linesize[2]);
     
     return err;
 }
