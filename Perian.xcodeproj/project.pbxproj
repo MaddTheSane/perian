@@ -42,6 +42,18 @@
 			name = "Lipo Static Libs";
 			productName = "Lipo Static Libs";
 		};
+		F5790A2F0A422CFC0083622C /* Perian */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F5790A3A0A422D2A0083622C /* Build configuration list for PBXAggregateTarget "Perian" */;
+			buildPhases = (
+			);
+			dependencies = (
+				F5790A330A422D040083622C /* PBXTargetDependency */,
+				F5790A310A422D040083622C /* PBXTargetDependency */,
+			);
+			name = Perian;
+			productName = "Perian All";
+		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
@@ -74,11 +86,18 @@
 			remoteGlobalIDString = 8F78AC730A41C73C005622AB;
 			remoteInfo = "Build Intel Static Libs";
 		};
-		8F9B11760A41D3AA00083569 /* PBXContainerItemProxy */ = {
+		F5790A300A422D040083622C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8F9B11480A41D10F00083569;
+			remoteGlobalIDString = 11A70AC00A3D0105002058D4 /* Perian */;
+			remoteInfo = Perian;
+		};
+		F5790A320A422D040083622C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8F9B11480A41D10F00083569 /* Lipo Static Libs */;
 			remoteInfo = "Lipo Static Libs";
 		};
 /* End PBXContainerItemProxy section */
@@ -192,9 +211,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		11A70AC00A3D0105002058D4 /* Perian */ = {
+		11A70AC00A3D0105002058D4 /* Perian (No Libraries) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */;
+			buildConfigurationList = 11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian (No Libraries)" */;
 			buildPhases = (
 				11A70ABD0A3D0105002058D4 /* Resources */,
 				11A70ABE0A3D0105002058D4 /* Sources */,
@@ -204,9 +223,8 @@
 			buildRules = (
 			);
 			dependencies = (
-				8F9B11770A41D3AA00083569 /* PBXTargetDependency */,
 			);
-			name = Perian;
+			name = "Perian (No Libraries)";
 			productName = Perian;
 			productReference = 11A70AC10A3D0105002058D4 /* Perian.component */;
 			productType = "com.apple.product-type.bundle";
@@ -221,7 +239,8 @@
 			mainGroup = 089C166AFE841209C02AAC07 /* ffmpeg DivX */;
 			projectDirPath = "";
 			targets = (
-				11A70AC00A3D0105002058D4 /* Perian */,
+				F5790A2F0A422CFC0083622C /* Perian */,
+				11A70AC00A3D0105002058D4 /* Perian (No Libraries) */,
 				8F9B11480A41D10F00083569 /* Lipo Static Libs */,
 				8F9B11390A41CFC400083569 /* Build PPC Static Libs */,
 				8F78AC730A41C73C005622AB /* Build Intel Static Libs */,
@@ -318,10 +337,15 @@
 			target = 8F78AC730A41C73C005622AB /* Build Intel Static Libs */;
 			targetProxy = 8F9B114F0A41D11700083569 /* PBXContainerItemProxy */;
 		};
-		8F9B11770A41D3AA00083569 /* PBXTargetDependency */ = {
+		F5790A310A422D040083622C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 11A70AC00A3D0105002058D4 /* Perian (No Libraries) */;
+			targetProxy = F5790A300A422D040083622C /* PBXContainerItemProxy */;
+		};
+		F5790A330A422D040083622C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8F9B11480A41D10F00083569 /* Lipo Static Libs */;
-			targetProxy = 8F9B11760A41D3AA00083569 /* PBXContainerItemProxy */;
+			targetProxy = F5790A320A422D040083622C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -588,10 +612,39 @@
 			};
 			name = Default;
 		};
+		F5790A3B0A422D2A0083622C /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Perian All";
+			};
+			name = Development;
+		};
+		F5790A3C0A422D2A0083622C /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Perian All";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		F5790A3D0A422D2A0083622C /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Perian All";
+			};
+			name = Default;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */ = {
+		11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian (No Libraries)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				11A70AC90A3D0111002058D4 /* Development */,
@@ -637,6 +690,16 @@
 				8F9B11540A41D13500083569 /* Development */,
 				8F9B11550A41D13500083569 /* Deployment */,
 				8F9B11560A41D13500083569 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		F5790A3A0A422D2A0083622C /* Build configuration list for PBXAggregateTarget "Perian" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5790A3B0A422D2A0083622C /* Development */,
+				F5790A3C0A422D2A0083622C /* Deployment */,
+				F5790A3D0A422D2A0083622C /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
