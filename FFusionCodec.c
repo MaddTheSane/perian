@@ -37,6 +37,16 @@
 #include "postprocess.h"
 #include "bswap.h"
 
+#ifdef __BIG_ENDIAN__
+#define make_big_32(x) (x)
+#else
+#ifdef __LITTLE_ENDIAN__
+#define make_big_32(x) bswap_32(x)
+#else
+#error Endian is unknown
+#endif //Little
+#endif //Big
+
 //---------------------------------------------------------------------------
 // Types
 //---------------------------------------------------------------------------
@@ -1107,14 +1117,14 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
     planar = (PlanarPixmapInfoYUV420 *) baseAddr;
     
     // if ya can't set da poiners, set da offsets
-    planar->componentInfoY.offset = bswap_32(picture->data[0] - baseAddr);
-    planar->componentInfoCb.offset =  bswap_32(picture->data[1] - baseAddr);
-    planar->componentInfoCr.offset =  bswap_32(picture->data[2] - baseAddr);
+    planar->componentInfoY.offset = make_big_32(picture->data[0] - baseAddr);
+    planar->componentInfoCb.offset =  make_big_32(picture->data[1] - baseAddr);
+    planar->componentInfoCr.offset =  make_big_32(picture->data[2] - baseAddr);
     
     // for the 16/32 add look at EDGE in mpegvideo.c
-    planar->componentInfoY.rowBytes = bswap_32(picture->linesize[0]);
-    planar->componentInfoCb.rowBytes = bswap_32(picture->linesize[1]);
-    planar->componentInfoCr.rowBytes = bswap_32(picture->linesize[2]);
+    planar->componentInfoY.rowBytes = make_big_32(picture->linesize[0]);
+    planar->componentInfoCb.rowBytes = make_big_32(picture->linesize[1]);
+    planar->componentInfoCr.rowBytes = make_big_32(picture->linesize[2]);
     
     return err;
 }

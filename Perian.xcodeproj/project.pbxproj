@@ -279,7 +279,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "BUILDDIR=\"$SYMROOT/ppc\"\nmkdir \"$BUILDDIR\"\n\ncd \"$BUILDDIR\"\nif [ `arch` = ppc ] ; then\n\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl\nelse\n\t../ffmpeg/configure --enable-pp --enable-gpl --cpu=ppc  --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc'\n\n\t#construct the \"fake\" config.mak and config.h files to work around the brokenness of cross-compiles\n\trm \"$BUILDDIR/config.h\"\n\tcp \"$SRCROOT/ppc-configured/config.h\" \"$BUILDDIR\"\n\trm \"$BUILDDIR/config.mak\"\n\tcp \"$SRCROOT/ppc-configured/config.mak\" \"$BUILDDIR\"\nfi\nmake\n\n";
+			shellScript = "BUILDDIR=\"$SYMROOT/ppc\"\nmkdir \"$BUILDDIR\"\n\ncd \"$BUILDDIR\"\nif [ `arch` = ppc ] ; then\n\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl\nelse\n\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl --cpu=ppc  --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc'\n\n\t#construct the \"fake\" config.mak and config.h files to work around the brokenness of cross-compiles\n\trm \"$BUILDDIR/config.h\"\n\tcp \"$SRCROOT/ppc-configured/config.h\" \"$BUILDDIR\"\n\trm \"$BUILDDIR/config.mak\"\n\tcp \"$SRCROOT/ppc-configured/config.mak\" \"$BUILDDIR\"\nfi\nmake\n\n";
 		};
 		8F9B11470A41D10F00083569 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
