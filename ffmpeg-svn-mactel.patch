@@ -302,6 +302,14 @@ diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/mmx.h ./libavcodec/i386/mm
 diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/motion_est_mmx.c ./libavcodec/i386/motion_est_mmx.c
 --- ../ffmpeg/libavcodec/i386/motion_est_mmx.c	2006-06-30 10:41:13.000000000 +0700
 +++ ./libavcodec/i386/motion_est_mmx.c	2006-06-30 09:53:53.000000000 +0700
+@@ -21,6 +21,7 @@
+  */
+ #include "../dsputil.h"
+ #include "x86_cpu.h"
++#include "mmx.h"
+ 
+ static const __attribute__ ((aligned(8))) uint64_t round_tab[3]={
+ 0x0000000000000000ULL,
 @@ -34,7 +34,7 @@
  {
      long len= -(stride*h);
@@ -359,6 +367,14 @@ diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/motion_est_mmx.c ./libavco
 diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/mpegvideo_mmx.c ./libavcodec/i386/mpegvideo_mmx.c
 --- ../ffmpeg/libavcodec/i386/mpegvideo_mmx.c	2006-06-30 10:41:13.000000000 +0700
 +++ ./libavcodec/i386/mpegvideo_mmx.c	2006-06-30 09:51:26.000000000 +0700
+@@ -24,6 +24,7 @@
+ #include "../mpegvideo.h"
+ #include "../avcodec.h"
+ #include "x86_cpu.h"
++#include "mmx.h"
+ 
+ extern uint8_t zigzag_direct_noperm[64];
+ extern uint16_t inv_zigzag_direct16[64];
 @@ -66,7 +66,7 @@
                  "packssdw %%mm5, %%mm5          \n\t"
                  "psubw %%mm5, %%mm7             \n\t"
