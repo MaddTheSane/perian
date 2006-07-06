@@ -1,48 +1,15 @@
 Index: configure
 ===================================================================
---- configure	(revision 5497)
-+++ configure	(working copy)
-@@ -47,6 +47,8 @@
-   echo ""
-   echo "Advanced options (experts only):"
-   echo "  --source-path=PATH       path to source code [$source_path]"
-+  echo "  --cross-compile          will be cross-compiling, so assume executables"
-+  echo "                           will not run on this system [default=no]"
-   echo "  --cross-prefix=PREFIX    use PREFIX for compilation tools [$cross_prefix]"
-   echo "  --cc=CC                  use C compiler CC [$cc]"
-   echo "  --make=MAKE              use specified make [$make]"
-@@ -247,7 +249,7 @@
+--- configure   (revision 5634)
++++ configure   (working copy)
+@@ -226,8 +226,10 @@
+     log check_ld "$@"
+     cat >$TMPC
+     log_file $TMPC
+-    log $cc $CFLAGS $LDFLAGS "$@" -o $TMPE $TMPC $extralibs
+-    $cc $CFLAGS $LDFLAGS "$@" -o $TMPE $TMPC $extralibs >>$logfile 2>&1
++    log $cc $CFLAGS "$@" -c -o $TMPO $TMPC >>$logfile 2>&1
++    log $cc $LDFLAGS "$@" -o $TMPE $TMPO $extralibs >>$logfile 2>&1
++    $cc $CFLAGS "$@" -c -o $TMPO $TMPC >>$logfile 2>&1
++    $cc $LDFLAGS "$@" -o $TMPE $TMPO $extralibs >>$logfile 2>&1
  }
- 
- check_exec(){
--    check_ld "$@" && { test -n "$cross_prefix" || $TMPE; }
-+    check_ld "$@" && { test -n "$cross_prefix" || test "cross_compile" = "yes" || $TMPE; }
- }
- 
- require(){
-@@ -286,6 +288,7 @@
- mandir=""
- bindir=""
- cross_prefix=""
-+cross_compile="no"
- cc="gcc"
- ar="ar"
- ranlib="ranlib"
-@@ -645,6 +648,8 @@
-   ;;
-   --cross-prefix=*) cross_prefix=`echo $opt | cut -d '=' -f 2`
-   ;;
-+  --cross-compile) cross_compile="yes"
-+  ;;
-   --cc=*) cc=`echo $opt | cut -d '=' -f 2-`
-   ;;
-   --make=*) make=`echo $opt | cut -d '=' -f 2`
-@@ -1113,7 +1118,7 @@
- 
- # ---
- # big/little-endian test
--if test -z "$cross_prefix" ; then
-+if test -z "$cross_prefix" && test "$cross_compile" = "no" ; then
-     check_ld <<EOF || die "endian test failed" && $TMPE && bigendian="yes"
- #include <inttypes.h>
- int main(int argc, char ** argv){
