@@ -1,16 +1,24 @@
-Index: libavcodec/i386/dsputil_mmx.c
-===================================================================
-RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/i386/dsputil_mmx.c,v
-retrieving revision 1.109
-diff -u -r1.109 dsputil_mmx.c
---- libavcodec/i386/dsputil_mmx.c	12 Jan 2006 22:43:17 -0000	1.109
-+++ libavcodec/i386/dsputil_mmx.c	26 Jan 2006 22:02:55 -0000
+diff -NaurbB --exclude=.svn ../ffmpeg/configure ./configure
+--- ../ffmpeg/configure	2006-06-30 10:58:24.000000000 +0700
++++ ./configure	2006-06-30 11:15:38.000000000 +0700
+@@ -1191,7 +1191,7 @@
+     check_func memalign || _memalign="no"
+ fi
+ 
+-if test "$_memalign" = "no" -a "$mmx" = "yes" -a "$memalignhack" != "yes"; then
++if test "$_memalign" = "no" -a "$mmx" = "yes" -a "$memalignhack" != "yes" -a $targetos != Darwin; then
+     die "Error, no memalign() but SSE enabled, disable it or use --enable-memalign-hack."
+ fi
+ 
+diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/dsputil_mmx.c ./libavcodec/i386/dsputil_mmx.c
+--- ../ffmpeg/libavcodec/i386/dsputil_mmx.c	2006-06-30 10:41:13.000000000 +0700
++++ ./libavcodec/i386/dsputil_mmx.c	2006-06-30 09:47:11.000000000 +0700
 @@ -52,7 +52,7 @@
  static const uint64_t ff_pb_3F attribute_used __attribute__ ((aligned(8))) = 0x3F3F3F3F3F3F3F3FULL;
  static const uint64_t ff_pb_FC attribute_used __attribute__ ((aligned(8))) = 0xFCFCFCFCFCFCFCFCULL;
  
 -#define JUMPALIGN() __asm __volatile (".balign 8"::)
-+#define JUMPALIGN() __asm __volatile (".p2align 3"::)
++#define JUMPALIGN() __asm __volatile (BALIGN_8::)
  #define MOVQ_ZERO(regd)  __asm __volatile ("pxor %%" #regd ", %%" #regd ::)
  
  #define MOVQ_WONE(regd) \
@@ -19,7 +27,7 @@ diff -u -r1.109 dsputil_mmx.c
          "mov $-128, %%"REG_a"           \n\t"
          "pxor %%mm7, %%mm7              \n\t"
 -        ".balign 16                     \n\t"
-+        ".p2align 4                     \n\t"
++        BALIGN_16
          "1:                             \n\t"
          "movq (%0), %%mm0               \n\t"
          "movq (%0, %2), %%mm2           \n\t"
@@ -28,7 +36,7 @@ diff -u -r1.109 dsputil_mmx.c
          "pxor %%mm7, %%mm7              \n\t"
          "mov $-128, %%"REG_a"           \n\t"
 -        ".balign 16                     \n\t"
-+        ".p2align 4                     \n\t"
++        BALIGN_16
          "1:                             \n\t"
          "movq (%0), %%mm0               \n\t"
          "movq (%1), %%mm2               \n\t"
@@ -37,7 +45,7 @@ diff -u -r1.109 dsputil_mmx.c
      __asm __volatile(
           "lea (%3, %3), %%"REG_a"       \n\t"
 -         ".balign 8                     \n\t"
-+         ".p2align 3                    \n\t"
++         BALIGN_8
           "1:                            \n\t"
           "movd (%1), %%mm0              \n\t"
           "movd (%1, %3), %%mm1          \n\t"
@@ -46,7 +54,7 @@ diff -u -r1.109 dsputil_mmx.c
      __asm __volatile(
           "lea (%3, %3), %%"REG_a"       \n\t"
 -         ".balign 8                     \n\t"
-+         ".p2align 3                    \n\t"
++         BALIGN_8
           "1:                            \n\t"
           "movq (%1), %%mm0              \n\t"
           "movq (%1, %3), %%mm1          \n\t"
@@ -55,39 +63,45 @@ diff -u -r1.109 dsputil_mmx.c
      __asm __volatile(
           "lea (%3, %3), %%"REG_a"       \n\t"
 -         ".balign 8                     \n\t"
-+         ".p2align 3                    \n\t"
++         BALIGN_8
           "1:                            \n\t"
           "movq (%1), %%mm0              \n\t"
           "movq 8(%1), %%mm4             \n\t"
-Index: libavcodec/i386/dsputil_mmx_avg.h
-===================================================================
-RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/i386/dsputil_mmx_avg.h,v
-retrieving revision 1.29
-diff -u -r1.29 dsputil_mmx_avg.h
---- libavcodec/i386/dsputil_mmx_avg.h	12 Jan 2006 22:43:17 -0000	1.29
-+++ libavcodec/i386/dsputil_mmx_avg.h	26 Jan 2006 22:02:55 -0000
+@@ -3101,7 +3101,12 @@
+         }
+ 
+ #ifdef CONFIG_SNOW_ENCODER
+-        if(mm_flags & MM_SSE2){
++#if defined(__APPLE__)
++        if (0)  // alignment issues with SSE2 code with Apple GCC
++#else
++        if(mm_flags & MM_SSE2)
++#endif
++        {
+             c->horizontal_compose97i = ff_snow_horizontal_compose97i_sse2;
+             c->vertical_compose97i = ff_snow_vertical_compose97i_sse2;
+             c->inner_add_yblock = ff_snow_inner_add_yblock_sse2;
+diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/dsputil_mmx_avg.h ./libavcodec/i386/dsputil_mmx_avg.h
+--- ../ffmpeg/libavcodec/i386/dsputil_mmx_avg.h	2006-06-30 10:41:13.000000000 +0700
++++ ./libavcodec/i386/dsputil_mmx_avg.h	2006-06-30 09:54:24.000000000 +0700
 @@ -754,7 +754,7 @@
          "lea (%3, %3), %%"REG_a"        \n\t"
          "movq (%1), %%mm0               \n\t"
          PAVGB" 1(%1), %%mm0             \n\t"
 -        ".balign 8                      \n\t"
-+        ".p2align 3                     \n\t"
++        BALIGN_8
          "1:                             \n\t"
          "movq (%1, %%"REG_a"), %%mm2    \n\t"
          "movq (%1, %3), %%mm1           \n\t"
-Index: libavcodec/i386/dsputil_mmx_rnd.h
-===================================================================
-RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/i386/dsputil_mmx_rnd.h,v
-retrieving revision 1.22
-diff -u -r1.22 dsputil_mmx_rnd.h
---- libavcodec/i386/dsputil_mmx_rnd.h	12 Jan 2006 22:43:17 -0000	1.22
-+++ libavcodec/i386/dsputil_mmx_rnd.h	26 Jan 2006 22:02:55 -0000
+diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/dsputil_mmx_rnd.h ./libavcodec/i386/dsputil_mmx_rnd.h
+--- ../ffmpeg/libavcodec/i386/dsputil_mmx_rnd.h	2006-06-30 10:41:13.000000000 +0700
++++ ./libavcodec/i386/dsputil_mmx_rnd.h	2006-06-30 09:50:02.000000000 +0700
 @@ -28,7 +28,7 @@
      MOVQ_BFE(mm6);
      __asm __volatile(
          "lea    (%3, %3), %%"REG_a"     \n\t"
 -        ".balign 8                      \n\t"
-+        ".p2align 3                     \n\t"
++        BALIGN_8
          "1:                             \n\t"
          "movq   (%1), %%mm0             \n\t"
          "movq   1(%1), %%mm1            \n\t"
@@ -96,7 +110,7 @@ diff -u -r1.22 dsputil_mmx_rnd.h
          "add    %5, %3                  \n\t"
          "decl   %0                      \n\t"
 -        ".balign 8                      \n\t"
-+        ".p2align 3                     \n\t"
++        BALIGN_8
          "1:                             \n\t"
          "movq   (%1), %%mm0             \n\t"
          "movq   (%2), %%mm1             \n\t"
@@ -105,7 +119,7 @@ diff -u -r1.22 dsputil_mmx_rnd.h
      __asm __volatile(
          "lea        (%3, %3), %%"REG_a" \n\t"
 -        ".balign 8                      \n\t"
-+        ".p2align 3                     \n\t"
++        BALIGN_8
          "1:                             \n\t"
          "movq   (%1), %%mm0             \n\t"
          "movq   1(%1), %%mm1            \n\t"
@@ -114,7 +128,7 @@ diff -u -r1.22 dsputil_mmx_rnd.h
          "add    %5, %3                  \n\t"
          "decl   %0                      \n\t"
 -        ".balign 8                      \n\t"
-+        ".p2align 3                     \n\t"
++        BALIGN_8
          "1:                             \n\t"
          "movq   (%1), %%mm0             \n\t"
          "movq   (%2), %%mm1             \n\t"
@@ -123,7 +137,7 @@ diff -u -r1.22 dsputil_mmx_rnd.h
          "lea (%3, %3), %%"REG_a"        \n\t"
          "movq (%1), %%mm0               \n\t"
 -        ".balign 8                      \n\t"
-+        ".p2align 3                     \n\t"
++        BALIGN_8
          "1:                             \n\t"
          "movq   (%1, %3), %%mm1         \n\t"
          "movq   (%1, %%"REG_a"),%%mm2   \n\t"
@@ -132,7 +146,7 @@ diff -u -r1.22 dsputil_mmx_rnd.h
          "xor    %%"REG_a", %%"REG_a"    \n\t"
          "add    %3, %1                  \n\t"
 -        ".balign 8                      \n\t"
-+        ".p2align 3                     \n\t"
++        BALIGN_8
          "1:                             \n\t"
          "movq   (%1, %%"REG_a"), %%mm0  \n\t"
          "movq   1(%1, %%"REG_a"), %%mm2 \n\t"
@@ -141,7 +155,7 @@ diff -u -r1.22 dsputil_mmx_rnd.h
          "lea    (%3, %3), %%"REG_a"     \n\t"
          "movq   (%1), %%mm0             \n\t"
 -        ".balign 8                      \n\t"
-+        ".p2align 3                     \n\t"
++        BALIGN_8
          "1:                             \n\t"
          "movq   (%1, %3), %%mm1         \n\t"
          "movq   (%1, %%"REG_a"), %%mm2  \n\t"
@@ -150,145 +164,92 @@ diff -u -r1.22 dsputil_mmx_rnd.h
          "xor    %%"REG_a", %%"REG_a"    \n\t"
          "add    %3, %1                  \n\t"
 -        ".balign 8                      \n\t"
-+        ".p2align 3                     \n\t"
++        BALIGN_8
          "1:                             \n\t"
          "movq   (%1, %%"REG_a"), %%mm0  \n\t"
          "movq   1(%1, %%"REG_a"), %%mm2 \n\t"
-Index: libavcodec/i386/fdct_mmx.c
-===================================================================
-RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/i386/fdct_mmx.c,v
-retrieving revision 1.19
-diff -u -r1.19 fdct_mmx.c
---- libavcodec/i386/fdct_mmx.c	22 Dec 2005 01:10:09 -0000	1.19
-+++ libavcodec/i386/fdct_mmx.c	26 Jan 2006 22:02:55 -0000
-@@ -350,61 +350,67 @@
+diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/fdct_mmx.c ./libavcodec/i386/fdct_mmx.c
+--- ../ffmpeg/libavcodec/i386/fdct_mmx.c	2006-06-30 10:41:13.000000000 +0700
++++ ./libavcodec/i386/fdct_mmx.c	2006-06-30 09:35:07.000000000 +0700
+@@ -350,6 +350,67 @@
  
  static always_inline void fdct_row_sse2(const int16_t *in, int16_t *out)
  {
-+#define FDCT_ROW_SSE2_H1(i,t) \
-+        "movq      " #i "(%0), %%xmm2      \n\t" \
-+        "movq      " #i "+8(%0), %%xmm0    \n\t" \
-+        "movdqa    " #t "+32(%1), %%xmm3   \n\t" \
-+        "movdqa    " #t "+48(%1), %%xmm7   \n\t" \
-+        "movdqa    " #t "(%1), %%xmm4      \n\t" \
-+        "movdqa    " #t "+16(%1), %%xmm5   \n\t"
++#if defined(__APPLE__)
++    // Apple 'as' has a different macro syntax than FSF GCC 'as'
++    asm volatile(
++        ".macro FDCT_ROW_SSE2_H1        \n\t"
++        "movq      $0(%0), %%xmm2       \n\t"
++        "movq      $0+8(%0), %%xmm0     \n\t"
++        "movdqa    $1+32(%1), %%xmm3    \n\t"
++        "movdqa    $1+48(%1), %%xmm7    \n\t"
++        "movdqa    $1(%1), %%xmm4       \n\t"
++        "movdqa    $1+16(%1), %%xmm5    \n\t"
++        ".endmacro                      \n\t"
++        ".macro FDCT_ROW_SSE2_H2        \n\t"
++        "movq      $0(%0), %%xmm2       \n\t"
++        "movq      $0+8(%0), %%xmm0     \n\t"
++        "movdqa    $1+32(%1), %%xmm3    \n\t"
++        "movdqa    $1+48(%1), %%xmm7    \n\t"
++        ".endmacro                      \n\t"
++        ".macro FDCT_ROW_SSE2           \n\t"
++        "movq      %%xmm2, %%xmm1       \n\t"
++        "pshuflw   $$0x27, %%xmm0, %%xmm0  \n\t"
++        "paddsw    %%xmm0, %%xmm1       \n\t"
++        "psubsw    %%xmm0, %%xmm2       \n\t"
++        "punpckldq %%xmm2, %%xmm1       \n\t"
++        "pshufd    $$0x78, %%xmm1, %%xmm2  \n\t"
++        "pmaddwd   %%xmm2, %%xmm3       \n\t"
++        "pmaddwd   %%xmm1, %%xmm7       \n\t"
++        "pmaddwd   %%xmm5, %%xmm2       \n\t"
++        "pmaddwd   %%xmm4, %%xmm1       \n\t"
++        "paddd     %%xmm7, %%xmm3       \n\t"
++        "paddd     %%xmm2, %%xmm1       \n\t"
++        "paddd     %%xmm6, %%xmm3       \n\t"
++        "paddd     %%xmm6, %%xmm1       \n\t"
++        "psrad     $%3, %%xmm3          \n\t"
++        "psrad     $%3, %%xmm1          \n\t"
++        "packssdw  %%xmm3, %%xmm1       \n\t"
++        "movdqa    %%xmm1, $0(%4)       \n\t"
++        ".endmacro                      \n\t"
++        "movdqa    (%2), %%xmm6         \n\t"
++        "FDCT_ROW_SSE2_H1 0,0           \n\t"
++        "FDCT_ROW_SSE2 0                \n\t"
++        "FDCT_ROW_SSE2_H2 64,0          \n\t"
++        "FDCT_ROW_SSE2 64               \n\t"
 +
-+#define FDCT_ROW_SSE2_H2(i,t) \
-+        "movq      " #i "(%0), %%xmm2      \n\t" \
-+        "movq      " #i "+8(%0), %%xmm0    \n\t" \
-+        "movdqa    " #t "+32(%1), %%xmm3   \n\t" \
-+        "movdqa    " #t "+48(%1), %%xmm7   \n\t"
++        "FDCT_ROW_SSE2_H1 16,64         \n\t"
++        "FDCT_ROW_SSE2 16               \n\t"
++        "FDCT_ROW_SSE2_H2 112,64        \n\t"
++        "FDCT_ROW_SSE2 112              \n\t"
 +
-+#define FDCT_ROW_SSE2(i) \
-+        "movq      %%xmm2, %%xmm1       \n\t" \
-+        "pshuflw   $27, %%xmm0, %%xmm0  \n\t" \
-+        "paddsw    %%xmm0, %%xmm1       \n\t" \
-+        "psubsw    %%xmm0, %%xmm2       \n\t" \
-+        "punpckldq %%xmm2, %%xmm1       \n\t" \
-+        "pshufd    $78, %%xmm1, %%xmm2  \n\t" \
-+        "pmaddwd   %%xmm2, %%xmm3       \n\t" \
-+        "pmaddwd   %%xmm1, %%xmm7       \n\t" \
-+        "pmaddwd   %%xmm5, %%xmm2       \n\t" \
-+        "pmaddwd   %%xmm4, %%xmm1       \n\t" \
-+        "paddd     %%xmm7, %%xmm3       \n\t" \
-+        "paddd     %%xmm2, %%xmm1       \n\t" \
-+        "paddd     %%xmm6, %%xmm3       \n\t" \
-+        "paddd     %%xmm6, %%xmm1       \n\t" \
-+        "psrad     %3, %%xmm3           \n\t" \
-+        "psrad     %3, %%xmm1           \n\t" \
-+        "packssdw  %%xmm3, %%xmm1       \n\t" \
-+        "movdqa    %%xmm1, " #i "(%4)   \n\t"
++        "FDCT_ROW_SSE2_H1 32,128        \n\t"
++        "FDCT_ROW_SSE2 32               \n\t"
++        "FDCT_ROW_SSE2_H2 96,128        \n\t"
++        "FDCT_ROW_SSE2 96               \n\t"
 +
++        "FDCT_ROW_SSE2_H1 48,192        \n\t"
++        "FDCT_ROW_SSE2 48               \n\t"
++        "FDCT_ROW_SSE2_H2 80,192        \n\t"
++        "FDCT_ROW_SSE2 80               \n\t"
++        :
++        : "r" (in), "r" (tab_frw_01234567_sse2.tab_frw_01234567_sse2), "r" (fdct_r_row_sse2.fdct_r_row_sse2), "i" (SHIFT_FRW_ROW), "r" (out)
++    );
++#else
      asm volatile(
--        ".macro FDCT_ROW_SSE2_H1 i t    \n\t"
--        "movq      \\i(%0), %%xmm2      \n\t"
--        "movq      \\i+8(%0), %%xmm0    \n\t"
--        "movdqa    \\t+32(%1), %%xmm3   \n\t"
--        "movdqa    \\t+48(%1), %%xmm7   \n\t"
--        "movdqa    \\t(%1), %%xmm4      \n\t"
--        "movdqa    \\t+16(%1), %%xmm5   \n\t"
--        ".endm                          \n\t"
--        ".macro FDCT_ROW_SSE2_H2 i t    \n\t"
--        "movq      \\i(%0), %%xmm2      \n\t"
--        "movq      \\i+8(%0), %%xmm0    \n\t"
--        "movdqa    \\t+32(%1), %%xmm3   \n\t"
--        "movdqa    \\t+48(%1), %%xmm7   \n\t"
--        ".endm                          \n\t"
--        ".macro FDCT_ROW_SSE2 i         \n\t"
--        "movq      %%xmm2, %%xmm1       \n\t"
--        "pshuflw   $27, %%xmm0, %%xmm0  \n\t"
--        "paddsw    %%xmm0, %%xmm1       \n\t"
--        "psubsw    %%xmm0, %%xmm2       \n\t"
--        "punpckldq %%xmm2, %%xmm1       \n\t"
--        "pshufd    $78, %%xmm1, %%xmm2  \n\t"
--        "pmaddwd   %%xmm2, %%xmm3       \n\t"
--        "pmaddwd   %%xmm1, %%xmm7       \n\t"
--        "pmaddwd   %%xmm5, %%xmm2       \n\t"
--        "pmaddwd   %%xmm4, %%xmm1       \n\t"
--        "paddd     %%xmm7, %%xmm3       \n\t"
--        "paddd     %%xmm2, %%xmm1       \n\t"
--        "paddd     %%xmm6, %%xmm3       \n\t"
--        "paddd     %%xmm6, %%xmm1       \n\t"
--        "psrad     %3, %%xmm3           \n\t"
--        "psrad     %3, %%xmm1           \n\t"
--        "packssdw  %%xmm3, %%xmm1       \n\t"
--        "movdqa    %%xmm1, \\i(%4)      \n\t"
--        ".endm                          \n\t"
-+//        ".macro FDCT_ROW_SSE2_H1 i t    \n\t"
-+//        ".endm                          \n\t"
-+//        ".macro FDCT_ROW_SSE2_H2 i t    \n\t"
-+//        ".endm                          \n\t"
-+//        ".macro FDCT_ROW_SSE2 i         \n\t"
-+//        ".endm                          \n\t"
-         "movdqa    (%2), %%xmm6         \n\t"
--        "FDCT_ROW_SSE2_H1 0 0           \n\t"
--        "FDCT_ROW_SSE2 0                \n\t"
--        "FDCT_ROW_SSE2_H2 64 0          \n\t"
--        "FDCT_ROW_SSE2 64               \n\t"
--
--        "FDCT_ROW_SSE2_H1 16 64         \n\t"
--        "FDCT_ROW_SSE2 16               \n\t"
--        "FDCT_ROW_SSE2_H2 112 64        \n\t"
--        "FDCT_ROW_SSE2 112              \n\t"
--
--        "FDCT_ROW_SSE2_H1 32 128        \n\t"
--        "FDCT_ROW_SSE2 32               \n\t"
--        "FDCT_ROW_SSE2_H2 96 128        \n\t"
--        "FDCT_ROW_SSE2 96               \n\t"
--
--        "FDCT_ROW_SSE2_H1 48 192        \n\t"
--        "FDCT_ROW_SSE2 48               \n\t"
--        "FDCT_ROW_SSE2_H2 80 192        \n\t"
--        "FDCT_ROW_SSE2 80               \n\t"
-+        FDCT_ROW_SSE2_H1(0,0)
-+        FDCT_ROW_SSE2(0)
-+        FDCT_ROW_SSE2_H2(64,0)
-+        FDCT_ROW_SSE2(64)
-+
-+        FDCT_ROW_SSE2_H1(16,64)
-+        FDCT_ROW_SSE2(16)
-+        FDCT_ROW_SSE2_H2(112,64)
-+        FDCT_ROW_SSE2(112)
-+
-+        FDCT_ROW_SSE2_H1(32,128)
-+        FDCT_ROW_SSE2(32)
-+        FDCT_ROW_SSE2_H2(96,128)
-+        FDCT_ROW_SSE2(96)
-+
-+        FDCT_ROW_SSE2_H1(48,192)
-+        FDCT_ROW_SSE2(48)
-+        FDCT_ROW_SSE2_H2(80,192)
-+        FDCT_ROW_SSE2(80)
+         ".macro FDCT_ROW_SSE2_H1 i t    \n\t"
+         "movq      \\i(%0), %%xmm2      \n\t"
+@@ -408,6 +469,7 @@
          :
          : "r" (in), "r" (tab_frw_01234567_sse2.tab_frw_01234567_sse2), "r" (fdct_r_row_sse2.fdct_r_row_sse2), "i" (SHIFT_FRW_ROW), "r" (out)
      );
-Index: libavcodec/i386/idct_mmx_xvid.c
-===================================================================
-RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/i386/idct_mmx_xvid.c,v
-retrieving revision 1.4
-diff -u -r1.4 idct_mmx_xvid.c
---- libavcodec/i386/idct_mmx_xvid.c	12 Jan 2006 22:43:18 -0000	1.4
-+++ libavcodec/i386/idct_mmx_xvid.c	26 Jan 2006 22:02:55 -0000
++#endif
+ }
+ 
+ static always_inline void fdct_row_mmx2(const int16_t *in, int16_t *out, const int16_t *table)
+diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/idct_mmx_xvid.c ./libavcodec/i386/idct_mmx_xvid.c
+--- ../ffmpeg/libavcodec/i386/idct_mmx_xvid.c	2006-06-30 10:41:13.000000000 +0700
++++ ./libavcodec/i386/idct_mmx_xvid.c	2006-06-30 09:35:07.000000000 +0700
 @@ -295,17 +295,17 @@
    "movq 8+" #A1 ",%%mm1                \n\t"/* 1     ; x7 x6 x5 x4*/\
    "movq %%mm0,%%mm2                \n\t"/* 2     ; x3 x2 x1 x0*/\
@@ -304,10 +265,10 @@ diff -u -r1.4 idct_mmx_xvid.c
    "pmaddwd %%mm1,%%mm4             \n\t"/* x6*w07+x4*w06 x6*w03+x4*w02*/\
    "movq 40+" #A3 ",%%mm7               \n\t"/* 7    ; w23 w22 w19 w18*/\
 -  "pshufw $0b11011101,%%mm2,%%mm2  \n\t"/* x3 x1 x3 x1*/\
-+  "pshufw $0xdd,%%mm2,%%mm2  \n\t"/* x3 x1 x3 x1*/\
++  "pshufw $0xDD,%%mm2,%%mm2  \n\t"/* x3 x1 x3 x1*/\
    "pmaddwd %%mm2,%%mm6             \n\t"/* x3*w21+x1*w20 x3*w17+x1*w16*/\
 -  "pshufw $0b11011101,%%mm5,%%mm5  \n\t"/* x7 x5 x7 x5*/\
-+  "pshufw $0xdd,%%mm5,%%mm5  \n\t"/* x7 x5 x7 x5*/\
++  "pshufw $0xDD,%%mm5,%%mm5  \n\t"/* x7 x5 x7 x5*/\
    "pmaddwd %%mm5,%%mm7             \n\t"/* x7*w23+x5*w22 x7*w19+x5*w18*/\
    "paddd " #A4 ",%%mm3                 \n\t"/* +%4*/\
    "pmaddwd 16+" #A3 ",%%mm0            \n\t"/* x2*w13+x0*w12 x2*w09+x0*w08*/\
@@ -316,23 +277,37 @@ diff -u -r1.4 idct_mmx_xvid.c
    "packssdw %%mm4,%%mm7            \n\t"/* 4     ; y6 y7 y4 y5*/\
    "movq %%mm3, " #A2 "                  \n\t"/* 3     ; save y3 y2 y1 y0*/\
 -  "pshufw $0b10110001,%%mm7,%%mm7  \n\t"/* y7 y6 y5 y4*/\
-+  "pshufw $0xb1,%%mm7,%%mm7  \n\t"/* y7 y6 y5 y4*/\
++  "pshufw $0xB1,%%mm7,%%mm7  \n\t"/* y7 y6 y5 y4*/\
    "movq %%mm7,8                +" #A2 "\n\t"/* 7     ; save y7 y6 y5 y4*/\
  
  
-Index: libavcodec/i386/motion_est_mmx.c
-===================================================================
-RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/i386/motion_est_mmx.c,v
-retrieving revision 1.19
-diff -u -r1.19 motion_est_mmx.c
---- libavcodec/i386/motion_est_mmx.c	12 Jan 2006 22:43:18 -0000	1.19
-+++ libavcodec/i386/motion_est_mmx.c	26 Jan 2006 22:02:55 -0000
+diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/mmx.h ./libavcodec/i386/mmx.h
+--- ../ffmpeg/libavcodec/i386/mmx.h	2006-06-30 10:41:13.000000000 +0700
++++ ./libavcodec/i386/mmx.h	2006-06-30 09:48:38.000000000 +0700
+@@ -23,6 +23,14 @@
+ #  define PTR_SIZE "4"
+ #endif
+ 
++#if defined(__APPLE__)
++#  define BALIGN_8  ".align 3 \n\t"
++#  define BALIGN_16 ".align 4 \n\t"
++#else
++#  define BALIGN_8  ".balign 8 \n\t"
++#  define BALIGN_16 ".balign 16 \n\t"
++#endif
++
+ /*
+  * The type of an value that fits in an MMX register (note that long
+  * long constant values MUST be suffixed by LL and unsigned long long
+diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/motion_est_mmx.c ./libavcodec/i386/motion_est_mmx.c
+--- ../ffmpeg/libavcodec/i386/motion_est_mmx.c	2006-06-30 10:41:13.000000000 +0700
++++ ./libavcodec/i386/motion_est_mmx.c	2006-06-30 09:53:53.000000000 +0700
 @@ -34,7 +34,7 @@
  {
      long len= -(stride*h);
      asm volatile(
 -        ".balign 16                     \n\t"
-+        ".p2align 4                     \n\t"
++        BALIGN_16
          "1:                             \n\t"
          "movq (%1, %%"REG_a"), %%mm0    \n\t"
          "movq (%2, %%"REG_a"), %%mm2    \n\t"
@@ -341,7 +316,7 @@ diff -u -r1.19 motion_est_mmx.c
      long len= -(stride*h);
      asm volatile(
 -        ".balign 16                     \n\t"
-+        ".p2align 4                     \n\t"
++        BALIGN_16
          "1:                             \n\t"
          "movq (%1, %%"REG_a"), %%mm0    \n\t"
          "movq (%2, %%"REG_a"), %%mm2    \n\t"
@@ -350,7 +325,7 @@ diff -u -r1.19 motion_est_mmx.c
      long len= -(stride*h);
      asm volatile(
 -        ".balign 16                     \n\t"
-+        ".p2align 4                     \n\t"
++        BALIGN_16
          "1:                             \n\t"
          "movq (%1, %%"REG_a"), %%mm0    \n\t"
          "movq (%2, %%"REG_a"), %%mm2    \n\t"
@@ -359,7 +334,7 @@ diff -u -r1.19 motion_est_mmx.c
      long len= -(stride*h);
      asm volatile(
 -        ".balign 16                     \n\t"
-+        ".p2align 4                     \n\t"
++        BALIGN_16
          "movq "MANGLE(bone)", %%mm5     \n\t"
          "1:                             \n\t"
          "movq (%1, %%"REG_a"), %%mm0    \n\t"
@@ -368,7 +343,7 @@ diff -u -r1.19 motion_est_mmx.c
      long len= -(stride*h);
      asm volatile(
 -        ".balign 16                     \n\t"
-+        ".p2align 4                     \n\t"
++        BALIGN_16
          "1:                             \n\t"
          "movq (%1, %%"REG_a"), %%mm0    \n\t"
          "movq (%2, %%"REG_a"), %%mm1    \n\t"
@@ -377,23 +352,19 @@ diff -u -r1.19 motion_est_mmx.c
      long len= -(stride*h);
      asm volatile(
 -        ".balign 16                     \n\t"
-+        ".p2align 4                     \n\t"
++        BALIGN_16
          "1:                             \n\t"
          "movq (%1, %%"REG_a"), %%mm0    \n\t"
          "movq (%2, %%"REG_a"), %%mm1    \n\t"
-Index: libavcodec/i386/mpegvideo_mmx.c
-===================================================================
-RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/i386/mpegvideo_mmx.c,v
-retrieving revision 1.37
-diff -u -r1.37 mpegvideo_mmx.c
---- libavcodec/i386/mpegvideo_mmx.c	12 Jan 2006 22:43:18 -0000	1.37
-+++ libavcodec/i386/mpegvideo_mmx.c	26 Jan 2006 22:02:55 -0000
+diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/mpegvideo_mmx.c ./libavcodec/i386/mpegvideo_mmx.c
+--- ../ffmpeg/libavcodec/i386/mpegvideo_mmx.c	2006-06-30 10:41:13.000000000 +0700
++++ ./libavcodec/i386/mpegvideo_mmx.c	2006-06-30 09:51:26.000000000 +0700
 @@ -66,7 +66,7 @@
                  "packssdw %%mm5, %%mm5          \n\t"
                  "psubw %%mm5, %%mm7             \n\t"
                  "pxor %%mm4, %%mm4              \n\t"
 -                ".balign 16                     \n\t"
-+                ".p2align 4                     \n\t"
++                BALIGN_16
                  "1:                             \n\t"
                  "movq (%0, %3), %%mm0           \n\t"
                  "movq 8(%0, %3), %%mm1          \n\t"
@@ -402,7 +373,7 @@ diff -u -r1.37 mpegvideo_mmx.c
                  "psubw %%mm5, %%mm7             \n\t"
                  "pxor %%mm4, %%mm4              \n\t"
 -                ".balign 16                     \n\t"
-+                ".p2align 4                     \n\t"
++                BALIGN_16
                  "1:                             \n\t"
                  "movq (%0, %3), %%mm0           \n\t"
                  "movq 8(%0, %3), %%mm1          \n\t"
@@ -411,7 +382,7 @@ diff -u -r1.37 mpegvideo_mmx.c
                  "packssdw %%mm6, %%mm6          \n\t"
                  "mov %3, %%"REG_a"              \n\t"
 -                ".balign 16                     \n\t"
-+                ".p2align 4                     \n\t"
++                BALIGN_16
                  "1:                             \n\t"
                  "movq (%0, %%"REG_a"), %%mm0    \n\t"
                  "movq 8(%0, %%"REG_a"), %%mm1   \n\t"
@@ -420,7 +391,7 @@ diff -u -r1.37 mpegvideo_mmx.c
                  "packssdw %%mm6, %%mm6          \n\t"
                  "mov %3, %%"REG_a"              \n\t"
 -                ".balign 16                     \n\t"
-+                ".p2align 4                     \n\t"
++                BALIGN_16
                  "1:                             \n\t"
                  "movq (%0, %%"REG_a"), %%mm0    \n\t"
                  "movq 8(%0, %%"REG_a"), %%mm1   \n\t"
@@ -429,7 +400,7 @@ diff -u -r1.37 mpegvideo_mmx.c
                  "packssdw %%mm6, %%mm6          \n\t"
                  "mov %3, %%"REG_a"              \n\t"
 -                ".balign 16                     \n\t"
-+                ".p2align 4                     \n\t"
++                BALIGN_16
                  "1:                             \n\t"
                  "movq (%0, %%"REG_a"), %%mm0    \n\t"
                  "movq 8(%0, %%"REG_a"), %%mm1   \n\t"
@@ -438,23 +409,19 @@ diff -u -r1.37 mpegvideo_mmx.c
                  "packssdw %%mm6, %%mm6          \n\t"
                  "mov %3, %%"REG_a"              \n\t"
 -                ".balign 16                     \n\t"
-+                ".p2align 4                     \n\t"
++                BALIGN_16
                  "1:                             \n\t"
                  "movq (%0, %%"REG_a"), %%mm0    \n\t"
                  "movq 8(%0, %%"REG_a"), %%mm1   \n\t"
-Index: libavcodec/i386/mpegvideo_mmx_template.c
-===================================================================
-RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/i386/mpegvideo_mmx_template.c,v
-retrieving revision 1.29
-diff -u -r1.29 mpegvideo_mmx_template.c
---- libavcodec/i386/mpegvideo_mmx_template.c	12 Jan 2006 22:43:18 -0000	1.29
-+++ libavcodec/i386/mpegvideo_mmx_template.c	26 Jan 2006 22:02:55 -0000
+diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/mpegvideo_mmx_template.c ./libavcodec/i386/mpegvideo_mmx_template.c
+--- ../ffmpeg/libavcodec/i386/mpegvideo_mmx_template.c	2006-06-30 10:41:13.000000000 +0700
++++ ./libavcodec/i386/mpegvideo_mmx_template.c	2006-06-30 09:52:00.000000000 +0700
 @@ -111,7 +111,7 @@
              "pxor %%mm6, %%mm6                  \n\t"
              "psubw (%3), %%mm6                  \n\t" // -bias[0]
              "mov $-128, %%"REG_a"               \n\t"
 -            ".balign 16                         \n\t"
-+            ".p2align 4                         \n\t"
++            BALIGN_16
              "1:                                 \n\t"
              "pxor %%mm1, %%mm1                  \n\t" // 0
              "movq (%1, %%"REG_a"), %%mm0        \n\t" // block[i]
@@ -463,18 +430,14 @@ diff -u -r1.29 mpegvideo_mmx_template.c
              "pxor %%mm4, %%mm4                  \n\t" // 0
              "mov $-128, %%"REG_a"               \n\t"
 -            ".balign 16                         \n\t"
-+            ".p2align 4                         \n\t"
++            BALIGN_16
              "1:                                 \n\t"
              "pxor %%mm1, %%mm1                  \n\t" // 0
              "movq (%1, %%"REG_a"), %%mm0        \n\t" // block[i]
-Index: libavcodec/i386/simple_idct_mmx.c
-===================================================================
-RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/i386/simple_idct_mmx.c,v
-retrieving revision 1.16
-diff -u -r1.16 simple_idct_mmx.c
---- libavcodec/i386/simple_idct_mmx.c	12 Jan 2006 22:43:18 -0000	1.16
-+++ libavcodec/i386/simple_idct_mmx.c	26 Jan 2006 22:02:55 -0000
-@@ -459,13 +459,12 @@
+diff -NaurbB --exclude=.svn ../ffmpeg/libavcodec/i386/simple_idct_mmx.c ./libavcodec/i386/simple_idct_mmx.c
+--- ../ffmpeg/libavcodec/i386/simple_idct_mmx.c	2006-06-30 10:41:13.000000000 +0700
++++ ./libavcodec/i386/simple_idct_mmx.c	2006-06-30 10:05:27.000000000 +0700
+@@ -459,10 +459,10 @@
  
  
  //IDCT(      src0,   src4,   src1,    src5,    dst, rounder, shift)
@@ -482,17 +445,14 @@ diff -u -r1.16 simple_idct_mmx.c
 -COL_IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),/nop, 20)
 -COL_IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),/nop, 20)
 -COL_IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),/nop, 20)
-+COL_IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0), "nop", 20)
-+COL_IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0), "nop", 20)
-+COL_IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0), "nop", 20)
-+COL_IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0), "nop", 20)
++COL_IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0),#nop, 20)
++COL_IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),#nop, 20)
++COL_IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),#nop, 20)
++COL_IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),#nop, 20)
  
  #else
--
- #define DC_COND_IDCT(src0, src4, src1, src5, dst, rounder, shift) \
-         "movq " #src0 ", %%mm0          \n\t" /* R4     R0      r4      r0 */\
-         "movq " #src4 ", %%mm1          \n\t" /* R6     R2      r6      r2 */\
-@@ -783,10 +782,10 @@
+ 
+@@ -783,10 +783,10 @@
  
  
  //IDCT(  src0,   src4,   src1,    src5,    dst, rounder, shift)
@@ -500,14 +460,14 @@ diff -u -r1.16 simple_idct_mmx.c
 -IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),/nop, 20)
 -IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),/nop, 20)
 -IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),/nop, 20)
-+IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0), "nop", 20)
-+IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0), "nop", 20)
-+IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0), "nop", 20)
-+IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0), "nop", 20)
++IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0),#nop, 20)
++IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),#nop, 20)
++IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),#nop, 20)
++IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),#nop, 20)
          "jmp 9f                         \n\t"
  
          "#.balign 16                    \n\t"\
-@@ -860,10 +859,10 @@
+@@ -860,10 +860,10 @@
          "movd %%mm5, 80+" #dst "        \n\t"
  
  //IDCT(  src0,   src4,   src1,    src5,    dst, rounder, shift)
@@ -515,14 +475,14 @@ diff -u -r1.16 simple_idct_mmx.c
 -IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),/nop, 20)
 -IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),/nop, 20)
 -IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),/nop, 20)
-+IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0), "nop", 20)
-+IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0), "nop", 20)
-+IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0), "nop", 20)
-+IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0), "nop", 20)
++IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0),#nop, 20)
++IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),#nop, 20)
++IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),#nop, 20)
++IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),#nop, 20)
          "jmp 9f                         \n\t"
  
          "#.balign 16                    \n\t"\
-@@ -928,10 +927,10 @@
+@@ -928,10 +928,10 @@
  
  
  //IDCT(  src0,   src4,   src1,    src5,    dst, rounder, shift)
@@ -530,14 +490,14 @@ diff -u -r1.16 simple_idct_mmx.c
 -IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),/nop, 20)
 -IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),/nop, 20)
 -IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),/nop, 20)
-+IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0), "nop", 20)
-+IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0), "nop", 20)
-+IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0), "nop", 20)
-+IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0), "nop", 20)
++IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0),#nop, 20)
++IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),#nop, 20)
++IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),#nop, 20)
++IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),#nop, 20)
          "jmp 9f                         \n\t"
  
          "#.balign 16                    \n\t"\
-@@ -1007,10 +1006,10 @@
+@@ -1007,10 +1007,10 @@
          "movd %%mm5, 80+" #dst "        \n\t"
  
  //IDCT(  src0,   src4,   src1,    src5,    dst, rounder, shift)
@@ -545,14 +505,14 @@ diff -u -r1.16 simple_idct_mmx.c
 -IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),/nop, 20)
 -IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),/nop, 20)
 -IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),/nop, 20)
-+IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0), "nop", 20)
-+IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0), "nop", 20)
-+IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0), "nop", 20)
-+IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0), "nop", 20)
++IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0),#nop, 20)
++IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),#nop, 20)
++IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),#nop, 20)
++IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),#nop, 20)
          "jmp 9f                         \n\t"
  
          "#.balign 16                    \n\t"\
-@@ -1073,10 +1072,10 @@
+@@ -1073,10 +1073,10 @@
  
  
  //IDCT(  src0,   src4,   src1,    src5,    dst, rounder, shift)
@@ -560,14 +520,14 @@ diff -u -r1.16 simple_idct_mmx.c
 -IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),/nop, 20)
 -IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),/nop, 20)
 -IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),/nop, 20)
-+IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0), "nop", 20)
-+IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0), "nop", 20)
-+IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0), "nop", 20)
-+IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0), "nop", 20)
++IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0),#nop, 20)
++IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),#nop, 20)
++IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),#nop, 20)
++IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),#nop, 20)
          "jmp 9f                         \n\t"
  
          "#.balign 16                    \n\t"\
-@@ -1141,10 +1140,10 @@
+@@ -1141,10 +1141,10 @@
  
  
  //IDCT(  src0,   src4,   src1,    src5,    dst, rounder, shift)
@@ -575,14 +535,14 @@ diff -u -r1.16 simple_idct_mmx.c
 -//IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),/nop, 20)
 -IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),/nop, 20)
 -//IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),/nop, 20)
-+IDCT(    0(%1), 64(%1), 32(%1),  96(%1),  0(%0), "nop", 20)
-+//IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0), "nop", 20)
-+IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0), "nop", 20)
-+//IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0), "nop", 20)
++IDCT(    0(%1), 64(%1), 32(%1),  96(%1),  0(%0),#nop, 20)
++//IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),#nop, 20)
++IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),#nop, 20)
++//IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),#nop, 20)
          "jmp 9f                         \n\t"
  
  
-@@ -1217,10 +1216,10 @@
+@@ -1217,10 +1217,10 @@
  
  
  //IDCT(  src0,   src4,   src1,    src5,    dst, rounder, shift)
@@ -590,14 +550,14 @@ diff -u -r1.16 simple_idct_mmx.c
 -IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),/nop, 20)
 -IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),/nop, 20)
 -IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),/nop, 20)
-+IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0), "nop", 20)
-+IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0), "nop", 20)
-+IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0), "nop", 20)
-+IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0), "nop", 20)
++IDCT(    (%1), 64(%1), 32(%1),  96(%1),  0(%0),#nop, 20)
++IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),#nop, 20)
++IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),#nop, 20)
++IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),#nop, 20)
          "jmp 9f                         \n\t"
  
  
-@@ -1259,10 +1258,10 @@
+@@ -1259,10 +1259,10 @@
          "movq %%mm0, 80+" #dst "        \n\t"
  
  //IDCT(  src0,   src4,   src1,    src5,    dst, rounder, shift)
@@ -605,10 +565,10 @@ diff -u -r1.16 simple_idct_mmx.c
 -//IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),/nop, 20)
 -IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),/nop, 20)
 -//IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),/nop, 20)
-+IDCT(   0(%1), 64(%1), 32(%1),  96(%1),  0(%0), "nop", 20)
-+//IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0), "nop", 20)
-+IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0), "nop", 20)
-+//IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0), "nop", 20)
++IDCT(   0(%1), 64(%1), 32(%1),  96(%1),  0(%0),#nop, 20)
++//IDCT(   8(%1), 72(%1), 40(%1), 104(%1),  4(%0),#nop, 20)
++IDCT(  16(%1), 80(%1), 48(%1), 112(%1),  8(%0),#nop, 20)
++//IDCT(  24(%1), 88(%1), 56(%1), 120(%1), 12(%0),#nop, 20)
  
  
  #endif
