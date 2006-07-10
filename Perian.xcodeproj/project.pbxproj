@@ -7,52 +7,16 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
-		8F78AC730A41C73C005622AB /* Build Intel Static Libs */ = {
+		11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = 8F78AC760A41C75B005622AB /* Build configuration list for PBXAggregateTarget "Build Intel Static Libs" */;
+			buildConfigurationList = 11BA39B00A61E453008AF206 /* Build configuration list for PBXAggregateTarget "ffmpeg Static Libraries" */;
 			buildPhases = (
-				8F78AC720A41C73C005622AB /* ShellScript */,
+				11BA39A70A61E450008AF206 /* ShellScript */,
 			);
 			dependencies = (
 			);
-			name = "Build Intel Static Libs";
-			productName = "Build Intel Static Libs";
-		};
-		8F9B11390A41CFC400083569 /* Build PPC Static Libs */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = 8F9B113C0A41CFE200083569 /* Build configuration list for PBXAggregateTarget "Build PPC Static Libs" */;
-			buildPhases = (
-				8F9B11380A41CFC400083569 /* ShellScript */,
-			);
-			dependencies = (
-			);
-			name = "Build PPC Static Libs";
-			productName = "Build PPC Static Libs";
-		};
-		8F9B11480A41D10F00083569 /* Lipo Static Libs */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = 8F9B11530A41D13500083569 /* Build configuration list for PBXAggregateTarget "Lipo Static Libs" */;
-			buildPhases = (
-				8F9B11470A41D10F00083569 /* ShellScript */,
-			);
-			dependencies = (
-				8F9B114E0A41D11600083569 /* PBXTargetDependency */,
-				8F9B11500A41D11700083569 /* PBXTargetDependency */,
-			);
-			name = "Lipo Static Libs";
-			productName = "Lipo Static Libs";
-		};
-		F5790A2F0A422CFC0083622C /* Perian */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = F5790A3A0A422D2A0083622C /* Build configuration list for PBXAggregateTarget "Perian" */;
-			buildPhases = (
-			);
-			dependencies = (
-				F5790A330A422D040083622C /* PBXTargetDependency */,
-				F5790A310A422D040083622C /* PBXTargetDependency */,
-			);
-			name = Perian;
-			productName = "Perian All";
+			name = "ffmpeg Static Libraries";
+			productName = "Version Macros and Static Libraries";
 		};
 /* End PBXAggregateTarget section */
 
@@ -72,33 +36,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		8F9B114D0A41D11600083569 /* PBXContainerItemProxy */ = {
+		11BA3DAF0A61EE90008AF206 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8F9B11390A41CFC400083569;
-			remoteInfo = "Build PPC Static Libs";
-		};
-		8F9B114F0A41D11700083569 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8F78AC730A41C73C005622AB;
-			remoteInfo = "Build Intel Static Libs";
-		};
-		F5790A300A422D040083622C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 11A70AC00A3D0105002058D4;
-			remoteInfo = Perian;
-		};
-		F5790A320A422D040083622C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8F9B11480A41D10F00083569;
-			remoteInfo = "Lipo Static Libs";
+			remoteGlobalIDString = 11BA39A80A61E450008AF206;
+			remoteInfo = "ffmpeg Static Libraries";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -211,20 +154,22 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		11A70AC00A3D0105002058D4 /* Perian (No Libraries) */ = {
+		11A70AC00A3D0105002058D4 /* Perian */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian (No Libraries)" */;
+			buildConfigurationList = 11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */;
 			buildPhases = (
 				11A70ABD0A3D0105002058D4 /* Resources */,
 				11A70ABE0A3D0105002058D4 /* Sources */,
 				11A70ABF0A3D0105002058D4 /* Frameworks */,
 				11A70ADC0A3D0156002058D4 /* Rez */,
+				11BA3E510A61F2CE008AF206 /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				11BA3DB00A61EE90008AF206 /* PBXTargetDependency */,
 			);
-			name = "Perian (No Libraries)";
+			name = Perian;
 			productName = Perian;
 			productReference = 11A70AC10A3D0105002058D4 /* Perian.component */;
 			productType = "com.apple.product-type.bundle";
@@ -239,11 +184,8 @@
 			mainGroup = 089C166AFE841209C02AAC07 /* ffmpeg DivX */;
 			projectDirPath = "";
 			targets = (
-				F5790A2F0A422CFC0083622C /* Perian */,
-				11A70AC00A3D0105002058D4 /* Perian (No Libraries) */,
-				8F9B11480A41D10F00083569 /* Lipo Static Libs */,
-				8F9B11390A41CFC400083569 /* Build PPC Static Libs */,
-				8F78AC730A41C73C005622AB /* Build Intel Static Libs */,
+				11A70AC00A3D0105002058D4 /* Perian */,
+				11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */,
 			);
 		};
 /* End PBXProject section */
@@ -274,7 +216,7 @@
 /* End PBXRezBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		8F78AC720A41C73C005622AB /* ShellScript */ = {
+		11BA39A70A61E450008AF206 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
 			files = (
@@ -282,12 +224,13 @@
 			inputPaths = (
 			);
 			outputPaths = (
+				"$(SYMROOT)/Universal/buildid",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "BUILDDIR=\"$SYMROOT/intel\"\nmkdir \"$BUILDDIR\"\n\ncd \"$SRCROOT/ffmpeg\"\npatch -p0 < ../ffmpeg-configure-crosscomp.patch\npatch -p0 < ../ffmpeg-svn-mactel.patch\n\ncd \"$BUILDDIR\"\nif [ `arch` != i386 ] ; then\n\t\"$SRCROOT/ffmpeg/configure\" --cross-compile --cpu=x86 --enable-pp --enable-gpl --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386'\nelse\n\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl --enable-memalign-hack\nfi\nmake -j3\n\ncd \"$SRCROOT/ffmpeg\"\npatch -R -p0 < ../ffmpeg-configure-crosscomp.patch\npatch -R -p0 < ../ffmpeg-svn-mactel.patch\n";
+			shellScript = "PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin\nbuildid_ffmpeg=\"r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`\"\n\nOUTPUT_FILE=\"$SYMROOT/Universal/buildid\"\n\nif [[ -e \"$OUTPUT_FILE\" ]] ; then\n\toldbuildid_ffmpeg=`cat \"$OUTPUT_FILE\"`\nelse\n\toldbuildid_ffmpeg=\"buildme\"\nfi\n\nif [[ $buildid == \"r\" ]] ; then\n\techo \"error: you're using svk. Please ask someone to add svk support to the build system. There's a script in Adium svn that can do this.\"\n\texit 1;\nfi\n\nif [ \"$buildid_ffmpeg\" = \"$oldbuildid_ffmpeg\" ] ; then\n\techo \"Static ffmpeg libs are up-to-date ; not rebuilding\"\nelse\n\techo \"Static ffmpeg libs are out-of-date ; rebuilding\"\n\t#######################\n\t# Intel shlibs\n\t#######################\n\tBUILDDIR=\"$SYMROOT/intel\"\n\tmkdir \"$BUILDDIR\"\n\t\n\tcd \"$SRCROOT/ffmpeg\"\n\tpatch -p0 < ../ffmpeg-configure-crosscomp.patch\n\tpatch -p0 < ../ffmpeg-svn-mactel.patch\n\t\n\tcd \"$BUILDDIR\"\n\tif [ `arch` != i386 ] ; then\n\t\t\"$SRCROOT/ffmpeg/configure\" --cross-compile --cpu=x86 --enable-pp --enable-gpl --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386'\n\telse\n\t\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl --enable-memalign-hack\n\tfi\n\tmake -j3\n\t\n\tcd \"$SRCROOT/ffmpeg\"\n\tpatch -R -p0 < ../ffmpeg-configure-crosscomp.patch\n\tpatch -R -p0 < ../ffmpeg-svn-mactel.patch\n\t\n\t\n\t#######################\n\t# PPC shlibs\n\t#######################\n\tBUILDDIR=\"$SYMROOT/ppc\"\n\tmkdir \"$BUILDDIR\"\n\t\n\tcd \"$SRCROOT/ffmpeg\"\n\tpatch -p0 < ../ffmpeg-configure-crosscomp.patch\n\t\n\tcd \"$BUILDDIR\"\n\tif [ `arch` = ppc ] ; then\n\t\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl\n\telse\n\t\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl --cpu=ppc  --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc'\n\tfi\n\tmake -j3\n\t\n\tcd \"$SRCROOT/ffmpeg\"\n\tpatch -R -p0 < ../ffmpeg-configure-crosscomp.patch\n\t\n\t\n\t#######################\n\t# lipo shlibs\n\t#######################\n\tBUILDDIR=\"$SYMROOT/Universal\"\n\tINTEL=\"$SYMROOT/intel\"\n\tPPC=\"$SYMROOT/ppc\"\n\trm -rf \"$BUILDDIR\"\n\tmkdir \"$BUILDDIR\"\n\tfor aa in \"$INTEL\"/*/*.a ; do\n\t\techo lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\\/.*\\//Universal\\//'`\n\t\tlipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\\/.*\\//Universal\\//'`\n\tdone\n\techo -n \"$buildid_ffmpeg\" > $OUTPUT_FILE\nfi\n";
 		};
-		8F9B11380A41CFC400083569 /* ShellScript */ = {
+		11BA3E510A61F2CE008AF206 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -298,20 +241,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "BUILDDIR=\"$SYMROOT/ppc\"\nmkdir \"$BUILDDIR\"\n\ncd \"$SRCROOT/ffmpeg\"\npatch -p0 < ../ffmpeg-configure-crosscomp.patch\n\ncd \"$BUILDDIR\"\nif [ `arch` = ppc ] ; then\n\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl\nelse\n\t\"$SRCROOT/ffmpeg/configure\" --enable-pp --enable-gpl --cpu=ppc  --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc'\nfi\nmake -j3\n\ncd \"$SRCROOT/ffmpeg\"\npatch -R -p0 < ../ffmpeg-configure-crosscomp.patch";
-		};
-		8F9B11470A41D10F00083569 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "BUILDDIR=\"$SYMROOT/Universal\"\nINTEL=\"$SYMROOT/intel\"\nPPC=\"$SYMROOT/ppc\"\nrm -rf \"$BUILDDIR\"\nmkdir \"$BUILDDIR\"\nfor aa in \"$INTEL\"/*/*.a ; do\n\techo lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\\/.*\\//Universal\\//'`\n\tlipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\\/.*\\//Universal\\//'`\ndone\n";
+			shellScript = "# Xcode auto-versioning script for Subversion\n# by Axel Andersson, modified by Daniel Jalkut to add\n# \"--revision HEAD\" to the svn info line, which allows\n# the latest revision to always be used.\n\n# further modified by Augie Fackler to be gross and sh-based in places\n# so that you can have svn installed anywhere\nPATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin\nffmpeg_rev=`cat \"$SYMROOT/Universal/buildid\"`\nREV=`svnversion -n ./`\necho $REV\n\necho | perl <<EOF\nuse strict;\ndie \"\\$0: Must be run from Xcode\" unless \\$ENV{\"BUILT_PRODUCTS_DIR\"};\n\nmy \\$INFO = \"\\$ENV{BUILT_PRODUCTS_DIR}/\\$ENV{WRAPPER_NAME}/Contents/Info.plist\";\n\nmy \\$version = \"$REV\";\n\n# (Match the last group of digits and optional letter M/S):\n\n# ugly yet functional (barely) regex by Daniel Jalkut:\n#$version =~ s/([\\d]*:)(\\d+[M|S]*).*/$2/;\n\n# better yet still functional regex via Kevin \"Regex Nerd\" Ballard\n(\\$version =~ m/\\d+[MS]*\\$/) && (\\$version = \\$&);\n\nopen(FH, \"\\$INFO\") or die \"\\$0: \\$INFO: $!\";\nmy \\$info = join(\"\", <FH>);\nclose(FH);\n\n#\\$info =~ s/([\\t ]+<key>CFBundleVersion<\\/key>\\n[\\t ]+<string>).*?(<\\/string>)/\\$1\\$version\\$2/;\n\\$info =~ s/SVNREVISION/\\$version/;\n\\$info =~ s/FFMPEGREVISION/$ffmpeg_rev/;\n\nopen(FH, \">\\$INFO\") or die \"\\$0: \\$INFO: \\$!\";\nprint FH \\$info;\nclose(FH);\nEOF\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -327,25 +257,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		8F9B114E0A41D11600083569 /* PBXTargetDependency */ = {
+		11BA3DB00A61EE90008AF206 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 8F9B11390A41CFC400083569 /* Build PPC Static Libs */;
-			targetProxy = 8F9B114D0A41D11600083569 /* PBXContainerItemProxy */;
-		};
-		8F9B11500A41D11700083569 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 8F78AC730A41C73C005622AB /* Build Intel Static Libs */;
-			targetProxy = 8F9B114F0A41D11700083569 /* PBXContainerItemProxy */;
-		};
-		F5790A310A422D040083622C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 11A70AC00A3D0105002058D4 /* Perian (No Libraries) */;
-			targetProxy = F5790A300A422D040083622C /* PBXContainerItemProxy */;
-		};
-		F5790A330A422D040083622C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 8F9B11480A41D10F00083569 /* Lipo Static Libs */;
-			targetProxy = F5790A320A422D040083622C /* PBXContainerItemProxy */;
+			target = 11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */;
+			targetProxy = 11BA3DAF0A61EE90008AF206 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -505,6 +420,35 @@
 			};
 			name = Default;
 		};
+		11BA39B10A61E453008AF206 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Version Macros and Static Libraries";
+			};
+			name = Development;
+		};
+		11BA39B20A61E453008AF206 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Version Macros and Static Libraries";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		11BA39B30A61E453008AF206 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Version Macros and Static Libraries";
+			};
+			name = Default;
+		};
 		11D4ED480A3CE59A0066D45F /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -525,131 +469,25 @@
 			};
 			name = Default;
 		};
-		8F78AC770A41C75B005622AB /* Development */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "Build Intel Static Libs";
-			};
-			name = Development;
-		};
-		8F78AC780A41C75B005622AB /* Deployment */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				PRODUCT_NAME = "Build Intel Static Libs";
-				ZERO_LINK = NO;
-			};
-			name = Deployment;
-		};
-		8F78AC790A41C75B005622AB /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Build Intel Static Libs";
-			};
-			name = Default;
-		};
-		8F9B113D0A41CFE200083569 /* Development */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "Build PPC Static Libs";
-			};
-			name = Development;
-		};
-		8F9B113E0A41CFE200083569 /* Deployment */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				PRODUCT_NAME = "Build PPC Static Libs";
-				ZERO_LINK = NO;
-			};
-			name = Deployment;
-		};
-		8F9B113F0A41CFE200083569 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Build PPC Static Libs";
-			};
-			name = Default;
-		};
-		8F9B11540A41D13500083569 /* Development */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "Lipo Static Libs";
-			};
-			name = Development;
-		};
-		8F9B11550A41D13500083569 /* Deployment */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				PRODUCT_NAME = "Lipo Static Libs";
-				ZERO_LINK = NO;
-			};
-			name = Deployment;
-		};
-		8F9B11560A41D13500083569 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Lipo Static Libs";
-			};
-			name = Default;
-		};
-		F5790A3B0A422D2A0083622C /* Development */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "Perian All";
-			};
-			name = Development;
-		};
-		F5790A3C0A422D2A0083622C /* Deployment */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				PRODUCT_NAME = "Perian All";
-				ZERO_LINK = NO;
-			};
-			name = Deployment;
-		};
-		F5790A3D0A422D2A0083622C /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Perian All";
-			};
-			name = Default;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian (No Libraries)" */ = {
+		11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				11A70AC90A3D0111002058D4 /* Development */,
 				11A70ACA0A3D0111002058D4 /* Deployment */,
 				11A70ACB0A3D0111002058D4 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		11BA39B00A61E453008AF206 /* Build configuration list for PBXAggregateTarget "ffmpeg Static Libraries" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11BA39B10A61E453008AF206 /* Development */,
+				11BA39B20A61E453008AF206 /* Deployment */,
+				11BA39B30A61E453008AF206 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
@@ -660,46 +498,6 @@
 				11D4ED480A3CE59A0066D45F /* Development */,
 				11D4ED490A3CE59A0066D45F /* Deployment */,
 				11D4ED4A0A3CE59A0066D45F /* Default */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
-		};
-		8F78AC760A41C75B005622AB /* Build configuration list for PBXAggregateTarget "Build Intel Static Libs" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				8F78AC770A41C75B005622AB /* Development */,
-				8F78AC780A41C75B005622AB /* Deployment */,
-				8F78AC790A41C75B005622AB /* Default */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
-		};
-		8F9B113C0A41CFE200083569 /* Build configuration list for PBXAggregateTarget "Build PPC Static Libs" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				8F9B113D0A41CFE200083569 /* Development */,
-				8F9B113E0A41CFE200083569 /* Deployment */,
-				8F9B113F0A41CFE200083569 /* Default */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
-		};
-		8F9B11530A41D13500083569 /* Build configuration list for PBXAggregateTarget "Lipo Static Libs" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				8F9B11540A41D13500083569 /* Development */,
-				8F9B11550A41D13500083569 /* Deployment */,
-				8F9B11560A41D13500083569 /* Default */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
-		};
-		F5790A3A0A422D2A0083622C /* Build configuration list for PBXAggregateTarget "Perian" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F5790A3B0A422D2A0083622C /* Development */,
-				F5790A3C0A422D2A0083622C /* Deployment */,
-				F5790A3D0A422D2A0083622C /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
