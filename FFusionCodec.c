@@ -193,9 +193,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
             
             if (bitfield >= 0x1010)
             {
-                Codecprintf("Use speedy y420 component");
-                printf(" 0x%lx\n", bitfield);
-                
+                Codecprintf("Use speedy y420 component");                
                 glob->hasy420 = 1;
             }
         }
@@ -208,7 +206,6 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         // most of our calls to the base decompressor instance
         
         err = OpenADefaultComponent(decompressorComponentType, kBaseCodecType, &glob->delegateComponent);
-        printf("Perian codec: glob->delegateComponent:0x%x \n",glob->delegateComponent);
         if (!err)
         {
             ComponentSetTarget(glob->delegateComponent, self);
