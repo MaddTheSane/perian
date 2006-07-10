@@ -26,19 +26,19 @@ else
 	mkdir "$BUILDDIR"
 	
 	cd "$SRCROOT/ffmpeg"
-	patch -p0 < ../ffmpeg-configure-crosscomp.patch
+	#patch -p0 < ../ffmpeg-configure-crosscomp.patch
 	patch -p0 < ../ffmpeg-svn-mactel.patch
 	
 	cd "$BUILDDIR"
 	if [ `arch` != i386 ] ; then
-		"$SRCROOT/ffmpeg/configure" --cross-compile --cpu=x86 --enable-pp --enable-gpl --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386'
+		"$SRCROOT/ffmpeg/configure" --cross-compile --cpu=x86 --enable-pp --enable-gpl --cc='gcc -arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk'
 	else
 		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl --enable-memalign-hack
 	fi
 	make -j3
 	
 	cd "$SRCROOT/ffmpeg"
-	patch -R -p0 < ../ffmpeg-configure-crosscomp.patch
+	#patch -R -p0 < ../ffmpeg-configure-crosscomp.patch
 	patch -R -p0 < ../ffmpeg-svn-mactel.patch
 	
 	
@@ -49,18 +49,18 @@ else
 	mkdir "$BUILDDIR"
 	
 	cd "$SRCROOT/ffmpeg"
-	patch -p0 < ../ffmpeg-configure-crosscomp.patch
+	#patch -p0 < ../ffmpeg-configure-crosscomp.patch
 	
 	cd "$BUILDDIR"
 	if [ `arch` = ppc ] ; then
 		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl
 	else
-		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl --cpu=ppc  --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-ldflags='-isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc'
+		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl --cpu=ppc  --cc='gcc -arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk'
 	fi
 	make -j3
 	
 	cd "$SRCROOT/ffmpeg"
-	patch -R -p0 < ../ffmpeg-configure-crosscomp.patch
+	#patch -R -p0 < ../ffmpeg-configure-crosscomp.patch
 	
 	
 	#######################
