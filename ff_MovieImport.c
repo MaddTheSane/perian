@@ -27,15 +27,6 @@
 /* This one is a little big in ffmpeg and private anyway */
 #define PROBE_BUF_SIZE 64
 
-/* Global variables declaration & definition */
-AVInputFormat *avi_iformat;
-
-/* This one is used because Global variables are initialized ONE time
- * until the application quits. Thus, we have to make sure we're initialize
- * the libavformat only once or we get an endlos loop when registering the same
- * element twice!! */
-Boolean initLib = TRUE;
-
 #include <CoreServices/CoreServices.h>
 #include <QuickTime/QuickTime.h>
 
@@ -58,6 +49,7 @@ struct _ff_global_context {
 	/* for overwriting the default sample descriptions */
 	ImageDescriptionHandle imgHdl;
 	SoundDescriptionHandle sndHdl;
+	AVInputFormat		*format;
 };
 typedef struct _ff_global_context ff_global_context;
 typedef ff_global_context *ff_global_ptr;
@@ -67,6 +59,21 @@ typedef ff_global_context *ff_global_ptr;
 #include <QuickTime/ComponentDispatchHelper.c>
 
 #pragma mark -
+
+void initLib()
+{
+	/* This one is used because Global variables are initialized ONE time
+	* until the application quits. Thus, we have to make sure we're initialize
+	* the libavformat only once or we get an endlos loop when registering the same
+	* element twice!! */
+	static Boolean inited = FALSE;
+
+	/* Register the Parser of ffmpeg, needed because we do no proper setup of the libraries */
+	if(!inited) {
+		inited = TRUE;
+		av_register_all();
+	}
+}
 
 /************************************
 ** Base Component Manager Routines **
@@ -206,7 +213,6 @@ bail:
 
 ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle dataRef, OSType dataRefType, UInt8 *valid)
 {
-	AVInputFormat *format = avi_iformat;
 	ComponentResult result = noErr;
 	DataHandler dataHandler = NULL;
 	uint8_t buf[PROBE_BUF_SIZE];
@@ -226,8 +232,9 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	result = DataHScheduleData(dataHandler, (Ptr)(pd->buf), 0, PROBE_BUF_SIZE, 0, NULL, NULL);
 	require_noerr(result,bail);
 	
-	success = format->read_probe(pd);
-	if(success)
+	initLib();
+	storage->format = av_probe_input_format(pd, 1);
+	if(storage->format != NULL)
 		*valid = 255; /* This means we can read the data */
 bail:
 	if(dataHandler)
@@ -278,11 +285,11 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	/* make sure that in case of error, the flag movieImportResultComplete is not set */
 	*outFlags = 0;
 	
-	/* Register the Parser of ffmpeg, needed because we do no proper setup of the libraries */
-	if(initLib) {
-		initLib = FALSE;
-		register_parsers();
-	}
+	/* probe the format first */
+	UInt8 valid = 0;
+	FFAvi_MovieImportValidateDataRef(storage, dataRef, dataRefType, &valid);
+	if(valid != 255)
+		goto bail;
 	
 	/* Prepare the iocontext structure */
 	memset(&byteContext, 0, sizeof(byteContext));
@@ -291,14 +298,13 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	
 	/* Open the Format Context */
 	memset(&params, 0, sizeof(params));
-	if (avi_iformat == NULL)
-		avi_iformat = (AVInputFormat *)malloc(sizeof(AVInputFormat));
-	result = av_open_input_stream(&ic, &byteContext, "", avi_iformat, &params);
+	result = av_open_input_stream(&ic, &byteContext, "", storage->format, &params);
 	require_noerr(result,bail);
 	
 	/* Get the Stream Infos if not already read */
 	result = av_find_stream_info(ic);
-	require_noerr(result,bail);
+	if(result < 0)
+		goto bail;
 	
 	/* Seek backwards to get a manually read packet for file offset */
 	result = av_seek_frame(ic, -1, 0, 0);
