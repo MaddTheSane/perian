@@ -1647,3 +1647,4 @@ resource 'STR ' (kXVIDInfoResID) {
 resource 'dlle' (256) {
         "FFusionCodecComponentDispatch"
 };
+
