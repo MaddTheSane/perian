@@ -251,7 +251,6 @@
 			inputPaths = (
 			);
 			outputPaths = (
-				"$(SYMROOT)/Universal/buildid",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
