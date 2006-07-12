@@ -190,6 +190,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	if(!map->vbr) /* This works for all the tested codecs. but is there any better way? */
 		asbd.mBytesPerPacket = codec->block_align; /* this is tested for alaw/mulaw/msadpcm */
 	asbd.mFramesPerPacket = codec->frame_size; /* works for mp3, all other codecs this is 0 anyway */
+	asbd.mBitsPerChannel = codec->bits_per_sample;
 	
 	/* ask the toolbox about more information */
 	ioSize = sizeof(AudioStreamBasicDescription);
