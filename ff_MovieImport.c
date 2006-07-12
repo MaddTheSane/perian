@@ -81,7 +81,6 @@ void initLib()
 
 ComponentResult FFAvi_MovieImportOpen(ff_global_ptr storage, ComponentInstance self)
 {
-	printf("Perian AVIImpoter opened\n");
 	ComponentResult result;
 	
 	/* Check for Mac OS 10.4 & QT 7 */
