@@ -80,5 +80,6 @@ else
 	echo -n "$buildid_ffmpeg" > $OUTPUT_FILE
 fi
 
+mkdir "$SYMROOT/Universal" || true
 cp "$BUILT_PRODUCTS_DIR/Universal"/* "$SYMROOT/Universal"
 ranlib "$SYMROOT/Universal"/*.a
