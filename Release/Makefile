@@ -34,6 +34,8 @@ createfolder:
 	@# copy the text files
 #	cp $(SRC_DIR)/Changes.txt $(ADIUM_DIR)
 #	cp $(SRC_DIR)/License.txt $(ADIUM_DIR)
+	cp $(SRC_DIR)/Release/Read\ Me.txt $(ADIUM_DIR)
+	cp $(SRC_DIR)/Release/License.txt $(ADIUM_DIR)
 	
 	@# symlink /Library/QuickTime
 	ln -s /Library/QuickTime $(ADIUM_DIR)/QuickTime
