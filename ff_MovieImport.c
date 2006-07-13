@@ -23,6 +23,7 @@
 #include "ff_MovieImportVersion.h"
 #include "avformat.h"
 #include "ff_private.h"
+#include "allformats.h"
 
 /* This one is a little big in ffmpeg and private anyway */
 #define PROBE_BUF_SIZE 64
@@ -71,7 +72,8 @@ void initLib()
 	/* Register the Parser of ffmpeg, needed because we do no proper setup of the libraries */
 	if(!inited) {
 		inited = TRUE;
-		av_register_all();
+		av_register_input_format(&avi_demuxer);
+		register_parsers();
 	}
 }
 

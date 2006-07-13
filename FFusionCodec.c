@@ -368,7 +368,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     if (!glob->avCodec)
     {
         avcodec_init();
-        avcodec_register_all();
+        register_avcodec(&msmpeg4v1_decoder);
+        register_avcodec(&msmpeg4v2_decoder);
+        register_avcodec(&msmpeg4v3_decoder);
+        register_avcodec(&mpeg4_decoder);
 
         switch (glob->componentType)
         {
