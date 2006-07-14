@@ -18,6 +18,19 @@
 			name = "ffmpeg Static Libraries";
 			productName = "Version Macros and Static Libraries";
 		};
+		F59E09EA0A670E3D0019A3F0 /* Debug In QuickTime Player */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F59E0A0B0A670E950019A3F0 /* Build configuration list for PBXAggregateTarget "Debug In QuickTime Player" */;
+			buildPhases = (
+				F59E09E90A670E3D0019A3F0 /* CopyFiles */,
+			);
+			comments = "This is only useful in the debug mode";
+			dependencies = (
+				F59E09EC0A670E420019A3F0 /* PBXTargetDependency */,
+			);
+			name = "Debug In QuickTime Player";
+			productName = "Debug In QuickTime Player";
+		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
@@ -40,6 +53,7 @@
 		8F483B550A642644002CCA73 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B540A642644002CCA73 /* libavformat.a */; };
 		8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */; };
 		8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */ = {isa = PBXBuildFile; fileRef = 8F483B8B0A642886002CCA73 /* PerianAviImporter.r */; };
+		F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,7 +64,27 @@
 			remoteGlobalIDString = 11BA39A80A61E450008AF206;
 			remoteInfo = "ffmpeg Static Libraries";
 		};
+		F59E09EB0A670E420019A3F0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 11A70AC00A3D0105002058D4 /* Perian */;
+			remoteInfo = Perian;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F59E09E90A670E3D0019A3F0 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(HOME)/Library/QuickTime";
+			dstSubfolderSpec = 0;
+			files = (
+				F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		02B4991E040D596C0049362E /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/main.nib; sourceTree = "<group>"; };
@@ -211,6 +245,7 @@
 			targets = (
 				11A70AC00A3D0105002058D4 /* Perian */,
 				11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */,
+				F59E09EA0A670E3D0019A3F0 /* Debug In QuickTime Player */,
 			);
 		};
 /* End PBXProject section */
@@ -291,6 +326,11 @@
 			target = 11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */;
 			targetProxy = 11BA3DAF0A61EE90008AF206 /* PBXContainerItemProxy */;
 		};
+		F59E09EC0A670E420019A3F0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 11A70AC00A3D0105002058D4 /* Perian */;
+			targetProxy = F59E09EB0A670E420019A3F0 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -356,7 +396,7 @@
 					ffmpeg/libavformat,
 				);
 				INFOPLIST_FILE = "Perian-Info.plist";
-				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = (
 					$SYMROOT/Universal,
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
@@ -407,7 +447,7 @@
 					ffmpeg/libavformat,
 				);
 				INFOPLIST_FILE = "Perian-Info.plist";
-				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = (
 					$SYMROOT/Universal,
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
@@ -454,7 +494,7 @@
 					ffmpeg/libavformat,
 				);
 				INFOPLIST_FILE = "Perian-Info.plist";
-				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = (
 					$SYMROOT/Universal,
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
@@ -523,6 +563,35 @@
 			};
 			name = Default;
 		};
+		F59E0A0C0A670E950019A3F0 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Debug In QuickTime Player";
+			};
+			name = Development;
+		};
+		F59E0A0D0A670E950019A3F0 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Debug In QuickTime Player";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		F59E0A0E0A670E950019A3F0 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Debug In QuickTime Player";
+			};
+			name = Default;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -552,6 +621,16 @@
 				11D4ED480A3CE59A0066D45F /* Development */,
 				11D4ED490A3CE59A0066D45F /* Deployment */,
 				11D4ED4A0A3CE59A0066D45F /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		F59E0A0B0A670E950019A3F0 /* Build configuration list for PBXAggregateTarget "Debug In QuickTime Player" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F59E0A0C0A670E950019A3F0 /* Development */,
+				F59E0A0D0A670E950019A3F0 /* Deployment */,
+				F59E0A0E0A670E950019A3F0 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
