@@ -1195,10 +1195,10 @@ OSErr FFusionSlowDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProc
     
     // now let's do some yuv420/vuy2 conversion
     
-    yuvPtr = baseAddr;
-    py = picture->data[0];
-    pu = picture->data[1];
-    pv = picture->data[2];
+    yuvPtr = (char *)baseAddr;
+    py = (char *)picture->data[0];
+    pu = (char *)picture->data[1];
+    pv = (char *)picture->data[2];
 
     for(i = 0 ;  i < height; i++)
     {
