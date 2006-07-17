@@ -152,7 +152,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
     
     GetComponentInfo((Component)self, &descout, 0, 0, 0);
 
-    Codecprintf(glob->fileLog, "Opening component for type");
+    Codecprintf(NULL, "Opening component for type");
     FourCCprintf(" ", descout.componentSubType);
 
     // Allocate memory for our globals, set them up and inform the component manager that we've done so
