@@ -92,9 +92,9 @@ typedef struct
 // Prototypes of private subroutines
 //---------------------------------------------------------------------------
 
-static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture, long length, char firstFrame);
-
-static OSErr FFusionSlowDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture, long length, char firstFrame);
+static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length, char firstFrame);
+static void FastY420(UInt8 *baseAddr, AVFrame *picture);
+static void SlowY420(UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture);
 
 int GetPPUserPreference();
 void SetPPUserPreference(int value);
@@ -335,7 +335,7 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 
     cap->decompressRecordSize = sizeof(FFusionDecompressRecord);
     cap->canAsync = true;
-
+	
     return noErr;
 }
 
@@ -448,7 +448,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         // correctly initialized when calling the alloc function
         
         glob->avContext = avcodec_alloc_context();
-        
+		
         // Image size is mandatory for DivX-like codecs
         
         glob->avContext->width = (**p->imageDescription).width;
@@ -758,13 +758,14 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
     int ppStride[3];
 
     
-    if (myDrp->pixelFormat == 'y420')
-    {
-        err = FFusionDecompress(glob->avContext, dataPtr, dataProc, (UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame);
+	err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame);
+	if (myDrp->pixelFormat == 'y420')
+	{
+		FastY420((UInt8 *)drp->baseAddr, glob->picture);
     }
     else
     {
-        err = FFusionSlowDecompress(glob->avContext, dataPtr, dataProc, (UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame);
+		SlowY420((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, glob->picture);
     }
 
     if (glob->firstFrame)
@@ -1024,20 +1025,15 @@ int FourCCcompare(OSType *a, OSType *b)
 // FFusionDecompress
 //-----------------------------------------------------------------
 // This function calls libavcodec to decompress one frame.
-// It returns y420 data directly to QuickTime which then converts
-// in RGB for display
 //-----------------------------------------------------------------
 
-OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture, long length, char firstFrame)
+OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length, char firstFrame)
 {
     OSErr err = noErr;
     int got_picture = false;
     int len = 0;
-    UInt8 *endOfScanLine;
-    PlanarPixmapInfoYUV420 *planar;
     long availableData = dataProc ? codecMinimumDataSize : kInfiniteDataSize;
 
-    endOfScanLine = baseAddr + (width * 4);
     context->width = width;
     context->height = height;
     picture->data[0] = 0;
@@ -1077,6 +1073,19 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
         availableData -= len;
         dataPtr += len;
     }
+    return err;
+}
+
+//-----------------------------------------------------------------
+// FastY420
+//-----------------------------------------------------------------
+// Returns y420 data directly to QuickTime which then converts
+// in RGB for display
+//-----------------------------------------------------------------
+
+static void FastY420(UInt8 *baseAddr, AVFrame *picture)
+{
+    PlanarPixmapInfoYUV420 *planar;
 
 	/*From Docs: PixMap baseAddr points to a big-endian PlanarPixmapInfoYUV420 struct; see ImageCodec.i. */
     planar = (PlanarPixmapInfoYUV420 *) baseAddr;
@@ -1090,74 +1099,24 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
     planar->componentInfoY.rowBytes = make_big_32(picture->linesize[0]);
     planar->componentInfoCb.rowBytes = make_big_32(picture->linesize[1]);
     planar->componentInfoCr.rowBytes = make_big_32(picture->linesize[2]);
-    
-    return err;
 }
 
 //-----------------------------------------------------------------
 // FFusionSlowDecompress
 //-----------------------------------------------------------------
-// This function calls libavcodec to decompress one frame.
-// In this case we have to return 2yuv values because
+// We have to return 2yuv values because
 // QT version has no built-in y420 component.
 // Since we do the conversion ourselves it is not really optimized....
 // The function should never be called since many people now
 // have a decent OS/QT version.
 //-----------------------------------------------------------------
 
-OSErr FFusionSlowDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture, long length, char firstFrame)
+static void SlowY420(UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture)
 {
-    OSErr err = noErr;
-    int got_picture = false;
-    int len = 0;
     unsigned int i, j;
-    UInt8 *endOfScanLine;
     char *yuvPtr;
     char *py,*pu,*pv;
-    long availableData = dataProc ? codecMinimumDataSize : kInfiniteDataSize;
 
-    endOfScanLine = baseAddr + (width * 4);
-    context->width = width;
-    context->height = height;
-    picture->data[0] = 0;
-    
-    while (!got_picture)
-    {
-        if (availableData < kSpoolChunkSize) 
-        {
-            // get some more source data
-            
-            err = InvokeICMDataUPP((Ptr *)&dataPtr, length, dataProc->dataRefCon, dataProc->dataProc);
-                
-            if (err == eofErr) err = noErr;
-            if (err) return err;
-    
-            availableData = codecMinimumDataSize;
-        }
-        
-        len = avcodec_decode_video(context, picture, &got_picture, dataPtr, length);
-        
-        if (len < 0)
-        {
-            got_picture = 0;
-            len = 1;
-            
-            Codecprintf(NULL, "Error while decoding frame\n");
-
-            if (firstFrame)
-            {
-                return codecErr;
-            }
-            else
-            {
-                return noErr;
-            }
-        }
-        
-        availableData -= len;
-        dataPtr += len;
-    }
-    
     // now let's do some yuv420/vuy2 conversion
     
     yuvPtr = (char *)baseAddr;
@@ -1184,8 +1143,6 @@ OSErr FFusionSlowDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProc
             pv += picture->linesize[2];
         }
     }
-
-    return err;
 }
 
 int GetPPUserPreference()
