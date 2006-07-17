@@ -346,9 +346,8 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 	// QT 7
 	if(cap->recordSize > offsetof(ImageSubCodecDecompressCapabilities, baseCodecShouldCallDecodeBandForAllFrames))
 	{
-//		cap->subCodecIsMultiBufferAware = true;
 		cap->subCodecSupportsOutOfOrderDisplayTimes = true;
-//		cap->baseCodecShouldCallDecodeBandForAllFrames = true;
+		cap->baseCodecShouldCallDecodeBandForAllFrames = true;
 	}
 	
     return noErr;
