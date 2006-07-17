@@ -60,6 +60,7 @@
 #define	kDivX5NameResID		260
 #define	k3ivxNameResID		261
 #define	kXVIDNameResID		262
+#define kH264NameResID		270
 
 // Codec infos Resource ID
 
@@ -70,6 +71,7 @@
 #define	kDivX5InfoResID		267
 #define	k3ivxInfoResID		268
 #define	kXVIDInfoResID		269
+#define kH264InfoResID		271
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -380,7 +382,6 @@ resource 'thng' (259) {
 		platformIA32NativeEntryPoint,
         };
 };
-
 
 //---------------------------------------------------------------------------
 // MS-MPEG4 v2 Component
@@ -1576,12 +1577,47 @@ resource 'thng' (298) {
         };
 };
 
+// H264
+resource 'thng' (299) {
+	decompressorComponentType,		// Type			
+	'H264',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kH264NameResID,			// Name ID
+	'STR ',					// Info Type
+	kH264InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
 
 resource 'STR ' (kDivX1NameResID) {
 	"MS-MPEG4 v1 Decoder"
+};
+
+resource 'STR ' (kH264NameResID) {
+	"H264 Decoder"
 };
 
 resource 'STR ' (kDivX2NameResID) {
@@ -1638,6 +1674,10 @@ resource 'STR ' (k3ivxInfoResID) {
 
 resource 'STR ' (kXVIDInfoResID) {
 	"Decompresses video stored in XVID format."
+};
+
+resource 'STR ' (kH264InfoResID) {
+	"Decompresses video stored in H264 format."
 };
 
 //---------------------------------------------------------------------------

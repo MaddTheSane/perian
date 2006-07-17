@@ -22,6 +22,7 @@
 
 #include "ff_private.h"
 #include "avcodec.h"
+#include "Codecprintf.h"
 
 #include <CoreServices/CoreServices.h>
 #include <AudioToolbox/AudioToolbox.h>
@@ -140,6 +141,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	/* Create the Image Description Handle */
 	imgHdl = (ImageDescriptionHandle)NewHandleClear(sizeof(ImageDescription));
 	(*imgHdl)->idSize = sizeof(ImageDescription);
+	Codecprintf("fourcc: %c%c%c%c\n",0xff & (codec->codec_tag),0xff & (codec->codec_tag)>>8,0xff & (codec->codec_tag)>>16,0xff & (codec->codec_tag)>>24);
 	(*imgHdl)->cType = BSWAP(codec->codec_tag);
 	(*imgHdl)->temporalQuality = codecMaxQuality;
 	(*imgHdl)->spatialQuality = codecMaxQuality;

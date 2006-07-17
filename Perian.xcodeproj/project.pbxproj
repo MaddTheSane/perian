@@ -35,6 +35,7 @@
 
 /* Begin PBXBuildFile section */
 		112E0C820A6436BA00DB4C29 /* FFusionCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F560DF0003D61D0101ABA332 /* FFusionCodec.c */; };
+		113F589A0A6B091600509987 /* Codecprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 113F58990A6B091600509987 /* Codecprintf.c */; };
 		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA10A3CE8C10066D45F /* libavcodec.a */; };
 		11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA20A3CE8C10066D45F /* libavutil.a */; };
@@ -68,7 +69,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 11A70AC00A3D0105002058D4 /* Perian */;
+			remoteGlobalIDString = 11A70AC00A3D0105002058D4;
 			remoteInfo = Perian;
 		};
 /* End PBXContainerItemProxy section */
@@ -93,6 +94,8 @@
 		02CA1BD10513A38400D00256 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/PostProcessing.strings; sourceTree = "<group>"; };
 		02CA1BD20513A38D00D00256 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		113F58980A6B091600509987 /* Codecprintf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Codecprintf.h; sourceTree = "<group>"; };
+		113F58990A6B091600509987 /* Codecprintf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Codecprintf.c; sourceTree = "<group>"; };
 		1156DBD80A3CE9F500963B0E /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Perian-Info.plist"; sourceTree = "<group>"; };
 		11A70AC10A3D0105002058D4 /* Perian.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.component; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -190,6 +193,8 @@
 				F560DEFC03D61BE301ABA332 /* FFusionCodec.h */,
 				F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */,
 				F560DF0003D61D0101ABA332 /* FFusionCodec.c */,
+				113F58980A6B091600509987 /* Codecprintf.h */,
+				113F58990A6B091600509987 /* Codecprintf.c */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -315,6 +320,7 @@
 				11C85EDA0A641E6400DF3D73 /* ff_private.c in Sources */,
 				11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */,
 				112E0C820A6436BA00DB4C29 /* FFusionCodec.c in Sources */,
+				113F589A0A6B091600509987 /* Codecprintf.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -38,8 +38,6 @@
 #define k3ivxCodecInfoResID		261
 #define kXVIDCodecInfoResID		262
 
-#define CODEC_HEADER			"Perian Codec: "
-
 #define kFFusionCodecManufacturer	'SNE2'
 
 #define kOptionKeyModifier		0x04

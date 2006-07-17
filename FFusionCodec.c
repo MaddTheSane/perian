@@ -36,6 +36,7 @@
 #include "avcodec.h"
 #include "postprocess.h"
 #include "bswap.h"
+#include "Codecprintf.h"
 
 #ifdef __BIG_ENDIAN__
 #define make_big_32(x) (x)
@@ -94,13 +95,6 @@ static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataP
 
 static OSErr FFusionSlowDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture, long length, char firstFrame);
 
-#ifdef DEBUG_BUILD
-int Codecprintf(const char *format, ...);
-void FourCCprintf(char *string, unsigned long a);
-#else
-#define Codecprintf(fmt, ...) /**/
-#define FourCCprintf(string,a) /**/
-#endif
 void FourCCcopy(OSType *dest, OSType *src);
 int FourCCcompare(OSType *a, OSType *b);
 
@@ -372,6 +366,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         register_avcodec(&msmpeg4v2_decoder);
         register_avcodec(&msmpeg4v3_decoder);
         register_avcodec(&mpeg4_decoder);
+		register_avcodec(&h264_decoder);
 
         switch (glob->componentType)
         {
@@ -429,7 +424,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
             case '3iv2':
                 glob->avCodec = avcodec_find_decoder(CODEC_ID_MPEG4);
             break;
-            
+			case 'H264':
+				glob->avCodec = avcodec_find_decoder(CODEC_ID_H264);
+				break;
             default:
                 Codecprintf("Warning! Unknown codec type! Using MPEG4 by default.\n");
                 
@@ -991,43 +988,6 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 //---------------------------------------------------------------------------
 // Private SubRoutines
 //---------------------------------------------------------------------------
-
-//-----------------------------------------------------------------
-// Codecprintf
-//-----------------------------------------------------------------
-// Little function to print correctly messages in the console
-//-----------------------------------------------------------------
-
-#ifdef DEBUG_BUILD
-int Codecprintf(const char *format, ...)
-{
-    printf(CODEC_HEADER);
-    
-    return printf(format);
-}
-#endif
-
-//-----------------------------------------------------------------
-// FourCCprintf
-//-----------------------------------------------------------------
-// Little function to print correctly AVI's FourCC Code
-//-----------------------------------------------------------------
-#ifdef DEBUG_BUILD
-void FourCCprintf (char *string, unsigned long a)
-{
-    if (a < 64)
-    {
-        printf("%s: %ld\n", string, a);
-    }
-    else
-    {
-        printf("%s: %c%c%c%c\n", string, (unsigned char)((a >> 24) & 0xff), 
-                                        (unsigned char)((a >> 16) & 0xff), 
-                                        (unsigned char)((a >> 8) & 0xff), 
-                                        (unsigned char)(a & 0xff));
-    }
-}
-#endif
 
 //-----------------------------------------------------------------
 // FourCCcopy
