@@ -70,6 +70,7 @@ typedef struct
     AVCodec			*avCodec;
     AVCodecContext		*avContext;
     AVFrame			*picture;
+	AVFrame			*futurePicture;
     OSType			componentType;
     char			hasy420;
     char			firstFrame;
@@ -85,6 +86,7 @@ typedef struct
     long			depth;
     OSType			pixelFormat;
     long			bufferSize;
+	int				decoded;
 } FFusionDecompressRecord;
 
 
@@ -246,6 +248,11 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         {
             av_free(glob->picture);
         }
+		
+		if (glob->futurePicture)
+		{
+			av_free(glob->futurePicture);
+		}
         
         if (glob->avContext)
         {
@@ -335,6 +342,14 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 
     cap->decompressRecordSize = sizeof(FFusionDecompressRecord);
     cap->canAsync = true;
+	
+	// QT 7
+	if(cap->recordSize > offsetof(ImageSubCodecDecompressCapabilities, baseCodecShouldCallDecodeBandForAllFrames))
+	{
+//		cap->subCodecIsMultiBufferAware = true;
+		cap->subCodecSupportsOutOfOrderDisplayTimes = true;
+//		cap->baseCodecShouldCallDecodeBandForAllFrames = true;
+	}
 	
     return noErr;
 }
@@ -443,6 +458,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         // allocation function
         
         glob->picture = avcodec_alloc_frame();
+		glob->futurePicture = avcodec_alloc_frame();
         
         // we do the same for the AVCodecContext since all context values are
         // correctly initialized when calling the alloc function
@@ -614,6 +630,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     myDrp->bufferSize = p->bufferSize;			// bufferSize is the data size of the current frame
 
     myDrp->pixelFormat = p->dstPixMap.pixelFormat;
+	myDrp->decoded = p->frameTime ? (0 != (p->frameTime->flags & icmFrameAlreadyDecoded)) : false;
 	
     if (p->conditionFlags & codecConditionFirstFrame)
     {
@@ -723,6 +740,22 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     return noErr;
 }
 
+pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodecDecompressRecord *drp, unsigned long flags)
+{
+	OSErr err = noErr;
+	
+    FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
+    unsigned char *dataPtr = (unsigned char *)drp->codecData;
+    
+    ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
+    
+	err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame);
+	
+	myDrp->decoded = true;
+	
+	return err;
+}
+
 //-----------------------------------------------------------------
 // ImageCodecDrawBand
 //-----------------------------------------------------------------
@@ -748,17 +781,13 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDecompressRecord *drp)
 {
     OSErr err = noErr;
-    
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
-    unsigned char *dataPtr = (unsigned char *)drp->codecData;
-    
-    ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
-    
     unsigned char *ppPage[3];
     int ppStride[3];
-
-    
-	err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame);
+	
+	if(!myDrp->decoded)
+		err = FFusionCodecDecodeBand(glob, drp, 0);
+	
 	if (myDrp->pixelFormat == 'y420')
 	{
 		FastY420((UInt8 *)drp->baseAddr, glob->picture);
@@ -1038,7 +1067,7 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
     context->height = height;
     picture->data[0] = 0;
     
-    while (!got_picture) 
+    while (!got_picture && length != 0) 
     {
         if (availableData < kSpoolChunkSize) 
         {
@@ -1072,6 +1101,7 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
         
         availableData -= len;
         dataPtr += len;
+		length -= len;
     }
     return err;
 }
