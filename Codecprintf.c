@@ -30,7 +30,7 @@ int Codecprintf(FILE *fileLog, const char *format, ...)
 #endif
 		printf(CODEC_HEADER);
 		
-		return vprintf(format, va);
+		ret = vprintf(format, va);
 #ifdef FILELOG
 	}
 #endif
