@@ -8,9 +8,9 @@
  */
 
 #ifdef DEBUG_BUILD
-int Codecprintf(const char *format, ...);
+int Codecprintf(FILE *, const char *format, ...);
 void FourCCprintf(char *string, unsigned long a);
 #else
-#define Codecprintf(fmt, ...) /**/
+#define Codecprintf(file, fmt, ...) /**/
 #define FourCCprintf(string,a) /**/
 #endif

@@ -13,17 +13,29 @@
 
 #ifdef DEBUG_BUILD
 #define CODEC_HEADER			"Perian Codec: "
-int Codecprintf(const char *format, ...)
+int Codecprintf(FILE *fileLog, const char *format, ...)
 {
-	va_list ap; /* Points to each unamed argument in turn */
-	va_start(ap, format); /* Make ap point to the first unnamed argument */
-    char *output = malloc(sizeof(char)*strlen(format)+strlen(CODEC_HEADER)+1);
-	strncpy(output,CODEC_HEADER,strlen(CODEC_HEADER));
-	strncat(output,format,sizeof(char)*strlen(format));
-	int retV = vprintf(output,ap);
-	dealloc(output);
-	va_end(ap);
-	return retV;
+	int ret;
+	va_list va;
+	va_start(va, format);
+#ifdef FILELOG
+	if(fileLog)
+	{
+		fprintf(glob->fileLog, CODEC_HEADER);
+		ret = vfprintf(fileLog, format, va);
+		fflush(glob->fileLog);
+	}
+	else
+	{
+#endif
+		printf(CODEC_HEADER);
+		
+		return vprintf(format, va);
+#ifdef FILELOG
+	}
+#endif
+	va_end(va);
+	return ret;
 }
 
 void FourCCprintf (char *string, unsigned long a)

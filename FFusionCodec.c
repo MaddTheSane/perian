@@ -75,6 +75,7 @@ typedef struct
     char			firstFrame;
     char			alreadyDonePPPref;
     PostProcParamRecord		postProcParams;
+	FILE			*fileLog;
 } FFusionGlobalsRecord, *FFusionGlobals;
 
 typedef struct
@@ -94,9 +95,6 @@ typedef struct
 static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture, long length, char firstFrame);
 
 static OSErr FFusionSlowDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture, long length, char firstFrame);
-
-void FourCCcopy(OSType *dest, OSType *src);
-int FourCCcompare(OSType *a, OSType *b);
 
 int GetPPUserPreference();
 void SetPPUserPreference(int value);
@@ -154,7 +152,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
     
     GetComponentInfo((Component)self, &descout, 0, 0, 0);
 
-    Codecprintf("Opening component for type");
+    Codecprintf(glob->fileLog, "Opening component for type");
     FourCCprintf(" ", descout.componentSubType);
 
     // Allocate memory for our globals, set them up and inform the component manager that we've done so
@@ -163,7 +161,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
     
     if (err = MemError())
     {
-        Codecprintf("Unable to allocate globals! Exiting.\n");            
+        Codecprintf(NULL, "Unable to allocate globals! Exiting.\n");            
     }
     else
     {
@@ -178,6 +176,11 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         glob->firstFrame = 0;
         glob->alreadyDonePPPref = 0;
         glob->componentType = descout.componentSubType;
+#ifdef FILELOG
+		glob->fileLog = fopen("/tmp/perian.log", "a");
+#else
+		glob->fileLog = NULL;
+#endif
 
         c = FindNextComponent(c, &cd);
 
@@ -187,13 +190,13 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
             
             if (bitfield >= 0x1010)
             {
-                Codecprintf("Use speedy y420 component");                
+                Codecprintf(glob->fileLog, "Use speedy y420 component\n");
                 glob->hasy420 = 1;
             }
         }
         else
         {
-            Codecprintf("Use slow y420 component\n");
+            Codecprintf(glob->fileLog, "Use slow y420 component\n");
         }
 
         // Open and target an instance of the base decompressor as we delegate
@@ -206,7 +209,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         }
         else
         {
-            Codecprintf("Error opening the base image decompressor! Exiting.\n");
+            Codecprintf(glob->fileLog, "Error opening the base image decompressor! Exiting.\n");
         }
     }
     
@@ -257,6 +260,8 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
 
         if (glob->postProcParams.context)
             pp_free_context(glob->postProcParams.context);
+		if(glob->fileLog)
+			fclose(glob->fileLog);
              
         DisposePtr((Ptr)glob);
     }
@@ -428,7 +433,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_H264);
 				break;
             default:
-                Codecprintf("Warning! Unknown codec type! Using MPEG4 by default.\n");
+                Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
                 
                 glob->avCodec = avcodec_find_decoder(CODEC_ID_MPEG4);
         }
@@ -462,7 +467,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         
         if (altivec)
         {
-            Codecprintf("Altivec Acceleration enabled!\n");
+            Codecprintf(glob->fileLog, "Altivec Acceleration enabled!\n");
                 
             glob->avContext->idct_algo = FF_IDCT_ALTIVEC;
         }
@@ -471,7 +476,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         
         if (avcodec_open(glob->avContext, glob->avCodec))
         {
-            Codecprintf("Error opening avcodec!\n");
+            Codecprintf(glob->fileLog, "Error opening avcodec!\n");
             
             return -2;
         }
@@ -555,7 +560,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 
         if (glob->postProcParams.mode[i] == NULL) 
         {
-            printf("Error getting PP filter %d!\n", i);
+            Codecprintf(glob->fileLog, "Error getting PP filter %d!\n", i);
             
             return -1;
         }
@@ -609,7 +614,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     myDrp->bufferSize = p->bufferSize;			// bufferSize is the data size of the current frame
 
     myDrp->pixelFormat = p->dstPixMap.pixelFormat;
-    
+	
     if (p->conditionFlags & codecConditionFirstFrame)
     {
         glob->firstFrame = 1;
@@ -1057,7 +1062,7 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
         {            
             got_picture = 0;
             len = 1;
-            Codecprintf("Error while decoding frame\n");
+            Codecprintf(NULL, "Error while decoding frame\n");
             
             if (firstFrame)
             {
@@ -1137,7 +1142,7 @@ OSErr FFusionSlowDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProc
             got_picture = 0;
             len = 1;
             
-            Codecprintf("Error while decoding frame\n");
+            Codecprintf(NULL, "Error while decoding frame\n");
 
             if (firstFrame)
             {
@@ -1197,7 +1202,7 @@ int GetPPUserPreference()
     }
     else
     {
-        Codecprintf("Key does not exists\n");
+        Codecprintf(NULL, "Key does not exists\n");
         
         ppUserValue = 0;
     }
@@ -1216,7 +1221,7 @@ void SetPPUserPreference(int value)
     
     if (!syncOK)
     {
-        Codecprintf("Error writing user preference!\n");
+        Codecprintf(NULL, "Error writing user preference!\n");
     }
 }
 
@@ -1253,7 +1258,7 @@ pascal OSStatus HandlePPDialogWindowEvent(EventHandlerCallRef  nextHandler, Even
                 }
                 else
                 {
-                    Codecprintf("Unable to get post-processing control value!\n");
+                    Codecprintf(NULL, "Unable to get post-processing control value!\n");
                 }
                 
                 SetPPUserPreference(value);
@@ -1315,7 +1320,7 @@ void ChangeHintText(int value, ControlRef staticTextField)
     
     if (bundleRef == NULL)
     {
-        Codecprintf("Error getting current bundle!\n");
+        Codecprintf(NULL, "Error getting current bundle!\n");
     }
     
     if (myIndexCFSTR = CFStringCreateWithFormatAndArguments(NULL, NULL, CFSTR("%d"), (va_list)&value))
@@ -1333,7 +1338,7 @@ void ChangeHintText(int value, ControlRef staticTextField)
     resErr = SetControlData(staticTextField, kControlEntireControl, kControlStaticTextCFStringTag, CFStringGetLength(myCFSTR), &myCFSTR);
                 
     if (resErr != noErr)
-        Codecprintf("Could not change control title! (%d) \n", (int)resErr);
+        Codecprintf(NULL, "Could not change control title! (%d) \n", (int)resErr);
     
     Draw1Control(staticTextField);
 }
