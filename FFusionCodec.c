@@ -68,9 +68,8 @@ typedef struct
     ImageCodecMPDrawBandUPP 	drawBandUPP;
     Handle			pixelTypes;
     AVCodec			*avCodec;
-    AVCodecContext		*avContext;
+    AVCodecContext	*avContext;
     AVFrame			*picture;
-	AVFrame			*futurePicture;
     OSType			componentType;
     char			hasy420;
     char			firstFrame;
@@ -243,17 +242,12 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         {
             avcodec_close(glob->avContext);
         }
-        
+		        
         if (glob->picture)
         {
             av_free(glob->picture);
         }
 		
-		if (glob->futurePicture)
-		{
-			av_free(glob->futurePicture);
-		}
-        
         if (glob->avContext)
         {
             av_free(glob->avContext);
@@ -386,7 +380,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         register_avcodec(&msmpeg4v3_decoder);
         register_avcodec(&mpeg4_decoder);
 		register_avcodec(&h264_decoder);
-
+		
         switch (glob->componentType)
         {
             case 'MPG4':	// MS-MPEG4 v1
@@ -457,7 +451,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         // allocation function
         
         glob->picture = avcodec_alloc_frame();
-		glob->futurePicture = avcodec_alloc_frame();
         
         // we do the same for the AVCodecContext since all context values are
         // correctly initialized when calling the alloc function
@@ -468,7 +461,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         
         glob->avContext->width = (**p->imageDescription).width;
         glob->avContext->height = (**p->imageDescription).height;
-        
+
         // We also pass the FourCC since it allows the H263 hybrid decoder
         // to make the difference between the various flavours of DivX
         
@@ -735,7 +728,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
             }
         }
     }*/
-
+	
     return noErr;
 }
 
@@ -786,6 +779,10 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	
 	if(!myDrp->decoded)
 		err = FFusionCodecDecodeBand(glob, drp, 0);
+	
+	if(glob->picture->data[0] == 0)
+		//No picture
+		return noErr;
 	
 	if (myDrp->pixelFormat == 'y420')
 	{
@@ -1065,6 +1062,10 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
     context->width = width;
     context->height = height;
     picture->data[0] = 0;
+	
+	if(firstFrame)
+		//Hack to force display of first frame instead of a green screen
+		context->flags |= CODEC_FLAG_LOW_DELAY;
     
     while (!got_picture && length != 0) 
     {
@@ -1081,6 +1082,13 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
         }
                 
         len = avcodec_decode_video(context, picture, &got_picture, dataPtr, length);
+		if(firstFrame)
+		{
+			//clean up after hack
+			context->flags &= ~CODEC_FLAG_LOW_DELAY;
+			avcodec_flush_buffers(context);
+			len = avcodec_decode_video(context, picture, &got_picture, dataPtr, length);
+		}
         
         if (len < 0)
         {            
@@ -1115,7 +1123,7 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
 static void FastY420(UInt8 *baseAddr, AVFrame *picture)
 {
     PlanarPixmapInfoYUV420 *planar;
-
+	
 	/*From Docs: PixMap baseAddr points to a big-endian PlanarPixmapInfoYUV420 struct; see ImageCodec.i. */
     planar = (PlanarPixmapInfoYUV420 *) baseAddr;
     
