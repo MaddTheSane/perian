@@ -73,7 +73,6 @@ void initLib()
 	if(!inited) {
 		inited = TRUE;
 		av_register_input_format(&avi_demuxer);
-		av_register_input_format(&ogg_demuxer);
 		register_parsers();
 	}
 }
