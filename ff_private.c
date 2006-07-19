@@ -141,7 +141,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	/* Create the Image Description Handle */
 	imgHdl = (ImageDescriptionHandle)NewHandleClear(sizeof(ImageDescription));
 	(*imgHdl)->idSize = sizeof(ImageDescription);
-	Codecprintf("fourcc: %c%c%c%c\n",0xff & (codec->codec_tag),0xff & (codec->codec_tag)>>8,0xff & (codec->codec_tag)>>16,0xff & (codec->codec_tag)>>24);
+	Codecprintf(NULL, "fourcc: %c%c%c%c\n",0xff & (codec->codec_tag),0xff & (codec->codec_tag)>>8,0xff & (codec->codec_tag)>>16,0xff & (codec->codec_tag)>>24);
 	(*imgHdl)->cType = BSWAP(codec->codec_tag);
 	(*imgHdl)->temporalQuality = codecMaxQuality;
 	(*imgHdl)->spatialQuality = codecMaxQuality;
@@ -415,6 +415,7 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 	int64_t offset,duration;
 	OSStatus err;
 	short flags;
+	short hadIndex = 0;
 	
 	/* process each stream in ic */
 	for(j = 0; j < ic->nb_streams; j++) {
@@ -429,6 +430,8 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 		
 		/* now parse the index entries */
 		for(k = 0; k < stream->nb_index_entries; k++) {
+			
+			hadIndex = 1;
 			
 			/* file offset */
 			offset = aviheader_offset + stream->index_entries[k].pos;
@@ -488,6 +491,63 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 			
 			/* Add the sample to the media */
 			err = AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
+		}
+	}
+	if(hadIndex == 0)
+	{
+		AVPacket pkt;
+		while(av_read_frame(ic, &pkt) == noErr)
+		{
+			ncstr = &map[pkt.stream_index];
+			stream = ncstr->str;
+			codec = stream->codec;
+			
+			flags = 0;
+			if(pkt.flags & PKT_FLAG_KEY)
+				flags |= mediaSampleNotSync;
+
+			memset(&sampleRec, 0, sizeof(sampleRec));
+			sampleRec.dataOffset.hi = pkt.pos >> 32;
+			sampleRec.dataOffset.lo = (uint32_t) pkt.pos;
+			sampleRec.dataSize = pkt.size;
+			sampleRec.sampleFlags = flags;
+			
+			if(sampleRec.dataSize <= 0)
+				continue;
+			
+			if(codec->codec_type == CODEC_TYPE_VIDEO)
+			{
+				if(pkt.duration == 0)
+					sampleRec.durationPerSample = map->base.num;
+				else
+					sampleRec.durationPerSample = map->base.num * pkt.duration;
+				sampleRec.numberOfSamples = 1;
+			}
+			else if (codec->codec_type == CODEC_TYPE_AUDIO)
+			{
+				if(ncstr->vbr) {
+					if(codec->frame_size == ncstr->base.num) {
+						sampleRec.durationPerSample = codec->frame_size;
+						sampleRec.numberOfSamples = 1;
+					}
+					else {
+						/* This seems to work. Although I have no idea why.
+						* Perhaps the stream's timebase is adjusted to
+						* let that work. as the timebase has strange values...*/
+						sampleRec.durationPerSample = sampleRec.dataSize;
+						sampleRec.numberOfSamples = 1;
+					}
+				} else {
+					sampleRec.durationPerSample = 1;
+					sampleRec.numberOfSamples = (pkt.size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
+				}
+			}
+			Handle dataIn = NewHandle(pkt.size);
+			HLock(dataIn);
+			memcpy(*dataIn, pkt.data, pkt.size);
+			HUnlock(dataIn);
+			err = AddMediaSample(ncstr->media, dataIn, 0, pkt.size, 1, ncstr->sampleHdl, pkt.duration, sampleRec.sampleFlags, NULL);
+			av_free_packet(&pkt);
 		}
 	}
 } /* import_avi() */
