@@ -1,24 +1,24 @@
 /*****************************************************************************
- *
- *  Avi Import Component dataref interface for libavformat
- *
- *  Copyright(C) 2006 Christoph Naegeli <chn1@mac.com>
- *
- *  This program is free software ; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation ; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY ; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program ; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- ****************************************************************************/
+*
+*  Avi Import Component dataref interface for libavformat
+*
+*  Copyright(C) 2006 Christoph Naegeli <chn1@mac.com>
+*
+*  This program is free software ; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation ; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY ; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this program ; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+*
+****************************************************************************/
 
 #include "avformat.h"
 
@@ -36,7 +36,7 @@ typedef struct _dataref_private dataref_private;
 /* DataRef Wrapper for QuickTime */
 
 /* !!! THIS FUNCTION ASSUMES h->priv_data IS VALID in contrary to the other open functions
- * found in ffmpeg */
+* found in ffmpeg */
 static int dataref_open(URLContext *h, const char *filename, int flags)
 {
 	ComponentResult result;
@@ -67,7 +67,7 @@ static int dataref_open(URLContext *h, const char *filename, int flags)
 		result = DataHOpenForWrite(private->dh);
 		require_noerr(result,bail);
 	}
-		
+	
 	private->pos = 0ll;
 	private->size = 0ll;
 	
@@ -76,7 +76,7 @@ static int dataref_open(URLContext *h, const char *filename, int flags)
 	private->size += (int64_t)fsize.hi << 32;
 	
 bail:
-	return result;
+		return result;
 } /* dataref_open() */
 
 static int dataref_read(URLContext *h, unsigned char *buf, int size)
@@ -101,7 +101,7 @@ static int dataref_read(URLContext *h, unsigned char *buf, int size)
 	p->pos += read;
 	
 bail:
-	return (int)read;
+		return (int)read;
 } /* dataref_read() */
 
 static int dataref_write(URLContext *h, unsigned char *buf, int size)
@@ -123,7 +123,7 @@ static int dataref_write(URLContext *h, unsigned char *buf, int size)
 	p->pos += written;
 	
 bail:
-	return written;
+		return written;
 } /* dataref_write() */
 
 static offset_t dataref_seek(URLContext *h, offset_t pos, int whence)
@@ -207,6 +207,6 @@ OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType)
 		url_close(uc);
 		return err;
 	}
-		
+	
 	return noErr;
 } /* url_open_dataref() */

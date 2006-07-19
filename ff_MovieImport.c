@@ -1,24 +1,24 @@
 /*****************************************************************************
- *
- *  Avi Import Component QuickTime Component Interface
- *
- *  Copyright(C) 2006 Christoph Naegeli <chn1@mac.com>
- *
- *  This program is free software ; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation ; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY ; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program ; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- ****************************************************************************/
+*
+*  Avi Import Component QuickTime Component Interface
+*
+*  Copyright(C) 2006 Christoph Naegeli <chn1@mac.com>
+*
+*  This program is free software ; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation ; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY ; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this program ; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+*
+****************************************************************************/
 
 #include "ff_MovieImportVersion.h"
 #include "avformat.h"
@@ -68,7 +68,7 @@ void initLib()
 	* the libavformat only once or we get an endlos loop when registering the same
 	* element twice!! */
 	static Boolean inited = FALSE;
-
+	
 	/* Register the Parser of ffmpeg, needed because we do no proper setup of the libraries */
 	if(!inited) {
 		inited = TRUE;
@@ -102,7 +102,7 @@ ComponentResult FFAvi_MovieImportOpen(ff_global_ptr storage, ComponentInstance s
 	SetDefaultComponent((Component)self, defaultComponentAnyFlagsAnyManufacturer);
 	
 bail:
-	return result;
+		return result;
 } /* FFAvi_MovieImportOpen() */
 
 ComponentResult FFAvi_MovieImportClose(ff_global_ptr storage, ComponentInstance self)
@@ -165,7 +165,7 @@ ComponentResult FFAvi_MovieImportSetSampleDescription(ff_global_ptr storage, Sam
 			storage->imgHdl = (ImageDescriptionHandle)desc;
 			if(storage->imgHdl)
 				result = HandToHand((Handle*)&storage->imgHdl);
-			break;
+				break;
 		case SoundMediaType:
 			if(storage->sndHdl)
 				DisposeHandle((Handle)storage->sndHdl);
@@ -173,7 +173,7 @@ ComponentResult FFAvi_MovieImportSetSampleDescription(ff_global_ptr storage, Sam
 			storage->sndHdl = (SoundDescriptionHandle)desc;
 			if(storage->sndHdl)
 				result = HandToHand((Handle*)&storage->sndHdl);
-			break;
+				break;
 		default:
 			break;
 	}
@@ -207,8 +207,8 @@ ComponentResult FFAvi_MovieImportValidate(ff_global_ptr storage, const FSSpec *t
 	result = MovieImportValidateDataRef(storage->ci, dataRef, dataRefType, (UInt8*)valid);
 	
 bail:
-	if(dataRef)
-		DisposeHandle(dataRef);
+		if(dataRef)
+			DisposeHandle(dataRef);
 	
 	return result;
 } /* FFAvi_MovieImportValidate() */
@@ -239,8 +239,8 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	if(storage->format != NULL)
 		*valid = 255; /* This means we can read the data */
 bail:
-	if(dataHandler)
-		CloseComponent(dataHandler);
+		if(dataHandler)
+			CloseComponent(dataHandler);
 	free(pd);
 	
 	return result;
@@ -248,7 +248,7 @@ bail:
 
 
 ComponentResult FFAvi_MovieImportFile(ff_global_ptr storage, const FSSpec *theFile, Movie theMovie, Track targetTrack,
-										Track *usedTrack, TimeValue atTime, TimeValue *addedDuration, long inFlags, long *outFlags)
+									  Track *usedTrack, TimeValue atTime, TimeValue *addedDuration, long inFlags, long *outFlags)
 {
 	ComponentResult result;
 	Handle dataRef = NULL;
@@ -260,16 +260,16 @@ ComponentResult FFAvi_MovieImportFile(ff_global_ptr storage, const FSSpec *theFi
 	require_noerr(result,bail);
 	
 	result = MovieImportDataRef(storage->ci, dataRef, dataRefType, theMovie, targetTrack, usedTrack, atTime, addedDuration,
-							inFlags, outFlags);
+								inFlags, outFlags);
 bail:
-	if(dataRef)
-		DisposeHandle(dataRef);
+		if(dataRef)
+			DisposeHandle(dataRef);
 	
 	return result;
 } /* FFAvi_MovieImportFile() */
 
 ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, OSType dataRefType, Movie theMovie, Track targetTrack,
-											Track *usedTrack, TimeValue atTime, TimeValue *addedDuration, long inFlags, long *outFlags)
+										 Track *usedTrack, TimeValue atTime, TimeValue *addedDuration, long inFlags, long *outFlags)
 {
 	ComponentResult result;
 	ByteIOContext byteContext;
@@ -362,8 +362,8 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		media = map[j].media;
 		if(media) {
 			/* we could handle this stream.
-			 * convert the atTime parameter to track scale.
-			 * FIXME: check if that's correct */			
+			* convert the atTime parameter to track scale.
+			* FIXME: check if that's correct */			
 			time.value.hi = 0;
 			time.value.lo = atTime;
 			time.scale = GetMovieTimeScale(theMovie);
@@ -386,7 +386,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	}
 	
 	/* The usedTrack parameter. Count the number of Tracks and set usedTrack if we operated
-	 * on a single track. Note that this requires the media to be set by track counting above*/
+		* on a single track. Note that this requires the media to be set by track counting above*/
 	if(usedTrack && count == 1 && media)
 		*usedTrack = GetMediaTrack(media);
 	
@@ -417,11 +417,11 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		/* set the finished flag */
 		*outFlags |= movieImportResultComplete;
 	}
-		
+	
 bail:
-	/* Free all the data structures used */
-	if(ic)
-		av_close_input_file(ic);
+		/* Free all the data structures used */
+		if(ic)
+			av_close_input_file(ic);
 	if(map)
 		av_free(map);
 	

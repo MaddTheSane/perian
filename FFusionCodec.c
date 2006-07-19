@@ -144,7 +144,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
     ComponentDescription cd;
     Component c = 0;
     long bitfield;
-
+	
     cd.componentType = 'imdc';
     cd.componentSubType = 'y420';
     cd.componentManufacturer = 0;
@@ -152,12 +152,12 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
     cd.componentFlagsMask = 0;
     
     GetComponentInfo((Component)self, &descout, 0, 0, 0);
-
+	
     Codecprintf(NULL, "Opening component for type");
     FourCCprintf(" ", descout.componentSubType);
-
+	
     // Allocate memory for our globals, set them up and inform the component manager that we've done so
-        
+	
     glob = (FFusionGlobals)NewPtrClear(sizeof(FFusionGlobalsRecord));
     
     if (err = MemError())
@@ -182,9 +182,9 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 #else
 		glob->fileLog = NULL;
 #endif
-
+		
 //        c = FindNextComponent(c, &cd);
-
+		
         if (c != 0)
         {            
             Gestalt(gestaltSystemVersion, &bitfield);
@@ -199,7 +199,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         {
             Codecprintf(glob->fileLog, "Use slow y420 component\n");
         }
-
+		
         // Open and target an instance of the base decompressor as we delegate
         // most of our calls to the base decompressor instance
         
@@ -242,7 +242,7 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         {
             avcodec_close(glob->avContext);
         }
-		        
+		
         if (glob->picture)
         {
             av_free(glob->picture);
@@ -258,15 +258,15 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
             if (glob->postProcParams.mode[i])
                 pp_free_mode(glob->postProcParams.mode[i]);
         }
-
+		
         if (glob->postProcParams.context)
             pp_free_context(glob->postProcParams.context);
 		if(glob->fileLog)
 			fclose(glob->fileLog);
-             
+		
         DisposePtr((Ptr)glob);
     }
-
+	
     return noErr;
 }
 
@@ -290,7 +290,7 @@ pascal ComponentResult FFusionCodecVersion(FFusionGlobals glob)
 pascal ComponentResult FFusionCodecTarget(FFusionGlobals glob, ComponentInstance target)
 {
     glob->target = target;
-        
+	
     return noErr;
 }
 
@@ -310,8 +310,8 @@ pascal ComponentResult FFusionCodecTarget(FFusionGlobals glob, ComponentInstance
 pascal ComponentResult FFusionCodecGetMPWorkFunction(FFusionGlobals glob, ComponentMPWorkFunctionUPP *workFunction, void **refCon)
 {
 	if (glob->drawBandUPP == NULL)
-            glob->drawBandUPP = NewImageCodecMPDrawBandUPP((ImageCodecMPDrawBandProcPtr)FFusionCodecDrawBand);
-		
+		glob->drawBandUPP = NewImageCodecMPDrawBandUPP((ImageCodecMPDrawBandProcPtr)FFusionCodecDrawBand);
+	
 	return ImageCodecGetBaseMPWorkFunction(glob->delegateComponent, workFunction, refCon, glob->drawBandUPP, glob);
 }
 
@@ -327,13 +327,13 @@ pascal ComponentResult FFusionCodecGetMPWorkFunction(FFusionGlobals glob, Compon
 
 pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodecDecompressCapabilities *cap)
 {
-
+	
     // Secifies the size of the ImageSubCodecDecompressRecord structure
     // and say we can support asyncronous decompression
     // With the help of the base image decompressor, any image decompressor
     // that uses only interrupt-safe calls for decompression operations can
     // support asynchronous decompression.
-
+	
     cap->decompressRecordSize = sizeof(FFusionDecompressRecord);
     cap->canAsync = true;
 	
@@ -369,7 +369,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     long bitfield;
     char altivec = 0;
     Byte* myptr;
-
+	
     // We first open libavcodec library and the codec corresponding
     // to the fourCC if it has not been done before
     
@@ -389,15 +389,15 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
             case 'DIV1':
             case 'div1':
                 glob->avCodec = avcodec_find_decoder(CODEC_ID_MSMPEG4V1);
-            break;
-
+				break;
+				
             case 'MP42':	// MS-MPEG4 v2
             case 'mp42':
             case 'DIV2':
             case 'div2':
                 glob->avCodec = avcodec_find_decoder(CODEC_ID_MSMPEG4V2);
-            break;
-
+				break;
+				
             case 'div6':	// DivX 3
             case 'DIV6':
             case 'div5':
@@ -418,8 +418,8 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
             case '3IVD':	// 3ivx
             case '3ivd':
                 glob->avCodec = avcodec_find_decoder(CODEC_ID_MSMPEG4V3);
-            break;
-
+				break;
+				
             case 'divx':	// DivX 4
             case 'DIVX':
             case 'mp4s':
@@ -437,12 +437,12 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
             case '3IV2':	// 3ivx
             case '3iv2':
                 glob->avCodec = avcodec_find_decoder(CODEC_ID_MPEG4);
-            break;
+				break;
 			case 'H264':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_H264);
 				break;
             default:
-                Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
+			Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
                 
                 glob->avCodec = avcodec_find_decoder(CODEC_ID_MPEG4);
         }
@@ -462,7 +462,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         
         glob->avContext->width = (**p->imageDescription).width;
         glob->avContext->height = (**p->imageDescription).height;
-
+		
         // We also pass the FourCC since it allows the H263 hybrid decoder
         // to make the difference between the various flavours of DivX
         
@@ -477,10 +477,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         if (altivec)
         {
             Codecprintf(glob->fileLog, "Altivec Acceleration enabled!\n");
-                
+			
             glob->avContext->idct_algo = FF_IDCT_ALTIVEC;
         }
-    
+		
         // Finally we open the avcodec 
         
         if (avcodec_open(glob->avContext, glob->avCodec))
@@ -498,12 +498,12 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
     capabilities->bandMin = (**p->imageDescription).height;
     capabilities->bandInc = capabilities->bandMin;
-
+	
     // libavcodec 0.4.x is no longer stream based i.e. you cannot pass just
     // an arbitrary amount of data to the library.
     // Instead we have to tell QT to just pass the data corresponding 
     // to one frame
-     
+	
     capabilities->flags |= codecWantsSpecialScaling;
     
     p->requestedBufferWidth = (**p->imageDescription).width;
@@ -525,7 +525,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     pos = *((OSType **)glob->pixelTypes);
     
     index = 0;
-
+	
     if (glob->hasy420)
     {
         pos[index++] = 'y420';
@@ -537,7 +537,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
     pos[index++] = 0;
     HUnlock(glob->pixelTypes);
-
+	
     p->wantedDestinationPixelTypes = (OSType **)glob->pixelTypes;
     
     // Specify the number of pixels the image must be extended in width and height if
@@ -566,19 +566,19 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         {
             glob->postProcParams.mode[i] = pp_get_mode_by_name_and_quality("hb,vb,dr,""hb:c,vb:c,dr:c,"/*"al:f"*/, i);
         }
-
+		
         if (glob->postProcParams.mode[i] == NULL) 
         {
             Codecprintf(glob->fileLog, "Error getting PP filter %d!\n", i);
             
             return -1;
         }
-
+		
         glob->postProcParams.goodness = 0;
         glob->postProcParams.level = 0;//GetPPUserPreference();
     }
 	capabilities->flags |= codecCanAsync | codecCanAsyncWhen;
-
+	
     
     return noErr;
 }
@@ -601,7 +601,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 {	
     long offsetH, offsetV;
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
-        
+	
     //////
     IBNibRef 		nibRef;
     WindowRef 		window;
@@ -614,7 +614,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     KeyMap		currentKeyMap;
     int			userPreference;
     ///////
-
+	
     offsetH = (long)(p->dstRect.left - p->dstPixMap.bounds.left) * (long)(p->dstPixMap.pixelSize >> 3);
     offsetV = (long)(p->dstRect.top - p->dstPixMap.bounds.top) * (long)drp->rowBytes;
     
@@ -622,7 +622,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     myDrp->height = (**p->imageDescription).height;
     myDrp->depth = (**p->imageDescription).depth;
     myDrp->bufferSize = p->bufferSize;			// bufferSize is the data size of the current frame
-
+	
     myDrp->pixelFormat = p->dstPixMap.pixelFormat;
 	myDrp->decoded = p->frameTime ? (0 != (p->frameTime->flags & icmFrameAlreadyDecoded)) : false;
 	
@@ -632,15 +632,15 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
         
         GetKeys(currentKeyMap);
         
-/*        if ((currentKeyMap[1] & kOptionKeyModifier) && !glob->alreadyDonePPPref)
+		/*        if ((currentKeyMap[1] & kOptionKeyModifier) && !glob->alreadyDonePPPref)
         {
             glob->alreadyDonePPPref = 1;
-    
+			
             bundleRef = CFBundleGetBundleWithIdentifier(CFSTR("net.aldorande.component.FFusion"));
-        
+			
             if (bundleRef == NULL)
                 printf("Cannot get main bundle reference\n");
-                
+			
             err = CreateNibReferenceWithCFBundle(bundleRef, CFSTR("main"), &nibRef);
             
             if (err != noErr)
@@ -654,7 +654,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
                     printf("cannot create window!\n");
                 
                 DisposeNibReference(nibRef);
-            
+				
                 if (window != NULL)
                 {
                     controlID.signature = 'post';
@@ -666,7 +666,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
                     {
                         printf("Cannot get slider hint text control!\n");
                     }
-
+					
                     userPreference = GetPPUserPreference();
                     ChangeHintText(userPreference, theControl);
                     
@@ -679,9 +679,9 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
                     {
                         printf("Cannot get slider control!\n");
                     }
-
+					
                     SetControl32BitValue(theControl, userPreference);
-
+					
                     ShowWindow(window);
                     
                     handlerUPP = NewEventHandlerUPP(HandlePPDialogWindowEvent);
@@ -794,7 +794,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
     {
 		SlowY420((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, glob->picture);
     }
-
+	
     if (glob->firstFrame)
         glob->firstFrame = 0;
     
@@ -806,7 +806,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
         ppStride[0] = glob->picture->linesize[0];
         ppStride[1] = glob->picture->linesize[1];
         ppStride[2] = glob->picture->linesize[2];
-
+		
         pp_postprocess(ppPage, ppStride,
                        ppPage, ppStride,
                        myDrp->width, myDrp->height,
@@ -901,12 +901,12 @@ pascal ComponentResult FFusionCodecQueueStopping(FFusionGlobals glob)
 pascal ComponentResult FFusionCodecGetCompressedImageSize(FFusionGlobals glob, ImageDescriptionHandle desc, Ptr data, long dataSize, ICMDataProcRecordPtr dataProc, long *size)
 {
     ImageFramePtr framePtr = (ImageFramePtr)data;
-
+	
     if (size == NULL) 
-            return paramErr;
-
+		return paramErr;
+	
     *size = EndianU32_BtoN(framePtr->frameSize) + sizeof(ImageFrame);
-
+	
     return noErr;
 }
 
@@ -924,7 +924,7 @@ pascal ComponentResult FFusionCodecGetCompressedImageSize(FFusionGlobals glob, I
 pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *info)
 {
     OSErr err = noErr;
-
+	
     if (info == NULL) 
     {
         err = paramErr;
@@ -932,7 +932,7 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
     else 
     {
         CodecInfo **tempCodecInfo;
-
+		
         switch (glob->componentType)
         {
             case 'MPG4':	// MS-MPEG4 v1
@@ -968,7 +968,7 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
             case 'col1':
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX3CodecInfoResID, (Handle *)&tempCodecInfo);
                 break;
-
+				
             case 'divx':	// DivX 4
             case 'DIVX':
             case 'mp4s':
@@ -1001,7 +1001,7 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
                 
             default:	// should never happen but we have to handle the case
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX4CodecInfoResID, (Handle *)&tempCodecInfo);
-
+				
         }
         
         if (err == noErr) 
@@ -1011,7 +1011,7 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
             DisposeHandle((Handle)tempCodecInfo);
         }
     }
-
+	
     return err;
 }
 
@@ -1060,7 +1060,7 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
     int got_picture = false;
     int len = 0;
     long availableData = dataProc ? codecMinimumDataSize : kInfiniteDataSize;
-
+	
     context->width = width;
     context->height = height;
     picture->data[0] = 0;
@@ -1076,13 +1076,13 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
             // get some more source data
             
             err = InvokeICMDataUPP((Ptr *)&dataPtr, length, dataProc->dataRefCon, dataProc->dataProc);
-                
+			
             if (err == eofErr) err = noErr;
             if (err) return err;
-
+			
             availableData = codecMinimumDataSize;
         }
-                
+		
         len = avcodec_decode_video(context, picture, &got_picture, dataPtr, length);
 		if(firstFrame)
 		{
@@ -1155,14 +1155,14 @@ static void SlowY420(UInt8 *baseAddr, long rowBump, long width, long height, AVF
     unsigned int i, j;
     char *yuvPtr;
     char *py,*pu,*pv;
-
+	
     // now let's do some yuv420/vuy2 conversion
     
     yuvPtr = (char *)baseAddr;
     py = (char *)picture->data[0];
     pu = (char *)picture->data[1];
     pv = (char *)picture->data[2];
-
+	
     for(i = 0 ;  i < height; i++)
     {
         for(j = 0; j < width; j+= 2)
@@ -1210,7 +1210,7 @@ void SetPPUserPreference(int value)
 {
     int	    sameValue = value;
     Boolean syncOK;
-        
+	
     CFPreferencesSetAppValue(CFSTR("postProcessingLevel"), CFNumberCreate(NULL, kCFNumberIntType, &sameValue), CFSTR("net.aldorande.component.FFusion"));
     
     syncOK = CFPreferencesAppSynchronize(CFSTR("net.aldorande.component.FFusion"));
@@ -1234,12 +1234,12 @@ pascal OSStatus HandlePPDialogWindowEvent(EventHandlerCallRef  nextHandler, Even
     ControlID	controlID;
     
     whatHappened = GetEventKind(theEvent);
-
+	
     switch (whatHappened)
     {
         case kEventCommandProcess:
             GetEventParameter(theEvent, kEventParamDirectObject, typeHICommand, NULL, sizeof(HICommand), NULL, &commandStruct);
-        
+			
             theCommandID = commandStruct.commandID;
             
             if (theCommandID == kHICommandOK)
@@ -1258,20 +1258,20 @@ pascal OSStatus HandlePPDialogWindowEvent(EventHandlerCallRef  nextHandler, Even
                 }
                 
                 SetPPUserPreference(value);
-            
+				
                 DisposeWindow(window);
                 
                 theErr = noErr;
             }
-            
-            if (theCommandID == kHICommandCancel)
-            {                
-                DisposeWindow(window);
-                
-                theErr = noErr;
-            }
-
-            break;
+				
+				if (theCommandID == kHICommandCancel)
+				{                
+					DisposeWindow(window);
+					
+					theErr = noErr;
+				}
+				
+				break;
     }
     
     return theErr;
@@ -1327,12 +1327,12 @@ void ChangeHintText(int value, ControlRef staticTextField)
     {
         myCFSTR = CFBundleCopyLocalizedString(bundleRef, CFSTR("0"), NULL, CFSTR("PostProcessing"));
     }
-            
+	
     //resErr = SetControlData(staticTextField, kControlEntireControl, kControlStaticTextTextTag, CFStringGetLength(myCFSTR), CFStringGetCStringPtr(myCFSTR, CFStringGetSystemEncoding()));
     
     //this works only under 10.2
     resErr = SetControlData(staticTextField, kControlEntireControl, kControlStaticTextCFStringTag, CFStringGetLength(myCFSTR), &myCFSTR);
-                
+	
     if (resErr != noErr)
         Codecprintf(NULL, "Could not change control title! (%d) \n", (int)resErr);
     

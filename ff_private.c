@@ -1,24 +1,24 @@
 /*****************************************************************************
- *
- *  Avi Import Component Private Functions
- *
- *  Copyright(C) 2006 Christoph Naegeli <chn1@mac.com>
- *
- *  This program is free software ; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation ; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY ; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program ; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
- *
- ****************************************************************************/
+*
+*  Avi Import Component Private Functions
+*
+*  Copyright(C) 2006 Christoph Naegeli <chn1@mac.com>
+*
+*  This program is free software ; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation ; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY ; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this program ; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+*
+****************************************************************************/
 
 #include "ff_private.h"
 #include "avcodec.h"
@@ -43,7 +43,7 @@ ComponentResult check_system()
 		result = -1;
 	
 bail:
-	return result;
+		return result;
 } /* check_system() */
 
 /* This routine does register the ffmpeg parsers which would normally
@@ -105,8 +105,8 @@ int prepare_track(AVFormatContext *ic, NCStream **out_map, Track targetTrack, Ha
 	
 	return 0;
 err:
-	if(map)
-		av_free(map);
+		if(map)
+			av_free(map);
 	return -1;
 } /* prepare_track() */
 
@@ -123,13 +123,13 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	map->base = map->str->time_base;
 	if(map->base.den > 100000) {
 		/* if that's the case, then we probably ran out of timevalues!
-		 * a timescale of 100000 allows a movie duration of 5-6 hours
-		 * so I think this will be enough */
+		* a timescale of 100000 allows a movie duration of 5-6 hours
+		* so I think this will be enough */
 		den = map->base.den;
 		num = map->base.num;
 		
 		/* we use the following approach ##.### frames per second.
-		 * afterwards rounding */
+			* afterwards rounding */
 		den = den / num * 1000.0;
 		map->base.num = 1000;
 		map->base.den = round(den);
@@ -186,7 +186,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	AudioFormatGetProperty(kAudioFormatProperty_FormatIsVBR, sizeof(AudioStreamBasicDescription), &asbd, &ioSize, &map->vbr);
 	
 	/* Set some fields of the AudioStreamBasicDescription. Then ask the AudioToolbox
-	 * to fill as much as possible before creating the SoundDescriptionHandle */
+		* to fill as much as possible before creating the SoundDescriptionHandle */
 	asbd.mSampleRate = codec->sample_rate;
 	asbd.mChannelsPerFrame = codec->channels;
 	if(!map->vbr) /* This works for all the tested codecs. but is there any better way? */
@@ -201,16 +201,16 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	/* If we have vbr audio, the media scale most likely has to be set to the time_base denumerator */
 	if(map->vbr) {
 		/* if we have mFramesPerPacket, set mBytesPerPacket to 0 as this can cause
-		 * errors if set incorrectly. But in vbr, we just need the mFramesPerPacket
-		 * value */
+		* errors if set incorrectly. But in vbr, we just need the mFramesPerPacket
+		* value */
 		if(asbd.mFramesPerPacket)
 			asbd.mBytesPerPacket = 0;
 		SetMediaTimeScale(media, map->str->time_base.den);
 	}
 	
 	/* FIXME. in the MSADPCM codec, we get a wrong mFramesPerPacket entry because
-	 * of the difference in the sample_rate and the time_base denumerator. So we
-	 * recalculate here the mFramesPerPacket entry */
+		* of the difference in the sample_rate and the time_base denumerator. So we
+		* recalculate here the mFramesPerPacket entry */
 	if(asbd.mBytesPerPacket) {
 		/* For calculation, lets assume a packet duration of 1, use ioSize as tmp storage */
 		ioSize = map->str->time_base.num * codec->sample_rate / map->str->time_base.den;
@@ -219,8 +219,8 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	}
 	
 	/* here use a version1, because version2 will fail! (no idea why)
-	 * and as we are using version1, we may not have more than 2 channels.
-	 * perhaps we should go to version2 some day. */
+		* and as we are using version1, we may not have more than 2 channels.
+		* perhaps we should go to version2 some day. */
 	if(asbd.mChannelsPerFrame > 2)
 		asbd.mChannelsPerFrame = 2;
 	err = QTSoundDescriptionCreate(&asbd, NULL, 0, NULL, 0, kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndHdl);
@@ -230,7 +230,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	cookie = create_cookie(codec, &cookieSize, asbd.mFormatID);
 	if(cookie) {
 		err = QTSoundDescriptionSetProperty(sndHdl, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie,
-			cookieSize, cookie);
+											cookieSize, cookie);
 		if(err) fprintf(stderr, "AVI IMPORTER: Error appending the magic cookie to the sound description\n");
 		av_free(cookie);
 	}
@@ -249,8 +249,8 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 		case CODEC_ID_MP3:
 			asbd->mFormatID = kAudioFormatMPEGLayer3;
 			break;
-		/* currently we use ms four_char_code for ac3 */
-		/* case CODEC_ID_AC3:
+			/* currently we use ms four_char_code for ac3 */
+			/* case CODEC_ID_AC3:
 			asbd->mFormatID = kAudioFormatAC3;
 			break; */
 		case CODEC_ID_PCM_S16LE:
@@ -297,9 +297,9 @@ uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID)
 	/* Do we need an endia atom, too? */
 	
 	/* initialize the user Atom
-	 * 8 bytes			for the atom size & atom type
-	 * 18 bytes			for the already extracted part, see wav.c in the ffmpeg project
-	 * extradata_size	for the data still stored in the AVCodecContext structure */
+		* 8 bytes			for the atom size & atom type
+		* 18 bytes			for the already extracted part, see wav.c in the ffmpeg project
+		* extradata_size	for the data still stored in the AVCodecContext structure */
 	waveSize = 18 + codec->extradata_size + 8;
 	waveAtom = av_malloc(waveSize);
 	
@@ -316,7 +316,7 @@ uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID)
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->extradata_size));
 	/* now the remaining stuff */
 	ptr = write_data(ptr, codec->extradata, codec->extradata_size);
-		
+	
 	/* Calculate the size of the cookie */
 	size  = sizeof(formatAtom) + sizeof(termAtom) + waveSize;
 	
@@ -328,7 +328,7 @@ uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID)
 	/* Terminator Atom */
 	termAtom.atomType = kAudioTerminatorAtomType;
 	termAtom.size = sizeof(AudioTerminatorAtom);
-
+	
 	result = av_malloc(size);
 	
 	/* use ptr to write to the result */
@@ -340,7 +340,7 @@ uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID)
 	ptr = write_data(ptr, (uint8_t*)&termAtom, sizeof(termAtom));
 	
 bail:
-	*cookieSize = size;
+		*cookieSize = size;
 	if(waveAtom)
 		av_free(waveAtom);
 	return result;
@@ -383,7 +383,7 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 	map = av_mallocz(ic->nb_streams * sizeof(NCStream));
 	
 	for(j = 0; j < ic->nb_streams; j++) {
-	
+		
 		st = ic->streams[j];
 		map[j].index = st->index;
 		map[j].str = st;
@@ -449,8 +449,8 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 			sampleRec.sampleFlags = flags;
 			
 			/* some samples have a data_size of zero. if that's the case, ignore them
-			 * they seem to be used to stretch the frame duration & are already handled
-			 * by the previous pkt */
+				* they seem to be used to stretch the frame duration & are already handled
+				* by the previous pkt */
 			if(sampleRec.dataSize <= 0)
 				continue;
 			
@@ -478,8 +478,8 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 					}
 					else {
 						/* This seems to work. Although I have no idea why.
-						 * Perhaps the stream's timebase is adjusted to
-						 * let that work. as the timebase has strange values...*/
+						* Perhaps the stream's timebase is adjusted to
+						* let that work. as the timebase has strange values...*/
 						sampleRec.durationPerSample = sampleRec.dataSize;
 						sampleRec.numberOfSamples = 1;
 					}
@@ -505,7 +505,7 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 			flags = 0;
 			if(pkt.flags & PKT_FLAG_KEY)
 				flags |= mediaSampleNotSync;
-
+			
 			memset(&sampleRec, 0, sizeof(sampleRec));
 			sampleRec.dataOffset.hi = pkt.pos >> 32;
 			sampleRec.dataOffset.lo = (uint32_t) pkt.pos;
