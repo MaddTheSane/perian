@@ -183,7 +183,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 		glob->fileLog = NULL;
 #endif
 
-        c = FindNextComponent(c, &cd);
+//        c = FindNextComponent(c, &cd);
 
         if (c != 0)
         {            
@@ -340,6 +340,7 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 	// QT 7
 	if(cap->recordSize > offsetof(ImageSubCodecDecompressCapabilities, baseCodecShouldCallDecodeBandForAllFrames))
 	{
+		cap->subCodecIsMultiBufferAware = true;
 		cap->subCodecSupportsOutOfOrderDisplayTimes = true;
 		cap->baseCodecShouldCallDecodeBandForAllFrames = true;
 	}
@@ -576,6 +577,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         glob->postProcParams.goodness = 0;
         glob->postProcParams.level = 0;//GetPPUserPreference();
     }
+	capabilities->flags |= codecCanAsync | codecCanAsyncWhen;
 
     
     return noErr;
