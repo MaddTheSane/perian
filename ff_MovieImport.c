@@ -73,6 +73,7 @@ void initLib()
 	if(!inited) {
 		inited = TRUE;
 		av_register_input_format(&avi_demuxer);
+		av_register_input_format(&ogg_demuxer);
 		register_parsers();
 	}
 }
@@ -308,12 +309,19 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		goto bail;
 	
 	/* Seek backwards to get a manually read packet for file offset */
-	result = av_seek_frame(ic, -1, 0, 0);
-	if(result < 0) goto bail;
-	
-	ic->iformat->read_packet(ic, &pkt);
-	dataOffset = pkt.pos - ic->streams[pkt.stream_index]->index_entries[0].pos;
-	av_free_packet(&pkt);
+	if(ic->streams[0]->index_entries == NULL)
+	{
+		dataOffset = 0;
+	}
+	else
+	{
+		result = av_seek_frame(ic, -1, 0, 0);
+		if(result < 0) goto bail;
+		
+		ic->iformat->read_packet(ic, &pkt);
+		dataOffset = pkt.pos - ic->streams[pkt.stream_index]->index_entries[0].pos;
+		av_free_packet(&pkt);
+	}
 	
 	/* Initialize the Movie */
 	if(inFlags & movieImportMustUseTrack) {
