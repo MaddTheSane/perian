@@ -70,6 +70,10 @@ typedef struct
     AVCodec			*avCodec;
     AVCodecContext	*avContext;
     AVFrame			*picture;
+	AVFrame			*futureFrame;
+	int				futureFrameDisplayNumber;
+	int				lastDisplayedFramePts;
+	int				lastFrameNumber;
     OSType			componentType;
     char			hasy420;
     char			firstFrame;
@@ -86,6 +90,8 @@ typedef struct
     OSType			pixelFormat;
     long			bufferSize;
 	int				decoded;
+	long			frameNumber;
+	int				useFuture;
 } FFusionDecompressRecord;
 
 
@@ -182,6 +188,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 #else
 		glob->fileLog = NULL;
 #endif
+		glob->futureFrameDisplayNumber = -1;
 		
 //        c = FindNextComponent(c, &cd);
 		
@@ -247,6 +254,11 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         {
             av_free(glob->picture);
         }
+		
+		if (glob->futureFrame)
+		{
+			av_free(glob->futureFrame);
+		}
 		
         if (glob->avContext)
         {
@@ -452,11 +464,15 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         // allocation function
         
         glob->picture = avcodec_alloc_frame();
+		glob->futureFrame = avcodec_alloc_frame();
         
         // we do the same for the AVCodecContext since all context values are
         // correctly initialized when calling the alloc function
         
         glob->avContext = avcodec_alloc_context();
+		
+		// Use low delay
+		glob->avContext->flags |= CODEC_FLAG_LOW_DELAY;
 		
         // Image size is mandatory for DivX-like codecs
         
@@ -625,6 +641,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	
     myDrp->pixelFormat = p->dstPixMap.pixelFormat;
 	myDrp->decoded = p->frameTime ? (0 != (p->frameTime->flags & icmFrameAlreadyDecoded)) : false;
+	myDrp->frameNumber = p->frameNumber - 1;
 	
     if (p->conditionFlags & codecConditionFirstFrame)
     {
@@ -739,11 +756,44 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	OSErr err = noErr;
 	
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
-    unsigned char *dataPtr = (unsigned char *)drp->codecData;
-    
-    ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
-    
-	err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame);
+	if(myDrp->frameNumber != glob->lastFrameNumber + 1)
+	{
+		avcodec_flush_buffers(glob->avContext);
+		glob->futureFrameDisplayNumber = -1;
+		glob->lastDisplayedFramePts = -1;
+	}
+	glob->lastFrameNumber = myDrp->frameNumber;
+	if(glob->futureFrameDisplayNumber != myDrp->frameNumber)
+	{
+		unsigned char *dataPtr = (unsigned char *)drp->codecData;
+		
+		ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
+		
+		err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame);
+		
+		if(glob->lastDisplayedFramePts == -1)
+			glob->lastDisplayedFramePts = glob->picture->pts - 1;
+		if(glob->picture->pts > glob->lastDisplayedFramePts + 1 && 
+		   err == noErr && 
+		   glob->picture->data[0] != NULL)
+		{
+		//Save the P frame for the future
+			AVFrame *tpict = glob->picture;
+			glob->picture = glob->futureFrame;
+			glob->futureFrame = tpict;
+			
+			glob->futureFrameDisplayNumber = myDrp->frameNumber + glob->futureFrame->pts - 1 - glob->lastDisplayedFramePts;
+			err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, 6, 0);
+		}
+		glob->lastDisplayedFramePts = glob->picture->pts;
+		myDrp->useFuture = false;
+	}
+	else
+	{
+		//We already have the frame
+		myDrp->useFuture = true;
+		glob->lastDisplayedFramePts = glob->futureFrame->pts;
+	}
 	
 	myDrp->decoded = true;
 	
@@ -782,17 +832,21 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	if(!myDrp->decoded)
 		err = FFusionCodecDecodeBand(glob, drp, 0);
 	
-	if(glob->picture->data[0] == 0)
+	AVFrame *picture = glob->picture;
+	if(myDrp->useFuture)
+		picture = glob->futureFrame;
+	
+	if(picture->data[0] == 0)
 		//No picture
 		return noErr;
 	
 	if (myDrp->pixelFormat == 'y420')
 	{
-		FastY420((UInt8 *)drp->baseAddr, glob->picture);
+		FastY420((UInt8 *)drp->baseAddr, picture);
     }
     else
     {
-		SlowY420((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, glob->picture);
+		SlowY420((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
     }
 	
     if (glob->firstFrame)
@@ -800,21 +854,21 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
     
     if ((err == noErr) && (glob->postProcParams.level > 0))
     {
-        ppPage[0] = glob->picture->data[0];
-        ppPage[1] = glob->picture->data[1];
-        ppPage[2] = glob->picture->data[2];
-        ppStride[0] = glob->picture->linesize[0];
-        ppStride[1] = glob->picture->linesize[1];
-        ppStride[2] = glob->picture->linesize[2];
+        ppPage[0] = picture->data[0];
+        ppPage[1] = picture->data[1];
+        ppPage[2] = picture->data[2];
+        ppStride[0] = picture->linesize[0];
+        ppStride[1] = picture->linesize[1];
+        ppStride[2] = picture->linesize[2];
 		
         pp_postprocess(ppPage, ppStride,
                        ppPage, ppStride,
                        myDrp->width, myDrp->height,
-                       glob->picture->qscale_table,
-                       glob->picture->qstride,
+                       picture->qscale_table,
+                       picture->qstride,
                        glob->postProcParams.mode[glob->postProcParams.level],
                        glob->postProcParams.context,
-                       glob->picture->pict_type);
+                       picture->pict_type);
     }
     
     return err;
@@ -1065,10 +1119,6 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
     context->height = height;
     picture->data[0] = 0;
 	
-	if(firstFrame)
-		//Hack to force display of first frame instead of a green screen
-		context->flags |= CODEC_FLAG_LOW_DELAY;
-    
     while (!got_picture && length != 0) 
     {
         if (availableData < kSpoolChunkSize) 
@@ -1084,13 +1134,6 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
         }
 		
         len = avcodec_decode_video(context, picture, &got_picture, dataPtr, length);
-		if(firstFrame)
-		{
-			//clean up after hack
-			context->flags &= ~CODEC_FLAG_LOW_DELAY;
-			avcodec_flush_buffers(context);
-			len = avcodec_decode_video(context, picture, &got_picture, dataPtr, length);
-		}
         
         if (len < 0)
         {            
