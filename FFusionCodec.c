@@ -71,8 +71,6 @@ typedef struct
     AVCodecContext	*avContext;
     AVFrame			*picture;
 	AVFrame			*futureFrame;
-	int				futureFrameDisplayNumber;
-	int				lastDisplayedFramePts;
 	int				lastFrameNumber;
     OSType			componentType;
     char			hasy420;
@@ -80,6 +78,7 @@ typedef struct
     char			alreadyDonePPPref;
     PostProcParamRecord		postProcParams;
 	FILE			*fileLog;
+	int				futureFrameAvailable;
 } FFusionGlobalsRecord, *FFusionGlobals;
 
 typedef struct
@@ -91,7 +90,6 @@ typedef struct
     long			bufferSize;
 	int				decoded;
 	long			frameNumber;
-	int64_t			frameTime;
 	int				useFuture;
 } FFusionDecompressRecord;
 
@@ -189,7 +187,6 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 #else
 		glob->fileLog = NULL;
 #endif
-		glob->futureFrameDisplayNumber = -1;
 		
 //        c = FindNextComponent(c, &cd);
 		
@@ -644,10 +641,6 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	myDrp->decoded = p->frameTime ? (0 != (p->frameTime->flags & icmFrameAlreadyDecoded)) : false;
 	myDrp->frameNumber = p->frameNumber - 1;
 	
-	ICMFrameTimePtr frameTime = p->frameTime;
-	int64_t value = (int64_t)frameTime->value.lo | (int64_t)frameTime->value.hi << 32;
-	myDrp->frameTime = value * (int64_t)glob->avContext->time_base.den / (int64_t)frameTime->scale / (int64_t)glob->avContext->time_base.num;
-	
     if (p->conditionFlags & codecConditionFirstFrame)
     {
         glob->firstFrame = 1;
@@ -764,45 +757,36 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	if(myDrp->frameNumber != glob->lastFrameNumber + 1)
 	{
 		avcodec_flush_buffers(glob->avContext);
-		glob->futureFrameDisplayNumber = -1;
-		glob->lastDisplayedFramePts = -1;
+		glob->futureFrameAvailable = false;
 	}
 	glob->lastFrameNumber = myDrp->frameNumber;
-	if(glob->futureFrameDisplayNumber != myDrp->frameNumber)
-	{
-		unsigned char *dataPtr = (unsigned char *)drp->codecData;
-		
-		ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
-		
-		err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame);
-		
-		if(glob->lastDisplayedFramePts == -1)
-			glob->lastDisplayedFramePts = glob->picture->pts;
-
-		uint64_t ptsPerFrame = myDrp->frameTime / myDrp->frameNumber;
-		int frameIncrement = (glob->picture->pts - glob->lastDisplayedFramePts) / ptsPerFrame;
-		if(frameIncrement > 1 && 
-		   err == noErr && 
-		   glob->picture->data[0] != NULL)
-		{
-		//Save the P frame for the future
-			AVFrame *tpict = glob->picture;
-			glob->picture = glob->futureFrame;
-			glob->futureFrame = tpict;
-			
-			glob->futureFrameDisplayNumber = myDrp->frameNumber + frameIncrement - 1;
-			err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, 6, 0);
-		}
-		glob->lastDisplayedFramePts = glob->picture->pts;
-		myDrp->useFuture = false;
-	}
-	else
-	{
-		//We already have the frame
-		myDrp->useFuture = true;
-		glob->lastDisplayedFramePts = glob->futureFrame->pts;
-	}
 	
+	unsigned char *dataPtr = (unsigned char *)drp->codecData;
+	ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
+	
+	err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame);
+	myDrp->useFuture = false;
+	
+	if(glob->picture->data[0] == NULL && glob->futureFrameAvailable)
+	{
+		myDrp->useFuture = true;
+		glob->futureFrameAvailable = false;
+	}
+	else if(glob->picture->pict_type == FF_P_TYPE && err == noErr)
+	{
+		//Check to see if a B-Frame follows this
+		unsigned char nullChars[8] = {0,0,0,0, 0,0,0,0};
+		err = FFusionDecompress(glob->avContext, nullChars, NULL, myDrp->width, myDrp->height, glob->futureFrame, 8, glob->firstFrame);
+		if(glob->futureFrame->data[0] != NULL)
+		{
+			//We found a B-frame in here
+			AVFrame *tframe = glob->picture;
+			glob->picture = glob->futureFrame;
+			glob->futureFrame = tframe;
+			
+			glob->futureFrameAvailable = true;
+		}
+	}
 	myDrp->decoded = true;
 	
 	return err;
