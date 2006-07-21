@@ -48,6 +48,13 @@
 #endif //Little
 #endif //Big
 
+void inline swapFrame(AVFrame * *a, AVFrame * *b)
+{
+	AVFrame *t = *a;
+	*a = *b;
+	*b = t;
+}
+
 //---------------------------------------------------------------------------
 // Types
 //---------------------------------------------------------------------------
@@ -72,6 +79,7 @@ typedef struct
     AVFrame			*picture;
 	AVFrame			*futureFrame;
 	int				lastFrameNumber;
+	uint64_t		lastFramePts;
     OSType			componentType;
     char			hasy420;
     char			firstFrame;
@@ -79,6 +87,7 @@ typedef struct
     PostProcParamRecord		postProcParams;
 	FILE			*fileLog;
 	int				futureFrameAvailable;
+	int				delayedFrames;
 } FFusionGlobalsRecord, *FFusionGlobals;
 
 typedef struct
@@ -98,7 +107,7 @@ typedef struct
 // Prototypes of private subroutines
 //---------------------------------------------------------------------------
 
-static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length, char firstFrame);
+static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length, char firstFrame, int useFirstFrameHack);
 static void FastY420(UInt8 *baseAddr, AVFrame *picture);
 static void SlowY420(UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture);
 
@@ -180,6 +189,8 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         glob->avCodec = 0;
         glob->hasy420 = 0;
         glob->firstFrame = 0;
+		glob->lastFrameNumber = 0;
+		glob->lastFramePts = 0;
         glob->alreadyDonePPPref = 0;
         glob->componentType = descout.componentSubType;
 #ifdef FILELOG
@@ -752,31 +763,72 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodecDecompressRecord *drp, unsigned long flags)
 {
 	OSErr err = noErr;
+	int useFirstFrameHack = 0;
+	AVFrame tempFrame;
 	
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
 	if(myDrp->frameNumber != glob->lastFrameNumber + 1)
 	{
 		avcodec_flush_buffers(glob->avContext);
 		glob->futureFrameAvailable = false;
+		glob->lastFramePts = 0;
+		if(glob->delayedFrames != 0)
+		{
+			//Hack to force display of first frame
+			glob->avContext->flags |= CODEC_FLAG_LOW_DELAY;
+			useFirstFrameHack = 1;
+		}
 	}
 	glob->lastFrameNumber = myDrp->frameNumber;
 	
 	unsigned char *dataPtr = (unsigned char *)drp->codecData;
 	ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
 	
-	err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame);
+	avcodec_get_frame_defaults(&tempFrame);
+	err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, &tempFrame, myDrp->bufferSize, glob->firstFrame, useFirstFrameHack);
 	myDrp->useFuture = false;
+	
+	if(tempFrame.pts < glob->lastFramePts && glob->delayedFrames == 0)
+	{
+		//Badly framed...  No choice but to delay frames by 1
+		glob->delayedFrames = 1;
+		swapFrame(&glob->picture, &glob->futureFrame);
+		memcpy(glob->picture, &tempFrame, sizeof(AVFrame));
+	}
+	else if(glob->delayedFrames == 1)
+	{
+		memcpy(glob->picture, &tempFrame, sizeof(AVFrame));
+		if(tempFrame.pict_type == FF_I_TYPE)
+		{
+			glob->avContext->flags &= ~CODEC_FLAG_LOW_DELAY;
+			avcodec_flush_buffers(glob->avContext);
+			err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, glob->picture, myDrp->bufferSize, glob->firstFrame, 1);
+			glob->delayedFrames = 2;
+		}
+		else if(tempFrame.pict_type != FF_B_TYPE)
+		{
+			swapFrame(&glob->picture, &glob->futureFrame);
+			glob->futureFrameAvailable = 1;
+		}
+		glob->lastFramePts = glob->picture->pts;
+	}
+	else
+	{
+		memcpy(glob->picture, &tempFrame, sizeof(AVFrame));
+		glob->lastFramePts = glob->picture->pts;	
+	}
 	
 	if(glob->picture->data[0] == NULL && glob->futureFrameAvailable)
 	{
 		myDrp->useFuture = true;
 		glob->futureFrameAvailable = false;
+		glob->lastFramePts = glob->futureFrame->pts;
 	}
-	else if(glob->picture->pict_type == FF_P_TYPE && err == noErr)
+	else if(glob->picture->pict_type == FF_P_TYPE && glob->delayedFrames == 0 && err == noErr)
 	{
 		//Check to see if a B-Frame follows this
 		unsigned char nullChars[8] = {0,0,0,0, 0,0,0,0};
-		err = FFusionDecompress(glob->avContext, nullChars, NULL, myDrp->width, myDrp->height, glob->futureFrame, 8, glob->firstFrame);
+		err = FFusionDecompress(glob->avContext, nullChars, NULL, myDrp->width, myDrp->height, glob->futureFrame, 8, glob->firstFrame, 0);
 		if(glob->futureFrame->data[0] != NULL)
 		{
 			//We found a B-frame in here
@@ -785,6 +837,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 			glob->futureFrame = tframe;
 			
 			glob->futureFrameAvailable = true;
+			glob->lastFramePts = glob->picture->pts;
 		}
 	}
 	myDrp->decoded = true;
@@ -1100,7 +1153,7 @@ int FourCCcompare(OSType *a, OSType *b)
 // This function calls libavcodec to decompress one frame.
 //-----------------------------------------------------------------
 
-OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length, char firstFrame)
+OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length, char firstFrame, int useFirstFrameHack)
 {
     OSErr err = noErr;
     int got_picture = false;
@@ -1110,6 +1163,12 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
     context->width = width;
     context->height = height;
     picture->data[0] = 0;
+	
+	if(useFirstFrameHack)
+	{
+		//Hack to first display of first frame when not using low delay
+		context->flags |= CODEC_FLAG_LOW_DELAY;
+	}
 	
     while (!got_picture && length != 0) 
     {
@@ -1126,6 +1185,14 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
         }
 		
         len = avcodec_decode_video(context, picture, &got_picture, dataPtr, length);
+		
+		if(useFirstFrameHack)
+		{
+			//clean up after hack
+			context->flags &= ~CODEC_FLAG_LOW_DELAY;
+			avcodec_flush_buffers(context);
+			len = avcodec_decode_video(context, picture, &got_picture, dataPtr, length);
+		}
         
         if (len < 0)
         {            
