@@ -310,6 +310,8 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	/* Seek backwards to get a manually read packet for file offset */
 	if(ic->streams[0]->index_entries == NULL)
 	{
+		//Try to seek to the first frame; don't care if it fails
+		av_seek_frame(ic, -1, 0, 0);
 		dataOffset = 0;
 	}
 	else

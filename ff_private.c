@@ -503,7 +503,7 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 			codec = stream->codec;
 			
 			flags = 0;
-			if(pkt.flags & PKT_FLAG_KEY)
+			if((pkt.flags & PKT_FLAG_KEY) == 0)
 				flags |= mediaSampleNotSync;
 			
 			memset(&sampleRec, 0, sizeof(sampleRec));
@@ -542,11 +542,13 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 					sampleRec.numberOfSamples = (pkt.size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
 				}
 			}
-			Handle dataIn = NewHandle(pkt.size);
+			err = AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
+			//Need to do something like this when the libavformat doesn't give us a position
+/*			Handle dataIn = NewHandle(pkt.size);
 			HLock(dataIn);
 			memcpy(*dataIn, pkt.data, pkt.size);
 			HUnlock(dataIn);
-			err = AddMediaSample(ncstr->media, dataIn, 0, pkt.size, 1, ncstr->sampleHdl, pkt.duration, sampleRec.sampleFlags, NULL);
+			err = AddMediaSample(ncstr->media, dataIn, 0, pkt.size, 1, ncstr->sampleHdl, pkt.duration, sampleRec.sampleFlags, NULL);*/
 			av_free_packet(&pkt);
 		}
 	}
