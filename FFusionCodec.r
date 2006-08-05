@@ -50,6 +50,7 @@
 #define	kDivX5Name		"DivX 5"
 #define k3ivxName		"3ivx"
 #define kXVIDName		"XVID"
+#define kH264Name		"H.264"
 
 // Codec names Resource ID
 
@@ -240,6 +241,31 @@ resource 'cdci' (k3ivxCodecInfoResID) {
 
 resource 'cdci' (kXVIDCodecInfoResID) {
 	kXVIDName,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// H.264 Description Resource
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kH264CodecInfoResID) {
+	kH264Name,				// Type
 	1,					// Version
 	1,					// Revision level
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -1581,6 +1607,36 @@ resource 'thng' (298) {
 resource 'thng' (299) {
 	decompressorComponentType,		// Type			
 	'H264',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kH264NameResID,			// Name ID
+	'STR ',					// Info Type
+	kH264InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (300) {
+	decompressorComponentType,		// Type			
+	'h264',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
 	0,					// - use componentHasMultiplePlatforms
 	0,

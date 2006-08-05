@@ -460,6 +460,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
                 glob->avCodec = avcodec_find_decoder(CODEC_ID_MPEG4);
 				break;
 			case 'H264':
+			case 'h264':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_H264);
 				break;
             default:
@@ -1097,7 +1098,12 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
             case '3iv2':
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, k3ivxCodecInfoResID, (Handle *)&tempCodecInfo);
                 break;
-                
+				
+			case 'H264':
+			case 'h264':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kH264CodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
+				
             default:	// should never happen but we have to handle the case
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX4CodecInfoResID, (Handle *)&tempCodecInfo);
 				
