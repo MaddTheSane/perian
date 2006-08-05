@@ -378,6 +378,7 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 	AVStream *st;
 	NCStream *map;
 	Track track;
+	Track first_audio_track = NULL;
 	
 	/* make the stream map structure */
 	map = av_mallocz(ic->nb_streams * sizeof(NCStream));
@@ -394,6 +395,11 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 		} else {
 			track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
 			initialize_audio_map(&map[j], track, dataRef, dataRefType);
+			
+			if (first_audio_track == NULL)
+				first_audio_track = track;
+			else
+				SetTrackAlternate(track, first_audio_track);
 		}
 	}
 	
