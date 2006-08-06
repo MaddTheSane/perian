@@ -282,6 +282,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	Track track;
 	Media media;
 	TimeRecord time;
+	int i;
 	
 	/* make sure that in case of error, the flag movieImportResultComplete is not set */
 	*outFlags = 0;
@@ -320,7 +321,14 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		if(result < 0) goto bail;
 		
 		ic->iformat->read_packet(ic, &pkt);
-		dataOffset = pkt.pos - ic->streams[pkt.stream_index]->index_entries[0].pos;
+		/* read_packet will give the first decodable packet. However, that isn't necessarily
+			the first entry in the index, so look for an entry with a matching size. */
+		for (i = 0; i < ic->streams[pkt.stream_index]->nb_index_entries; i++) {
+			if (pkt.size == ic->streams[pkt.stream_index]->index_entries[i].size) {
+				dataOffset = pkt.pos - ic->streams[pkt.stream_index]->index_entries[i].pos;
+				break;
+			}
+		}
 		av_free_packet(&pkt);
 	}
 	
