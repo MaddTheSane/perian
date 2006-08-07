@@ -24,6 +24,7 @@
 #include "avformat.h"
 #include "ff_private.h"
 #include "allformats.h"
+#include "Codecprintf.h"
 
 /* This one is a little big in ffmpeg and private anyway */
 #define PROBE_BUF_SIZE 64
@@ -74,6 +75,7 @@ void initLib()
 		inited = TRUE;
 		av_register_input_format(&avi_demuxer);
 		register_parsers();
+		av_log_set_callback(FFMpegCodecprintf);
 	}
 }
 

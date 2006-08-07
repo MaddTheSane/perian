@@ -402,6 +402,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         register_avcodec(&msmpeg4v3_decoder);
         register_avcodec(&mpeg4_decoder);
 		register_avcodec(&h264_decoder);
+		av_log_set_callback(FFMpegCodecprintf);
 		
         switch (glob->componentType)
         {

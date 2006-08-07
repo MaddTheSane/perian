@@ -14,3 +14,5 @@ void FourCCprintf(char *string, unsigned long a);
 #define Codecprintf(file, fmt, ...) /**/
 #define FourCCprintf(string,a) /**/
 #endif
+
+void FFMpegCodecprintf(void* ptr, int level, const char* fmt, va_list vl);
