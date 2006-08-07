@@ -50,6 +50,7 @@
 #define	kDivX5Name		"DivX 5"
 #define k3ivxName		"3ivx"
 #define kXVIDName		"XVID"
+#define kMPEG4Name		"MPEG-4 Video"
 #define kH264Name		"H.264"
 
 // Codec names Resource ID
@@ -61,18 +62,20 @@
 #define	kDivX5NameResID		260
 #define	k3ivxNameResID		261
 #define	kXVIDNameResID		262
-#define kH264NameResID		270
+#define	kMPEG4NameResID		263
+#define kH264NameResID		264
 
 // Codec infos Resource ID
 
-#define kDivX1InfoResID		263
-#define kDivX2InfoResID		264
-#define	kDivX3InfoResID		265
-#define	kDivX4InfoResID		266
-#define	kDivX5InfoResID		267
-#define	k3ivxInfoResID		268
-#define	kXVIDInfoResID		269
-#define kH264InfoResID		271
+#define kDivX1InfoResID		285
+#define kDivX2InfoResID		286
+#define	kDivX3InfoResID		287
+#define	kDivX4InfoResID		288
+#define	kDivX5InfoResID		289
+#define	k3ivxInfoResID		290
+#define	kXVIDInfoResID		291
+#define	kMPEG4InfoResID		292
+#define kH264InfoResID		293
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -241,6 +244,31 @@ resource 'cdci' (k3ivxCodecInfoResID) {
 
 resource 'cdci' (kXVIDCodecInfoResID) {
 	kXVIDName,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// MPEG-4 Description Resource
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kMPEG4CodecInfoResID) {
+	kMPEG4Name,				// Type
 	1,					// Version
 	1,					// Revision level
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -1603,8 +1631,162 @@ resource 'thng' (298) {
         };
 };
 
-// H264
+//---------------------------------------------------------------------------
+// Miscellaneous MPEG4 AVI FourCCs
+//---------------------------------------------------------------------------
 resource 'thng' (299) {
+	decompressorComponentType,		// Type			
+	'RMP4',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG4NameResID,				// Name ID
+	'STR ',					// Info Type
+	kMPEG4NameResID,				// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+	{
+		kFFusionDecompressionFlags, 
+		'dlle',				// Entry point found by symbol name 'dlle' resource
+		256,				// ID of 'dlle' resource
+		platformPowerPCNativeEntryPoint,
+		kFFusionDecompressionFlags,
+		'dlle',
+		256,
+		platformIA32NativeEntryPoint,
+	};
+};
+
+resource 'thng' (300) {
+	decompressorComponentType,		// Type			
+	'SEDG',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG4NameResID,				// Name ID
+	'STR ',					// Info Type
+	kMPEG4NameResID,				// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+	{
+		kFFusionDecompressionFlags, 
+		'dlle',				// Entry point found by symbol name 'dlle' resource
+		256,				// ID of 'dlle' resource
+		platformPowerPCNativeEntryPoint,
+		kFFusionDecompressionFlags,
+		'dlle',
+		256,
+		platformIA32NativeEntryPoint,
+	};
+};
+
+resource 'thng' (301) {
+	decompressorComponentType,		// Type			
+	'WV1F',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG4NameResID,				// Name ID
+	'STR ',					// Info Type
+	kMPEG4NameResID,				// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+	{
+		kFFusionDecompressionFlags, 
+		'dlle',				// Entry point found by symbol name 'dlle' resource
+		256,				// ID of 'dlle' resource
+		platformPowerPCNativeEntryPoint,
+		kFFusionDecompressionFlags,
+		'dlle',
+		256,
+		platformIA32NativeEntryPoint,
+	};
+};
+
+resource 'thng' (302) {
+	decompressorComponentType,		// Type			
+	'FMP4',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG4NameResID,				// Name ID
+	'STR ',					// Info Type
+	kMPEG4NameResID,				// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+	{
+		kFFusionDecompressionFlags, 
+		'dlle',				// Entry point found by symbol name 'dlle' resource
+		256,				// ID of 'dlle' resource
+		platformPowerPCNativeEntryPoint,
+		kFFusionDecompressionFlags,
+		'dlle',
+		256,
+		platformIA32NativeEntryPoint,
+	};
+};
+
+resource 'thng' (303) {
+	decompressorComponentType,		// Type			
+	'SMP4',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG4NameResID,				// Name ID
+	'STR ',					// Info Type
+	kMPEG4NameResID,				// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+	{
+		kFFusionDecompressionFlags, 
+		'dlle',				// Entry point found by symbol name 'dlle' resource
+		256,				// ID of 'dlle' resource
+		platformPowerPCNativeEntryPoint,
+		kFFusionDecompressionFlags,
+		'dlle',
+		256,
+		platformIA32NativeEntryPoint,
+	};
+};
+
+
+// H264
+resource 'thng' (304) {
 	decompressorComponentType,		// Type			
 	'H264',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -1634,9 +1816,129 @@ resource 'thng' (299) {
 };
 };
 
-resource 'thng' (300) {
+resource 'thng' (305) {
 	decompressorComponentType,		// Type			
 	'h264',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kH264NameResID,			// Name ID
+	'STR ',					// Info Type
+	kH264InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (306) {
+	decompressorComponentType,		// Type			
+	'X264',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kH264NameResID,			// Name ID
+	'STR ',					// Info Type
+	kH264InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (307) {
+	decompressorComponentType,		// Type			
+	'x264',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kH264NameResID,			// Name ID
+	'STR ',					// Info Type
+	kH264InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (308) {
+	decompressorComponentType,		// Type			
+	'DAVC',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kH264NameResID,			// Name ID
+	'STR ',					// Info Type
+	kH264InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (309) {
+	decompressorComponentType,		// Type			
+	'VSSH',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
 	0,					// - use componentHasMultiplePlatforms
 	0,
@@ -1672,10 +1974,6 @@ resource 'STR ' (kDivX1NameResID) {
 	"MS-MPEG4 v1 Decoder"
 };
 
-resource 'STR ' (kH264NameResID) {
-	"H264 Decoder"
-};
-
 resource 'STR ' (kDivX2NameResID) {
 	"MS-MPEG4 v2 Decoder"
 };
@@ -1698,6 +1996,14 @@ resource 'STR ' (k3ivxNameResID) {
 
 resource 'STR ' (kXVIDNameResID) {
 	"XVID Decoder"
+};
+
+resource 'STR ' (kMPEG4NameResID) {
+	"MPEG-4 Decoder"
+};
+
+resource 'STR ' (kH264NameResID) {
+	"H264 Decoder"
 };
 
 //---------------------------------------------------------------------------
@@ -1730,6 +2036,10 @@ resource 'STR ' (k3ivxInfoResID) {
 
 resource 'STR ' (kXVIDInfoResID) {
 	"Decompresses video stored in XVID format."
+};
+
+resource 'STR ' (kMPEG4InfoResID) {
+	"Decompresses video stored in MPEG-4 format."
 };
 
 resource 'STR ' (kH264InfoResID) {
