@@ -893,8 +893,23 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 		picture = glob->futureFrame;
 	
 	if(picture->data[0] == 0)
+	{
 		//No picture
+		int i, j;
+		Ptr addr = drp->baseAddr;
+		for(i=0; i<myDrp->height; i++)
+		{
+			for(j=0; j<myDrp->width*2; j+=2)
+			{
+				addr[j] = 0x80;
+				addr[j+1] = 0x10;
+				addr[j+2] = 0x80;
+				addr[j+3] = 0x10;
+			}
+			addr += drp->rowBytes;
+		}
 		return noErr;
+	}
 	
 	if (myDrp->pixelFormat == 'y420')
 	{
