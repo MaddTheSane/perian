@@ -271,6 +271,7 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 			asbd->mFormatID = kMicrosoftADPCMFormat;
 			break;
 		case CODEC_ID_AAC:
+		case CODEC_ID_MPEG4AAC:
 			asbd->mFormatID = kAudioFormatMPEG4AAC;
 			break;
 		case CODEC_ID_VORBIS:
@@ -518,8 +519,12 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 					if(codec->frame_size == ncstr->base.num) {
 						sampleRec.durationPerSample = codec->frame_size;
 						sampleRec.numberOfSamples = 1;
-					}
-					else {
+					} else if (ncstr->asbd.mFormatID == kAudioFormatMPEG4AAC) {
+						/* AVI-mux GUI, the author of which created this hack in the first place,
+						* seems to special-case getting an AAC audio sample's duration this way */
+						sampleRec.durationPerSample = ic->streams[j]->time_base.num;
+						sampleRec.numberOfSamples = 1;
+					} else {
 						/* This seems to work. Although I have no idea why.
 						* Perhaps the stream's timebase is adjusted to
 						* let that work. as the timebase has strange values...*/
@@ -572,8 +577,12 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 					if(codec->frame_size == ncstr->base.num) {
 						sampleRec.durationPerSample = codec->frame_size;
 						sampleRec.numberOfSamples = 1;
-					}
-					else {
+					} else if (ncstr->asbd.mFormatID == kAudioFormatMPEG4AAC) {
+						/* AVI-mux GUI, the author of which created this hack in the first place,
+						* seems to special-case getting an AAC audio sample's duration this way */
+						sampleRec.durationPerSample = ic->streams[pkt.stream_index]->time_base.num;
+						sampleRec.numberOfSamples = 1;
+					} else {
 						/* This seems to work. Although I have no idea why.
 						* Perhaps the stream's timebase is adjusted to
 						* let that work. as the timebase has strange values...*/
