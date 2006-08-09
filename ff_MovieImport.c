@@ -99,9 +99,6 @@ ComponentResult FFAvi_MovieImportOpen(ff_global_ptr storage, ComponentInstance s
 	
 	SetComponentInstanceStorage(storage->ci, (Handle)storage);
 	
-	/* Set this component as default one */
-	SetDefaultComponent((Component)self, defaultComponentAnyFlagsAnyManufacturer);
-	
 bail:
 		return result;
 } /* FFAvi_MovieImportOpen() */
@@ -124,13 +121,6 @@ ComponentResult FFAvi_MovieImportVersion(ff_global_ptr storage)
 {
 	return kFFAviComponentVersion;
 } /* FFAvi_MovieImportVersion() */
-
-ComponentResult FFAvi_MovieImportRegister(ff_global_ptr storage)
-{
-	SetDefaultComponent((Component)storage->ci, defaultComponentAnyFlagsAnyManufacturer);
-	
-	return noErr;
-} /* FFAvi_MovieImportRegister() */
 
 #pragma mark -
 

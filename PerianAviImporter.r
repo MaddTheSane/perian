@@ -24,6 +24,7 @@
 
 #define thng_RezTemplateVersion 2
 
+#include "ff_MovieImportVersion.h"
 #include <Carbon/Carbon.r>
 #include <QuickTime/QuickTime.r>
 #undef __CARBON_R__
@@ -34,7 +35,7 @@
 #define kFFAvi_MovieImportFlags \
 ( canMovieImportFiles | canMovieImportInPlace | canMovieImportDataReferences | canMovieImportValidateFile \
 		| canMovieImportValidateDataReferences | hasMovieImportMIMEList | movieImportMustGetDestinationMediaType \
-		| cmpWantsRegisterMessage)
+		| cmpThreadSafe )
 
 
 /* Component Manager Things:
@@ -55,7 +56,7 @@ resource 'thng' (512) {
 	0,							// Info ID
 	0,							// Icon Type
 	0,							// Icon ID
-	0,							// Version
+	kFFAviComponentVersion,		// Version
 	componentHasMultiplePlatforms +
 	componentDoAutoVersion,		// Registratin Flags
 	0,							// Resource ID of Icon Family
@@ -72,11 +73,11 @@ resource 'thng' (512) {
 'thnr', 512
 };
 
-resource 'thng' (513) {
+resource 'thga' (513) {
 	'eat ',					// Type
 	'VFW ',					// SubType
 	kChristophManufacturer,	// Manufacturer
-	0,
+	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
 	0,
@@ -86,28 +87,21 @@ resource 'thng' (513) {
 	0,							// Info ID
 	0,							// Icon Type
 	0,							// Icon ID
-	0,							// Version
-	componentHasMultiplePlatforms +
-	componentDoAutoVersion,		// Registratin Flags
-	0,							// Resource ID of Icon Family
-{
-	kFFAvi_MovieImportFlags,
-	'dlle',					// Code Resource type
-	512,
-	platformIA32NativeEntryPoint,		// IA32
-	kFFAvi_MovieImportFlags,
-	'dlle',
-	512,
-	platformPowerPCNativeEntryPoint,	// PowerPC
-},
-'thnr', 512
+								// TARGET COMPONENT ---------------
+	'eat ',						// Type
+	'VfW ',						// SubType
+	kChristophManufacturer,		// Manufaturer
+	0,							// Component Flags
+	0,							// Component Flags Mask
+	'thnr', 512,				// Component public resource identifier
+	cmpAliasOnlyThisFile
 };
 
-resource 'thng' (514) {
+resource 'thga' (514) {
 	'eat ',					// Type
 	'AVI ',					// SubType
 	kChristophManufacturer,	// Manufacturer
-	0,
+	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
 	0,
@@ -117,21 +111,14 @@ resource 'thng' (514) {
 	0,							// Info ID
 	0,							// Icon Type
 	0,							// Icon ID
-	0,							// Version
-	componentHasMultiplePlatforms +
-	componentDoAutoVersion,		// Registratin Flags
-	0,							// Resource ID of Icon Family
-{
-	kFFAvi_MovieImportFlags,
-	'dlle',					// Code Resource type
-	512,
-	platformIA32NativeEntryPoint,		// IA32
-	kFFAvi_MovieImportFlags,
-	'dlle',
-	512,
-	platformPowerPCNativeEntryPoint,	// PowerPC
-},
-'thnr', 512
+								// TARGET COMPONENT ---------------
+	'eat ',						// Type
+	'VfW ',						// SubType
+	kChristophManufacturer,		// Manufaturer
+	0,							// Component Flags
+	0,							// Component Flags Mask
+	'thnr', 512,				// Component public resource identifier
+	cmpAliasOnlyThisFile
 };
 
 

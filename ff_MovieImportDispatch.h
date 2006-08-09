@@ -29,7 +29,7 @@
 //	ComponentRangeBegin	(4)
 	ComponentRangeBegin	(0)
 		ComponentError	(Target)
-		StdComponentCall(Register)
+		ComponentError  (Register)
 		StdComponentCall(Version)
 		StdComponentCall(CanDo)
 		StdComponentCall(Close)
