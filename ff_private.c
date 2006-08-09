@@ -367,6 +367,41 @@ uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size)
 } /* write_data() */
 
 
+/* Add the meta data that lavf exposes to the movie */
+void add_metadata(AVFormatContext *ic, Movie theMovie)
+{
+    QTMetaDataRef movie_metadata;
+    OSType key, err;
+    
+    err = QTCopyMovieMetaData(theMovie, &movie_metadata);
+    if (err) return;
+    
+    key = kQTMetaDataCommonKeyDisplayName;
+    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->title, strlen(ic->title), kQTMetaDataTypeUTF8, NULL);
+
+    key = kQTMetaDataCommonKeyAuthor;
+    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->author, strlen(ic->author), kQTMetaDataTypeUTF8, NULL);
+
+    key = kQTMetaDataCommonKeyCopyright;
+    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->copyright, strlen(ic->copyright), kQTMetaDataTypeUTF8, NULL);
+
+    key = kQTMetaDataCommonKeyComment;
+    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->comment, strlen(ic->comment), kQTMetaDataTypeUTF8, NULL);
+
+    key = kQTMetaDataCommonKeyComment;
+    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->album, strlen(ic->album), kQTMetaDataTypeUTF8, NULL);
+
+    key = kQTMetaDataCommonKeyGenre;
+    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->genre, strlen(ic->genre), kQTMetaDataTypeUTF8, NULL);
+    QTMetaDataRelease(movie_metadata);
+}
+
 /* This function prepares the movie to receivve the movie data,
  * After success, *out_map points to a valid stream maping
  * Return values:
@@ -403,6 +438,8 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 		}
 	}
 	
+    add_metadata(ic, theMovie);
+    
 	*out_map = map;
 	
 	return 0;
