@@ -33,7 +33,6 @@ else
 	mkdir "$BUILDDIR"
 	
 	cd "$SRCROOT/ffmpeg"
-	patch -p0 < ../ffmpeg-svn-mactel.patch
 	
 	cd "$BUILDDIR"
 	if [ `arch` != i386 ] ; then
@@ -44,7 +43,6 @@ else
 	make -j3
 	
 	cd "$SRCROOT/ffmpeg"
-	patch -R -p0 < ../ffmpeg-svn-mactel.patch
 	
 	
 	#######################
