@@ -210,8 +210,11 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	DataHandler dataHandler = NULL;
 	uint8_t buf[PROBE_BUF_SIZE];
 	AVProbeData *pd = (AVProbeData *)malloc(sizeof(AVProbeData));
-	int success;
-	
+	ByteIOContext byteContext;
+	AVFormatContext *ic = NULL;
+	AVFormatParameters params;
+	int success, i;
+
 	/* default */
 	*valid = 0;
 	
@@ -227,11 +230,32 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	
 	initLib();
 	storage->format = av_probe_input_format(pd, 1);
-	if(storage->format != NULL)
+	if(storage->format != NULL) {
 		*valid = 255; /* This means we can read the data */
+		
+		/* Prepare the iocontext structure */
+		memset(&byteContext, 0, sizeof(byteContext));
+		result = url_open_dataref(&byteContext, dataRef, dataRefType);
+		require_noerr(result, bail);
+		
+		/* Open the Format Context */
+		memset(&params, 0, sizeof(params));
+		result = av_open_input_stream(&ic, &byteContext, "", storage->format, &params);
+		require_noerr(result,bail);
+		
+		for (i = 0; i < ic->nb_streams; i++) {
+			if (ic->streams[i]->codec->codec_id == CODEC_ID_MJPEG || 
+				ic->streams[i]->codec->codec_id == CODEC_ID_MJPEGB)
+				/* but we don't do MJPEG's Huffman tables right yet */
+				*valid = 0;
+		}
+	}
+		
 bail:
 		if(dataHandler)
 			CloseComponent(dataHandler);
+	if(ic)
+		av_close_input_file(ic);
 	free(pd);
 	
 	return result;
