@@ -563,6 +563,33 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 			if(sampleRec.dataSize <= 0)
 				continue;
 			
+			if (codec->codec_type == CODEC_TYPE_AUDIO && !ncstr->vbr)
+				sampleRec.numberOfSamples = (pkt.size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
+			else
+				sampleRec.numberOfSamples = 1;
+				
+			// we have a sample waiting to be added; calculate the duration and add it
+			if (ncstr->lastSample.numberOfSamples > 0) {
+				ncstr->lastSample.durationPerSample = (pkt.pts - ncstr->lastpts) * ncstr->base.num;
+				AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &ncstr->lastSample, NULL);
+			}
+			
+			if (pkt.duration == 0) {
+				// no duration, we'll have to wait for the next packet to calculate it
+				// keep the duration of the last sample, so we can use it if it's the last frame
+				sampleRec.durationPerSample = ncstr->lastSample.durationPerSample;
+				ncstr->lastSample = sampleRec;
+				ncstr->lastpts = pkt.pts;
+				
+			} else {
+				ncstr->lastSample.numberOfSamples = 0;
+				if (codec->codec_type == CODEC_TYPE_AUDIO && !ncstr->vbr)
+					sampleRec.durationPerSample = 1;
+				else
+					sampleRec.durationPerSample = pkt.duration * ncstr->base.num;
+				AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
+			}
+#if 0
 			if(codec->codec_type == CODEC_TYPE_VIDEO)
 			{
 				if(pkt.duration == 0)
@@ -595,6 +622,7 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 				}
 			}
 			err = AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
+#endif
 			//Need to do something like this when the libavformat doesn't give us a position
 /*			Handle dataIn = NewHandle(pkt.size);
 			HLock(dataIn);
@@ -602,6 +630,12 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 			HUnlock(dataIn);
 			err = AddMediaSample(ncstr->media, dataIn, 0, pkt.size, 1, ncstr->sampleHdl, pkt.duration, sampleRec.sampleFlags, NULL);*/
 			av_free_packet(&pkt);
+		}
+		// import the last frames
+		for (j = 0; j < ic->nb_streams; j++) {
+			ncstr = &map[j];
+			if (ncstr->lastSample.numberOfSamples > 0)
+				AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &ncstr->lastSample, NULL);
 		}
 	}
 } /* import_avi() */

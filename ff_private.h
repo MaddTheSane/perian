@@ -35,6 +35,8 @@ struct _NCStream {
 	Media media;
 	UInt32 vbr;
 	AVRational base;
+	int64_t lastpts;
+	SampleReference64Record lastSample;
 };
 typedef struct _NCStream NCStream;
 
