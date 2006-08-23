@@ -141,8 +141,14 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	/* Create the Image Description Handle */
 	imgHdl = (ImageDescriptionHandle)NewHandleClear(sizeof(ImageDescription));
 	(*imgHdl)->idSize = sizeof(ImageDescription);
-	Codecprintf(NULL, "fourcc: %c%c%c%c\n",0xff & (codec->codec_tag),0xff & (codec->codec_tag)>>8,0xff & (codec->codec_tag)>>16,0xff & (codec->codec_tag)>>24);
-	(*imgHdl)->cType = BSWAP(codec->codec_tag);
+	
+	if (codec->codec_tag)
+		(*imgHdl)->cType = BSWAP(codec->codec_tag);
+	else
+		// need to lookup the fourcc from the codec_id
+		(*imgHdl)->cType = map_video_codec_to_mov_tag(codec->codec_id);
+	Codecprintf(NULL, "fourcc: %c%c%c%c\n",0xff & (*imgHdl)->cType,0xff & (*imgHdl)->cType>>8,0xff & (*imgHdl)->cType>>16,0xff & (*imgHdl)->cType>>24);
+	
 	(*imgHdl)->temporalQuality = codecMaxQuality;
 	(*imgHdl)->spatialQuality = codecMaxQuality;
 	(*imgHdl)->width = codec->width;
@@ -194,6 +200,11 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	asbd.mFramesPerPacket = codec->frame_size; /* works for mp3, all other codecs this is 0 anyway */
 	asbd.mBitsPerChannel = codec->bits_per_sample;
 	
+	// this probably isn't quite right; FLV doesn't set frame_size or block_align, 
+	// but we need > 0 frames per packet or Apple's mp3 decoder won't work
+	if (asbd.mBytesPerPacket == 0 && asbd.mFramesPerPacket == 0)
+		asbd.mFramesPerPacket = 1;
+	
 	/* ask the toolbox about more information */
 	ioSize = sizeof(AudioStreamBasicDescription);
 	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
@@ -238,6 +249,15 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	map->sampleHdl = (SampleDescriptionHandle)sndHdl;
 	map->asbd = asbd;
 } /* initialize_audio_map() */
+
+OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
+{
+	switch(codec_id) {
+		case CODEC_ID_FLV1:
+			return 'FLV1';
+	}
+	return 0;
+}
 
 /* maps the codec_id tag of libavformat to a constant the AudioToolbox can work with */
 void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd)

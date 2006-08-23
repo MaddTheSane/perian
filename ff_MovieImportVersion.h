@@ -27,4 +27,7 @@
 
 #define kChristophManufacturer 'Rafz'
 
+#define kAVIthngResID 512
+#define kFLVthngResID 515
+
 #endif

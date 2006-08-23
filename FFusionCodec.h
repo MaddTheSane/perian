@@ -35,10 +35,11 @@
 #define kDivX3CodecInfoResID		258
 #define kDivX4CodecInfoResID		259
 #define kDivX5CodecInfoResID		260
-#define k3ivxCodecInfoResID		261
-#define kXVIDCodecInfoResID		262
-#define kMPEG4CodecInfoResID	263
-#define kH264CodecInfoResID		264
+#define k3ivxCodecInfoResID			261
+#define kXVIDCodecInfoResID			262
+#define kMPEG4CodecInfoResID		263
+#define kH264CodecInfoResID			264
+#define kFLV1CodecInfoResID			265
 
 #define kFFusionCodecManufacturer	'SNE2'
 

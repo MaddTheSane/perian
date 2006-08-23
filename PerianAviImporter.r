@@ -37,12 +37,9 @@
 		| canMovieImportValidateDataReferences | hasMovieImportMIMEList | movieImportMustGetDestinationMediaType \
 		| cmpThreadSafe )
 
-
-/* Component Manager Things:
-* The Component Manager alias doesn't seem to work so we have
-* More than one thing 
-*/
-resource 'thng' (512) {
+/* Component Manager Things - 
+	AVI */
+resource 'thng' (kAVIthngResID) {
 	'eat ',					// Type
 	'VfW ',					// SubType
 	kChristophManufacturer,	// Manufacturer
@@ -51,7 +48,7 @@ resource 'thng' (512) {
 	0,
 	0,
 	'STR ',						// Name Type
-	512,						// Name ID
+	kAVIthngResID,						// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -70,7 +67,7 @@ resource 'thng' (512) {
 	512,
 	platformPowerPCNativeEntryPoint,	// PowerPC
 },
-'thnr', 512
+'thnr', kAVIthngResID
 };
 
 resource 'thga' (513) {
@@ -82,7 +79,7 @@ resource 'thga' (513) {
 	0,
 	0,
 	'STR ',						// Name Type
-	512,						// Name ID
+	kAVIthngResID,						// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -93,7 +90,7 @@ resource 'thga' (513) {
 	kChristophManufacturer,		// Manufaturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
-	'thnr', 512,				// Component public resource identifier
+	'thnr', kAVIthngResID,				// Component public resource identifier
 	cmpAliasOnlyThisFile
 };
 
@@ -106,7 +103,7 @@ resource 'thga' (514) {
 	0,
 	0,
 	'STR ',						// Name Type
-	512,						// Name ID
+	kAVIthngResID,						// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -117,20 +114,19 @@ resource 'thga' (514) {
 	kChristophManufacturer,		// Manufaturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
-	'thnr', 512,				// Component public resource identifier
+	'thnr', kAVIthngResID,				// Component public resource identifier
 	cmpAliasOnlyThisFile
 };
 
-
 /* Perhaps in a later version, we have to use "QuickTime Media Configuration Resources" */
-resource 'thnr' (512) {
+resource 'thnr' (kAVIthngResID) {
 {
 	'mime', 1, 0,
-	'mime', 512, 0,
+	'mime', kAVIthngResID, 0,
 }
 };
 
-resource 'mime' (512) {
+resource 'mime' (kAVIthngResID) {
 {
 	kMimeInfoMimeTypeTag,		1,	"video/x-msvideo";
 	kMimeInfoMimeTypeTag,		2,	"video/msvideo";
@@ -144,8 +140,61 @@ resource 'mime' (512) {
 };
 };
 
-resource 'STR ' (512) {
+resource 'STR ' (kAVIthngResID) {
 	"FFAvi Movie Importer"
+};
+
+
+/* Component Manager Things - 
+	FLV */
+resource 'thng' (kFLVthngResID) {
+	'eat ',					// Type
+	'FLV ',					// SubType
+	'vide',					// Manufacturer
+	0,
+	0,
+	0,
+	0,
+	'STR ',						// Name Type
+	kFLVthngResID,						// Name ID
+	0,							// Info Type
+	0,							// Info ID
+	0,							// Icon Type
+	0,							// Icon ID
+	kFFAviComponentVersion,		// Version
+	componentHasMultiplePlatforms +
+	componentDoAutoVersion,		// Registratin Flags
+	0,							// Resource ID of Icon Family
+{
+	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
+	'dlle',					// Code Resource type
+	512,
+	platformIA32NativeEntryPoint,		// IA32
+	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
+	'dlle',
+	512,
+	platformPowerPCNativeEntryPoint,	// PowerPC
+},
+'thnr', kFLVthngResID
+};
+
+resource 'thnr' (kFLVthngResID) {
+{
+	'mime', 1, 0,
+	'mime', kFLVthngResID, 0,
+}
+};
+
+resource 'mime' (kFLVthngResID) {
+{
+	kMimeInfoMimeTypeTag,		1, "video/x-flv";
+	kMimeInfoFileExtensionTag,	1, "flv";
+	kMimeInfoDescriptionTag,	1, "Flash Video";
+};
+};
+
+resource 'STR ' (kFLVthngResID) {
+	"Flash Video Importer"
 };
 
 resource 'dlle' (512) {

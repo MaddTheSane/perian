@@ -57,6 +57,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 
 void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset);
 
+OSType map_video_codec_to_mov_tag(enum CodecID codec_id);
 void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd);
 uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID);
 

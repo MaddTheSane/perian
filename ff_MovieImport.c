@@ -43,6 +43,7 @@
 
 struct _ff_global_context {
 	ComponentInstance ci;
+	OSType componentType;
 	
 	/* For feedback during import */
 	MovieProgressUPP prog;
@@ -74,7 +75,17 @@ void initLib()
 	if(!inited) {
 		inited = TRUE;
 		av_register_input_format(&avi_demuxer);
+		av_register_input_format(&flv_demuxer);
 		register_parsers();
+		
+		avcodec_init();
+		register_avcodec(&msmpeg4v1_decoder);
+		register_avcodec(&msmpeg4v2_decoder);
+		register_avcodec(&msmpeg4v3_decoder);
+		register_avcodec(&mpeg4_decoder);
+		register_avcodec(&h264_decoder);
+		register_avcodec(&flv_decoder);
+		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
 }
@@ -86,10 +97,13 @@ void initLib()
 ComponentResult FFAvi_MovieImportOpen(ff_global_ptr storage, ComponentInstance self)
 {
 	ComponentResult result;
+    ComponentDescription descout;
 	
 	/* Check for Mac OS 10.4 & QT 7 */
 	result = check_system();
 	require_noerr(result,bail);
+	
+    GetComponentInfo((Component)self, &descout, 0, 0, 0);
 	
 	storage = malloc(sizeof(ff_global_context));
 	if(!storage) goto bail;
@@ -99,6 +113,7 @@ ComponentResult FFAvi_MovieImportOpen(ff_global_ptr storage, ComponentInstance s
 	
 	SetComponentInstanceStorage(storage->ci, (Handle)storage);
 	
+	storage->componentType = descout.componentSubType;
 bail:
 		return result;
 } /* FFAvi_MovieImportOpen() */
@@ -130,7 +145,21 @@ ComponentResult FFAvi_MovieImportVersion(ff_global_ptr storage)
 
 ComponentResult FFAvi_MovieImportGetMIMETypeList(ff_global_ptr storage, QTAtomContainer *mimeInfo)
 {
-	return GetComponentResource((Component)storage->ci, 'mime', 512, (Handle*)mimeInfo);
+	ComponentResult err = noErr;
+	switch (storage->componentType) {
+		case 'VfW ':
+		case 'VFW ':
+		case 'AVI ':
+			err = GetComponentResource((Component)storage->ci, 'mime', kAVIthngResID, (Handle*)mimeInfo);
+			break;
+		case 'FLV ':
+			err = GetComponentResource((Component)storage->ci, 'mime', kFLVthngResID, (Handle*)mimeInfo);
+			break;
+		default:
+			err = GetComponentResource((Component)storage->ci, 'mime', kAVIthngResID, (Handle*)mimeInfo);
+			break;
+	}
+	return err;
 } /* FFAvi_MovieImportGetMIMETypeList() */
 
 ComponentResult FFAvi_MovieImportSetProgressProc(ff_global_ptr storage, MovieProgressUPP prog, long refcon)
@@ -327,8 +356,11 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	/* Seek backwards to get a manually read packet for file offset */
 	if(ic->streams[0]->index_entries == NULL)
 	{
-		//Try to seek to the first frame; don't care if it fails
-		av_seek_frame(ic, -1, 0, 0);
+		if (storage->componentType == 'AVI ' || storage->componentType == 'VfW ' || storage->componentType == 'VFW ')
+			//Try to seek to the first frame; don't care if it fails
+			// Is this really needed for AVIs w/out an index? It seems to work fine without, 
+			// and it seems that with it the first frame is skipped.
+			av_seek_frame(ic, -1, 0, 0);
 		dataOffset = 0;
 	}
 	else

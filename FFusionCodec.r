@@ -52,6 +52,7 @@
 #define kXVIDName		"XVID"
 #define kMPEG4Name		"MPEG-4 Video"
 #define kH264Name		"H.264"
+#define kFLV1Name		"Sorenson H.263"
 
 // Codec names Resource ID
 
@@ -64,6 +65,7 @@
 #define	kXVIDNameResID		262
 #define	kMPEG4NameResID		263
 #define kH264NameResID		264
+#define kFLV1NameResID		265
 
 // Codec infos Resource ID
 
@@ -76,6 +78,7 @@
 #define	kXVIDInfoResID		291
 #define	kMPEG4InfoResID		292
 #define kH264InfoResID		293
+#define kFLV1InfoResID		294
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -294,6 +297,31 @@ resource 'cdci' (kMPEG4CodecInfoResID) {
 
 resource 'cdci' (kH264CodecInfoResID) {
 	kH264Name,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// Flash Video Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kFLV1CodecInfoResID) {
+	kFLV1Name,				// Type
 	1,					// Version
 	1,					// Revision level
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -1966,6 +1994,36 @@ resource 'thng' (309) {
 };
 };
 
+resource 'thng' (310) {
+	decompressorComponentType,		// Type			
+	'FLV1',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kFLV1NameResID,			// Name ID
+	'STR ',					// Info Type
+	kFLV1InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
@@ -2006,6 +2064,10 @@ resource 'STR ' (kH264NameResID) {
 	"H264 Decoder"
 };
 
+resource 'STR ' (kFLV1NameResID) {
+	"Sorenson H.263 Decoder"
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
@@ -2044,6 +2106,10 @@ resource 'STR ' (kMPEG4InfoResID) {
 
 resource 'STR ' (kH264InfoResID) {
 	"Decompresses video stored in H264 format."
+};
+
+resource 'STR ' (kFLV1InfoResID) {
+	"Decompresses video stored in Sorenson H.263 format."
 };
 
 //---------------------------------------------------------------------------

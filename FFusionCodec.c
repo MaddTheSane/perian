@@ -118,6 +118,8 @@ pascal OSStatus HandlePPDialogWindowEvent(EventHandlerCallRef  nextHandler, Even
 pascal OSStatus HandlePPDialogControlEvent(EventHandlerCallRef  nextHandler, EventRef theEvent, void* userData);
 void ChangeHintText(int value, ControlRef staticTextField);
 
+extern void initLib();
+
 //---------------------------------------------------------------------------
 // Component Dispatcher
 //---------------------------------------------------------------------------
@@ -397,13 +399,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
     if (!glob->avCodec)
     {
-        avcodec_init();
-        register_avcodec(&msmpeg4v1_decoder);
-        register_avcodec(&msmpeg4v2_decoder);
-        register_avcodec(&msmpeg4v3_decoder);
-        register_avcodec(&mpeg4_decoder);
-		register_avcodec(&h264_decoder);
-		av_log_set_callback(FFMpegCodecprintf);
+		initLib();
 		
         switch (glob->componentType)
         {
@@ -473,6 +469,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			case 'DAVC':
 			case 'VSSH':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_H264);
+				break;
+			case 'FLV1':
+				glob->avCodec = avcodec_find_decoder(CODEC_ID_FLV1);
 				break;
             default:
 			Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
@@ -1148,6 +1147,10 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 			case 'DAVC':
 			case 'VSSH':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kH264CodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
+				
+			case 'FLV1':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kFLV1CodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
             default:	// should never happen but we have to handle the case
