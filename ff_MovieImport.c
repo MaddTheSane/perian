@@ -274,8 +274,10 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 		
 		for (i = 0; i < ic->nb_streams; i++) {
 			if (ic->streams[i]->codec->codec_id == CODEC_ID_MJPEG || 
-				ic->streams[i]->codec->codec_id == CODEC_ID_MJPEGB)
-				/* but we don't do MJPEG's Huffman tables right yet */
+				ic->streams[i]->codec->codec_id == CODEC_ID_MJPEGB || 
+				ic->streams[i]->codec->codec_id == CODEC_ID_DVVIDEO)
+				/* but we don't do MJPEG's Huffman tables right yet, and DV video seems to have 
+				  an aspect ratio coded in the bitstream that ffmpeg doesn't read */
 				*valid = 0;
 		}
 	}
