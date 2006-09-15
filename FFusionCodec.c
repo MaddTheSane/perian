@@ -275,6 +275,11 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         {
             av_free(glob->avContext);
         }
+		
+		if (glob->pixelTypes)
+		{
+			DisposeHandle(glob->pixelTypes);
+		}
         
         for (i=0; i<=PP_QUALITY_MAX; i++)
         {
