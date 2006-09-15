@@ -115,6 +115,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 {
 	Media media;
 	ImageDescriptionHandle imgHdl;
+	Handle imgDescExt = NULL;
 	AVCodecContext *codec;
 	double num,den;
 	
@@ -157,6 +158,13 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	(*imgHdl)->vRes = 72 << 16;
 	(*imgHdl)->depth = codec->bits_per_sample;
 	(*imgHdl)->clutID = -1; // no color lookup table...
+	
+	/* Create the strf image description extension (see AVI's BITMAPINFOHEADER) */
+	imgDescExt = create_strf_ext(codec);
+	if (imgDescExt) {
+		AddImageDescriptionExtension(imgHdl, imgDescExt, 'strf');
+		DisposeHandle(imgDescExt);
+	}
 	
 	map->sampleHdl = (SampleDescriptionHandle)imgHdl;
 	
@@ -370,6 +378,52 @@ bail:
 		av_free(waveAtom);
 	return result;
 } /* create_cookie() */
+
+/* This function creates an image description extension that some codecs need to be able 
+ * to decode properly, a copy of the strf (BITMAPINFOHEADER) chunk in the avi.
+ * Return value: a handle to an image description extension which has to be DisposeHandle()'d
+ * in cookieSize, the size of the image description extension is returned to the caller */
+Handle create_strf_ext(AVCodecContext *codec)
+{
+	Handle result = NULL;
+	uint8_t *ptr;
+	long size;
+	
+	/* initialize the extension
+		* 40 bytes			for the BITMAPINFOHEADER stucture, see avienc.c in the ffmpeg project
+		* extradata_size	for the data still stored in the AVCodecContext structure */
+	size = 40 + codec->extradata_size;
+	result = NewHandle(size);
+	if (result == NULL)
+		goto bail;
+	
+	/* construct the BITMAPINFOHEADER structure */
+	/* QT Atoms are big endian, but the STRF atom should be little endian */
+	ptr = write_int32((uint8_t *)*result, EndianS32_NtoL(size)); /* size */
+	ptr = write_int32(ptr, EndianS32_NtoL(codec->width));
+	ptr = write_int32(ptr, EndianS32_NtoL(codec->height));
+	ptr = write_int16(ptr, EndianS16_NtoL(1)); /* planes */
+	
+	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_sample ? codec->bits_per_sample : 24)); /* depth */
+	/* compression type */
+	ptr = write_int32(ptr, EndianS32_NtoL(codec->codec_tag));
+	ptr = write_int32(ptr, EndianS32_NtoL(codec->width * codec->height * 3));
+	ptr = write_int32(ptr, EndianS32_NtoL(0));
+	ptr = write_int32(ptr, EndianS32_NtoL(0));
+	ptr = write_int32(ptr, EndianS32_NtoL(0));
+	ptr = write_int32(ptr, EndianS32_NtoL(0));
+	
+	/* now the remaining stuff */
+	ptr = write_data(ptr, codec->extradata, codec->extradata_size);
+	
+	if (codec->extradata_size & 1) {
+		uint8_t zero = 0;
+		ptr = write_data(ptr, &zero, 1);
+	}
+	
+bail:
+	return result;
+} /* create_extension() */
 
 /* write the int32_t data to target & then return a pointer which points after that data */
 uint8_t *write_int32(uint8_t *target, int32_t data)
