@@ -110,6 +110,7 @@ typedef struct
 static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length, int useFirstFrameHack);
 static void FastY420(UInt8 *baseAddr, AVFrame *picture);
 static void SlowY420(UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture);
+static void BGR24toRGB24(UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture);
 
 int GetPPUserPreference();
 void SetPPUserPreference(int value);
@@ -471,6 +472,15 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			case 'FLV1':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_FLV1);
 				break;
+			case 'FSV1':
+				glob->avCodec = avcodec_find_decoder(CODEC_ID_FLASHSV);
+				break;
+			case 'VP62':
+				glob->avCodec = avcodec_find_decoder(CODEC_ID_VP6);
+				break;
+			case 'VP6F':
+				glob->avCodec = avcodec_find_decoder(CODEC_ID_VP6F);
+				break;
             default:
 			Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
                 
@@ -508,7 +518,8 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         Gestalt(gestaltPowerPCProcessorFeatures, &bitfield);
         altivec = (bitfield & (1 << gestaltPowerPCHasVectorInstructions)) != 0;
         
-        if (altivec)
+		// VP6 needs VP3 IDCT; Altivec IDCT doesn't work for now
+        if (altivec && glob->componentType != 'VP62' && glob->componentType != 'VP6F')
         {
             Codecprintf(glob->fileLog, "Altivec Acceleration enabled!\n");
 			
@@ -560,14 +571,23 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
     index = 0;
 	
-    if (glob->hasy420)
-    {
-        pos[index++] = 'y420';
-    }
-    else
-    {
-        pos[index++] = k2vuyPixelFormat;        
-    }
+	switch (glob->avContext->pix_fmt)
+	{
+		case PIX_FMT_BGR24:
+			pos[index++] = k24RGBPixelFormat;
+			break;
+		case PIX_FMT_YUV420P:
+		default:
+			if (glob->hasy420)
+			{
+				pos[index++] = 'y420';
+			}
+			else
+			{
+				pos[index++] = k2vuyPixelFormat;        
+			}
+			break;
+	}
     
     pos[index++] = 0;
     HUnlock(glob->pixelTypes);
@@ -915,14 +935,24 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	else
 		memcpy(&(glob->lastDisplayedFrame), picture, sizeof(AVFrame));
 	
-	if (myDrp->pixelFormat == 'y420')
+	if (myDrp->pixelFormat == 'y420' && glob->avContext->pix_fmt == PIX_FMT_YUV420P)
 	{
 		FastY420((UInt8 *)drp->baseAddr, picture);
-    }
-    else
-    {
+	}
+	else if (myDrp->pixelFormat == k2vuyPixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUV420P)
+	{
 		SlowY420((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-    }
+	}
+	else if (myDrp->pixelFormat == k24RGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_BGR24)
+	{
+		BGR24toRGB24((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
+	}
+	else
+	{
+		Codecprintf(glob->fileLog, "Unsupported conversion from PIX_FMT %d to %c%c%c%c (%08x) buffer\n",
+					glob->avContext->pix_fmt, myDrp->pixelFormat >> 24 & 0xff, myDrp->pixelFormat >> 16 & 0xff, 
+					myDrp->pixelFormat >> 8 & 0xff, myDrp->pixelFormat & 0xff, myDrp->pixelFormat);
+	}
 	
     if ((err == noErr) && (glob->postProcParams.level > 0))
     {
@@ -1146,6 +1176,15 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kFLV1CodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
+			case 'FSV1':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kFlashSVCodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
+				
+			case 'VP62':
+			case 'VP6F':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kVP6CodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
+				
             default:	// should never happen but we have to handle the case
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX4CodecInfoResID, (Handle *)&tempCodecInfo);
 				
@@ -1325,6 +1364,24 @@ static void SlowY420(UInt8 *baseAddr, long rowBump, long width, long height, AVF
             pv += picture->linesize[2];
         }
     }
+}
+
+static void BGR24toRGB24(UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture)
+{
+	unsigned int i, j;
+	UInt8 *srcPtr = picture->data[0];
+
+	for (i = 0; i < height; ++i)
+	{
+		for (j = 0; j < width * 3; j += 3)
+		{
+			baseAddr[j] = srcPtr[j+2];
+			baseAddr[j+1] = srcPtr[j+1];
+			baseAddr[j+2] = srcPtr[j];
+		}
+		baseAddr += rowBump;
+		srcPtr += picture->linesize[0];
+	}
 }
 
 int GetPPUserPreference()

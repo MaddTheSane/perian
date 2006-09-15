@@ -255,6 +255,10 @@ OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
 	switch(codec_id) {
 		case CODEC_ID_FLV1:
 			return 'FLV1';
+		case CODEC_ID_VP6F:
+			return 'VP6F';
+		case CODEC_ID_FLASHSV:
+			return 'FSV1';
 	}
 	return 0;
 }

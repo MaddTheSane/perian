@@ -53,6 +53,8 @@
 #define kMPEG4Name		"MPEG-4 Video"
 #define kH264Name		"H.264"
 #define kFLV1Name		"Sorenson H.263"
+#define kFlashSVName	"Flash Screen Video"
+#define kVP6Name		"TrueMotion VP6"
 
 // Codec names Resource ID
 
@@ -66,6 +68,8 @@
 #define	kMPEG4NameResID		263
 #define kH264NameResID		264
 #define kFLV1NameResID		265
+#define kFlashSVNameResID	266
+#define kVP6NameResID		267
 
 // Codec infos Resource ID
 
@@ -79,6 +83,8 @@
 #define	kMPEG4InfoResID		292
 #define kH264InfoResID		293
 #define kFLV1InfoResID		294
+#define kFlashSVInfoResID	295
+#define kVP6InfoResID		296
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -322,6 +328,56 @@ resource 'cdci' (kH264CodecInfoResID) {
 
 resource 'cdci' (kFLV1CodecInfoResID) {
 	kFLV1Name,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// Flash Screen Video Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kFlashSVCodecInfoResID) {
+	kFlashSVName,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// VP6 Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kVP6CodecInfoResID) {
+	kVP6Name,				// Type
 	1,					// Version
 	1,					// Revision level
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2024,6 +2080,96 @@ resource 'thng' (310) {
 };
 };
 
+resource 'thng' (311) {
+	decompressorComponentType,		// Type			
+	'FSV1',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kFlashSVNameResID,			// Name ID
+	'STR ',					// Info Type
+	kFlashSVInfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (312) {
+	decompressorComponentType,		// Type			
+	'VP62',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kVP6NameResID,			// Name ID
+	'STR ',					// Info Type
+	kVP6InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (313) {
+	decompressorComponentType,		// Type			
+	'VP6F',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kVP6NameResID,			// Name ID
+	'STR ',					// Info Type
+	kVP6InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
@@ -2068,6 +2214,14 @@ resource 'STR ' (kFLV1NameResID) {
 	"Sorenson H.263 Decoder"
 };
 
+resource 'STR ' (kFlashSVNameResID) {
+	"Flash Screen Video Decoder"
+};
+
+resource 'STR ' (kVP6NameResID) {
+	"TrueMotion VP6 Decoder"
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
@@ -2110,6 +2264,14 @@ resource 'STR ' (kH264InfoResID) {
 
 resource 'STR ' (kFLV1InfoResID) {
 	"Decompresses video stored in Sorenson H.263 format."
+};
+
+resource 'STR ' (kFlashSVInfoResID) {
+	"Decompresses video stored in Flash Screen Video format."
+};
+
+resource 'STR ' (kVP6InfoResID) {
+	"Decompresses video stored in TrueMotion VP6 format."
 };
 
 //---------------------------------------------------------------------------

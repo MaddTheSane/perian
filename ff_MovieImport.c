@@ -85,6 +85,9 @@ void initLib()
 		register_avcodec(&mpeg4_decoder);
 		register_avcodec(&h264_decoder);
 		register_avcodec(&flv_decoder);
+		register_avcodec(&flashsv_decoder);
+		register_avcodec(&vp6_decoder);
+		register_avcodec(&vp6f_decoder);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
