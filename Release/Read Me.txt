@@ -17,8 +17,12 @@ This is a prerelease-ish version of Perian, bugs will happen, and the final
 feature set should grow dramatically.
 
 The Perian Team:
-Augie Fackler
-Graham Booker
+Augie Fackler - Lead Dev
+Graham Booker - Dev and hosting
+Chris Forsythe - Project Manager
+David Conrad - Dev
+Alexander Strange - Dev
+
 
 
 
