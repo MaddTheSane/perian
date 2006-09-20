@@ -18,7 +18,13 @@ else
 	PERIAN_BUILD_DIR=$(TARGET_BUILD_DIR)
 endif
 
-release: createfolder diskimage
+
+BUILDFLAGS="BUILDCONFIGURATION=$(BUILDSTYLE)"
+
+release: compile createfolder diskimage
+
+compile:
+	$(MAKE) $(BUILDFLAGS) -C $(SRC_DIR)
 
 createfolder:
 	@# clean build directory
@@ -34,7 +40,7 @@ createfolder:
 	@# copy the text files
 #	cp $(SRC_DIR)/Changes.txt $(PERIAN_DIR)
 #	cp $(SRC_DIR)/License.txt $(PERIAN_DIR)
-	cp $(SRC_DIR)/Release/Read\ Me.txt $(PERIAN_DIR)
+	cp $(SRC_DIR)/Release/Read\ Me.rtf $(PERIAN_DIR)
 	cp $(SRC_DIR)/Release/License.txt $(PERIAN_DIR)
 	
 	@# symlink /Library/QuickTime
