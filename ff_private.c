@@ -594,13 +594,9 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 				
 				/* FIXME: check if that's really the right thing to do here */
 				if(ncstr->vbr) {
-					if(codec->frame_size == ncstr->base.num) {
-						sampleRec.durationPerSample = codec->frame_size;
-						sampleRec.numberOfSamples = 1;
-					} else if (ncstr->asbd.mFormatID == kAudioFormatMPEG4AAC) {
-						/* AVI-mux GUI, the author of which created this hack in the first place,
-						* seems to special-case getting an AAC audio sample's duration this way */
-						sampleRec.durationPerSample = ic->streams[j]->time_base.num;
+					if(codec->frame_size == ncstr->base.num || codec->frame_size == 0) {
+						/* frame_size is set to zero for AAC and some MP3 tracks and it works this way */
+						sampleRec.durationPerSample = ncstr->base.num;
 						sampleRec.numberOfSamples = 1;
 					} else {
 						/* This seems to work. Although I have no idea why.
