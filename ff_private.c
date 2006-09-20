@@ -526,8 +526,8 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 
 /* This function imports the avi represented by the AVFormatContext to the movie media represented
  * in the map function. The aviheader_offset is used to calculate the packet offset from the
- * beginning of the file */
-void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
+ * beginning of the file. It returns whether it was successful or not (i.e. whether the file had an index) */
+short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 {
 	int j, k, l;
 	NCStream *ncstr;
@@ -619,101 +619,112 @@ void import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 			err = AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
 		}
 	}
-	if(hadIndex == 0)
-	{
-		AVPacket pkt;
-		while(av_read_frame(ic, &pkt) == noErr)
-		{
-			ncstr = &map[pkt.stream_index];
-			stream = ncstr->str;
-			codec = stream->codec;
-			
-			flags = 0;
-			if((pkt.flags & PKT_FLAG_KEY) == 0)
-				flags |= mediaSampleNotSync;
-			
-			memset(&sampleRec, 0, sizeof(sampleRec));
-			sampleRec.dataOffset.hi = pkt.pos >> 32;
-			sampleRec.dataOffset.lo = (uint32_t) pkt.pos;
-			sampleRec.dataSize = pkt.size;
-			sampleRec.sampleFlags = flags;
-			
-			if(sampleRec.dataSize <= 0)
-				continue;
-			
-			if (codec->codec_type == CODEC_TYPE_AUDIO && !ncstr->vbr)
-				sampleRec.numberOfSamples = (pkt.size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
-			else
-				sampleRec.numberOfSamples = 1;
-				
-			// we have a sample waiting to be added; calculate the duration and add it
-			if (ncstr->lastSample.numberOfSamples > 0) {
-				ncstr->lastSample.durationPerSample = (pkt.pts - ncstr->lastpts) * ncstr->base.num;
-				AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &ncstr->lastSample, NULL);
-			}
-			
-			if (pkt.duration == 0) {
-				// no duration, we'll have to wait for the next packet to calculate it
-				// keep the duration of the last sample, so we can use it if it's the last frame
-				sampleRec.durationPerSample = ncstr->lastSample.durationPerSample;
-				ncstr->lastSample = sampleRec;
-				ncstr->lastpts = pkt.pts;
-				
-			} else {
-				ncstr->lastSample.numberOfSamples = 0;
-				if (codec->codec_type == CODEC_TYPE_AUDIO && !ncstr->vbr)
-					sampleRec.durationPerSample = 1;
-				else
-					sampleRec.durationPerSample = pkt.duration * ncstr->base.num;
-				AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
-			}
-#if 0
-			if(codec->codec_type == CODEC_TYPE_VIDEO)
-			{
-				if(pkt.duration == 0)
-					sampleRec.durationPerSample = map->base.num;
-				else
-					sampleRec.durationPerSample = map->base.num * pkt.duration;
-				sampleRec.numberOfSamples = 1;
-			}
-			else if (codec->codec_type == CODEC_TYPE_AUDIO)
-			{
-				if(ncstr->vbr) {
-					if(codec->frame_size == ncstr->base.num) {
-						sampleRec.durationPerSample = codec->frame_size;
-						sampleRec.numberOfSamples = 1;
-					} else if (ncstr->asbd.mFormatID == kAudioFormatMPEG4AAC) {
-						/* AVI-mux GUI, the author of which created this hack in the first place,
-						* seems to special-case getting an AAC audio sample's duration this way */
-						sampleRec.durationPerSample = ic->streams[pkt.stream_index]->time_base.num;
-						sampleRec.numberOfSamples = 1;
-					} else {
-						/* This seems to work. Although I have no idea why.
-						* Perhaps the stream's timebase is adjusted to
-						* let that work. as the timebase has strange values...*/
-						sampleRec.durationPerSample = sampleRec.dataSize;
-						sampleRec.numberOfSamples = 1;
-					}
-				} else {
-					sampleRec.durationPerSample = 1;
-					sampleRec.numberOfSamples = (pkt.size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
-				}
-			}
-			err = AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
-#endif
-			//Need to do something like this when the libavformat doesn't give us a position
-/*			Handle dataIn = NewHandle(pkt.size);
-			HLock(dataIn);
-			memcpy(*dataIn, pkt.data, pkt.size);
-			HUnlock(dataIn);
-			err = AddMediaSample(ncstr->media, dataIn, 0, pkt.size, 1, ncstr->sampleHdl, pkt.duration, sampleRec.sampleFlags, NULL);*/
-			av_free_packet(&pkt);
-		}
-		// import the last frames
-		for (j = 0; j < ic->nb_streams; j++) {
-			ncstr = &map[j];
-			if (ncstr->lastSample.numberOfSamples > 0)
-				AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &ncstr->lastSample, NULL);
-		}
-	}
+	return hadIndex;
 } /* import_avi() */
+
+/* This function imports the video file using standard av_read_frame() calls, 
+ * which works on files that don't have an index */
+void import_without_index(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
+{
+	int i;
+	NCStream *ncstr;
+	AVStream *stream;
+	AVCodecContext *codec;
+	SampleReference64Record sampleRec;
+	short flags;
+	AVPacket pkt;
+	
+	while(av_read_frame(ic, &pkt) == noErr)
+	{
+		ncstr = &map[pkt.stream_index];
+		stream = ncstr->str;
+		codec = stream->codec;
+		
+		flags = 0;
+		if((pkt.flags & PKT_FLAG_KEY) == 0)
+			flags |= mediaSampleNotSync;
+		
+		memset(&sampleRec, 0, sizeof(sampleRec));
+		sampleRec.dataOffset.hi = pkt.pos >> 32;
+		sampleRec.dataOffset.lo = (uint32_t) pkt.pos;
+		sampleRec.dataSize = pkt.size;
+		sampleRec.sampleFlags = flags;
+		
+		if(sampleRec.dataSize <= 0)
+			continue;
+		
+		if (codec->codec_type == CODEC_TYPE_AUDIO && !ncstr->vbr)
+			sampleRec.numberOfSamples = (pkt.size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
+		else
+			sampleRec.numberOfSamples = 1;
+		
+		// we have a sample waiting to be added; calculate the duration and add it
+		if (ncstr->lastSample.numberOfSamples > 0) {
+			ncstr->lastSample.durationPerSample = (pkt.pts - ncstr->lastpts) * ncstr->base.num;
+			AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &ncstr->lastSample, NULL);
+		}
+		
+		if (pkt.duration == 0) {
+			// no duration, we'll have to wait for the next packet to calculate it
+			// keep the duration of the last sample, so we can use it if it's the last frame
+			sampleRec.durationPerSample = ncstr->lastSample.durationPerSample;
+			ncstr->lastSample = sampleRec;
+			ncstr->lastpts = pkt.pts;
+			
+		} else {
+			ncstr->lastSample.numberOfSamples = 0;
+			if (codec->codec_type == CODEC_TYPE_AUDIO && !ncstr->vbr)
+				sampleRec.durationPerSample = 1;
+			else
+				sampleRec.durationPerSample = pkt.duration * ncstr->base.num;
+			AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
+		}
+#if 0
+		if(codec->codec_type == CODEC_TYPE_VIDEO)
+		{
+			if(pkt.duration == 0)
+				sampleRec.durationPerSample = map->base.num;
+			else
+				sampleRec.durationPerSample = map->base.num * pkt.duration;
+			sampleRec.numberOfSamples = 1;
+		}
+		else if (codec->codec_type == CODEC_TYPE_AUDIO)
+		{
+			if(ncstr->vbr) {
+				if(codec->frame_size == ncstr->base.num) {
+					sampleRec.durationPerSample = codec->frame_size;
+					sampleRec.numberOfSamples = 1;
+				} else if (ncstr->asbd.mFormatID == kAudioFormatMPEG4AAC) {
+					/* AVI-mux GUI, the author of which created this hack in the first place,
+					* seems to special-case getting an AAC audio sample's duration this way */
+					sampleRec.durationPerSample = ic->streams[pkt.stream_index]->time_base.num;
+					sampleRec.numberOfSamples = 1;
+				} else {
+					/* This seems to work. Although I have no idea why.
+					* Perhaps the stream's timebase is adjusted to
+					* let that work. as the timebase has strange values...*/
+					sampleRec.durationPerSample = sampleRec.dataSize;
+					sampleRec.numberOfSamples = 1;
+				}
+			} else {
+				sampleRec.durationPerSample = 1;
+				sampleRec.numberOfSamples = (pkt.size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
+			}
+		}
+		err = AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
+#endif
+		//Need to do something like this when the libavformat doesn't give us a position
+		/*			Handle dataIn = NewHandle(pkt.size);
+		HLock(dataIn);
+		memcpy(*dataIn, pkt.data, pkt.size);
+		HUnlock(dataIn);
+		err = AddMediaSample(ncstr->media, dataIn, 0, pkt.size, 1, ncstr->sampleHdl, pkt.duration, sampleRec.sampleFlags, NULL);*/
+		av_free_packet(&pkt);
+	}
+	// import the last frames
+	for (i = 0; i < ic->nb_streams; i++) {
+		ncstr = &map[i];
+		if (ncstr->lastSample.numberOfSamples > 0)
+			AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &ncstr->lastSample, NULL);
+	}
+}

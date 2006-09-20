@@ -333,6 +333,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	Media media;
 	TimeRecord time;
 	int i;
+	short hadIndex = 0;
 	
 	/* make sure that in case of error, the flag movieImportResultComplete is not set */
 	*outFlags = 0;
@@ -416,7 +417,12 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	
 	/* Import the Data*/
 	/* FIXME: Implement the progress upp */
-	import_avi(ic, map, dataOffset);
+	/* note: flv builds a partial index that's unusable, so force importing without an index */
+	if (!(storage->componentType == 'FLV '))
+		hadIndex = import_avi(ic, map, dataOffset);
+	
+	if (!hadIndex)
+		import_without_index(ic, map, dataOffset);
 	
 	/* Insert the Medias into the Tracks */
 	result = noErr;
