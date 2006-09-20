@@ -63,8 +63,8 @@ typedef struct
 {
     pp_mode_t			*mode[PP_QUALITY_MAX+1];
     pp_context_t		*context;
-    short			goodness;
     short			level;
+	AVFrame			*destBuffer;
 } PostProcParamRecord;
 
 typedef struct
@@ -255,6 +255,13 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         {
             DisposeImageCodecMPDrawBandUPP(glob->drawBandUPP);
         }
+		
+		if (glob->postProcParams.destBuffer)
+		{
+			if (glob->postProcParams.destBuffer->data[0])
+				avcodec_default_release_buffer(glob->avContext, glob->postProcParams.destBuffer);
+			av_free(glob->postProcParams.destBuffer);
+		}
         
         if (glob->avCodec)
         {
@@ -607,35 +614,40 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     capabilities->extendHeight = 0;
     
     // Post-processing
-    
-    glob->postProcParams.context = pp_get_context((**p->imageDescription).width, (**p->imageDescription).height, PP_FORMAT_420);
-    
-    for (i=0; i<=PP_QUALITY_MAX; i++) 
-    {
-        
-        if (i <= 2) 
-        {
-            glob->postProcParams.mode[i] = pp_get_mode_by_name_and_quality("h1,v1,dr"/*"al:f"*/, i);
-        } 
-        else if (i <= 4) 
-        {
-            glob->postProcParams.mode[i] = pp_get_mode_by_name_and_quality("hb,vb,dr,"/*"al:f"*/, i);
-        } 
-        else 
-        {
-            glob->postProcParams.mode[i] = pp_get_mode_by_name_and_quality("hb,vb,dr,""hb:c,vb:c,dr:c,"/*"al:f"*/, i);
-        }
+	if (!glob->postProcParams.context)
+	{
+		// allocate a destination buffer so we don't mess with the decoded data
+		glob->postProcParams.destBuffer = avcodec_alloc_frame();
+		avcodec_default_get_buffer(glob->avContext, glob->postProcParams.destBuffer);
 		
-        if (glob->postProcParams.mode[i] == NULL) 
-        {
-            Codecprintf(glob->fileLog, "Error getting PP filter %d!\n", i);
-            
-            return -1;
-        }
+		glob->postProcParams.context = pp_get_context((**p->imageDescription).width, (**p->imageDescription).height, PP_FORMAT_420);
 		
-        glob->postProcParams.goodness = 0;
-        glob->postProcParams.level = 0;//GetPPUserPreference();
-    }
+		for (i=0; i<=PP_QUALITY_MAX; i++) 
+		{
+			
+			if (i <= 2) 
+			{
+				glob->postProcParams.mode[i] = pp_get_mode_by_name_and_quality("h1,v1,dr"/*"al:f"*/, i);
+			} 
+			else if (i <= 4) 
+			{
+				glob->postProcParams.mode[i] = pp_get_mode_by_name_and_quality("hb,vb,dr,"/*"al:f"*/, i);
+			} 
+			else 
+			{
+				glob->postProcParams.mode[i] = pp_get_mode_by_name_and_quality("hb,vb,dr,""hb:c,vb:c,dr:c,"/*"al:f"*/, i);
+			}
+			
+			if (glob->postProcParams.mode[i] == NULL) 
+			{
+				Codecprintf(glob->fileLog, "Error getting PP filter %d!\n", i);
+				
+				return -1;
+			}
+			
+			glob->postProcParams.level = 0;//GetPPUserPreference();
+		}
+	}
 	capabilities->flags |= codecCanAsync | codecCanAsyncWhen;
 	
     
@@ -903,8 +915,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 {
     OSErr err = noErr;
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
-    unsigned char *ppPage[3];
-    int ppStride[3];
+	AVFrame *ppDestPic = glob->postProcParams.destBuffer;
 	
 	if(!myDrp->decoded)
 		err = FFusionCodecDecodeBand(glob, drp, 0);
@@ -938,7 +949,21 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 		}
 	}
 	else
+	{
 		memcpy(&(glob->lastDisplayedFrame), picture, sizeof(AVFrame));
+		
+		// only do post processing if it's a new frame
+		if (glob->postProcParams.level > 0)
+		{
+			pp_postprocess(picture->data, picture->linesize, 
+						   ppDestPic->data, ppDestPic->linesize, 
+						   myDrp->width, myDrp->height, 
+						   picture->qscale_table, picture->qstride, 
+						   glob->postProcParams.mode[glob->postProcParams.level],
+						   glob->postProcParams.context, picture->pict_type);
+			picture = ppDestPic;
+		}
+	}
 	
 	if (myDrp->pixelFormat == 'y420' && glob->avContext->pix_fmt == PIX_FMT_YUV420P)
 	{
@@ -959,25 +984,6 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 					myDrp->pixelFormat >> 8 & 0xff, myDrp->pixelFormat & 0xff, myDrp->pixelFormat);
 	}
 	
-    if ((err == noErr) && (glob->postProcParams.level > 0))
-    {
-        ppPage[0] = picture->data[0];
-        ppPage[1] = picture->data[1];
-        ppPage[2] = picture->data[2];
-        ppStride[0] = picture->linesize[0];
-        ppStride[1] = picture->linesize[1];
-        ppStride[2] = picture->linesize[2];
-		
-        pp_postprocess(ppPage, ppStride,
-                       ppPage, ppStride,
-                       myDrp->width, myDrp->height,
-                       picture->qscale_table,
-                       picture->qstride,
-                       glob->postProcParams.mode[glob->postProcParams.level],
-                       glob->postProcParams.context,
-                       picture->pict_type);
-    }
-    
     return err;
 }
 
