@@ -60,7 +60,7 @@ diskimage:
 	@# make Perian disk image
 	mkdir -p $(PERIAN_DIR)/
 #.background
-#	cp $(ART_DIR)/dmgBackground.png $(PERIAN_DIR)/.background
+	cp $(ART_DIR)/periandmgbg.png $(PERIAN_DIR)/.background
 
 	./make-diskimage.sh $(BUILD_DIR)/$(RELEASE_NAME)_$(VERSION).dmg $(PERIAN_DIR) "Perian $(VERSION)" dmg_perian.scpt
 	
