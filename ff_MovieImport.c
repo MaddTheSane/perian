@@ -25,6 +25,7 @@
 #include "ff_private.h"
 #include "allformats.h"
 #include "Codecprintf.h"
+#include "riff.h"
 
 /* This one is a little big in ffmpeg and private anyway */
 #define PROBE_BUF_SIZE 64
@@ -236,6 +237,44 @@ bail:
 	return result;
 } /* FFAvi_MovieImportValidate() */
 
+// this function is a small avi parser to get the video track's fourcc as
+// fast as possible, so we can decide whether we can handle the necessary 
+// image description extensions for the format in ValidateDataRef() quickly
+OSType get_avi_strf_fourcc(ByteIOContext *pb)
+{
+	OSType tag, subtag;
+	unsigned int size;
+	
+	if (get_be32(pb) != 'RIFF')
+		return 0;
+	
+	// file size
+	get_le32(pb);
+	
+	if (get_be32(pb) != 'AVI ')
+		return 0;
+	
+	while (!url_feof(pb)) {
+		tag = get_be32(pb);
+		size = get_le32(pb);
+		
+		if (tag == 'LIST') {
+			subtag = get_be32(pb);
+			
+			// only lists we care about: hdrl & strl, so skip the rest
+			if (subtag != 'hdrl' && subtag != 'strl')
+				url_fskip(pb, size - 4 + (size & 1));
+			
+		} else if (tag == 'strf') {
+			// 16-byte offset to the fourcc
+			url_fskip(pb, 16);
+			return get_be32(pb);
+		} else
+			url_fskip(pb, size + (size & 1));
+	}
+	return 0;
+}
+
 ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle dataRef, OSType dataRefType, UInt8 *valid)
 {
 	ComponentResult result = noErr;
@@ -243,7 +282,6 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	uint8_t buf[PROBE_BUF_SIZE];
 	AVProbeData *pd = (AVProbeData *)malloc(sizeof(AVProbeData));
 	ByteIOContext byteContext;
-	AVFormatContext *ic = NULL;
 	AVFormatParameters params;
 	int success, i;
 
@@ -265,22 +303,19 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	if(storage->format != NULL) {
 		*valid = 255; /* This means we can read the data */
 		
-		/* Prepare the iocontext structure */
-		memset(&byteContext, 0, sizeof(byteContext));
-		result = url_open_dataref(&byteContext, dataRef, dataRefType);
-		require_noerr(result, bail);
-		
-		/* Open the Format Context */
-		memset(&params, 0, sizeof(params));
-		result = av_open_input_stream(&ic, &byteContext, "", storage->format, &params);
-		require_noerr(result,bail);
-		
-		for (i = 0; i < ic->nb_streams; i++) {
-			if (ic->streams[i]->codec->codec_id == CODEC_ID_MJPEG || 
-				ic->streams[i]->codec->codec_id == CODEC_ID_MJPEGB || 
-				ic->streams[i]->codec->codec_id == CODEC_ID_DVVIDEO)
-				/* but we don't do MJPEG's Huffman tables right yet, and DV video seems to have 
-				  an aspect ratio coded in the bitstream that ffmpeg doesn't read */
+		/* we don't do MJPEG's Huffman tables right yet, and DV video seems to have 
+		an aspect ratio coded in the bitstream that ffmpeg doesn't read, so let Apple's 
+		AVI importer handle AVIs with these two video types */
+		if (IS_AVI(storage->componentType)) {
+			/* Prepare the iocontext structure */
+			memset(&byteContext, 0, sizeof(byteContext));
+			result = url_open_dataref(&byteContext, dataRef, dataRefType);
+			require_noerr(result, bail);
+			
+			OSType fourcc = get_avi_strf_fourcc(&byteContext);
+			
+			if (codec_get_bmp_id(BSWAP(fourcc)) == CODEC_ID_MJPEG || 
+				codec_get_bmp_id(BSWAP(fourcc)) == CODEC_ID_DVVIDEO)
 				*valid = 0;
 		}
 	}
@@ -288,8 +323,6 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 bail:
 		if(dataHandler)
 			CloseComponent(dataHandler);
-	if(ic)
-		av_close_input_file(ic);
 	free(pd);
 	
 	return result;
@@ -362,7 +395,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	/* Seek backwards to get a manually read packet for file offset */
 	if(ic->streams[0]->index_entries == NULL)
 	{
-		if (storage->componentType == 'AVI ' || storage->componentType == 'VfW ' || storage->componentType == 'VFW ')
+		if (IS_AVI(storage->componentType))
 			//Try to seek to the first frame; don't care if it fails
 			// Is this really needed for AVIs w/out an index? It seems to work fine without, 
 			// and it seems that with it the first frame is skipped.
