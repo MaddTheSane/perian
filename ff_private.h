@@ -36,6 +36,7 @@ struct _NCStream {
 	UInt32 vbr;
 	AVRational base;
 	int64_t lastpts;
+	int idxEntry;
 	SampleReference64Record lastSample;
 };
 typedef struct _NCStream NCStream;
@@ -67,5 +68,8 @@ uint8_t *write_int32(uint8_t *target, int32_t data);
 uint8_t *write_int16(uint8_t *target, int16_t data);
 uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size);
 
+#define BSWAP(a) ( (((a)&0xff) << 24) | (((a)&0xff00) << 8) | (((a)&0xff0000) >> 8) | (((a) >> 24) & 0xff) )
+
+#define IS_AVI(x) (x == 'AVI ' || x == 'VfW ' || x == 'VFW ')
 
 #endif

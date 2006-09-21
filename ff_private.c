@@ -27,8 +27,6 @@
 #include <CoreServices/CoreServices.h>
 #include <AudioToolbox/AudioToolbox.h>
 
-#define BSWAP(a) ( (((a)&0xff) << 24) | (((a)&0xff00) << 8) | (((a)&0xff0000) >> 8) | (((a) >> 24) & 0xff) )
-
 /* This routine checks if the system requirements are fullfilled */
 ComponentResult check_system()
 {
@@ -529,7 +527,7 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
  * beginning of the file. It returns whether it was successful or not (i.e. whether the file had an index) */
 short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 {
-	int j, k, l;
+	int j, k, l, nextFrame;
 	NCStream *ncstr;
 	AVStream *stream;
 	AVCodecContext *codec;
