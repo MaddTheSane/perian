@@ -527,7 +527,7 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
  * beginning of the file. It returns whether it was successful or not (i.e. whether the file had an index) */
 short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 {
-	int j, k, l, nextFrame;
+	int j, k, l;
 	NCStream *ncstr;
 	AVStream *stream;
 	AVCodecContext *codec;
