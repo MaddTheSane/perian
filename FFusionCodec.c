@@ -258,8 +258,6 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
 		
 		if (glob->postProcParams.destBuffer)
 		{
-			if (glob->postProcParams.destBuffer->data[0])
-				avcodec_default_release_buffer(glob->avContext, glob->postProcParams.destBuffer);
 			av_free(glob->postProcParams.destBuffer);
 		}
         
