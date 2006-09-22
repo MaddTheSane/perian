@@ -592,11 +592,12 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 				
 				/* FIXME: check if that's really the right thing to do here */
 				if(ncstr->vbr) {
-					if(codec->frame_size == ncstr->base.num || codec->frame_size == 0) {
+					if(codec->frame_size == ncstr->base.num || (codec->frame_size == 0 && ncstr->base.num > 1)) {
 						/* frame_size is set to zero for AAC and some MP3 tracks and it works this way */
 						sampleRec.durationPerSample = ncstr->base.num;
 						sampleRec.numberOfSamples = 1;
 					} else {
+						/* this logic seems to be needed even iff ncstr->base.num == 1, but I'm not entirely sure */
 						/* This seems to work. Although I have no idea why.
 						* Perhaps the stream's timebase is adjusted to
 						* let that work. as the timebase has strange values...*/
