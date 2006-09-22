@@ -23,7 +23,7 @@
 #ifndef __FF_MOVIEIMPORTVERSION__
 #define __FF_MOVIEIMPORTVERSION__
 
-#define kFFAviComponentVersion 0x00000001
+#define kFFAviComponentVersion 0x00010001
 
 #define kChristophManufacturer 'Rafz'
 
