@@ -4,6 +4,7 @@ SRC_DIR=..
 BUILD_DIR=build
 RELEASE_NAME=Perian
 PERIAN_DIR=$(BUILD_DIR)/Perian
+ARTWORK_DIR=Artwork
 
 ifeq ($(BETA),TRUE)
     BUILDSTYLE=Development
@@ -58,6 +59,7 @@ endif
 diskimage:
 	rm "$(BUILD_DIR)/$(RELEASE_NAME).dmg" || true
 	@# make Perian disk image
+	mkdir -p $(ADIUM_DIR)/.background
 	mkdir -p $(PERIAN_DIR)/
 #.background
 	cp $(ART_DIR)/periandmgbg.png $(PERIAN_DIR)/.background
