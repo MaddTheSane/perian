@@ -118,6 +118,30 @@ resource 'thga' (514) {
 	cmpAliasOnlyThisFile
 };
 
+resource 'thga' (515) {
+	'eat ',					// Type
+	'DIVX',					// SubType
+	kChristophManufacturer,	// Manufacturer
+	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
+	0,
+	0,
+	0,
+	'STR ',						// Name Type
+	kAVIthngResID,						// Name ID
+	0,							// Info Type
+	0,							// Info ID
+	0,							// Icon Type
+	0,							// Icon ID
+								// TARGET COMPONENT ---------------
+	'eat ',						// Type
+	'VfW ',						// SubType
+	kChristophManufacturer,		// Manufaturer
+	0,							// Component Flags
+	0,							// Component Flags Mask
+	'thnr', kAVIthngResID,				// Component public resource identifier
+	cmpAliasOnlyThisFile
+};
+
 /* Perhaps in a later version, we have to use "QuickTime Media Configuration Resources" */
 resource 'thnr' (kAVIthngResID) {
 {
