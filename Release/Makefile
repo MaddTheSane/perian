@@ -1,9 +1,10 @@
-VERSION=0.1
+VERSION=0.5
 BETA=FALSE
 SRC_DIR=..
 BUILD_DIR=build
 RELEASE_NAME=Perian
-ADIUM_DIR=$(BUILD_DIR)/Perian
+PERIAN_DIR=$(BUILD_DIR)/Perian
+ART_DIR=Artwork
 
 ifeq ($(BETA),TRUE)
     BUILDSTYLE=Development
@@ -12,33 +13,39 @@ else
 endif
 
 ifeq ($(strip $(PRODUCT_DIR)),)
-	ADIUM_BUILD_DIR=$(SRC_DIR)/build/$(BUILDSTYLE)
+	PERIAN_BUILD_DIR=$(SRC_DIR)/build/$(BUILDSTYLE)
 else
 	TARGET_BUILD_DIR=$(PRODUCT_DIR)/$(BUILDSTYLE)
-	ADIUM_BUILD_DIR=$(TARGET_BUILD_DIR)
+	PERIAN_BUILD_DIR=$(TARGET_BUILD_DIR)
 endif
 
-release: createfolder diskimage
+
+BUILDFLAGS="BUILDCONFIGURATION=$(BUILDSTYLE)"
+
+release: compile createfolder diskimage
+
+compile:
+	$(MAKE) $(BUILDFLAGS) -C $(SRC_DIR)
 
 createfolder:
 	@# clean build directory
 	rm -rf $(BUILD_DIR)
 	mkdir $(BUILD_DIR)
 
-	mkdir $(ADIUM_DIR)
+	mkdir $(PERIAN_DIR)
 	
 	@# copy the app
-	cp -R $(ADIUM_BUILD_DIR)/Perian.component $(ADIUM_DIR)
-	strip -s $(SRC_DIR)/exportedSymbols -u $(ADIUM_DIR)/Perian.component/Contents/MacOS/Perian
+	cp -R $(PERIAN_BUILD_DIR)/Perian.component $(PERIAN_DIR)
+	strip -s $(SRC_DIR)/exportedSymbols -u $(PERIAN_DIR)/Perian.component/Contents/MacOS/Perian
 
 	@# copy the text files
-#	cp $(SRC_DIR)/Changes.txt $(ADIUM_DIR)
-#	cp $(SRC_DIR)/License.txt $(ADIUM_DIR)
-	cp $(SRC_DIR)/Release/Read\ Me.txt $(ADIUM_DIR)
-	cp $(SRC_DIR)/Release/License.txt $(ADIUM_DIR)
+#	cp $(SRC_DIR)/Changes.txt $(PERIAN_DIR)
+#	cp $(SRC_DIR)/License.txt $(PERIAN_DIR)
+	cp $(SRC_DIR)/Release/Read\ Me.rtf $(PERIAN_DIR)
+	cp $(SRC_DIR)/Release/License.txt $(PERIAN_DIR)
 	
 	@# symlink /Library/QuickTime
-	ln -s /Library/QuickTime $(ADIUM_DIR)/QuickTime
+	ln -s /Library/QuickTime $(PERIAN_DIR)/QuickTime
 
 	@# delete svn  and backup files
 	find $(BUILD_DIR) -name ".svn" -type d -exec rm -rf {} \; -prune
@@ -51,11 +58,11 @@ endif
 
 diskimage:
 	rm "$(BUILD_DIR)/$(RELEASE_NAME).dmg" || true
-	@# make Adium disk image
-	mkdir -p $(ADIUM_DIR)/
+	@# make Perian disk image
+	mkdir -p $(PERIAN_DIR)/.background
 #.background
-#	cp $(ART_DIR)/dmgBackground.png $(ADIUM_DIR)/.background
+	cp $(ART_DIR)/periandmgbg.png $(PERIAN_DIR)/.background
 
-	./make-diskimage.sh $(BUILD_DIR)/$(RELEASE_NAME)_$(VERSION).dmg $(ADIUM_DIR) "Perian $(VERSION)" dmg_adium.scpt
+	./make-diskimage.sh $(BUILD_DIR)/$(RELEASE_NAME)_$(VERSION).dmg $(PERIAN_DIR) "Perian $(VERSION)" dmg_perian.scpt
 	
 	@echo Build finished
