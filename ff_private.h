@@ -36,7 +36,6 @@ struct _NCStream {
 	UInt32 vbr;
 	AVRational base;
 	int64_t lastpts;
-	int idxEntry;
 	SampleReference64Record lastSample;
 };
 typedef struct _NCStream NCStream;
