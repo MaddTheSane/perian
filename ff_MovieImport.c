@@ -395,7 +395,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		goto bail;
 	
 	/* Seek backwards to get a manually read packet for file offset */
-	if(ic->streams[0]->index_entries == NULL)
+	if(ic->streams[0]->index_entries == NULL || storage->componentType == 'FLV ')
 	{
 		if (IS_AVI(storage->componentType))
 			//Try to seek to the first frame; don't care if it fails
