@@ -78,7 +78,7 @@
 
 #include "MatroskaImportVersion.h"
 
-#define kMkvImportResource	512
+#define kMkvImportResource	510
 
 // These flags specify information about the capabilities of the component
 // Can import from files

@@ -155,8 +155,6 @@ pascal ComponentResult MatroskaImportDataRef(MatroskaImportGlobals store, Handle
 											  TimeValue atTime, TimeValue *durationAdded,
 											  long inFlags, long *outFlags)
 {
-#pragma unused(store,targetTrack)
-
 	OSErr err = noErr;
 
 	*outFlags = 0;
@@ -225,8 +223,6 @@ pascal ComponentResult MatroskaImportValidateDataRef(MatroskaImportGlobals store
                                                      Handle dataRef, 
                                                      OSType dataRefType, UInt8 *valid)
 {
-#pragma unused(store)
-
 	OSErr err = noErr;
 	
 	store->dataRef = dataRef;

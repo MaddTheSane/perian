@@ -366,7 +366,7 @@ ComponentResult WriteFrame(MatroskaExportGlobals glob)
 	DataBuffer data((binary *)glob->sampleBuffer, sampleDataSize);
 	
 	// TODO: import with references to correct frames
-	glob->currentCluster->AddFrame(*glob->outputTracks->at(trackNum).kaxTrack, 
+	//glob->currentCluster->AddFrame(*glob->outputTracks->at(trackNum).kaxTrack, 
 								   
 	
 	return err;

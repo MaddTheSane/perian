@@ -234,13 +234,19 @@ EbmlElement *GetLevelOneElement(EbmlStream &aStream, const EbmlCallbacks &callba
 	return NULL;
 }
 
-void ImportCluster(KaxCluster *cluster, MkvSegment &segment, bool addMediaToTrack, 
-				   TimeValue *maxLoadedTime) {
+void ImportCluster(EbmlStream &aStream, KaxCluster *cluster, MkvSegment &segment, 
+                   bool addMediaToTrack, TimeValue *maxLoadedTime) {
 	KaxClusterTimecode *clusterTime = FindChild<KaxClusterTimecode>(*cluster);
 	cluster->InitTimecode(uint64(*clusterTime), segment.timecodeScale);
 	
 	KaxBlockGroup *blkGroup = FindChild<KaxBlockGroup>(*cluster);
 	while (blkGroup && blkGroup->GetSize() > 0) {
+		int upperLevel = 0;
+		EbmlElement *el_l3;
+		
+		// TODO: since we have to read the blockgroup here anyway, don't read the entire file at once
+		blkGroup->Read(aStream, KaxBlockGroup::ClassInfos.Context, upperLevel, el_l3, true);
+		
 		KaxBlock *block = FindChild<KaxBlock>(*blkGroup);
 		block->SetParent(*cluster);
 		
@@ -281,6 +287,7 @@ void ImportCluster(KaxCluster *cluster, MkvSegment &segment, bool addMediaToTrac
 			// not reading the block makes for faster parsing, but also doesn't set the correct
 			// data start position if the block's laced. Adjust for that here (this seems to work
 			// for all 3 lacing types, though I'm not 100% sure why)
+#if 0
 			short offset = 0;
 			switch (block->GetLacingType()) {
 				case LACING_XIPH:
@@ -291,8 +298,9 @@ void ImportCluster(KaxCluster *cluster, MkvSegment &segment, bool addMediaToTrac
 					offset = 1;
 					break;
 			}
+#endif
 			for (int j = 0; j < lastBlock->numFrames; j++) {
-				lastBlock->dataOffset.push_back(block->GetDataPosition(j) + offset);
+				lastBlock->dataOffset.push_back(block->GetDataPosition(j) /*+ offset*/);
 				lastBlock->dataSize.push_back(block->GetFrameSize(j));
 			}
 			
@@ -332,7 +340,7 @@ ComponentResult ImportMkvIdle(MatroskaImportGlobals globals, long *outFlags, int
 		cluster->Read(*priv->aStream, KaxCluster::ClassInfos.Context, upperLevel, 
 					  el_l1, true, SCOPE_PARTIAL_DATA);
 		cluster->SetParent(*priv->segments[i].segment);
-		ImportCluster(cluster, priv->segments[i], true, &globals->maxLoadedTime);
+		ImportCluster(*priv->aStream, cluster, priv->segments[i], true, &globals->maxLoadedTime);
 		
 	} else {
 #if 0
@@ -505,7 +513,7 @@ ComponentResult ImportMkvRef(MatroskaImportGlobals globals)
 			KaxCluster *cluster = FindChild<KaxCluster>(*segment);
 			cluster->SetParent(*segment);
 			while (cluster && cluster->GetSize() > 0) {
-				ImportCluster(cluster, priv->segments[i], false, &globals->maxLoadedTime);
+				ImportCluster(*priv->aStream, cluster, priv->segments[i], false, &globals->maxLoadedTime);
 				cluster = FindNextChild<KaxCluster>(*segment, *cluster);
 				cluster->SetParent(*segment);
 			}

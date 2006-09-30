@@ -51,6 +51,111 @@
 		11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */; };
 		11C85FE60A64314500DF3D73 /* FFusionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = F560DF0203D622D001ABA332 /* FFusionCodec.r */; };
 		11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */; };
+		61CB11200ACDF3A2007994BD /* Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11070ACDF3A2007994BD /* Debug.h */; };
+		61CB11210ACDF3A2007994BD /* EbmlBinary.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11080ACDF3A2007994BD /* EbmlBinary.h */; };
+		61CB11220ACDF3A2007994BD /* EbmlConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11090ACDF3A2007994BD /* EbmlConfig.h */; };
+		61CB11230ACDF3A2007994BD /* EbmlContexts.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB110A0ACDF3A2007994BD /* EbmlContexts.h */; };
+		61CB11240ACDF3A2007994BD /* EbmlCrc32.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB110B0ACDF3A2007994BD /* EbmlCrc32.h */; };
+		61CB11250ACDF3A2007994BD /* EbmlDate.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB110C0ACDF3A2007994BD /* EbmlDate.h */; };
+		61CB11260ACDF3A2007994BD /* EbmlDummy.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB110D0ACDF3A2007994BD /* EbmlDummy.h */; };
+		61CB11270ACDF3A2007994BD /* EbmlElement.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB110E0ACDF3A2007994BD /* EbmlElement.h */; };
+		61CB11280ACDF3A2007994BD /* EbmlEndian.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB110F0ACDF3A2007994BD /* EbmlEndian.h */; };
+		61CB11290ACDF3A2007994BD /* EbmlFloat.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11100ACDF3A2007994BD /* EbmlFloat.h */; };
+		61CB112A0ACDF3A2007994BD /* EbmlHead.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11110ACDF3A2007994BD /* EbmlHead.h */; };
+		61CB112B0ACDF3A2007994BD /* EbmlId.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11120ACDF3A2007994BD /* EbmlId.h */; };
+		61CB112C0ACDF3A2007994BD /* EbmlMaster.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11130ACDF3A2007994BD /* EbmlMaster.h */; };
+		61CB112D0ACDF3A2007994BD /* EbmlSInteger.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11140ACDF3A2007994BD /* EbmlSInteger.h */; };
+		61CB112E0ACDF3A2007994BD /* EbmlStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11150ACDF3A2007994BD /* EbmlStream.h */; };
+		61CB112F0ACDF3A2007994BD /* EbmlString.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11160ACDF3A2007994BD /* EbmlString.h */; };
+		61CB11300ACDF3A2007994BD /* EbmlSubHead.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11170ACDF3A2007994BD /* EbmlSubHead.h */; };
+		61CB11310ACDF3A2007994BD /* EbmlTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11180ACDF3A2007994BD /* EbmlTypes.h */; };
+		61CB11320ACDF3A2007994BD /* EbmlUInteger.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11190ACDF3A2007994BD /* EbmlUInteger.h */; };
+		61CB11330ACDF3A2007994BD /* EbmlUnicodeString.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB111A0ACDF3A2007994BD /* EbmlUnicodeString.h */; };
+		61CB11340ACDF3A2007994BD /* EbmlVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB111B0ACDF3A2007994BD /* EbmlVersion.h */; };
+		61CB11350ACDF3A2007994BD /* EbmlVoid.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB111C0ACDF3A2007994BD /* EbmlVoid.h */; };
+		61CB11360ACDF3A2007994BD /* IOCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB111D0ACDF3A2007994BD /* IOCallback.h */; };
+		61CB11370ACDF3A2007994BD /* MemIOCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB111E0ACDF3A2007994BD /* MemIOCallback.h */; };
+		61CB11380ACDF3A2007994BD /* StdIOCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB111F0ACDF3A2007994BD /* StdIOCallback.h */; };
+		61CB114E0ACDF3C2007994BD /* Debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11390ACDF3C2007994BD /* Debug.cpp */; };
+		61CB114F0ACDF3C2007994BD /* EbmlBinary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB113A0ACDF3C2007994BD /* EbmlBinary.cpp */; };
+		61CB11500ACDF3C2007994BD /* EbmlContexts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB113B0ACDF3C2007994BD /* EbmlContexts.cpp */; };
+		61CB11510ACDF3C2007994BD /* EbmlCrc32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB113C0ACDF3C2007994BD /* EbmlCrc32.cpp */; };
+		61CB11520ACDF3C2007994BD /* EbmlDate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB113D0ACDF3C2007994BD /* EbmlDate.cpp */; };
+		61CB11530ACDF3C2007994BD /* EbmlDummy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB113E0ACDF3C2007994BD /* EbmlDummy.cpp */; };
+		61CB11540ACDF3C2007994BD /* EbmlElement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB113F0ACDF3C2007994BD /* EbmlElement.cpp */; };
+		61CB11550ACDF3C2007994BD /* EbmlFloat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11400ACDF3C2007994BD /* EbmlFloat.cpp */; };
+		61CB11560ACDF3C2007994BD /* EbmlHead.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11410ACDF3C2007994BD /* EbmlHead.cpp */; };
+		61CB11570ACDF3C2007994BD /* EbmlMaster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11420ACDF3C2007994BD /* EbmlMaster.cpp */; };
+		61CB11580ACDF3C2007994BD /* EbmlSInteger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11430ACDF3C2007994BD /* EbmlSInteger.cpp */; };
+		61CB11590ACDF3C2007994BD /* EbmlStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11440ACDF3C2007994BD /* EbmlStream.cpp */; };
+		61CB115A0ACDF3C2007994BD /* EbmlString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11450ACDF3C2007994BD /* EbmlString.cpp */; };
+		61CB115B0ACDF3C2007994BD /* EbmlSubHead.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11460ACDF3C2007994BD /* EbmlSubHead.cpp */; };
+		61CB115C0ACDF3C2007994BD /* EbmlUInteger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11470ACDF3C2007994BD /* EbmlUInteger.cpp */; };
+		61CB115D0ACDF3C2007994BD /* EbmlUnicodeString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11480ACDF3C2007994BD /* EbmlUnicodeString.cpp */; };
+		61CB115E0ACDF3C2007994BD /* EbmlVersion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11490ACDF3C2007994BD /* EbmlVersion.cpp */; };
+		61CB115F0ACDF3C2007994BD /* EbmlVoid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB114A0ACDF3C2007994BD /* EbmlVoid.cpp */; };
+		61CB11600ACDF3C2007994BD /* IOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB114B0ACDF3C2007994BD /* IOCallback.cpp */; };
+		61CB11610ACDF3C2007994BD /* MemIOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB114C0ACDF3C2007994BD /* MemIOCallback.cpp */; };
+		61CB11620ACDF3C2007994BD /* StdIOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB114D0ACDF3C2007994BD /* StdIOCallback.cpp */; };
+		61CB116F0ACDF40C007994BD /* libebml_t.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB116E0ACDF40C007994BD /* libebml_t.h */; };
+		61CB11960ACDF4FF007994BD /* FileKax.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB117C0ACDF4FF007994BD /* FileKax.h */; };
+		61CB11970ACDF4FF007994BD /* KaxAttached.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB117D0ACDF4FF007994BD /* KaxAttached.h */; };
+		61CB11980ACDF4FF007994BD /* KaxAttachments.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB117E0ACDF4FF007994BD /* KaxAttachments.h */; };
+		61CB11990ACDF4FF007994BD /* KaxBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB117F0ACDF4FF007994BD /* KaxBlock.h */; };
+		61CB119A0ACDF4FF007994BD /* KaxBlockData.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11800ACDF4FF007994BD /* KaxBlockData.h */; };
+		61CB119B0ACDF4FF007994BD /* KaxChapters.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11810ACDF4FF007994BD /* KaxChapters.h */; };
+		61CB119C0ACDF4FF007994BD /* KaxCluster.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11820ACDF4FF007994BD /* KaxCluster.h */; };
+		61CB119D0ACDF4FF007994BD /* KaxClusterData.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11830ACDF4FF007994BD /* KaxClusterData.h */; };
+		61CB119E0ACDF4FF007994BD /* KaxConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11840ACDF4FF007994BD /* KaxConfig.h */; };
+		61CB119F0ACDF4FF007994BD /* KaxContentEncoding.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11850ACDF4FF007994BD /* KaxContentEncoding.h */; };
+		61CB11A00ACDF4FF007994BD /* KaxContexts.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11860ACDF4FF007994BD /* KaxContexts.h */; };
+		61CB11A10ACDF4FF007994BD /* KaxCues.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11870ACDF4FF007994BD /* KaxCues.h */; };
+		61CB11A20ACDF4FF007994BD /* KaxCuesData.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11880ACDF4FF007994BD /* KaxCuesData.h */; };
+		61CB11A30ACDF4FF007994BD /* KaxInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11890ACDF4FF007994BD /* KaxInfo.h */; };
+		61CB11A40ACDF4FF007994BD /* KaxInfoData.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118A0ACDF4FF007994BD /* KaxInfoData.h */; };
+		61CB11A50ACDF4FF007994BD /* KaxSeekHead.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118B0ACDF4FF007994BD /* KaxSeekHead.h */; };
+		61CB11A60ACDF4FF007994BD /* KaxSegment.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118C0ACDF4FF007994BD /* KaxSegment.h */; };
+		61CB11A70ACDF4FF007994BD /* KaxTag.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118D0ACDF4FF007994BD /* KaxTag.h */; };
+		61CB11A80ACDF4FF007994BD /* KaxTagMulti.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118E0ACDF4FF007994BD /* KaxTagMulti.h */; };
+		61CB11A90ACDF4FF007994BD /* KaxTags.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118F0ACDF4FF007994BD /* KaxTags.h */; };
+		61CB11AA0ACDF4FF007994BD /* KaxTrackAudio.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11900ACDF4FF007994BD /* KaxTrackAudio.h */; };
+		61CB11AB0ACDF4FF007994BD /* KaxTrackEntryData.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11910ACDF4FF007994BD /* KaxTrackEntryData.h */; };
+		61CB11AC0ACDF4FF007994BD /* KaxTracks.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11920ACDF4FF007994BD /* KaxTracks.h */; };
+		61CB11AD0ACDF4FF007994BD /* KaxTrackVideo.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11930ACDF4FF007994BD /* KaxTrackVideo.h */; };
+		61CB11AE0ACDF4FF007994BD /* KaxTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11940ACDF4FF007994BD /* KaxTypes.h */; };
+		61CB11AF0ACDF4FF007994BD /* KaxVersion.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11950ACDF4FF007994BD /* KaxVersion.h */; };
+		61CB11CC0ACDF50F007994BD /* FileKax.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11B40ACDF50F007994BD /* FileKax.cpp */; };
+		61CB11CD0ACDF50F007994BD /* KaxAttached.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11B50ACDF50F007994BD /* KaxAttached.cpp */; };
+		61CB11CE0ACDF50F007994BD /* KaxAttachments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11B60ACDF50F007994BD /* KaxAttachments.cpp */; };
+		61CB11CF0ACDF50F007994BD /* KaxBlock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11B70ACDF50F007994BD /* KaxBlock.cpp */; };
+		61CB11D00ACDF50F007994BD /* KaxBlockData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11B80ACDF50F007994BD /* KaxBlockData.cpp */; };
+		61CB11D10ACDF50F007994BD /* KaxChapters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11B90ACDF50F007994BD /* KaxChapters.cpp */; };
+		61CB11D20ACDF50F007994BD /* KaxCluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BA0ACDF50F007994BD /* KaxCluster.cpp */; };
+		61CB11D30ACDF50F007994BD /* KaxClusterData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BB0ACDF50F007994BD /* KaxClusterData.cpp */; };
+		61CB11D40ACDF50F007994BD /* KaxContentEncoding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BC0ACDF50F007994BD /* KaxContentEncoding.cpp */; };
+		61CB11D50ACDF50F007994BD /* KaxContexts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BD0ACDF50F007994BD /* KaxContexts.cpp */; };
+		61CB11D60ACDF50F007994BD /* KaxCues.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BE0ACDF50F007994BD /* KaxCues.cpp */; };
+		61CB11D70ACDF50F007994BD /* KaxCuesData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BF0ACDF50F007994BD /* KaxCuesData.cpp */; };
+		61CB11D80ACDF50F007994BD /* KaxInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C00ACDF50F007994BD /* KaxInfo.cpp */; };
+		61CB11D90ACDF50F007994BD /* KaxInfoData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C10ACDF50F007994BD /* KaxInfoData.cpp */; };
+		61CB11DA0ACDF50F007994BD /* KaxSeekHead.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C20ACDF50F007994BD /* KaxSeekHead.cpp */; };
+		61CB11DB0ACDF50F007994BD /* KaxSegment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C30ACDF50F007994BD /* KaxSegment.cpp */; };
+		61CB11DC0ACDF50F007994BD /* KaxTag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C40ACDF50F007994BD /* KaxTag.cpp */; };
+		61CB11DD0ACDF50F007994BD /* KaxTagMulti.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C50ACDF50F007994BD /* KaxTagMulti.cpp */; };
+		61CB11DE0ACDF50F007994BD /* KaxTags.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C60ACDF50F007994BD /* KaxTags.cpp */; };
+		61CB11DF0ACDF50F007994BD /* KaxTrackAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C70ACDF50F007994BD /* KaxTrackAudio.cpp */; };
+		61CB11E00ACDF50F007994BD /* KaxTrackEntryData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C80ACDF50F007994BD /* KaxTrackEntryData.cpp */; };
+		61CB11E10ACDF50F007994BD /* KaxTracks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C90ACDF50F007994BD /* KaxTracks.cpp */; };
+		61CB11E20ACDF50F007994BD /* KaxTrackVideo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11CA0ACDF50F007994BD /* KaxTrackVideo.cpp */; };
+		61CB11E30ACDF50F007994BD /* KaxVersion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11CB0ACDF50F007994BD /* KaxVersion.cpp */; };
+		61CB11F30ACE0F6D007994BD /* libebml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CB10FF0ACDF350007994BD /* libebml.a */; };
+		61CB11F40ACE0F73007994BD /* libmatroska.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CB11770ACDF4D8007994BD /* libmatroska.a */; };
+		61CB12090ACE0F85007994BD /* MatroskaImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D691570AC8E382000EFC7D /* MatroskaImport.c */; };
+		61CB120A0ACE0F86007994BD /* MkvImportPrivate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D6915E0AC8E382000EFC7D /* MkvImportPrivate.cpp */; };
+		61CB120B0ACE0F87007994BD /* MkvMovieSetup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D691600AC8E382000EFC7D /* MkvMovieSetup.cpp */; };
+		61CB120C0ACE0F8A007994BD /* DataHandlerCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D6914E0AC8E382000EFC7D /* DataHandlerCallback.cpp */; };
+		61CB120D0ACE0F8D007994BD /* MatroskaCodecIDs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D691500AC8E382000EFC7D /* MatroskaCodecIDs.cpp */; };
+		61CB12260ACE1074007994BD /* MatroskaImport.r in Rez */ = {isa = PBXBuildFile; fileRef = 61D691590AC8E382000EFC7D /* MatroskaImport.r */; };
 		8F483B550A642644002CCA73 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B540A642644002CCA73 /* libavformat.a */; };
 		8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */; };
 		8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */ = {isa = PBXBuildFile; fileRef = 8F483B8B0A642886002CCA73 /* PerianAviImporter.r */; };
@@ -64,6 +169,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 11BA39A80A61E450008AF206;
 			remoteInfo = "ffmpeg Static Libraries";
+		};
+		61CB120F0ACE0FB1007994BD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 61CB10FE0ACDF350007994BD /* ebml */;
+			remoteInfo = ebml;
+		};
+		61CB12110ACE0FB1007994BD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 61CB11760ACDF4D8007994BD /* matroska */;
+			remoteInfo = matroska;
 		};
 		F59E09EB0A670E420019A3F0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -109,6 +228,105 @@
 		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = build/Universal/libavcodec.a; sourceTree = "<group>"; };
 		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = build/Universal/libavutil.a; sourceTree = "<group>"; };
 		11D4EFA30A3CE8C10066D45F /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpostproc.a; path = build/Universal/libpostproc.a; sourceTree = "<group>"; };
+		61CB10FF0ACDF350007994BD /* libebml.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libebml.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		61CB11070ACDF3A2007994BD /* Debug.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Debug.h; path = libebml/ebml/Debug.h; sourceTree = "<group>"; };
+		61CB11080ACDF3A2007994BD /* EbmlBinary.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlBinary.h; path = libebml/ebml/EbmlBinary.h; sourceTree = "<group>"; };
+		61CB11090ACDF3A2007994BD /* EbmlConfig.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlConfig.h; path = libebml/ebml/EbmlConfig.h; sourceTree = "<group>"; };
+		61CB110A0ACDF3A2007994BD /* EbmlContexts.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlContexts.h; path = libebml/ebml/EbmlContexts.h; sourceTree = "<group>"; };
+		61CB110B0ACDF3A2007994BD /* EbmlCrc32.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlCrc32.h; path = libebml/ebml/EbmlCrc32.h; sourceTree = "<group>"; };
+		61CB110C0ACDF3A2007994BD /* EbmlDate.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlDate.h; path = libebml/ebml/EbmlDate.h; sourceTree = "<group>"; };
+		61CB110D0ACDF3A2007994BD /* EbmlDummy.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlDummy.h; path = libebml/ebml/EbmlDummy.h; sourceTree = "<group>"; };
+		61CB110E0ACDF3A2007994BD /* EbmlElement.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlElement.h; path = libebml/ebml/EbmlElement.h; sourceTree = "<group>"; };
+		61CB110F0ACDF3A2007994BD /* EbmlEndian.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlEndian.h; path = libebml/ebml/EbmlEndian.h; sourceTree = "<group>"; };
+		61CB11100ACDF3A2007994BD /* EbmlFloat.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlFloat.h; path = libebml/ebml/EbmlFloat.h; sourceTree = "<group>"; };
+		61CB11110ACDF3A2007994BD /* EbmlHead.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlHead.h; path = libebml/ebml/EbmlHead.h; sourceTree = "<group>"; };
+		61CB11120ACDF3A2007994BD /* EbmlId.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlId.h; path = libebml/ebml/EbmlId.h; sourceTree = "<group>"; };
+		61CB11130ACDF3A2007994BD /* EbmlMaster.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlMaster.h; path = libebml/ebml/EbmlMaster.h; sourceTree = "<group>"; };
+		61CB11140ACDF3A2007994BD /* EbmlSInteger.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlSInteger.h; path = libebml/ebml/EbmlSInteger.h; sourceTree = "<group>"; };
+		61CB11150ACDF3A2007994BD /* EbmlStream.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlStream.h; path = libebml/ebml/EbmlStream.h; sourceTree = "<group>"; };
+		61CB11160ACDF3A2007994BD /* EbmlString.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlString.h; path = libebml/ebml/EbmlString.h; sourceTree = "<group>"; };
+		61CB11170ACDF3A2007994BD /* EbmlSubHead.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlSubHead.h; path = libebml/ebml/EbmlSubHead.h; sourceTree = "<group>"; };
+		61CB11180ACDF3A2007994BD /* EbmlTypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlTypes.h; path = libebml/ebml/EbmlTypes.h; sourceTree = "<group>"; };
+		61CB11190ACDF3A2007994BD /* EbmlUInteger.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlUInteger.h; path = libebml/ebml/EbmlUInteger.h; sourceTree = "<group>"; };
+		61CB111A0ACDF3A2007994BD /* EbmlUnicodeString.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlUnicodeString.h; path = libebml/ebml/EbmlUnicodeString.h; sourceTree = "<group>"; };
+		61CB111B0ACDF3A2007994BD /* EbmlVersion.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlVersion.h; path = libebml/ebml/EbmlVersion.h; sourceTree = "<group>"; };
+		61CB111C0ACDF3A2007994BD /* EbmlVoid.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlVoid.h; path = libebml/ebml/EbmlVoid.h; sourceTree = "<group>"; };
+		61CB111D0ACDF3A2007994BD /* IOCallback.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = IOCallback.h; path = libebml/ebml/IOCallback.h; sourceTree = "<group>"; };
+		61CB111E0ACDF3A2007994BD /* MemIOCallback.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = MemIOCallback.h; path = libebml/ebml/MemIOCallback.h; sourceTree = "<group>"; };
+		61CB111F0ACDF3A2007994BD /* StdIOCallback.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = StdIOCallback.h; path = libebml/ebml/StdIOCallback.h; sourceTree = "<group>"; };
+		61CB11390ACDF3C2007994BD /* Debug.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Debug.cpp; path = libebml/src/Debug.cpp; sourceTree = "<group>"; };
+		61CB113A0ACDF3C2007994BD /* EbmlBinary.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlBinary.cpp; path = libebml/src/EbmlBinary.cpp; sourceTree = "<group>"; };
+		61CB113B0ACDF3C2007994BD /* EbmlContexts.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlContexts.cpp; path = libebml/src/EbmlContexts.cpp; sourceTree = "<group>"; };
+		61CB113C0ACDF3C2007994BD /* EbmlCrc32.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlCrc32.cpp; path = libebml/src/EbmlCrc32.cpp; sourceTree = "<group>"; };
+		61CB113D0ACDF3C2007994BD /* EbmlDate.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlDate.cpp; path = libebml/src/EbmlDate.cpp; sourceTree = "<group>"; };
+		61CB113E0ACDF3C2007994BD /* EbmlDummy.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlDummy.cpp; path = libebml/src/EbmlDummy.cpp; sourceTree = "<group>"; };
+		61CB113F0ACDF3C2007994BD /* EbmlElement.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlElement.cpp; path = libebml/src/EbmlElement.cpp; sourceTree = "<group>"; };
+		61CB11400ACDF3C2007994BD /* EbmlFloat.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlFloat.cpp; path = libebml/src/EbmlFloat.cpp; sourceTree = "<group>"; };
+		61CB11410ACDF3C2007994BD /* EbmlHead.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlHead.cpp; path = libebml/src/EbmlHead.cpp; sourceTree = "<group>"; };
+		61CB11420ACDF3C2007994BD /* EbmlMaster.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlMaster.cpp; path = libebml/src/EbmlMaster.cpp; sourceTree = "<group>"; };
+		61CB11430ACDF3C2007994BD /* EbmlSInteger.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlSInteger.cpp; path = libebml/src/EbmlSInteger.cpp; sourceTree = "<group>"; };
+		61CB11440ACDF3C2007994BD /* EbmlStream.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlStream.cpp; path = libebml/src/EbmlStream.cpp; sourceTree = "<group>"; };
+		61CB11450ACDF3C2007994BD /* EbmlString.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlString.cpp; path = libebml/src/EbmlString.cpp; sourceTree = "<group>"; };
+		61CB11460ACDF3C2007994BD /* EbmlSubHead.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlSubHead.cpp; path = libebml/src/EbmlSubHead.cpp; sourceTree = "<group>"; };
+		61CB11470ACDF3C2007994BD /* EbmlUInteger.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlUInteger.cpp; path = libebml/src/EbmlUInteger.cpp; sourceTree = "<group>"; };
+		61CB11480ACDF3C2007994BD /* EbmlUnicodeString.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlUnicodeString.cpp; path = libebml/src/EbmlUnicodeString.cpp; sourceTree = "<group>"; };
+		61CB11490ACDF3C2007994BD /* EbmlVersion.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlVersion.cpp; path = libebml/src/EbmlVersion.cpp; sourceTree = "<group>"; };
+		61CB114A0ACDF3C2007994BD /* EbmlVoid.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = EbmlVoid.cpp; path = libebml/src/EbmlVoid.cpp; sourceTree = "<group>"; };
+		61CB114B0ACDF3C2007994BD /* IOCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = IOCallback.cpp; path = libebml/src/IOCallback.cpp; sourceTree = "<group>"; };
+		61CB114C0ACDF3C2007994BD /* MemIOCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = MemIOCallback.cpp; path = libebml/src/MemIOCallback.cpp; sourceTree = "<group>"; };
+		61CB114D0ACDF3C2007994BD /* StdIOCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = StdIOCallback.cpp; path = libebml/src/StdIOCallback.cpp; sourceTree = "<group>"; };
+		61CB116E0ACDF40C007994BD /* libebml_t.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = libebml_t.h; path = libebml/ebml/c/libebml_t.h; sourceTree = "<group>"; };
+		61CB11770ACDF4D8007994BD /* libmatroska.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmatroska.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		61CB117C0ACDF4FF007994BD /* FileKax.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = FileKax.h; path = libmatroska/matroska/FileKax.h; sourceTree = "<group>"; };
+		61CB117D0ACDF4FF007994BD /* KaxAttached.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxAttached.h; path = libmatroska/matroska/KaxAttached.h; sourceTree = "<group>"; };
+		61CB117E0ACDF4FF007994BD /* KaxAttachments.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxAttachments.h; path = libmatroska/matroska/KaxAttachments.h; sourceTree = "<group>"; };
+		61CB117F0ACDF4FF007994BD /* KaxBlock.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxBlock.h; path = libmatroska/matroska/KaxBlock.h; sourceTree = "<group>"; };
+		61CB11800ACDF4FF007994BD /* KaxBlockData.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxBlockData.h; path = libmatroska/matroska/KaxBlockData.h; sourceTree = "<group>"; };
+		61CB11810ACDF4FF007994BD /* KaxChapters.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxChapters.h; path = libmatroska/matroska/KaxChapters.h; sourceTree = "<group>"; };
+		61CB11820ACDF4FF007994BD /* KaxCluster.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxCluster.h; path = libmatroska/matroska/KaxCluster.h; sourceTree = "<group>"; };
+		61CB11830ACDF4FF007994BD /* KaxClusterData.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxClusterData.h; path = libmatroska/matroska/KaxClusterData.h; sourceTree = "<group>"; };
+		61CB11840ACDF4FF007994BD /* KaxConfig.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxConfig.h; path = libmatroska/matroska/KaxConfig.h; sourceTree = "<group>"; };
+		61CB11850ACDF4FF007994BD /* KaxContentEncoding.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxContentEncoding.h; path = libmatroska/matroska/KaxContentEncoding.h; sourceTree = "<group>"; };
+		61CB11860ACDF4FF007994BD /* KaxContexts.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxContexts.h; path = libmatroska/matroska/KaxContexts.h; sourceTree = "<group>"; };
+		61CB11870ACDF4FF007994BD /* KaxCues.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxCues.h; path = libmatroska/matroska/KaxCues.h; sourceTree = "<group>"; };
+		61CB11880ACDF4FF007994BD /* KaxCuesData.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxCuesData.h; path = libmatroska/matroska/KaxCuesData.h; sourceTree = "<group>"; };
+		61CB11890ACDF4FF007994BD /* KaxInfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxInfo.h; path = libmatroska/matroska/KaxInfo.h; sourceTree = "<group>"; };
+		61CB118A0ACDF4FF007994BD /* KaxInfoData.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxInfoData.h; path = libmatroska/matroska/KaxInfoData.h; sourceTree = "<group>"; };
+		61CB118B0ACDF4FF007994BD /* KaxSeekHead.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxSeekHead.h; path = libmatroska/matroska/KaxSeekHead.h; sourceTree = "<group>"; };
+		61CB118C0ACDF4FF007994BD /* KaxSegment.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxSegment.h; path = libmatroska/matroska/KaxSegment.h; sourceTree = "<group>"; };
+		61CB118D0ACDF4FF007994BD /* KaxTag.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTag.h; path = libmatroska/matroska/KaxTag.h; sourceTree = "<group>"; };
+		61CB118E0ACDF4FF007994BD /* KaxTagMulti.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTagMulti.h; path = libmatroska/matroska/KaxTagMulti.h; sourceTree = "<group>"; };
+		61CB118F0ACDF4FF007994BD /* KaxTags.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTags.h; path = libmatroska/matroska/KaxTags.h; sourceTree = "<group>"; };
+		61CB11900ACDF4FF007994BD /* KaxTrackAudio.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTrackAudio.h; path = libmatroska/matroska/KaxTrackAudio.h; sourceTree = "<group>"; };
+		61CB11910ACDF4FF007994BD /* KaxTrackEntryData.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTrackEntryData.h; path = libmatroska/matroska/KaxTrackEntryData.h; sourceTree = "<group>"; };
+		61CB11920ACDF4FF007994BD /* KaxTracks.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTracks.h; path = libmatroska/matroska/KaxTracks.h; sourceTree = "<group>"; };
+		61CB11930ACDF4FF007994BD /* KaxTrackVideo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTrackVideo.h; path = libmatroska/matroska/KaxTrackVideo.h; sourceTree = "<group>"; };
+		61CB11940ACDF4FF007994BD /* KaxTypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTypes.h; path = libmatroska/matroska/KaxTypes.h; sourceTree = "<group>"; };
+		61CB11950ACDF4FF007994BD /* KaxVersion.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxVersion.h; path = libmatroska/matroska/KaxVersion.h; sourceTree = "<group>"; };
+		61CB11B40ACDF50F007994BD /* FileKax.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = FileKax.cpp; path = libmatroska/src/FileKax.cpp; sourceTree = "<group>"; };
+		61CB11B50ACDF50F007994BD /* KaxAttached.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxAttached.cpp; path = libmatroska/src/KaxAttached.cpp; sourceTree = "<group>"; };
+		61CB11B60ACDF50F007994BD /* KaxAttachments.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxAttachments.cpp; path = libmatroska/src/KaxAttachments.cpp; sourceTree = "<group>"; };
+		61CB11B70ACDF50F007994BD /* KaxBlock.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxBlock.cpp; path = libmatroska/src/KaxBlock.cpp; sourceTree = "<group>"; };
+		61CB11B80ACDF50F007994BD /* KaxBlockData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxBlockData.cpp; path = libmatroska/src/KaxBlockData.cpp; sourceTree = "<group>"; };
+		61CB11B90ACDF50F007994BD /* KaxChapters.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxChapters.cpp; path = libmatroska/src/KaxChapters.cpp; sourceTree = "<group>"; };
+		61CB11BA0ACDF50F007994BD /* KaxCluster.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxCluster.cpp; path = libmatroska/src/KaxCluster.cpp; sourceTree = "<group>"; };
+		61CB11BB0ACDF50F007994BD /* KaxClusterData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxClusterData.cpp; path = libmatroska/src/KaxClusterData.cpp; sourceTree = "<group>"; };
+		61CB11BC0ACDF50F007994BD /* KaxContentEncoding.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxContentEncoding.cpp; path = libmatroska/src/KaxContentEncoding.cpp; sourceTree = "<group>"; };
+		61CB11BD0ACDF50F007994BD /* KaxContexts.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxContexts.cpp; path = libmatroska/src/KaxContexts.cpp; sourceTree = "<group>"; };
+		61CB11BE0ACDF50F007994BD /* KaxCues.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxCues.cpp; path = libmatroska/src/KaxCues.cpp; sourceTree = "<group>"; };
+		61CB11BF0ACDF50F007994BD /* KaxCuesData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxCuesData.cpp; path = libmatroska/src/KaxCuesData.cpp; sourceTree = "<group>"; };
+		61CB11C00ACDF50F007994BD /* KaxInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxInfo.cpp; path = libmatroska/src/KaxInfo.cpp; sourceTree = "<group>"; };
+		61CB11C10ACDF50F007994BD /* KaxInfoData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxInfoData.cpp; path = libmatroska/src/KaxInfoData.cpp; sourceTree = "<group>"; };
+		61CB11C20ACDF50F007994BD /* KaxSeekHead.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxSeekHead.cpp; path = libmatroska/src/KaxSeekHead.cpp; sourceTree = "<group>"; };
+		61CB11C30ACDF50F007994BD /* KaxSegment.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxSegment.cpp; path = libmatroska/src/KaxSegment.cpp; sourceTree = "<group>"; };
+		61CB11C40ACDF50F007994BD /* KaxTag.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTag.cpp; path = libmatroska/src/KaxTag.cpp; sourceTree = "<group>"; };
+		61CB11C50ACDF50F007994BD /* KaxTagMulti.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTagMulti.cpp; path = libmatroska/src/KaxTagMulti.cpp; sourceTree = "<group>"; };
+		61CB11C60ACDF50F007994BD /* KaxTags.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTags.cpp; path = libmatroska/src/KaxTags.cpp; sourceTree = "<group>"; };
+		61CB11C70ACDF50F007994BD /* KaxTrackAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTrackAudio.cpp; path = libmatroska/src/KaxTrackAudio.cpp; sourceTree = "<group>"; };
+		61CB11C80ACDF50F007994BD /* KaxTrackEntryData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTrackEntryData.cpp; path = libmatroska/src/KaxTrackEntryData.cpp; sourceTree = "<group>"; };
+		61CB11C90ACDF50F007994BD /* KaxTracks.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTracks.cpp; path = libmatroska/src/KaxTracks.cpp; sourceTree = "<group>"; };
+		61CB11CA0ACDF50F007994BD /* KaxTrackVideo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTrackVideo.cpp; path = libmatroska/src/KaxTrackVideo.cpp; sourceTree = "<group>"; };
+		61CB11CB0ACDF50F007994BD /* KaxVersion.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxVersion.cpp; path = libmatroska/src/KaxVersion.cpp; sourceTree = "<group>"; };
 		61D6914E0AC8E382000EFC7D /* DataHandlerCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DataHandlerCallback.cpp; sourceTree = "<group>"; };
 		61D6914F0AC8E382000EFC7D /* DataHandlerCallback.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DataHandlerCallback.h; sourceTree = "<group>"; };
 		61D691500AC8E382000EFC7D /* MatroskaCodecIDs.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MatroskaCodecIDs.cpp; sourceTree = "<group>"; };
@@ -146,6 +364,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61CB11F40ACE0F73007994BD /* libmatroska.a in Frameworks */,
+				61CB11F30ACE0F6D007994BD /* libebml.a in Frameworks */,
 				11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */,
 				11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */,
 				11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */,
@@ -154,6 +374,20 @@
 				11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */,
 				8F483B550A642644002CCA73 /* libavformat.a in Frameworks */,
 				8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		61CB10FD0ACDF350007994BD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		61CB11750ACDF4D8007994BD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,13 +460,128 @@
 			isa = PBXGroup;
 			children = (
 				11A70AC10A3D0105002058D4 /* Perian.component */,
+				61CB10FF0ACDF350007994BD /* libebml.a */,
+				61CB11770ACDF4D8007994BD /* libmatroska.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		61CB11020ACDF37C007994BD /* libebml */ = {
+			isa = PBXGroup;
+			children = (
+				61CB116E0ACDF40C007994BD /* libebml_t.h */,
+				61CB11390ACDF3C2007994BD /* Debug.cpp */,
+				61CB113A0ACDF3C2007994BD /* EbmlBinary.cpp */,
+				61CB113B0ACDF3C2007994BD /* EbmlContexts.cpp */,
+				61CB113C0ACDF3C2007994BD /* EbmlCrc32.cpp */,
+				61CB113D0ACDF3C2007994BD /* EbmlDate.cpp */,
+				61CB113E0ACDF3C2007994BD /* EbmlDummy.cpp */,
+				61CB113F0ACDF3C2007994BD /* EbmlElement.cpp */,
+				61CB11400ACDF3C2007994BD /* EbmlFloat.cpp */,
+				61CB11410ACDF3C2007994BD /* EbmlHead.cpp */,
+				61CB11420ACDF3C2007994BD /* EbmlMaster.cpp */,
+				61CB11430ACDF3C2007994BD /* EbmlSInteger.cpp */,
+				61CB11440ACDF3C2007994BD /* EbmlStream.cpp */,
+				61CB11450ACDF3C2007994BD /* EbmlString.cpp */,
+				61CB11460ACDF3C2007994BD /* EbmlSubHead.cpp */,
+				61CB11470ACDF3C2007994BD /* EbmlUInteger.cpp */,
+				61CB11480ACDF3C2007994BD /* EbmlUnicodeString.cpp */,
+				61CB11490ACDF3C2007994BD /* EbmlVersion.cpp */,
+				61CB114A0ACDF3C2007994BD /* EbmlVoid.cpp */,
+				61CB114B0ACDF3C2007994BD /* IOCallback.cpp */,
+				61CB114C0ACDF3C2007994BD /* MemIOCallback.cpp */,
+				61CB114D0ACDF3C2007994BD /* StdIOCallback.cpp */,
+				61CB11070ACDF3A2007994BD /* Debug.h */,
+				61CB11080ACDF3A2007994BD /* EbmlBinary.h */,
+				61CB11090ACDF3A2007994BD /* EbmlConfig.h */,
+				61CB110A0ACDF3A2007994BD /* EbmlContexts.h */,
+				61CB110B0ACDF3A2007994BD /* EbmlCrc32.h */,
+				61CB110C0ACDF3A2007994BD /* EbmlDate.h */,
+				61CB110D0ACDF3A2007994BD /* EbmlDummy.h */,
+				61CB110E0ACDF3A2007994BD /* EbmlElement.h */,
+				61CB110F0ACDF3A2007994BD /* EbmlEndian.h */,
+				61CB11100ACDF3A2007994BD /* EbmlFloat.h */,
+				61CB11110ACDF3A2007994BD /* EbmlHead.h */,
+				61CB11120ACDF3A2007994BD /* EbmlId.h */,
+				61CB11130ACDF3A2007994BD /* EbmlMaster.h */,
+				61CB11140ACDF3A2007994BD /* EbmlSInteger.h */,
+				61CB11150ACDF3A2007994BD /* EbmlStream.h */,
+				61CB11160ACDF3A2007994BD /* EbmlString.h */,
+				61CB11170ACDF3A2007994BD /* EbmlSubHead.h */,
+				61CB11180ACDF3A2007994BD /* EbmlTypes.h */,
+				61CB11190ACDF3A2007994BD /* EbmlUInteger.h */,
+				61CB111A0ACDF3A2007994BD /* EbmlUnicodeString.h */,
+				61CB111B0ACDF3A2007994BD /* EbmlVersion.h */,
+				61CB111C0ACDF3A2007994BD /* EbmlVoid.h */,
+				61CB111D0ACDF3A2007994BD /* IOCallback.h */,
+				61CB111E0ACDF3A2007994BD /* MemIOCallback.h */,
+				61CB111F0ACDF3A2007994BD /* StdIOCallback.h */,
+			);
+			name = libebml;
+			sourceTree = "<group>";
+		};
+		61CB11720ACDF4BB007994BD /* libmatroska */ = {
+			isa = PBXGroup;
+			children = (
+				61CB11B40ACDF50F007994BD /* FileKax.cpp */,
+				61CB11B50ACDF50F007994BD /* KaxAttached.cpp */,
+				61CB11B60ACDF50F007994BD /* KaxAttachments.cpp */,
+				61CB11B70ACDF50F007994BD /* KaxBlock.cpp */,
+				61CB11B80ACDF50F007994BD /* KaxBlockData.cpp */,
+				61CB11B90ACDF50F007994BD /* KaxChapters.cpp */,
+				61CB11BA0ACDF50F007994BD /* KaxCluster.cpp */,
+				61CB11BB0ACDF50F007994BD /* KaxClusterData.cpp */,
+				61CB11BC0ACDF50F007994BD /* KaxContentEncoding.cpp */,
+				61CB11BD0ACDF50F007994BD /* KaxContexts.cpp */,
+				61CB11BE0ACDF50F007994BD /* KaxCues.cpp */,
+				61CB11BF0ACDF50F007994BD /* KaxCuesData.cpp */,
+				61CB11C00ACDF50F007994BD /* KaxInfo.cpp */,
+				61CB11C10ACDF50F007994BD /* KaxInfoData.cpp */,
+				61CB11C20ACDF50F007994BD /* KaxSeekHead.cpp */,
+				61CB11C30ACDF50F007994BD /* KaxSegment.cpp */,
+				61CB11C40ACDF50F007994BD /* KaxTag.cpp */,
+				61CB11C50ACDF50F007994BD /* KaxTagMulti.cpp */,
+				61CB11C60ACDF50F007994BD /* KaxTags.cpp */,
+				61CB11C70ACDF50F007994BD /* KaxTrackAudio.cpp */,
+				61CB11C80ACDF50F007994BD /* KaxTrackEntryData.cpp */,
+				61CB11C90ACDF50F007994BD /* KaxTracks.cpp */,
+				61CB11CA0ACDF50F007994BD /* KaxTrackVideo.cpp */,
+				61CB11CB0ACDF50F007994BD /* KaxVersion.cpp */,
+				61CB117C0ACDF4FF007994BD /* FileKax.h */,
+				61CB117D0ACDF4FF007994BD /* KaxAttached.h */,
+				61CB117E0ACDF4FF007994BD /* KaxAttachments.h */,
+				61CB117F0ACDF4FF007994BD /* KaxBlock.h */,
+				61CB11800ACDF4FF007994BD /* KaxBlockData.h */,
+				61CB11810ACDF4FF007994BD /* KaxChapters.h */,
+				61CB11820ACDF4FF007994BD /* KaxCluster.h */,
+				61CB11830ACDF4FF007994BD /* KaxClusterData.h */,
+				61CB11840ACDF4FF007994BD /* KaxConfig.h */,
+				61CB11850ACDF4FF007994BD /* KaxContentEncoding.h */,
+				61CB11860ACDF4FF007994BD /* KaxContexts.h */,
+				61CB11870ACDF4FF007994BD /* KaxCues.h */,
+				61CB11880ACDF4FF007994BD /* KaxCuesData.h */,
+				61CB11890ACDF4FF007994BD /* KaxInfo.h */,
+				61CB118A0ACDF4FF007994BD /* KaxInfoData.h */,
+				61CB118B0ACDF4FF007994BD /* KaxSeekHead.h */,
+				61CB118C0ACDF4FF007994BD /* KaxSegment.h */,
+				61CB118D0ACDF4FF007994BD /* KaxTag.h */,
+				61CB118E0ACDF4FF007994BD /* KaxTagMulti.h */,
+				61CB118F0ACDF4FF007994BD /* KaxTags.h */,
+				61CB11900ACDF4FF007994BD /* KaxTrackAudio.h */,
+				61CB11910ACDF4FF007994BD /* KaxTrackEntryData.h */,
+				61CB11920ACDF4FF007994BD /* KaxTracks.h */,
+				61CB11930ACDF4FF007994BD /* KaxTrackVideo.h */,
+				61CB11940ACDF4FF007994BD /* KaxTypes.h */,
+				61CB11950ACDF4FF007994BD /* KaxVersion.h */,
+			);
+			name = libmatroska;
 			sourceTree = "<group>";
 		};
 		61D691460AC8E333000EFC7D /* Matroska */ = {
 			isa = PBXGroup;
 			children = (
+				61CB11020ACDF37C007994BD /* libebml */,
+				61CB11720ACDF4BB007994BD /* libmatroska */,
 				61D6916B0AC8E3A3000EFC7D /* Import */,
 				61D6916C0AC8E3C5000EFC7D /* Export */,
 				61D6914E0AC8E382000EFC7D /* DataHandlerCallback.cpp */,
@@ -281,6 +630,75 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		61CB10FB0ACDF350007994BD /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61CB11200ACDF3A2007994BD /* Debug.h in Headers */,
+				61CB11210ACDF3A2007994BD /* EbmlBinary.h in Headers */,
+				61CB11220ACDF3A2007994BD /* EbmlConfig.h in Headers */,
+				61CB11230ACDF3A2007994BD /* EbmlContexts.h in Headers */,
+				61CB11240ACDF3A2007994BD /* EbmlCrc32.h in Headers */,
+				61CB11250ACDF3A2007994BD /* EbmlDate.h in Headers */,
+				61CB11260ACDF3A2007994BD /* EbmlDummy.h in Headers */,
+				61CB11270ACDF3A2007994BD /* EbmlElement.h in Headers */,
+				61CB11280ACDF3A2007994BD /* EbmlEndian.h in Headers */,
+				61CB11290ACDF3A2007994BD /* EbmlFloat.h in Headers */,
+				61CB112A0ACDF3A2007994BD /* EbmlHead.h in Headers */,
+				61CB112B0ACDF3A2007994BD /* EbmlId.h in Headers */,
+				61CB112C0ACDF3A2007994BD /* EbmlMaster.h in Headers */,
+				61CB112D0ACDF3A2007994BD /* EbmlSInteger.h in Headers */,
+				61CB112E0ACDF3A2007994BD /* EbmlStream.h in Headers */,
+				61CB112F0ACDF3A2007994BD /* EbmlString.h in Headers */,
+				61CB11300ACDF3A2007994BD /* EbmlSubHead.h in Headers */,
+				61CB11310ACDF3A2007994BD /* EbmlTypes.h in Headers */,
+				61CB11320ACDF3A2007994BD /* EbmlUInteger.h in Headers */,
+				61CB11330ACDF3A2007994BD /* EbmlUnicodeString.h in Headers */,
+				61CB11340ACDF3A2007994BD /* EbmlVersion.h in Headers */,
+				61CB11350ACDF3A2007994BD /* EbmlVoid.h in Headers */,
+				61CB11360ACDF3A2007994BD /* IOCallback.h in Headers */,
+				61CB11370ACDF3A2007994BD /* MemIOCallback.h in Headers */,
+				61CB11380ACDF3A2007994BD /* StdIOCallback.h in Headers */,
+				61CB116F0ACDF40C007994BD /* libebml_t.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		61CB11730ACDF4D8007994BD /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61CB11960ACDF4FF007994BD /* FileKax.h in Headers */,
+				61CB11970ACDF4FF007994BD /* KaxAttached.h in Headers */,
+				61CB11980ACDF4FF007994BD /* KaxAttachments.h in Headers */,
+				61CB11990ACDF4FF007994BD /* KaxBlock.h in Headers */,
+				61CB119A0ACDF4FF007994BD /* KaxBlockData.h in Headers */,
+				61CB119B0ACDF4FF007994BD /* KaxChapters.h in Headers */,
+				61CB119C0ACDF4FF007994BD /* KaxCluster.h in Headers */,
+				61CB119D0ACDF4FF007994BD /* KaxClusterData.h in Headers */,
+				61CB119E0ACDF4FF007994BD /* KaxConfig.h in Headers */,
+				61CB119F0ACDF4FF007994BD /* KaxContentEncoding.h in Headers */,
+				61CB11A00ACDF4FF007994BD /* KaxContexts.h in Headers */,
+				61CB11A10ACDF4FF007994BD /* KaxCues.h in Headers */,
+				61CB11A20ACDF4FF007994BD /* KaxCuesData.h in Headers */,
+				61CB11A30ACDF4FF007994BD /* KaxInfo.h in Headers */,
+				61CB11A40ACDF4FF007994BD /* KaxInfoData.h in Headers */,
+				61CB11A50ACDF4FF007994BD /* KaxSeekHead.h in Headers */,
+				61CB11A60ACDF4FF007994BD /* KaxSegment.h in Headers */,
+				61CB11A70ACDF4FF007994BD /* KaxTag.h in Headers */,
+				61CB11A80ACDF4FF007994BD /* KaxTagMulti.h in Headers */,
+				61CB11A90ACDF4FF007994BD /* KaxTags.h in Headers */,
+				61CB11AA0ACDF4FF007994BD /* KaxTrackAudio.h in Headers */,
+				61CB11AB0ACDF4FF007994BD /* KaxTrackEntryData.h in Headers */,
+				61CB11AC0ACDF4FF007994BD /* KaxTracks.h in Headers */,
+				61CB11AD0ACDF4FF007994BD /* KaxTrackVideo.h in Headers */,
+				61CB11AE0ACDF4FF007994BD /* KaxTypes.h in Headers */,
+				61CB11AF0ACDF4FF007994BD /* KaxVersion.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		11A70AC00A3D0105002058D4 /* Perian */ = {
 			isa = PBXNativeTarget;
@@ -296,11 +714,47 @@
 			);
 			dependencies = (
 				11BA3DB00A61EE90008AF206 /* PBXTargetDependency */,
+				61CB12100ACE0FB1007994BD /* PBXTargetDependency */,
+				61CB12120ACE0FB1007994BD /* PBXTargetDependency */,
 			);
 			name = Perian;
 			productName = Perian;
 			productReference = 11A70AC10A3D0105002058D4 /* Perian.component */;
 			productType = "com.apple.product-type.bundle";
+		};
+		61CB10FE0ACDF350007994BD /* ebml */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 61CB11030ACDF37C007994BD /* Build configuration list for PBXNativeTarget "ebml" */;
+			buildPhases = (
+				61CB10FB0ACDF350007994BD /* Headers */,
+				61CB10FC0ACDF350007994BD /* Sources */,
+				61CB10FD0ACDF350007994BD /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ebml;
+			productName = ebml;
+			productReference = 61CB10FF0ACDF350007994BD /* libebml.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		61CB11760ACDF4D8007994BD /* matroska */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 61CB11B00ACDF4FF007994BD /* Build configuration list for PBXNativeTarget "matroska" */;
+			buildPhases = (
+				61CB11730ACDF4D8007994BD /* Headers */,
+				61CB11740ACDF4D8007994BD /* Sources */,
+				61CB11750ACDF4D8007994BD /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = matroska;
+			productName = matroska;
+			productReference = 61CB11770ACDF4D8007994BD /* libmatroska.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
@@ -315,6 +769,8 @@
 				11A70AC00A3D0105002058D4 /* Perian */,
 				11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */,
 				F59E09EA0A670E3D0019A3F0 /* Debug In QuickTime Player */,
+				61CB10FE0ACDF350007994BD /* ebml */,
+				61CB11760ACDF4D8007994BD /* matroska */,
 			);
 		};
 /* End PBXProject section */
@@ -341,6 +797,7 @@
 			files = (
 				8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */,
 				11C85FE60A64314500DF3D73 /* FFusionCodec.r in Rez */,
+				61CB12260ACE1074007994BD /* MatroskaImport.r in Rez */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -385,6 +842,70 @@
 				11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */,
 				112E0C820A6436BA00DB4C29 /* FFusionCodec.c in Sources */,
 				113F589A0A6B091600509987 /* Codecprintf.c in Sources */,
+				61CB12090ACE0F85007994BD /* MatroskaImport.c in Sources */,
+				61CB120A0ACE0F86007994BD /* MkvImportPrivate.cpp in Sources */,
+				61CB120B0ACE0F87007994BD /* MkvMovieSetup.cpp in Sources */,
+				61CB120C0ACE0F8A007994BD /* DataHandlerCallback.cpp in Sources */,
+				61CB120D0ACE0F8D007994BD /* MatroskaCodecIDs.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		61CB10FC0ACDF350007994BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61CB114E0ACDF3C2007994BD /* Debug.cpp in Sources */,
+				61CB114F0ACDF3C2007994BD /* EbmlBinary.cpp in Sources */,
+				61CB11500ACDF3C2007994BD /* EbmlContexts.cpp in Sources */,
+				61CB11510ACDF3C2007994BD /* EbmlCrc32.cpp in Sources */,
+				61CB11520ACDF3C2007994BD /* EbmlDate.cpp in Sources */,
+				61CB11530ACDF3C2007994BD /* EbmlDummy.cpp in Sources */,
+				61CB11540ACDF3C2007994BD /* EbmlElement.cpp in Sources */,
+				61CB11550ACDF3C2007994BD /* EbmlFloat.cpp in Sources */,
+				61CB11560ACDF3C2007994BD /* EbmlHead.cpp in Sources */,
+				61CB11570ACDF3C2007994BD /* EbmlMaster.cpp in Sources */,
+				61CB11580ACDF3C2007994BD /* EbmlSInteger.cpp in Sources */,
+				61CB11590ACDF3C2007994BD /* EbmlStream.cpp in Sources */,
+				61CB115A0ACDF3C2007994BD /* EbmlString.cpp in Sources */,
+				61CB115B0ACDF3C2007994BD /* EbmlSubHead.cpp in Sources */,
+				61CB115C0ACDF3C2007994BD /* EbmlUInteger.cpp in Sources */,
+				61CB115D0ACDF3C2007994BD /* EbmlUnicodeString.cpp in Sources */,
+				61CB115E0ACDF3C2007994BD /* EbmlVersion.cpp in Sources */,
+				61CB115F0ACDF3C2007994BD /* EbmlVoid.cpp in Sources */,
+				61CB11600ACDF3C2007994BD /* IOCallback.cpp in Sources */,
+				61CB11610ACDF3C2007994BD /* MemIOCallback.cpp in Sources */,
+				61CB11620ACDF3C2007994BD /* StdIOCallback.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		61CB11740ACDF4D8007994BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61CB11CC0ACDF50F007994BD /* FileKax.cpp in Sources */,
+				61CB11CD0ACDF50F007994BD /* KaxAttached.cpp in Sources */,
+				61CB11CE0ACDF50F007994BD /* KaxAttachments.cpp in Sources */,
+				61CB11CF0ACDF50F007994BD /* KaxBlock.cpp in Sources */,
+				61CB11D00ACDF50F007994BD /* KaxBlockData.cpp in Sources */,
+				61CB11D10ACDF50F007994BD /* KaxChapters.cpp in Sources */,
+				61CB11D20ACDF50F007994BD /* KaxCluster.cpp in Sources */,
+				61CB11D30ACDF50F007994BD /* KaxClusterData.cpp in Sources */,
+				61CB11D40ACDF50F007994BD /* KaxContentEncoding.cpp in Sources */,
+				61CB11D50ACDF50F007994BD /* KaxContexts.cpp in Sources */,
+				61CB11D60ACDF50F007994BD /* KaxCues.cpp in Sources */,
+				61CB11D70ACDF50F007994BD /* KaxCuesData.cpp in Sources */,
+				61CB11D80ACDF50F007994BD /* KaxInfo.cpp in Sources */,
+				61CB11D90ACDF50F007994BD /* KaxInfoData.cpp in Sources */,
+				61CB11DA0ACDF50F007994BD /* KaxSeekHead.cpp in Sources */,
+				61CB11DB0ACDF50F007994BD /* KaxSegment.cpp in Sources */,
+				61CB11DC0ACDF50F007994BD /* KaxTag.cpp in Sources */,
+				61CB11DD0ACDF50F007994BD /* KaxTagMulti.cpp in Sources */,
+				61CB11DE0ACDF50F007994BD /* KaxTags.cpp in Sources */,
+				61CB11DF0ACDF50F007994BD /* KaxTrackAudio.cpp in Sources */,
+				61CB11E00ACDF50F007994BD /* KaxTrackEntryData.cpp in Sources */,
+				61CB11E10ACDF50F007994BD /* KaxTracks.cpp in Sources */,
+				61CB11E20ACDF50F007994BD /* KaxTrackVideo.cpp in Sources */,
+				61CB11E30ACDF50F007994BD /* KaxVersion.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,6 +916,16 @@
 			isa = PBXTargetDependency;
 			target = 11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */;
 			targetProxy = 11BA3DAF0A61EE90008AF206 /* PBXContainerItemProxy */;
+		};
+		61CB12100ACE0FB1007994BD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 61CB10FE0ACDF350007994BD /* ebml */;
+			targetProxy = 61CB120F0ACE0FB1007994BD /* PBXContainerItemProxy */;
+		};
+		61CB12120ACE0FB1007994BD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 61CB11760ACDF4D8007994BD /* matroska */;
+			targetProxy = 61CB12110ACE0FB1007994BD /* PBXContainerItemProxy */;
 		};
 		F59E09EC0A670E420019A3F0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -464,6 +995,8 @@
 					ffmpeg/libavutil,
 					ffmpeg/libpostproc,
 					ffmpeg/libavformat,
+					libebml,
+					libmatroska,
 				);
 				INFOPLIST_FILE = "Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
@@ -478,6 +1011,7 @@
 					"-read_only_relocs",
 					suppress,
 				);
+				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
@@ -515,6 +1049,8 @@
 					ffmpeg/libavutil,
 					ffmpeg/libpostproc,
 					ffmpeg/libavformat,
+					libebml,
+					libmatroska,
 				);
 				INFOPLIST_FILE = "Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
@@ -529,7 +1065,9 @@
 					"-read_only_relocs",
 					suppress,
 				);
+				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
 				PREBINDING = NO;
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_NAME = Perian;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WRAPPER_EXTENSION = component;
@@ -562,6 +1100,8 @@
 					ffmpeg/libavutil,
 					ffmpeg/libpostproc,
 					ffmpeg/libavformat,
+					libebml,
+					libmatroska,
 				);
 				INFOPLIST_FILE = "Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
@@ -576,6 +1116,7 @@
 					"-read_only_relocs",
 					suppress,
 				);
+				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
@@ -630,6 +1171,121 @@
 		11D4ED4A0A3CE59A0066D45F /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+			};
+			name = Default;
+		};
+		61CB11040ACDF37C007994BD /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = ebml;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		61CB11050ACDF37C007994BD /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = s;
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = ebml;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		61CB11060ACDF37C007994BD /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = ebml;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
+				ZERO_LINK = YES;
+			};
+			name = Default;
+		};
+		61CB11B10ACDF4FF007994BD /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = matroska;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
+				ZERO_LINK = NO;
+			};
+			name = Development;
+		};
+		61CB11B20ACDF4FF007994BD /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = matroska;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		61CB11B30ACDF4FF007994BD /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = matroska;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
+				ZERO_LINK = YES;
 			};
 			name = Default;
 		};
@@ -691,6 +1347,26 @@
 				11D4ED480A3CE59A0066D45F /* Development */,
 				11D4ED490A3CE59A0066D45F /* Deployment */,
 				11D4ED4A0A3CE59A0066D45F /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		61CB11030ACDF37C007994BD /* Build configuration list for PBXNativeTarget "ebml" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				61CB11040ACDF37C007994BD /* Development */,
+				61CB11050ACDF37C007994BD /* Deployment */,
+				61CB11060ACDF37C007994BD /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		61CB11B00ACDF4FF007994BD /* Build configuration list for PBXNativeTarget "matroska" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				61CB11B10ACDF4FF007994BD /* Development */,
+				61CB11B20ACDF4FF007994BD /* Deployment */,
+				61CB11B30ACDF4FF007994BD /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
