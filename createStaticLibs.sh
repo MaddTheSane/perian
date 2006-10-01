@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/bin/sh -v
 PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
+generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip"
+
 if [ "$BUILD_STYLE" = "Development" ] ; then
-	extraConfigureOptions="--disable-strip --disable-opts --disable-mmx --disable-altivec"
-else
-	extraConfigureOptions="--enable-small"
+	extraConfigureOptions="--disable-opts --disable-mmx" #gcc can't build the MMX at -O0 due to compiler bugs
 fi
 
 OUTPUT_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
@@ -36,9 +36,9 @@ else
 	
 	cd "$BUILDDIR"
 	if [ `arch` != i386 ] ; then
-		"$SRCROOT/ffmpeg/configure" --cross-compile --cpu=x86 --enable-pp --enable-gpl --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' $extraConfigureOptions
+		"$SRCROOT/ffmpeg/configure" --cross-compile --cpu=x86 --enable-pp --enable-gpl --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' $extraConfigureOptions $generalConfigureOptions
 	else
-		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl --enable-memalign-hack $extraConfigureOptions
+		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl --enable-memalign-hack $extraConfigureOptions $generalConfigureOptions
 	fi
 	make -j3
 	
@@ -55,9 +55,9 @@ else
 	
 	cd "$BUILDDIR"
 	if [ `arch` = ppc ] ; then
-		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl $extraConfigureOptions
+		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl $extraConfigureOptions $generalConfigureOptions
 	else
-		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl --cpu=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' $extraConfigureOptions
+		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl --cpu=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' $extraConfigureOptions $generalConfigureOptions
 	fi
 	make -j3
 	
@@ -80,4 +80,5 @@ fi
 
 mkdir "$SYMROOT/Universal" || true
 cp "$BUILT_PRODUCTS_DIR/Universal"/* "$SYMROOT/Universal"
+strip -S "$SYMROOT/Universal"/*.a
 ranlib "$SYMROOT/Universal"/*.a

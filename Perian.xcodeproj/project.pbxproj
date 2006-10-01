@@ -174,14 +174,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 61CB10FE0ACDF350007994BD /* ebml */;
+			remoteGlobalIDString = 61CB10FE0ACDF350007994BD;
 			remoteInfo = ebml;
 		};
 		61CB12110ACE0FB1007994BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 61CB11760ACDF4D8007994BD /* matroska */;
+			remoteGlobalIDString = 61CB11760ACDF4D8007994BD;
 			remoteInfo = matroska;
 		};
 		F59E09EB0A670E420019A3F0 /* PBXContainerItemProxy */ = {
@@ -1028,7 +1028,6 @@
 					i386,
 					ppc,
 				);
-				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = stabs;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
@@ -1041,7 +1040,6 @@
 				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G4;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				HEADER_SEARCH_PATHS = (
@@ -1165,6 +1163,7 @@
 		11D4ED490A3CE59A0066D45F /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Deployment;
 		};
