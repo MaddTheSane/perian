@@ -203,6 +203,27 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandl
 	return noErr;
 }
 
+// VobSub stores the .idx file in the codec private, pass it as an .IDX extension
+ComponentResult DescExt_VobSub(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
+{
+	if (!tr_entry || !desc) return paramErr;
+	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
+	
+	if (dir == kToSampleDescription) {
+		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+		if (codecPrivate == NULL)
+			return invalidAtomErr;
+		
+		Handle imgDescExt = NewHandle(codecPrivate->GetSize());
+		memcpy(*imgDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
+		
+		AddImageDescriptionExtension(imgDesc, imgDescExt, '.IDX');
+		
+		DisposeHandle((Handle) imgDescExt);
+	}
+	return noErr;
+}
+
 ComponentResult ASBDExt_AC3(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)
 {
 	if (!tr_entry || !asbd) return paramErr;

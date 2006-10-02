@@ -51,6 +51,8 @@
 		11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */; };
 		11C85FE60A64314500DF3D73 /* FFusionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = F560DF0203D622D001ABA332 /* FFusionCodec.r */; };
 		11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */; };
+		6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */; };
+		6123D6270AD0A3FF003EDE52 /* VobSubCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = 6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */; };
 		61CB11200ACDF3A2007994BD /* Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11070ACDF3A2007994BD /* Debug.h */; };
 		61CB11210ACDF3A2007994BD /* EbmlBinary.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11080ACDF3A2007994BD /* EbmlBinary.h */; };
 		61CB11220ACDF3A2007994BD /* EbmlConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11090ACDF3A2007994BD /* EbmlConfig.h */; };
@@ -228,6 +230,10 @@
 		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = build/Universal/libavcodec.a; sourceTree = "<group>"; };
 		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = build/Universal/libavutil.a; sourceTree = "<group>"; };
 		11D4EFA30A3CE8C10066D45F /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpostproc.a; path = build/Universal/libpostproc.a; sourceTree = "<group>"; };
+		6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = VobSubCodec.c; sourceTree = "<group>"; };
+		6123D6230AD0A3FE003EDE52 /* VobSubCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = VobSubCodec.h; sourceTree = "<group>"; };
+		6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; path = VobSubCodec.r; sourceTree = "<group>"; };
+		6123D6250AD0A3FF003EDE52 /* VobSubCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = VobSubCodecDispatch.h; sourceTree = "<group>"; };
 		61CB10FF0ACDF350007994BD /* libebml.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libebml.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		61CB11070ACDF3A2007994BD /* Debug.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Debug.h; path = libebml/ebml/Debug.h; sourceTree = "<group>"; };
 		61CB11080ACDF3A2007994BD /* EbmlBinary.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = EbmlBinary.h; path = libebml/ebml/EbmlBinary.h; sourceTree = "<group>"; };
@@ -424,6 +430,7 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */,
 				61D691590AC8E382000EFC7D /* MatroskaImport.r */,
 				61D691540AC8E382000EFC7D /* MatroskaExport.r */,
 				8F483B8B0A642886002CCA73 /* PerianAviImporter.r */,
@@ -440,6 +447,7 @@
 			isa = PBXGroup;
 			children = (
 				61D691460AC8E333000EFC7D /* Matroska */,
+				6123D61D0AD0A052003EDE52 /* Subtitles */,
 				11C85ED30A641E6400DF3D73 /* ff_dataref.c */,
 				8F483BBC0A642B3D002CCA73 /* ff_MovieImportDispatch.h */,
 				11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */,
@@ -464,6 +472,16 @@
 				61CB11770ACDF4D8007994BD /* libmatroska.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		6123D61D0AD0A052003EDE52 /* Subtitles */ = {
+			isa = PBXGroup;
+			children = (
+				6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */,
+				6123D6230AD0A3FE003EDE52 /* VobSubCodec.h */,
+				6123D6250AD0A3FF003EDE52 /* VobSubCodecDispatch.h */,
+			);
+			name = Subtitles;
 			sourceTree = "<group>";
 		};
 		61CB11020ACDF37C007994BD /* libebml */ = {
@@ -798,6 +816,7 @@
 				8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */,
 				11C85FE60A64314500DF3D73 /* FFusionCodec.r in Rez */,
 				61CB12260ACE1074007994BD /* MatroskaImport.r in Rez */,
+				6123D6270AD0A3FF003EDE52 /* VobSubCodec.r in Rez */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -847,6 +866,7 @@
 				61CB120B0ACE0F87007994BD /* MkvMovieSetup.cpp in Sources */,
 				61CB120C0ACE0F8A007994BD /* DataHandlerCallback.cpp in Sources */,
 				61CB120D0ACE0F8D007994BD /* MatroskaCodecIDs.cpp in Sources */,
+				6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

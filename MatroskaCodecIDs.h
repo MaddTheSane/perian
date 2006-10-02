@@ -157,12 +157,12 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	
 #if 0
 	{ kBMPCodecType, "S_IMAGE/BMP" },
-	{ kSubFormatUTF8, "S_TEXT/UTF8" },
 	{ kSubFormatSSA, "S_TEXT/SSA" },
 	{ kSubFormatASS, "S_TEXT/ASS" },
 	{ kSubFormatUSF, "S_TEXT/USF" },
-	{ kSubFormatVobSub, "S_TEXT/VOBSUB" },
 #endif
+	{ kSubFormatUTF8, "S_TEXT/UTF8" },
+	{ kSubFormatVobSub, "S_VOBSUB" },
 };
 
 // these CodecIDs need special handling since they correspond to many fourccs
@@ -203,6 +203,7 @@ typedef enum {
 ComponentResult DescExt_H264(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
 ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
 ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
+ComponentResult DescExt_VobSub(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
 
 struct CodecDescExtFunc {
 	OSType cType;
@@ -212,7 +213,8 @@ struct CodecDescExtFunc {
 static const struct CodecDescExtFunc kMatroskaSampleDescExtFuncs[] = {
 	{ kH264CodecType, DescExt_H264 },
 	{ kAudioFormatXiphVorbis, DescExt_XiphVorbis },
-	{ kAudioFormatXiphFLAC, DescExt_XiphFLAC }
+	{ kAudioFormatXiphFLAC, DescExt_XiphFLAC },
+	{ kSubFormatVobSub, DescExt_VobSub }
 };
 
 

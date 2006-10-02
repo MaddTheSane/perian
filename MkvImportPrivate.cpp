@@ -522,7 +522,7 @@ ComponentResult ImportMkvRef(MatroskaImportGlobals globals)
 			for (int j = 0; j < priv->segments[i].tracks.size(); j++) {
 				MkvTrackPtr mkvTrack = &priv->segments[i].tracks[j];
 				
-				if (mkvTrack->theTrack) {
+				if (mkvTrack->theTrack && mkvTrack->trackType != track_subtitle) {
 					if (mkvTrack->trackType == track_video) {
 						err = AddSampleTableToMedia(mkvTrack->theMedia,
 													mkvTrack->sampleTable,
@@ -622,6 +622,10 @@ ComponentResult MkvImportBlock(MkvBlock *block, MkvTrackPtr mkvTrack, bool addTo
 			sampleTimePtr = NULL;
 		}
 	}
+	
+	// subtitle tracks usually have gaps, so we need to add it to the track regardless
+	if (mkvTrack->trackType == track_subtitle)
+		addToTrack = true;
 	
 	if (addToTrack) {
 		if (mkvTrack->trackType == track_video) {

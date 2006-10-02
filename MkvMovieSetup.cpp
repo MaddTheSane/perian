@@ -46,6 +46,7 @@
 #include <matroska/KaxTrackEntryData.h>
 #include <matroska/KaxTrackAudio.h>
 #include <matroska/KaxTrackVideo.h>
+#include <matroska/KaxContentEncoding.h>
 
 using namespace std;
 using namespace libmatroska;
@@ -529,7 +530,75 @@ ComponentResult MkvCreateSubtitleTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_e
 									   Movie theMovie, Handle dataRef, OSType dataRefType)
 {
 	ComponentResult err = noErr;
+	Fixed trackWidth, trackHeight;
+	Fixed horizontalOffset, verticalOffset;
+	Rect movieBox;
+	MediaHandler mh;
+	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
 	
+	// we assume that a video track has already been created, so we can set the subtitle track
+	// to have the same dimensions as it. Note that this doesn't work so well with multiple
+	// video tracks with different dimensions; but QuickTime doesn't expect that; how should we handle them?
+	GetMovieBox(theMovie, &movieBox);
+	trackWidth = IntToFixed(movieBox.right - movieBox.left);
+	trackHeight = IntToFixed(movieBox.bottom - movieBox.top);
+	
+	(*imgDesc)->idSize = sizeof(ImageDescription);
+	(*imgDesc)->cType = GetFourCC(tr_entry);
+	(*imgDesc)->frameCount = 1;
+	(*imgDesc)->depth = 32;
+	(*imgDesc)->clutID = -1;
+	
+	if ((*imgDesc)->cType == kSubFormatVobSub) {
+		int width, height;
+		
+		// bitmap width & height is in the codec private in text format
+		KaxCodecPrivate *idxFile = FindChild<KaxCodecPrivate>(*tr_entry);
+		string idxFileStr((char *)idxFile->GetBuffer(), idxFile->GetSize());
+		string::size_type loc = idxFileStr.find("size:", 0);
+		if (loc == string::npos) {
+			// we can't continue without bitmap width/height
+			err = invalidTrack;
+			goto bail;
+		}
+		sscanf(&idxFileStr.c_str()[loc], "size: %dx%d", &width, &height);
+		(*imgDesc)->width = width;
+		(*imgDesc)->height = height;
+		
+	} else if ((*imgDesc)->cType == kSubFormatUTF8) {
+		(*imgDesc)->width = FixedToInt(trackWidth);
+		(*imgDesc)->height = FixedToInt(trackWidth);
+		
+	} else {
+		err = invalidTrack;
+		goto bail;
+	}
+	
+	mkvTrack->theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
+	if (mkvTrack->theTrack == NULL) {
+		err = GetMoviesError();
+		goto bail;
+	}
+	
+	mkvTrack->theMedia = NewTrackMedia(mkvTrack->theTrack, VideoMediaType, 
+									   GetMovieTimeScale(theMovie), dataRef, dataRefType);
+	if (mkvTrack->theMedia == NULL) {
+		err = GetMoviesError();
+		goto bail;
+	}
+	
+	// this sets up anything else needed in the description for the specific codec.
+	FinishSampleDescription(tr_entry, (SampleDescriptionHandle) imgDesc);
+	
+	// finally, say that we're transparent
+	mh = GetMediaHandler(mkvTrack->theMedia);
+	MediaSetGraphicsMode(mh, graphicsModePreWhiteAlpha, NULL);
+	
+	// and save our sample description
+	mkvTrack->sampleHdl = (SampleDescriptionHandle) imgDesc;
+
+bail:
+	if (err) DisposeHandle((Handle) imgDesc);
 	return err;
 }
 
@@ -538,6 +607,12 @@ FourCharCode GetFourCC(KaxTrackEntry *tr_entry)
 	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
 	if (tr_codec == NULL)
 		return 0;
+	
+	// how should we handle compressed tracks?
+	KaxContentEncodings *contentEncs = FindChild<KaxContentEncodings>(*tr_entry);
+	if (contentEncs) {
+		return 'COMP';
+	}
 	
 	string codecString(*tr_codec);
 	
