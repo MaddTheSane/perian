@@ -2,3 +2,4 @@ _FFusionCodecComponentDispatch
 _FFAvi_MovieImportComponentDispatch
 _MatroskaImportComponentDispatch
 _VobSubCodecComponentDispatch
+_TextSubCodecComponentDispatch

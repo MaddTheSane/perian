@@ -567,7 +567,7 @@ ComponentResult MkvCreateSubtitleTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_e
 		
 	} else if ((*imgDesc)->cType == kSubFormatUTF8) {
 		(*imgDesc)->width = FixedToInt(trackWidth);
-		(*imgDesc)->height = FixedToInt(trackWidth);
+		(*imgDesc)->height = FixedToInt(trackHeight);
 		
 	} else {
 		err = invalidTrack;
