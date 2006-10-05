@@ -300,7 +300,7 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	CGContextClearRect(c, CGRectMake(0, 0, myDrp->width, myDrp->height));
 	
 	// hardcoded subtitle font+size...
-	CGContextSelectFont(c, "Chalkboard-Bold", 30, kCGEncodingMacRoman);
+	CGContextSelectFont(c, "HelveticaNeue-CondensedBold", 30, kCGEncodingMacRoman);
 	CGContextSetRGBFillColor(c, 1, 1, .1, 1);
 	CGContextSetRGBStrokeColor(c, 0, 0, 0, 1);
 
