@@ -61,6 +61,7 @@ FourCharCode GetFourCC(KaxTrackEntry *tr_entry);
 int GetAACProfile(KaxTrackEntry *tr_entry);
 UInt32 GetDefaultChannelLayout(AudioStreamBasicDescription &asbd);
 void FinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc);
+typedef struct PixelAspectRatio {UInt32 hSpacing, vSpacing;} PixelAspectRatio;
 
 ComponentResult ReadSegmentInfo(KaxInfo *segmentInfo, MkvSegment *segment, Movie theMovie)
 {
@@ -382,12 +383,14 @@ ComponentResult MkvCreateVideoTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_entr
 {
 	ComponentResult err = noErr;
 	ImageDescriptionHandle imgDesc;
+	PixelAspectRatio **pasp = (PixelAspectRatio**)NewHandle(sizeof(PixelAspectRatio));
 	Fixed width, height;
 	
 	KaxTrackVideo *tr_video = FindChild<KaxTrackVideo>(*tr_entry);
 	if (tr_video == NULL) 
 		return -1;
-	
+	**pasp = (PixelAspectRatio){1,1};
+
 	KaxVideoDisplayWidth *disp_width = FindChild<KaxVideoDisplayWidth>(*tr_video);
 	KaxVideoDisplayHeight *disp_height = FindChild<KaxVideoDisplayHeight>(*tr_video);
 	KaxVideoPixelWidth *pxl_width = FindChild<KaxVideoPixelWidth>(*tr_video);
@@ -396,6 +399,10 @@ ComponentResult MkvCreateVideoTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_entr
 	if (disp_width != NULL && disp_height != NULL) {
 		width = IntToFixed((int)uint32(*disp_width));
 		height = IntToFixed((int)uint32(*disp_height));
+		if (pxl_width != NULL && pxl_height != NULL) {
+			**pasp = (PixelAspectRatio){uint32(*disp_width) * uint32(*pxl_height),uint32(*disp_height) * uint32(*pxl_width)};
+			if ((*pasp)->hSpacing == (*pasp)->vSpacing) **pasp = (PixelAspectRatio){1,1};
+		}
 		
 	} else if (pxl_width != NULL || pxl_height != NULL) {
 		// if no display tags are set, the display dimensions are the pixel dimensions
@@ -428,6 +435,9 @@ ComponentResult MkvCreateVideoTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_entr
 	(*imgDesc)->cType = GetFourCC(tr_entry);
     (*imgDesc)->depth = 24;
     (*imgDesc)->clutID = -1;
+	(*pasp)->hSpacing = EndianU32_NtoB((*pasp)->hSpacing);
+	(*pasp)->vSpacing = EndianU32_NtoB((*pasp)->vSpacing);
+	AddImageDescriptionExtension(imgDesc,(Handle)pasp,kICMImageDescriptionPropertyID_PixelAspectRatio);
 	
 	// this sets up anything else needed in the description for the specific codec.
 	FinishSampleDescription(tr_entry, (SampleDescriptionHandle) imgDesc);
