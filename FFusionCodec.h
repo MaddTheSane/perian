@@ -42,6 +42,7 @@
 #define kFLV1CodecInfoResID			265
 #define kFlashSVCodecInfoResID		266
 #define kVP6CodecInfoResID			267
+#define kI263CodecInfoResID			268
 
 #define kFFusionCodecManufacturer	'SNE2'
 
