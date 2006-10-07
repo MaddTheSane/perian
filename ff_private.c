@@ -197,6 +197,10 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	ioSize = sizeof(UInt32);
 	AudioFormatGetProperty(kAudioFormatProperty_FormatIsVBR, sizeof(AudioStreamBasicDescription), &asbd, &ioSize, &map->vbr);
 	
+	/* ask the toolbox about more information */
+	ioSize = sizeof(AudioStreamBasicDescription);
+	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
+	
 	/* Set some fields of the AudioStreamBasicDescription. Then ask the AudioToolbox
 		* to fill as much as possible before creating the SoundDescriptionHandle */
 	asbd.mSampleRate = codec->sample_rate;
@@ -210,10 +214,6 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	// but we need > 0 frames per packet or Apple's mp3 decoder won't work
 	if (asbd.mBytesPerPacket == 0 && asbd.mFramesPerPacket == 0)
 		asbd.mFramesPerPacket = 1;
-	
-	/* ask the toolbox about more information */
-	ioSize = sizeof(AudioStreamBasicDescription);
-	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
 	
 	/* If we have vbr audio, the media scale most likely has to be set to the time_base denumerator */
 	if(map->vbr) {
