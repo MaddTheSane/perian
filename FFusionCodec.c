@@ -494,6 +494,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			case 'I263':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_H263I);
 				break;
+			case 'VP30':
+			case 'VP31':
+				glob->avCodec = avcodec_find_decoder(CODEC_ID_VP3);
+				break;
             default:
 			Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
                 
@@ -1199,6 +1203,11 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 				
 			case 'I263':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kI263CodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
+				
+			case 'VP30':
+			case 'VP31':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kVP3CodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
             default:	// should never happen but we have to handle the case

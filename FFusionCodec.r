@@ -56,6 +56,7 @@
 #define kFlashSVName	"Flash Screen Video"
 #define kVP6Name		"TrueMotion VP6"
 #define kI263Name		"Intel H.263"
+#define kVP3Name		"On2 VP3"
 
 // Codec names Resource ID
 
@@ -72,6 +73,7 @@
 #define kFlashSVNameResID	266
 #define kVP6NameResID		267
 #define kI263NameResID		268
+#define kVP3NameResID		269
 
 // Codec infos Resource ID
 
@@ -88,6 +90,7 @@
 #define kFlashSVInfoResID	295
 #define kVP6InfoResID		296
 #define kI263InfoResID		297
+#define kVP3InfoResID		298
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -381,6 +384,31 @@ resource 'cdci' (kFlashSVCodecInfoResID) {
 
 resource 'cdci' (kVP6CodecInfoResID) {
 	kVP6Name,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// VP3 Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kVP3CodecInfoResID) {
+	kVP3Name,				// Type
 	1,					// Version
 	1,					// Revision level
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2228,6 +2256,66 @@ resource 'thng' (314) {
 };
 };
 
+resource 'thng' (315) {
+	decompressorComponentType,		// Type			
+	'VP30',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kVP3NameResID,			// Name ID
+	'STR ',					// Info Type
+	kVP3InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (316) {
+	decompressorComponentType,		// Type			
+	'VP31',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kVP3NameResID,			// Name ID
+	'STR ',					// Info Type
+	kVP3InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
@@ -2284,6 +2372,10 @@ resource 'STR ' (kI263NameResID) {
 	"Intel H.263 Decoder"
 };
 
+resource 'STR ' (kVP3NameResID) {
+	"On2 VP3 Decoder"
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
@@ -2338,6 +2430,10 @@ resource 'STR ' (kVP6InfoResID) {
 
 resource 'STR ' (kI263InfoResID) {
 	"Decompresses video stored in Intel H.263 format."
+};
+
+resource 'STR ' (kVP3InfoResID) {
+	"Decompresses video stored in On2 VP3 format."
 };
 
 //---------------------------------------------------------------------------

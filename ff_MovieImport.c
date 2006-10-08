@@ -87,6 +87,7 @@ void initLib()
 		register_avcodec(&h264_decoder);
 		register_avcodec(&flv_decoder);
 		register_avcodec(&flashsv_decoder);
+		register_avcodec(&vp3_decoder);
 		register_avcodec(&vp6_decoder);
 		register_avcodec(&vp6f_decoder);
 		register_avcodec(&h263i_decoder);
