@@ -65,6 +65,7 @@ enum {
 enum {
 	kSampleDescriptionExtensionTheora = 'XdxT',
 	kSampleDescriptionExtensionVobSubIdx = '.IDX',
+	kSampleDescriptionExtensionReal = 'RVex',
 };
 
 
@@ -141,6 +142,7 @@ ComponentResult DescExt_H264(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
 ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
 ComponentResult DescExt_VobSub(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
+ComponentResult DescExt_Real(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
 
 struct CodecDescExtFunc {
 	OSType cType;
@@ -152,6 +154,10 @@ static const struct CodecDescExtFunc kMatroskaSampleDescExtFuncs[] = {
 	{ kAudioFormatXiphVorbis, DescExt_XiphVorbis },
 	{ kAudioFormatXiphFLAC, DescExt_XiphFLAC },
 	{ kSubFormatVobSub, DescExt_VobSub },
+	{ kVideoFormatReal5, DescExt_Real },
+	{ kVideoFormatRealG2, DescExt_Real },
+	{ kVideoFormatReal8, DescExt_Real },
+	{ kVideoFormatReal9, DescExt_Real },
 };
 
 short GetTrackLanguage(KaxTrackEntry *tr_entry);
