@@ -26,8 +26,11 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <matroska/KaxTracks.h>
 #include <matroska/KaxTrackEntryData.h>
+#include <matroska/KaxContentEncoding.h>
 #include "MatroskaCodecIDs.h"
+#include "CommonUtils.h"
 #include <string>
+
 using namespace std;
 using namespace libmatroska;
 
@@ -217,7 +220,7 @@ ComponentResult DescExt_VobSub(KaxTrackEntry *tr_entry, SampleDescriptionHandle 
 		Handle imgDescExt = NewHandle(codecPrivate->GetSize());
 		memcpy(*imgDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
 		
-		AddImageDescriptionExtension(imgDesc, imgDescExt, '.IDX');
+		AddImageDescriptionExtension(imgDesc, imgDescExt, kSampleDescriptionExtensionVobSubIdx);
 		
 		DisposeHandle((Handle) imgDescExt);
 	}
@@ -323,16 +326,130 @@ ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription
 	return noErr;
 }
 
-long GetTrackLanguage(KaxTrackEntry *tr_entry) {
+short GetTrackLanguage(KaxTrackEntry *tr_entry) {
 	KaxTrackLanguage *trLang = FindChild<KaxTrackLanguage>(*tr_entry);
 	if (trLang != NULL) {
-		string lang(*trLang);
-		int i;
+		char lang[4];
+		string langStr(*trLang);
+		strncpy(lang, langStr.c_str(), 3);
+		lang[3] = '\0';
 		
-		for (i = 0; i < sizeof(MkvAndQTLanguagePairs) / sizeof(LanguagePair); i++) {
-			if (lang.compare(MkvAndQTLanguagePairs[i].mkvLang) == 0)
-				return MkvAndQTLanguagePairs[i].qtLang;
-		}
+		return ThreeCharLangCodeToQTLangCode(lang);
 	}
 	return langUnspecified;
+}
+
+
+
+typedef struct {
+	OSType cType;
+	char *mkvID;
+} MatroskaQT_Codec;
+
+// the first matching pair is used for conversion
+static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
+	{ kRawCodecType, "V_UNCOMPRESSED" },
+	{ kMPEG4VisualCodecType, "V_MPEG4/ISO/ASP" },
+	{ kMPEG4VisualCodecType, "V_MPEG4/ISO/SP" },
+	{ kMPEG4VisualCodecType, "V_MPEG4/ISO/AP" },
+	{ kH264CodecType, "V_MPEG4/ISO/AVC" },
+	{ kVideoFormatMSMPEG4v3, "V_MPEG4/MS/V3" },
+	{ kMPEG1VisualCodecType, "V_MPEG1" },
+	{ kMPEG2VisualCodecType, "V_MPEG2" },
+	{ kVideoFormatReal5, "V_REAL/RV10" },
+	{ kVideoFormatRealG2, "V_REAL/RV20" },
+	{ kVideoFormatReal8, "V_REAL/RV30" },
+	{ kVideoFormatReal9, "V_REAL/RV40" },
+	{ kVideoFormatXiphTheora, "V_THEORA" },
+	
+	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/LC" },
+	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/MAIN" },
+	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/LC/SBR" },
+	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/SSR" },
+	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/LTP" },
+	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG2/LC" },
+	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG2/MAIN" },
+	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG2/LC/SBR" },
+	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG2/SSR" },
+	{ kAudioFormatMPEGLayer1, "A_MPEG/L1" },
+	{ kAudioFormatMPEGLayer2, "A_MPEG/L2" },
+	{ kAudioFormatMPEGLayer3, "A_MPEG/L3" },
+	{ kAudioFormatAC3, "A_AC3" },
+	{ kAudioFormatAC3MS, "A_AC3" },
+	// anything special for these two?
+	{ kAudioFormatAC3, "A_AC3/BSID9" },
+	{ kAudioFormatAC3, "A_AC3/BSID10" },
+	{ kAudioFormatXiphVorbis, "A_VORBIS" },
+	{ kAudioFormatXiphFLAC, "A_FLAC" },
+	{ kAudioFormatLinearPCM, "A_PCM/INT/LIT" },
+	{ kAudioFormatLinearPCM, "A_PCM/INT/BIG" },
+	{ kAudioFormatLinearPCM, "A_PCM/FLOAT/IEEE" },
+	{ kAudioFormatDTS, "A_DTS" },
+	{ kAudioFormatTTA, "A_TTA1" },
+	{ kAudioFormatWavepack, "A_WAVPACK4" },
+	{ kAudioFormatReal1, "A_REAL/14_4" },
+	{ kAudioFormatReal2, "A_REAL/28_8" },
+	{ kAudioFormatRealCook, "A_REAL/COOK" },
+	{ kAudioFormatRealSipro, "A_REAL/SIPR" },
+	{ kAudioFormatRealLossless, "A_REAL/RALF" },
+	{ kAudioFormatRealAtrac3, "A_REAL/ATRC" },
+	
+#if 0
+	{ kBMPCodecType, "S_IMAGE/BMP" },
+	{ kSubFormatSSA, "S_TEXT/SSA" },
+	{ kSubFormatASS, "S_TEXT/ASS" },
+	{ kSubFormatUSF, "S_TEXT/USF" },
+#endif
+	{ kSubFormatUTF8, "S_TEXT/UTF8" },
+	{ kSubFormatVobSub, "S_VOBSUB" },
+};
+
+
+FourCharCode GetFourCC(KaxTrackEntry *tr_entry)
+{
+	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
+	if (tr_codec == NULL)
+		return 0;
+	
+	string codecString(*tr_codec);
+	
+	// how should we handle compressed tracks in general?
+	KaxContentEncodings *contentEncs = FindChild<KaxContentEncodings>(*tr_entry);
+	if (contentEncs) {
+		OSType subtype = 0;
+		for (int i = 0; i < sizeof(kMatroskaCodecIDs) / sizeof(MatroskaQT_Codec); i++) {
+			if (codecString == kMatroskaCodecIDs[i].mkvID)
+				subtype = kMatroskaCodecIDs[i].cType;
+		}
+		else
+			return 'COMP';
+	}
+	
+	if (codecString == MKV_V_MS) {
+		// avi compatibility mode, 4cc is in private info
+		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+		if (codecPrivate == NULL)
+			return 0;
+		
+		// offset to biCompression in BITMAPINFO
+		unsigned char *p = (unsigned char *) codecPrivate->GetBuffer() + 16;
+		return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+		
+	} else if (codecString == MKV_V_QT) {
+		// QT compatibility mode, private info is the ImageDescription structure, big endian
+		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+		if (codecPrivate == NULL)
+			return 0;
+		
+		// starts at the 4CC
+		unsigned char *p = (unsigned char *) codecPrivate->GetBuffer();
+		return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+		
+	} else {
+		for (int i = 0; i < sizeof(kMatroskaCodecIDs) / sizeof(MatroskaQT_Codec); i++) {
+			if (codecString == kMatroskaCodecIDs[i].mkvID)
+				return kMatroskaCodecIDs[i].cType;
+		}
+	}
+	return 0;
 }

@@ -57,7 +57,6 @@ ComponentResult MkvCreateAudioTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_entr
 									Movie theMovie, Handle dataRef, OSType dataRefType);
 ComponentResult MkvCreateSubtitleTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tracks, 
 									   Movie theMovie, Handle dataRef, OSType dataRefType);
-FourCharCode GetFourCC(KaxTrackEntry *tr_entry);
 int GetAACProfile(KaxTrackEntry *tr_entry);
 UInt32 GetDefaultChannelLayout(AudioStreamBasicDescription &asbd);
 void FinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc);
@@ -610,49 +609,6 @@ ComponentResult MkvCreateSubtitleTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_e
 bail:
 	if (err) DisposeHandle((Handle) imgDesc);
 	return err;
-}
-
-FourCharCode GetFourCC(KaxTrackEntry *tr_entry)
-{
-	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
-	if (tr_codec == NULL)
-		return 0;
-	
-	// how should we handle compressed tracks?
-	KaxContentEncodings *contentEncs = FindChild<KaxContentEncodings>(*tr_entry);
-	if (contentEncs) {
-		return 'COMP';
-	}
-	
-	string codecString(*tr_codec);
-	
-	if (codecString == MKV_V_MS) {
-		// avi compatibility mode, 4cc is in private info
-		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		if (codecPrivate == NULL)
-			return 0;
-		
-		// offset to biCompression in BITMAPINFO
-		unsigned char *p = (unsigned char *) codecPrivate->GetBuffer() + 16;
-		return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
-		
-	} else if (codecString == MKV_V_QT) {
-		// QT compatibility mode, private info is the ImageDescription structure, big endian
-		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		if (codecPrivate == NULL)
-			return 0;
-		
-		// starts at the 4CC
-		unsigned char *p = (unsigned char *) codecPrivate->GetBuffer();
-		return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
-		
-	} else {
-		for (int i = 0; i < sizeof(kMatroskaCodecIDs) / sizeof(MatroskaQT_Codec); i++) {
-			if (codecString == kMatroskaCodecIDs[i].mkvID)
-				return kMatroskaCodecIDs[i].cType;
-		}
-	}
-	return 0;
 }
 
 int GetAACProfile(KaxTrackEntry *tr_entry) {

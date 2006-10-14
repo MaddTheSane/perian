@@ -63,7 +63,8 @@ enum {
 };
 
 enum {
-    kSampleDescriptionExtensionTheora = 'XdxT'
+	kSampleDescriptionExtensionTheora = 'XdxT',
+	kSampleDescriptionExtensionVobSubIdx = '.IDX',
 };
 
 
@@ -102,69 +103,6 @@ enum {
 
 
 
-typedef struct {
-	OSType cType;
-	char *mkvID;
-} MatroskaQT_Codec;
-
-// the first matching pair is used for conversion
-static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
-	{ kRawCodecType, "V_UNCOMPRESSED" },
-	{ kMPEG4VisualCodecType, "V_MPEG4/ISO/ASP" },
-	{ kMPEG4VisualCodecType, "V_MPEG4/ISO/SP" },
-	{ kMPEG4VisualCodecType, "V_MPEG4/ISO/AP" },
-	{ kH264CodecType, "V_MPEG4/ISO/AVC" },
-	{ kVideoFormatMSMPEG4v3, "V_MPEG4/MS/V3" },
-	{ kMPEG1VisualCodecType, "V_MPEG1" },
-	{ kMPEG2VisualCodecType, "V_MPEG2" },
-	{ kVideoFormatReal5, "V_REAL/RV10" },
-	{ kVideoFormatRealG2, "V_REAL/RV20" },
-	{ kVideoFormatReal8, "V_REAL/RV30" },
-	{ kVideoFormatReal9, "V_REAL/RV40" },
-	{ kVideoFormatXiphTheora, "V_THEORA" },
-	
-	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/LC" },
-	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/MAIN" },
-	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/LC/SBR" },
-	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/SSR" },
-	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/LTP" },
-	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG2/LC" },
-	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG2/MAIN" },
-	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG2/LC/SBR" },
-	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG2/SSR" },
-	{ kAudioFormatMPEGLayer1, "A_MPEG/L1" },
-	{ kAudioFormatMPEGLayer2, "A_MPEG/L2" },
-	{ kAudioFormatMPEGLayer3, "A_MPEG/L3" },
-	{ kAudioFormatAC3, "A_AC3" },
-	{ kAudioFormatAC3MS, "A_AC3" },
-	// anything special for these two?
-	{ kAudioFormatAC3, "A_AC3/BSID9" },
-	{ kAudioFormatAC3, "A_AC3/BSID10" },
-	{ kAudioFormatXiphVorbis, "A_VORBIS" },
-	{ kAudioFormatXiphFLAC, "A_FLAC" },
-	{ kAudioFormatLinearPCM, "A_PCM/INT/LIT" },
-	{ kAudioFormatLinearPCM, "A_PCM/INT/BIG" },
-	{ kAudioFormatLinearPCM, "A_PCM/FLOAT/IEEE" },
-	{ kAudioFormatDTS, "A_DTS" },
-	{ kAudioFormatTTA, "A_TTA1" },
-	{ kAudioFormatWavepack, "A_WAVPACK4" },
-	{ kAudioFormatReal1, "A_REAL/14_4" },
-	{ kAudioFormatReal2, "A_REAL/28_8" },
-	{ kAudioFormatRealCook, "A_REAL/COOK" },
-	{ kAudioFormatRealSipro, "A_REAL/SIPR" },
-	{ kAudioFormatRealLossless, "A_REAL/RALF" },
-	{ kAudioFormatRealAtrac3, "A_REAL/ATRC" },
-	
-#if 0
-	{ kBMPCodecType, "S_IMAGE/BMP" },
-	{ kSubFormatSSA, "S_TEXT/SSA" },
-	{ kSubFormatASS, "S_TEXT/ASS" },
-	{ kSubFormatUSF, "S_TEXT/USF" },
-#endif
-	{ kSubFormatUTF8, "S_TEXT/UTF8" },
-	{ kSubFormatVobSub, "S_VOBSUB" },
-};
-
 // these CodecIDs need special handling since they correspond to many fourccs
 #define MKV_V_MS "V_MS/VFW/FOURCC"
 #define MKV_V_QT "V_QUICKTIME"
@@ -193,7 +131,6 @@ static const struct ASBDExtensionFunc kMatroskaASBDExtensionFuncs[] = {
 };
 
 
-
 typedef enum {
 	kToKaxTrackEntry,
 	kToSampleDescription
@@ -214,135 +151,10 @@ static const struct CodecDescExtFunc kMatroskaSampleDescExtFuncs[] = {
 	{ kH264CodecType, DescExt_H264 },
 	{ kAudioFormatXiphVorbis, DescExt_XiphVorbis },
 	{ kAudioFormatXiphFLAC, DescExt_XiphFLAC },
-	{ kSubFormatVobSub, DescExt_VobSub }
+	{ kSubFormatVobSub, DescExt_VobSub },
 };
 
-
-
-struct LanguagePair {
-	char mkvLang[4];	// (ISO 639-2 3 char code)
-	long qtLang;
-};
-
-// don't think there's a function already to do ISO 639-2 -> language code 
-// that SetMediaLanguage accepts
-static const struct LanguagePair MkvAndQTLanguagePairs[] = {
-	{ "afr", langAfrikaans },
-	{ "alb", langAlbanian },
-	{ "amh", langAmharic },
-	{ "ara", langArabic },
-	{ "arm", langArmenian },
-	{ "asm", langAssamese }, 
-	{ "aym", langAymara },
-	{ "aze", langAzerbaijani },
-	{ "baq", langBasque },
-	{ "ben", langBengali },
-	{ "bre", langBreton },
-	{ "bul", langBulgarian },
-	{ "bur", langBurmese },
-	{ "cat", langCatalan },
-	{ "chi", langTradChinese },
-	{ "cze", langCzech },
-	{ "dan", langDanish },
-	{ "dut", langDutch },
-	{ "dzo", langDzongkha },
-	{ "eng", langEnglish },
-	{ "epo", langEsperanto },
-	{ "est", langEstonian },
-	{ "fao", langFaroese },
-	{ "fin", langFinnish },
-	{ "fre", langFrench },
-	{ "geo", langGeorgian },
-	{ "ger", langGerman },
-	{ "gig", langGalician },
-	{ "gla", langScottishGaelic },
-	{ "gle", langIrishGaelic },
-	{ "glv", langManxGaelic },
-	{ "grc", langGreekAncient },
-	{ "gre", langGreek },
-	{ "grn", langGuarani },
-	{ "guj", langGujarati },
-	{ "heb", langHebrew },
-	{ "hin", langHindi },
-	{ "hmn", langHungarian },
-	{ "ice", langIcelandic },
-	{ "ind", langIndonesian },
-	{ "ita", langItalian },
-	{ "jav", langJavaneseRom },
-	{ "jpn", langJapanese },
-	{ "kal", langGreenlandic },
-	{ "kan", langKannada },
-	{ "kas", langKashmiri },
-	{ "kaz", langKazakh },
-	{ "khm", langKhmer },
-	{ "kin", langKinyarwanda },
-	{ "kir", langKirghiz },
-	{ "kor", langKorean },
-	{ "kur", langKurdish },
-	{ "lao", langLao },
-	{ "lat", langLatin },
-	{ "lav", langLatvian },
-	{ "lit", langLithuanian },
-	{ "mac", langMacedonian },
-	{ "mal", langMalayalam },
-	{ "mar", langMarathi },
-	{ "may", langMalayRoman },
-	{ "mlg", langMalagasy },
-	{ "mlt", langMaltese },
-	{ "mol", langMoldavian },
-	{ "mon", langMongolian },
-	{ "nep", langNepali },
-	{ "nob", langNorwegian },	// Norwegian Bokmål
-	{ "nor", langNorwegian },
-	{ "nno", langNynorsk },
-	{ "nya", langNyanja },
-	{ "ori", langOriya },
-	{ "orm", langOromo },
-	{ "pan", langPunjabi },
-	{ "per", langPersian },
-	{ "pol", langPolish },
-	{ "por", langPortuguese },
-	{ "que", langQuechua },
-	{ "rum", langRomanian },
-	{ "run", langRundi },
-	{ "rus", langRussian },
-	{ "san", langSanskrit },
-	{ "scc", langSerbian },
-	{ "scr", langCroatian },
-	{ "sin", langSinhalese },
-	{ "sit", langTibetan },		// Sino-Tibetan (Other)
-	{ "slo", langSlovak },
-	{ "slv", langSlovenian },
-	{ "sme", langSami },
-	{ "smi", langSami },		// Sami languages (Other)
-	{ "snd", langSindhi },
-	{ "som", langSomali },
-	{ "spa", langSpanish },
-	{ "sun", langSundaneseRom },
-	{ "swa", langSwahili },
-	{ "swe", langSwedish },
-	{ "tam", langTamil },
-	{ "tat", langTatar },
-	{ "tel", langTelugu },
-	{ "tgk", langTajiki },
-	{ "tgl", langTagalog },
-	{ "tha", langThai },
-	{ "tib", langTibetan },
-	{ "tir", langTigrinya },
-	{ "tog", langTongan },		// Tonga (Nyasa)
-	{ "tog", langTongan },		// Tonga (Tonga Islands)
-	{ "tur", langTurkish },
-	{ "tuk", langTurkmen },
-	{ "uig", langUighur },
-	{ "ukr", langUkrainian },
-	{ "und", langUnspecified },
-	{ "urd", langUrdu },
-	{ "uzb", langUzbek },
-	{ "vie", langVietnamese },
-	{ "wel", langWelsh },
-	{ "yid", langYiddish }
-};
-
-long GetTrackLanguage(KaxTrackEntry *tr_entry);
+short GetTrackLanguage(KaxTrackEntry *tr_entry);
+FourCharCode GetFourCC(KaxTrackEntry *tr_entry);
 
 #endif
