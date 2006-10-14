@@ -504,7 +504,7 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 		if(st->codec->codec_type == CODEC_TYPE_VIDEO) {
 			track = NewMovieTrack(theMovie, st->codec->width << 16, st->codec->height << 16, kNoVolume);
 			initialize_video_map(&map[j], track, dataRef, dataRefType);
-		} else {
+		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
 			track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
 			initialize_audio_map(&map[j], track, dataRef, dataRefType);
 			
