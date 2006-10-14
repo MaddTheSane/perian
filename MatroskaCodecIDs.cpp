@@ -441,8 +441,7 @@ FourCharCode GetFourCC(KaxTrackEntry *tr_entry)
 			if (codecString == kMatroskaCodecIDs[i].mkvID)
 				subtype = kMatroskaCodecIDs[i].cType;
 		}
-		else
-			return 'COMP';
+		return 'COMP';
 	}
 	
 	if (codecString == MKV_V_MS) {
