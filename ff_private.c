@@ -49,8 +49,8 @@ bail:
 void register_parsers()
 {
 	/* Do we need more parsers here? */
-    av_register_codec_parser(&mpegaudio_parser);
-	av_register_codec_parser(&ac3_parser);
+//    av_register_codec_parser(&mpegaudio_parser);
+//	av_register_codec_parser(&ac3_parser);
 } /* register_parsers() */
 
 
