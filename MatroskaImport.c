@@ -36,6 +36,7 @@
 #include "MatroskaImportVersion.h"
 #include "MatroskaImport.h"
 #include "MkvImportPrivate.h"
+#include "SubImport.h"
 
 #pragma mark- Component Dispatch
 
@@ -137,7 +138,10 @@ pascal ComponentResult MatroskaImportFile(MatroskaImportGlobals store, const FSS
 							durationAdded,
 							inFlags,
 							outFlags);
-
+	if (err) goto bail;
+	
+	LoadExternalSubtitles(&theFileFSRef, theMovie);
+	
 bail:
 	if (store->filename)
 		CFRelease(store->filename);

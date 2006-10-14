@@ -25,6 +25,7 @@
 #include "MatroskaCodecIDs.h"
 #include "MkvImportPrivate.h"
 #include "MkvMovieSetup.h"
+#include "SubImport.h"
 #include <QuickTime/QuickTime.h>
 #include <AudioToolbox/AudioToolbox.h>
 
@@ -540,7 +541,6 @@ ComponentResult MkvCreateSubtitleTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_e
 {
 	ComponentResult err = noErr;
 	Fixed trackWidth, trackHeight;
-	Fixed horizontalOffset, verticalOffset;
 	Rect movieBox;
 	MediaHandler mh;
 	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
@@ -574,34 +574,38 @@ ComponentResult MkvCreateSubtitleTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_e
 		(*imgDesc)->width = width;
 		(*imgDesc)->height = height;
 		
+		mkvTrack->theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
+		if (mkvTrack->theTrack == NULL) {
+			err = GetMoviesError();
+			goto bail;
+		}
+		
+		mkvTrack->theMedia = NewTrackMedia(mkvTrack->theTrack, VideoMediaType, GetMovieTimeScale(theMovie), dataRef, dataRefType);
+		if (mkvTrack->theMedia == NULL) {
+			err = GetMoviesError();
+			goto bail;
+		}
+		
+		// finally, say that we're transparent
+		mh = GetMediaHandler(mkvTrack->theMedia);
+		MediaSetGraphicsMode(mh, graphicsModePreWhiteAlpha, NULL);
+		
 	} else if ((*imgDesc)->cType == kSubFormatUTF8) {
-		(*imgDesc)->width = FixedToInt(trackWidth);
-		(*imgDesc)->height = FixedToInt(trackHeight);
+		mkvTrack->theTrack = CreatePlaintextSubTrack(theMovie, imgDesc, GetMovieTimeScale(theMovie), dataRef, dataRefType);
+		if (mkvTrack->theTrack == NULL) {
+			err = GetMoviesError();
+			goto bail;
+		}
+		
+		mkvTrack->theMedia = GetTrackMedia(mkvTrack->theTrack);
 		
 	} else {
 		err = invalidTrack;
 		goto bail;
 	}
 	
-	mkvTrack->theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
-	if (mkvTrack->theTrack == NULL) {
-		err = GetMoviesError();
-		goto bail;
-	}
-	
-	mkvTrack->theMedia = NewTrackMedia(mkvTrack->theTrack, VideoMediaType, 
-									   GetMovieTimeScale(theMovie), dataRef, dataRefType);
-	if (mkvTrack->theMedia == NULL) {
-		err = GetMoviesError();
-		goto bail;
-	}
-	
 	// this sets up anything else needed in the description for the specific codec.
 	FinishSampleDescription(tr_entry, (SampleDescriptionHandle) imgDesc);
-	
-	// finally, say that we're transparent
-	mh = GetMediaHandler(mkvTrack->theMedia);
-	MediaSetGraphicsMode(mh, graphicsModePreWhiteAlpha, NULL);
 	
 	// and save our sample description
 	mkvTrack->sampleHdl = (SampleDescriptionHandle) imgDesc;

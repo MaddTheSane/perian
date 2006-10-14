@@ -26,6 +26,7 @@
 #include "allformats.h"
 #include "Codecprintf.h"
 #include "riff.h"
+#include "SubImport.h"
 
 /* This one is a little big in ffmpeg and private anyway */
 #define PROBE_BUF_SIZE 64
@@ -339,6 +340,7 @@ ComponentResult FFAvi_MovieImportFile(ff_global_ptr storage, const FSSpec *theFi
 	ComponentResult result;
 	Handle dataRef = NULL;
 	OSType dataRefType;
+	FSRef theFileFSRef;
 	
 	*outFlags = 0;
 	
@@ -347,6 +349,13 @@ ComponentResult FFAvi_MovieImportFile(ff_global_ptr storage, const FSSpec *theFi
 	
 	result = MovieImportDataRef(storage->ci, dataRef, dataRefType, theMovie, targetTrack, usedTrack, atTime, addedDuration,
 								inFlags, outFlags);
+	require_noerr(result, bail);
+	
+	result = FSpMakeFSRef(theFile, &theFileFSRef);
+	require_noerr(result, bail);
+	
+	LoadExternalSubtitles(&theFileFSRef, theMovie);
+	
 bail:
 		if(dataRef)
 			DisposeHandle(dataRef);

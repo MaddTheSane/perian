@@ -160,6 +160,8 @@
 		61CB120C0ACE0F8A007994BD /* DataHandlerCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D6914E0AC8E382000EFC7D /* DataHandlerCallback.cpp */; };
 		61CB120D0ACE0F8D007994BD /* MatroskaCodecIDs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D691500AC8E382000EFC7D /* MatroskaCodecIDs.cpp */; };
 		61CB12260ACE1074007994BD /* MatroskaImport.r in Rez */ = {isa = PBXBuildFile; fileRef = 61D691590AC8E382000EFC7D /* MatroskaImport.r */; };
+		61D514DE0ADF3DBA00A671E1 /* SubImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D514DD0ADF3DBA00A671E1 /* SubImport.c */; };
+		61D517730AE0402E00A671E1 /* CommonUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D517720AE0402E00A671E1 /* CommonUtils.c */; };
 		8F483B550A642644002CCA73 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B540A642644002CCA73 /* libavformat.a */; };
 		8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */; };
 		8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */ = {isa = PBXBuildFile; fileRef = 8F483B8B0A642886002CCA73 /* PerianAviImporter.r */; };
@@ -339,6 +341,10 @@
 		61CB11C90ACDF50F007994BD /* KaxTracks.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTracks.cpp; path = libmatroska/src/KaxTracks.cpp; sourceTree = "<group>"; };
 		61CB11CA0ACDF50F007994BD /* KaxTrackVideo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTrackVideo.cpp; path = libmatroska/src/KaxTrackVideo.cpp; sourceTree = "<group>"; };
 		61CB11CB0ACDF50F007994BD /* KaxVersion.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxVersion.cpp; path = libmatroska/src/KaxVersion.cpp; sourceTree = "<group>"; };
+		61D514DC0ADF3DBA00A671E1 /* SubImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubImport.h; sourceTree = "<group>"; };
+		61D514DD0ADF3DBA00A671E1 /* SubImport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SubImport.c; sourceTree = "<group>"; };
+		61D517710AE0402E00A671E1 /* CommonUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommonUtils.h; sourceTree = "<group>"; };
+		61D517720AE0402E00A671E1 /* CommonUtils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CommonUtils.c; sourceTree = "<group>"; };
 		61D6914E0AC8E382000EFC7D /* DataHandlerCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DataHandlerCallback.cpp; sourceTree = "<group>"; };
 		61D6914F0AC8E382000EFC7D /* DataHandlerCallback.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DataHandlerCallback.h; sourceTree = "<group>"; };
 		61D691500AC8E382000EFC7D /* MatroskaCodecIDs.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MatroskaCodecIDs.cpp; sourceTree = "<group>"; };
@@ -421,6 +427,8 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				61CB11020ACDF37C007994BD /* libebml */,
+				61CB11720ACDF4BB007994BD /* libmatroska */,
 				8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */,
 				1156DBD80A3CE9F500963B0E /* libz.dylib */,
 				11D4EFA10A3CE8C10066D45F /* libavcodec.a */,
@@ -467,6 +475,8 @@
 				F560DF0003D61D0101ABA332 /* FFusionCodec.c */,
 				113F58980A6B091600509987 /* Codecprintf.h */,
 				113F58990A6B091600509987 /* Codecprintf.c */,
+				61D517710AE0402E00A671E1 /* CommonUtils.h */,
+				61D517720AE0402E00A671E1 /* CommonUtils.c */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -490,6 +500,8 @@
 				6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */,
 				6123D6230AD0A3FE003EDE52 /* VobSubCodec.h */,
 				6123D6250AD0A3FF003EDE52 /* VobSubCodecDispatch.h */,
+				61D514DC0ADF3DBA00A671E1 /* SubImport.h */,
+				61D514DD0ADF3DBA00A671E1 /* SubImport.c */,
 			);
 			name = Subtitles;
 			sourceTree = "<group>";
@@ -608,8 +620,6 @@
 		61D691460AC8E333000EFC7D /* Matroska */ = {
 			isa = PBXGroup;
 			children = (
-				61CB11020ACDF37C007994BD /* libebml */,
-				61CB11720ACDF4BB007994BD /* libmatroska */,
 				61D6916B0AC8E3A3000EFC7D /* Import */,
 				61D6916C0AC8E3C5000EFC7D /* Export */,
 				61D6914E0AC8E382000EFC7D /* DataHandlerCallback.cpp */,
@@ -879,6 +889,8 @@
 				61CB120D0ACE0F8D007994BD /* MatroskaCodecIDs.cpp in Sources */,
 				6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */,
 				613CD51E0AD1FB650098A825 /* TextSubCodec.c in Sources */,
+				61D514DE0ADF3DBA00A671E1 /* SubImport.c in Sources */,
+				61D517730AE0402E00A671E1 /* CommonUtils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
