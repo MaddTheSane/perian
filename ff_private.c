@@ -511,11 +511,12 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 	NCStream *ncstr;
 	AVStream *stream;
 	AVCodecContext *codec;
-	SampleReference64Record sampleRec;
+	SampleReference64Ptr sampleRec;
 	int64_t offset,duration;
 	OSStatus err;
 	short flags;
 	short hadIndex = 0;
+	int sampleNum;
 	
 	/* process each stream in ic */
 	for(j = 0; j < ic->nb_streams; j++) {
@@ -527,6 +528,9 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 		/* no stream we can read */
 		if(!ncstr->media)
 			continue;
+		
+		sampleNum = 0;
+		ncstr->sampleTable = calloc(stream->nb_index_entries, sizeof(SampleReference64Record));
 		
 		/* now parse the index entries */
 		for(k = 0; k < stream->nb_index_entries; k++) {
@@ -541,18 +545,21 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 			if((stream->index_entries[k].flags & AVINDEX_KEYFRAME) == 0)
 				flags |= mediaSampleNotSync;
 			
+			sampleRec = &ncstr->sampleTable[sampleNum++];
+			
 			/* set as many fields in sampleRec as possible */
-			memset(&sampleRec, 0, sizeof(sampleRec));
-			sampleRec.dataOffset.hi = offset >> 32;
-			sampleRec.dataOffset.lo = (uint32_t)offset;
-			sampleRec.dataSize = stream->index_entries[k].size;
-			sampleRec.sampleFlags = flags;
+			sampleRec->dataOffset.hi = offset >> 32;
+			sampleRec->dataOffset.lo = (uint32_t)offset;
+			sampleRec->dataSize = stream->index_entries[k].size;
+			sampleRec->sampleFlags = flags;
 			
 			/* some samples have a data_size of zero. if that's the case, ignore them
 				* they seem to be used to stretch the frame duration & are already handled
 				* by the previous pkt */
-			if(sampleRec.dataSize <= 0)
+			if(sampleRec->dataSize <= 0) {
+				sampleNum--;
 				continue;
+			}
 			
 			/* switch for the remaining fields */
 			if(codec->codec_type == CODEC_TYPE_VIDEO) {
@@ -565,8 +572,8 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 					duration++;
 				}
 				
-				sampleRec.durationPerSample = map->base.num * duration;
-				sampleRec.numberOfSamples = 1;
+				sampleRec->durationPerSample = map->base.num * duration;
+				sampleRec->numberOfSamples = 1;
 			}
 			else if(codec->codec_type == CODEC_TYPE_AUDIO) {
 				
@@ -574,25 +581,25 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 				if(ncstr->vbr) {
 					if(codec->frame_size == ncstr->base.num || (codec->frame_size == 0 && ncstr->base.num > 1)) {
 						/* frame_size is set to zero for AAC and some MP3 tracks and it works this way */
-						sampleRec.durationPerSample = ncstr->base.num;
-						sampleRec.numberOfSamples = 1;
+						sampleRec->durationPerSample = ncstr->base.num;
+						sampleRec->numberOfSamples = 1;
 					} else {
 						/* this logic seems to be needed even iff ncstr->base.num == 1, but I'm not entirely sure */
 						/* This seems to work. Although I have no idea why.
 						* Perhaps the stream's timebase is adjusted to
 						* let that work. as the timebase has strange values...*/
-						sampleRec.durationPerSample = sampleRec.dataSize;
-						sampleRec.numberOfSamples = 1;
+						sampleRec->durationPerSample = sampleRec->dataSize;
+						sampleRec->numberOfSamples = 1;
 					}
 				} else {
-					sampleRec.durationPerSample = 1;
-					sampleRec.numberOfSamples = (stream->index_entries[k].size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
+					sampleRec->durationPerSample = 1;
+					sampleRec->numberOfSamples = (stream->index_entries[k].size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
 				}
 			}
-			
-			/* Add the sample to the media */
-			err = AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
 		}
+		/* Add all of the samples to the media */
+		err = AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, sampleNum, ncstr->sampleTable, NULL);
+		free(ncstr->sampleTable);
 	}
 	return hadIndex;
 } /* import_avi() */
