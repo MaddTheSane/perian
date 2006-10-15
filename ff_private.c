@@ -23,6 +23,7 @@
 #include "ff_private.h"
 #include "avcodec.h"
 #include "Codecprintf.h"
+#include "CommonUtils.h"
 
 #include <CoreServices/CoreServices.h>
 #include <AudioToolbox/AudioToolbox.h>
@@ -422,27 +423,6 @@ Handle create_strf_ext(AVCodecContext *codec)
 bail:
 	return result;
 } /* create_extension() */
-
-/* write the int32_t data to target & then return a pointer which points after that data */
-uint8_t *write_int32(uint8_t *target, int32_t data)
-{
-	return write_data(target, (uint8_t*)&data, sizeof(data));
-} /* write_int32() */
-
-/* write the int16_t data to target & then return a pointer which points after that data */
-uint8_t *write_int16(uint8_t *target, int16_t data)
-{
-	return write_data(target, (uint8_t*)&data, sizeof(data));
-} /* write_int16() */
-
-/* write the data to the target adress & then return a pointer which points after the written data */
-uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size)
-{
-	if(data_size > 0)
-		memcpy(target, data, data_size);
-	return (target + data_size);
-} /* write_data() */
-
 
 /* Add the meta data that lavf exposes to the movie */
 void add_metadata(AVFormatContext *ic, Movie theMovie)

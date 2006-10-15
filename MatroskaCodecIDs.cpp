@@ -247,6 +247,98 @@ ComponentResult DescExt_Real(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 	return noErr;
 }
 
+// the esds atom creation is based off of the routines for it in ffmpeg's movenc.c
+static unsigned int descrLength(unsigned int len)
+{
+    int i;
+    for(i=1; len>>(7*i); i++);
+    return len + 1 + i;
+}
+
+static uint8_t* putDescr(uint8_t *buffer, int tag, unsigned int size)
+{
+    int i= descrLength(size) - size - 2;
+    *buffer++ = tag;
+    for(; i>0; i--)
+       *buffer++ = (size>>(7*i)) | 0x80;
+    *buffer++ = size & 0x7F;
+	return buffer;
+}
+
+// ESDS layout:
+//  + version             (4 bytes)
+//  + ES descriptor 
+//   + Track ID            (2 bytes)
+//   + Flags               (1 byte)
+//   + DecoderConfig descriptor
+//    + Object Type         (1 byte)
+//    + Stream Type         (1 byte)
+//    + Buffersize DB       (3 bytes)
+//    + Max bitrate         (4 bytes)
+//    + VBR/Avg bitrate     (4 bytes)
+//    + DecoderSpecific info descriptor
+//     + codecPrivate        (codecPrivate->GetSize())
+//   + SL descriptor
+//    + dunno               (1 byte)
+
+ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
+{
+	if (!tr_entry || !desc) return paramErr;
+	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
+	
+	if (dir == kToSampleDescription) {
+		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+		KaxTrackNumber *trackNum = FindChild<KaxTrackNumber>(*tr_entry);
+		
+		int vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
+		int trackID = trackNum ? uint16(*trackNum) : 1;
+		int decoderSpecificInfoLen = vosLen ? descrLength(vosLen) : 0;
+		
+		Handle imgDescExt = NewHandle(4 + descrLength(3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1)));
+		UInt8 *pos = (UInt8 *) *imgDescExt;
+		
+		pos = write_int32(pos, 0);		// version
+		
+		// ES Descriptor
+		pos = putDescr(pos, 0x03, 3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
+		pos = write_int16(pos, EndianS16_NtoB(trackID));
+		*pos++ = 0;		// no flags
+		
+		// DecoderConfig descriptor
+		pos = putDescr(pos, 0x04, 13 + decoderSpecificInfoLen);
+		
+		// Object type indication, see http://gpac.sourceforge.net/tutorial/mediatypes.htm
+		*pos++ = 0x20;
+		
+		// streamtype (video)
+		*pos++ = 0x11;
+		
+		// 3 bytes: buffersize DB (not sure how to get easily)
+		*pos++ = 0;
+		pos = write_int16(pos, 0);
+		
+		// max bitrate, not sure how to get easily
+		pos = write_int32(pos, 0);
+		
+		// vbr
+		pos = write_int32(pos, 0);
+		
+		if (vosLen) {
+			pos = putDescr(pos, 0x05, vosLen);
+			pos = write_data(pos, codecPrivate->GetBuffer(), vosLen);
+		}
+		
+		// SL descriptor
+		pos = putDescr(pos, 0x06, 1);
+		*pos++ = 0x02;
+		
+		AddImageDescriptionExtension(imgDesc, imgDescExt, 'esds');
+		
+		DisposeHandle((Handle) imgDescExt);
+	}
+	return noErr;
+}
+
 ComponentResult ASBDExt_AC3(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)
 {
 	if (!tr_entry || !asbd) return paramErr;
