@@ -589,11 +589,11 @@ ComponentResult ProcessControlSequence(UInt8 *controlSeq, UInt32 palette[16],
             case 0x05:
                 // coordinates of image
                 controlDataOut->startCol   = controlSeq[i + 1] << 4;
-                controlDataOut->startCol  += controlSeq[i + 2] & 0xf0;
+                controlDataOut->startCol  += (controlSeq[i + 2] & 0xf0) >> 4;
                 controlDataOut->endCol    = (controlSeq[i + 2] & 0x0f) << 8;
                 controlDataOut->endCol    += controlSeq[i + 3];
                 controlDataOut->startLine  = controlSeq[i + 4] << 4;
-                controlDataOut->startLine += controlSeq[i + 5] & 0xf0;
+                controlDataOut->startLine += (controlSeq[i + 5] & 0xf0) >> 4;
                 controlDataOut->endLine   = (controlSeq[i + 5] & 0x0f) << 8;
                 controlDataOut->endLine   += controlSeq[i + 6];
                 
