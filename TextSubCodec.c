@@ -23,6 +23,8 @@ typedef struct	{
 	
 	CGColorSpaceRef         colorSpace;
 	
+	ATSUStyle				textStyle;
+	ATSUTextLayout			textLayout;
 	//Ptr                     textBuffer;
 } TextSubGlobalsRecord, *TextSubGlobals;
 
@@ -114,7 +116,12 @@ pascal ComponentResult TextSubCodecClose(TextSubGlobals glob, ComponentInstance 
 		if (glob->colorSpace) {
 			CGColorSpaceRelease(glob->colorSpace);
 		}
-
+		if (glob->textStyle) {
+			ATSUDisposeStyle(glob->textStyle);
+		}
+		if (glob->textLayout) {
+			ATSUDisposeTextLayout(glob->textLayout);
+		}
 		DisposePtr((Ptr)glob);
 	}
 
@@ -216,7 +223,7 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 	
 	if (glob->colorSpace == NULL)
 		glob->colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-
+	
 	return noErr;
 }
 
@@ -272,12 +279,32 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 										   8, drp->rowBytes,  glob->colorSpace,
 										   kCGImageAlphaPremultipliedFirst);
 	
+	if (!glob->textStyle) { //TODO: set language region based on track language... does that even matter?
+		ATSUAttributeTag tags[] = {kATSUSizeTag, kATSURGBAlphaColorTag, kATSUStyleRenderingOptionsTag, kATSUFontTag};
+		ByteCount		 sizes[] = {sizeof(Fixed), sizeof(ATSURGBAlphaColor), sizeof(ATSStyleRenderingOptions), sizeof(ATSUFontID)};
+		Fixed			 size = X2Fix(sqrt(myDrp->width*myDrp->width+myDrp->height*myDrp->height)*.04); ATSURGBAlphaColor yellow = {1,1,0,1};
+		Boolean			 trueval = TRUE; ATSUFontID fid; ATSStyleRenderingOptions rend = kATSStyleApplyAntiAliasing;
+		ATSUAttributeValuePtr vals[] = {&size,&yellow,&rend,&fid};
+		ATSUCreateStyle(&glob->textStyle);
+		ATSUFindFontFromName("Helvetica Neue Condensed Bold",strlen("Helvetica Neue Condensed Bold"),kFontFullName,kFontNoPlatform,kFontNoScript,kFontNoLanguage,&fid);
+		ATSUSetAttributes(glob->textStyle,4, tags, sizes, vals);
+	}
+	
+	if (!glob->textLayout) {
+		ATSUAttributeTag tags[] = {kATSULineFlushFactorTag, kATSULineWidthTag};
+		ByteCount		 sizes[] = {sizeof(Fract),sizeof(ATSUTextMeasurement)};
+		Fract			 lf = kATSUCenterAlignment; ATSUTextMeasurement w = Long2Fix(myDrp->width);
+		ATSUAttributeValuePtr vals[] = {&lf, &w};
+		ATSUCreateTextLayout(&glob->textLayout);
+		ATSUSetLayoutControls(glob->textLayout, 2, tags, sizes, vals);
+	}
+	
 	// ultra basic support for multiple lines; relies on \n deliminator
 	int lineStarts[10] = {0};
 	int numLines = 0;
 	
 	// QuickTime doesn't like it if we complain too much
-    if (c == NULL)
+    if (!c || !glob->textStyle)
 		return noErr;
 
 	Ptr textBuffer = NewPtr(myDrp->dataSize + 1);
@@ -297,27 +324,31 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	if (numLines >= 10)
 		numLines = 9;
 
+	ATSUAttributeTag cgc[] = {kATSUCGContextTag};
+	ByteCount cgc_s[] = {sizeof(CGContextRef)};
+	ATSUAttributeValuePtr cgc_v[] = {&c};
+	ATSUSetLayoutControls(glob->textLayout, 1, cgc, cgc_s, cgc_v);
+
 	CGContextClearRect(c, CGRectMake(0, 0, myDrp->width, myDrp->height));
 	
-	// hardcoded subtitle font+size...
-	CGContextSelectFont(c, "HelveticaNeue-CondensedBold", 30, kCGEncodingMacRoman);
-	CGContextSetRGBFillColor(c, 1, 1, .1, 1);
-	CGContextSetRGBStrokeColor(c, 0, 0, 0, 1);
-
 	int drawnLines = 0;
 	for (i = numLines - 1; i >= 0; i--) {
 		char *sub = &textBuffer[lineStarts[i]];
 		int sublen = strlen(sub);
 		if (sublen == 0)
 			continue;
-		
-		CGContextSetTextDrawingMode(c, kCGTextInvisible);
-		CGContextSetTextPosition(c, 0, 0);
-		CGContextShowText(c, sub, sublen);
-		CGPoint endPos = CGContextGetTextPosition(c);
-		
-		CGContextSetTextDrawingMode(c, kCGTextFillStroke);
-		CGContextShowTextAtPoint(c, (myDrp->width - endPos.x) / 2, 20 + 37 * drawnLines++, sub, sublen);
+		else {
+			CFStringRef cstr = CFStringCreateWithCString(NULL, sub, kCFStringEncodingUTF8);
+			sublen = CFStringGetLength(cstr);
+			UniChar uc[sublen];
+			CFStringGetCharacters(cstr, CFRangeMake(0, sublen), uc);
+			ATSUSetTextPointerLocation(glob->textLayout,uc,kATSUFromTextBeginning, kATSUToTextEnd,sublen);
+			ATSUSetRunStyle(glob->textLayout,glob->textStyle,kATSUFromTextBeginning,kATSUToTextEnd);
+			ATSUSetTransientFontMatching(glob->textLayout,TRUE);
+			ATSUDrawText(glob->textLayout, kATSUFromTextBeginning, kATSUToTextEnd, Long2Fix(0), Long2Fix(20 + 28 * drawnLines));
+			CFRelease(cstr);
+			drawnLines++;
+		}
 	}
 	
 	CGContextSynchronize(c);
