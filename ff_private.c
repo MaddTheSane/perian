@@ -22,6 +22,8 @@
 
 #include "ff_private.h"
 #include "avcodec.h"
+#include "mpegaudio.h"
+#include "allformats.h"
 #include "Codecprintf.h"
 #include "CommonUtils.h"
 
@@ -485,6 +487,27 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 			track = NewMovieTrack(theMovie, st->codec->width << 16, st->codec->height << 16, kNoVolume);
 			initialize_video_map(&map[j], track, dataRef, dataRefType);
 		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
+			// Since we don't register codec parsers, the frame_size of mp3 audio, which we need
+			// in order to figure out the duration of audio samples in some cases, isn't calculated. 
+			// Calculate it here.
+			if (st->codec->codec_id == CODEC_ID_MP3 && ic->iformat == &avi_demuxer) {
+				uint32_t header;
+				int ret = -1;
+				AVPacket pkt;
+				
+				av_seek_frame(ic, st->index, 0, 0);
+				
+				// this looping seems to be necessary since some mp3 tracks don't have the first audio frame in the first packet
+				while (ret < 0) {
+					ic->iformat->read_packet(ic, &pkt);
+					if (pkt.stream_index == st->index) {
+						header = (pkt.data[0] << 24) | (pkt.data[1] << 16) | (pkt.data[2] << 8) | pkt.data[3];
+						ret = mpa_decode_header(st->codec, header);
+					}
+					av_free_packet(&pkt);
+				}
+			}
+			
 			track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
 			initialize_audio_map(&map[j], track, dataRef, dataRefType);
 			
