@@ -607,7 +607,6 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 						sampleRec->durationPerSample = ncstr->base.num;
 						sampleRec->numberOfSamples = 1;
 					} else {
-						/* this logic seems to be needed even iff ncstr->base.num == 1, but I'm not entirely sure */
 						/* This seems to work. Although I have no idea why.
 						* Perhaps the stream's timebase is adjusted to
 						* let that work. as the timebase has strange values...*/
