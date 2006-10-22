@@ -181,16 +181,19 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 			TimeRecord movieStartTime = { SInt64ToWide(startTime), 1000, 0 };
 
 			if (subOffset != NULL) {
-				err = AddMediaSampleReference(theMedia, subTextOffset - data, 
-				                              subOffset - subTextOffset - 1, 
-				                              duration, (SampleDescriptionHandle) textDesc, 
-				                              1, 0, &sampleTime);
-				if (err) goto bail;
+				if(subOffset - subTextOffset - 1 > 0 && duration > 0) //Make sure subtitle is not empty
+				{
+					err = AddMediaSampleReference(theMedia, subTextOffset - data, 
+												  subOffset - subTextOffset - 1, 
+												  duration, (SampleDescriptionHandle) textDesc, 
+												  1, 0, &sampleTime);
+					if (err) goto bail;
 
-				ConvertTimeScale(&movieStartTime, GetMovieTimeScale(theMovie));
+					ConvertTimeScale(&movieStartTime, GetMovieTimeScale(theMovie));
 
-				err = InsertMediaIntoTrack(theTrack, movieStartTime.value.lo, sampleTime, duration, fixed1);
-				if (err) goto bail;
+					err = InsertMediaIntoTrack(theTrack, movieStartTime.value.lo, sampleTime, duration, fixed1);
+					if (err) goto bail;
+				}
 
 				// with the subtitle offset, we want the number at the beginning
 				// so advance past the newline in the stream
