@@ -82,5 +82,7 @@ fi
 
 mkdir "$SYMROOT/Universal" || true
 cp "$BUILT_PRODUCTS_DIR/Universal"/* "$SYMROOT/Universal"
-strip -S "$SYMROOT/Universal"/*.a
+if [ "$BUILD_STYLE" = "Deployment" ] ; then
+	strip -S "$SYMROOT/Universal"/*.a
+fi
 ranlib "$SYMROOT/Universal"/*.a
