@@ -487,27 +487,6 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 			track = NewMovieTrack(theMovie, st->codec->width << 16, st->codec->height << 16, kNoVolume);
 			initialize_video_map(&map[j], track, dataRef, dataRefType);
 		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
-			// Since we don't register codec parsers, the frame_size of mp3 audio, which we need
-			// in order to figure out the duration of audio samples in some cases, isn't calculated. 
-			// Calculate it here.
-			if (st->codec->codec_id == CODEC_ID_MP3 && ic->iformat == &avi_demuxer) {
-				uint32_t header;
-				int ret = -1;
-				AVPacket pkt;
-				
-				av_seek_frame(ic, st->index, 0, 0);
-				
-				// this looping seems to be necessary since some mp3 tracks don't have the first audio frame in the first packet
-				while (ret < 0) {
-					ic->iformat->read_packet(ic, &pkt);
-					if (pkt.stream_index == st->index) {
-						header = (pkt.data[0] << 24) | (pkt.data[1] << 16) | (pkt.data[2] << 8) | pkt.data[3];
-						ret = mpa_decode_header(st->codec, header);
-					}
-					av_free_packet(&pkt);
-				}
-			}
-			
 			track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
 			initialize_audio_map(&map[j], track, dataRef, dataRefType);
 			
@@ -602,17 +581,15 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 				
 				/* FIXME: check if that's really the right thing to do here */
 				if(ncstr->vbr) {
-					if(codec->frame_size == ncstr->base.num || (codec->frame_size == 0 && ncstr->base.num > 1)) {
-						/* frame_size is set to zero for AAC and some MP3 tracks and it works this way */
-						sampleRec->durationPerSample = ncstr->base.num;
-						sampleRec->numberOfSamples = 1;
-					} else {
-						/* This seems to work. Although I have no idea why.
-						* Perhaps the stream's timebase is adjusted to
-						* let that work. as the timebase has strange values...*/
-						sampleRec->durationPerSample = sampleRec->dataSize;
-						sampleRec->numberOfSamples = 1;
-					}
+					sampleRec->numberOfSamples = 1;
+					
+					if (k + 1 < stream->nb_index_entries)
+						sampleRec->durationPerSample = (stream->index_entries[k+1].timestamp - stream->index_entries[k].timestamp) * ncstr->base.num;
+					else if (sampleNum - 2 >= 0)
+						// if we're at the last index entry, use the duration of the previous sample
+						// FIXME: this probably could be better
+						sampleRec->durationPerSample = ncstr->sampleTable[sampleNum-2].durationPerSample;
+					
 				} else {
 					sampleRec->durationPerSample = 1;
 					sampleRec->numberOfSamples = (stream->index_entries[k].size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
