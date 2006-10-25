@@ -26,7 +26,7 @@
 #define __DATAHANDLERCALLBACK_H__
 
 #include <QuickTime/QuickTime.h>
-#include <EBML/IOCallback.h>
+#include <ebml/IOCallback.h>
 
 #include <stdexcept>
 #include <cerrno>
