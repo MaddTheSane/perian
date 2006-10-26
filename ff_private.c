@@ -340,7 +340,7 @@ uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID)
 	/* now construct the wave atom */
 	/* QT Atoms are big endian, I think but the WAVE data should be little endian */
 	ptr = write_int32(waveAtom, EndianS32_NtoB(waveSize));
-	ptr = write_int32(ptr, formatID);
+	ptr = write_int32(ptr, EndianS32_NtoB(formatID));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->codec_tag));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->channels));
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->sample_rate));
@@ -355,13 +355,13 @@ uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID)
 	size  = sizeof(formatAtom) + sizeof(termAtom) + waveSize;
 	
 	/* Audio Format Atom */
-	formatAtom.size = sizeof(AudioFormatAtom);
-	formatAtom.atomType = kAudioFormatAtomType;
-	formatAtom.format = formatID;
+	formatAtom.size = EndianS32_NtoB(sizeof(AudioFormatAtom));
+	formatAtom.atomType = EndianS32_NtoB(kAudioFormatAtomType);
+	formatAtom.format = EndianS32_NtoB(formatID);
 	
 	/* Terminator Atom */
-	termAtom.atomType = kAudioTerminatorAtomType;
-	termAtom.size = sizeof(AudioTerminatorAtom);
+	termAtom.atomType = EndianS32_NtoB(kAudioTerminatorAtomType);
+	termAtom.size = EndianS32_NtoB(sizeof(AudioTerminatorAtom));
 	
 	result = av_malloc(size);
 	
