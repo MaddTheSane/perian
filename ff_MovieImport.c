@@ -272,6 +272,10 @@ OSType get_avi_strf_fourcc(ByteIOContext *pb)
 			// 16-byte offset to the fourcc
 			url_fskip(pb, 16);
 			return get_be32(pb);
+		} else if (tag == 'strh'){
+			// 4-byte offset to the fourcc
+			url_fskip(pb, 4);
+			return get_be32(pb);
 		} else
 			url_fskip(pb, size + (size & 1));
 	}
