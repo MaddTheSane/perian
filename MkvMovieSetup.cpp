@@ -435,9 +435,11 @@ ComponentResult MkvCreateVideoTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_entr
 	(*imgDesc)->cType = GetFourCC(tr_entry);
     (*imgDesc)->depth = 24;
     (*imgDesc)->clutID = -1;
-	(*pasp)->hSpacing = EndianU32_NtoB((*pasp)->hSpacing);
-	(*pasp)->vSpacing = EndianU32_NtoB((*pasp)->vSpacing);
-	AddImageDescriptionExtension(imgDesc,(Handle)pasp,kICMImageDescriptionPropertyID_PixelAspectRatio);
+	if ((*pasp)->hSpacing != (*pasp)->vSpacing) {
+		(*pasp)->hSpacing = EndianU32_NtoB((*pasp)->hSpacing);
+		(*pasp)->vSpacing = EndianU32_NtoB((*pasp)->vSpacing);
+		AddImageDescriptionExtension(imgDesc,(Handle)pasp,kICMImageDescriptionPropertyID_PixelAspectRatio);
+	}
 	
 	// this sets up anything else needed in the description for the specific codec.
 	FinishSampleDescription(tr_entry, (SampleDescriptionHandle) imgDesc);

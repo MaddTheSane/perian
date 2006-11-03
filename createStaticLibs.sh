@@ -2,10 +2,10 @@
 PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
-generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip"
+generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-gpl --enable-pp --enable-pthreads"
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
-	extraConfigureOptions="--disable-opts --disable-mmx" #gcc can't build the MMX at -O0 due to compiler bugs
+	extraConfigureOptions="--disable-opts"
 fi
 
 OUTPUT_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
@@ -34,9 +34,9 @@ else
 	
 	cd "$BUILDDIR"
 	if [ `arch` != i386 ] ; then
-		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86 --enable-pp --enable-gpl --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' $extraConfigureOptions $generalConfigureOptions
+		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
 	else
-		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl --enable-memalign-hack $extraConfigureOptions $generalConfigureOptions
+		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
 	fi
         make -C libavutil   depend
         make -C libavcodec  depend
@@ -60,9 +60,9 @@ fi
 	
 	cd "$BUILDDIR"
 	if [ `arch` = ppc ] ; then
-		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl $extraConfigureOptions $generalConfigureOptions
+		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions
 	else
-		"$SRCROOT/ffmpeg/configure" --enable-pp --enable-gpl --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' $extraConfigureOptions $generalConfigureOptions
+		"$SRCROOT/ffmpeg/configure" --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' $extraConfigureOptions $generalConfigureOptions
 	fi
         make -C libavutil   depend
         make -C libavcodec  depend
