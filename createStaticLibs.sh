@@ -43,6 +43,12 @@ else
         make -C libavformat depend
         make -C libpostproc depend
         make -C vhook       depend
+if [ "$BUILD_STYLE" = "Development" ] ; then
+	cd libavcodec
+	export CFLAGS="-O3 -fomit-frame-pointer"; make h264.o cabac.o
+	unset CFLAGS;
+	cd ..
+fi
         make -j3            lib
 	
 	
