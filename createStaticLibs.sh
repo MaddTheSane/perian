@@ -43,7 +43,7 @@ else
         make -C libavformat depend
         make -C libpostproc depend
         make -C vhook       depend
-	make -j3
+        make -j3            lib
 	
 	
 	#######################
@@ -63,7 +63,7 @@ else
         make -C libavformat depend
         make -C libpostproc depend
         make -C vhook       depend
-	make -j3
+        make -j3            lib
 	
 	#######################
 	# lipo shlibs
