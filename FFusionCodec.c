@@ -170,8 +170,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
     
     GetComponentInfo((Component)self, &descout, 0, 0, 0);
 	
-    Codecprintf(NULL, "Opening component for type");
-    FourCCprintf(" ", descout.componentSubType);
+    FourCCprintf("Opening component for type ", descout.componentSubType);
 	
     // Allocate memory for our globals, set them up and inform the component manager that we've done so
 	
@@ -1228,36 +1227,6 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 
 #define kSpoolChunkSize (16384)
 #define kInfiniteDataSize (0x7fffffff)
-
-//---------------------------------------------------------------------------
-// Private SubRoutines
-//---------------------------------------------------------------------------
-
-//-----------------------------------------------------------------
-// FourCCcopy
-//-----------------------------------------------------------------
-// Copy src FourCC in dest FourCC
-//-----------------------------------------------------------------
-
-void FourCCcopy(OSType *dest, OSType *src)
-{
-    int i;
-    
-    for (i=0; i<3; i++)
-        dest[i] = src[i];
-}
-
-//-----------------------------------------------------------------
-// FourCCprintf
-//-----------------------------------------------------------------
-// Compare two FourCC (case sensitive)
-// Returns 1 if equal, 0 if not equal
-//-----------------------------------------------------------------
-
-int FourCCcompare(OSType *a, OSType *b)
-{
-    return ((a[0] == b[0]) && (a[1] == b[1]) && (a[2] == b[2]) && (a[3] == b[3]));
-}
 
 //-----------------------------------------------------------------
 // FFusionDecompress

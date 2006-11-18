@@ -54,11 +54,12 @@ void FourCCprintf (char *string, unsigned long a)
 {
     if (a < 64)
     {
-        printf("%s: %ld\n", string, a);
+        Codecprintf(NULL, "%s%ld\n", string, a);
     }
     else
     {
-        printf("%s: %c%c%c%c\n", string, (unsigned char)((a >> 24) & 0xff), 
+        Codecprintf(NULL, "%s%c%c%c%c\n", string,
+			   (unsigned char)((a >> 24) & 0xff), 
 			   (unsigned char)((a >> 16) & 0xff), 
 			   (unsigned char)((a >> 8) & 0xff), 
 			   (unsigned char)(a & 0xff));

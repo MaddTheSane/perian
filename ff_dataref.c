@@ -30,6 +30,7 @@ struct _dataref_private {
 	DataHandler dh;
 	int64_t pos;
 	int64_t size;
+	unsigned char supportsWideOffsets;
 };
 typedef struct _dataref_private dataref_private;
 
@@ -71,9 +72,18 @@ static int dataref_open(URLContext *h, const char *filename, int flags)
 	private->pos = 0ll;
 	private->size = 0ll;
 	
-	DataHGetFileSize64(private->dh, &fsize);
-	private->size = (int64_t)fsize.lo;
-	private->size += (int64_t)fsize.hi << 32;
+	result = DataHGetFileSize64(private->dh, &fsize);
+	if(result == noErr) {
+		private->size = (int64_t)fsize.lo;
+		private->size += (int64_t)fsize.hi << 32;
+		// Our data handler supports wide offsets. Remember for later use.
+		private->supportsWideOffsets = 1;
+	} else {
+		long size32;
+		result = DataHGetFileSize(private->dh, &size32);
+		require_noerr(result, bail);
+		private->size = size32;
+	}
 	
 bail:
 		return result;
@@ -83,16 +93,22 @@ static int dataref_read(URLContext *h, unsigned char *buf, int size)
 {
 	int result;
 	int64_t read;
-	wide offset;
+
 	dataref_private *p = (dataref_private*)h->priv_data;
 	
 	read = p->size - p->pos;
 	read = (read < size) ? read : size;
 	
-	offset.hi = p->pos >> 32;
-	offset.lo = (UInt32)p->pos;
+	if(p->supportsWideOffsets) {
+		wide offset;
+		offset.hi = p->pos >> 32;
+		offset.lo = (UInt32)p->pos;
+		
+		result = DataHScheduleData64(p->dh, (Ptr)buf, &offset, (long)read, 0, NULL, NULL);
+	} else {
+		result = DataHScheduleData(p->dh, (Ptr)buf, (long)p->pos, (long)read, 0, NULL, NULL);
+	}
 	
-	result = DataHScheduleData64(p->dh, (Ptr)buf, &offset, (long)read, 0, NULL, NULL);
 	if(result != noErr) {
 		read = -1;
 		goto bail;
@@ -108,13 +124,18 @@ static int dataref_write(URLContext *h, unsigned char *buf, int size)
 {
 	int result;
 	int written = size;
-	wide offset;
 	dataref_private *p = (dataref_private*)h->priv_data;
 	
-	offset.hi = p->pos >> 32;
-	offset.lo = (UInt32)p->pos;
+	if(p->supportsWideOffsets) {
+		wide offset;
+		offset.hi = p->pos >> 32;
+		offset.lo = (UInt32)p->pos;
+		
+		result = DataHWrite64(p->dh, (Ptr)buf, &offset, size, NULL, 0);
+	} else {
+		result = DataHWrite(p->dh, (Ptr)buf, (long)p->pos, size, NULL, 0);
+	}
 	
-	result = DataHWrite64(p->dh, (Ptr)buf, &offset, size, NULL, 0);
 	if(result != noErr) {
 		written = -1;
 		goto bail;
