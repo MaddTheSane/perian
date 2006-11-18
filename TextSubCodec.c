@@ -319,6 +319,9 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	ATSUAttributeValuePtr cgc_v[] = {&c};
 	
 	CFStringRef cfsub = CFStringCreateWithCString(NULL, textBuffer, kCFStringEncodingUTF8);
+	if (cfsub == NULL)
+		return noErr;
+	
 	int sublen = CFStringGetLength(cfsub);
 	
 	UniChar		uc[sublen];
