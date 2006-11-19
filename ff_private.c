@@ -427,7 +427,7 @@ bail:
 } /* create_extension() */
 
 /* Add the meta data that lavf exposes to the movie */
-void add_metadata(AVFormatContext *ic, Movie theMovie)
+static void add_metadata(AVFormatContext *ic, Movie theMovie)
 {
     QTMetaDataRef movie_metadata;
     OSType key, err;
@@ -435,29 +435,36 @@ void add_metadata(AVFormatContext *ic, Movie theMovie)
     err = QTCopyMovieMetaData(theMovie, &movie_metadata);
     if (err) return;
     
-    key = kQTMetaDataCommonKeyDisplayName;
-    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->title, strlen(ic->title), kQTMetaDataTypeUTF8, NULL);
-
-    key = kQTMetaDataCommonKeyAuthor;
-    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->author, strlen(ic->author), kQTMetaDataTypeUTF8, NULL);
-
-    key = kQTMetaDataCommonKeyCopyright;
-    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->copyright, strlen(ic->copyright), kQTMetaDataTypeUTF8, NULL);
-
-    key = kQTMetaDataCommonKeyComment;
-    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->comment, strlen(ic->comment), kQTMetaDataTypeUTF8, NULL);
-
-    key = kQTMetaDataCommonKeyComment;
-    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->album, strlen(ic->album), kQTMetaDataTypeUTF8, NULL);
-
-    key = kQTMetaDataCommonKeyGenre;
-    QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-                      (UInt8 *)&key, sizeof(key), (UInt8 *)ic->genre, strlen(ic->genre), kQTMetaDataTypeUTF8, NULL);
+	if (strlen(ic->title)) {
+		key = kQTMetaDataCommonKeyDisplayName;
+		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->title, strlen(ic->title), kQTMetaDataTypeUTF8, NULL);
+	}
+	if (strlen(ic->author)) {
+		key = kQTMetaDataCommonKeyAuthor;
+		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->author, strlen(ic->author), kQTMetaDataTypeUTF8, NULL);
+	}
+	if (strlen(ic->copyright)) {
+		key = kQTMetaDataCommonKeyCopyright;
+		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->copyright, strlen(ic->copyright), kQTMetaDataTypeUTF8, NULL);
+	}
+	if (strlen(ic->comment)) {
+		key = kQTMetaDataCommonKeyComment;
+		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->comment, strlen(ic->comment), kQTMetaDataTypeUTF8, NULL);
+	}
+	if (strlen(ic->album)) {
+		key = kQTMetaDataCommonKeyComment;
+		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->album, strlen(ic->album), kQTMetaDataTypeUTF8, NULL);
+	}
+	if (strlen(ic->genre)) {
+		key = kQTMetaDataCommonKeyGenre;
+		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
+		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->genre, strlen(ic->genre), kQTMetaDataTypeUTF8, NULL);
+	}
     QTMetaDataRelease(movie_metadata);
 }
 
