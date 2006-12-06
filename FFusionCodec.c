@@ -1241,8 +1241,6 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
     int len = 0;
     long availableData = dataProc ? codecMinimumDataSize : kInfiniteDataSize;
 	
-    context->width = width;
-    context->height = height;
     picture->data[0] = 0;
 	
 	if(useFirstFrameHack)
