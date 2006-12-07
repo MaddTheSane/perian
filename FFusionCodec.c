@@ -35,6 +35,10 @@
 #include "EI_Image.h"
 #include "avcodec.h"
 #include "postprocess.h"
+
+//mru, in rev 7238, moved this into internal.h  I don't think this was a good idea and including internal.h is a worse idea.
+#define always_inline __attribute__((always_inline)) inline
+
 #include "bswap.h"
 #include "Codecprintf.h"
 
