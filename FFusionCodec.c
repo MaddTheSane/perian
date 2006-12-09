@@ -35,22 +35,7 @@
 #include "EI_Image.h"
 #include "avcodec.h"
 #include "postprocess.h"
-
-//mru, in rev 7238, moved this into internal.h  I don't think this was a good idea and including internal.h is a worse idea.
-#define always_inline __attribute__((always_inline)) inline
-
-#include "bswap.h"
 #include "Codecprintf.h"
-
-#ifdef __BIG_ENDIAN__
-#define make_big_32(x) (x)
-#else
-#ifdef __LITTLE_ENDIAN__
-#define make_big_32(x) bswap_32(x)
-#else
-#error Endian is unknown
-#endif //Little
-#endif //Big
 
 void inline swapFrame(AVFrame * *a, AVFrame * *b)
 {
@@ -1308,14 +1293,14 @@ static void FastY420(UInt8 *baseAddr, AVFrame *picture)
     planar = (PlanarPixmapInfoYUV420 *) baseAddr;
     
     // if ya can't set da poiners, set da offsets
-    planar->componentInfoY.offset = make_big_32(picture->data[0] - baseAddr);
-    planar->componentInfoCb.offset =  make_big_32(picture->data[1] - baseAddr);
-    planar->componentInfoCr.offset =  make_big_32(picture->data[2] - baseAddr);
+    planar->componentInfoY.offset = EndianU32_NtoB(picture->data[0] - baseAddr);
+    planar->componentInfoCb.offset =  EndianU32_NtoB(picture->data[1] - baseAddr);
+    planar->componentInfoCr.offset =  EndianU32_NtoB(picture->data[2] - baseAddr);
     
     // for the 16/32 add look at EDGE in mpegvideo.c
-    planar->componentInfoY.rowBytes = make_big_32(picture->linesize[0]);
-    planar->componentInfoCb.rowBytes = make_big_32(picture->linesize[1]);
-    planar->componentInfoCr.rowBytes = make_big_32(picture->linesize[2]);
+    planar->componentInfoY.rowBytes = EndianU32_NtoB(picture->linesize[0]);
+    planar->componentInfoCb.rowBytes = EndianU32_NtoB(picture->linesize[1]);
+    planar->componentInfoCr.rowBytes = EndianU32_NtoB(picture->linesize[2]);
 }
 
 //-----------------------------------------------------------------
