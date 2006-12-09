@@ -47,16 +47,16 @@ CRTError::CRTError(const std::string & Description,int nError)
 DataHandlerCallback::DataHandlerCallback(ComponentInstance dataHandler, const open_mode aMode)
 {	
 	closeHandler = false;
-	mDataReader = mDataWriter = NULL;
+	supportsWideOffsets = true;
+	this->dataHandler = NULL;
+	mCurrentPosition = 0;
+	this->aMode = aMode;
 	
 	switch (aMode)
 	{
 		case MODE_READ:
-			mDataReader = dataHandler;
-			break;
-			
 		case MODE_WRITE:
-			mDataWriter = dataHandler;
+			this->dataHandler = dataHandler;
 			break;
 			
 		default:
@@ -64,7 +64,8 @@ DataHandlerCallback::DataHandlerCallback(ComponentInstance dataHandler, const op
 			break;
 	}
 	
-	mCurrentPosition = 0;
+	// figure out if we support wide offesets
+	getFileSize();
 }
 
 DataHandlerCallback::DataHandlerCallback(Handle dataRef, OSType dataRefType, const open_mode aMode)
@@ -73,63 +74,52 @@ DataHandlerCallback::DataHandlerCallback(Handle dataRef, OSType dataRefType, con
     Component dataHComponent = NULL;
 	
 	closeHandler = true;
-	mDataReader = mDataWriter = NULL;
-    
-	switch (aMode)
-	{
-	case MODE_READ:
+	supportsWideOffsets = true;
+	dataHComponent = NULL;
+	mCurrentPosition = 0;
+	this->aMode = aMode;
+	
+	if (aMode == MODE_READ)
 		dataHComponent = GetDataHandler(dataRef, dataRefType, kDataHCanRead);
-        err = OpenAComponent(dataHComponent, &mDataReader);
-        if (err) {
-            stringstream Msg;
-            Msg << "Error opening data handler component " << err;
-            throw CRTError(Msg.str());
-        }
-        
-        err = DataHSetDataRef(mDataReader, dataRef);
-        if (err) {
-            stringstream Msg;
-            Msg << "Error setting data handler ref " << err;
-            throw CRTError(Msg.str());
-        }
-        
-		err = DataHOpenForRead(mDataReader);
+	else if (aMode == MODE_WRITE)
+		dataHComponent = GetDataHandler(dataRef, dataRefType, kDataHCanWrite);
+	else
+		throw 0;
+	
+	err = OpenAComponent(dataHComponent, &dataHandler);
+	if (err) {
+		stringstream Msg;
+		Msg << "Error opening data handler component " << err;
+		throw CRTError(Msg.str());
+	}
+	
+	err = DataHSetDataRef(dataHandler, dataRef);
+	if (err) {
+		stringstream Msg;
+		Msg << "Error setting data handler ref " << err;
+		throw CRTError(Msg.str());
+	}
+	
+	if (aMode == MODE_READ) {
+		err = DataHOpenForRead(dataHandler);
         if (err) {
             stringstream Msg;
             Msg << "Error opening data handler for read " << err;
             throw CRTError(Msg.str());
         }
-		
-		break;
-	case MODE_WRITE:
-		dataHComponent = GetDataHandler(dataRef, dataRefType, kDataHCanWrite);
-        err = OpenAComponent(dataHComponent, &mDataWriter);
-        if (err) {
-            stringstream Msg;
-            Msg << "Error opening data handler component " << err;
-            throw CRTError(Msg.str());
-        }
-			
-		err = DataHSetDataRef(mDataWriter, dataRef);
-        if (err) {
-            stringstream Msg;
-            Msg << "Error setting data handler ref " << err;
-            throw CRTError(Msg.str());
-        }
-			
-		err = DataHOpenForWrite(mDataWriter);
+	} else if (aMode == MODE_WRITE) {
+		err = DataHOpenForWrite(dataHandler);
         if (err) {
             stringstream Msg;
             Msg << "Error opening data handler for write " << err;
             throw CRTError(Msg.str());
         }
-		
-		break;
-	default:
+	} else {
 		throw 0;
 	}
 	
-	mCurrentPosition = 0;
+	// figure out if we support wide offesets
+	getFileSize();
 }
 
 
@@ -142,12 +132,18 @@ DataHandlerCallback::~DataHandlerCallback() throw()
 
 uint32 DataHandlerCallback::read(void *Buffer, size_t Size)
 {
-	assert(mDataReader != 0);
+	assert(dataHandler != 0);
 	
 	ComponentResult err = noErr;
-	wide wideOffset = SInt64ToWide((SInt64) mCurrentPosition);
 	
-	err = DataHScheduleData64(mDataReader, (Ptr)Buffer, &wideOffset, Size, 0, NULL, NULL);
+	if (supportsWideOffsets) {
+		wide wideOffset = SInt64ToWide(mCurrentPosition);
+		
+		err = DataHScheduleData64(dataHandler, (Ptr)Buffer, &wideOffset, Size, 0, NULL, NULL);
+	} else {
+		err = DataHScheduleData(dataHandler, (Ptr)Buffer, mCurrentPosition, Size, 0, NULL, NULL);
+	}
+	
 	if (err) {
 		stringstream Msg;
 		Msg << "Error reading data " << err;
@@ -161,14 +157,10 @@ uint32 DataHandlerCallback::read(void *Buffer, size_t Size)
 
 void DataHandlerCallback::setFilePointer(int64 Offset, LIBEBML_NAMESPACE::seek_mode Mode)
 {
-	assert(mDataReader != NULL || mDataWriter != NULL);
-
 	assert(Offset <= LONG_MAX);
 	assert(Offset >= LONG_MIN);
 
 	assert(Mode==SEEK_CUR||Mode==SEEK_END||Mode==SEEK_SET);
-	
-	ComponentInstance dataHandler = mDataReader != NULL ? mDataReader : mDataWriter;
 	
 	switch ( Mode )
 	{
@@ -177,9 +169,7 @@ void DataHandlerCallback::setFilePointer(int64 Offset, LIBEBML_NAMESPACE::seek_m
 			break;
 		case SEEK_END:
 			// I think this is what seeking this way does (was ftell(File))
-			wide filesize;
-			DataHGetFileSize64(dataHandler, &filesize);
-			mCurrentPosition = WideToSInt64(filesize) + Offset;
+			mCurrentPosition = getFileSize() + Offset;
 			break;
 		case SEEK_SET:
 			mCurrentPosition = Offset;
@@ -189,12 +179,18 @@ void DataHandlerCallback::setFilePointer(int64 Offset, LIBEBML_NAMESPACE::seek_m
 
 size_t DataHandlerCallback::write(const void *Buffer, size_t Size)
 {
-	assert(mDataWriter != NULL);
+	assert(dataHandler != NULL);
 	
 	ComponentResult err = noErr;
-	wide wideOffset = SInt64ToWide((SInt64) mCurrentPosition);
 	
-	err = DataHWrite64(mDataWriter, (Ptr)Buffer, &wideOffset, Size, NULL, 0);
+	if (supportsWideOffsets) {
+		wide wideOffset = SInt64ToWide(mCurrentPosition);
+		
+		err = DataHWrite64(dataHandler, (Ptr)Buffer, &wideOffset, Size, NULL, 0);
+	} else {
+		err = DataHWrite(dataHandler, (Ptr)Buffer, mCurrentPosition, Size, NULL, 0);
+	}
+	
 	if (err) {
 		stringstream Msg;
 		Msg << "Error writing data " << err;
@@ -208,7 +204,7 @@ size_t DataHandlerCallback::write(const void *Buffer, size_t Size)
 
 uint64 DataHandlerCallback::getFilePointer()
 {
-	assert(mDataReader != NULL || mDataWriter != NULL);
+	assert(dataHandler != NULL);
 
 	return mCurrentPosition;
 }
@@ -216,24 +212,30 @@ uint64 DataHandlerCallback::getFilePointer()
 void DataHandlerCallback::close()
 {
 	if (closeHandler) {
-		if (mDataReader) {
-			DataHCloseForRead(mDataReader);
-			mDataReader = NULL;
-		}
-		if (mDataWriter) {
-			DataHCloseForWrite(mDataWriter);
-			mDataWriter = NULL;
-		}
+		if (aMode == MODE_READ)
+			DataHCloseForRead(dataHandler);
+		else if (aMode == MODE_WRITE)
+			DataHCloseForWrite(dataHandler);
+		dataHandler = NULL;
 	}
 }
 
 SInt64 DataHandlerCallback::getFileSize()
 {
-	wide filesize;
-	if (mDataReader)
-		DataHGetFileSize64(mDataReader,&filesize);
-	else if (mDataWriter)
-		DataHGetFileSize64(mDataWriter,&filesize);
+	ComponentResult err = noErr;
+	SInt64 filesize;
+	wide wideFilesize;
 	
-	return WideToSInt64(filesize);
+	err = DataHGetFileSize64(dataHandler, &wideFilesize);
+	if (err == noErr) {
+		supportsWideOffsets = true;
+		filesize = WideToSInt64(wideFilesize);
+	} else {
+		long size32;
+		supportsWideOffsets = false;
+		DataHGetFileSize(dataHandler, &size32);
+		filesize = size32;
+	}
+	
+	return filesize;
 }

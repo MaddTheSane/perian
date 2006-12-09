@@ -52,10 +52,11 @@ public:
 class DataHandlerCallback:public LIBEBML_NAMESPACE::IOCallback
 {
 private:
-    ComponentInstance mDataReader;
-	ComponentInstance mDataWriter;
-    uint64 mCurrentPosition;
+	ComponentInstance dataHandler;
+	uint64 mCurrentPosition;
 	bool closeHandler;
+	bool supportsWideOffsets;
+	open_mode aMode;
     
 public:
 	DataHandlerCallback::DataHandlerCallback(ComponentInstance dataHandler, const open_mode aMode);
