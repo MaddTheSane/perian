@@ -461,18 +461,10 @@
 		08FB77ADFE841716C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				F53AD5E20B2A4EC000D93AC9 /* FFMPEG */,
 				61D691460AC8E333000EFC7D /* Matroska */,
 				6123D61D0AD0A052003EDE52 /* Subtitles */,
-				11C85ED30A641E6400DF3D73 /* ff_dataref.c */,
-				8F483BBC0A642B3D002CCA73 /* ff_MovieImportDispatch.h */,
-				11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */,
-				11C85ED50A641E6400DF3D73 /* ff_MovieImportVersion.h */,
-				11C85ED60A641E6400DF3D73 /* ff_private.c */,
-				11C85ED70A641E6400DF3D73 /* ff_private.h */,
 				F560DECD03D61B6101ABA332 /* Components.k.h */,
-				F560DEFC03D61BE301ABA332 /* FFusionCodec.h */,
-				F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */,
-				F560DF0003D61D0101ABA332 /* FFusionCodec.c */,
 				113F58980A6B091600509987 /* Codecprintf.h */,
 				113F58990A6B091600509987 /* Codecprintf.c */,
 				61D517710AE0402E00A671E1 /* CommonUtils.h */,
@@ -664,6 +656,38 @@
 				F50D440703EAD8DF01B1D299 /* FFusion.icns */,
 			);
 			name = Images;
+			sourceTree = "<group>";
+		};
+		F53AD5E20B2A4EC000D93AC9 /* FFMPEG */ = {
+			isa = PBXGroup;
+			children = (
+				F53AD5E70B2A4EFA00D93AC9 /* Codec */,
+				F53AD5E30B2A4EE100D93AC9 /* File Import */,
+			);
+			name = FFMPEG;
+			sourceTree = "<group>";
+		};
+		F53AD5E30B2A4EE100D93AC9 /* File Import */ = {
+			isa = PBXGroup;
+			children = (
+				11C85ED30A641E6400DF3D73 /* ff_dataref.c */,
+				8F483BBC0A642B3D002CCA73 /* ff_MovieImportDispatch.h */,
+				11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */,
+				11C85ED50A641E6400DF3D73 /* ff_MovieImportVersion.h */,
+				11C85ED60A641E6400DF3D73 /* ff_private.c */,
+				11C85ED70A641E6400DF3D73 /* ff_private.h */,
+			);
+			name = "File Import";
+			sourceTree = "<group>";
+		};
+		F53AD5E70B2A4EFA00D93AC9 /* Codec */ = {
+			isa = PBXGroup;
+			children = (
+				F560DEFC03D61BE301ABA332 /* FFusionCodec.h */,
+				F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */,
+				F560DF0003D61D0101ABA332 /* FFusionCodec.c */,
+			);
+			name = Codec;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
