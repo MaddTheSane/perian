@@ -6,8 +6,10 @@
 	<string>English</string>
 	<key>CFBundleExecutable</key>
 	<string>Perian</string>
+	<key>CFBundleGetInfoString</key>
+	<string>0.1 (SVNREVISION ffmpeg: FFMPEGREVISION), Copyright 2006 The Perian Team</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.yourcompany.Perian</string>
+	<string>org.perian.Perian</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
@@ -15,9 +17,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>0.1</string>
-	<key>CFBundleGetInfoString</key>
-	<string>0.1 (SVNREVISION ffmpeg: FFMPEGREVISION), Copyright 2006 The Perian Team</string>
+	<string>0.5</string>
 	<key>CSResourcesFileMapped</key>
 	<string>yes</string>
 </dict>

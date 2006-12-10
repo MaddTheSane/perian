@@ -193,7 +193,7 @@ URLProtocol dataref_protocol = {
 };
 
 /* This is the public function to open bytecontext withs datarefs */
-OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType)
+OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType, DataHandler *dataHandler, Boolean *wideSupport, int64_t *dataSize)
 {
 	URLContext *uc;
 	URLProtocol *up;
@@ -219,6 +219,7 @@ OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType)
 	uc->priv_data = private;
 	
 	err = up->url_open(uc, uc->filename, URL_RDONLY);
+		
 	if(err < 0) {
 		av_free(uc);
 		return err;
@@ -228,6 +229,15 @@ OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType)
 		url_close(uc);
 		return err;
 	}
+	
+	if(dataHandler)
+		*dataHandler = private->dh;
+	
+	if(wideSupport)
+		*wideSupport = private->supportsWideOffsets;
+	
+	if(dataSize)
+		*dataSize = private->size;	
 	
 	return noErr;
 } /* url_open_dataref() */

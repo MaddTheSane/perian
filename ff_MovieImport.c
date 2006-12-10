@@ -43,22 +43,6 @@
 #define COMPONENT_DISPATCH_FILE		"ff_MovieImportDispatch.h"
 #define COMPONENT_UPP_SELECT_ROOT()	MovieImport
 
-struct _ff_global_context {
-	ComponentInstance ci;
-	OSType componentType;
-	
-	/* For feedback during import */
-	MovieProgressUPP prog;
-	long refcon;
-	
-	/* for overwriting the default sample descriptions */
-	ImageDescriptionHandle imgHdl;
-	SoundDescriptionHandle sndHdl;
-	AVInputFormat		*format;
-};
-typedef struct _ff_global_context ff_global_context;
-typedef ff_global_context *ff_global_ptr;
-
 #include <CoreServices/Components.k.h>
 #include <QuickTime/QuickTimeComponents.k.h>
 #include <QuickTime/ComponentDispatchHelper.c>
@@ -121,6 +105,7 @@ ComponentResult FFAvi_MovieImportOpen(ff_global_ptr storage, ComponentInstance s
 	SetComponentInstanceStorage(storage->ci, (Handle)storage);
 	
 	storage->componentType = descout.componentSubType;
+	storage->movieLoadState = kMovieLoadStateLoading;
 bail:
 		return result;
 } /* FFAvi_MovieImportOpen() */
@@ -132,6 +117,12 @@ ComponentResult FFAvi_MovieImportClose(ff_global_ptr storage, ComponentInstance 
 		DisposeHandle((Handle)storage->imgHdl);
 	if(storage->sndHdl)
 		DisposeHandle((Handle)storage->sndHdl);
+	
+	if(storage->stream_map)
+		av_free(storage->stream_map);
+	
+	if(storage->format_context)
+		av_close_input_file(storage->format_context);
 	
 	if(storage)
 		free(storage);
@@ -316,7 +307,7 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 		if (IS_AVI(storage->componentType)) {
 			/* Prepare the iocontext structure */
 			memset(&byteContext, 0, sizeof(byteContext));
-			result = url_open_dataref(&byteContext, dataRef, dataRefType);
+			result = url_open_dataref(&byteContext, dataRef, dataRefType, NULL, NULL, NULL);
 			require_noerr(result, bail);
 			
 			OSType fourcc = get_avi_strf_fourcc(&byteContext);
@@ -374,17 +365,11 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	ByteIOContext byteContext;
 	AVFormatContext *ic = NULL;
 	AVFormatParameters params;
-	int64_t dataOffset;
 	AVPacket pkt;
-	NCStream *map = NULL;
-	int map_count,j,count;
 	OSType mediaType;
-	Track track;
 	Media media;
-	TimeRecord time;
-	int i;
-	short hadIndex = 0;
-	
+	int count, hadIndex, i, j;
+		
 	/* make sure that in case of error, the flag movieImportResultComplete is not set */
 	*outFlags = 0;
 	
@@ -393,155 +378,133 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	FFAvi_MovieImportValidateDataRef(storage, dataRef, dataRefType, &valid);
 	if(valid != 255)
 		goto bail;
-	
+		
 	/* Prepare the iocontext structure */
 	memset(&byteContext, 0, sizeof(byteContext));
-	result = url_open_dataref(&byteContext, dataRef, dataRefType);
+	result = url_open_dataref(&byteContext, dataRef, dataRefType, &storage->dataHandler, &storage->dataHandlerSupportsWideOffsets, &storage->dataSize);
 	require_noerr(result, bail);
 	
 	/* Open the Format Context */
 	memset(&params, 0, sizeof(params));
 	result = av_open_input_stream(&ic, &byteContext, "", storage->format, &params);
 	require_noerr(result,bail);
+	storage->format_context = ic;
 	
 	/* Get the Stream Infos if not already read */
 	result = av_find_stream_info(ic);
 	if(result < 0)
 		goto bail;
 	
-	/* Seek backwards to get a manually read packet for file offset */
-	if(ic->streams[0]->index_entries == NULL || storage->componentType == 'FLV ')
-	{
-		if (IS_AVI(storage->componentType))
-			//Try to seek to the first frame; don't care if it fails
-			// Is this really needed for AVIs w/out an index? It seems to work fine without, 
-			// and it seems that with it the first frame is skipped.
-			av_seek_frame(ic, -1, 0, 0);
-		dataOffset = 0;
-	}
-	else
-	{
-		result = av_seek_frame(ic, -1, 0, 0);
-		if(result < 0) goto bail;
-		
-		ic->iformat->read_packet(ic, &pkt);
-		/* read_packet will give the first decodable packet. However, that isn't necessarily
-			the first entry in the index, so look for an entry with a matching size. */
-		for (i = 0; i < ic->streams[pkt.stream_index]->nb_index_entries; i++) {
-			if (pkt.size == ic->streams[pkt.stream_index]->index_entries[i].size) {
-				dataOffset = pkt.pos - ic->streams[pkt.stream_index]->index_entries[i].pos;
-				break;
-			}
-		}
-		av_free_packet(&pkt);
-	}
+	//determine a header offset (needed by index-based import).
+	result = determine_header_offset(storage);
+	if(result < 0)
+		goto bail;
 	
 	/* Initialize the Movie */
+	storage->movie = theMovie;
 	if(inFlags & movieImportMustUseTrack) {
-		map_count = 1;
-		prepare_track(ic, &map, targetTrack, dataRef, dataRefType);
+		storage->map_count = 1;
+		prepare_track(ic, &storage->stream_map, targetTrack, dataRef, dataRefType);
 	} else {
-		map_count = ic->nb_streams;
-		prepare_movie(ic, &map, theMovie, dataRef, dataRefType);
+		storage->map_count = ic->nb_streams;
+		prepare_movie(ic, &storage->stream_map, theMovie, dataRef, dataRefType);
 	}
 	
 	/* replace the SampleDescription if user called MovieImportSetSampleDescription() */
 	if(storage->imgHdl) {
-		for(j = 0; j < map_count; j++) {
-			GetMediaHandlerDescription(map[j].media, &mediaType, NULL, NULL);
-			if(mediaType == VideoMediaType && map[j].sampleHdl) {
-				DisposeHandle((Handle)map[j].sampleHdl);
-				map[j].sampleHdl = (SampleDescriptionHandle)storage->imgHdl;
+		for(j = 0; j < storage->map_count; j++) {
+			NCStream ncstream = storage->stream_map[j];
+			GetMediaHandlerDescription(ncstream.media, &mediaType, NULL, NULL);
+			if(mediaType == VideoMediaType && ncstream.sampleHdl) {
+				DisposeHandle((Handle)ncstream.sampleHdl);
+				ncstream.sampleHdl = (SampleDescriptionHandle)storage->imgHdl;
 			}
 		}
 	}
 	if(storage->sndHdl) {
-		for(j = 0; j < map_count; j++) {
-			GetMediaHandlerDescription(map[j].media, &mediaType, NULL, NULL);
-			if(mediaType == SoundMediaType && map[j].sampleHdl) {
-				DisposeHandle((Handle)map[j].sampleHdl);
-				map[j].sampleHdl = (SampleDescriptionHandle)storage->sndHdl;
+		for(j = 0; j < storage->map_count; j++) {
+			NCStream ncstream = storage->stream_map[j];
+			GetMediaHandlerDescription(ncstream.media, &mediaType, NULL, NULL);
+			if(mediaType == SoundMediaType && ncstream.sampleHdl) {
+				DisposeHandle((Handle)ncstream.sampleHdl);
+				ncstream.sampleHdl = (SampleDescriptionHandle)storage->sndHdl;
 			}
 		}
 	}
 	
-	/* Import the Data*/
-	/* FIXME: Implement the progress upp */
-	/* note: flv builds a partial index that's unusable, so force importing without an index */
-	if (!(storage->componentType == 'FLV '))
-		hadIndex = import_avi(ic, map, dataOffset);
-	
-	if (!hadIndex)
-		import_without_index(ic, map, dataOffset);
-	
-	/* Insert the Medias into the Tracks */
-	result = noErr;
-	for(j = 0; j < map_count && result == noErr; j++) {
-		media = map[j].media;
-		if(media) {
-			/* we could handle this stream.
-			* convert the atTime parameter to track scale.
-			* FIXME: check if that's correct */			
-			time.value.hi = 0;
-			time.value.lo = atTime;
-			time.scale = GetMovieTimeScale(theMovie);
-			time.base = NULL;
-			ConvertTimeScale(&time, GetMediaTimeScale(media));
-			
-			track = GetMediaTrack(media);
-			result = InsertMediaIntoTrack(track, time.value.lo, 0, GetMediaDuration(media), fixed1);
-		}
-	}
-	require_noerr(result,bail);
-	
-	/* Set return values of the function */
-	
 	count = 0; media = NULL;
-	for(j = 0; j < map_count; j++) {
-		media = map[j].media;
+	for(j = 0; j < storage->map_count; j++) {
+		media = storage->stream_map[j].media;
 		if(media)
 			count++;
 	}
+	
+	if(count > 1)
+		*outFlags |= movieImportResultUsedMultipleTracks;
 	
 	/* The usedTrack parameter. Count the number of Tracks and set usedTrack if we operated
 		* on a single track. Note that this requires the media to be set by track counting above*/
 	if(usedTrack && count == 1 && media)
 		*usedTrack = GetMediaTrack(media);
 	
-	/* the addedDuration parameter */
-	if(addedDuration) {
-		*addedDuration = 0;
-		for(j = 0; j < map_count; j++) {
-			media = map[j].media;
-			if(media) {
-				time.value.hi = 0;
-				time.value.lo = GetMediaDuration(media);
-				time.scale = GetMediaTimeScale(media);
-				time.base = NULL;
-				ConvertTimeScale(&time, GetMovieTimeScale(theMovie));
-				
-				/* if that's longer than before, replace */
-				if(time.value.lo > *addedDuration)
-					*addedDuration = time.value.lo;
-			}
-		}
-	}
+	result = noErr;
+
+	*addedDuration = 0;
 	
-	/* now set the outflags, set to zero at the beginning of the function */
-	if(outFlags) {
-		if(count > 1)
-			*outFlags |= movieImportResultUsedMultipleTracks;
-		
-		/* set the finished flag */
+	//attempt to import using indexes.
+	result = import_using_index(storage, &hadIndex, addedDuration);
+	require_noerr(result, bail);
+	
+	if(hadIndex) {
+		//file had an index and was imported; we are done.
 		*outFlags |= movieImportResultComplete;
+		
+	} else if(inFlags & movieImportWithIdle) {
+		if(addedDuration && ic->duration > 0) {
+			TimeValue sampleTime;
+			TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
+			*addedDuration = movieTimeScale * ic->duration / AV_TIME_BASE;
+			
+			//create a placeholder track so that progress displays correctly.
+			create_placeholder_track(storage, *addedDuration, dataRef, dataRefType);
+			
+			//give the data handler a hint as to how fast we need the data.
+			//suggest a speed that's faster than the bare minimum.
+			//if there's an error, the data handler probably doesn't support
+			//this, so we can just ignore.
+			DataHPlaybackHints(storage->dataHandler, 0, 0, -1, (storage->dataSize * 1.15) / ((double)ic->duration / AV_TIME_BASE));
+		}
+			
+		//import with idle. Decode a little bit of data now.
+		import_with_idle(storage, inFlags, outFlags, 10, 300);
+	} else {
+		//QuickTime didn't request import with idle, so do it all now.
+		import_with_idle(storage, inFlags, outFlags, 0, 0);			
 	}
 	
 bail:
-		/* Free all the data structures used */
-		if(ic)
-			av_close_input_file(ic);
-	if(map)
-		av_free(map);
+	if(result == noErr)
+		storage->movieLoadState == kMovieLoadStateLoaded;
+	else
+		storage->movieLoadState == kMovieLoadStateError;
 	
 	return result;
 } /* FFAvi_MovieImportDataRef */
+
+ComponentResult FFAvi_MovieImportSetIdleManager(ff_global_ptr storage, IdleManager im) {
+	storage->idleManager = im;
+}
+
+ComponentResult FFAvi_MovieImportIdle(ff_global_ptr storage, long inFlags, long *outFlags) {
+	return(import_with_idle(storage, inFlags | movieImportWithIdle, outFlags, 0, 1000));	
+}
+
+ComponentResult FFAvi_MovieImportGetLoadState(ff_global_ptr storage, long *importerLoadState) {
+	*importerLoadState = storage->movieLoadState;
+	return(noErr);
+}
+
+ComponentResult FFAvi_MovieImportGetMaxLoadedTime(ff_global_ptr storage, TimeValue *time) {
+	*time = storage->loadedTime;
+	return(noErr);
+}

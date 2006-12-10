@@ -38,8 +38,47 @@ struct _NCStream {
 	int64_t lastpts;
 	SampleReference64Ptr sampleTable;
 	SampleReference64Record lastSample;
+	TimeValue duration;
 };
 typedef struct _NCStream NCStream;
+
+// this used to live in ff_MovieImport.c, but it had to move here for idling support
+struct _ff_global_context {
+	Movie movie;
+	ComponentInstance ci;
+	OSType componentType;
+	
+	/* For feedback during import */
+	MovieProgressUPP prog;
+	long refcon;
+	
+	/* for overwriting the default sample descriptions */
+	ImageDescriptionHandle imgHdl;
+	SoundDescriptionHandle sndHdl;
+	
+	// things needed for idling support
+	Track placeholderTrack;
+	DataHandler dataHandler;
+	Boolean dataHandlerSupportsWideOffsets;
+	int64_t dataSize;
+	int largestPacketSize;
+	
+	IdleManager idleManager;
+	long movieLoadState;
+	TimeValue loadedTime;
+	
+	//the "atTime" parameter to the initial import.
+	TimeValue atTime;
+	
+	// libavcodec fun.
+	AVInputFormat *format;
+	AVFormatContext *format_context;
+	NCStream *stream_map;
+	int map_count;
+	int64_t header_offset;
+};
+typedef struct _ff_global_context ff_global_context;
+typedef ff_global_context *ff_global_ptr;
 
 /* Utilities */
 ComponentResult check_system();
@@ -48,7 +87,7 @@ ComponentResult check_system();
 void register_parsers();
 
 /* Public interface of the DataRef interface */
-OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType);
+OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType, DataHandler *dataHandler, Boolean *wideSupport, int64_t *dataSize);
 
 /* Import routines */
 int prepare_track(AVFormatContext *ic, NCStream **out_map, Track targetTrack, Handle dataRef, OSType dataRefType);
@@ -56,8 +95,11 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType);
 void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType);
 
-short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset);
-void import_without_index(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset);
+int determine_header_offset(ff_global_ptr storage);
+int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDuration);
+ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames);
+ComponentResult create_placeholder_track(ff_global_ptr storage, TimeValue duration, Handle dataRef, OSType dataRefType);
+void send_movie_changed_notification(Movie movie);
 
 OSType map_video_codec_to_mov_tag(enum CodecID codec_id);
 void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd);

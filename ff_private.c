@@ -29,6 +29,7 @@
 
 #include <CoreServices/CoreServices.h>
 #include <AudioToolbox/AudioToolbox.h>
+#include <QuickTime/QuickTime.h>
 
 /* This routine checks if the system requirements are fullfilled */
 ComponentResult check_system()
@@ -511,25 +512,77 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 	return 0;
 } /* prepare_movie() */
 
+int determine_header_offset(ff_global_ptr storage) {
+	AVFormatContext *formatContext;
+	AVPacket packet;
+	int result, i;
+	
+	formatContext = storage->format_context;
+	result = noErr;
+	storage->header_offset = 0;
+	
+	/* Seek backwards to get a manually read packet for file offset */
+	if(formatContext->streams[0]->index_entries == NULL || storage->componentType == 'FLV ')
+	{
+		if (IS_AVI(storage->componentType))
+			//Try to seek to the first frame; don't care if it fails
+			// Is this really needed for AVIs w/out an index? It seems to work fine without, 
+			// and it seems that with it the first frame is skipped.
+			av_seek_frame(formatContext, -1, 0, 0);
+		storage->header_offset = 0;
+	}
+	else
+	{
+		result = av_seek_frame(formatContext, -1, 0, 0);
+		if(result < 0) goto bail;
+		
+		formatContext->iformat->read_packet(formatContext, &packet);
+		/* read_packet will give the first decodable packet. However, that isn't necessarily
+			the first entry in the index, so look for an entry with a matching size. */
+		for (i = 0; i < formatContext->streams[packet.stream_index]->nb_index_entries; i++) {
+			if (packet.size == formatContext->streams[packet.stream_index]->index_entries[i].size) {
+				storage->header_offset = packet.pos - formatContext->streams[packet.stream_index]->index_entries[i].pos;
+				break;
+			}
+		}
+		av_free_packet(&packet);
+		
+		// seek back to the beginning, otherwise av_read_frame-based decoding will skip a few packets.
+		av_seek_frame(formatContext, -1, 0, 0);
+	}
+		
+bail:
+	return(result);
+}
+
 /* This function imports the avi represented by the AVFormatContext to the movie media represented
  * in the map function. The aviheader_offset is used to calculate the packet offset from the
  * beginning of the file. It returns whether it was successful or not (i.e. whether the file had an index) */
-short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
-{
+int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDuration) {
 	int j, k, l;
+	NCStream *map;
 	NCStream *ncstr;
+	AVFormatContext *ic;
 	AVStream *stream;
 	AVCodecContext *codec;
 	SampleReference64Ptr sampleRec;
-	int64_t offset,duration;
-	OSStatus err;
+	int64_t header_offset, offset, duration;
 	short flags;
-	short hadIndex = 0;
 	int sampleNum;
+	ComponentResult result = noErr;
+	
+	map = storage->stream_map;
+	ic = storage->format_context;
+	header_offset = storage->header_offset;
+
+	*hadIndex = 0;
+	
+	//FLVs have unusable indexes, so don't even bother.
+	if(storage->componentType == 'FLV ')
+		goto bail;
 	
 	/* process each stream in ic */
 	for(j = 0; j < ic->nb_streams; j++) {
-		
 		ncstr = &map[j];
 		stream = ncstr->str;
 		codec = stream->codec;
@@ -538,16 +591,20 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 		if(!ncstr->media)
 			continue;
 		
+		/* no index, we might as well skip */
+		if(stream->nb_index_entries == 0)
+			continue;
+		
 		sampleNum = 0;
 		ncstr->sampleTable = calloc(stream->nb_index_entries, sizeof(SampleReference64Record));
 		
 		/* now parse the index entries */
 		for(k = 0; k < stream->nb_index_entries; k++) {
 			
-			hadIndex = 1;
+			*hadIndex = 1;
 			
 			/* file offset */
-			offset = aviheader_offset + stream->index_entries[k].pos;
+			offset = header_offset + stream->index_entries[k].pos;
 			
 			/* flags */
 			flags = 0;
@@ -604,115 +661,296 @@ short import_avi(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
 			}
 		}
 		/* Add all of the samples to the media */
-		err = AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, sampleNum, ncstr->sampleTable, NULL);
+		AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, sampleNum, ncstr->sampleTable, NULL);
 		free(ncstr->sampleTable);
 	}
-	return hadIndex;
-} /* import_avi() */
-
-/* This function imports the video file using standard av_read_frame() calls, 
- * which works on files that don't have an index */
-void import_without_index(AVFormatContext *ic, NCStream *map, int64_t aviheader_offset)
-{
-	int i;
-	NCStream *ncstr;
-	AVStream *stream;
-	AVCodecContext *codec;
-	SampleReference64Record sampleRec;
-	short flags;
-	AVPacket pkt;
 	
-	while(av_read_frame(ic, &pkt) == noErr)
-	{
-		ncstr = &map[pkt.stream_index];
-		stream = ncstr->str;
-		codec = stream->codec;
+	if(*hadIndex == 0)
+		//No index, the remainder of this function will fail.
+		goto bail;
+	
+	// insert media and set addedDuration;
+	for(j = 0; j < storage->map_count && result == noErr; j++) {
+		Media media = storage->stream_map[j].media;
+		if(media) {
+			Track track;
+			TimeRecord time;
+			TimeValue mediaDuration;
+			TimeScale mediaTimeScale;
+			TimeScale movieTimeScale;
+
+			mediaDuration = GetMediaDuration(media);
+			mediaTimeScale = GetMediaTimeScale(media);
+			movieTimeScale = GetMovieTimeScale(storage->movie);
+			
+			/* we could handle this stream.
+			* convert the atTime parameter to track scale.
+			* FIXME: check if that's correct */
+			time.value.hi = 0;
+			time.value.lo = storage->atTime;
+			time.scale = movieTimeScale;
+			time.base = NULL;
+			ConvertTimeScale(&time, mediaTimeScale);
+			
+			track = GetMediaTrack(media);
+			result = InsertMediaIntoTrack(track, time.value.lo, 0, mediaDuration, fixed1);
+
+			if(result != noErr)
+				goto bail;
+			
+			time.value.hi = 0;
+			time.value.lo = mediaDuration;
+			time.scale = mediaTimeScale;
+			time.base = NULL;
+			ConvertTimeScale(&time, movieTimeScale);
+			
+			if(time.value.lo > *addedDuration)
+				*addedDuration = time.value.lo;
+		}
+	}
+	
+	storage->loadedTime = *addedDuration;
+	
+bail:
+	return result;
+} /* import_using_index() */
+
+/* Import function for movies that lack an index.
+ * Supports progressive importing, but will not idle if maxFrames == 0.
+ */
+ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames) {
+	SampleReference64Record sampleRec;
+	DataHandler dataHandler;
+	AVFormatContext *formatContext;
+	AVCodecContext *codecContext;
+	AVStream *stream;
+	AVPacket packet;
+	NCStream *ncstream;
+	ComponentResult dataResult; //used for data handler operations that can fail.
+	ComponentResult result;
+	TimeValue minLoadedTime;
+	int64_t availableSize, margin;
+	long idling;
+	int readResult, framesProcessed, i;
+	short flags;
+	
+	dataHandler = storage->dataHandler;
+	formatContext = storage->format_context;
+	dataResult = noErr;
+	result = noErr;
+	minLoadedTime = 0;
+	availableSize = 0;
+	margin = 0;
+	idling = (inFlags & movieImportWithIdle);
+	framesProcessed = 0;
 		
+	if(idling) {
+		//get the size of immediately available data
+		if(storage->dataHandlerSupportsWideOffsets) {
+			wide wideSize;
+			
+			dataResult = DataHGetAvailableFileSize64(storage->dataHandler, &wideSize);
+			if(dataResult == noErr) availableSize = ((int64_t)wideSize.hi << 32) + wideSize.lo;
+		} else {
+			long longSize;
+			
+			dataResult = DataHGetAvailableFileSize(storage->dataHandler, &longSize);
+			if(dataResult == noErr) availableSize = longSize;
+		}
+	}
+	
+	// record stream durations before we add any samples so that we know what to tell InsertMediaIntoTrack later
+	for(i = 0; i < storage->map_count; i++) {
+		ncstream = &storage->stream_map[i];
+		Media media = ncstream->media;
+		
+		if(media)
+			ncstream->duration = GetMediaDuration(media);
+	}
+	
+	while((readResult = av_read_frame(formatContext, &packet)) == 0) {		
+		ncstream = &storage->stream_map[packet.stream_index];
+		stream = ncstream->str;
+		codecContext = stream->codec;
 		flags = 0;
-		if((pkt.flags & PKT_FLAG_KEY) == 0)
+		
+		if((packet.flags & PKT_FLAG_KEY) == 0)
 			flags |= mediaSampleNotSync;
 		
 		memset(&sampleRec, 0, sizeof(sampleRec));
-		sampleRec.dataOffset.hi = pkt.pos >> 32;
-		sampleRec.dataOffset.lo = (uint32_t) pkt.pos;
-		sampleRec.dataSize = pkt.size;
+		sampleRec.dataOffset.hi = packet.pos >> 32;
+		sampleRec.dataOffset.lo = (uint32_t)packet.pos;
+		sampleRec.dataSize = packet.size;
 		sampleRec.sampleFlags = flags;
+		
+		if(packet.size > storage->largestPacketSize)
+			storage->largestPacketSize = packet.size;
 		
 		if(sampleRec.dataSize <= 0)
 			continue;
 		
-		if (codec->codec_type == CODEC_TYPE_AUDIO && !ncstr->vbr)
-			sampleRec.numberOfSamples = (pkt.size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
+		if(codecContext->codec_type == CODEC_TYPE_AUDIO && !ncstream->vbr)
+			sampleRec.numberOfSamples = (packet.size * ncstream->asbd.mFramesPerPacket) / ncstream->asbd.mBytesPerPacket;
 		else
-			sampleRec.numberOfSamples = 1;
+			sampleRec.numberOfSamples = 1; //packet.duration;
 		
-		// we have a sample waiting to be added; calculate the duration and add it
-		if (ncstr->lastSample.numberOfSamples > 0) {
-			ncstr->lastSample.durationPerSample = (pkt.pts - ncstr->lastpts) * ncstr->base.num;
-			AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &ncstr->lastSample, NULL);
-		}
-		
-		if (pkt.duration == 0) {
-			// no duration, we'll have to wait for the next packet to calculate it
-			// keep the duration of the last sample, so we can use it if it's the last frame
-			sampleRec.durationPerSample = ncstr->lastSample.durationPerSample;
-			ncstr->lastSample = sampleRec;
-			ncstr->lastpts = pkt.pts;
+		//add any samples waiting to be added
+		if(ncstream->lastSample.numberOfSamples > 0) {
+			//calculate the duration of the sample before adding it
+			ncstream->lastSample.durationPerSample = (packet.pts - ncstream->lastpts) * ncstream->base.num;
 			
+			AddMediaSampleReferences64(ncstream->media, ncstream->sampleHdl, 1, &ncstream->lastSample, NULL);
+		}
+		
+		if(packet.duration == 0) {
+			//no duration, we'll have to wait for the next packet to calculate it
+			// keep the duration of the last sample, so we can use it if it's the last frame
+			sampleRec.durationPerSample = ncstream->lastSample.durationPerSample;
+			ncstream->lastSample = sampleRec;
+			ncstream->lastpts = packet.pts;
 		} else {
-			ncstr->lastSample.numberOfSamples = 0;
-			if (codec->codec_type == CODEC_TYPE_AUDIO && !ncstr->vbr)
+			ncstream->lastSample.numberOfSamples = 0;
+			
+			if(codecContext->codec_type == CODEC_TYPE_AUDIO && !ncstream->vbr)
 				sampleRec.durationPerSample = 1;
 			else
-				sampleRec.durationPerSample = pkt.duration * ncstr->base.num;
-			AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
+				sampleRec.durationPerSample = ncstream->base.num * packet.duration;
+
+			AddMediaSampleReferences64(ncstream->media, ncstream->sampleHdl, 1, &sampleRec, NULL);
 		}
-#if 0
-		if(codec->codec_type == CODEC_TYPE_VIDEO)
-		{
-			if(pkt.duration == 0)
-				sampleRec.durationPerSample = map->base.num;
-			else
-				sampleRec.durationPerSample = map->base.num * pkt.duration;
-			sampleRec.numberOfSamples = 1;
-		}
-		else if (codec->codec_type == CODEC_TYPE_AUDIO)
-		{
-			if(ncstr->vbr) {
-				if(codec->frame_size == ncstr->base.num) {
-					sampleRec.durationPerSample = codec->frame_size;
-					sampleRec.numberOfSamples = 1;
-				} else if (ncstr->asbd.mFormatID == kAudioFormatMPEG4AAC) {
-					/* AVI-mux GUI, the author of which created this hack in the first place,
-					* seems to special-case getting an AAC audio sample's duration this way */
-					sampleRec.durationPerSample = ic->streams[pkt.stream_index]->time_base.num;
-					sampleRec.numberOfSamples = 1;
-				} else {
-					/* This seems to work. Although I have no idea why.
-					* Perhaps the stream's timebase is adjusted to
-					* let that work. as the timebase has strange values...*/
-					sampleRec.durationPerSample = sampleRec.dataSize;
-					sampleRec.numberOfSamples = 1;
-				}
-			} else {
-				sampleRec.durationPerSample = 1;
-				sampleRec.numberOfSamples = (pkt.size * ncstr->asbd.mFramesPerPacket) / ncstr->asbd.mBytesPerPacket;
+		
+		framesProcessed++;
+		
+		//if we're idling, try really not to read past the end of available data
+		//otherwise we will cause blocking i/o.
+		if(idling && framesProcessed >= minFrames && availableSize > 0 && availableSize < storage->dataSize) {
+			margin = availableSize - (packet.pos + packet.size);
+			if(margin < (storage->largestPacketSize * 8)) { // 8x fudge factor for comfortable margin, could be tweaked.
+				av_free_packet(&packet);
+				break;
 			}
 		}
-		err = AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &sampleRec, NULL);
-#endif
-		//Need to do something like this when the libavformat doesn't give us a position
-		/*			Handle dataIn = NewHandle(pkt.size);
-		HLock(dataIn);
-		memcpy(*dataIn, pkt.data, pkt.size);
-		HUnlock(dataIn);
-		err = AddMediaSample(ncstr->media, dataIn, 0, pkt.size, 1, ncstr->sampleHdl, pkt.duration, sampleRec.sampleFlags, NULL);*/
-		av_free_packet(&pkt);
+		
+		av_free_packet(&packet);
+		
+		//stop processing if we've hit the max frame limit
+		if(maxFrames > 0 && framesProcessed >= maxFrames)
+			break;
 	}
-	// import the last frames
-	for (i = 0; i < ic->nb_streams; i++) {
-		ncstr = &map[i];
-		if (ncstr->lastSample.numberOfSamples > 0)
-			AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, 1, &ncstr->lastSample, NULL);
+		
+	if(readResult != 0) {
+		//if readResult != 0, we've hit the end of the stream.
+		//add any pending last frames.
+		for(i = 0; i < formatContext->nb_streams; i++) {
+			ncstream = &storage->stream_map[i];
+			if(ncstream->lastSample.numberOfSamples > 0)
+				AddMediaSampleReferences64(ncstream->media, ncstream->sampleHdl, 1, &ncstream->lastSample, NULL);
+		}
 	}
+	
+	for(i = 0; i < storage->map_count && result == noErr; i++) {
+		ncstream = &storage->stream_map[i];
+		Media media = ncstream->media;
+		
+		if(media) {
+			Track track = GetMediaTrack(media);
+			TimeScale mediaTimeScale = GetMediaTimeScale(media);
+			TimeValue prevDuration = ncstream->duration;
+			TimeValue mediaDuration = GetMediaDuration(media);
+			TimeValue addedDuration = mediaDuration - prevDuration;
+			TimeValue mediaLoadedTime = GetMovieTimeScale(storage->movie) * (double)mediaDuration / (double)mediaTimeScale;
+			
+			if(minLoadedTime == 0 || mediaLoadedTime < minLoadedTime)
+				minLoadedTime = mediaLoadedTime;
+			
+			if(addedDuration > 0) {
+				result = InsertMediaIntoTrack(track, -1, prevDuration, addedDuration, fixed1);
+			}
+		}
+	}
+	
+	//set the loaded time to the length of the shortest track.
+	storage->loadedTime = minLoadedTime;
+	
+	if(readResult != 0) {
+		//remove the placeholder track
+		if(storage->placeholderTrack != NULL) {
+			DisposeMovieTrack(storage->placeholderTrack);
+			storage->placeholderTrack = NULL;
+		}
+		
+		//set the movie load state to complete, as well as mark the import output flag.
+		storage->movieLoadState = kMovieLoadStateComplete;
+		*outFlags |= movieImportResultComplete;		
+	} else {
+		//if we're not yet done with the import, calculate the movie load state.
+		int64_t timeToCompleteFile; //time until the file should be completely available, in terms of AV_TIME_BASE
+		long dataRate;
+		
+		dataResult = DataHGetDataRate(storage->dataHandler, 0, &dataRate);
+		if(dataResult == noErr) {
+			timeToCompleteFile = (AV_TIME_BASE * (storage->dataSize - availableSize)) / dataRate;
+			
+			if(storage->loadedTime > (10 * GetMovieTimeScale(storage->movie)) && timeToCompleteFile < (storage->format_context->duration * .85))
+				storage->movieLoadState = kMovieLoadStatePlaythroughOK;
+			else
+				storage->movieLoadState = kMovieLoadStatePlayable;
+			
+		} else {
+			storage->movieLoadState = kMovieLoadStatePlayable;
+		}
+		
+		*outFlags |= movieImportResultNeedIdles;
+	}
+	
+	send_movie_changed_notification(storage->movie);
+	
+	//tell the idle manager to idle us again in 500ms.
+	if(idling && storage->idleManager)
+		QTIdleManagerSetNextIdleTimeDelta(storage->idleManager, 1, 2);
+	
+	return(result);
+} /* import_with_idle() */
+
+ComponentResult create_placeholder_track(ff_global_ptr storage, TimeValue duration, Handle dataRef, OSType dataRefType) {
+	SampleDescriptionHandle sdH;
+	Media placeholderMedia;
+	TimeScale movieTimeScale;
+	ComponentResult result = noErr;
+	
+	movieTimeScale = GetMovieTimeScale(storage->movie);
+	
+	sdH = (SampleDescriptionHandle)NewHandleClear(sizeof(SampleDescription));
+	(*sdH)->descSize = sizeof(SampleDescription);
+	
+	storage->placeholderTrack = NewMovieTrack(storage->movie, 0, 0, kNoVolume);
+	placeholderMedia = NewTrackMedia(storage->placeholderTrack, BaseMediaType, movieTimeScale, dataRef, dataRefType);
+	
+	result = AddMediaSampleReference(placeholderMedia, 0, 1, duration, sdH, 1, 0, NULL);
+	if(result != noErr)
+		goto bail;
+	
+	result = InsertMediaIntoTrack(storage->placeholderTrack, -1, 0, duration, fixed1);
+	
+bail:
+	return(result);
+}
+
+void send_movie_changed_notification(Movie movie) {
+	QTAtomContainer container;
+	
+	if(QTNewAtomContainer(&container) == noErr) {
+		QTAtom anAction;
+		OSType whichAction = EndianU32_NtoB(kActionMovieChanged);
+		
+		OSErr err = QTInsertChild(container, kParentAtomIsContainer, kAction, 1, 0, 0, NULL, &anAction);
+		
+		if(err == noErr)
+			err = QTInsertChild(container, anAction, kWhichAction, 1, 0, sizeof(whichAction), &whichAction, NULL);
+		
+		if(err == noErr)
+			err = MovieExecuteWiredActions(movie, 0, container);
+		
+		err = QTDisposeAtomContainer(container);
+	}	
 }
