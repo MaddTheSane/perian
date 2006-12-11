@@ -601,8 +601,6 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 		/* now parse the index entries */
 		for(k = 0; k < stream->nb_index_entries; k++) {
 			
-			*hadIndex = 1;
-			
 			/* file offset */
 			offset = header_offset + stream->index_entries[k].pos;
 			
@@ -660,9 +658,15 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 				}
 			}
 		}
-		/* Add all of the samples to the media */
-		AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, sampleNum, ncstr->sampleTable, NULL);
-		free(ncstr->sampleTable);
+		if(sampleNum != 0)
+		{
+			/* Add all of the samples to the media */
+			AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, sampleNum, ncstr->sampleTable, NULL);
+			free(ncstr->sampleTable);			
+
+			/* The index is both present and not empty */
+			*hadIndex = 1;
+		}
 	}
 	
 	if(*hadIndex == 0)
