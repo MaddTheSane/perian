@@ -889,10 +889,10 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 	} else {
 		//if we're not yet done with the import, calculate the movie load state.
 		int64_t timeToCompleteFile; //time until the file should be completely available, in terms of AV_TIME_BASE
-		long dataRate;
+		long dataRate = 0;
 		
 		dataResult = DataHGetDataRate(storage->dataHandler, 0, &dataRate);
-		if(dataResult == noErr) {
+		if(dataResult == noErr && dataRate > 0) {
 			timeToCompleteFile = (AV_TIME_BASE * (storage->dataSize - availableSize)) / dataRate;
 			
 			if(storage->loadedTime > (10 * GetMovieTimeScale(storage->movie)) && timeToCompleteFile < (storage->format_context->duration * .85))
