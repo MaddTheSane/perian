@@ -518,19 +518,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         myptr = (unsigned char *)&(glob->componentType);
         glob->avContext->codec_tag = (myptr[3] << 24) + (myptr[2] << 16) + (myptr[1] << 8) + myptr[0];
         
-        // Let's look for a CPU with AltiVec-like SMID unit
-        
-        Gestalt(gestaltPowerPCProcessorFeatures, &bitfield);
-        altivec = (bitfield & (1 << gestaltPowerPCHasVectorInstructions)) != 0;
-        
-		// VP6 needs VP3 IDCT; Altivec IDCT doesn't work for now
-        if (altivec && glob->componentType != 'VP62' && glob->componentType != 'VP6F')
-        {
-            Codecprintf(glob->fileLog, "Altivec Acceleration enabled!\n");
-			
-            glob->avContext->idct_algo = FF_IDCT_ALTIVEC;
-        }
-		
         // Finally we open the avcodec 
         
         if (avcodec_open(glob->avContext, glob->avCodec))
