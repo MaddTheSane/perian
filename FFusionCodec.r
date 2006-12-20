@@ -2108,6 +2108,36 @@ resource 'thng' (309) {
 
 resource 'thng' (310) {
 	decompressorComponentType,		// Type			
+	'AVC1',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kH264NameResID,			// Name ID
+	'STR ',					// Info Type
+	kH264InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (311) {
+	decompressorComponentType,		// Type			
 	'FLV1',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
 	0,					// - use componentHasMultiplePlatforms
@@ -2136,7 +2166,7 @@ resource 'thng' (310) {
 };
 };
 
-resource 'thng' (311) {
+resource 'thng' (312) {
 	decompressorComponentType,		// Type			
 	'FSV1',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2166,39 +2196,9 @@ resource 'thng' (311) {
 };
 };
 
-resource 'thng' (312) {
-	decompressorComponentType,		// Type			
-	'VP62',					// SubType
-	kFFusionCodecManufacturer,			// Manufacturer
-	0,					// - use componentHasMultiplePlatforms
-	0,
-	0,
-	0,
-	'STR ',					// Name Type
-	kVP6NameResID,			// Name ID
-	'STR ',					// Info Type
-	kVP6InfoResID,			// Info ID
-	0,					// Icon Type
-	0,					// Icon ID
-	kFFusionCodecVersion,			// Version
-	componentHasMultiplePlatforms +		// Registration Flags 
-	componentDoAutoVersion,			// Registration Flags
-	0,					// Resource ID of Icon Family
-{
-	kFFusionDecompressionFlags, 
-	'dlle',				// Entry point found by symbol name 'dlle' resource
-	256,				// ID of 'dlle' resource
-	platformPowerPCNativeEntryPoint,
-	kFFusionDecompressionFlags,
-	'dlle',
-	256,
-	platformIA32NativeEntryPoint,
-};
-};
-
 resource 'thng' (313) {
 	decompressorComponentType,		// Type			
-	'VP6F',					// SubType
+	'VP60',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
 	0,					// - use componentHasMultiplePlatforms
 	0,
@@ -2228,6 +2228,96 @@ resource 'thng' (313) {
 
 resource 'thng' (314) {
 	decompressorComponentType,		// Type			
+	'VP61',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kVP6NameResID,			// Name ID
+	'STR ',					// Info Type
+	kVP6InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (315) {
+	decompressorComponentType,		// Type			
+	'VP62',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kVP6NameResID,			// Name ID
+	'STR ',					// Info Type
+	kVP6InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (316) {
+	decompressorComponentType,		// Type			
+	'VP6F',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kVP6NameResID,			// Name ID
+	'STR ',					// Info Type
+	kVP6InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (317) {
+	decompressorComponentType,		// Type			
 	'I263',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
 	0,					// - use componentHasMultiplePlatforms
@@ -2256,7 +2346,37 @@ resource 'thng' (314) {
 };
 };
 
-resource 'thng' (315) {
+resource 'thng' (318) {
+	decompressorComponentType,		// Type			
+	'i263',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kI263NameResID,			// Name ID
+	'STR ',					// Info Type
+	kI263InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (319) {
 	decompressorComponentType,		// Type			
 	'VP30',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2286,7 +2406,7 @@ resource 'thng' (315) {
 };
 };
 
-resource 'thng' (316) {
+resource 'thng' (320) {
 	decompressorComponentType,		// Type			
 	'VP31',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer

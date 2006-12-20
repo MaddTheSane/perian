@@ -463,6 +463,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			case 'h264':
 			case 'X264':
 			case 'x264':
+			case 'AVC1':
 			case 'DAVC':
 			case 'VSSH':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_H264);
@@ -473,6 +474,8 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			case 'FSV1':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_FLASHSV);
 				break;
+			case 'VP60':
+			case 'VP61':
 			case 'VP62':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_VP6);
 				break;
@@ -480,6 +483,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_VP6F);
 				break;
 			case 'I263':
+			case 'i263':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_H263I);
 				break;
 			case 'VP30':
@@ -1158,6 +1162,7 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 			case 'h264':
 			case 'X264':
 			case 'x264':
+			case 'AVC1':
 			case 'DAVC':
 			case 'VSSH':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kH264CodecInfoResID, (Handle *)&tempCodecInfo);
@@ -1170,13 +1175,16 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 			case 'FSV1':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kFlashSVCodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
-				
+			
+			case 'VP60':
+			case 'VP61':
 			case 'VP62':
 			case 'VP6F':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kVP6CodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
 			case 'I263':
+			case 'i263':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kI263CodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
