@@ -1925,7 +1925,9 @@ resource 'thng' (303) {
 };
 
 
-// H264
+//---------------------------------------------------------------------------
+// H264 Components
+//---------------------------------------------------------------------------
 resource 'thng' (304) {
 	decompressorComponentType,		// Type			
 	'H264',					// SubType
@@ -2138,6 +2140,40 @@ resource 'thng' (310) {
 
 resource 'thng' (311) {
 	decompressorComponentType,		// Type			
+	'avc1',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kH264NameResID,			// Name ID
+	'STR ',					// Info Type
+	kH264InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+
+//---------------------------------------------------------------------------
+// Flash Video Codecs
+//---------------------------------------------------------------------------
+resource 'thng' (312) {
+	decompressorComponentType,		// Type			
 	'FLV1',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
 	0,					// - use componentHasMultiplePlatforms
@@ -2166,7 +2202,7 @@ resource 'thng' (311) {
 };
 };
 
-resource 'thng' (312) {
+resource 'thng' (313) {
 	decompressorComponentType,		// Type			
 	'FSV1',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2196,7 +2232,11 @@ resource 'thng' (312) {
 };
 };
 
-resource 'thng' (313) {
+
+//---------------------------------------------------------------------------
+// VP6 Components
+//---------------------------------------------------------------------------
+resource 'thng' (314) {
 	decompressorComponentType,		// Type			
 	'VP60',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2226,7 +2266,7 @@ resource 'thng' (313) {
 };
 };
 
-resource 'thng' (314) {
+resource 'thng' (315) {
 	decompressorComponentType,		// Type			
 	'VP61',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2256,7 +2296,7 @@ resource 'thng' (314) {
 };
 };
 
-resource 'thng' (315) {
+resource 'thng' (316) {
 	decompressorComponentType,		// Type			
 	'VP62',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2286,7 +2326,7 @@ resource 'thng' (315) {
 };
 };
 
-resource 'thng' (316) {
+resource 'thng' (317) {
 	decompressorComponentType,		// Type			
 	'VP6F',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2316,7 +2356,11 @@ resource 'thng' (316) {
 };
 };
 
-resource 'thng' (317) {
+
+//---------------------------------------------------------------------------
+// Intel H.263 Components
+//---------------------------------------------------------------------------
+resource 'thng' (318) {
 	decompressorComponentType,		// Type			
 	'I263',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2346,7 +2390,7 @@ resource 'thng' (317) {
 };
 };
 
-resource 'thng' (318) {
+resource 'thng' (319) {
 	decompressorComponentType,		// Type			
 	'i263',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2376,7 +2420,11 @@ resource 'thng' (318) {
 };
 };
 
-resource 'thng' (319) {
+
+//---------------------------------------------------------------------------
+// VP3 Components
+//---------------------------------------------------------------------------
+resource 'thng' (320) {
 	decompressorComponentType,		// Type			
 	'VP30',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2406,7 +2454,7 @@ resource 'thng' (319) {
 };
 };
 
-resource 'thng' (320) {
+resource 'thng' (321) {
 	decompressorComponentType,		// Type			
 	'VP31',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer

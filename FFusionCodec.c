@@ -56,6 +56,14 @@ typedef struct
 	AVFrame			*destBuffer;
 } PostProcParamRecord;
 
+// 32 because that's ffmpeg's INTERNAL_BUFFER_SIZE
+#define FFUSION_MAX_BUFFERS 32
+typedef struct
+{
+	AVFrame		*frame;
+	bool		used;
+} FFusionBuffer;
+
 typedef struct
 {
     ComponentInstance		self;
@@ -77,6 +85,10 @@ typedef struct
 	int				futureFrameAvailable;
 	int				delayedFrames;
 	AVFrame			lastDisplayedFrame;
+	bool			quicktimeDoesReorder;		// QT will call DrawBand() in display order
+	FFusionBuffer	buffers[FFUSION_MAX_BUFFERS];	// the buffers which the codec has retained
+	int				lastAllocatedBuffer;		// the index of the buffer which was last allocated 
+												// by the codec (and is the latest in decode order)
 } FFusionGlobalsRecord, *FFusionGlobals;
 
 typedef struct
@@ -89,6 +101,7 @@ typedef struct
 	int				decoded;
 	long			frameNumber;
 	int				useFuture;
+	FFusionBuffer	*buffer;
 } FFusionDecompressRecord;
 
 
@@ -100,6 +113,8 @@ static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataP
 static void FastY420(UInt8 *baseAddr, AVFrame *picture);
 static void SlowY420(UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture);
 static void BGR24toRGB24(UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture);
+static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic);
+static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
 
 int GetPPUserPreference();
 void SetPPUserPreference(int value);
@@ -266,6 +281,9 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
 		
         if (glob->avContext)
         {
+			if (glob->avContext->extradata)
+				free(glob->avContext->extradata);
+			
             av_free(glob->avContext);
         }
 		
@@ -364,6 +382,7 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 		cap->subCodecIsMultiBufferAware = true;
 		cap->subCodecSupportsOutOfOrderDisplayTimes = true;
 		cap->baseCodecShouldCallDecodeBandForAllFrames = true;
+		cap->subCodecSupportsScheduledBackwardsPlaybackWithDifferenceFrames = true;
 	}
 	
     return noErr;
@@ -459,7 +478,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			case 'SMP4':
                 glob->avCodec = avcodec_find_decoder(CODEC_ID_MPEG4);
 				break;
-			case 'H264':	// H.264
+
+			case 'avc1':	// H.264 in mov/mp4/mkv
+				glob->quicktimeDoesReorder = true;
+			case 'H264':	// H.264 in AVI
 			case 'h264':
 			case 'X264':
 			case 'x264':
@@ -468,28 +490,35 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			case 'VSSH':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_H264);
 				break;
+
 			case 'FLV1':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_FLV1);
 				break;
+
 			case 'FSV1':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_FLASHSV);
 				break;
+
 			case 'VP60':
 			case 'VP61':
 			case 'VP62':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_VP6);
 				break;
+
 			case 'VP6F':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_VP6F);
 				break;
+
 			case 'I263':
 			case 'i263':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_H263I);
 				break;
+
 			case 'VP30':
 			case 'VP31':
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_VP3);
 				break;
+
             default:
 			Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
                 
@@ -522,6 +551,30 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         myptr = (unsigned char *)&(glob->componentType);
         glob->avContext->codec_tag = (myptr[3] << 24) + (myptr[2] << 16) + (myptr[1] << 8) + myptr[0];
         
+		// avc1 requires the avcC extension
+		if (glob->componentType == 'avc1') {
+			long count = 0;
+			Handle imgDescExt;
+			
+			CountImageDescriptionExtensionType(p->imageDescription, 'avcC', &count);
+			if (count >= 1) {
+				imgDescExt = NewHandle(0);
+				GetImageDescriptionExtension(p->imageDescription, &imgDescExt, 'avcC', 1);
+				
+				glob->avContext->extradata = malloc(GetHandleSize(imgDescExt));
+				memcpy(glob->avContext->extradata, *imgDescExt, GetHandleSize(imgDescExt));
+				glob->avContext->extradata_size = GetHandleSize(imgDescExt);
+				
+				DisposeHandle(imgDescExt);
+			}
+		}
+		
+		// some hooks into ffmpeg's buffer allocation to get frames in 
+		// decode order without delay more easily
+		glob->avContext->opaque = glob;
+		glob->avContext->get_buffer = FFusionGetBuffer;
+		glob->avContext->release_buffer = FFusionReleaseBuffer;
+		
         // Finally we open the avcodec 
         
         if (avcodec_open(glob->avContext, glob->avCodec))
@@ -681,6 +734,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     myDrp->pixelFormat = p->dstPixMap.pixelFormat;
 	myDrp->decoded = p->frameTime ? (0 != (p->frameTime->flags & icmFrameAlreadyDecoded)) : false;
 	myDrp->frameNumber = p->frameNumber - 1;
+	myDrp->buffer = NULL;
 	
     if (p->conditionFlags & codecConditionFirstFrame)
     {
@@ -795,7 +849,10 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	AVFrame tempFrame;
 	
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
-	if(myDrp->frameNumber != glob->lastFrameNumber + 1)
+	
+	// QuickTime will drop H.264 frames when necessary if a sample dependency table exists
+	// we don't want to flush buffers in that case.
+	if(myDrp->frameNumber != glob->lastFrameNumber + 1 && !glob->quicktimeDoesReorder)
 	{
 		avcodec_flush_buffers(glob->avContext);
 		glob->futureFrameAvailable = false;
@@ -815,6 +872,12 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	avcodec_get_frame_defaults(&tempFrame);
 	err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, &tempFrame, myDrp->bufferSize, useFirstFrameHack);
 	myDrp->useFuture = false;
+	
+	if (glob->quicktimeDoesReorder) {
+		myDrp->buffer = &glob->buffers[glob->lastAllocatedBuffer];
+		myDrp->decoded = true;
+		return err;
+	}
 	
 	if(tempFrame.pts < glob->lastFramePts && glob->delayedFrames == 0)
 	{
@@ -900,13 +963,24 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
     OSErr err = noErr;
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
 	AVFrame *ppDestPic = glob->postProcParams.destBuffer;
+	int i, j;
 	
 	if(!myDrp->decoded)
 		err = FFusionCodecDecodeBand(glob, drp, 0);
 	
-	AVFrame *picture = glob->picture;
-	if(myDrp->useFuture)
-		picture = glob->futureFrame;
+	AVFrame *picture;
+	
+	if (glob->quicktimeDoesReorder) {
+		if (myDrp->buffer)
+			picture = myDrp->buffer->frame;
+		else
+			picture = &glob->lastDisplayedFrame;
+	} else {
+		if(myDrp->useFuture)
+			picture = glob->futureFrame;
+		else
+			picture = glob->picture;
+	}
 	
 	if(picture->data[0] == 0)
 	{
@@ -916,7 +990,6 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 		else
 		{ 
 			//Can't display anything so put up a black frame
-			int i, j; 
 			Ptr addr = drp->baseAddr; 
 			for(i=0; i<myDrp->height; i++) 
 			{ 
@@ -1163,6 +1236,7 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 			case 'X264':
 			case 'x264':
 			case 'AVC1':
+			case 'avc1':
 			case 'DAVC':
 			case 'VSSH':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kH264CodecInfoResID, (Handle *)&tempCodecInfo);
@@ -1211,6 +1285,37 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 
 #define kSpoolChunkSize (16384)
 #define kInfiniteDataSize (0x7fffffff)
+
+static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic)
+{
+	FFusionGlobals glob = s->opaque;
+	int ret = avcodec_default_get_buffer(s, pic);
+	int i;
+	
+	if (ret >= 0) {
+		for (i = 0; i < FFUSION_MAX_BUFFERS; i++) {
+			if (!glob->buffers[i].used) {
+				pic->opaque = &glob->buffers[i];
+				glob->buffers[i].frame = pic;
+				glob->buffers[i].used = true;
+				glob->lastAllocatedBuffer = i;
+				break;
+			}
+		}
+	}
+	
+	return ret;
+}
+
+static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic)
+{
+	FFusionGlobals glob = s->opaque;
+	FFusionBuffer *buf = pic->opaque;
+	
+	buf->used = false;
+	
+	avcodec_default_release_buffer(s, pic);
+}
 
 //-----------------------------------------------------------------
 // FFusionDecompress
