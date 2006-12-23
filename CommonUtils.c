@@ -7,6 +7,7 @@
  *
  */
 
+#include "avcodec.h"
 #include "CommonUtils.h"
 
 
@@ -201,3 +202,65 @@ uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size)
 	return (target + data_size);
 } /* write_data() */
 
+
+
+#define MP4ESDescrTag                   0x03
+#define MP4DecConfigDescrTag            0x04
+#define MP4DecSpecificDescrTag          0x05
+
+// based off of mov_mp4_read_descr_len from mov.c in ffmpeg's libavformat
+static int readDescrLen(UInt8 **buffer)
+{
+	int len = 0;
+	int count = 4;
+	while (count--) {
+		int c = *(*buffer)++;
+		len = (len << 7) | (c & 0x7f);
+		if (!(c & 0x80))
+			break;
+	}
+	return len;
+}
+
+// based off of mov_mp4_read_descr from mov.c in ffmpeg's libavformat
+static int readDescr(UInt8 **buffer, int *tag)
+{
+	int len;
+	*tag = *(*buffer)++;
+	return readDescrLen(buffer);
+}
+
+// based off of mov_read_esds from mov.c in ffmpeg's libavformat
+ComponentResult ReadESDSDescExt(Handle descExt, UInt8 **buffer, int *size)
+{
+	UInt8 *esds = (UInt8 *) *descExt;
+	int tag, len;
+	
+	*size = 0;
+	
+	esds += 4;		// version + flags
+	len = readDescr(&esds, &tag);
+	esds += 2;		// ID
+	if (tag == MP4ESDescrTag)
+		esds++;		// priority
+	
+	len = readDescr(&esds, &tag);
+	if (tag == MP4DecConfigDescrTag) {
+		esds++;		// object type id
+		esds++;		// stream type
+		esds += 3;	// buffer size db
+		esds += 4;	// max bitrate
+		esds += 4;	// average bitrate
+		
+		len = readDescr(&esds, &tag);
+		if (tag == MP4DecSpecificDescrTag) {
+			*buffer = calloc(1, len + FF_INPUT_BUFFER_PADDING_SIZE);
+			if (*buffer) {
+				memcpy(*buffer, esds, len);
+				*size = len;
+			}
+		}
+	}
+	
+	return noErr;
+}

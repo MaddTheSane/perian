@@ -30,6 +30,10 @@ uint8_t *write_int16(uint8_t *target, int16_t data);
 /* write the data to the target adress & then return a pointer which points after the written data */
 uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size);
 
+// mallocs the buffer and copies the codec-specific description to it, in the same format
+// as is specified in Matroska and is used in libavcodec
+ComponentResult ReadESDSDescExt(Handle descExt, UInt8 **buffer, int *size);
+
 #ifdef __cplusplus
 }
 #endif

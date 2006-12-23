@@ -409,6 +409,8 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     long bitfield;
     char altivec = 0;
     Byte* myptr;
+	long count = 0;
+	Handle imgDescExt;
 	
     // We first open libavcodec library and the codec corresponding
     // to the fourCC if it has not been done before
@@ -455,6 +457,8 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
                 glob->avCodec = avcodec_find_decoder(CODEC_ID_MSMPEG4V3);
 				break;
 				
+			case 'mp4v':	// MPEG4 part 2 in mov/mp4
+				glob->quicktimeDoesReorder = true;
             case 'divx':	// DivX 4
             case 'DIVX':
             case 'mp4s':
@@ -553,17 +557,26 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         
 		// avc1 requires the avcC extension
 		if (glob->componentType == 'avc1') {
-			long count = 0;
-			Handle imgDescExt;
-			
 			CountImageDescriptionExtensionType(p->imageDescription, 'avcC', &count);
+			
 			if (count >= 1) {
 				imgDescExt = NewHandle(0);
 				GetImageDescriptionExtension(p->imageDescription, &imgDescExt, 'avcC', 1);
 				
-				glob->avContext->extradata = malloc(GetHandleSize(imgDescExt));
+				glob->avContext->extradata = calloc(1, GetHandleSize(imgDescExt) + FF_INPUT_BUFFER_PADDING_SIZE);
 				memcpy(glob->avContext->extradata, *imgDescExt, GetHandleSize(imgDescExt));
 				glob->avContext->extradata_size = GetHandleSize(imgDescExt);
+				
+				DisposeHandle(imgDescExt);
+			}
+		} else if (glob->componentType == 'mp4v') {
+			CountImageDescriptionExtensionType(p->imageDescription, 'esds', &count);
+			
+			if (count >= 1) {
+				imgDescExt = NewHandle(0);
+				GetImageDescriptionExtension(p->imageDescription, &imgDescExt, 'esds', 1);
+				
+				ReadESDSDescExt(imgDescExt, &glob->avContext->extradata, &glob->avContext->extradata_size);
 				
 				DisposeHandle(imgDescExt);
 			}
@@ -1228,6 +1241,7 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 			case 'WV1F':
 			case 'FMP4':
 			case 'SMP4':
+			case 'mp4v':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kMPEG4CodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
