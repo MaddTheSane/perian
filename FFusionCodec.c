@@ -89,6 +89,8 @@ typedef struct
 	FFusionBuffer	buffers[FFUSION_MAX_BUFFERS];	// the buffers which the codec has retained
 	int				lastAllocatedBuffer;		// the index of the buffer which was last allocated 
 												// by the codec (and is the latest in decode order)
+	uint8_t			*inputBuffer;
+	unsigned int	inputBufSize;
 } FFusionGlobalsRecord, *FFusionGlobals;
 
 typedef struct
@@ -292,6 +294,11 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
 			DisposeHandle(glob->pixelTypes);
 		}
         
+		if (glob->inputBuffer)
+		{
+			av_free(glob->inputBuffer);
+		}
+		
         for (i=0; i<=PP_QUALITY_MAX; i++)
         {
             if (glob->postProcParams.mode[i])
@@ -596,6 +603,11 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
             
             return -2;
         }
+		
+		// we allocate some space for copying the frame data since we need some padding at the end
+		// for ffmpeg's optimized bitstream readers. Size doesn't really matter, it'll grow if need be
+		glob->inputBuffer = av_malloc(64*1024);
+		glob->inputBufSize = 64*1024;
     }
     
     // Specify the minimum image band height supported by the component
@@ -881,6 +893,13 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	
 	unsigned char *dataPtr = (unsigned char *)drp->codecData;
 	ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
+	
+	glob->inputBuffer = av_fast_realloc(glob->inputBuffer, &glob->inputBufSize, myDrp->bufferSize + FF_INPUT_BUFFER_PADDING_SIZE);
+	if (glob->inputBuffer) {
+		dataPtr = glob->inputBuffer;
+		memcpy(dataPtr, drp->codecData, myDrp->bufferSize);
+		memset(dataPtr + myDrp->bufferSize, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+	}
 	
 	avcodec_get_frame_defaults(&tempFrame);
 	err = FFusionDecompress(glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, &tempFrame, myDrp->bufferSize, useFirstFrameHack);
