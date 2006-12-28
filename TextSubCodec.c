@@ -13,7 +13,9 @@
 #define SubFontName "Trebuchet MS Bold"
 // basically random numbers i picked, font size is a factor of the diagonal of the movie window, border is a factor of that
 #define FontSizeRatio .04
-#define BorderSizeRatio FontSizeRatio * .045
+#define BorderSizeRatio FontSizeRatio * .09
+// in pixels
+#define ShadowDistance 2.8
 
 // Constants
 const UInt8 kNumPixelFormatsSupportedTextSub = 1;
@@ -28,7 +30,7 @@ typedef struct	{
 	
 	CGColorSpaceRef         colorSpace;
 	
-	ATSUStyle				textStyle;
+	ATSUStyle				textStyle, shadowStyle;
 	ATSUTextLayout			textLayout;
 	//Ptr                     textBuffer;
 } TextSubGlobalsRecord, *TextSubGlobals;
@@ -277,7 +279,7 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	int i;
 	TextSubDecompressRecord *myDrp = (TextSubDecompressRecord *)drp->userDecompressRecord;
 	float diagonalLength = sqrtf(myDrp->width*myDrp->width+myDrp->height*myDrp->height);
-	ATSUTextMeasurement lineWidth = Long2Fix(myDrp->width), lineHeight = Long2Fix(20);
+	ATSUTextMeasurement lineWidth = Long2Fix(myDrp->width), lineHeight = Long2Fix(20), ShadowDistFix = FloatToFixed(ShadowDistance);
 //	char *dataPtr = (char *)drp->codecData;
 //	ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
 	
@@ -288,12 +290,19 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	if (!glob->textStyle) { //TODO: set language region based on track language... does that even matter?
 		ATSUAttributeTag tags[] = {kATSUSizeTag, kATSURGBAlphaColorTag, kATSUStyleRenderingOptionsTag, kATSUFontTag};
 		ByteCount		 sizes[] = {sizeof(Fixed), sizeof(ATSURGBAlphaColor), sizeof(ATSStyleRenderingOptions), sizeof(ATSUFontID)};
-		Fixed			 size = X2Fix(diagonalLength * FontSizeRatio); ATSURGBAlphaColor white = {1,1,1,1};
+		Fixed			 size = X2Fix(diagonalLength * FontSizeRatio); ATSURGBAlphaColor white = {1,1,1,1}, black = {0,0,0,1};
 		Boolean			 trueval = TRUE; ATSUFontID fid; ATSStyleRenderingOptions rend = kATSStyleApplyAntiAliasing;
-		ATSUAttributeValuePtr vals[] = {&size,&white,&rend,&fid};
+		ATSUAttributeValuePtr vals[] = {&size, &white, &rend,&fid};
 		ATSUCreateStyle(&glob->textStyle);
 		ATSUFindFontFromName(SubFontName,strlen(SubFontName),kFontFullName,kFontNoPlatform,kFontNoScript,kFontNoLanguage,&fid);
 		ATSUSetAttributes(glob->textStyle,5, tags, sizes, vals);
+	
+		ATSUAttributeTag btags[] = {kATSURGBAlphaColorTag};
+		ByteCount		 bsizes[] = {sizeof(ATSURGBAlphaColor)};
+		ATSUAttributeValuePtr bvals[] = {&black};
+		
+		ATSUCreateAndCopyStyle(glob->textStyle,&glob->shadowStyle);
+		ATSUSetAttributes(glob->shadowStyle,1, btags, bsizes, bvals);
 	}
 	
 	if (!glob->textLayout) {
@@ -345,18 +354,41 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	breaks[breakCount+1] = kATSUToTextEnd;
 	
 	CGContextClearRect(c, CGRectMake(0, 0, myDrp->width, myDrp->height));
-	CGContextSetRGBStrokeColor(c, 0,0,0,1);
-	CGContextSetTextDrawingMode(c, kCGTextFillStroke);
-	CGContextSetLineWidth(c, diagonalLength * BorderSizeRatio);
 
 	for (i = breakCount; i >= 0; i--) {
 		int end = breaks[i+1];
 		if (end == kATSUToTextEnd) end=sublen;
-		ATSUDrawText(glob->textLayout, breaks[i], end-breaks[i], Long2Fix(0), lineHeight);
+		
+		// we draw shadow, then stroke text, then fill text
+		// this has several problems relating to hinting and line height and etc.
+		// ideally we'd draw the shadow of every line first (rather than shadow, text, next shadow, next text)
+		// and do a combined outside-stroke-then-fill operation on every line afterwards
+		// but ATSUI only has fill-then-stroke :(
+		CGContextSetTextDrawingMode(c, kCGTextFill);
 
+		ATSUSetRunStyle(glob->textLayout,glob->shadowStyle,kATSUFromTextBeginning,kATSUToTextEnd);
+		
+		ATSUDrawText(glob->textLayout, breaks[i], end-breaks[i], Long2Fix(0) + ShadowDistFix, lineHeight - ShadowDistFix);
+		
+		ATSUSetRunStyle(glob->textLayout,glob->textStyle,kATSUFromTextBeginning,kATSUToTextEnd);
+		
+		CGContextSetRGBStrokeColor(c, 0,0,0,1);
+		CGContextSetTextDrawingMode(c, kCGTextStroke);
+		CGContextSetLineWidth(c, diagonalLength * BorderSizeRatio);
+		
+		ATSUDrawText(glob->textLayout, breaks[i], end-breaks[i], Long2Fix(0), lineHeight);
+		
 		ATSUTextMeasurement ascent, descent; ByteCount unused;
 		ATSUGetLineControl(glob->textLayout, breaks[i], kATSULineAscentTag, sizeof(ATSUTextMeasurement), &ascent, &unused);
 		ATSUGetLineControl(glob->textLayout, breaks[i], kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, &unused);
+		
+		CGContextSetTextDrawingMode(c, kCGTextFill);
+
+		ATSUDrawText(glob->textLayout, breaks[i], end-breaks[i], Long2Fix(0), lineHeight);
+
+//		CGContextSetRGBFillColor(c, 0,0,0,1);
+//		CGContextSetTextDrawingMode(c, kCGTextFill);
+
 		lineHeight += ascent + descent;
 	}
 	
