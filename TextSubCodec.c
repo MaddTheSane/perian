@@ -10,9 +10,9 @@
 
 #include "TextSubCodec.h"
 
-#define SubFontName "Helvetica Neue Condensed Bold"
+#define SubFontName "Trebuchet MS Bold"
 // basically random numbers i picked, font size is a factor of the diagonal of the movie window, border is a factor of that
-#define FontSizeRatio .035
+#define FontSizeRatio .04
 #define BorderSizeRatio FontSizeRatio * .045
 
 // Constants
@@ -286,11 +286,11 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 										   kCGImageAlphaPremultipliedFirst);
 	
 	if (!glob->textStyle) { //TODO: set language region based on track language... does that even matter?
-		ATSUAttributeTag tags[] = {kATSUSizeTag, kATSURGBAlphaColorTag, kATSUStyleRenderingOptionsTag, kATSUFontTag, kATSUQDBoldfaceTag};
-		ByteCount		 sizes[] = {sizeof(Fixed), sizeof(ATSURGBAlphaColor), sizeof(ATSStyleRenderingOptions), sizeof(ATSUFontID), sizeof(Boolean)};
-		Fixed			 size = X2Fix(diagonalLength * FontSizeRatio); ATSURGBAlphaColor yellow = {.9,.9,.1,1};
+		ATSUAttributeTag tags[] = {kATSUSizeTag, kATSURGBAlphaColorTag, kATSUStyleRenderingOptionsTag, kATSUFontTag};
+		ByteCount		 sizes[] = {sizeof(Fixed), sizeof(ATSURGBAlphaColor), sizeof(ATSStyleRenderingOptions), sizeof(ATSUFontID)};
+		Fixed			 size = X2Fix(diagonalLength * FontSizeRatio); ATSURGBAlphaColor white = {1,1,1,1};
 		Boolean			 trueval = TRUE; ATSUFontID fid; ATSStyleRenderingOptions rend = kATSStyleApplyAntiAliasing;
-		ATSUAttributeValuePtr vals[] = {&size,&yellow,&rend,&fid,&trueval};
+		ATSUAttributeValuePtr vals[] = {&size,&white,&rend,&fid};
 		ATSUCreateStyle(&glob->textStyle);
 		ATSUFindFontFromName(SubFontName,strlen(SubFontName),kFontFullName,kFontNoPlatform,kFontNoScript,kFontNoLanguage,&fid);
 		ATSUSetAttributes(glob->textStyle,5, tags, sizes, vals);
