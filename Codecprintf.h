@@ -7,6 +7,10 @@
  *
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef DEBUG_BUILD
 int Codecprintf(FILE *, const char *format, ...);
 void FourCCprintf(char *string, unsigned long a);
@@ -16,3 +20,7 @@ void FourCCprintf(char *string, unsigned long a);
 #endif
 
 void FFMpegCodecprintf(void* ptr, int level, const char* fmt, va_list vl);
+
+#ifdef __cplusplus
+}
+#endif
