@@ -84,7 +84,7 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 		if (theMedia != NULL) {
 			// finally, say that we're transparent
 			MediaHandler mh = GetMediaHandler(theMedia);
-			MediaSetGraphicsMode(mh, graphicsModePreWhiteAlpha, NULL);
+			MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
 		}
 	}
 

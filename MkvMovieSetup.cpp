@@ -590,7 +590,7 @@ ComponentResult MkvCreateSubtitleTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_e
 		
 		// finally, say that we're transparent
 		mh = GetMediaHandler(mkvTrack->theMedia);
-		MediaSetGraphicsMode(mh, graphicsModePreWhiteAlpha, NULL);
+		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
 		
 	} else if ((*imgDesc)->cType == kSubFormatUTF8) {
 		mkvTrack->theTrack = CreatePlaintextSubTrack(theMovie, imgDesc, GetMovieTimeScale(theMovie), dataRef, dataRefType);
@@ -600,6 +600,8 @@ ComponentResult MkvCreateSubtitleTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_e
 		}
 		
 		mkvTrack->theMedia = GetTrackMedia(mkvTrack->theTrack);
+		mh = GetMediaHandler(mkvTrack->theMedia);
+		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
 		
 	} else {
 		err = invalidTrack;

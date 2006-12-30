@@ -49,7 +49,7 @@
 #define	kDivX4Name		"DivX 4"
 #define	kDivX5Name		"DivX 5"
 #define k3ivxName		"3ivx"
-#define kXVIDName		"XVID"
+#define kXVIDName		"Xvid"
 #define kMPEG4Name		"MPEG-4 Video"
 #define kH264Name		"H.264"
 #define kFLV1Name		"Sorenson H.263"
@@ -2544,7 +2544,7 @@ resource 'STR ' (k3ivxNameResID) {
 };
 
 resource 'STR ' (kXVIDNameResID) {
-	"XVID Decoder"
+	"Xvid Decoder"
 };
 
 resource 'STR ' (kMPEG4NameResID) {
@@ -2604,7 +2604,7 @@ resource 'STR ' (k3ivxInfoResID) {
 };
 
 resource 'STR ' (kXVIDInfoResID) {
-	"Decompresses video stored in XVID format."
+	"Decompresses video stored in Xvid format."
 };
 
 resource 'STR ' (kMPEG4InfoResID) {
