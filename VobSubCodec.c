@@ -417,7 +417,7 @@ ComponentResult SetupColorPalette(VobSubCodecGlobals glob, ImageDescriptionHandl
     
     Handle descExtension = NewHandle(0);
     
-    err = GetImageDescriptionExtension(imageDescription, &descExtension, kIDXExtension, 1);
+    err = GetImageDescriptionExtension(imageDescription, &descExtension, kSampleDescriptionExtensionVobSubIdx, 1);
     
     char *string = (char *) *descExtension;
     

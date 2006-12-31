@@ -6,12 +6,10 @@
  *  Copyright 2006 Perian Project. All rights reserved.
  *
  */
+#include "CodecIDs.h"
 
 // The high word is the codecInterfaceVersion
 #define kVobSubCodecVersion		(0x00020001)
-
-#define kVobSubCodec            'SPU '
-#define kIDXExtension           '.IDX'
 
 #define	kVobSubCodecFormatName	"VobSub"
 

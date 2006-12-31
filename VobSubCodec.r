@@ -90,7 +90,7 @@ resource 'cdci' (kVobSubCodecResource) {
 
 resource 'thng' (kVobSubCodecResource) {
 	decompressorComponentType,				// Type			
-	kVobSubCodec,							// SubType
+	kSubFormatVobSub,							// SubType
 	kManufacturer,							// Manufacturer
 											// - use componentHasMultiplePlatforms
 	0,										// not used Component flags

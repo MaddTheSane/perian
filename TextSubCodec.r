@@ -89,7 +89,7 @@ resource 'cdci' (kTextSubCodecResource) {
 
 resource 'thng' (kTextSubCodecResource) {
 	decompressorComponentType,				// Type			
-	kPlainTextSub,							// SubType
+	kSubFormatUTF8,							// SubType
 	kManufacturer,							// Manufacturer
 											// - use componentHasMultiplePlatforms
 	0,										// not used Component flags

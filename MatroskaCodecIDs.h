@@ -29,79 +29,9 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <matroska/KaxTracks.h>
 #include <matroska/KaxTrackEntryData.h>
+#include "CodecIDs.h"
+
 using namespace libmatroska;
-
-
-// Description Extensions
-enum {
-    kCookieTypeOggSerialNo = 'oCtN'
-};
-
-// format specific cookie types
-enum {
-    kCookieTypeVorbisHeader = 'vCtH',
-    kCookieTypeVorbisComments = 'vCt#',
-    kCookieTypeVorbisCodebooks = 'vCtC',
-	kCookieTypeVorbisFirstPageNo = 'vCtN'
-};
-
-enum {
-    kCookieTypeSpeexHeader = 'sCtH',
-    kCookieTypeSpeexComments = 'sCt#',
-    kCookieTypeSpeexExtraHeader	= 'sCtX'
-};
-
-enum {
-    kCookieTypeTheoraHeader = 'tCtH',
-    kCookieTypeTheoraComments = 'tCt#',
-    kCookieTypeTheoraCodebooks = 'tCtC'
-};
-
-enum {
-    kCookieTypeFLACStreaminfo = 'fCtS',
-    kCookieTypeFLACMetadata = 'fCtM'
-};
-
-enum {
-	kSampleDescriptionExtensionTheora = 'XdxT',
-	kSampleDescriptionExtensionVobSubIdx = '.IDX',
-	kSampleDescriptionExtensionReal = 'RVex',
-};
-
-
-enum {
-	// unofficial QuickTime FourCCs
-    kAudioFormatXiphVorbis                  = 'XiVs',
-    kAudioFormatXiphSpeex                   = 'XiSp',
-    kAudioFormatXiphFLAC                    = 'XiFL',
-    kVideoFormatXiphTheora                  = 'XiTh',
-	kAudioFormatAC3MS                       = 0x6D732000,
-	kVideoFormatMSMPEG4v3                   = 'MP43',
-	
-	kSubFormatUTF8                          = 'SRT ',
-	kSubFormatSSA                           = 'SSA ',
-	kSubFormatASS                           = 'ASS ',
-	kSubFormatUSF                           = 'USF ',
-	kSubFormatVobSub                        = 'SPU ',
-	
-	// the following 4CCs don't have decoder support yet
-	kMPEG1VisualCodecType                   = 'mp1v',
-	kMPEG2VisualCodecType                   = 'mp2v',
-	kAudioFormatDTS                         = 'DTS ', 
-	kAudioFormatTTA                         = 'TTA1',
-	kAudioFormatWavepack                    = 'WVPK',
-	kVideoFormatReal5                       = 'RV10',
-	kVideoFormatRealG2                      = 'RV20',
-	kVideoFormatReal8                       = 'RV30',
-	kVideoFormatReal9                       = 'RV40',
-	kAudioFormatReal1                       = '14_4',
-	kAudioFormatReal2                       = '28_8',
-	kAudioFormatRealCook                    = 'COOK',
-	kAudioFormatRealSipro                   = 'SIPR',
-	kAudioFormatRealLossless                = 'RALF',
-	kAudioFormatRealAtrac3                  = 'ATRC'
-};
-
 
 
 // these CodecIDs need special handling since they correspond to many fourccs
@@ -114,56 +44,13 @@ enum {
 #define MKV_A_PCM_FLOAT "A_PCM/FLOAT/IEEE"
 
 
-// these functions modify the AudioStreamBasicDescription properly for the audio format
-ComponentResult ASBDExt_AC3(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd);
-ComponentResult ASBDExt_LPCM(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd);
-ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd);
-
-
-struct ASBDExtensionFunc {
-	OSType cType;
-	ComponentResult (*finishASBD) (KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd);
-};
-
-const struct ASBDExtensionFunc kMatroskaASBDExtensionFuncs[] = {
-	{ kAudioFormatMPEG4AAC, ASBDExt_AAC },
-	{ kAudioFormatAC3, ASBDExt_AC3 },
-	{ kAudioFormatLinearPCM, ASBDExt_LPCM }
-};
-
-
 typedef enum {
 	kToKaxTrackEntry,
 	kToSampleDescription
 } DescExtDirection;
 
-// these functions set/read extensions to the ImageDescription/SoundDescription
-ComponentResult DescExt_H264(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
-ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
-ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
-ComponentResult DescExt_VobSub(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
-ComponentResult DescExt_Real(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
-ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
-
-
-struct CodecDescExtFunc {
-	OSType cType;
-	ComponentResult (*descExtension) (KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
-};
-
-const struct CodecDescExtFunc kMatroskaSampleDescExtFuncs[] = {
-	{ kH264CodecType, DescExt_H264 },
-	{ kAudioFormatXiphVorbis, DescExt_XiphVorbis },
-	{ kAudioFormatXiphFLAC, DescExt_XiphFLAC },
-	{ kSubFormatVobSub, DescExt_VobSub },
-	{ kVideoFormatReal5, DescExt_Real },
-	{ kVideoFormatRealG2, DescExt_Real },
-	{ kVideoFormatReal8, DescExt_Real },
-	{ kVideoFormatReal9, DescExt_Real },
-	{ kMPEG4VisualCodecType, DescExt_mp4v },
-};
-
-
+ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
+ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd);
 short GetTrackLanguage(KaxTrackEntry *tr_entry);
 FourCharCode GetFourCC(KaxTrackEntry *tr_entry);
 

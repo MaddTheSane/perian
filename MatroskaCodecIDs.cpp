@@ -438,6 +438,49 @@ ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription
 	return noErr;
 }
 
+ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
+{
+	switch ((*desc)->dataFormat) {
+		case kH264CodecType:
+			return DescExt_H264(tr_entry, desc, dir);
+			
+		case kAudioFormatXiphVorbis:
+			return DescExt_XiphVorbis(tr_entry, desc, dir);
+			
+		case kAudioFormatXiphFLAC:
+			return DescExt_XiphFLAC(tr_entry, desc, dir);
+			
+		case kSubFormatVobSub:
+			return DescExt_VobSub(tr_entry, desc, dir);
+			
+		case kVideoFormatReal5:
+		case kVideoFormatRealG2:
+		case kVideoFormatReal8:
+		case kVideoFormatReal9:
+			return DescExt_Real(tr_entry, desc, dir);
+			
+		case kMPEG4VisualCodecType:
+			return DescExt_mp4v(tr_entry, desc, dir);
+	}
+	return noErr;
+}
+
+ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)
+{
+	switch (asbd->mFormatID) {
+		case kAudioFormatMPEG4AAC:
+			return ASBDExt_AAC(tr_entry, asbd);
+			
+		case kAudioFormatAC3:
+			return ASBDExt_AC3(tr_entry, asbd);
+			
+		case kAudioFormatLinearPCM:
+			return ASBDExt_LPCM(tr_entry, asbd);
+	}
+	return noErr;
+}
+
+
 short GetTrackLanguage(KaxTrackEntry *tr_entry) {
 	KaxTrackLanguage *trLang = FindChild<KaxTrackLanguage>(*tr_entry);
 	if (trLang != NULL) {

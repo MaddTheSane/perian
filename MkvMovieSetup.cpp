@@ -500,12 +500,7 @@ ComponentResult MkvCreateAudioTrack(MkvTrackPtr mkvTrack, KaxTrackEntry *tr_entr
 	asbd.mSampleRate = Float64(*sampleFreq);
 	asbd.mChannelsPerFrame = uint32(*numChannels);
 	
-	for (int i = 0; i < sizeof(kMatroskaASBDExtensionFuncs) / sizeof(struct ASBDExtensionFunc); i++) {
-		if (asbd.mFormatID == kMatroskaASBDExtensionFuncs[i].cType) {
-			kMatroskaASBDExtensionFuncs[i].finishASBD(tr_entry, &asbd);
-			break;
-		}
-	}
+	MkvFinishASBD(tr_entry, &asbd);
 	
 	// get more info about the codec
 	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
@@ -816,11 +811,6 @@ void FinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 		DisposeHandle((Handle) sndDescExt);
 #endif
 	} else {
-		for (int i = 0; i < sizeof(kMatroskaSampleDescExtFuncs) / sizeof(struct CodecDescExtFunc); i++) {
-			if ((*desc)->dataFormat == kMatroskaSampleDescExtFuncs[i].cType) {
-				kMatroskaSampleDescExtFuncs[i].descExtension(tr_entry, desc, kToSampleDescription);
-				break;
-			}
-		}
+		MkvFinishSampleDescription(tr_entry, desc, kToSampleDescription);
 	}
 }

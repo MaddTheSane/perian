@@ -6,9 +6,7 @@
  *  Copyright 2006 Perian Project. All rights reserved.
  *
  */
-
-
-#define kPlainTextSub           'SRT '
+#include "CodecIDs.h"
 
 #define	kTextSubCodecFormatName	"Text Subtitle"
 

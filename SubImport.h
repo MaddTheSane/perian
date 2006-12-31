@@ -11,8 +11,7 @@
 #define __SUBIMPORT_H__
 
 #include <QuickTime/QuickTime.h>
-
-#define kSubFormatUTF8 'SRT '
+#include "CodecIDs.h"
 
 #ifdef __cplusplus
 extern "C"
