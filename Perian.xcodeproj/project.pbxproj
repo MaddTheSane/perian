@@ -51,6 +51,16 @@
 		11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */; };
 		11C85FE60A64314500DF3D73 /* FFusionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = F560DF0203D622D001ABA332 /* FFusionCodec.r */; };
 		11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */; };
+		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
+		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
+		6116E5530B43C27B0020F1CE /* ACSimpleCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E53E0B43C27B0020F1CE /* ACSimpleCodec.cpp */; };
+		6116E5570B43C27B0020F1CE /* CAStreamBasicDescription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5490B43C27B0020F1CE /* CAStreamBasicDescription.cpp */; };
+		6116E5580B43C27B0020F1CE /* FFissionCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */; };
+		6116E5590B43C27B0020F1CE /* FFissionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = 6116E54E0B43C27B0020F1CE /* FFissionCodec.r */; };
+		6116E55A0B43C27B0020F1CE /* FFissionDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */; };
+		6116E61C0B44A5A70020F1CE /* GetCodecBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5400B43C27B0020F1CE /* GetCodecBundle.cpp */; };
+		6116E6200B44A5B30020F1CE /* CADebugMacros.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5460B43C27B0020F1CE /* CADebugMacros.cpp */; };
+		6116E6220B44A5BC0020F1CE /* CABundleLocker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5430B43C27B0020F1CE /* CABundleLocker.cpp */; };
 		6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */; };
 		6123D6270AD0A3FF003EDE52 /* VobSubCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = 6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */; };
 		613CD51E0AD1FB650098A825 /* TextSubCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = 613CD51A0AD1FB650098A825 /* TextSubCodec.c */; };
@@ -234,6 +244,32 @@
 		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = build/Universal/libavcodec.a; sourceTree = "<group>"; };
 		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = build/Universal/libavutil.a; sourceTree = "<group>"; };
 		11D4EFA30A3CE8C10066D45F /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpostproc.a; path = build/Universal/libpostproc.a; sourceTree = "<group>"; };
+		6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACBaseCodec.cpp; sourceTree = "<group>"; };
+		6116E5380B43C27B0020F1CE /* ACBaseCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACBaseCodec.h; sourceTree = "<group>"; };
+		6116E5390B43C27B0020F1CE /* ACCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACCodec.cpp; sourceTree = "<group>"; };
+		6116E53A0B43C27B0020F1CE /* ACCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACCodec.h; sourceTree = "<group>"; };
+		6116E53B0B43C27B0020F1CE /* ACCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACCodecDispatch.h; sourceTree = "<group>"; };
+		6116E53C0B43C27B0020F1CE /* ACCodecDispatchTypes.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACCodecDispatchTypes.h; sourceTree = "<group>"; };
+		6116E53D0B43C27B0020F1CE /* ACConditionalMacros.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACConditionalMacros.h; sourceTree = "<group>"; };
+		6116E53E0B43C27B0020F1CE /* ACSimpleCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACSimpleCodec.cpp; sourceTree = "<group>"; };
+		6116E53F0B43C27B0020F1CE /* ACSimpleCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACSimpleCodec.h; sourceTree = "<group>"; };
+		6116E5400B43C27B0020F1CE /* GetCodecBundle.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = GetCodecBundle.cpp; sourceTree = "<group>"; };
+		6116E5410B43C27B0020F1CE /* GetCodecBundle.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = GetCodecBundle.h; sourceTree = "<group>"; };
+		6116E5430B43C27B0020F1CE /* CABundleLocker.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = CABundleLocker.cpp; sourceTree = "<group>"; };
+		6116E5440B43C27B0020F1CE /* CABundleLocker.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CABundleLocker.h; sourceTree = "<group>"; };
+		6116E5450B43C27B0020F1CE /* CAConditionalMacros.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CAConditionalMacros.h; sourceTree = "<group>"; };
+		6116E5460B43C27B0020F1CE /* CADebugMacros.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = CADebugMacros.cpp; sourceTree = "<group>"; };
+		6116E5470B43C27B0020F1CE /* CADebugMacros.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CADebugMacros.h; sourceTree = "<group>"; };
+		6116E5480B43C27B0020F1CE /* CADebugPrintf.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CADebugPrintf.h; sourceTree = "<group>"; };
+		6116E5490B43C27B0020F1CE /* CAStreamBasicDescription.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = CAStreamBasicDescription.cpp; sourceTree = "<group>"; };
+		6116E54A0B43C27B0020F1CE /* CAStreamBasicDescription.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CAStreamBasicDescription.h; sourceTree = "<group>"; };
+		6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionCodec.cpp; sourceTree = "<group>"; };
+		6116E54D0B43C27B0020F1CE /* FFissionCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FFissionCodec.h; sourceTree = "<group>"; };
+		6116E54E0B43C27B0020F1CE /* FFissionCodec.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; name = FFissionCodec.r; path = FFissionCodec/FFissionCodec.r; sourceTree = "<group>"; };
+		6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionDecoder.cpp; sourceTree = "<group>"; };
+		6116E5500B43C27B0020F1CE /* FFissionDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FFissionDecoder.h; sourceTree = "<group>"; };
+		6116E55D0B43C29F0020F1CE /* XCAResources.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; path = XCAResources.r; sourceTree = "<group>"; };
+		6116E74E0B4738CE0020F1CE /* CodecIDs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodecIDs.h; sourceTree = "<group>"; };
 		6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = VobSubCodec.c; sourceTree = "<group>"; };
 		6123D6230AD0A3FE003EDE52 /* VobSubCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = VobSubCodec.h; sourceTree = "<group>"; };
 		6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; path = VobSubCodec.r; sourceTree = "<group>"; };
@@ -453,6 +489,8 @@
 				02B499DE040D7A180049362E /* PostProcessing.strings */,
 				02B4991D040D596C0049362E /* main.nib */,
 				F560DF0203D622D001ABA332 /* FFusionCodec.r */,
+				6116E54E0B43C27B0020F1CE /* FFissionCodec.r */,
+				6116E55D0B43C29F0020F1CE /* XCAResources.r */,
 				F50D440903EAD8E701B1D299 /* Images */,
 			);
 			name = Resources;
@@ -464,11 +502,14 @@
 				F53AD5E20B2A4EC000D93AC9 /* FFMPEG */,
 				61D691460AC8E333000EFC7D /* Matroska */,
 				6123D61D0AD0A052003EDE52 /* Subtitles */,
+				6116E5360B43C27B0020F1CE /* ACPublic */,
+				6116E5420B43C27B0020F1CE /* CAPublicUtility */,
 				F560DECD03D61B6101ABA332 /* Components.k.h */,
 				113F58980A6B091600509987 /* Codecprintf.h */,
 				113F58990A6B091600509987 /* Codecprintf.c */,
 				61D517710AE0402E00A671E1 /* CommonUtils.h */,
 				61D517720AE0402E00A671E1 /* CommonUtils.c */,
+				6116E74E0B4738CE0020F1CE /* CodecIDs.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -481,6 +522,51 @@
 				61CB11770ACDF4D8007994BD /* libmatroska.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		6116E5360B43C27B0020F1CE /* ACPublic */ = {
+			isa = PBXGroup;
+			children = (
+				6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */,
+				6116E5380B43C27B0020F1CE /* ACBaseCodec.h */,
+				6116E5390B43C27B0020F1CE /* ACCodec.cpp */,
+				6116E53A0B43C27B0020F1CE /* ACCodec.h */,
+				6116E53B0B43C27B0020F1CE /* ACCodecDispatch.h */,
+				6116E53C0B43C27B0020F1CE /* ACCodecDispatchTypes.h */,
+				6116E53D0B43C27B0020F1CE /* ACConditionalMacros.h */,
+				6116E53E0B43C27B0020F1CE /* ACSimpleCodec.cpp */,
+				6116E53F0B43C27B0020F1CE /* ACSimpleCodec.h */,
+				6116E5400B43C27B0020F1CE /* GetCodecBundle.cpp */,
+				6116E5410B43C27B0020F1CE /* GetCodecBundle.h */,
+			);
+			path = ACPublic;
+			sourceTree = "<group>";
+		};
+		6116E5420B43C27B0020F1CE /* CAPublicUtility */ = {
+			isa = PBXGroup;
+			children = (
+				6116E5430B43C27B0020F1CE /* CABundleLocker.cpp */,
+				6116E5440B43C27B0020F1CE /* CABundleLocker.h */,
+				6116E5450B43C27B0020F1CE /* CAConditionalMacros.h */,
+				6116E5460B43C27B0020F1CE /* CADebugMacros.cpp */,
+				6116E5470B43C27B0020F1CE /* CADebugMacros.h */,
+				6116E5480B43C27B0020F1CE /* CADebugPrintf.h */,
+				6116E5490B43C27B0020F1CE /* CAStreamBasicDescription.cpp */,
+				6116E54A0B43C27B0020F1CE /* CAStreamBasicDescription.h */,
+			);
+			path = CAPublicUtility;
+			sourceTree = "<group>";
+		};
+		6116E54B0B43C27B0020F1CE /* Audio Codec */ = {
+			isa = PBXGroup;
+			children = (
+				6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */,
+				6116E54D0B43C27B0020F1CE /* FFissionCodec.h */,
+				6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */,
+				6116E5500B43C27B0020F1CE /* FFissionDecoder.h */,
+			);
+			name = "Audio Codec";
+			path = FFissionCodec;
 			sourceTree = "<group>";
 		};
 		6123D61D0AD0A052003EDE52 /* Subtitles */ = {
@@ -661,7 +747,8 @@
 		F53AD5E20B2A4EC000D93AC9 /* FFMPEG */ = {
 			isa = PBXGroup;
 			children = (
-				F53AD5E70B2A4EFA00D93AC9 /* Codec */,
+				6116E54B0B43C27B0020F1CE /* Audio Codec */,
+				F53AD5E70B2A4EFA00D93AC9 /* Video Codec */,
 				F53AD5E30B2A4EE100D93AC9 /* File Import */,
 			);
 			name = FFMPEG;
@@ -680,14 +767,14 @@
 			name = "File Import";
 			sourceTree = "<group>";
 		};
-		F53AD5E70B2A4EFA00D93AC9 /* Codec */ = {
+		F53AD5E70B2A4EFA00D93AC9 /* Video Codec */ = {
 			isa = PBXGroup;
 			children = (
 				F560DEFC03D61BE301ABA332 /* FFusionCodec.h */,
 				F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */,
 				F560DF0003D61D0101ABA332 /* FFusionCodec.c */,
 			);
-			name = Codec;
+			name = "Video Codec";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -862,6 +949,7 @@
 				61CB12260ACE1074007994BD /* MatroskaImport.r in Rez */,
 				6123D6270AD0A3FF003EDE52 /* VobSubCodec.r in Rez */,
 				613CD51F0AD1FB650098A825 /* TextSubCodec.r in Rez */,
+				6116E5590B43C27B0020F1CE /* FFissionCodec.r in Rez */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -915,6 +1003,15 @@
 				613CD51E0AD1FB650098A825 /* TextSubCodec.c in Sources */,
 				61D514DE0ADF3DBA00A671E1 /* SubImport.c in Sources */,
 				61D517730AE0402E00A671E1 /* CommonUtils.c in Sources */,
+				6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */,
+				6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */,
+				6116E5530B43C27B0020F1CE /* ACSimpleCodec.cpp in Sources */,
+				6116E5570B43C27B0020F1CE /* CAStreamBasicDescription.cpp in Sources */,
+				6116E5580B43C27B0020F1CE /* FFissionCodec.cpp in Sources */,
+				6116E55A0B43C27B0020F1CE /* FFissionDecoder.cpp in Sources */,
+				6116E61C0B44A5A70020F1CE /* GetCodecBundle.cpp in Sources */,
+				6116E6200B44A5B30020F1CE /* CADebugMacros.cpp in Sources */,
+				6116E6220B44A5BC0020F1CE /* CABundleLocker.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

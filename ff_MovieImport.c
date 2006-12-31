@@ -77,6 +77,9 @@ void initLib()
 		register_avcodec(&vp6f_decoder);
 		register_avcodec(&h263i_decoder);
 		
+		register_avcodec(&wmav1_decoder);
+		register_avcodec(&wmav2_decoder);
+		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
 }
