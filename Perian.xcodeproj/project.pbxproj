@@ -39,7 +39,6 @@
 		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA10A3CE8C10066D45F /* libavcodec.a */; };
 		11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA20A3CE8C10066D45F /* libavutil.a */; };
-		11A70AD10A3D0131002058D4 /* libpostproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA30A3CE8C10066D45F /* libpostproc.a */; };
 		11A70AD20A3D0131002058D4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1156DBD80A3CE9F500963B0E /* libz.dylib */; };
 		11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EED50A3CE7EC0066D45F /* QuickTime.framework */; };
 		11A70AD80A3D0149002058D4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
@@ -423,7 +422,6 @@
 				11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */,
 				11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */,
 				11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */,
-				11A70AD10A3D0131002058D4 /* libpostproc.a in Frameworks */,
 				11A70AD20A3D0131002058D4 /* libz.dylib in Frameworks */,
 				11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */,
 				8F483B550A642644002CCA73 /* libavformat.a in Frameworks */,

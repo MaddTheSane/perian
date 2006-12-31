@@ -2,7 +2,7 @@
 PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
-generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-gpl --enable-pp --enable-pthreads"
+generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-pthreads"
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
 	extraConfigureOptions="--disable-opts"
