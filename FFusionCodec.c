@@ -10,19 +10,19 @@
 //Copyright 2001-2002 Jamby
 //uses libavcodec from ffmpeg 0.4.6
 //
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
+//This library is free software; you can redistribute it and/or
+//modify it under the terms of the GNU Lesser General Public
+//License as published by the Free Software Foundation; either
+//version 2.1 of the License, or (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+//This library is distributed in the hope that it will be useful,
+//but WITHOUT ANY WARRANTY; without even the implied warranty of
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//You should have received a copy of the GNU Lesser General Public
+//License along with this library; if not, write to the Free Software
+//Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 //---------------------------------------------------------------------------
 // Source Code
@@ -34,7 +34,6 @@
 #include "FFusionCodec.h"
 #include "EI_Image.h"
 #include "avcodec.h"
-//#include "postprocess.h"
 #include "Codecprintf.h"
 
 void inline swapFrame(AVFrame * *a, AVFrame * *b)
@@ -47,14 +46,6 @@ void inline swapFrame(AVFrame * *a, AVFrame * *b)
 //---------------------------------------------------------------------------
 // Types
 //---------------------------------------------------------------------------
-
-/*typedef struct
-{
-    pp_mode_t			*mode[PP_QUALITY_MAX+1];
-    pp_context_t		*context;
-    short			level;
-	AVFrame			*destBuffer;
-} PostProcParamRecord;*/
 
 // 32 because that's ffmpeg's INTERNAL_BUFFER_SIZE
 #define FFUSION_MAX_BUFFERS 32
@@ -80,7 +71,6 @@ typedef struct
     OSType			componentType;
     char			hasy420;
     char			alreadyDonePPPref;
-//    PostProcParamRecord		postProcParams;
 	FILE			*fileLog;
 	int				futureFrameAvailable;
 	int				delayedFrames;
@@ -260,11 +250,6 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         {
             DisposeImageCodecMPDrawBandUPP(glob->drawBandUPP);
         }
-		
-/*		if (glob->postProcParams.destBuffer)
-		{
-			av_free(glob->postProcParams.destBuffer);
-		}*/
         
         if (glob->avCodec)
         {
@@ -298,15 +283,7 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
 		{
 			av_free(glob->inputBuffer);
 		}
-		
-/*        for (i=0; i<=PP_QUALITY_MAX; i++)
-        {
-            if (glob->postProcParams.mode[i])
-                pp_free_mode(glob->postProcParams.mode[i]);
-        }
-		
-        if (glob->postProcParams.context)
-            pp_free_context(glob->postProcParams.context);*/
+
 		if(glob->fileLog)
 			fclose(glob->fileLog);
 		
@@ -675,41 +652,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     capabilities->extendWidth = 0;
     capabilities->extendHeight = 0;
     
-    // Post-processing
-/*	if (!glob->postProcParams.context)
-	{
-		// allocate a destination buffer so we don't mess with the decoded data
-		glob->postProcParams.destBuffer = avcodec_alloc_frame();
-		avcodec_default_get_buffer(glob->avContext, glob->postProcParams.destBuffer);
-		
-		glob->postProcParams.context = pp_get_context((**p->imageDescription).width, (**p->imageDescription).height, PP_FORMAT_420);
-		
-		for (i=0; i<=PP_QUALITY_MAX; i++) 
-		{
-			
-			if (i <= 2) 
-			{
-				glob->postProcParams.mode[i] = pp_get_mode_by_name_and_quality("h1,v1,dr"/*"al:f"*, i);
-			} 
-			else if (i <= 4) 
-			{
-				glob->postProcParams.mode[i] = pp_get_mode_by_name_and_quality("hb,vb,dr,"/*"al:f"*, i);
-			} 
-			else 
-			{
-				glob->postProcParams.mode[i] = pp_get_mode_by_name_and_quality("hb,vb,dr,""hb:c,vb:c,dr:c,"/*"al:f"*, i);
-			}
-			
-			if (glob->postProcParams.mode[i] == NULL) 
-			{
-				Codecprintf(glob->fileLog, "Error getting PP filter %d!\n", i);
-				
-				return -1;
-			}
-			
-			glob->postProcParams.level = 0;//GetPPUserPreference();
-		}
-	}*/
 	capabilities->flags |= codecCanAsync | codecCanAsyncWhen;
 	
     
@@ -760,109 +702,6 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	myDrp->decoded = p->frameTime ? (0 != (p->frameTime->flags & icmFrameAlreadyDecoded)) : false;
 	myDrp->frameNumber = p->frameNumber - 1;
 	myDrp->buffer = NULL;
-	
-    if (p->conditionFlags & codecConditionFirstFrame)
-    {
-        GetKeys(currentKeyMap);
-        
-		/*        if ((currentKeyMap[1] & kOptionKeyModifier) && !glob->alreadyDonePPPref)
-        {
-            glob->alreadyDonePPPref = 1;
-			
-            bundleRef = CFBundleGetBundleWithIdentifier(CFSTR("net.aldorande.component.FFusion"));
-			
-            if (bundleRef == NULL)
-                printf("Cannot get main bundle reference\n");
-			
-            err = CreateNibReferenceWithCFBundle(bundleRef, CFSTR("main"), &nibRef);
-            
-            if (err != noErr)
-                printf("cannot create nib reference! %d\n", (int)err);
-            
-            if (nibRef != NULL)
-            {
-                err = CreateWindowFromNib(nibRef, CFSTR("PostProcessing"), &window);
-                
-                if (err != noErr)
-                    printf("cannot create window!\n");
-                
-                DisposeNibReference(nibRef);
-				
-                if (window != NULL)
-                {
-                    controlID.signature = 'post';
-                    controlID.id = 128;
-                    
-                    err = GetControlByID(window, &controlID, &theControl);
-                    
-                    if (err != noErr)
-                    {
-                        printf("Cannot get slider hint text control!\n");
-                    }
-					
-                    userPreference = GetPPUserPreference();
-                    ChangeHintText(userPreference, theControl);
-                    
-                    controlID.signature = 'post';
-                    controlID.id = 129;
-                    
-                    err = GetControlByID(window, &controlID, &theControl);
-                    
-                    if (err != noErr)
-                    {
-                        printf("Cannot get slider control!\n");
-                    }
-					
-                    SetControl32BitValue(theControl, userPreference);
-					
-                    ShowWindow(window);
-                    
-                    handlerUPP = NewEventHandlerUPP(HandlePPDialogWindowEvent);
-                    
-                    eventType.eventClass = kEventClassCommand;
-                    eventType.eventKind  = kEventCommandProcess;
-                    
-                    InstallWindowEventHandler(window, handlerUPP, 1, &eventType, window, NULL);
-                    
-                    handlerUPP2 = NewEventHandlerUPP(HandlePPDialogControlEvent);
-                    
-                    eventType.eventClass = kEventClassControl;
-                    eventType.eventKind = kEventControlTrack;
-                    
-                    InstallControlEventHandler(theControl, handlerUPP2, 1, &eventType, window, NULL);
-                }
-            }
-        }*/
-    }
-    
-    /*if ((glob->postProcParams.level >= 0) && (GetPPUserPreference() > 0)) 
-    {
-        if (p->conditionFlags & codecConditionCatchUpDiff) 
-        {
-            if (glob->postProcParams.level > 0) 
-            {
-                glob->postProcParams.level--;
-                
-                printf("PP=%i -\n", glob->postProcParams.level);
-            }
-            
-            glob->postProcParams.goodness = 0;
-        } 
-        else 
-        {
-            if (++glob->postProcParams.goodness > 5) 
-            {
-                if (glob->postProcParams.level < PP_QUALITY_MAX + 1) 
-                {
-                    glob->postProcParams.level++;
-                    
-                    printf("PP=%i +\n", glob->postProcParams.level);
-                }
-                
-                glob->postProcParams.goodness = 0;
-            }
-        }
-    }*/
 	
     return noErr;
 }
@@ -994,7 +833,6 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 {
     OSErr err = noErr;
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
-//	AVFrame *ppDestPic = glob->postProcParams.destBuffer;
 	int i, j;
 	
 	if(!myDrp->decoded)
@@ -1040,18 +878,6 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	else
 	{
 		memcpy(&(glob->lastDisplayedFrame), picture, sizeof(AVFrame));
-		
-		// only do post processing if it's a new frame
-/*		if (glob->postProcParams.level > 0)
-		{
-			pp_postprocess(picture->data, picture->linesize, 
-						   ppDestPic->data, ppDestPic->linesize, 
-						   myDrp->width, myDrp->height, 
-						   picture->qscale_table, picture->qstride, 
-						   glob->postProcParams.mode[glob->postProcParams.level],
-						   glob->postProcParams.context, picture->pict_type);
-			picture = ppDestPic;
-		}*/
 	}
 	
 	if (myDrp->pixelFormat == 'y420' && glob->avContext->pix_fmt == PIX_FMT_YUV420P)
@@ -1498,157 +1324,3 @@ static void BGR24toRGB24(UInt8 *baseAddr, long rowBump, long width, long height,
 	}
 }
 
-/*int GetPPUserPreference()
-{
-    CFIndex 	userPref;
-    Boolean 	keyExists;
-    int		ppUserValue = 0;
-    
-    userPref = CFPreferencesGetAppIntegerValue(CFSTR("postProcessingLevel"), CFSTR("net.aldorande.component.FFusion"), &keyExists);
-    
-    if (keyExists)
-    {
-        ppUserValue = (int)userPref;
-    }
-    else
-    {
-        Codecprintf(NULL, "Key does not exists\n");
-        
-        ppUserValue = 0;
-    }
-    
-    return ppUserValue;
-}
-
-void SetPPUserPreference(int value)
-{
-    int	    sameValue = value;
-    Boolean syncOK;
-	
-    CFPreferencesSetAppValue(CFSTR("postProcessingLevel"), CFNumberCreate(NULL, kCFNumberIntType, &sameValue), CFSTR("net.aldorande.component.FFusion"));
-    
-    syncOK = CFPreferencesAppSynchronize(CFSTR("net.aldorande.component.FFusion"));
-    
-    if (!syncOK)
-    {
-        Codecprintf(NULL, "Error writing user preference!\n");
-    }
-}
-
-pascal OSStatus HandlePPDialogWindowEvent(EventHandlerCallRef  nextHandler, EventRef theEvent, void* userData)
-{
-    UInt32	whatHappened;
-    HICommand 	commandStruct;
-    UInt32 	theCommandID;
-    OSErr	theErr = eventNotHandledErr;
-    OSErr	resErr;
-    WindowRef	window = (WindowRef)userData;
-    SInt32	value = 0;
-    ControlRef	slider;
-    ControlID	controlID;
-    
-    whatHappened = GetEventKind(theEvent);
-	
-    switch (whatHappened)
-    {
-        case kEventCommandProcess:
-            GetEventParameter(theEvent, kEventParamDirectObject, typeHICommand, NULL, sizeof(HICommand), NULL, &commandStruct);
-			
-            theCommandID = commandStruct.commandID;
-            
-            if (theCommandID == kHICommandOK)
-            {
-                controlID.id = 129;
-                controlID.signature = 'post';
-                resErr = GetControlByID(window, &controlID, &slider);
-                
-                if (resErr == noErr)
-                {
-                    value = GetControl32BitValue(slider);
-                }
-                else
-                {
-                    Codecprintf(NULL, "Unable to get post-processing control value!\n");
-                }
-                
-                SetPPUserPreference(value);
-				
-                DisposeWindow(window);
-                
-                theErr = noErr;
-            }
-				
-				if (theCommandID == kHICommandCancel)
-				{                
-					DisposeWindow(window);
-					
-					theErr = noErr;
-				}
-				
-				break;
-    }
-    
-    return theErr;
-}
-
-pascal OSStatus HandlePPDialogControlEvent(EventHandlerCallRef nextHandler, EventRef theEvent, void* userData)
-{
-    WindowRef	window = (WindowRef)userData;
-    ControlID	controlID;
-    ControlRef	slider, staticText;
-    OSErr	resErr;
-    SInt32	value;
-    OSErr	result;
-    
-    result = CallNextEventHandler(nextHandler, theEvent);
-    
-    if (result == noErr)
-    {        
-        controlID.id = 128;
-        controlID.signature = 'post';
-        resErr = GetControlByID(window, &controlID, &staticText);
-        
-        controlID.id = 129;
-        controlID.signature = 'post';
-        resErr = GetControlByID(window, &controlID, &slider);
-        
-        value = GetControl32BitValue(slider);
-        
-        ChangeHintText(value, staticText);
-    }
-    
-    return result;
-}
-
-void ChangeHintText(int value, ControlRef staticTextField)
-{
-    CFStringRef myCFSTR, myIndexCFSTR;
-    OSErr	resErr;
-    CFBundleRef	bundleRef;
-    
-    bundleRef = CFBundleGetBundleWithIdentifier(CFSTR("net.aldorande.component.FFusion"));
-    
-    if (bundleRef == NULL)
-    {
-        Codecprintf(NULL, "Error getting current bundle!\n");
-    }
-    
-    if (myIndexCFSTR = CFStringCreateWithFormatAndArguments(NULL, NULL, CFSTR("%d"), (va_list)&value))
-    {
-        myCFSTR = CFBundleCopyLocalizedString(bundleRef, myIndexCFSTR, NULL, CFSTR("PostProcessing"));
-    }
-    else
-    {
-        myCFSTR = CFBundleCopyLocalizedString(bundleRef, CFSTR("0"), NULL, CFSTR("PostProcessing"));
-    }
-	
-    //resErr = SetControlData(staticTextField, kControlEntireControl, kControlStaticTextTextTag, CFStringGetLength(myCFSTR), CFStringGetCStringPtr(myCFSTR, CFStringGetSystemEncoding()));
-    
-    //this works only under 10.2
-    resErr = SetControlData(staticTextField, kControlEntireControl, kControlStaticTextCFStringTag, CFStringGetLength(myCFSTR), &myCFSTR);
-	
-    if (resErr != noErr)
-        Codecprintf(NULL, "Could not change control title! (%d) \n", (int)resErr);
-    
-    Draw1Control(staticTextField);
-}*/
