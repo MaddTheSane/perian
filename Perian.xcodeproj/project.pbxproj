@@ -1413,8 +1413,6 @@
 		11D4ED480A3CE59A0066D45F /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = include;
-				LIBRARY_SEARCH_PATHS = staticLibs;
 			};
 			name = Development;
 		};
