@@ -171,6 +171,10 @@
 		61CB12260ACE1074007994BD /* MatroskaImport.r in Rez */ = {isa = PBXBuildFile; fileRef = 61D691590AC8E382000EFC7D /* MatroskaImport.r */; };
 		61D514DE0ADF3DBA00A671E1 /* SubImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D514DD0ADF3DBA00A671E1 /* SubImport.c */; };
 		61D517730AE0402E00A671E1 /* CommonUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D517720AE0402E00A671E1 /* CommonUtils.c */; };
+		83D1D6CF0B4C7AC400E09EC9 /* PreferencePanes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */; };
+		83D1D6DE0B4C7F8300E09EC9 /* PerianPrefPane.nib in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */; };
+		83D1D6E20B4C81F200E09EC9 /* CPFPerianPrefPaneController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */; };
+		83D1D6F50B4C85AB00E09EC9 /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		8F483B550A642644002CCA73 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B540A642644002CCA73 /* libavformat.a */; };
 		8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */; };
 		8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */ = {isa = PBXBuildFile; fileRef = 8F483B8B0A642886002CCA73 /* PerianAviImporter.r */; };
@@ -400,6 +404,13 @@
 		61D6915F0AC8E382000EFC7D /* MkvImportPrivate.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MkvImportPrivate.h; sourceTree = "<group>"; };
 		61D691600AC8E382000EFC7D /* MkvMovieSetup.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MkvMovieSetup.cpp; sourceTree = "<group>"; };
 		61D691610AC8E382000EFC7D /* MkvMovieSetup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MkvMovieSetup.h; sourceTree = "<group>"; };
+		83D1D6C80B4C794700E09EC9 /* PerianPane.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PerianPane.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
+		83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "PerianPane-Info.plist"; sourceTree = "<group>"; };
+		83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PreferencePanes.framework; path = /System/Library/Frameworks/PreferencePanes.framework; sourceTree = "<absolute>"; };
+		83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = PerianPrefPane.nib; sourceTree = "<group>"; };
+		83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CPFPerianPrefPaneController.h; sourceTree = "<group>"; };
+		83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CPFPerianPrefPaneController.m; sourceTree = "<group>"; };
+		83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Perian_icon.icns; sourceTree = "<group>"; };
 		8F483B540A642644002CCA73 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = build/Universal/libavformat.a; sourceTree = "<group>"; };
 		8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		8F483B8B0A642886002CCA73 /* PerianAviImporter.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianAviImporter.r; sourceTree = "<group>"; };
@@ -443,6 +454,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		83D1D6C60B4C794700E09EC9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83D1D6CF0B4C7AC400E09EC9 /* PreferencePanes.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -454,6 +473,7 @@
 				089C1671FE841209C02AAC07 /* External Frameworks and Libraries */,
 				19C28FB4FE9D528D11CA2CBB /* Products */,
 				11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */,
+				83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */,
 			);
 			name = "ffmpeg DivX";
 			sourceTree = "<group>";
@@ -478,6 +498,9 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */,
+				83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */,
+				83D1D6D00B4C7AD200E09EC9 /* Frameworks */,
 				613CD51C0AD1FB650098A825 /* TextSubCodec.r */,
 				6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */,
 				61D691590AC8E382000EFC7D /* MatroskaImport.r */,
@@ -497,6 +520,7 @@
 		08FB77ADFE841716C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				83D1D6DF0B4C81E000E09EC9 /* PrefPane */,
 				F53AD5E20B2A4EC000D93AC9 /* FFMPEG */,
 				61D691460AC8E333000EFC7D /* Matroska */,
 				6123D61D0AD0A052003EDE52 /* Subtitles */,
@@ -518,6 +542,7 @@
 				11A70AC10A3D0105002058D4 /* Perian.component */,
 				61CB10FF0ACDF350007994BD /* libebml.a */,
 				61CB11770ACDF4D8007994BD /* libmatroska.a */,
+				83D1D6C80B4C794700E09EC9 /* PerianPane.prefPane */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -734,6 +759,23 @@
 			name = Export;
 			sourceTree = "<group>";
 		};
+		83D1D6D00B4C7AD200E09EC9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		83D1D6DF0B4C81E000E09EC9 /* PrefPane */ = {
+			isa = PBXGroup;
+			children = (
+				83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */,
+				83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */,
+			);
+			name = PrefPane;
+			sourceTree = "<group>";
+		};
 		F50D440903EAD8E701B1D299 /* Images */ = {
 			isa = PBXGroup;
 			children = (
@@ -903,6 +945,23 @@
 			productReference = 61CB11770ACDF4D8007994BD /* libmatroska.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		83D1D6C70B4C794700E09EC9 /* PerianPane */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 83D1D6CA0B4C794900E09EC9 /* Build configuration list for PBXNativeTarget "PerianPane" */;
+			buildPhases = (
+				83D1D6C40B4C794700E09EC9 /* Resources */,
+				83D1D6C50B4C794700E09EC9 /* Sources */,
+				83D1D6C60B4C794700E09EC9 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PerianPane;
+			productName = PerianPane;
+			productReference = 83D1D6C80B4C794700E09EC9 /* PerianPane.prefPane */;
+			productType = "com.apple.product-type.bundle";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -918,6 +977,7 @@
 				F59E09EA0A670E3D0019A3F0 /* Debug In QuickTime Player */,
 				61CB10FE0ACDF350007994BD /* ebml */,
 				61CB11760ACDF4D8007994BD /* matroska */,
+				83D1D6C70B4C794700E09EC9 /* PerianPane */,
 			);
 		};
 /* End PBXProject section */
@@ -932,6 +992,15 @@
 				11A70ADA0A3D0149002058D4 /* main.nib in Resources */,
 				11A70ADB0A3D0149002058D4 /* PostProcessing.strings in Resources */,
 				11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83D1D6C40B4C794700E09EC9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83D1D6DE0B4C7F8300E09EC9 /* PerianPrefPane.nib in Resources */,
+				83D1D6F50B4C85AB00E09EC9 /* Perian_icon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1069,6 +1138,14 @@
 				61CB11E10ACDF50F007994BD /* KaxTracks.cpp in Sources */,
 				61CB11E20ACDF50F007994BD /* KaxTrackVideo.cpp in Sources */,
 				61CB11E30ACDF50F007994BD /* KaxVersion.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83D1D6C50B4C794700E09EC9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83D1D6E20B4C81F200E09EC9 /* CPFPerianPrefPaneController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1455,6 +1532,78 @@
 			};
 			name = Default;
 		};
+		83D1D6CB0B4C794900E09EC9 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "PerianPane-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianPane;
+				WRAPPER_EXTENSION = prefPane;
+				ZERO_LINK = YES;
+			};
+			name = Development;
+		};
+		83D1D6CC0B4C794900E09EC9 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "PerianPane-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianPane;
+				WRAPPER_EXTENSION = prefPane;
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		83D1D6CD0B4C794900E09EC9 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "PerianPane-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianPane;
+				WRAPPER_EXTENSION = prefPane;
+				ZERO_LINK = YES;
+			};
+			name = Default;
+		};
 		F59E0A0C0A670E950019A3F0 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1533,6 +1682,16 @@
 				61CB11B10ACDF4FF007994BD /* Development */,
 				61CB11B20ACDF4FF007994BD /* Deployment */,
 				61CB11B30ACDF4FF007994BD /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		83D1D6CA0B4C794900E09EC9 /* Build configuration list for PBXNativeTarget "PerianPane" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83D1D6CB0B4C794900E09EC9 /* Development */,
+				83D1D6CC0B4C794900E09EC9 /* Deployment */,
+				83D1D6CD0B4C794900E09EC9 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
