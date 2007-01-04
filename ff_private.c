@@ -742,7 +742,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 	formatContext = storage->format_context;
 	dataResult = noErr;
 	result = noErr;
-	minLoadedTime = 0;
+	minLoadedTime = -1;
 	availableSize = 0;
 	margin = 0;
 	idling = (inFlags & movieImportWithIdle);
@@ -864,7 +864,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			TimeValue addedDuration = mediaDuration - prevDuration;
 			TimeValue mediaLoadedTime = GetMovieTimeScale(storage->movie) * (double)mediaDuration / (double)mediaTimeScale;
 			
-			if(minLoadedTime == 0 || mediaLoadedTime < minLoadedTime)
+			if(minLoadedTime == -1 || mediaLoadedTime < minLoadedTime)
 				minLoadedTime = mediaLoadedTime;
 			
 			if(addedDuration > 0) {
@@ -874,7 +874,8 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 	}
 	
 	//set the loaded time to the length of the shortest track.
-	storage->loadedTime = minLoadedTime;
+	if(minLoadedTime > 0)
+		storage->loadedTime = minLoadedTime;
 	
 	if(readResult != 0) {
 		//remove the placeholder track
