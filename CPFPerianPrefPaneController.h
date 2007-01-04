@@ -25,6 +25,10 @@
 	IBOutlet NSButton					*button_donate;
 	IBOutlet NSButton					*button_forum;
 	
+	NSURL								*perianForumURL;
+	NSURL								*perianDonateURL;
+	NSURL								*perianWebSiteURL;
+	
 }
 //General Pane
 - (IBAction)installUninstall:(id)sender;
