@@ -1,9 +1,33 @@
 {
     IBClasses = (
         {
-            ACTIONS = {installUninstall = id; }; 
+            ACTIONS = {
+                installUninstall = id; 
+                launchDonate = id; 
+                launchForum = id; 
+                launchWebsite = id; 
+                setAC3DynamicRange = id; 
+                setAC3StereoOverDolby = id; 
+                setAutoUpdateCheck = id; 
+                updateCheck = id; 
+            }; 
             CLASS = CPFPerianPrefPaneController; 
             LANGUAGE = ObjC; 
+            OUTLETS = {
+                "button_ac3DynamicRange" = NSButton; 
+                "button_ac3StereoOverDolby" = NSButton; 
+                "button_autoUpdateCheck" = NSButton; 
+                "button_donate" = NSButton; 
+                "button_forum" = NSButton; 
+                "button_install" = NSButton; 
+                "button_updateCheck" = NSButton; 
+                "button_website" = NSButton; 
+                "progress_install" = NSProgressIndicator; 
+                "progress_updateCheck" = NSProgressIndicator; 
+                "textField_currentVersion" = NSTextField; 
+                "textField_installStatus" = NSTextField; 
+                "textView_about" = NSTextView; 
+            }; 
             SUPERCLASS = NSPreferencePane; 
         }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
