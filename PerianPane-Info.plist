@@ -21,6 +21,8 @@
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFile</key>
 	<string>Perian_icon</string>
+	<key>NSPrefPaneIconFile</key>
+	<string>Perian_icon</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.perian.PerianPane</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -31,6 +33,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
+	<key>CFBundleName</key>
+	<string>Perian</string>
 	<key>NSMainNibFile</key>
 	<string>PerianPrefPane</string>
 	<key>NSPrincipalClass</key>
