@@ -457,6 +457,31 @@ resource 'cdci' (kI263CodecInfoResID) {
 };
 
 //---------------------------------------------------------------------------
+// Huffyuv Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kHuffYUVCodecInfoResID) {
+	kHuffYUVName,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
 // MS-MPEG4 v1 Component
 //---------------------------------------------------------------------------
 

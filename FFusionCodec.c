@@ -572,6 +572,20 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				
 				DisposeHandle(imgDescExt);
 			}
+		} else {
+			CountImageDescriptionExtensionType(p->imageDescription, 'strf', &count);
+			
+			if (count >= 1) {
+				imgDescExt = NewHandle(0);
+				GetImageDescriptionExtension(p->imageDescription, &imgDescExt, 'strf', 1);
+				
+				if (GetHandleSize(imgDescExt) - 40 > 0) {
+					glob->avContext->extradata = calloc(1, GetHandleSize(imgDescExt) - 40 + FF_INPUT_BUFFER_PADDING_SIZE);
+					memcpy(glob->avContext->extradata, *imgDescExt + 40, GetHandleSize(imgDescExt) - 40);
+					glob->avContext->extradata_size = GetHandleSize(imgDescExt) - 40;
+				}
+				DisposeHandle(imgDescExt);
+			}
 		}
 		
 		// some hooks into ffmpeg's buffer allocation to get frames in 
@@ -634,6 +648,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 	{
 		case PIX_FMT_BGR24:
 			pos[index++] = k24RGBPixelFormat;
+			break;
+		case PIX_FMT_RGB32:
+			pos[index++] = k32ARGBPixelFormat;
 			break;
 		case PIX_FMT_YUV420P:
 		default:
@@ -899,6 +916,16 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	else if (myDrp->pixelFormat == k24RGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_BGR24)
 	{
 		BGR24toRGB24((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
+	}
+	else if (myDrp->pixelFormat == k32ARGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_RGB32)
+	{
+		Ptr dest = drp->baseAddr;
+		Ptr src = (Ptr) picture->data[0];
+		for (i = 0; i < myDrp->height; i++) {
+			memcpy(dest, src, FFMIN(drp->rowBytes, picture->linesize[0]));
+			dest += drp->rowBytes;
+			src += picture->linesize[0];
+		}
 	}
 	else
 	{
