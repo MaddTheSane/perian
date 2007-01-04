@@ -57,6 +57,7 @@
 #define kVP6Name		"TrueMotion VP6"
 #define kI263Name		"Intel H.263"
 #define kVP3Name		"On2 VP3"
+#define kHuffYUVName		"HuffYUV"
 
 // Codec names Resource ID
 
@@ -74,6 +75,7 @@
 #define kVP6NameResID		267
 #define kI263NameResID		268
 #define kVP3NameResID		269
+#define kHuffYUVNameResID	270
 
 // Codec infos Resource ID
 
@@ -91,6 +93,7 @@
 #define kVP6InfoResID		296
 #define kI263InfoResID		297
 #define kVP3InfoResID		298
+#define kHuffYUVInfoResID		299
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -2515,6 +2518,70 @@ resource 'thng' (322) {
 };
 };
 
+
+//---------------------------------------------------------------------------
+// VP3 Components
+//---------------------------------------------------------------------------
+resource 'thng' (323) {
+	decompressorComponentType,		// Type			
+	'HFYU',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kHuffYUVNameResID,			// Name ID
+	'STR ',					// Info Type
+	kHuffYUVInfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (324) {
+	decompressorComponentType,		// Type			
+	'FFVH',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kHuffYUVNameResID,			// Name ID
+	'STR ',					// Info Type
+	kHuffYUVInfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
@@ -2575,6 +2642,10 @@ resource 'STR ' (kVP3NameResID) {
 	"On2 VP3 Decoder"
 };
 
+resource 'STR ' (kHuffYUVNameResID) {
+	"HuffYUV Decoder"
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
@@ -2633,6 +2704,10 @@ resource 'STR ' (kI263InfoResID) {
 
 resource 'STR ' (kVP3InfoResID) {
 	"Decompresses video stored in On2 VP3 format."
+};
+
+resource 'STR ' (kHuffYUVInfoResID) {
+	"Decompresses video stored in HuffYUV format."
 };
 
 //---------------------------------------------------------------------------
