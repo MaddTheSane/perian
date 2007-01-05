@@ -29,6 +29,9 @@
 	NSURL								*perianDonateURL;
 	NSURL								*perianWebSiteURL;
 	
+	CFStringRef							perianAppID;
+	CFStringRef							a52AppID;
+	
 }
 //General Pane
 - (IBAction)installUninstall:(id)sender;
