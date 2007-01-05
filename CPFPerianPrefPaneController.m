@@ -1,8 +1,10 @@
 #import "CPFPerianPrefPaneController.h"
+#import <Security/Security.h>
 
 #define ComponentInfoDictionaryKey	@"Components"
 #define BundleVersionKey @"CFBundleVersion"
 #define ComponentNameKey @"Name"
+#define ComponentArchiveNameKey @"ArchiveName"
 #define ComponentTypeKey @"Type"
 
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
@@ -101,20 +103,19 @@
     return self;
 }
 
-- (void)mainViewDidLoad
+- (void)checkForInstallation
 {
-	/* General */
 	NSDictionary *infoDict = [[self bundle] infoDictionary];
 	installStatus = [self installStatusForComponent:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey]];
 	if(installStatus == InstallStatusNotInstalled)
 	{
 		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is not Installed", @"")];
-		[button_install setStringValue:NSLocalizedString(@"Install", @"")];
+		[button_install setTitle:NSLocalizedString(@"Install Perian", @"")];
 	}
 	else if(installStatus == InstallStatusOutdated)
 	{
 		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed, but Outdated", @"")];
-		[button_install setStringValue:NSLocalizedString(@"Update", @"")];
+		[button_install setTitle:NSLocalizedString(@"Update Perian", @"")];
 	}
 	else
 	{
@@ -134,25 +135,31 @@
 			{
 				case InstallStatusNotInstalled:
 					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed, but parts are Not Installed", @"")];
-					[button_install setStringValue:NSLocalizedString(@"Install", @"")];
+					[button_install setTitle:NSLocalizedString(@"Install Perian", @"")];
 					break;
 				case InstallStatusOutdated:
 					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed, but parts are Outdated", @"")];
-					[button_install setStringValue:NSLocalizedString(@"Update", @"")];
+					[button_install setTitle:NSLocalizedString(@"Update Perian", @"")];
 					break;
 				case InstallStatusInstalled:
 					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed", @"")];
-					[button_install setStringValue:NSLocalizedString(@"Uninstall", @"")];
+					[button_install setTitle:NSLocalizedString(@"Uninstall Perian", @"")];
 					break;
 			}
 		}
 		else
 		{
 			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed", @"")];
-			[button_install setStringValue:NSLocalizedString(@"Uninstall", @"")];
+			[button_install setTitle:NSLocalizedString(@"Uninstall Perian", @"")];
 		}
 		
-	}
+	}	
+}
+
+- (void)mainViewDidLoad
+{
+	/* General */
+	[self checkForInstallation];
 	
 	/* A52 Prefs */
 	[self setButton:button_ac3DynamicRange fromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:NO];
@@ -173,8 +180,151 @@
 }
 
 #pragma mark Install/Uninstall
+
+/* Shamelessly ripped from Sparkle */
+- (BOOL)_extractArchivePath:archivePath toDestination:(NSString *)destination pipingDataToCommand:(NSString *)command
+{
+	// Get the file size.
+	NSNumber *fs = [[[NSFileManager defaultManager] fileAttributesAtPath:archivePath traverseLink:NO] objectForKey:NSFileSize];
+	if (fs == nil) { return NO; }
+	
+	// Thank you, Allan Odgaard!
+	// (who wrote the following extraction alg.)
+	
+	long current = 0;
+	FILE *fp, *cmdFP;
+	sig_t oldSigPipeHandler = signal(SIGPIPE, SIG_IGN);
+	if ((fp = fopen([archivePath UTF8String], "r")))
+	{
+		setenv("DESTINATION", [destination fileSystemRepresentation], 1);
+		if ((cmdFP = popen([command cString], "w")))
+		{
+			char buf[32*1024];
+			long len;
+			while((len = fread(buf, 1, 32 * 1024, fp)))
+			{				
+				current += len;
+				
+				fwrite(buf, 1, len, cmdFP);
+				
+			}
+			pclose(cmdFP);
+		}
+		fclose(fp);
+	}	
+	signal(SIGPIPE, oldSigPipeHandler);
+	return YES;
+}
+
+- (BOOL)installArchive:(NSString *)archivePath forPiece:(NSString *)component type:(ComponentType)type withMyVersion:(NSString *)myVersion andAuthorization:(AuthorizationRef *)auth
+{
+	NSString *containingDir = nil;
+	switch(type)
+	{
+		case ComponentTypeCoreAudio:
+			containingDir = [self coreAudioComponentDir];
+			break;
+		case ComponentTypeQuickTime:
+			containingDir = [self quickTimeComponentDir];
+			break;
+	}
+	InstallStatus pieceStatus = [self installStatusForComponent:component type:type withMyVersion:myVersion];
+	if(pieceStatus == InstallStatusOutdated)
+	{
+		//Remove the old one here
+		//XXX what about authorized
+		int tag = 0;
+		BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:containingDir destination:@"" files:[NSArray arrayWithObject:component] tag:&tag];
+		if(result == NO)
+			return NO;
+	}
+	if(pieceStatus != InstallStatusInstalled)
+	{
+		//Decompress and install new one
+		//XXX Need to do authorized version as well
+		BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir pipingDataToCommand:@"ditto -x -k - \"$DESTINATION\""];
+		if(result == NO)
+			return NO;
+	}
+	return YES;
+}
+
+- (void)install:(id)sender
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSDictionary *infoDict = [[self bundle] infoDictionary];
+	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
+	NSString *componentPath = [[[self bundle] resourcePath] stringByAppendingPathComponent:@"Components"];
+	NSString *coreAudioComponentPath = [componentPath stringByAppendingPathComponent:@"CoreAudio"];
+	NSString *quickTimeComponentPath = [componentPath stringByAppendingPathComponent:@"QuickTime"];
+	
+	[self installArchive:[componentPath stringByAppendingPathComponent:@"Perian.zip"] forPiece:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey] andAuthorization:NULL];
+	
+	NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
+	NSDictionary *myComponent = nil;
+	while((myComponent = [componentEnum nextObject]) != nil)
+	{
+		NSString *archivePath = nil;
+		ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
+		switch(type)
+		{
+			case ComponentTypeCoreAudio:
+				archivePath = [coreAudioComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
+				break;
+			case ComponentTypeQuickTime:
+				archivePath = [quickTimeComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
+				break;
+		}
+		[self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey] andAuthorization:NULL];
+	}
+	[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
+	[pool release];
+}
+
+- (void)uninstall:(id)sender
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSDictionary *infoDict = [[self bundle] infoDictionary];
+	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
+	
+	//XXX what about authorized
+	int tag = 0;
+	BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[self quickTimeComponentDir] destination:@"" files:[NSArray arrayWithObject:@"Perian.component"] tag:&tag];
+	
+	NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
+	NSDictionary *myComponent = nil;
+	while((myComponent = [componentEnum nextObject]) != nil)
+	{
+		ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
+		NSString *directory = nil;
+		switch(type)
+		{
+			case ComponentTypeCoreAudio:
+				directory = [self coreAudioComponentDir];
+				break;
+			case ComponentTypeQuickTime:
+				directory = [self quickTimeComponentDir];
+				break;
+		}
+		BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:directory destination:@"" files:[myComponent objectForKey:ComponentNameKey] tag:&tag];
+	}
+	[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
+	[pool release];
+}
+
 - (IBAction)installUninstall:(id)sender
 {
+	[progress_install startAnimation:sender];
+	if(installStatus == InstallStatusInstalled)
+		[NSThread detachNewThreadSelector:@selector(uninstall:) toTarget:self withObject:nil];
+	else
+		[NSThread detachNewThreadSelector:@selector(install:) toTarget:self withObject:nil];
+}
+
+- (void)installComplete:(id)sender
+{
+	[progress_install stopAnimation:sender];
+	[self checkForInstallation];
 }
 
 #pragma mark Check Updates
