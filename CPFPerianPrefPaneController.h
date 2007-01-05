@@ -3,6 +3,19 @@
 #import <Cocoa/Cocoa.h>
 #import <PreferencePanes/NSPreferencePane.h>
 
+typedef enum
+{
+	InstallStatusNotInstalled,
+	InstallStatusOutdated,
+	InstallStatusInstalled
+} InstallStatus;
+
+typedef enum
+{
+	ComponentTypeQuickTime,
+	ComponentTypeCoreAudio
+} ComponentType;
+
 @interface CPFPerianPrefPaneController : NSPreferencePane
 {
 	//General Pane
@@ -24,6 +37,8 @@
 	IBOutlet NSButton					*button_website;
 	IBOutlet NSButton					*button_donate;
 	IBOutlet NSButton					*button_forum;
+	
+	InstallStatus						installStatus; //This is only marked as installed if everything is installed
 	
 	NSURL								*perianForumURL;
 	NSURL								*perianDonateURL;
