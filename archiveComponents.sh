@@ -9,7 +9,7 @@ for itemName in *.component ; do
     item=${itemName:0:$itemLength-10}
 #    echo $item
     if [[ -d $itemName ]] ; then
-        zip -9r "${item}.zip" "$itemName"
+        ditto -c -k --rsrc --keepParent "$itemName" "${item}.zip"
         cp "${item}.zip" "$2"
     fi
 done
