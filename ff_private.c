@@ -239,12 +239,21 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 		asbd.mFramesPerPacket = ioSize * asbd.mBytesPerPacket / codec->block_align;
 	}
 	
-	/* here use a version1, because version2 will fail! (no idea why)
-		* and as we are using version1, we may not have more than 2 channels.
-		* perhaps we should go to version2 some day. */
+	AudioChannelLayout acl;
+	int aclSize = 0;  //Set this if you intend to use it
+	memset(&acl, 0, sizeof(AudioChannelLayout));
 	if(asbd.mChannelsPerFrame > 2)
-		asbd.mChannelsPerFrame = 2;
-	err = QTSoundDescriptionCreate(&asbd, NULL, 0, NULL, 0, kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndHdl);
+	{
+		/* We have to just guess what layout to use.  People, add them here: */
+		if((asbd.mFormatID == 'ac-3' || asbd.mFormatID == 'ms \0') && asbd.mChannelsPerFrame == 5)
+		{
+			/* likely really 5.1, but not absolutely sure.  guess it is, can't do any better */
+			asbd.mChannelsPerFrame++;
+			acl.mChannelLayoutTag = kAudioChannelLayoutTag_ITU_3_2_1;
+			aclSize = sizeof(AudioChannelLayout);
+		}
+	}
+	err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, NULL, 0, kQTSoundDescriptionKind_Movie_Version2, &sndHdl);
 	if(err) fprintf(stderr, "AVI IMPORTER: Error creating the sound description\n");
 	
 	/* Create the magic cookie */
