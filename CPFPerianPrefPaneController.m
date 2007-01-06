@@ -252,7 +252,7 @@
 		return FALSE;
 	
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
-	setenv("$DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
+	setenv("DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
 	setenv("TMP_PATH", [[finalPath stringByAppendingPathExtension:@"old"] fileSystemRepresentation], 1);
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
 	
@@ -281,7 +281,7 @@
 	
 	char *buf = NULL;
 	asprintf(&buf,
-			 "rm -rf \"$COMP_PATH\" && ");
+			 "rm -rf \"$COMP_PATH\"");
 	if(!buf)
 		return FALSE;
 	
@@ -406,7 +406,11 @@
 	}
 	
 	int tag = 0;
-	BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[self quickTimeComponentDir] destination:@"" files:[NSArray arrayWithObject:@"Perian.component"] tag:&tag];
+	BOOL result = NO;
+	if(auth != nil)
+		[self _authenticatedRemove:[[self quickTimeComponentDir] stringByAppendingPathComponent:@"Perian.component"] authorization:auth];
+	else
+		result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[self quickTimeComponentDir] destination:@"" files:[NSArray arrayWithObject:@"Perian.component"] tag:&tag];
 	
 	NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
 	NSDictionary *myComponent = nil;
@@ -426,7 +430,10 @@
 				directory = [self frameworkComponentDir];
 				break;
 		}
-		result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:directory destination:@"" files:[myComponent objectForKey:ComponentNameKey] tag:&tag];
+		if(auth != nil)
+			[self _authenticatedRemove:[directory stringByAppendingPathComponent:[myComponent objectForKey:ComponentNameKey]] authorization:auth];
+		else
+			result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:directory destination:@"" files:[NSArray arrayWithObject:[myComponent objectForKey:ComponentNameKey]] tag:&tag];
 	}
 	if(auth != nil)
 		AuthorizationFree(auth, 0);

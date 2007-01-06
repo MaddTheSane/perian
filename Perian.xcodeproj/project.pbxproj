@@ -1284,7 +1284,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$BUILT_PRODUCTS_DIR\"\n./PerianPanePListGenerator \"${SRCROOT}/PerianPane-Info.plist\" \"${BUILT_PRODUCTS_DIR}\n\" \"${SRCROOT}/PerianPaneReal-Info.plist\"";
+			shellScript = "cd \"$BUILT_PRODUCTS_DIR\"\n./PerianPanePListGenerator \"${SRCROOT}/PerianPane-Info.plist\" \"${BUILT_PRODUCTS_DIR}\" \"${SRCROOT}/PerianPaneReal-Info.plist\"";
 		};
 		F5CFD3B90B50142100616865 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
