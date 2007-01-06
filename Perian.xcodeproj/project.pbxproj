@@ -31,6 +31,18 @@
 			name = "Debug In QuickTime Player";
 			productName = "Debug In QuickTime Player";
 		};
+		F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F5CFD2650B500B9D00616865 /* Build configuration list for PBXAggregateTarget "CreatePrefPanePlist" */;
+			buildPhases = (
+				F5CFD2590B500B7200616865 /* ShellScript */,
+			);
+			dependencies = (
+				F5CFD2580B500B6200616865 /* PBXTargetDependency */,
+			);
+			name = CreatePrefPanePlist;
+			productName = CreatePrefPanePlist;
+		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
@@ -179,6 +191,8 @@
 		8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */ = {isa = PBXBuildFile; fileRef = 8F483B8B0A642886002CCA73 /* PerianAviImporter.r */; };
 		F53E18E50B4F483C003A0471 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53E18E40B4F483C003A0471 /* Security.framework */; };
 		F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
+		F5CFD1C10B5000DF00616865 /* GBPerianPanePListGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */; };
+		F5CFD22A0B50087C00616865 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5CFD2290B50087C00616865 /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -209,6 +223,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 11A70AC00A3D0105002058D4;
 			remoteInfo = Perian;
+		};
+		F5CFD2570B500B6200616865 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F5CFD1B30B50009000616865 /* PerianPanePListGenerator */;
+			remoteInfo = PerianPanePListGenerator;
+		};
+		F5CFD25D0B500B9400616865 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */;
+			remoteInfo = CreatePrefPanePlist;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -419,6 +447,10 @@
 		F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodecDispatch.h; sourceTree = "<group>"; };
 		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFusionCodec.c; sourceTree = "<group>"; };
 		F560DF0203D622D001ABA332 /* FFusionCodec.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = FFusionCodec.r; sourceTree = "<group>"; };
+		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = PerianPanePListGenerator; path = build/Development/PerianPanePListGenerator; sourceTree = "<group>"; };
+		F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBPerianPanePListGenerator.h; sourceTree = "<group>"; };
+		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
+		F5CFD2290B50087C00616865 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -461,6 +493,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F5CFD1B20B50009000616865 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F5CFD22A0B50087C00616865 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -480,6 +520,7 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				F5CFD2290B50087C00616865 /* Foundation.framework */,
 				61CB11020ACDF37C007994BD /* libebml */,
 				61CB11720ACDF4BB007994BD /* libmatroska */,
 				8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */,
@@ -543,6 +584,7 @@
 				61CB10FF0ACDF350007994BD /* libebml.a */,
 				61CB11770ACDF4D8007994BD /* libmatroska.a */,
 				83D1D6C80B4C794700E09EC9 /* PerianPane.prefPane */,
+				F5CFD1B40B50009000616865 /* PerianPanePListGenerator */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -769,6 +811,8 @@
 			children = (
 				83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */,
 				83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */,
+				F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */,
+				F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */,
 			);
 			name = PrefPane;
 			sourceTree = "<group>";
@@ -954,11 +998,28 @@
 			buildRules = (
 			);
 			dependencies = (
+				F5CFD25E0B500B9400616865 /* PBXTargetDependency */,
 			);
 			name = PerianPane;
 			productName = PerianPane;
 			productReference = 83D1D6C80B4C794700E09EC9 /* PerianPane.prefPane */;
 			productType = "com.apple.product-type.bundle";
+		};
+		F5CFD1B30B50009000616865 /* PerianPanePListGenerator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F5CFD1B80B5000AF00616865 /* Build configuration list for PBXNativeTarget "PerianPanePListGenerator" */;
+			buildPhases = (
+				F5CFD1B10B50009000616865 /* Sources */,
+				F5CFD1B20B50009000616865 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PerianPanePListGenerator;
+			productName = PerianPanePListGenerator;
+			productReference = F5CFD1B40B50009000616865 /* PerianPanePListGenerator */;
+			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
@@ -976,6 +1037,8 @@
 				61CB10FE0ACDF350007994BD /* ebml */,
 				61CB11760ACDF4D8007994BD /* matroska */,
 				83D1D6C70B4C794700E09EC9 /* PerianPane */,
+				F5CFD1B30B50009000616865 /* PerianPanePListGenerator */,
+				F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */,
 			);
 		};
 /* End PBXProject section */
@@ -1059,6 +1122,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "source $SRCROOT/archiveComponents.sh";
+		};
+		F5CFD2590B500B7200616865 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$BUILT_PRODUCTS_DIR\"\n./PerianPanePListGenerator \"${SRCROOT}/PerianPane-Info.plist\" \"${BUILT_PRODUCTS_DIR}\n\" \"${SRCROOT}/PerianPaneReal-Info.plist\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1159,6 +1235,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F5CFD1B10B50009000616865 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F5CFD1C10B5000DF00616865 /* GBPerianPanePListGenerator.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -1181,6 +1265,16 @@
 			isa = PBXTargetDependency;
 			target = 11A70AC00A3D0105002058D4 /* Perian */;
 			targetProxy = F59E09EB0A670E420019A3F0 /* PBXContainerItemProxy */;
+		};
+		F5CFD2580B500B6200616865 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F5CFD1B30B50009000616865 /* PerianPanePListGenerator */;
+			targetProxy = F5CFD2570B500B6200616865 /* PBXContainerItemProxy */;
+		};
+		F5CFD25E0B500B9400616865 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */;
+			targetProxy = F5CFD25D0B500B9400616865 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1551,7 +1645,17 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "PerianPane-Info.plist";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
+				GCC_WARN_SHADOW = YES;
+				GCC_WARN_SIGN_COMPARE = YES;
+				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_LABEL = YES;
+				GCC_WARN_UNUSED_PARAMETER = NO;
+				GCC_WARN_UNUSED_VALUE = NO;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "PerianPaneReal-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1645,6 +1749,101 @@
 			};
 			name = Default;
 		};
+		F5CFD1B90B5000AF00616865 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = "$(HOME)/bin";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianPanePListGenerator;
+				ZERO_LINK = YES;
+			};
+			name = Development;
+		};
+		F5CFD1BA0B5000AF00616865 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = "$(HOME)/bin";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianPanePListGenerator;
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		F5CFD1BB0B5000AF00616865 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = "$(HOME)/bin";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianPanePListGenerator;
+				ZERO_LINK = YES;
+			};
+			name = Default;
+		};
+		F5CFD2660B500B9D00616865 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = CreatePrefPanePlist;
+			};
+			name = Development;
+		};
+		F5CFD2670B500B9D00616865 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = CreatePrefPanePlist;
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		F5CFD2680B500B9D00616865 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = CreatePrefPanePlist;
+			};
+			name = Default;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1714,6 +1913,26 @@
 				F59E0A0C0A670E950019A3F0 /* Development */,
 				F59E0A0D0A670E950019A3F0 /* Deployment */,
 				F59E0A0E0A670E950019A3F0 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		F5CFD1B80B5000AF00616865 /* Build configuration list for PBXNativeTarget "PerianPanePListGenerator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5CFD1B90B5000AF00616865 /* Development */,
+				F5CFD1BA0B5000AF00616865 /* Deployment */,
+				F5CFD1BB0B5000AF00616865 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		F5CFD2650B500B9D00616865 /* Build configuration list for PBXAggregateTarget "CreatePrefPanePlist" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5CFD2660B500B9D00616865 /* Development */,
+				F5CFD2670B500B9D00616865 /* Deployment */,
+				F5CFD2680B500B9D00616865 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
