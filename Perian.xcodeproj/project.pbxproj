@@ -43,6 +43,32 @@
 			name = CreatePrefPanePlist;
 			productName = CreatePrefPanePlist;
 		};
+		F5CFD2DB0B5012AA00616865 /* A52Codec */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F5CFD2EA0B5012E800616865 /* Build configuration list for PBXAggregateTarget "A52Codec" */;
+			buildPhases = (
+				F5CFD2E00B5012BC00616865 /* CopyFiles */,
+				F5CFD2E30B5012DB00616865 /* CopyFiles */,
+			);
+			dependencies = (
+				F5CFD3BC0B50142C00616865 /* PBXTargetDependency */,
+				F5CFD2DD0B5012B400616865 /* PBXTargetDependency */,
+				F5CFD2DF0B5012B400616865 /* PBXTargetDependency */,
+			);
+			name = A52Codec;
+			productName = A52Codec;
+		};
+		F5CFD3BA0B50142100616865 /* Setup Build Directories */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F5CFD3C10B50144E00616865 /* Build configuration list for PBXAggregateTarget "Setup Build Directories" */;
+			buildPhases = (
+				F5CFD3B90B50142100616865 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Setup Build Directories";
+			productName = "Setup Build Directories";
+		};
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
@@ -193,6 +219,8 @@
 		F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		F5CFD1C10B5000DF00616865 /* GBPerianPanePListGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */; };
 		F5CFD22A0B50087C00616865 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5CFD2290B50087C00616865 /* Foundation.framework */; };
+		F5CFD3B20B5013EA00616865 /* A52Codec.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D60B5012A100616865 /* A52Codec.component */; };
+		F5CFD3B70B5013EC00616865 /* AC3MovieImport.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D80B5012A100616865 /* AC3MovieImport.component */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -238,6 +266,62 @@
 			remoteGlobalIDString = F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */;
 			remoteInfo = CreatePrefPanePlist;
 		};
+		F5CFD2C60B50128200616865 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 11A70AC00A3D0105002058D4 /* Perian */;
+			remoteInfo = Perian;
+		};
+		F5CFD2D50B5012A100616865 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F5BDACAD0A20A00000FF4884 /* A52Codec.component */;
+			remoteInfo = "A52Codec (Upgraded)";
+		};
+		F5CFD2D70B5012A100616865 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F5525DF70A3BF78A00F36B86 /* AC3MovieImport.component */;
+			remoteInfo = AC3MovieImport;
+		};
+		F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = F50B7AB50AAB69C600065C78 /* Preferences.app */;
+			remoteInfo = A52Preferences;
+		};
+		F5CFD2DC0B5012B400616865 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F5BDAC850A20A00000FF4884 /* A52Codec (Upgraded) */;
+			remoteInfo = "A52Codec (Upgraded)";
+		};
+		F5CFD2DE0B5012B400616865 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = F5525DCA0A3BF78A00F36B86 /* AC3MovieImport */;
+			remoteInfo = AC3MovieImport;
+		};
+		F5CFD2F00B50132E00616865 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F5CFD2DB0B5012AA00616865 /* A52Codec */;
+			remoteInfo = A52Codec;
+		};
+		F5CFD3BB0B50142C00616865 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F5CFD3BA0B50142100616865 /* Setup Build Directories */;
+			remoteInfo = "Setup Build Directories";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -248,6 +332,26 @@
 			dstSubfolderSpec = 0;
 			files = (
 				F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F5CFD2E00B5012BC00616865 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = CoreAudio;
+			dstSubfolderSpec = 16;
+			files = (
+				F5CFD3B20B5013EA00616865 /* A52Codec.component in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F5CFD2E30B5012DB00616865 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = QuickTime;
+			dstSubfolderSpec = 16;
+			files = (
+				F5CFD3B70B5013EC00616865 /* AC3MovieImport.component in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -447,10 +551,11 @@
 		F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodecDispatch.h; sourceTree = "<group>"; };
 		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFusionCodec.c; sourceTree = "<group>"; };
 		F560DF0203D622D001ABA332 /* FFusionCodec.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = FFusionCodec.r; sourceTree = "<group>"; };
-		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = PerianPanePListGenerator; path = build/Development/PerianPanePListGenerator; sourceTree = "<group>"; };
+		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBPerianPanePListGenerator.h; sourceTree = "<group>"; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2290B50087C00616865 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -511,6 +616,7 @@
 				089C167CFE841241C02AAC07 /* Resources */,
 				089C1671FE841209C02AAC07 /* External Frameworks and Libraries */,
 				19C28FB4FE9D528D11CA2CBB /* Products */,
+				F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */,
 				11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */,
 				83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */,
 			);
@@ -858,6 +964,16 @@
 			name = "Video Codec";
 			sourceTree = "<group>";
 		};
+		F5CFD2CA0B5012A100616865 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F5CFD2D60B5012A100616865 /* A52Codec.component */,
+				F5CFD2D80B5012A100616865 /* AC3MovieImport.component */,
+				F5CFD2DA0B5012A100616865 /* Preferences.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -998,6 +1114,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				F5CFD2C70B50128200616865 /* PBXTargetDependency */,
+				F5CFD2F10B50132E00616865 /* PBXTargetDependency */,
 				F5CFD25E0B500B9400616865 /* PBXTargetDependency */,
 			);
 			name = PerianPane;
@@ -1030,6 +1148,12 @@
 			hasScannedForEncodings = 1;
 			mainGroup = 089C166AFE841209C02AAC07 /* ffmpeg DivX */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = F5CFD2CA0B5012A100616865 /* Products */;
+					ProjectRef = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
+				},
+			);
 			targets = (
 				11A70AC00A3D0105002058D4 /* Perian */,
 				11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */,
@@ -1039,9 +1163,35 @@
 				83D1D6C70B4C794700E09EC9 /* PerianPane */,
 				F5CFD1B30B50009000616865 /* PerianPanePListGenerator */,
 				F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */,
+				F5CFD3BA0B50142100616865 /* Setup Build Directories */,
+				F5CFD2DB0B5012AA00616865 /* A52Codec */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		F5CFD2D60B5012A100616865 /* A52Codec.component */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = A52Codec.component;
+			remoteRef = F5CFD2D50B5012A100616865 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F5CFD2D80B5012A100616865 /* AC3MovieImport.component */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = AC3MovieImport.component;
+			remoteRef = F5CFD2D70B5012A100616865 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F5CFD2DA0B5012A100616865 /* Preferences.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = Preferences.app;
+			remoteRef = F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		11A70ABD0A3D0105002058D4 /* Resources */ = {
@@ -1135,6 +1285,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "cd \"$BUILT_PRODUCTS_DIR\"\n./PerianPanePListGenerator \"${SRCROOT}/PerianPane-Info.plist\" \"${BUILT_PRODUCTS_DIR}\n\" \"${SRCROOT}/PerianPaneReal-Info.plist\"";
+		};
+		F5CFD3B90B50142100616865 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"${SRCROOT}/a52codec\"\nrm -Rf build\nln -s \"$BUILD_DIR\" build";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1275,6 +1438,31 @@
 			isa = PBXTargetDependency;
 			target = F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */;
 			targetProxy = F5CFD25D0B500B9400616865 /* PBXContainerItemProxy */;
+		};
+		F5CFD2C70B50128200616865 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 11A70AC00A3D0105002058D4 /* Perian */;
+			targetProxy = F5CFD2C60B50128200616865 /* PBXContainerItemProxy */;
+		};
+		F5CFD2DD0B5012B400616865 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "A52Codec (Upgraded)";
+			targetProxy = F5CFD2DC0B5012B400616865 /* PBXContainerItemProxy */;
+		};
+		F5CFD2DF0B5012B400616865 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = AC3MovieImport;
+			targetProxy = F5CFD2DE0B5012B400616865 /* PBXContainerItemProxy */;
+		};
+		F5CFD2F10B50132E00616865 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F5CFD2DB0B5012AA00616865 /* A52Codec */;
+			targetProxy = F5CFD2F00B50132E00616865 /* PBXContainerItemProxy */;
+		};
+		F5CFD3BC0B50142C00616865 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F5CFD3BA0B50142100616865 /* Setup Build Directories */;
+			targetProxy = F5CFD3BB0B50142C00616865 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1844,6 +2032,64 @@
 			};
 			name = Default;
 		};
+		F5CFD2EB0B5012E800616865 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = A52Codec;
+			};
+			name = Development;
+		};
+		F5CFD2EC0B5012E800616865 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = A52Codec;
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		F5CFD2ED0B5012E800616865 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = A52Codec;
+			};
+			name = Default;
+		};
+		F5CFD3C20B50144E00616865 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Setup Build Directories";
+			};
+			name = Development;
+		};
+		F5CFD3C30B50144E00616865 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Setup Build Directories";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		F5CFD3C40B50144E00616865 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Setup Build Directories";
+			};
+			name = Default;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1933,6 +2179,26 @@
 				F5CFD2660B500B9D00616865 /* Development */,
 				F5CFD2670B500B9D00616865 /* Deployment */,
 				F5CFD2680B500B9D00616865 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		F5CFD2EA0B5012E800616865 /* Build configuration list for PBXAggregateTarget "A52Codec" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5CFD2EB0B5012E800616865 /* Development */,
+				F5CFD2EC0B5012E800616865 /* Deployment */,
+				F5CFD2ED0B5012E800616865 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		F5CFD3C10B50144E00616865 /* Build configuration list for PBXAggregateTarget "Setup Build Directories" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5CFD3C20B50144E00616865 /* Development */,
+				F5CFD3C30B50144E00616865 /* Deployment */,
+				F5CFD3C40B50144E00616865 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
