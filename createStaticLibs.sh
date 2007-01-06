@@ -34,9 +34,9 @@ else
 	
 	cd "$BUILDDIR"
 	if [ `arch` != i386 ] ; then
-		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86_32 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86_32 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
 	else
-		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
+		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-ma --extra-cflags='-gdwarf-2'
 	fi
         make -C libavutil   depend
         make -C libavcodec  depend
@@ -60,9 +60,9 @@ fi
 	
 	cd "$BUILDDIR"
 	if [ `arch` = ppc ] ; then
-		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions
+		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --extra-cflags='-gdwarf-2'
 	else
-		"$SRCROOT/ffmpeg/configure" --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' $extraConfigureOptions $generalConfigureOptions
+		"$SRCROOT/ffmpeg/configure" --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2' $extraConfigureOptions $generalConfigureOptions
 	fi
         make -C libavutil   depend
         make -C libavcodec  depend

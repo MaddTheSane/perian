@@ -1228,7 +1228,6 @@
 				);
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
-				DEBUG_INFORMATION_FORMAT = stabs;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1285,7 +1284,6 @@
 					ppc,
 				);
 				DEAD_CODE_STRIPPING = YES;
-				DEBUG_INFORMATION_FORMAT = stabs;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1337,7 +1335,6 @@
 					ppc,
 				);
 				DEAD_CODE_STRIPPING = YES;
-				DEBUG_INFORMATION_FORMAT = stabs;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1413,12 +1410,14 @@
 		11D4ED480A3CE59A0066D45F /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
 			};
 			name = Development;
 		};
 		11D4ED490A3CE59A0066D45F /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Deployment;
@@ -1426,6 +1425,7 @@
 		11D4ED4A0A3CE59A0066D45F /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
 			};
 			name = Default;
 		};
