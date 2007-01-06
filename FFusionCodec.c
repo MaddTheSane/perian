@@ -515,6 +515,16 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_FFVHUFF);
 				break;
 				
+			case 'MPEG':
+			case 'mpg1':
+				glob->avCodec = avcodec_find_decoder(CODEC_ID_MPEG1VIDEO);
+				break;
+				
+			case 'MPG2':
+			case 'mpg2':
+				glob->avCodec = avcodec_find_decoder(CODEC_ID_MPEG2VIDEO);
+				break;
+				
             default:
 			Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
                 
@@ -1167,6 +1177,16 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 			case 'FFVH':
 			case 'HFYU':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kHuffYUVCodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
+				
+			case 'MPEG':
+			case 'mpg1':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kMPEG1CodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
+				
+			case 'MPG2':
+			case 'mpg2':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kMPEG2CodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
             default:	// should never happen but we have to handle the case

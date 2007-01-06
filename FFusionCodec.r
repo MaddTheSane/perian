@@ -58,6 +58,8 @@
 #define kI263Name		"Intel H.263"
 #define kVP3Name		"On2 VP3"
 #define kHuffYUVName		"HuffYUV"
+#define kMPEG1Name		"MPEG-1 Video"
+#define kMPEG2Name		"MPEG-2 Video"
 
 // Codec names Resource ID
 
@@ -76,6 +78,8 @@
 #define kI263NameResID		268
 #define kVP3NameResID		269
 #define kHuffYUVNameResID	270
+#define kMPEG1NameResID		271
+#define kMPEG2NameResID		272
 
 // Codec infos Resource ID
 
@@ -94,6 +98,8 @@
 #define kI263InfoResID		297
 #define kVP3InfoResID		298
 #define kHuffYUVInfoResID		299
+#define kMPEG1InfoResID		300
+#define kMPEG2InfoResID		301
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -462,6 +468,56 @@ resource 'cdci' (kI263CodecInfoResID) {
 
 resource 'cdci' (kHuffYUVCodecInfoResID) {
 	kHuffYUVName,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// MPEG-1 Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kMPEG1CodecInfoResID) {
+	kMPEG1Name,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// MPEG-2 Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kMPEG2CodecInfoResID) {
+	kMPEG2Name,				// Type
 	1,					// Version
 	1,					// Revision level
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2608,6 +2664,132 @@ resource 'thng' (324) {
 };
 
 //---------------------------------------------------------------------------
+// MPEG-1 Components
+//---------------------------------------------------------------------------
+resource 'thng' (325) {
+	decompressorComponentType,		// Type			
+	'MPEG',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG1NameResID,			// Name ID
+	'STR ',					// Info Type
+	kMPEG1InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (326) {
+	decompressorComponentType,		// Type			
+	'mpg1',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG1NameResID,			// Name ID
+	'STR ',					// Info Type
+	kMPEG1InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+//---------------------------------------------------------------------------
+// MPEG-2 Components
+//---------------------------------------------------------------------------
+resource 'thng' (327) {
+	decompressorComponentType,		// Type			
+	'MPG2',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG2NameResID,			// Name ID
+	'STR ',					// Info Type
+	kMPEG2InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (328) {
+	decompressorComponentType,		// Type			
+	'mpg2',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG2NameResID,			// Name ID
+	'STR ',					// Info Type
+	kMPEG2InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+//---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
 
@@ -2669,6 +2851,14 @@ resource 'STR ' (kVP3NameResID) {
 
 resource 'STR ' (kHuffYUVNameResID) {
 	"HuffYUV Decoder"
+};
+
+resource 'STR ' (kMPEG1NameResID) {
+	"MPEG-1 Decoder"
+};
+
+resource 'STR ' (kMPEG2NameResID) {
+	"MPEG-2 Decoder"
 };
 
 //---------------------------------------------------------------------------
@@ -2733,6 +2923,14 @@ resource 'STR ' (kVP3InfoResID) {
 
 resource 'STR ' (kHuffYUVInfoResID) {
 	"Decompresses video stored in HuffYUV format."
+};
+
+resource 'STR ' (kMPEG1InfoResID) {
+	"Decompresses video stored in MPEG-1 format."
+};
+
+resource 'STR ' (kMPEG2InfoResID) {
+	"Decompresses video stored in MPEG-2 format."
 };
 
 //---------------------------------------------------------------------------

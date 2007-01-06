@@ -77,8 +77,8 @@ enum {
 	kSubFormatVobSub                        = 'SPU ',
 	
 	// the following 4CCs don't have decoder support yet
-	kMPEG1VisualCodecType                   = 'mp1v',
-	kMPEG2VisualCodecType                   = 'mp2v',
+	kMPEG1VisualCodecType                   = 'MPEG',
+	kMPEG2VisualCodecType                   = 'MPG2',
 	kAudioFormatDTS                         = 'DTS ', 
 	kAudioFormatTTA                         = 'TTA1',
 	kAudioFormatWavepack                    = 'WVPK',
