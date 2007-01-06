@@ -256,70 +256,70 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F5CFD1B30B50009000616865 /* PerianPanePListGenerator */;
+			remoteGlobalIDString = F5CFD1B30B50009000616865;
 			remoteInfo = PerianPanePListGenerator;
 		};
 		F5CFD25D0B500B9400616865 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */;
+			remoteGlobalIDString = F5CFD2560B500B5E00616865;
 			remoteInfo = CreatePrefPanePlist;
 		};
 		F5CFD2C60B50128200616865 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 11A70AC00A3D0105002058D4 /* Perian */;
+			remoteGlobalIDString = 11A70AC00A3D0105002058D4;
 			remoteInfo = Perian;
 		};
 		F5CFD2D50B5012A100616865 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = F5BDACAD0A20A00000FF4884 /* A52Codec.component */;
+			remoteGlobalIDString = F5BDACAD0A20A00000FF4884;
 			remoteInfo = "A52Codec (Upgraded)";
 		};
 		F5CFD2D70B5012A100616865 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = F5525DF70A3BF78A00F36B86 /* AC3MovieImport.component */;
+			remoteGlobalIDString = F5525DF70A3BF78A00F36B86;
 			remoteInfo = AC3MovieImport;
 		};
 		F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = F50B7AB50AAB69C600065C78 /* Preferences.app */;
+			remoteGlobalIDString = F50B7AB50AAB69C600065C78;
 			remoteInfo = A52Preferences;
 		};
 		F5CFD2DC0B5012B400616865 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = F5BDAC850A20A00000FF4884 /* A52Codec (Upgraded) */;
+			remoteGlobalIDString = F5BDAC850A20A00000FF4884;
 			remoteInfo = "A52Codec (Upgraded)";
 		};
 		F5CFD2DE0B5012B400616865 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = F5525DCA0A3BF78A00F36B86 /* AC3MovieImport */;
+			remoteGlobalIDString = F5525DCA0A3BF78A00F36B86;
 			remoteInfo = AC3MovieImport;
 		};
 		F5CFD2F00B50132E00616865 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F5CFD2DB0B5012AA00616865 /* A52Codec */;
+			remoteGlobalIDString = F5CFD2DB0B5012AA00616865;
 			remoteInfo = A52Codec;
 		};
 		F5CFD3BB0B50142C00616865 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F5CFD3BA0B50142100616865 /* Setup Build Directories */;
+			remoteGlobalIDString = F5CFD3BA0B50142100616865;
 			remoteInfo = "Setup Build Directories";
 		};
 /* End PBXContainerItemProxy section */
@@ -1825,6 +1825,10 @@
 		83D1D6CB0B4C794900E09EC9 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -1853,6 +1857,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianPane;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WRAPPER_EXTENSION = prefPane;
 				ZERO_LINK = YES;
 			};
@@ -1881,6 +1886,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianPane;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WRAPPER_EXTENSION = prefPane;
 				ZERO_LINK = NO;
 			};
@@ -1889,6 +1895,10 @@
 		83D1D6CD0B4C794900E09EC9 /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1903,6 +1913,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianPane;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WRAPPER_EXTENSION = prefPane;
 				ZERO_LINK = YES;
 			};
