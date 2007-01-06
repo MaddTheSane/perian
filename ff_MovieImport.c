@@ -400,6 +400,12 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	if(result < 0)
 		goto bail;
 	
+	// we couldn't find any streams, bail with an error.
+	if(ic->nb_streams == 0) {
+		result = -1; //is there a more appropriate error code?
+		goto bail;
+	}
+	
 	//determine a header offset (needed by index-based import).
 	result = determine_header_offset(storage);
 	if(result < 0)
