@@ -1,5 +1,6 @@
 #import "CPFPerianPrefPaneController.h"
 #import <Security/Security.h>
+#include <sys/stat.h>
 
 #define ComponentInfoDictionaryKey	@"Components"
 #define BundleVersionKey @"CFBundleVersion"
@@ -35,12 +36,20 @@
 		CFPreferencesSetAppValue(key, kCFBooleanFalse, appID);
 }
 
-- (NSString *)quickTimeComponentDir
+- (BOOL)systemInstalled
 {
 	NSString *myPath = [[self bundle] bundlePath];
-	NSString *basePath = nil;
 	
 	if([myPath hasPrefix:NSHomeDirectory()])
+		return NO;
+	return YES;
+}
+
+- (NSString *)quickTimeComponentDir
+{
+	NSString *basePath = nil;
+	
+	if(![self systemInstalled])
 		basePath = NSHomeDirectory();
 	else
 		basePath = [NSString stringWithString:@"/"];
@@ -50,10 +59,9 @@
 
 - (NSString *)coreAudioComponentDir
 {
-	NSString *myPath = [[self bundle] bundlePath];
 	NSString *basePath = nil;
 	
-	if([myPath hasPrefix:NSHomeDirectory()])
+	if(![self systemInstalled])
 		basePath = NSHomeDirectory();
 	else
 		basePath = [NSString stringWithString:@"/"];
@@ -210,13 +218,90 @@
 			}
 			pclose(cmdFP);
 		}
+		unsetenv("DESTINATION");
 		fclose(fp);
 	}	
 	signal(SIGPIPE, oldSigPipeHandler);
 	return YES;
 }
 
-- (BOOL)installArchive:(NSString *)archivePath forPiece:(NSString *)component type:(ComponentType)type withMyVersion:(NSString *)myVersion andAuthorization:(AuthorizationRef *)auth
+- (BOOL)_authenticatedExtractArchivePath:(NSString *)archivePath toDestination:(NSString *)destination finalPath:(NSString *)finalPath authorization:(AuthorizationRef)auth
+{
+	BOOL ret = NO, oldExist = NO;
+	struct stat sb;
+	if(stat([finalPath fileSystemRepresentation], &sb) == 0)
+		oldExist = YES;
+	
+	if(stat([destination fileSystemRepresentation], &sb) != 0)
+		return FALSE;
+	
+	char *buf = NULL;
+	if(oldExist)
+		asprintf(&buf,
+				 "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
+				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
+				 "rm -rf \"$TMP_PATH\" && "
+				 "chown -R %d:%d \"$DST_COMPONENT\"",
+				 sb.st_uid, sb.st_gid);
+	else
+		asprintf(&buf,
+				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
+				 "chown -R %d:%d \"$DST_COMPONENT\"",
+				 sb.st_uid, sb.st_gid);
+	if(!buf)
+		return FALSE;
+	
+	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
+	setenv("$DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
+	setenv("TMP_PATH", [[finalPath stringByAppendingPathExtension:@"old"] fileSystemRepresentation], 1);
+	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
+	
+	char* arguments[] = { "-c", buf, NULL };
+	if(AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
+	{
+		int status;
+		int pid = wait(&status);
+		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
+			ret = YES;
+	}
+	free(buf);
+	unsetenv("SRC_ARCHIVE");
+	unsetenv("$DST_COMPONENT");
+	unsetenv("TMP_PATH");
+	unsetenv("DST_PATH");
+	return ret;
+}
+
+- (BOOL)_authenticatedRemove:(NSString *)componentPath authorization:(AuthorizationRef)auth
+{
+	BOOL ret = NO;
+	struct stat sb;
+	if(stat([componentPath fileSystemRepresentation], &sb) != 0)
+		return FALSE;
+	
+	char *buf = NULL;
+	asprintf(&buf,
+			 "rm -rf \"$COMP_PATH\" && ");
+	if(!buf)
+		return FALSE;
+	
+	setenv("COMP_PATH", [componentPath fileSystemRepresentation], 1);
+	
+	char* arguments[] = { "-c", buf, NULL };
+	if(AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
+	{
+		int status;
+		int pid = wait(&status);
+		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
+			ret = YES;
+	}
+	free(buf);
+	unsetenv("COMP_PATH");
+	return ret;
+}
+
+
+- (BOOL)installArchive:(NSString *)archivePath forPiece:(NSString *)component type:(ComponentType)type withMyVersion:(NSString *)myVersion andAuthorization:(AuthorizationRef)auth
 {
 	NSString *containingDir = nil;
 	switch(type)
@@ -229,22 +314,30 @@
 			break;
 	}
 	InstallStatus pieceStatus = [self installStatusForComponent:component type:type withMyVersion:myVersion];
-	if(pieceStatus == InstallStatusOutdated)
+	if(auth != nil && pieceStatus != InstallStatusInstalled)
 	{
-		//Remove the old one here
-		//XXX what about authorized
-		int tag = 0;
-		BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:containingDir destination:@"" files:[NSArray arrayWithObject:component] tag:&tag];
+		BOOL result = [self _authenticatedExtractArchivePath:archivePath toDestination:containingDir finalPath:[containingDir stringByAppendingPathComponent:component] authorization:auth];
 		if(result == NO)
 			return NO;
 	}
-	if(pieceStatus != InstallStatusInstalled)
+	else
 	{
-		//Decompress and install new one
-		//XXX Need to do authorized version as well
-		BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir pipingDataToCommand:@"ditto -x -k - \"$DESTINATION\""];
-		if(result == NO)
-			return NO;
+		//Not authenticated
+		if(pieceStatus == InstallStatusOutdated)
+		{
+			//Remove the old one here
+			int tag = 0;
+			BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:containingDir destination:@"" files:[NSArray arrayWithObject:component] tag:&tag];
+			if(result == NO)
+				return NO;
+		}
+		if(pieceStatus != InstallStatusInstalled)
+		{
+			//Decompress and install new one
+			BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir pipingDataToCommand:@"ditto -x -k - \"$DESTINATION\""];
+			if(result == NO)
+				return NO;
+		}		
 	}
 	return YES;
 }
@@ -257,8 +350,16 @@
 	NSString *componentPath = [[[self bundle] resourcePath] stringByAppendingPathComponent:@"Components"];
 	NSString *coreAudioComponentPath = [componentPath stringByAppendingPathComponent:@"CoreAudio"];
 	NSString *quickTimeComponentPath = [componentPath stringByAppendingPathComponent:@"QuickTime"];
+	AuthorizationRef auth = nil;
 	
-	[self installArchive:[componentPath stringByAppendingPathComponent:@"Perian.zip"] forPiece:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey] andAuthorization:NULL];
+	if([self systemInstalled])
+	{
+		if(!AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) == errAuthorizationSuccess)
+			// Try it anyway, it will likely fail, but who knows what kind of screwed up systems people have
+			auth = nil;
+	}
+	
+	[self installArchive:[componentPath stringByAppendingPathComponent:@"Perian.zip"] forPiece:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey] andAuthorization:auth];
 	
 	NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
 	NSDictionary *myComponent = nil;
@@ -275,8 +376,10 @@
 				archivePath = [quickTimeComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
 				break;
 		}
-		[self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey] andAuthorization:NULL];
+		[self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey] andAuthorization:auth];
 	}
+	if(auth != nil)
+		AuthorizationFree(auth, 0);
 	[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
 	[pool release];
 }
@@ -286,8 +389,15 @@
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *infoDict = [[self bundle] infoDictionary];
 	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
+	AuthorizationRef auth = nil;
 	
-	//XXX what about authorized
+	if([self systemInstalled])
+	{
+		if(!AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) == errAuthorizationSuccess)
+			// Try it anyway, it will likely fail, but who knows what kind of screwed up systems people have
+			auth = nil;
+	}
+	
 	int tag = 0;
 	BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[self quickTimeComponentDir] destination:@"" files:[NSArray arrayWithObject:@"Perian.component"] tag:&tag];
 	
@@ -308,6 +418,9 @@
 		}
 		BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:directory destination:@"" files:[myComponent objectForKey:ComponentNameKey] tag:&tag];
 	}
+	if(auth != nil)
+		AuthorizationFree(auth, 0);
+	
 	[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
 	[pool release];
 }
