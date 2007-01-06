@@ -190,39 +190,30 @@
 #pragma mark Install/Uninstall
 
 /* Shamelessly ripped from Sparkle */
-- (BOOL)_extractArchivePath:archivePath toDestination:(NSString *)destination pipingDataToCommand:(NSString *)command
+- (BOOL)_extractArchivePath:archivePath toDestination:(NSString *)destination
 {
-	// Get the file size.
-	NSNumber *fs = [[[NSFileManager defaultManager] fileAttributesAtPath:archivePath traverseLink:NO] objectForKey:NSFileSize];
-	if (fs == nil) { return NO; }
+	BOOL ret = NO;
+	struct stat sb;
+	if(stat([destination fileSystemRepresentation], &sb) != 0)
+		return FALSE;
 	
-	// Thank you, Allan Odgaard!
-	// (who wrote the following extraction alg.)
+	char *buf = NULL;
+	asprintf(&buf,
+			 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"");
+	if(!buf)
+		return FALSE;
 	
-	long current = 0;
-	FILE *fp, *cmdFP;
-	sig_t oldSigPipeHandler = signal(SIGPIPE, SIG_IGN);
-	if ((fp = fopen([archivePath UTF8String], "r")))
-	{
-		setenv("DESTINATION", [destination fileSystemRepresentation], 1);
-		if ((cmdFP = popen([command cString], "w")))
-		{
-			char buf[32*1024];
-			long len;
-			while((len = fread(buf, 1, 32 * 1024, fp)))
-			{				
-				current += len;
-				
-				fwrite(buf, 1, len, cmdFP);
-				
-			}
-			pclose(cmdFP);
-		}
-		unsetenv("DESTINATION");
-		fclose(fp);
-	}	
-	signal(SIGPIPE, oldSigPipeHandler);
-	return YES;
+	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
+	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
+	
+	int status = system(buf);
+	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
+		ret = YES;
+
+	free(buf);
+	unsetenv("SRC_ARCHIVE");
+	unsetenv("DST_PATH");
+	return ret;
 }
 
 - (BOOL)_authenticatedExtractArchivePath:(NSString *)archivePath toDestination:(NSString *)destination finalPath:(NSString *)finalPath authorization:(AuthorizationRef)auth
@@ -334,7 +325,7 @@
 		if(pieceStatus != InstallStatusInstalled)
 		{
 			//Decompress and install new one
-			BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir pipingDataToCommand:@"ditto -x -k - \"$DESTINATION\""];
+			BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir];
 			if(result == NO)
 				return NO;
 		}		
