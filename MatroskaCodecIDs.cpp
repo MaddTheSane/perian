@@ -29,6 +29,7 @@
 #include <matroska/KaxContentEncoding.h>
 #include "MatroskaCodecIDs.h"
 #include "CommonUtils.h"
+#include "Codecprintf.h"
 #include <string>
 
 using namespace std;
@@ -440,29 +441,162 @@ ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription
 
 ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
 {
-	switch ((*desc)->dataFormat) {
-		case kH264CodecType:
-			return DescExt_H264(tr_entry, desc, dir);
-			
-		case kAudioFormatXiphVorbis:
-			return DescExt_XiphVorbis(tr_entry, desc, dir);
-			
-		case kAudioFormatXiphFLAC:
-			return DescExt_XiphFLAC(tr_entry, desc, dir);
-			
-		case kSubFormatVobSub:
-			return DescExt_VobSub(tr_entry, desc, dir);
-			
-		case kVideoFormatReal5:
-		case kVideoFormatRealG2:
-		case kVideoFormatReal8:
-		case kVideoFormatReal9:
-			return DescExt_Real(tr_entry, desc, dir);
-			
-		case kMPEG4VisualCodecType:
-			return DescExt_mp4v(tr_entry, desc, dir);
+	KaxCodecID & tr_codec = GetChild<KaxCodecID>(*tr_entry);
+	
+	string codecString(tr_codec);
+	
+	if (codecString == MKV_V_MS) {
+		// BITMAPINFOHEADER is stored in the private data, and some codecs (WMV)
+		// need it to decode
+		KaxCodecPrivate & codecPrivate = GetChild<KaxCodecPrivate>(*tr_entry);
+		
+		Handle imgDescExt = NewHandle(codecPrivate.GetSize());
+		memcpy(*imgDescExt, codecPrivate.GetBuffer(), codecPrivate.GetSize());
+		
+		AddImageDescriptionExtension((ImageDescriptionHandle) desc, imgDescExt, 'strf');
+		
+	} else if (codecString == MKV_V_QT) {
+		// This seems to work fine, but there's something it's missing to get the 
+		// image description to match perfectly (last 2 bytes are different)
+		// Figure it out later...
+		KaxCodecPrivate & codecPrivate = GetChild<KaxCodecPrivate>(*tr_entry);
+		if (codecPrivate.GetSize() < sizeof(ImageDescription)) {
+			Codecprintf(NULL, "MatroskaQT: QuickTime track %hu doesn't have needed stsd data\n", 
+						uint16(tr_entry->TrackNumber()));
+			return -1;
+		}
+		
+		ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
+		SetHandleSize((Handle) imgDesc, codecPrivate.GetSize());
+		memcpy(&(*imgDesc)->cType, codecPrivate.GetBuffer(), codecPrivate.GetSize());
+		// it's stored in big endian, so flip endian to native
+		// I think we have to do this, need to check on Intel without them
+		(*imgDesc)->idSize = codecPrivate.GetSize();
+		(*imgDesc)->cType = EndianU32_BtoN((*imgDesc)->cType);
+		(*imgDesc)->resvd1 = EndianS32_BtoN((*imgDesc)->resvd1);
+		(*imgDesc)->resvd2 = EndianS16_BtoN((*imgDesc)->resvd2);
+		(*imgDesc)->dataRefIndex = EndianS16_BtoN((*imgDesc)->dataRefIndex);
+		(*imgDesc)->version = EndianS16_BtoN((*imgDesc)->version);
+		(*imgDesc)->revisionLevel = EndianS16_BtoN((*imgDesc)->revisionLevel);
+		(*imgDesc)->vendor = EndianS32_BtoN((*imgDesc)->vendor);
+		(*imgDesc)->temporalQuality = EndianU32_BtoN((*imgDesc)->temporalQuality);
+		(*imgDesc)->spatialQuality = EndianU32_BtoN((*imgDesc)->spatialQuality);
+		(*imgDesc)->width = EndianS16_BtoN((*imgDesc)->width);
+		(*imgDesc)->height = EndianS16_BtoN((*imgDesc)->height);
+		(*imgDesc)->vRes = EndianS32_BtoN((*imgDesc)->vRes);
+		(*imgDesc)->hRes = EndianS32_BtoN((*imgDesc)->hRes);
+		(*imgDesc)->dataSize = EndianS32_BtoN((*imgDesc)->dataSize);
+		(*imgDesc)->frameCount = EndianS16_BtoN((*imgDesc)->frameCount);
+		(*imgDesc)->depth = EndianS16_BtoN((*imgDesc)->depth);
+		(*imgDesc)->clutID = EndianS16_BtoN((*imgDesc)->clutID);
+#if 0
+	} else if (codecString == MKV_V_THEORA) {
+		// we need 3 setup packets for the image description extension, but
+		// the sample files I muxed have only 2 packets in the Codec Private element.
+		// Despite the Matroska specs agreeing with me about the 3 packets.
+		// Will figure out later.
+	} else if (codecString.compare(0, strlen(MKV_A_AAC), string(MKV_A_AAC)) == 0) {
+		// esds extension gives us the channel mapping for AAC
+		SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
+		
+		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+		if (codecPrivate == NULL)
+			return;
+		
+		Handle sndDescExt = NewHandle(codecPrivate->GetSize());
+		memcpy(*sndDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
+		
+		AddSoundDescriptionExtension(sndDesc, sndDescExt, 'esds');
+		
+		DisposeHandle((Handle) sndDescExt);
+#endif
+	} else {
+		switch ((*desc)->dataFormat) {
+			case kH264CodecType:
+				return DescExt_H264(tr_entry, desc, dir);
+				
+			case kAudioFormatXiphVorbis:
+				return DescExt_XiphVorbis(tr_entry, desc, dir);
+				
+			case kAudioFormatXiphFLAC:
+				return DescExt_XiphFLAC(tr_entry, desc, dir);
+				
+			case kSubFormatVobSub:
+				return DescExt_VobSub(tr_entry, desc, dir);
+				
+			case kVideoFormatReal5:
+			case kVideoFormatRealG2:
+			case kVideoFormatReal8:
+			case kVideoFormatReal9:
+				return DescExt_Real(tr_entry, desc, dir);
+				
+			case kMPEG4VisualCodecType:
+				return DescExt_mp4v(tr_entry, desc, dir);
+		}
 	}
 	return noErr;
+}
+
+// some default channel layouts for up to 8 channels
+// vorbis and aac should be correct unless extradata specifices something else for aac
+static const AudioChannelLayout vorbisChannelLayouts[9] = {
+	{ 0 },
+	{ kAudioChannelLayoutTag_Mono },
+	{ kAudioChannelLayoutTag_Stereo },
+	{ kAudioChannelLayoutTag_UseChannelBitmap, kAudioChannelBit_Left | kAudioChannelBit_Right | kAudioChannelBit_CenterSurround },
+	{ kAudioChannelLayoutTag_Quadraphonic },
+	{ kAudioChannelLayoutTag_MPEG_5_0_C },
+	{ kAudioChannelLayoutTag_MPEG_5_1_C }
+};
+
+// these should be the default for the number of channels; esds can specify other mappings
+static const AudioChannelLayout aacChannelLayouts[9] = {
+	{ 0 },
+	{ kAudioChannelLayoutTag_Mono },
+	{ kAudioChannelLayoutTag_Stereo },
+	{ kAudioChannelLayoutTag_MPEG_3_0_B },		// C L R according to wiki.multimedia.cx
+	{ kAudioChannelLayoutTag_AAC_4_0 },
+	{ kAudioChannelLayoutTag_AAC_5_0 },
+	{ kAudioChannelLayoutTag_AAC_5_1 },
+	{ kAudioChannelLayoutTag_AAC_6_1 },
+	{ kAudioChannelLayoutTag_AAC_7_1 }
+};
+
+static const AudioChannelLayout ac3ChannelLayouts[9] = {
+	{ 0 },
+	{ kAudioChannelLayoutTag_ITU_1_0 },
+	{ kAudioChannelLayoutTag_ITU_2_0 },
+	{ kAudioChannelLayoutTag_ITU_3_0 },
+	{ kAudioChannelLayoutTag_ITU_3_1 },
+	{ kAudioChannelLayoutTag_ITU_3_2 },
+	{ kAudioChannelLayoutTag_ITU_3_2_1 }
+};
+
+
+AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
+{
+	AudioChannelLayout acl = {0};
+	
+	if (asbd->mChannelsPerFrame <= 8) {
+		switch (asbd->mFormatID) {
+			case kAudioFormatXiphVorbis:
+			case kAudioFormatXiphFLAC:		// FLAC doesn't have official mappings, but the author said Vorbis's were likely to be used
+				acl = vorbisChannelLayouts[asbd->mChannelsPerFrame];
+				break;
+				
+			case kAudioFormatMPEG4AAC:
+				// TODO: use extradata to make ACL
+				acl = aacChannelLayouts[asbd->mChannelsPerFrame];
+				break;
+				
+			case kAudioFormatAC3:
+				// TODO: implement channel layout choosing based on an AC3 frame
+				acl = ac3ChannelLayouts[asbd->mChannelsPerFrame];
+				break;
+		}
+	}
+	
+	return acl;
 }
 
 ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)
@@ -479,21 +613,6 @@ ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescripti
 	}
 	return noErr;
 }
-
-
-short GetTrackLanguage(KaxTrackEntry *tr_entry) {
-	KaxTrackLanguage *trLang = FindChild<KaxTrackLanguage>(*tr_entry);
-	if (trLang != NULL) {
-		char lang[4];
-		string langStr(*trLang);
-		strncpy(lang, langStr.c_str(), 3);
-		lang[3] = '\0';
-		
-		return ThreeCharLangCodeToQTLangCode(lang);
-	}
-	return langUnspecified;
-}
-
 
 
 typedef struct {

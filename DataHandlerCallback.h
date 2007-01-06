@@ -57,6 +57,7 @@ private:
 	bool closeHandler;
 	bool supportsWideOffsets;
 	open_mode aMode;
+	SInt64 filesize;
     
 public:
 	DataHandlerCallback::DataHandlerCallback(ComponentInstance dataHandler, const open_mode aMode);

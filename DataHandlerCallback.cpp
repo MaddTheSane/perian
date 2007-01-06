@@ -22,8 +22,6 @@
  *
  */
 
-#include <sstream>
-
 #include "DataHandlerCallback.h"
 #include <QuickTime/QuickTime.h>
 
@@ -50,6 +48,7 @@ DataHandlerCallback::DataHandlerCallback(ComponentInstance dataHandler, const op
 	supportsWideOffsets = true;
 	this->dataHandler = NULL;
 	mCurrentPosition = 0;
+	filesize = 0;
 	this->aMode = aMode;
 	
 	switch (aMode)
@@ -77,6 +76,7 @@ DataHandlerCallback::DataHandlerCallback(Handle dataRef, OSType dataRefType, con
 	supportsWideOffsets = true;
 	dataHComponent = NULL;
 	mCurrentPosition = 0;
+	filesize = 0;
 	this->aMode = aMode;
 	
 	if (aMode == MODE_READ)
@@ -88,31 +88,23 @@ DataHandlerCallback::DataHandlerCallback(Handle dataRef, OSType dataRefType, con
 	
 	err = OpenAComponent(dataHComponent, &dataHandler);
 	if (err) {
-		stringstream Msg;
-		Msg << "Error opening data handler component " << err;
-		throw CRTError(Msg.str());
+		throw CRTError("Error opening data handler component", err);
 	}
 	
 	err = DataHSetDataRef(dataHandler, dataRef);
 	if (err) {
-		stringstream Msg;
-		Msg << "Error setting data handler ref " << err;
-		throw CRTError(Msg.str());
+		throw CRTError("Error setting data handler ref", err);
 	}
 	
 	if (aMode == MODE_READ) {
 		err = DataHOpenForRead(dataHandler);
         if (err) {
-            stringstream Msg;
-            Msg << "Error opening data handler for read " << err;
-            throw CRTError(Msg.str());
+            throw CRTError("Error opening data handler for read", err);
         }
 	} else if (aMode == MODE_WRITE) {
 		err = DataHOpenForWrite(dataHandler);
         if (err) {
-            stringstream Msg;
-            Msg << "Error opening data handler for write " << err;
-            throw CRTError(Msg.str());
+            throw CRTError("Error opening data handler for write", err);
         }
 	} else {
 		throw 0;
@@ -132,8 +124,6 @@ DataHandlerCallback::~DataHandlerCallback() throw()
 
 uint32 DataHandlerCallback::read(void *Buffer, size_t Size)
 {
-	assert(dataHandler != 0);
-	
 	ComponentResult err = noErr;
 	
 	if (supportsWideOffsets) {
@@ -145,11 +135,14 @@ uint32 DataHandlerCallback::read(void *Buffer, size_t Size)
 	}
 	
 	if (err) {
-		stringstream Msg;
-		Msg << "Error reading data " << err;
-		throw CRTError(Msg.str(), err);
+		throw CRTError("Error reading data", err);
 	}
 	mCurrentPosition += Size;
+	
+	if (mCurrentPosition > filesize) {
+		Size -= mCurrentPosition - filesize;
+		mCurrentPosition = filesize;
+	}
 	
 	// does QuickTime tell us how much it's read?
 	return Size;
@@ -157,11 +150,6 @@ uint32 DataHandlerCallback::read(void *Buffer, size_t Size)
 
 void DataHandlerCallback::setFilePointer(int64 Offset, LIBEBML_NAMESPACE::seek_mode Mode)
 {
-	assert(Offset <= LONG_MAX);
-	assert(Offset >= LONG_MIN);
-
-	assert(Mode==SEEK_CUR||Mode==SEEK_END||Mode==SEEK_SET);
-	
 	switch ( Mode )
 	{
 		case SEEK_CUR:
@@ -179,8 +167,6 @@ void DataHandlerCallback::setFilePointer(int64 Offset, LIBEBML_NAMESPACE::seek_m
 
 size_t DataHandlerCallback::write(const void *Buffer, size_t Size)
 {
-	assert(dataHandler != NULL);
-	
 	ComponentResult err = noErr;
 	
 	if (supportsWideOffsets) {
@@ -192,9 +178,7 @@ size_t DataHandlerCallback::write(const void *Buffer, size_t Size)
 	}
 	
 	if (err) {
-		stringstream Msg;
-		Msg << "Error writing data " << err;
-		throw CRTError(Msg.str(), err);
+		throw CRTError("Error writing data", err);
 	}
 	mCurrentPosition += Size;
 	
@@ -204,8 +188,6 @@ size_t DataHandlerCallback::write(const void *Buffer, size_t Size)
 
 uint64 DataHandlerCallback::getFilePointer()
 {
-	assert(dataHandler != NULL);
-
 	return mCurrentPosition;
 }
 
@@ -223,8 +205,10 @@ void DataHandlerCallback::close()
 SInt64 DataHandlerCallback::getFileSize()
 {
 	ComponentResult err = noErr;
-	SInt64 filesize;
 	wide wideFilesize;
+	
+	if (filesize > 0) 
+		return filesize;
 	
 	err = DataHGetFileSize64(dataHandler, &wideFilesize);
 	if (err == noErr) {

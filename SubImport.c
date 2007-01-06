@@ -37,7 +37,7 @@ short GetFilenameLanguage(CFStringRef filename)
 
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 4, kCFStringEncodingASCII);
-		lang = ThreeCharLangCodeToQTLangCode(langCStr);
+		lang = ISO639_2ToQTLangCode(langCStr);
 
 		CFRelease(langStr);
 	
@@ -47,7 +47,7 @@ short GetFilenameLanguage(CFStringRef filename)
 		
 		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 		CFStringGetCString(langStr, langCStr, 3, kCFStringEncodingASCII);
-		lang = TwoCharLangCodeToQTLangCode(langCStr);
+		lang = ISO639_1ToQTLangCode(langCStr);
 
 		CFRelease(langStr);
 	}

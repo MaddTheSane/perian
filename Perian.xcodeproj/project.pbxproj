@@ -163,14 +163,13 @@
 		61CB11E30ACDF50F007994BD /* KaxVersion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11CB0ACDF50F007994BD /* KaxVersion.cpp */; };
 		61CB11F30ACE0F6D007994BD /* libebml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CB10FF0ACDF350007994BD /* libebml.a */; };
 		61CB11F40ACE0F73007994BD /* libmatroska.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CB11770ACDF4D8007994BD /* libmatroska.a */; };
-		61CB12090ACE0F85007994BD /* MatroskaImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D691570AC8E382000EFC7D /* MatroskaImport.c */; };
-		61CB120A0ACE0F86007994BD /* MkvImportPrivate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D6915E0AC8E382000EFC7D /* MkvImportPrivate.cpp */; };
-		61CB120B0ACE0F87007994BD /* MkvMovieSetup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D691600AC8E382000EFC7D /* MkvMovieSetup.cpp */; };
+		61CB12090ACE0F85007994BD /* MatroskaImport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D691570AC8E382000EFC7D /* MatroskaImport.cpp */; };
 		61CB120C0ACE0F8A007994BD /* DataHandlerCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D6914E0AC8E382000EFC7D /* DataHandlerCallback.cpp */; };
 		61CB120D0ACE0F8D007994BD /* MatroskaCodecIDs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61D691500AC8E382000EFC7D /* MatroskaCodecIDs.cpp */; };
 		61CB12260ACE1074007994BD /* MatroskaImport.r in Rez */ = {isa = PBXBuildFile; fileRef = 61D691590AC8E382000EFC7D /* MatroskaImport.r */; };
 		61D514DE0ADF3DBA00A671E1 /* SubImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D514DD0ADF3DBA00A671E1 /* SubImport.c */; };
 		61D517730AE0402E00A671E1 /* CommonUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D517720AE0402E00A671E1 /* CommonUtils.c */; };
+		61FD41330B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61FD41320B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp */; };
 		83D1D6CF0B4C7AC400E09EC9 /* PreferencePanes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */; };
 		83D1D6DE0B4C7F8300E09EC9 /* PerianPrefPane.nib in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */; };
 		83D1D6E20B4C81F200E09EC9 /* CPFPerianPrefPaneController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */; };
@@ -394,17 +393,14 @@
 		61D691540AC8E382000EFC7D /* MatroskaExport.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; path = MatroskaExport.r; sourceTree = "<group>"; };
 		61D691550AC8E382000EFC7D /* MatroskaExportDispatch.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MatroskaExportDispatch.h; sourceTree = "<group>"; };
 		61D691560AC8E382000EFC7D /* MatroskaExportVersion.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MatroskaExportVersion.h; sourceTree = "<group>"; };
-		61D691570AC8E382000EFC7D /* MatroskaImport.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = MatroskaImport.c; sourceTree = "<group>"; };
+		61D691570AC8E382000EFC7D /* MatroskaImport.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MatroskaImport.cpp; sourceTree = "<group>"; };
 		61D691580AC8E382000EFC7D /* MatroskaImport.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MatroskaImport.h; sourceTree = "<group>"; };
 		61D691590AC8E382000EFC7D /* MatroskaImport.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; path = MatroskaImport.r; sourceTree = "<group>"; };
 		61D6915A0AC8E382000EFC7D /* MatroskaImportDispatch.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MatroskaImportDispatch.h; sourceTree = "<group>"; };
 		61D6915B0AC8E382000EFC7D /* MatroskaImportVersion.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MatroskaImportVersion.h; sourceTree = "<group>"; };
 		61D6915C0AC8E382000EFC7D /* MkvExportPrivate.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MkvExportPrivate.cpp; sourceTree = "<group>"; };
 		61D6915D0AC8E382000EFC7D /* MkvExportPrivate.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MkvExportPrivate.h; sourceTree = "<group>"; };
-		61D6915E0AC8E382000EFC7D /* MkvImportPrivate.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MkvImportPrivate.cpp; sourceTree = "<group>"; };
-		61D6915F0AC8E382000EFC7D /* MkvImportPrivate.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MkvImportPrivate.h; sourceTree = "<group>"; };
-		61D691600AC8E382000EFC7D /* MkvMovieSetup.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MkvMovieSetup.cpp; sourceTree = "<group>"; };
-		61D691610AC8E382000EFC7D /* MkvMovieSetup.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MkvMovieSetup.h; sourceTree = "<group>"; };
+		61FD41320B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatroskaImportPrivate.cpp; sourceTree = "<group>"; };
 		83D1D6C80B4C794700E09EC9 /* PerianPane.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PerianPane.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
 		83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "PerianPane-Info.plist"; sourceTree = "<group>"; };
 		83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PreferencePanes.framework; path = /System/Library/Frameworks/PreferencePanes.framework; sourceTree = "<absolute>"; };
@@ -738,14 +734,11 @@
 		61D6916B0AC8E3A3000EFC7D /* Import */ = {
 			isa = PBXGroup;
 			children = (
-				61D691570AC8E382000EFC7D /* MatroskaImport.c */,
+				61D691570AC8E382000EFC7D /* MatroskaImport.cpp */,
 				61D691580AC8E382000EFC7D /* MatroskaImport.h */,
+				61FD41320B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp */,
 				61D6915A0AC8E382000EFC7D /* MatroskaImportDispatch.h */,
 				61D6915B0AC8E382000EFC7D /* MatroskaImportVersion.h */,
-				61D6915E0AC8E382000EFC7D /* MkvImportPrivate.cpp */,
-				61D6915F0AC8E382000EFC7D /* MkvImportPrivate.h */,
-				61D691600AC8E382000EFC7D /* MkvMovieSetup.cpp */,
-				61D691610AC8E382000EFC7D /* MkvMovieSetup.h */,
 			);
 			name = Import;
 			sourceTree = "<group>";
@@ -1079,9 +1072,7 @@
 				11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */,
 				112E0C820A6436BA00DB4C29 /* FFusionCodec.c in Sources */,
 				113F589A0A6B091600509987 /* Codecprintf.c in Sources */,
-				61CB12090ACE0F85007994BD /* MatroskaImport.c in Sources */,
-				61CB120A0ACE0F86007994BD /* MkvImportPrivate.cpp in Sources */,
-				61CB120B0ACE0F87007994BD /* MkvMovieSetup.cpp in Sources */,
+				61CB12090ACE0F85007994BD /* MatroskaImport.cpp in Sources */,
 				61CB120C0ACE0F8A007994BD /* DataHandlerCallback.cpp in Sources */,
 				61CB120D0ACE0F8D007994BD /* MatroskaCodecIDs.cpp in Sources */,
 				6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */,
@@ -1097,6 +1088,7 @@
 				6116E61C0B44A5A70020F1CE /* GetCodecBundle.cpp in Sources */,
 				6116E6200B44A5B30020F1CE /* CADebugMacros.cpp in Sources */,
 				6116E6220B44A5BC0020F1CE /* CABundleLocker.cpp in Sources */,
+				61FD41330B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

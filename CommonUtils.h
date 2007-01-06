@@ -16,10 +16,10 @@ extern "C"
 #endif
 
 // ISO 639-1 to language ID expected by SetMediaLanguage
-short TwoCharLangCodeToQTLangCode(char *lang);
+short ISO639_1ToQTLangCode(const char *lang);
 
 // ISO 639-2 to language ID expected by SetMediaLanguage
-short ThreeCharLangCodeToQTLangCode(char *lang);
+short ISO639_2ToQTLangCode(const char *lang);
 
 /* write the int32_t data to target & then return a pointer which points after that data */
 uint8_t *write_int32(uint8_t *target, int32_t data);

@@ -156,7 +156,7 @@ static const LanguageTriplet ISO_QTLanguages[] = {
 	{ "yi", "yid", langYiddish }
 };
 
-short TwoCharLangCodeToQTLangCode(char *lang)
+short ISO639_1ToQTLangCode(const char *lang)
 {
 	int i;
 	
@@ -169,7 +169,7 @@ short TwoCharLangCodeToQTLangCode(char *lang)
 	}
 }
 
-short ThreeCharLangCodeToQTLangCode(char *lang)
+short ISO639_2ToQTLangCode(const char *lang)
 {
 	int i;
 	
