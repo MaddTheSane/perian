@@ -3,6 +3,12 @@
 #import <Cocoa/Cocoa.h>
 #import <PreferencePanes/NSPreferencePane.h>
 
+#define ComponentInfoDictionaryKey	@"Components"
+#define BundleVersionKey @"CFBundleVersion"
+#define ComponentNameKey @"Name"
+#define ComponentArchiveNameKey @"ArchiveName"
+#define ComponentTypeKey @"Type"
+
 typedef enum
 {
 	InstallStatusNotInstalled,
@@ -13,7 +19,8 @@ typedef enum
 typedef enum
 {
 	ComponentTypeQuickTime,
-	ComponentTypeCoreAudio
+	ComponentTypeCoreAudio,
+	ComponentTypeFramework
 } ComponentType;
 
 @interface CPFPerianPrefPaneController : NSPreferencePane

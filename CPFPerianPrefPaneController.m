@@ -2,12 +2,6 @@
 #import <Security/Security.h>
 #include <sys/stat.h>
 
-#define ComponentInfoDictionaryKey	@"Components"
-#define BundleVersionKey @"CFBundleVersion"
-#define ComponentNameKey @"Name"
-#define ComponentArchiveNameKey @"ArchiveName"
-#define ComponentTypeKey @"Type"
-
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
 #define AC3StereoOverDolbyKey CFSTR("useStereoOverDolby")
 
@@ -69,6 +63,18 @@
 	return [basePath stringByAppendingPathComponent:@"Library/Audio/Plug-Ins/Components"];
 }
 
+- (NSString *)frameworkComponentDir
+{
+	NSString *basePath = nil;
+	
+	if(![self systemInstalled])
+		basePath = NSHomeDirectory();
+	else
+		basePath = [NSString stringWithString:@"/"];
+	
+	return [basePath stringByAppendingPathComponent:@"Library/Frameworks"];
+}
+
 - (InstallStatus)installStatusForComponent:(NSString *)component type:(ComponentType)type withMyVersion:(NSString *)myVersion
 {
 	NSString *path = nil;
@@ -81,14 +87,17 @@
 		case ComponentTypeQuickTime:
 			path = [self quickTimeComponentDir];
 			break;
+		case ComponentTypeFramework:
+			path = [self frameworkComponentDir];
+			break;
 	}
 	path = [path stringByAppendingPathComponent:component];
 	
-	NSBundle *bundle = [NSBundle bundleWithPath:path];
-	if(bundle == nil)
+	NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
+	if(infoDict == nil)
 		return InstallStatusNotInstalled;
 	
-	NSString *currentVersion = [[bundle infoDictionary] objectForKey:BundleVersionKey];
+	NSString *currentVersion = [infoDict objectForKey:BundleVersionKey];
 	if([currentVersion compare:myVersion] == NSOrderedAscending)
 		return InstallStatusOutdated;
 	
@@ -161,7 +170,7 @@
 			[button_install setTitle:NSLocalizedString(@"Uninstall Perian", @"")];
 		}
 		
-	}	
+	}
 }
 
 - (void)mainViewDidLoad
@@ -303,6 +312,9 @@
 		case ComponentTypeQuickTime:
 			containingDir = [self quickTimeComponentDir];
 			break;
+		case ComponentTypeFramework:
+			containingDir = [self frameworkComponentDir];
+			break;
 	}
 	InstallStatus pieceStatus = [self installStatusForComponent:component type:type withMyVersion:myVersion];
 	if(auth != nil && pieceStatus != InstallStatusInstalled)
@@ -341,6 +353,7 @@
 	NSString *componentPath = [[[self bundle] resourcePath] stringByAppendingPathComponent:@"Components"];
 	NSString *coreAudioComponentPath = [componentPath stringByAppendingPathComponent:@"CoreAudio"];
 	NSString *quickTimeComponentPath = [componentPath stringByAppendingPathComponent:@"QuickTime"];
+	NSString *frameworkComponentPath = [componentPath stringByAppendingPathComponent:@"Frameworks"];
 	AuthorizationRef auth = nil;
 	
 	if([self systemInstalled])
@@ -365,6 +378,9 @@
 				break;
 			case ComponentTypeQuickTime:
 				archivePath = [quickTimeComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
+				break;
+			case ComponentTypeFramework:
+				archivePath = [frameworkComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
 				break;
 		}
 		[self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey] andAuthorization:auth];
@@ -406,8 +422,11 @@
 			case ComponentTypeQuickTime:
 				directory = [self quickTimeComponentDir];
 				break;
+			case ComponentTypeFramework:
+				directory = [self frameworkComponentDir];
+				break;
 		}
-		BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:directory destination:@"" files:[myComponent objectForKey:ComponentNameKey] tag:&tag];
+		result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:directory destination:@"" files:[myComponent objectForKey:ComponentNameKey] tag:&tag];
 	}
 	if(auth != nil)
 		AuthorizationFree(auth, 0);
