@@ -95,6 +95,8 @@ void FFissionDecoder::SetMagicCookie(const void* inMagicCookieData, UInt32 inMag
 
 void FFissionDecoder::SetupExtradata(OSType formatID)
 {
+	if (!magicCookie) return;
+	
 	switch (formatID) {
 		case kAudioFormatWMA1MS:
 		case kAudioFormatWMA2MS:
@@ -104,6 +106,9 @@ void FFissionDecoder::SetupExtradata(OSType formatID)
 			avContext->extradata = magicCookie + 12 + 18 + 8;
 			avContext->extradata_size = magicCookieSize - 12 - 18 - 8 - 8;
 			break;
+			
+		default:
+			return;
 	}
 	
 	// this is safe because we always allocate this amount of additional memory for our copy of the magic cookie
