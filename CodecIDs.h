@@ -69,6 +69,8 @@ enum {
 	kAudioFormatWMA1MS                      = 0x6D730160,
 	kAudioFormatWMA2MS                      = 0x6D730161,
 	kVideoFormatMSMPEG4v3                   = 'MP43',
+	kMPEG1VisualCodecType                   = 'MPEG',
+	kMPEG2VisualCodecType                   = 'MPG2',
 	
 	kSubFormatUTF8                          = 'SRT ',
 	kSubFormatSSA                           = 'SSA ',
@@ -77,8 +79,6 @@ enum {
 	kSubFormatVobSub                        = 'SPU ',
 	
 	// the following 4CCs don't have decoder support yet
-	kMPEG1VisualCodecType                   = 'MPEG',
-	kMPEG2VisualCodecType                   = 'MPG2',
 	kAudioFormatDTS                         = 'DTS ', 
 	kAudioFormatTTA                         = 'TTA1',
 	kAudioFormatWavepack                    = 'WVPK',
