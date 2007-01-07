@@ -340,37 +340,6 @@ ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 	return noErr;
 }
 
-ComponentResult ASBDExt_AC3(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)
-{
-	if (!tr_entry || !asbd) return paramErr;
-	
-	// Older AC3 codecs for QuickTime only claim the 'ms ' 4cc that DivX
-	// defined for AVIs, so check to see if that's all we have and set the
-	// 4cc appropriately based on decoder availbility.
-	Component c = NULL;
-	ComponentDescription cd = {0};
-	cd.componentType = kSoundDecompressor;
-	cd.componentSubType = kAudioFormatAC3;
-	
-	c = FindNextComponent(c, &cd);
-	if (c != NULL) {
-		// newer AC3 codecs claim this
-		asbd->mFormatID = kAudioFormatAC3;
-	} else {
-		cd.componentSubType = kAudioFormatAC3MS;
-		c = FindNextComponent(c, &cd);
-		
-		if (c != NULL) {
-			// older AC3 codecs claim this
-			asbd->mFormatID = kAudioFormatAC3MS;
-			asbd->mChannelsPerFrame = 2;
-		} else
-			// if we don't have an AC3 codec, might as well use the "proper" 4cc
-			asbd->mFormatID = kAudioFormatAC3;
-	}
-	return noErr;
-}
-
 ComponentResult ASBDExt_LPCM(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)
 {
 	if (!tr_entry || !asbd) return paramErr;
@@ -604,9 +573,6 @@ ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescripti
 	switch (asbd->mFormatID) {
 		case kAudioFormatMPEG4AAC:
 			return ASBDExt_AAC(tr_entry, asbd);
-			
-		case kAudioFormatAC3:
-			return ASBDExt_AC3(tr_entry, asbd);
 			
 		case kAudioFormatLinearPCM:
 			return ASBDExt_LPCM(tr_entry, asbd);
