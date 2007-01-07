@@ -131,6 +131,13 @@ ComponentResult FFAvi_MovieImportClose(ff_global_ptr storage, ComponentInstance 
 	if(storage->format_context)
 		av_close_input_file(storage->format_context);
 	
+	int i;
+	for(i=0; i<MAX_STREAMS; i++)
+	{
+		if(storage->firstFrames[i].data != NULL)
+			av_free_packet(storage->firstFrames + i);
+	}
+	
 	if(storage)
 		free(storage);
 	
