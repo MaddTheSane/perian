@@ -572,6 +572,7 @@ static const AudioChannelLayout ac3ChannelLayouts[9] = {
 	{ kAudioChannelLayoutTag_ITU_3_2_1 }
 };
 
+extern "C"{
 
 AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 {
@@ -597,6 +598,8 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 	}
 	
 	return acl;
+}
+
 }
 
 ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)

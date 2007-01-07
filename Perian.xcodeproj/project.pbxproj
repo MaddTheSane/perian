@@ -213,6 +213,7 @@
 		8F483B550A642644002CCA73 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B540A642644002CCA73 /* libavformat.a */; };
 		8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */; };
 		8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */ = {isa = PBXBuildFile; fileRef = 8F483B8B0A642886002CCA73 /* PerianAviImporter.r */; };
+		F52286260B50625E00F8CF7D /* bitstream_info.c in Sources */ = {isa = PBXBuildFile; fileRef = F52286250B50625E00F8CF7D /* bitstream_info.c */; };
 		F53E18E50B4F483C003A0471 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53E18E40B4F483C003A0471 /* Security.framework */; };
 		F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		F5CFD1C10B5000DF00616865 /* GBPerianPanePListGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */; };
@@ -539,13 +540,15 @@
 		8F483B8B0A642886002CCA73 /* PerianAviImporter.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianAviImporter.r; sourceTree = "<group>"; };
 		8F483BBC0A642B3D002CCA73 /* ff_MovieImportDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_MovieImportDispatch.h; sourceTree = "<group>"; };
 		F50D440703EAD8DF01B1D299 /* FFusion.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = FFusion.icns; sourceTree = "<group>"; };
+		F52286240B50625E00F8CF7D /* bitstream_info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bitstream_info.h; sourceTree = "<group>"; };
+		F52286250B50625E00F8CF7D /* bitstream_info.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bitstream_info.c; sourceTree = "<group>"; };
 		F53E18E40B4F483C003A0471 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		F560DECD03D61B6101ABA332 /* Components.k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Components.k.h; sourceTree = "<group>"; };
 		F560DEFC03D61BE301ABA332 /* FFusionCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodec.h; sourceTree = "<group>"; };
 		F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodecDispatch.h; sourceTree = "<group>"; };
 		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFusionCodec.c; sourceTree = "<group>"; };
 		F560DF0203D622D001ABA332 /* FFusionCodec.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = FFusionCodec.r; sourceTree = "<group>"; };
-		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBPerianPanePListGenerator.h; sourceTree = "<group>"; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2290B50087C00616865 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -942,6 +945,8 @@
 				11C85ED50A641E6400DF3D73 /* ff_MovieImportVersion.h */,
 				11C85ED60A641E6400DF3D73 /* ff_private.c */,
 				11C85ED70A641E6400DF3D73 /* ff_private.h */,
+				F52286240B50625E00F8CF7D /* bitstream_info.h */,
+				F52286250B50625E00F8CF7D /* bitstream_info.c */,
 			);
 			name = "File Import";
 			sourceTree = "<group>";
@@ -961,7 +966,7 @@
 			children = (
 				F5CFD2D60B5012A100616865 /* A52Codec.component */,
 				F5CFD2D80B5012A100616865 /* AC3MovieImport.component */,
-				F5CFD2DA0B5012A100616865 /* Preferences.app */,
+				F5CFD2DA0B5012A100616865 /* A52Preferences.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1176,10 +1181,10 @@
 			remoteRef = F5CFD2D70B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F5CFD2DA0B5012A100616865 /* Preferences.app */ = {
+		F5CFD2DA0B5012A100616865 /* A52Preferences.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = Preferences.app;
+			path = A52Preferences.app;
 			remoteRef = F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1318,6 +1323,7 @@
 				6116E6200B44A5B30020F1CE /* CADebugMacros.cpp in Sources */,
 				6116E6220B44A5BC0020F1CE /* CABundleLocker.cpp in Sources */,
 				61FD41330B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp in Sources */,
+				F52286260B50625E00F8CF7D /* bitstream_info.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1477,7 +1483,7 @@
 					ppc,
 				);
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = YES;
+				DEAD_CODE_STRIPPING = NO;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1517,7 +1523,7 @@
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
 				PREBINDING = NO;
-				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_NAME = Perian;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;

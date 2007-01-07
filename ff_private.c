@@ -31,6 +31,8 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <QuickTime/QuickTime.h>
 
+#include "bitstream_info.h"
+
 /* This routine checks if the system requirements are fullfilled */
 ComponentResult check_system()
 {
@@ -65,13 +67,14 @@ void register_parsers()
  *	  0: ok
  *	< 0: couldn't find a matching track
  */
-int prepare_track(AVFormatContext *ic, NCStream **out_map, Track targetTrack, Handle dataRef, OSType dataRefType)
+int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSType dataRefType)
 {
 	int j;
 	AVStream *st;
 	AVStream *outstr = NULL;
 	Media media;
 	NCStream *map = NULL;
+	AVFormatContext *ic = storage->format_context;
 	
 	/* If the track has already a media, return an err */
 	media = GetTrackMedia(targetTrack);
@@ -98,12 +101,12 @@ int prepare_track(AVFormatContext *ic, NCStream **out_map, Track targetTrack, Ha
 	map->str = outstr;
 	
 	if(st->codec->codec_type == CODEC_TYPE_VIDEO)
-		initialize_video_map(map, targetTrack, dataRef, dataRefType);
+		initialize_video_map(map, targetTrack, dataRef, dataRefType, storage->firstFrames + st->index);
 	else if(st->codec->codec_type == CODEC_TYPE_AUDIO)
-		initialize_audio_map(map, targetTrack, dataRef, dataRefType);
+		initialize_audio_map(map, targetTrack, dataRef, dataRefType, storage->firstFrames + st->index);
 	
 	/* return the map */
-	*out_map = map;
+	storage->stream_map = map;
 	
 	return 0;
 err:
@@ -113,7 +116,7 @@ err:
 } /* prepare_track() */
 
 /* Initializes the map & targetTrack to receive video data */
-void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType)
+void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame)
 {
 	Media media;
 	ImageDescriptionHandle imgHdl;
@@ -173,7 +176,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 } /* initialize_video_map() */
 
 /* Initializes the map & targetTrack to receive audio data */
-void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType)
+void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame)
 {
 	Media media;
 	SoundDescriptionHandle sndHdl;
@@ -242,16 +245,21 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	AudioChannelLayout acl;
 	int aclSize = 0;  //Set this if you intend to use it
 	memset(&acl, 0, sizeof(AudioChannelLayout));
-	if(asbd.mChannelsPerFrame > 2)
+
+	/* We have to parse the format */
+	int useDefault = 1;
+	if(asbd.mFormatID == 'ac-3' || asbd.mFormatID == 'ms \0')
 	{
-		/* We have to just guess what layout to use.  People, add them here: */
-		if((asbd.mFormatID == 'ac-3' || asbd.mFormatID == 'ms \0') && asbd.mChannelsPerFrame == 5)
+		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size))
 		{
-			/* likely really 5.1, but not absolutely sure.  guess it is, can't do any better */
-			asbd.mChannelsPerFrame++;
-			acl.mChannelLayoutTag = kAudioChannelLayoutTag_ITU_3_2_1;
+			useDefault = 0;
 			aclSize = sizeof(AudioChannelLayout);
 		}
+	}
+	if(useDefault && asbd.mChannelsPerFrame > 2)
+	{
+		acl.mChannelLayoutTag = GetDefaultChannelLayout();
+		aclSize = sizeof(AudioChannelLayout);
 	}
 	err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, NULL, 0, kQTSoundDescriptionKind_Movie_Version2, &sndHdl);
 	if(err) fprintf(stderr, "AVI IMPORTER: Error creating the sound description\n");
@@ -482,13 +490,14 @@ static void add_metadata(AVFormatContext *ic, Movie theMovie)
  * Return values:
  *	  0: ok
  */
-int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handle dataRef, OSType dataRefType)
+int prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OSType dataRefType)
 {
 	int j;
 	AVStream *st;
 	NCStream *map;
 	Track track;
 	Track first_audio_track = NULL;
+	AVFormatContext *ic = storage->format_context;
 	
 	/* make the stream map structure */
 	map = av_mallocz(ic->nb_streams * sizeof(NCStream));
@@ -501,10 +510,10 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 		
 		if(st->codec->codec_type == CODEC_TYPE_VIDEO) {
 			track = NewMovieTrack(theMovie, st->codec->width << 16, st->codec->height << 16, kNoVolume);
-			initialize_video_map(&map[j], track, dataRef, dataRefType);
+			initialize_video_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
 		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
 			track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
-			initialize_audio_map(&map[j], track, dataRef, dataRefType);
+			initialize_audio_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
 			
 			if (first_audio_track == NULL)
 				first_audio_track = track;
@@ -515,7 +524,7 @@ int prepare_movie(AVFormatContext *ic, NCStream **out_map, Movie theMovie, Handl
 	
     add_metadata(ic, theMovie);
     
-	*out_map = map;
+	storage->stream_map = map;
 	
 	return 0;
 } /* prepare_movie() */
@@ -541,6 +550,7 @@ int determine_header_offset(ff_global_ptr storage) {
 	}
 	else
 	{
+		int streamsRead = 0;
 		result = av_seek_frame(formatContext, -1, 0, 0);
 		if(result < 0) goto bail;
 		
@@ -553,7 +563,20 @@ int determine_header_offset(ff_global_ptr storage) {
 				break;
 			}
 		}
-		av_free_packet(&packet);
+		while(streamsRead < formatContext->nb_streams)
+		{
+			int streamIndex = packet.stream_index;
+			if(storage->firstFrames[streamIndex].size == 0)
+			{
+				memcpy(storage->firstFrames + streamIndex, &packet, sizeof(AVPacket));
+				streamsRead++;
+				if(streamsRead == formatContext->nb_streams)
+					break;
+			}
+			else
+				av_free_packet(&packet);
+			formatContext->iformat->read_packet(formatContext, &packet);
+		}
 		
 		// seek back to the beginning, otherwise av_read_frame-based decoding will skip a few packets.
 		av_seek_frame(formatContext, -1, 0, 0);

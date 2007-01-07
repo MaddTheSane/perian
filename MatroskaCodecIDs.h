@@ -52,6 +52,7 @@ typedef enum {
 ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
 ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd);
 FourCharCode GetFourCC(KaxTrackEntry *tr_entry);
+extern "C"{
 AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd);
-
+}
 #endif

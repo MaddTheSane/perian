@@ -417,10 +417,10 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	storage->movie = theMovie;
 	if(inFlags & movieImportMustUseTrack) {
 		storage->map_count = 1;
-		prepare_track(ic, &storage->stream_map, targetTrack, dataRef, dataRefType);
+		prepare_track(storage, targetTrack, dataRef, dataRefType);
 	} else {
 		storage->map_count = ic->nb_streams;
-		prepare_movie(ic, &storage->stream_map, theMovie, dataRef, dataRefType);
+		prepare_movie(storage, theMovie, dataRef, dataRefType);
 	}
 	
 	/* replace the SampleDescription if user called MovieImportSetSampleDescription() */
