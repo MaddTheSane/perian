@@ -72,6 +72,7 @@ public:
 	QTMutableSampleTableRef sampleTable;
 	QTSampleDescriptionID	qtSampleDesc;
 	SInt64					timecodeScale;
+	bool					seenFirstFrame;
 	
 private:
 	// adds an individual frame from a block group into the sample table if it exists,

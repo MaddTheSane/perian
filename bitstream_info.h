@@ -10,4 +10,12 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <QuickTime/QuickTime.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *acl, uint8_t *buffer, int buff_size);
+
+#ifdef __cplusplus
+}
+#endif

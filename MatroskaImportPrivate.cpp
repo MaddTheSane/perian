@@ -44,6 +44,7 @@
 #include "SubImport.h"
 #include "CommonUtils.h"
 #include "Codecprintf.h"
+#include "bitstream_info.h"
 
 using namespace std;
 using namespace libmatroska;
@@ -558,6 +559,7 @@ MatroskaTrack::MatroskaTrack()
 	sampleTable = NULL;
 	qtSampleDesc = 0;
 	timecodeScale = 1000000;
+	seenFirstFrame = false;
 }
 
 MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
@@ -579,6 +581,7 @@ MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
 	
 	qtSampleDesc = copy.qtSampleDesc;
 	timecodeScale = copy.timecodeScale;
+	seenFirstFrame = copy.seenFirstFrame;
 	
 	for (int i = 0; i < copy.lastFrames.size(); i++)
 		lastFrames.push_back(copy.lastFrames[i]);
@@ -597,6 +600,29 @@ void MatroskaTrack::AddBlock(KaxBlockGroup &blockGroup)
 {
 	KaxBlock & block = GetChild<KaxBlock>(blockGroup);
 	KaxBlockDuration & blockDuration = GetChild<KaxBlockDuration>(blockGroup);
+	
+	if (!seenFirstFrame) {
+		// we want to parse the first ac3 frame so that we can get a more correct channel layout
+		if ((*desc)->dataFormat == kAudioFormatAC3) {
+			AudioStreamBasicDescription asbd = {0};
+			AudioChannelLayout acl = {0};
+			
+			if (parse_ac3_bitstream(&asbd, &acl, block.GetBuffer(0).Buffer(), block.GetFrameSize(0))) {
+				// successful in parsing, so the acl and asbd are more correct than what we generated in 
+				// AddAudioTrack() so replace our sound description
+				SoundDescriptionHandle sndDesc = NULL;
+				asbd.mFormatID = kAudioFormatAC3;
+				
+				OSStatus err = QTSoundDescriptionCreate(&asbd, &acl, sizeof(AudioChannelLayout), NULL, 0, 
+														kQTSoundDescriptionKind_Movie_AnyVersion, &sndDesc);
+				if (err == noErr) {
+					DisposeHandle((Handle) desc);
+					desc = (SampleDescriptionHandle) sndDesc;
+				}
+			}
+		}
+		seenFirstFrame = true;
+	}
 	
 	for (int i = 0; i < lastFrames.size(); i++) {
 		// all the frames in the vector should have the same timecode at the moment
