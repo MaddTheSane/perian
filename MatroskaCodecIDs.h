@@ -27,6 +27,8 @@
 
 #include <QuickTime/QuickTime.h>
 #include <AudioToolbox/AudioToolbox.h>
+
+#ifdef __cplusplus
 #include <matroska/KaxTracks.h>
 #include <matroska/KaxTrackEntryData.h>
 #include "CodecIDs.h"
@@ -52,7 +54,13 @@ typedef enum {
 ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
 ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd);
 FourCharCode GetFourCC(KaxTrackEntry *tr_entry);
+
 extern "C"{
+#endif
+
 AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd);
+
+#ifdef __cplusplus
 }
+#endif
 #endif

@@ -32,6 +32,7 @@
 #include <QuickTime/QuickTime.h>
 
 #include "bitstream_info.h"
+#include "MatroskaCodecIDs.h"
 
 /* This routine checks if the system requirements are fullfilled */
 ComponentResult check_system()
@@ -258,7 +259,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	}
 	if(useDefault && asbd.mChannelsPerFrame > 2)
 	{
-		acl.mChannelLayoutTag = GetDefaultChannelLayout();
+		acl = GetDefaultChannelLayout(&asbd);
 		aclSize = sizeof(AudioChannelLayout);
 	}
 	err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, NULL, 0, kQTSoundDescriptionKind_Movie_Version2, &sndHdl);
