@@ -97,7 +97,7 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	uint8_t bitrate = ac3_bitratetab[frmsizecod >> 1];
 	int sample_rate = ac3_freqs[fscod];
 	
-	shift = 0
+	shift = 0;
 	if(bsid > 8)
 		shift = bsid - 8;
 	
