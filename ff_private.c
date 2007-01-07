@@ -249,7 +249,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 
 	/* We have to parse the format */
 	int useDefault = 1;
-	if(asbd.mFormatID == 'ac-3' || asbd.mFormatID == 'ms \0')
+	if(asbd.mFormatID == kAudioFormatAC3 || asbd.mFormatID == kAudioFormatAC3MS)
 	{
 		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size))
 		{

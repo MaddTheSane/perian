@@ -93,7 +93,7 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 		shift -= 2;
 	uint8_t lfe = (buffer[offset + 6] >> shift) & 0x01;
 	
-	//This is a valid frame!!!
+	/* This is a valid frame!!! */
 	uint8_t bitrate = ac3_bitratetab[frmsizecod >> 1];
 	int sample_rate = ac3_freqs[fscod];
 	
@@ -101,8 +101,14 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	if(bsid > 8)
 		shift = bsid - 8;
 	
+	/* Setup the AudioStreamBasicDescription and AudioChannelLayout */
+	memset(asbd, 0, sizeof(AudioStreamBasicDescription));
 	asbd->mSampleRate = sample_rate >> shift;
+	asbd->mFormatID = kAudioFormatAC3;
+	asbd->mFramesPerPacket = 1;
 	asbd->mChannelsPerFrame = nfchans_tbl[acmod] + lfe;
+	
+	memset(acl, 0, sizeof(AudioChannelLayout));
 	if(lfe)
 		acl->mChannelLayoutTag = ac3_layout_lfe[acmod];
 	else
