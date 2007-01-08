@@ -1059,7 +1059,7 @@
 			children = (
 				F5CFD2D60B5012A100616865 /* A52Codec.component */,
 				F5CFD2D80B5012A100616865 /* AC3MovieImport.component */,
-				F5CFD2DA0B5012A100616865 /* Preferences.app */,
+				F5CFD2DA0B5012A100616865 /* A52Preferences.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1299,10 +1299,10 @@
 			remoteRef = F5CFD2D70B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F5CFD2DA0B5012A100616865 /* Preferences.app */ = {
+		F5CFD2DA0B5012A100616865 /* A52Preferences.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = Preferences.app;
+			path = A52Preferences.app;
 			remoteRef = F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};

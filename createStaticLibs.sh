@@ -25,6 +25,12 @@ if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
 	echo "Static ffmpeg libs are up-to-date ; not rebuilding"
 else
 	echo "Static ffmpeg libs are out-of-date ; rebuilding"
+	
+	echo "Patching ffmpeg's broken linking"
+	cd "$SRCROOT"
+	svn revert ffmpeg/libavcodec/h264.c
+	patch -p0 < linkingFix.patch
+	
 	mkdir "$BUILT_PRODUCTS_DIR"
 	#######################
 	# Intel shlibs
