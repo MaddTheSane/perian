@@ -161,8 +161,10 @@ static offset_t dataref_seek(URLContext *h, offset_t pos, int whence)
 		case SEEK_END:
 			p->pos = p->size + pos;
 			break;
+		case AVSEEK_SIZE:
+			return p->size;
 		default:
-			break;
+			return -1;
 	}
 	
 	return p->pos;
