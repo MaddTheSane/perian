@@ -74,6 +74,21 @@
 /* Begin PBXBuildFile section */
 		112E0C820A6436BA00DB4C29 /* FFusionCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F560DF0003D61D0101ABA332 /* FFusionCodec.c */; };
 		113F589A0A6B091600509987 /* Codecprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 113F58990A6B091600509987 /* Codecprintf.c */; };
+		11629EE10B51E482006591C8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629EE00B51E482006591C8 /* main.m */; };
+		11629EEB0B51E4F1006591C8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
+		11629EF40B51E4FB006591C8 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
+		11629FD10B51E65F006591C8 /* NSString+extras.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629FD00B51E65F006591C8 /* NSString+extras.m */; };
+		1162A0540B51ECE1006591C8 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1162A0530B51ECE1006591C8 /* WebKit.framework */; };
+		116C42920B50463600FB0738 /* UpdateCheckerMainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */; };
+		116C42BC0B504C7C00FB0738 /* SUAppcast.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42BB0B504C7C00FB0738 /* SUAppcast.m */; };
+		116C42E80B504D2700FB0738 /* RSS.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E50B504D2700FB0738 /* RSS.m */; };
+		116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E70B504D2700FB0738 /* SUAppcastItem.m */; };
+		1184A2D30B50504900C8452A /* UpdateCheckerAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */; };
+		1184A3140B50548700C8452A /* SUUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A3130B50548700C8452A /* SUUtilities.m */; };
+		1184A3680B50586C00C8452A /* SUUpdateAlert.nib in Resources */ = {isa = PBXBuildFile; fileRef = 1184A3660B50586C00C8452A /* SUUpdateAlert.nib */; };
+		1184A3840B505A8800C8452A /* SUStatus.nib in Resources */ = {isa = PBXBuildFile; fileRef = 1184A3830B505A8800C8452A /* SUStatus.nib */; };
+		1184A38D0B505A9800C8452A /* SUStatusController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A38C0B505A9800C8452A /* SUStatusController.m */; };
+		1184A39E0B505AB600C8452A /* SUUpdateAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A39D0B505AB600C8452A /* SUUpdateAlert.m */; };
 		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA10A3CE8C10066D45F /* libavcodec.a */; };
 		11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA20A3CE8C10066D45F /* libavutil.a */; };
@@ -362,6 +377,31 @@
 		113F58980A6B091600509987 /* Codecprintf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Codecprintf.h; sourceTree = "<group>"; };
 		113F58990A6B091600509987 /* Codecprintf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Codecprintf.c; sourceTree = "<group>"; };
 		1156DBD80A3CE9F500963B0E /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
+		11629EE00B51E482006591C8 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		11629EEA0B51E4F1006591C8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		11629EF30B51E4FB006591C8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+		11629FCF0B51E65F006591C8 /* NSString+extras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+extras.h"; sourceTree = "<group>"; };
+		11629FD00B51E65F006591C8 /* NSString+extras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+extras.m"; sourceTree = "<group>"; };
+		1162A0530B51ECE1006591C8 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
+		116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PerianUpdateChecker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "PerianUpdateChecker-Info.plist"; sourceTree = "<group>"; };
+		116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateCheckerAppDelegate.h; sourceTree = "<group>"; };
+		116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateCheckerAppDelegate.m; sourceTree = "<group>"; };
+		116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = UpdateCheckerMainMenu.nib; path = "Update Checker Sources/UpdateCheckerMainMenu.nib"; sourceTree = "<group>"; };
+		116C42BA0B504C7C00FB0738 /* SUAppcast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUAppcast.h; sourceTree = "<group>"; };
+		116C42BB0B504C7C00FB0738 /* SUAppcast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUAppcast.m; sourceTree = "<group>"; };
+		116C42E40B504D2700FB0738 /* RSS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSS.h; sourceTree = "<group>"; };
+		116C42E50B504D2700FB0738 /* RSS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RSS.m; sourceTree = "<group>"; };
+		116C42E60B504D2700FB0738 /* SUAppcastItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUAppcastItem.h; sourceTree = "<group>"; };
+		116C42E70B504D2700FB0738 /* SUAppcastItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUAppcastItem.m; sourceTree = "<group>"; };
+		1184A3020B50548700C8452A /* SUUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUUtilities.h; sourceTree = "<group>"; };
+		1184A3130B50548700C8452A /* SUUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUUtilities.m; sourceTree = "<group>"; };
+		1184A3670B50586C00C8452A /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/SUUpdateAlert.nib; sourceTree = "<group>"; };
+		1184A3830B505A8800C8452A /* SUStatus.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = SUStatus.nib; sourceTree = "<group>"; };
+		1184A38B0B505A9800C8452A /* SUStatusController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUStatusController.h; sourceTree = "<group>"; };
+		1184A38C0B505A9800C8452A /* SUStatusController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUStatusController.m; sourceTree = "<group>"; };
+		1184A39C0B505AB600C8452A /* SUUpdateAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUUpdateAlert.h; path = ../SparklePlus/SUUpdateAlert.h; sourceTree = SOURCE_ROOT; };
+		1184A39D0B505AB600C8452A /* SUUpdateAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SUUpdateAlert.m; path = ../SparklePlus/SUUpdateAlert.m; sourceTree = SOURCE_ROOT; };
 		11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Perian-Info.plist"; sourceTree = "<group>"; };
 		11A70AC10A3D0105002058D4 /* Perian.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.component; sourceTree = BUILT_PRODUCTS_DIR; };
 		11C85ED30A641E6400DF3D73 /* ff_dataref.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_dataref.c; sourceTree = "<group>"; };
@@ -556,6 +596,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		116C42500B5041BD00FB0738 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11629EEB0B51E4F1006591C8 /* Cocoa.framework in Frameworks */,
+				11629EF40B51E4FB006591C8 /* AppKit.framework in Frameworks */,
+				1162A0540B51ECE1006591C8 /* WebKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		11A70ABF0A3D0105002058D4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -616,6 +666,7 @@
 				F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */,
 				11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */,
 				83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */,
+				116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */,
 			);
 			name = "ffmpeg DivX";
 			sourceTree = "<group>";
@@ -623,6 +674,9 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				1162A0530B51ECE1006591C8 /* WebKit.framework */,
+				11629EEA0B51E4F1006591C8 /* Cocoa.framework */,
+				11629EF30B51E4FB006591C8 /* AppKit.framework */,
 				F57755F40B51EB1800C7D833 /* CoreFoundation.framework */,
 				61CB11020ACDF37C007994BD /* libebml */,
 				61CB11720ACDF4BB007994BD /* libmatroska */,
@@ -642,6 +696,7 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */,
 				83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */,
 				83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */,
 				83D1D6D00B4C7AD200E09EC9 /* Frameworks */,
@@ -662,6 +717,7 @@
 		08FB77ADFE841716C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				116C425C0B50420D00FB0738 /* Update Checker Sources */,
 				83D1D6DF0B4C81E000E09EC9 /* PrefPane */,
 				F53AD5E20B2A4EC000D93AC9 /* FFMPEG */,
 				61D691460AC8E333000EFC7D /* Matroska */,
@@ -678,6 +734,40 @@
 			name = Source;
 			sourceTree = "<group>";
 		};
+		116C425C0B50420D00FB0738 /* Update Checker Sources */ = {
+			isa = PBXGroup;
+			children = (
+				1184A37C0B505A2E00C8452A /* Sparkle Files */,
+				116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */,
+				116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */,
+				11629EE00B51E482006591C8 /* main.m */,
+			);
+			path = "Update Checker Sources";
+			sourceTree = "<group>";
+		};
+		1184A37C0B505A2E00C8452A /* Sparkle Files */ = {
+			isa = PBXGroup;
+			children = (
+				11629FCF0B51E65F006591C8 /* NSString+extras.h */,
+				11629FD00B51E65F006591C8 /* NSString+extras.m */,
+				1184A39C0B505AB600C8452A /* SUUpdateAlert.h */,
+				1184A39D0B505AB600C8452A /* SUUpdateAlert.m */,
+				1184A38B0B505A9800C8452A /* SUStatusController.h */,
+				1184A38C0B505A9800C8452A /* SUStatusController.m */,
+				1184A3830B505A8800C8452A /* SUStatus.nib */,
+				1184A3660B50586C00C8452A /* SUUpdateAlert.nib */,
+				1184A3020B50548700C8452A /* SUUtilities.h */,
+				1184A3130B50548700C8452A /* SUUtilities.m */,
+				116C42E40B504D2700FB0738 /* RSS.h */,
+				116C42E50B504D2700FB0738 /* RSS.m */,
+				116C42E60B504D2700FB0738 /* SUAppcastItem.h */,
+				116C42E70B504D2700FB0738 /* SUAppcastItem.m */,
+				116C42BA0B504C7C00FB0738 /* SUAppcast.h */,
+				116C42BB0B504C7C00FB0738 /* SUAppcast.m */,
+			);
+			name = "Sparkle Files";
+			sourceTree = "<group>";
+		};
 		19C28FB4FE9D528D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -686,6 +776,7 @@
 				61CB11770ACDF4D8007994BD /* libmatroska.a */,
 				83D1D6C80B4C794700E09EC9 /* PerianPane.prefPane */,
 				F5CFD1B40B50009000616865 /* PerianPanePListGenerator */,
+				116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -966,7 +1057,7 @@
 			children = (
 				F5CFD2D60B5012A100616865 /* A52Codec.component */,
 				F5CFD2D80B5012A100616865 /* AC3MovieImport.component */,
-				F5CFD2DA0B5012A100616865 /* A52Preferences.app */,
+				F5CFD2DA0B5012A100616865 /* Preferences.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1043,6 +1134,23 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		116C42510B5041BD00FB0738 /* PerianUpdateChecker */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 116C42550B5041BF00FB0738 /* Build configuration list for PBXNativeTarget "PerianUpdateChecker" */;
+			buildPhases = (
+				116C424E0B5041BD00FB0738 /* Resources */,
+				116C424F0B5041BD00FB0738 /* Sources */,
+				116C42500B5041BD00FB0738 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PerianUpdateChecker;
+			productName = PerianUpdateChecker;
+			productReference = 116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */;
+			productType = "com.apple.product-type.application";
+		};
 		11A70AC00A3D0105002058D4 /* Perian */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */;
@@ -1143,6 +1251,13 @@
 			isa = PBXProject;
 			buildConfigurationList = 11D4ED470A3CE59A0066D45F /* Build configuration list for PBXProject "Perian" */;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+				en,
+			);
 			mainGroup = 089C166AFE841209C02AAC07 /* ffmpeg DivX */;
 			projectDirPath = "";
 			projectReferences = (
@@ -1162,6 +1277,7 @@
 				F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */,
 				F5CFD3BA0B50142100616865 /* Setup Build Directories */,
 				F5CFD2DB0B5012AA00616865 /* A52Codec */,
+				116C42510B5041BD00FB0738 /* PerianUpdateChecker */,
 			);
 		};
 /* End PBXProject section */
@@ -1181,16 +1297,26 @@
 			remoteRef = F5CFD2D70B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F5CFD2DA0B5012A100616865 /* A52Preferences.app */ = {
+		F5CFD2DA0B5012A100616865 /* Preferences.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = A52Preferences.app;
+			path = Preferences.app;
 			remoteRef = F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
+		116C424E0B5041BD00FB0738 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				116C42920B50463600FB0738 /* UpdateCheckerMainMenu.nib in Resources */,
+				1184A3680B50586C00C8452A /* SUUpdateAlert.nib in Resources */,
+				1184A3840B505A8800C8452A /* SUStatus.nib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		11A70ABD0A3D0105002058D4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1297,6 +1423,22 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		116C424F0B5041BD00FB0738 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				116C42BC0B504C7C00FB0738 /* SUAppcast.m in Sources */,
+				116C42E80B504D2700FB0738 /* RSS.m in Sources */,
+				116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */,
+				1184A2D30B50504900C8452A /* UpdateCheckerAppDelegate.m in Sources */,
+				1184A3140B50548700C8452A /* SUUtilities.m in Sources */,
+				1184A38D0B505A9800C8452A /* SUStatusController.m in Sources */,
+				1184A39E0B505AB600C8452A /* SUUpdateAlert.m in Sources */,
+				11629EE10B51E482006591C8 /* main.m in Sources */,
+				11629FD10B51E65F006591C8 /* NSString+extras.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		11A70ABE0A3D0105002058D4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1472,9 +1614,119 @@
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
+		1184A3660B50586C00C8452A /* SUUpdateAlert.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1184A3670B50586C00C8452A /* en */,
+			);
+			name = SUUpdateAlert.nib;
+			sourceTree = "<group>";
+		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		116C42560B5041BF00FB0738 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "PerianUpdateChecker-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianUpdateChecker;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
+			};
+			name = Development;
+		};
+		116C42570B5041BF00FB0738 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "PerianUpdateChecker-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianUpdateChecker;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		116C42580B5041BF00FB0738 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "PerianUpdateChecker-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianUpdateChecker;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
+			};
+			name = Default;
+		};
 		11A70AC90A3D0111002058D4 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2082,6 +2334,16 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		116C42550B5041BF00FB0738 /* Build configuration list for PBXNativeTarget "PerianUpdateChecker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				116C42560B5041BF00FB0738 /* Development */,
+				116C42570B5041BF00FB0738 /* Deployment */,
+				116C42580B5041BF00FB0738 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
 		11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
