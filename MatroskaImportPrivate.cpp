@@ -649,7 +649,6 @@ void MatroskaTrack::AddBlock(KaxBlockGroup &blockGroup)
 				// successful in parsing, so the acl and asbd are more correct than what we generated in 
 				// AddAudioTrack() so replace our sound description
 				SoundDescriptionHandle sndDesc = NULL;
-				asbd.mFormatID = kAudioFormatAC3;
 				
 				OSStatus err = QTSoundDescriptionCreate(&asbd, &acl, sizeof(AudioChannelLayout), NULL, 0, 
 														kQTSoundDescriptionKind_Movie_AnyVersion, &sndDesc);
