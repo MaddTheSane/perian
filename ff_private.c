@@ -949,25 +949,25 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 	return(result);
 } /* import_with_idle() */
 
-ComponentResult create_placeholder_track(ff_global_ptr storage, TimeValue duration, Handle dataRef, OSType dataRefType) {
+ComponentResult create_placeholder_track(Movie movie, Track *placeholderTrack, TimeValue duration, Handle dataRef, OSType dataRefType) {
 	SampleDescriptionHandle sdH;
 	Media placeholderMedia;
 	TimeScale movieTimeScale;
 	ComponentResult result = noErr;
 	
-	movieTimeScale = GetMovieTimeScale(storage->movie);
+	movieTimeScale = GetMovieTimeScale(movie);
 	
 	sdH = (SampleDescriptionHandle)NewHandleClear(sizeof(SampleDescription));
 	(*sdH)->descSize = sizeof(SampleDescription);
 	
-	storage->placeholderTrack = NewMovieTrack(storage->movie, 0, 0, kNoVolume);
-	placeholderMedia = NewTrackMedia(storage->placeholderTrack, BaseMediaType, movieTimeScale, dataRef, dataRefType);
+	*placeholderTrack = NewMovieTrack(movie, 0, 0, kNoVolume);
+	placeholderMedia = NewTrackMedia(*placeholderTrack, BaseMediaType, movieTimeScale, dataRef, dataRefType);
 	
 	result = AddMediaSampleReference(placeholderMedia, 0, 1, duration, sdH, 1, 0, NULL);
 	if(result != noErr)
 		goto bail;
 	
-	result = InsertMediaIntoTrack(storage->placeholderTrack, -1, 0, duration, fixed1);
+	result = InsertMediaIntoTrack(*placeholderTrack, -1, 0, duration, fixed1);
 	
 bail:
 	return(result);

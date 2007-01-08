@@ -34,6 +34,9 @@
 #include "SubImport.h"
 #include "Codecprintf.h"
 
+extern "C" 
+ComponentResult create_placeholder_track(Movie movie, Track *placeholderTrack, TimeValue duration, Handle dataRef, OSType dataRefType);
+
 using namespace libmatroska;
 
 #pragma mark- Component Dispatch
@@ -64,7 +67,7 @@ extern "C" {
 #pragma mark-
 
 // Component Open Request - Required
-pascal ComponentResult MatroskaImportOpen(MatroskaImport *store, ComponentInstance self)
+ComponentResult MatroskaImportOpen(MatroskaImport *store, ComponentInstance self)
 {
 	// Allocate memory for our globals, and inform the component manager that we've done so
 	store = new MatroskaImport(self);
@@ -78,7 +81,7 @@ pascal ComponentResult MatroskaImportOpen(MatroskaImport *store, ComponentInstan
 }
 
 // Component Close Request - Required
-pascal ComponentResult MatroskaImportClose(MatroskaImport *store, ComponentInstance self)
+ComponentResult MatroskaImportClose(MatroskaImport *store, ComponentInstance self)
 {
 	// Make sure to dealocate our storage
 	delete store;
@@ -87,7 +90,7 @@ pascal ComponentResult MatroskaImportClose(MatroskaImport *store, ComponentInsta
 }
 
 // Component Version Request - Required
-pascal ComponentResult MatroskaImportVersion(MatroskaImport *store)
+ComponentResult MatroskaImportVersion(MatroskaImport *store)
 {
 	return kMatroskaImportVersion;
 }
@@ -95,10 +98,8 @@ pascal ComponentResult MatroskaImportVersion(MatroskaImport *store)
 #pragma mark-
 
 // MovieImportFile
-pascal ComponentResult MatroskaImportFile(MatroskaImport *store, const FSSpec *theFile,
-										  Movie theMovie, Track targetTrack, Track *usedTrack,
-										  TimeValue atTime, TimeValue *durationAdded,
-										  long inFlags, long *outFlags)
+ComponentResult MatroskaImportFile(MatroskaImport *store, const FSSpec *theFile, Movie theMovie, Track targetTrack, 
+								   Track *usedTrack, TimeValue atTime, TimeValue *durationAdded, long inFlags, long *outFlags)
 {
 	OSErr err = noErr;
 	AliasHandle alias = NULL;
@@ -126,20 +127,15 @@ bail:
 }
 
 // MovieImportDataRef
-pascal ComponentResult MatroskaImportDataRef(MatroskaImport *store, Handle dataRef,
-											 OSType dataRefType, Movie theMovie,
-											 Track targetTrack, Track *usedTrack,
-											 TimeValue atTime, TimeValue *durationAdded,
-											 long inFlags, long *outFlags)
+ComponentResult MatroskaImportDataRef(MatroskaImport *store, Handle dataRef, OSType dataRefType, Movie theMovie, Track targetTrack,
+									  Track *usedTrack, TimeValue atTime, TimeValue *durationAdded, long inFlags, long *outFlags)
 {
 	return store->ImportDataRef(dataRef, dataRefType, theMovie, targetTrack,
 								usedTrack, atTime, durationAdded, inFlags, outFlags);
 }
 
 // MovieImportValidate
-pascal ComponentResult MatroskaImportValidate(MatroskaImport *store, 
-                                              const FSSpec *theFile, 
-                                              Handle theData, Boolean *valid)
+ComponentResult MatroskaImportValidate(MatroskaImport *store, const FSSpec *theFile, Handle theData, Boolean *valid)
 {
 	OSErr err = noErr;
 	AliasHandle alias = NULL; 
@@ -163,8 +159,7 @@ bail:
 }
 
 // MovieImportGetMIMETypeList
-pascal ComponentResult MatroskaImportGetMIMETypeList(MatroskaImport *store, 
-                                                     QTAtomContainer *retMimeInfo)
+ComponentResult MatroskaImportGetMIMETypeList(MatroskaImport *store, QTAtomContainer *retMimeInfo)
 {
 	// Note that GetComponentResource is only available in QuickTime 3.0 or later.
 	// However, it's safe to call it here because GetMIMETypeList is only defined in QuickTime 3.0 or later.
@@ -172,15 +167,29 @@ pascal ComponentResult MatroskaImportGetMIMETypeList(MatroskaImport *store,
 }
 
 // MovieImportValidateDataRef
-pascal ComponentResult MatroskaImportValidateDataRef(MatroskaImport *store, Handle dataRef, 
-                                                     OSType dataRefType, UInt8 *valid)
+ComponentResult MatroskaImportValidateDataRef(MatroskaImport *store, Handle dataRef, OSType dataRefType, UInt8 *valid)
 {
 	return store->ValidateDataRef(dataRef, dataRefType, valid);
 }
 
-pascal ComponentResult MatroskaImportIdle(MatroskaImport *store, long inFlags, long *outFlags)
+ComponentResult MatroskaImportIdle(MatroskaImport *store, long inFlags, long *outFlags)
 {
-	return noErr; //store->Idle(inFlags, outFlags);
+	return store->Idle(inFlags, outFlags);
+}
+
+ComponentResult MatroskaImportSetIdleManager(MatroskaImport *store, IdleManager im)
+{
+	return store->SetIdleManager(im);
+}
+
+ComponentResult MatroskaImportGetMaxLoadedTime(MatroskaImport *store, TimeValue *time)
+{
+	return store->GetMaxLoadedTime(time);
+}
+
+ComponentResult MatroskaImportGetLoadState(MatroskaImport *store, long *importerLoadState)
+{
+	return store->GetLoadState(importerLoadState);
 }
 
 
@@ -194,6 +203,8 @@ MatroskaImport::MatroskaImport(ComponentInstance self)
 	baseTrack = NULL;
 	timecodeScale = 1000000;
 	movieDuration = 0;
+	idleManager = NULL;
+	loadState = kMovieLoadStateLoading;
 	ioHandler = NULL;
 	aStream = NULL;
 	el_l0 = NULL;
@@ -230,6 +241,8 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 	if (inFlags & movieImportMustUseTrack)
 		return paramErr;
 	
+	loadState = kMovieLoadStateLoading;
+	
 	try {
 		if (!OpenFile())
 			// invalid file, validate should catch this
@@ -237,53 +250,49 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 		
 		SetupMovie();
 		
-		do {
-			KaxSegment & segment = *static_cast<KaxSegment *>(el_l0);
+		if (inFlags & movieImportWithIdle) {
+			create_placeholder_track(theMovie, &baseTrack, movieDuration, dataRef, dataRefType);
 			
+			// try to import one cluster so we have at least something
 			if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
 				int upperLevel = 0;
 				EbmlElement *dummyElt = NULL;
 				
 				el_l1->Read(*aStream, KaxCluster::ClassInfos.Context, upperLevel, dummyElt, true);
 				KaxCluster & cluster = *static_cast<KaxCluster *>(el_l1);
-				KaxClusterTimecode & clusterTime = GetChild<KaxClusterTimecode>(cluster);
 				
-				cluster.SetParent(segment);
-				cluster.InitTimecode(uint64(clusterTime), timecodeScale);
+				ImportCluster(cluster, true);
+			}
+			
+			if (!NextLevel1Element())
+				*outFlags |= movieImportResultComplete;
+			else
+				*outFlags |= movieImportResultNeedIdles;
+			
+			return noErr;
+		}
+		
+		do {
+			if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
+				int upperLevel = 0;
+				EbmlElement *dummyElt = NULL;
 				
-				KaxBlockGroup *blockGroup = FindChild<KaxBlockGroup>(cluster);
-				while (blockGroup->GetSize() > 0) {
-					KaxBlock & block = GetChild<KaxBlock>(*blockGroup);
-					block.SetParent(cluster);
-					
-					for (int i = 0; i < tracks.size(); i++) {
-						if (tracks[i].number == block.TrackNum())
-							tracks[i].AddBlock(*blockGroup);
-					}
-					
-					blockGroup = &GetNextChild<KaxBlockGroup>(cluster, *blockGroup);
-				}
+				el_l1->Read(*aStream, KaxCluster::ClassInfos.Context, upperLevel, dummyElt, true);
+				KaxCluster & cluster = *static_cast<KaxCluster *>(el_l1);
+				
+				ImportCluster(cluster, false);
 			}
 		} while (NextLevel1Element());
 		
 		// insert the a/v tracks' samples
-		for (int i = 0; i < tracks.size(); i++) {
-			if (tracks[i].type != track_subtitle) {
-				if (tracks[i].sampleTable) {
-					err = AddSampleTableToMedia(tracks[i].theMedia, tracks[i].sampleTable, 1, 
-												QTSampleTableGetNumberOfSamples(tracks[i].sampleTable), NULL);
-					if (err)
-						Codecprintf(NULL, "MKV: error adding sample table to media %d\n", err);
-				}
-				err = InsertMediaIntoTrack(tracks[i].theTrack, 0, 0, GetMediaDuration(tracks[i].theMedia), fixed1);
-				if (err)
-					Codecprintf(NULL, "MKV: error inserting media into track %d\n", err);
-			}
-		}
+		for (int i = 0; i < tracks.size(); i++)
+			tracks[i].AddSamplesToTrack();
 		
 	} catch (CRTError &err) {
 		return err.getError();
 	}
+	
+	loadState = kMovieLoadStateComplete;
 	
 	return noErr;
 }
@@ -302,5 +311,49 @@ ComponentResult MatroskaImport::ValidateDataRef(Handle dataRef, OSType dataRefTy
 		return err.getError();
 	}
 	
+	return noErr;
+}
+
+ComponentResult MatroskaImport::Idle(long inFlags, long *outFlags)
+{
+	if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
+		int upperLevel = 0;
+		EbmlElement *dummyElt = NULL;
+		
+		el_l1->Read(*aStream, KaxCluster::ClassInfos.Context, upperLevel, dummyElt, true);
+		KaxCluster & cluster = *static_cast<KaxCluster *>(el_l1);
+		
+		ImportCluster(cluster, true);
+	}
+	
+	if (!NextLevel1Element()) {
+		if (baseTrack)
+			DisposeMovieTrack(baseTrack);
+		*outFlags |= movieImportResultComplete;
+		loadState = kMovieLoadStateComplete;
+	}
+	
+	return noErr;
+}
+
+ComponentResult MatroskaImport::SetIdleManager(IdleManager im)
+{
+	idleManager = im;
+	return noErr;
+}
+
+ComponentResult MatroskaImport::GetMaxLoadedTime(TimeValue *time)
+{
+	*time = 0;
+	for (int i = 0; i < tracks.size(); i++) {
+		if (tracks[i].maxLoadedTime > *time)
+			*time = tracks[i].maxLoadedTime;
+	}
+	return noErr;
+}
+
+ComponentResult MatroskaImport::GetLoadState(long *importerLoadState)
+{
+	*importerLoadState = loadState;
 	return noErr;
 }

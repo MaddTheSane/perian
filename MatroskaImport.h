@@ -64,6 +64,10 @@ public:
 	// the media otherwise. If this track type is subtitle, also inserts it into the track.
 	void AddBlock(KaxBlockGroup &blockGroup);
 	
+	// this adds all the samples added through AddBlock() to the track that aren't already
+	// added, e.g. from a previous call to AddSamplesToTrack()
+	void AddSamplesToTrack();
+	
 	UInt16					number;
 	UInt8					type;
 	Track					theTrack;
@@ -72,18 +76,24 @@ public:
 	QTMutableSampleTableRef sampleTable;
 	QTSampleDescriptionID	qtSampleDesc;
 	SInt64					timecodeScale;
-	bool					seenFirstFrame;
+	TimeValue64				maxLoadedTime;
 	
 private:
 	// adds an individual frame from a block group into the sample table if it exists,
 	// the media otherwise, and into the track if the track is a subtitle track.
-	SInt64 AddFrame(MatroskaFrame &frame);
+	void AddFrame(MatroskaFrame &frame);
 	
 	// Since the duration in Matroska files is generally rather unreliable, rely only on
 	// the difference in timestamps between two frames. Thus, AddBlock() buffers frames
 	// from one block group until the next block group is found to set the duration of the
 	// previous ones to be the difference in timestamps.
 	vector<MatroskaFrame>	lastFrames;
+	bool					seenFirstFrame;
+	
+	// this is the first sample number (if sample table) or sample time that we haven't 
+	// yet added to the media/track. A value of -1 means the value is invalid/unset.
+	SInt64					firstSample;
+	SInt64					amountToAdd;	// num samples if sampleTable, duration otherwise
 };
 
 
@@ -106,6 +116,18 @@ public:
 	
 	// MatroskaImportValidateDataRef()
 	ComponentResult ValidateDataRef(Handle dataRef, OSType dataRefType, UInt8 *valid);
+	
+	// MatroskaImportIdle()
+	ComponentResult Idle(long inFlags, long *outFlags);
+	
+	// MatroskaImportSetIdleManager()
+	ComponentResult SetIdleManager(IdleManager im);
+	
+	// MatroskaImportGetMaxLoadedTime()
+	ComponentResult GetMaxLoadedTime(TimeValue *time);
+	
+	// MatroskaImportGetLoadState()
+	ComponentResult GetLoadState(long *importerLoadState);
 	
 	// we need to get our component instance to get our mime type resource
 	ComponentInstance Component() { return self; }
@@ -144,6 +166,9 @@ private:
 	// chapter track, since QT doesn't support chapter nesting.
 	void AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack);
 	
+	// assumes cluster has been read already, and cycles through the contained blocks and
+	// adds the frames to the media/sample table, and to the track if addToTrack is true
+	void ImportCluster(KaxCluster &cluster, bool addToTrack);
 		
 	ComponentInstance		self;
 	Handle					dataRef;
@@ -155,6 +180,9 @@ private:
 											// of a movie while idle importing
 	SInt64					timecodeScale;
 	TimeValue64				movieDuration;	// in the timescale of timecodeScale
+	
+	IdleManager				idleManager;
+	long					loadState;
 	
 	DataHandlerCallback		*ioHandler;
 	EbmlStream				*aStream;

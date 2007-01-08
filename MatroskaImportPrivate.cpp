@@ -548,6 +548,37 @@ void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
 	}
 }
 
+void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
+{
+	KaxSegment & segment = *static_cast<KaxSegment *>(el_l0);
+	KaxClusterTimecode & clusterTime = GetChild<KaxClusterTimecode>(cluster);
+				
+	cluster.SetParent(segment);
+	cluster.InitTimecode(uint64(clusterTime), timecodeScale);
+	
+	KaxBlockGroup *blockGroup = FindChild<KaxBlockGroup>(cluster);
+	while (blockGroup->GetSize() > 0) {
+		KaxBlock & block = GetChild<KaxBlock>(*blockGroup);
+		block.SetParent(cluster);
+		
+		for (int i = 0; i < tracks.size(); i++) {
+			if (tracks[i].number == block.TrackNum()) {
+				tracks[i].AddBlock(*blockGroup);
+				break;
+			}
+		}
+		
+		blockGroup = &GetNextChild<KaxBlockGroup>(cluster, *blockGroup);
+	}
+	
+	if (addToTrack) {
+		for (int i = 0; i < tracks.size(); i++)
+			tracks[i].AddSamplesToTrack();
+		
+		loadState = kMovieLoadStatePlayable;
+	}
+}
+
 
 MatroskaTrack::MatroskaTrack()
 {
@@ -559,7 +590,10 @@ MatroskaTrack::MatroskaTrack()
 	sampleTable = NULL;
 	qtSampleDesc = 0;
 	timecodeScale = 1000000;
+	maxLoadedTime = 0;
 	seenFirstFrame = false;
+	firstSample = -1;
+	amountToAdd = 0;
 }
 
 MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
@@ -581,10 +615,14 @@ MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
 	
 	qtSampleDesc = copy.qtSampleDesc;
 	timecodeScale = copy.timecodeScale;
-	seenFirstFrame = copy.seenFirstFrame;
+	maxLoadedTime = copy.maxLoadedTime;
 	
 	for (int i = 0; i < copy.lastFrames.size(); i++)
 		lastFrames.push_back(copy.lastFrames[i]);
+	
+	seenFirstFrame = copy.seenFirstFrame;
+	firstSample = copy.firstSample;
+	amountToAdd = copy.amountToAdd;
 }
 
 MatroskaTrack::~MatroskaTrack()
@@ -653,7 +691,7 @@ void MatroskaTrack::AddBlock(KaxBlockGroup &blockGroup)
 	}
 }
 
-SInt64 MatroskaTrack::AddFrame(MatroskaFrame &frame)
+void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 {
 	ComponentResult err = noErr;
 	SInt64 sampleNum = 0;
@@ -664,6 +702,8 @@ SInt64 MatroskaTrack::AddFrame(MatroskaFrame &frame)
 											   0, 1, frame.flags, qtSampleDesc, &sampleNum);
 		if (err)
 			Codecprintf(NULL, "MKV: error adding sample reference to table %d\n", err);
+		
+		amountToAdd++;
 	} else {
 		SampleReference64Record sample;
 		sample.dataOffset = SInt64ToWide(frame.offset);
@@ -676,6 +716,8 @@ SInt64 MatroskaTrack::AddFrame(MatroskaFrame &frame)
 		sampleNum = sampleTime;
 		if (err)
 			Codecprintf(NULL, "MKV: error adding sample reference to media %d\n", err);
+		
+		amountToAdd += frame.duration;
 	}
 	
 	// add to track immediately if subtitle, otherwise we let it be added elsewhere when we can do several at once
@@ -693,5 +735,34 @@ SInt64 MatroskaTrack::AddFrame(MatroskaFrame &frame)
 			Codecprintf(NULL, "MKV: error adding subtitle media into track %d\n", err);
 	}
 	
-	return sampleNum;
+	if (firstSample == -1)
+		firstSample = sampleNum;
+}
+
+void MatroskaTrack::AddSamplesToTrack()
+{
+	OSStatus err = noErr;
+	
+	if (type == track_subtitle)
+		// subtitle tracks add the media in AddFrame() since there's gaps
+		return;
+	
+	if (sampleTable) {
+		TimeValue64 sampleTime64;
+		TimeValue mediaDuration = GetMediaDuration(theMedia);
+		
+		err = AddSampleTableToMedia(theMedia, sampleTable, firstSample, amountToAdd, &sampleTime64);
+		if (err)
+			Codecprintf(NULL, "MKV: error adding sample table to media %d\n", err);
+		
+		firstSample = sampleTime64;
+		amountToAdd = GetMediaDuration(theMedia) - mediaDuration;
+	}
+	err = InsertMediaIntoTrack(theTrack, -1, firstSample, amountToAdd, fixed1);
+	if (err)
+		Codecprintf(NULL, "MKV: error inserting media into track %d\n", err);
+	
+	maxLoadedTime += amountToAdd;
+	firstSample = -1;
+	amountToAdd = 0;
 }

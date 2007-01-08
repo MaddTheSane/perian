@@ -100,7 +100,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 int determine_header_offset(ff_global_ptr storage);
 int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDuration);
 ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames);
-ComponentResult create_placeholder_track(ff_global_ptr storage, TimeValue duration, Handle dataRef, OSType dataRefType);
+ComponentResult create_placeholder_track(Movie movie, Track *placeholderTrack, TimeValue duration, Handle dataRef, OSType dataRefType);
 void send_movie_changed_notification(Movie movie);
 
 OSType map_video_codec_to_mov_tag(enum CodecID codec_id);

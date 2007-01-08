@@ -486,7 +486,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 			*addedDuration = movieTimeScale * ic->duration / AV_TIME_BASE;
 			
 			//create a placeholder track so that progress displays correctly.
-			create_placeholder_track(storage, *addedDuration, dataRef, dataRefType);
+			create_placeholder_track(storage->movie, &storage->placeholderTrack, *addedDuration, dataRef, dataRefType);
 			
 			//give the data handler a hint as to how fast we need the data.
 			//suggest a speed that's faster than the bare minimum.
