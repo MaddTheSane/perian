@@ -950,7 +950,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 } /* import_with_idle() */
 
 ComponentResult create_placeholder_track(Movie movie, Track *placeholderTrack, TimeValue duration, Handle dataRef, OSType dataRefType) {
-	SampleDescriptionHandle sdH;
+	SampleDescriptionHandle sdH = NULL;
 	Media placeholderMedia;
 	TimeScale movieTimeScale;
 	ComponentResult result = noErr;
@@ -970,6 +970,8 @@ ComponentResult create_placeholder_track(Movie movie, Track *placeholderTrack, T
 	result = InsertMediaIntoTrack(*placeholderTrack, -1, 0, duration, fixed1);
 	
 bail:
+	if (sdH)
+		DisposeHandle((Handle) sdH);
 	return(result);
 }
 
