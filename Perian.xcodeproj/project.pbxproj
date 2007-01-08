@@ -215,9 +215,9 @@
 		8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */ = {isa = PBXBuildFile; fileRef = 8F483B8B0A642886002CCA73 /* PerianAviImporter.r */; };
 		F52286260B50625E00F8CF7D /* bitstream_info.c in Sources */ = {isa = PBXBuildFile; fileRef = F52286250B50625E00F8CF7D /* bitstream_info.c */; };
 		F53E18E50B4F483C003A0471 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53E18E40B4F483C003A0471 /* Security.framework */; };
+		F57755F50B51EB1800C7D833 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
 		F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		F5CFD1C10B5000DF00616865 /* GBPerianPanePListGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */; };
-		F5CFD22A0B50087C00616865 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5CFD2290B50087C00616865 /* Foundation.framework */; };
 		F5CFD3B20B5013EA00616865 /* A52Codec.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D60B5012A100616865 /* A52Codec.component */; };
 		F5CFD3B70B5013EC00616865 /* AC3MovieImport.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D80B5012A100616865 /* AC3MovieImport.component */; };
 /* End PBXBuildFile section */
@@ -548,10 +548,10 @@
 		F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodecDispatch.h; sourceTree = "<group>"; };
 		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFusionCodec.c; sourceTree = "<group>"; };
 		F560DF0203D622D001ABA332 /* FFusionCodec.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = FFusionCodec.r; sourceTree = "<group>"; };
+		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBPerianPanePListGenerator.h; sourceTree = "<group>"; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
-		F5CFD2290B50087C00616865 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -592,6 +592,7 @@
 			files = (
 				83D1D6CF0B4C7AC400E09EC9 /* PreferencePanes.framework in Frameworks */,
 				F53E18E50B4F483C003A0471 /* Security.framework in Frameworks */,
+				F57755F50B51EB1800C7D833 /* CoreFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -599,7 +600,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F5CFD22A0B50087C00616865 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -623,7 +623,7 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				F5CFD2290B50087C00616865 /* Foundation.framework */,
+				F57755F40B51EB1800C7D833 /* CoreFoundation.framework */,
 				61CB11020ACDF37C007994BD /* libebml */,
 				61CB11720ACDF4BB007994BD /* libmatroska */,
 				8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */,
