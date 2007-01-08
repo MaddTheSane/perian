@@ -62,7 +62,7 @@ fi
 	if [ `arch` = ppc ] ; then
 		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --extra-cflags='-gdwarf-2'
 	else
-		"$SRCROOT/ffmpeg/configure" --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2' $extraConfigureOptions $generalConfigureOptions
+		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2' $extraConfigureOptions $generalConfigureOptions
 	fi
         make -C libavutil   depend
         make -C libavcodec  depend
