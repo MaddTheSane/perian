@@ -54,10 +54,8 @@
 	NSString *currentSystemVersion = [[[NSDictionary dictionaryWithContentsOfFile:versionPlistPath] objectForKey:@"ProductVersion"] retain];
 
 	BOOL updateAvailable = SUStandardVersionComparison([latest minimumSystemVersion], currentSystemVersion);
-	NSLog([latest fileVersion]);
-	NSLog(SUHostAppVersion());
+#warning This should compare against the Perian.prefpane version, not the SUHostAppVersion, but I didn't do that yet - RAF
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], SUHostAppVersion()) == NSOrderedAscending));
-	NSLog(@"<%@>",[[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY]);
 	NSString *skippedVersion = [[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY];
 	if (updateAvailable && (!skippedVersion || 
 		(skippedVersion && ![skippedVersion isEqualToString:[latest versionString]]))) {
@@ -153,7 +151,7 @@
 	downloader = nil;
 	NSLog(@"EXTRACT!");
 	NSBeep();
-//	[self extractUpdate];
+#warning we should actually extract and not do this bogosity.
 }	
 
 - (BOOL)showsReleaseNotes
