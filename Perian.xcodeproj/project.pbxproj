@@ -88,7 +88,6 @@
 		1184A3680B50586C00C8452A /* SUUpdateAlert.nib in Resources */ = {isa = PBXBuildFile; fileRef = 1184A3660B50586C00C8452A /* SUUpdateAlert.nib */; };
 		1184A3840B505A8800C8452A /* SUStatus.nib in Resources */ = {isa = PBXBuildFile; fileRef = 1184A3830B505A8800C8452A /* SUStatus.nib */; };
 		1184A38D0B505A9800C8452A /* SUStatusController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A38C0B505A9800C8452A /* SUStatusController.m */; };
-		1184A39E0B505AB600C8452A /* SUUpdateAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A39D0B505AB600C8452A /* SUUpdateAlert.m */; };
 		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA10A3CE8C10066D45F /* libavcodec.a */; };
 		11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA20A3CE8C10066D45F /* libavutil.a */; };
@@ -101,6 +100,7 @@
 		11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */; };
 		11C85FE60A64314500DF3D73 /* FFusionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = F560DF0203D622D001ABA332 /* FFusionCodec.r */; };
 		11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */; };
+		11F28DAD0B52EB75000AF78C /* SUUpdateAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
 		6116E5530B43C27B0020F1CE /* ACSimpleCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E53E0B43C27B0020F1CE /* ACSimpleCodec.cpp */; };
@@ -401,8 +401,6 @@
 		1184A3830B505A8800C8452A /* SUStatus.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = SUStatus.nib; sourceTree = "<group>"; };
 		1184A38B0B505A9800C8452A /* SUStatusController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUStatusController.h; sourceTree = "<group>"; };
 		1184A38C0B505A9800C8452A /* SUStatusController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUStatusController.m; sourceTree = "<group>"; };
-		1184A39C0B505AB600C8452A /* SUUpdateAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SUUpdateAlert.h; path = ../SparklePlus/SUUpdateAlert.h; sourceTree = SOURCE_ROOT; };
-		1184A39D0B505AB600C8452A /* SUUpdateAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SUUpdateAlert.m; path = ../SparklePlus/SUUpdateAlert.m; sourceTree = SOURCE_ROOT; };
 		11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Perian-Info.plist"; sourceTree = "<group>"; };
 		11A70AC10A3D0105002058D4 /* Perian.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.component; sourceTree = BUILT_PRODUCTS_DIR; };
 		11C85ED30A641E6400DF3D73 /* ff_dataref.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_dataref.c; sourceTree = "<group>"; };
@@ -415,6 +413,8 @@
 		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = build/Universal/libavcodec.a; sourceTree = "<group>"; };
 		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = build/Universal/libavutil.a; sourceTree = "<group>"; };
 		11D4EFA30A3CE8C10066D45F /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpostproc.a; path = build/Universal/libpostproc.a; sourceTree = "<group>"; };
+		11F28DAB0B52EB75000AF78C /* SUUpdateAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUUpdateAlert.h; sourceTree = "<group>"; };
+		11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUUpdateAlert.m; sourceTree = "<group>"; };
 		6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACBaseCodec.cpp; sourceTree = "<group>"; };
 		6116E5380B43C27B0020F1CE /* ACBaseCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACBaseCodec.h; sourceTree = "<group>"; };
 		6116E5390B43C27B0020F1CE /* ACCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACCodec.cpp; sourceTree = "<group>"; };
@@ -752,8 +752,8 @@
 			children = (
 				11629FCF0B51E65F006591C8 /* NSString+extras.h */,
 				11629FD00B51E65F006591C8 /* NSString+extras.m */,
-				1184A39C0B505AB600C8452A /* SUUpdateAlert.h */,
-				1184A39D0B505AB600C8452A /* SUUpdateAlert.m */,
+				11F28DAB0B52EB75000AF78C /* SUUpdateAlert.h */,
+				11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */,
 				1184A38B0B505A9800C8452A /* SUStatusController.h */,
 				1184A38C0B505A9800C8452A /* SUStatusController.m */,
 				1184A3830B505A8800C8452A /* SUStatus.nib */,
@@ -1059,7 +1059,7 @@
 			children = (
 				F5CFD2D60B5012A100616865 /* A52Codec.component */,
 				F5CFD2D80B5012A100616865 /* AC3MovieImport.component */,
-				F5CFD2DA0B5012A100616865 /* A52Preferences.app */,
+				F5CFD2DA0B5012A100616865 /* Preferences.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1299,10 +1299,10 @@
 			remoteRef = F5CFD2D70B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F5CFD2DA0B5012A100616865 /* A52Preferences.app */ = {
+		F5CFD2DA0B5012A100616865 /* Preferences.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = A52Preferences.app;
+			path = Preferences.app;
 			remoteRef = F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1435,9 +1435,9 @@
 				1184A2D30B50504900C8452A /* UpdateCheckerAppDelegate.m in Sources */,
 				1184A3140B50548700C8452A /* SUUtilities.m in Sources */,
 				1184A38D0B505A9800C8452A /* SUStatusController.m in Sources */,
-				1184A39E0B505AB600C8452A /* SUUpdateAlert.m in Sources */,
 				11629EE10B51E482006591C8 /* main.m in Sources */,
 				11629FD10B51E65F006591C8 /* NSString+extras.m in Sources */,
+				11F28DAD0B52EB75000AF78C /* SUUpdateAlert.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
