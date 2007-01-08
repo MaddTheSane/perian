@@ -1,5 +1,4 @@
 #import "CPFPerianPrefPaneController.h"
-#import <Security/Security.h>
 #include <sys/stat.h>
 
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
@@ -30,78 +29,73 @@
 		CFPreferencesSetAppValue(key, kCFBooleanFalse, appID);
 }
 
-- (BOOL)systemInstalled
+- (NSString *)installationBasePath:(BOOL)userInstallation
 {
-	NSString *myPath = [[self bundle] bundlePath];
-	
-	if([myPath hasPrefix:NSHomeDirectory()])
-		return NO;
-	return YES;
+	if(userInstallation)
+		return NSHomeDirectory();
+	return [NSString stringWithString:@"/"];
 }
 
-- (NSString *)quickTimeComponentDir
+- (NSString *)quickTimeComponentDir:(BOOL)userInstallation
 {
-	NSString *basePath = nil;
-	
-	if(![self systemInstalled])
-		basePath = NSHomeDirectory();
-	else
-		basePath = [NSString stringWithString:@"/"];
-	
-	return [basePath stringByAppendingPathComponent:@"Library/QuickTime"];
+	return [[self installationBasePath:userInstallation] stringByAppendingPathComponent:@"Library/QuickTime"];
 }
 
-- (NSString *)coreAudioComponentDir
+- (NSString *)coreAudioComponentDir:(BOOL)userInstallation
 {
-	NSString *basePath = nil;
-	
-	if(![self systemInstalled])
-		basePath = NSHomeDirectory();
-	else
-		basePath = [NSString stringWithString:@"/"];
-	
-	return [basePath stringByAppendingPathComponent:@"Library/Audio/Plug-Ins/Components"];
+	return [[self installationBasePath:userInstallation] stringByAppendingPathComponent:@"Library/Audio/Plug-Ins/Components"];
 }
 
-- (NSString *)frameworkComponentDir
+- (NSString *)frameworkComponentDir:(BOOL)userInstallation
 {
-	NSString *basePath = nil;
-	
-	if(![self systemInstalled])
-		basePath = NSHomeDirectory();
-	else
-		basePath = [NSString stringWithString:@"/"];
-	
-	return [basePath stringByAppendingPathComponent:@"Library/Frameworks"];
+	return [[self installationBasePath:userInstallation] stringByAppendingPathComponent:@"Library/Frameworks"];
 }
 
-- (InstallStatus)installStatusForComponent:(NSString *)component type:(ComponentType)type withMyVersion:(NSString *)myVersion
+- (NSString *)basePathForType:(ComponentType)type user:(BOOL)userInstallation
 {
 	NSString *path = nil;
 	
 	switch(type)
 	{
 		case ComponentTypeCoreAudio:
-			path = [self coreAudioComponentDir];
+			path = [self coreAudioComponentDir:userInstallation];
 			break;
 		case ComponentTypeQuickTime:
-			path = [self quickTimeComponentDir];
+			path = [self quickTimeComponentDir:userInstallation];
 			break;
 		case ComponentTypeFramework:
-			path = [self frameworkComponentDir];
+			path = [self frameworkComponentDir:userInstallation];
 			break;
 	}
-	path = [path stringByAppendingPathComponent:component];
+	return path;
+}
+
+- (InstallStatus)installStatusForComponent:(NSString *)component type:(ComponentType)type withMyVersion:(NSString *)myVersion
+{
+	NSString *path = nil;
+	InstallStatus ret = InstallStatusNotInstalled;
+	
+	path = [[self basePathForType:type user:userInstalled] stringByAppendingPathComponent:component];
 	
 	NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
+	if(infoDict != nil)
+	{
+		NSString *currentVersion = [infoDict objectForKey:BundleVersionKey];
+		if([currentVersion compare:myVersion] == NSOrderedAscending)
+			ret = InstallStatusOutdated;
+		
+		ret = InstallStatusInstalled;		
+	}
+	
+	/* Check other installation type */
+	path = [[self basePathForType:type user:!userInstalled] stringByAppendingPathComponent:component];
+	
+	infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
 	if(infoDict == nil)
-		return InstallStatusNotInstalled;
+		/* Above result is all there is */
+		return ret;
 	
-	NSString *currentVersion = [infoDict objectForKey:BundleVersionKey];
-	if([currentVersion compare:myVersion] == NSOrderedAscending)
-		return InstallStatusOutdated;
-	
-	return InstallStatusInstalled;
+	return setWrongLocationInstalled(ret);
 }
 
 #pragma mark Preference Pane Support
@@ -115,6 +109,13 @@
 		
 		perianAppID = CFSTR("org.perian.perian");
 		a52AppID = CFSTR("com.cod3r.a52codec");
+		
+		NSString *myPath = [[self bundle] bundlePath];
+		
+		if([myPath hasPrefix:@"/Library"])
+			userInstalled = NO;
+		else
+			userInstalled = YES;
     }
     
     return self;
@@ -124,12 +125,12 @@
 {
 	NSDictionary *infoDict = [[self bundle] infoDictionary];
 	installStatus = [self installStatusForComponent:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey]];
-	if(installStatus == InstallStatusNotInstalled)
+	if(currentInstallStatus(installStatus) == InstallStatusNotInstalled)
 	{
 		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is not Installed", @"")];
 		[button_install setTitle:NSLocalizedString(@"Install Perian", @"")];
 	}
-	else if(installStatus == InstallStatusOutdated)
+	else if(currentInstallStatus(installStatus) == InstallStatusOutdated)
 	{
 		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed, but Outdated", @"")];
 		[button_install setTitle:NSLocalizedString(@"Update Perian", @"")];
@@ -150,19 +151,30 @@
 			}
 			switch(installStatus)
 			{
+				case InstallStatusInstalledInWrongLocation:
 				case InstallStatusNotInstalled:
 					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed, but parts are Not Installed", @"")];
 					[button_install setTitle:NSLocalizedString(@"Install Perian", @"")];
 					break;
+				case InstallStatusOutdatedWithAnotherInWrongLocation:
 				case InstallStatusOutdated:
 					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed, but parts are Outdated", @"")];
 					[button_install setTitle:NSLocalizedString(@"Update Perian", @"")];
+					break;
+				case InstallStatusInstalledInBothLocations:
+					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed Twice", @"")];
+					[button_install setTitle:NSLocalizedString(@"Correct Installation", @"")];
 					break;
 				case InstallStatusInstalled:
 					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed", @"")];
 					[button_install setTitle:NSLocalizedString(@"Uninstall Perian", @"")];
 					break;
 			}
+		}
+		else if(isWrongLocationInstalled(installStatus))
+		{
+			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed Twice", @"")];
+			[button_install setTitle:NSLocalizedString(@"Correct Installation", @"")];
 		}
 		else
 		{
@@ -193,6 +205,9 @@
 	[perianForumURL release];
 	[perianDonateURL release];
 	[perianWebSiteURL release];
+	if(auth != nil)
+		AuthorizationFree(auth, 0);
+	[errorString release];
 	[super dealloc];
 }
 
@@ -204,13 +219,19 @@
 	BOOL ret = NO;
 	struct stat sb;
 	if(stat([destination fileSystemRepresentation], &sb) != 0)
+	{
+		[errorString appendFormat:NSLocalizedString(@"No such directory %@\n", @""), destination];
 		return FALSE;
+	}
 	
 	char *buf = NULL;
 	asprintf(&buf,
 			 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"");
 	if(!buf)
+	{
+		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for extraction command\n", @"")];
 		return FALSE;
+	}
 	
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
@@ -218,6 +239,8 @@
 	int status = system(buf);
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		ret = YES;
+	else
+		[errorString appendFormat:NSLocalizedString(@"Extraction for %@ failed\n", @""), archivePath];
 
 	free(buf);
 	unsetenv("SRC_ARCHIVE");
@@ -225,7 +248,7 @@
 	return ret;
 }
 
-- (BOOL)_authenticatedExtractArchivePath:(NSString *)archivePath toDestination:(NSString *)destination finalPath:(NSString *)finalPath authorization:(AuthorizationRef)auth
+- (BOOL)_authenticatedExtractArchivePath:(NSString *)archivePath toDestination:(NSString *)destination finalPath:(NSString *)finalPath
 {
 	BOOL ret = NO, oldExist = NO;
 	struct stat sb;
@@ -233,7 +256,10 @@
 		oldExist = YES;
 	
 	if(stat([destination fileSystemRepresentation], &sb) != 0)
+	{
+		[errorString appendFormat:NSLocalizedString(@"No such directory %@\n", @""), destination];
 		return FALSE;
+	}
 	
 	char *buf = NULL;
 	if(oldExist)
@@ -249,7 +275,10 @@
 				 "chown -R %d:%d \"$DST_COMPONENT\"",
 				 sb.st_uid, sb.st_gid);
 	if(!buf)
+	{
+		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for extraction command\n", @"")];
 		return FALSE;
+	}
 	
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
 	setenv("DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
@@ -263,7 +292,12 @@
 		int pid = wait(&status);
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
+		else
+			[errorString appendFormat:NSLocalizedString(@"Extraction for %@ failed\n", @""), archivePath];
 	}
+	else
+		[errorString appendFormat:NSLocalizedString(@"Authentication failed for extraction for %@\n", @""), archivePath];
+	
 	free(buf);
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("$DST_COMPONENT");
@@ -272,18 +306,22 @@
 	return ret;
 }
 
-- (BOOL)_authenticatedRemove:(NSString *)componentPath authorization:(AuthorizationRef)auth
+- (BOOL)_authenticatedRemove:(NSString *)componentPath
 {
 	BOOL ret = NO;
 	struct stat sb;
 	if(stat([componentPath fileSystemRepresentation], &sb) != 0)
+		/* No error, just forget it */
 		return FALSE;
 	
 	char *buf = NULL;
 	asprintf(&buf,
 			 "rm -rf \"$COMP_PATH\"");
 	if(!buf)
+	{
+		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for removal command\n", @"")];
 		return FALSE;
+	}
 	
 	setenv("COMP_PATH", [componentPath fileSystemRepresentation], 1);
 	
@@ -294,55 +332,62 @@
 		int pid = wait(&status);
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
+		else
+			[errorString appendFormat:NSLocalizedString(@"Removal for %@ failed\n", @""), componentPath];
 	}
+	else
+		[errorString appendFormat:NSLocalizedString(@"Authentication failed for removal for %@\n", @""), componentPath];
 	free(buf);
 	unsetenv("COMP_PATH");
 	return ret;
 }
 
 
-- (BOOL)installArchive:(NSString *)archivePath forPiece:(NSString *)component type:(ComponentType)type withMyVersion:(NSString *)myVersion andAuthorization:(AuthorizationRef)auth
+- (BOOL)installArchive:(NSString *)archivePath forPiece:(NSString *)component type:(ComponentType)type withMyVersion:(NSString *)myVersion
 {
-	NSString *containingDir = nil;
-	switch(type)
-	{
-		case ComponentTypeCoreAudio:
-			containingDir = [self coreAudioComponentDir];
-			break;
-		case ComponentTypeQuickTime:
-			containingDir = [self quickTimeComponentDir];
-			break;
-		case ComponentTypeFramework:
-			containingDir = [self frameworkComponentDir];
-			break;
-	}
+	NSString *containingDir = [self basePathForType:type user:userInstalled];
+	BOOL ret = YES;
+
 	InstallStatus pieceStatus = [self installStatusForComponent:component type:type withMyVersion:myVersion];
-	if(auth != nil && pieceStatus != InstallStatusInstalled)
+	if(!userInstalled && currentInstallStatus(pieceStatus) != InstallStatusInstalled)
 	{
-		BOOL result = [self _authenticatedExtractArchivePath:archivePath toDestination:containingDir finalPath:[containingDir stringByAppendingPathComponent:component] authorization:auth];
+		BOOL result = [self _authenticatedExtractArchivePath:archivePath toDestination:containingDir finalPath:[containingDir stringByAppendingPathComponent:component]];
 		if(result == NO)
-			return NO;
+			ret = NO;
 	}
 	else
 	{
 		//Not authenticated
-		if(pieceStatus == InstallStatusOutdated)
+		if(currentInstallStatus(pieceStatus) == InstallStatusOutdated)
 		{
 			//Remove the old one here
 			int tag = 0;
 			BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:containingDir destination:@"" files:[NSArray arrayWithObject:component] tag:&tag];
 			if(result == NO)
-				return NO;
+				ret = NO;
 		}
-		if(pieceStatus != InstallStatusInstalled)
+		if(currentInstallStatus(pieceStatus) != InstallStatusInstalled)
 		{
 			//Decompress and install new one
 			BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir];
 			if(result == NO)
-				return NO;
+				ret = NO;
 		}		
 	}
-	return YES;
+	if(ret != NO && isWrongLocationInstalled(pieceStatus) != 0)
+	{
+		/* Let's try and remove the wrong one, if we can, but only if install succeeded */
+		containingDir = [self basePathForType:type user:!userInstalled];
+
+		if(userInstalled)
+			[self _authenticatedRemove:[containingDir stringByAppendingPathComponent:component]];
+		else
+		{
+			int tag = 0;
+			[[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:containingDir destination:@"" files:[NSArray arrayWithObject:component] tag:&tag];
+		}
+	}
+	return ret;
 }
 
 - (void)install:(id)sender
@@ -354,16 +399,15 @@
 	NSString *coreAudioComponentPath = [componentPath stringByAppendingPathComponent:@"CoreAudio"];
 	NSString *quickTimeComponentPath = [componentPath stringByAppendingPathComponent:@"QuickTime"];
 	NSString *frameworkComponentPath = [componentPath stringByAppendingPathComponent:@"Frameworks"];
-	AuthorizationRef auth = nil;
+
+	[errorString release];
+	errorString = [[NSMutableString alloc] init];
+	/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
+	if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
+		/* Oh well, hope we don't need it */
+		auth = nil;
 	
-	if([self systemInstalled])
-	{
-		if(!AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) == errAuthorizationSuccess)
-			// Try it anyway, it will likely fail, but who knows what kind of screwed up systems people have
-			auth = nil;
-	}
-	
-	[self installArchive:[componentPath stringByAppendingPathComponent:@"Perian.zip"] forPiece:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey] andAuthorization:auth];
+	[self installArchive:[componentPath stringByAppendingPathComponent:@"Perian.zip"] forPiece:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey]];
 	
 	NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
 	NSDictionary *myComponent = nil;
@@ -383,10 +427,13 @@
 				archivePath = [frameworkComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
 				break;
 		}
-		[self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey] andAuthorization:auth];
+		[self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey]];
 	}
 	if(auth != nil)
+	{
 		AuthorizationFree(auth, 0);
+		auth = nil;
+	}
 	[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
 	[pool release];
 }
@@ -396,47 +443,37 @@
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *infoDict = [[self bundle] infoDictionary];
 	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
-	AuthorizationRef auth = nil;
-	
-	if([self systemInstalled])
-	{
-		if(!AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) == errAuthorizationSuccess)
-			// Try it anyway, it will likely fail, but who knows what kind of screwed up systems people have
-			auth = nil;
-	}
+
+	[errorString release];
+	errorString = [[NSMutableString alloc] init];
+	/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
+	if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
+		/* Oh well, hope we don't need it */
+		auth = nil;
 	
 	int tag = 0;
 	BOOL result = NO;
 	if(auth != nil)
-		[self _authenticatedRemove:[[self quickTimeComponentDir] stringByAppendingPathComponent:@"Perian.component"] authorization:auth];
+		[self _authenticatedRemove:[[self quickTimeComponentDir:userInstalled] stringByAppendingPathComponent:@"Perian.component"]];
 	else
-		result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[self quickTimeComponentDir] destination:@"" files:[NSArray arrayWithObject:@"Perian.component"] tag:&tag];
+		result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[self quickTimeComponentDir:userInstalled] destination:@"" files:[NSArray arrayWithObject:@"Perian.component"] tag:&tag];
 	
 	NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
 	NSDictionary *myComponent = nil;
 	while((myComponent = [componentEnum nextObject]) != nil)
 	{
 		ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
-		NSString *directory = nil;
-		switch(type)
-		{
-			case ComponentTypeCoreAudio:
-				directory = [self coreAudioComponentDir];
-				break;
-			case ComponentTypeQuickTime:
-				directory = [self quickTimeComponentDir];
-				break;
-			case ComponentTypeFramework:
-				directory = [self frameworkComponentDir];
-				break;
-		}
+		NSString *directory = [self basePathForType:type user:userInstalled];
 		if(auth != nil)
-			[self _authenticatedRemove:[directory stringByAppendingPathComponent:[myComponent objectForKey:ComponentNameKey]] authorization:auth];
+			[self _authenticatedRemove:[directory stringByAppendingPathComponent:[myComponent objectForKey:ComponentNameKey]]];
 		else
 			result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:directory destination:@"" files:[NSArray arrayWithObject:[myComponent objectForKey:ComponentNameKey]] tag:&tag];
 	}
 	if(auth != nil)
+	{
 		AuthorizationFree(auth, 0);
+		auth = nil;
+	}
 	
 	[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
 	[pool release];

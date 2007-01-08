@@ -2,6 +2,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <PreferencePanes/NSPreferencePane.h>
+#import <Security/Security.h>
 
 #define ComponentInfoDictionaryKey	@"Components"
 #define BundleVersionKey @"CFBundleVersion"
@@ -11,10 +12,28 @@
 
 typedef enum
 {
-	InstallStatusNotInstalled,
-	InstallStatusOutdated,
-	InstallStatusInstalled
+	InstallStatusInstalledInWrongLocation = 0,
+	InstallStatusNotInstalled = 1,
+	InstallStatusOutdatedWithAnotherInWrongLocation = 2,
+	InstallStatusOutdated = 3,
+	InstallStatusInstalledInBothLocations = 4,
+	InstallStatusInstalled = 5
 } InstallStatus;
+
+InstallStatus inline currentInstallStatus(InstallStatus status)
+{
+	return (status | 1);
+}
+
+BOOL inline isWrongLocationInstalled(InstallStatus status)
+{
+	return ((status & 1) == 0);
+}
+
+InstallStatus inline setWrongLocationInstalled(InstallStatus status)
+{
+	return (status & ~1);
+}
 
 typedef enum
 {
@@ -46,6 +65,9 @@ typedef enum
 	IBOutlet NSButton					*button_forum;
 	
 	InstallStatus						installStatus; //This is only marked as installed if everything is installed
+	BOOL								userInstalled;
+	AuthorizationRef					auth;
+	NSMutableString						*errorString;
 	
 	NSURL								*perianForumURL;
 	NSURL								*perianDonateURL;
