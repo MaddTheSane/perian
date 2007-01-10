@@ -30,11 +30,13 @@
 
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
+#include <Accelerate/Accelerate.h>
 
 #include "FFusionCodec.h"
 #include "EI_Image.h"
 #include "avcodec.h"
 #include "Codecprintf.h"
+#include "ColorConversions.h"
 
 void inline swapFrame(AVFrame * *a, AVFrame * *b)
 {
@@ -102,10 +104,6 @@ typedef struct
 //---------------------------------------------------------------------------
 
 static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length, int useFirstFrameHack, int failSilently);
-static void FastY420(UInt8 *baseAddr, AVFrame *picture);
-static void SlowY420(UInt8* baseAddr, int outRB, int width, int height, AVFrame * picture);
-static void EndianSwapRow32(UInt32 *d, UInt32 *s, size_t n);
-static void BGR24toRGB24(UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture);
 static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic);
 static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
 
@@ -933,17 +931,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	}
 	else if (myDrp->pixelFormat == k32ARGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_RGB32)
 	{
-		Ptr dest = drp->baseAddr;
-		Ptr src = (Ptr) picture->data[0];
-		for (i = 0; i < myDrp->height; i++) {
-#ifdef __BIG_ENDIAN__
-			memcpy(dest, src, FFMIN(drp->rowBytes, picture->linesize[0]));
-#else
-			EndianSwapRow32(dest, src, myDrp->width);
-#endif
-			dest += drp->rowBytes;
-			src += picture->linesize[0];
-		}
+		RGB32toRGB32((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
 	}
 	else
 	{
@@ -1304,135 +1292,4 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
 		length -= len;
     }
     return err;
-}
-
-//-----------------------------------------------------------------
-// FastY420
-//-----------------------------------------------------------------
-// Returns y420 data directly to QuickTime which then converts
-// in RGB for display
-//-----------------------------------------------------------------
-
-static void FastY420(UInt8 *baseAddr, AVFrame *picture)
-{
-    PlanarPixmapInfoYUV420 *planar;
-	
-	/*From Docs: PixMap baseAddr points to a big-endian PlanarPixmapInfoYUV420 struct; see ImageCodec.i. */
-    planar = (PlanarPixmapInfoYUV420 *) baseAddr;
-    
-    // if ya can't set da poiners, set da offsets
-    planar->componentInfoY.offset = EndianU32_NtoB(picture->data[0] - baseAddr);
-    planar->componentInfoCb.offset =  EndianU32_NtoB(picture->data[1] - baseAddr);
-    planar->componentInfoCr.offset =  EndianU32_NtoB(picture->data[2] - baseAddr);
-    
-    // for the 16/32 add look at EDGE in mpegvideo.c
-    planar->componentInfoY.rowBytes = EndianU32_NtoB(picture->linesize[0]);
-    planar->componentInfoCb.rowBytes = EndianU32_NtoB(picture->linesize[1]);
-    planar->componentInfoCr.rowBytes = EndianU32_NtoB(picture->linesize[2]);
-}
-
-//-----------------------------------------------------------------
-// FFusionSlowDecompress
-//-----------------------------------------------------------------
-// We have to return 2yuv values because
-// QT version has no built-in y420 component.
-// Since we do the conversion ourselves it is not really optimized....
-// The function should never be called since many people now
-// have a decent OS/QT version.
-//-----------------------------------------------------------------
-
-#ifdef __BIG_ENDIAN__
-//hand-unrolled code is a bad idea on modern CPUs. luckily, this does not run on modern CPUs, only G3s.
-//also, big-endian only
-static void 
-SlowY420(UInt8* baseAddr, int outRB, int width, int height, AVFrame * picture)
-{
-	int             y = height >> 1;
-	int             halfWidth = width >> 1, halfHalfWidth = halfWidth >> 1;
-	UInt8          *inY = picture->data[0], *inU = picture->data[1], *inV = picture->data[2];
-	int             rB = picture->linesize[0], rbU = picture->linesize[1], rbV = picture->linesize[2];
-	
-	while (y--) {
-		UInt32         *ldst = (UInt32 *) baseAddr, *ldstr2 = (UInt32 *) (baseAddr + outRB);
-		UInt32         *lsrc = (UInt32 *) inY, *lsrcr2 = (UInt32 *) (inY + rB);
-		UInt16         *sU = (UInt16 *) inU, *sV = (UInt16 *) inV;
-		ptrdiff_t		off;
-		
-		for (off = 0; off < halfHalfWidth; off++) {
-			UInt16          chrU = sU[off], chrV = sV[off];
-			UInt32          row1luma = lsrc[off], row2luma = lsrcr2[off];
-			UInt32          chromas1 = (chrU & 0xff00) << 16 | (chrV & 0xff00),
-				chromas2 = (chrU & 0xff) << 24 | (chrV & 0xff) << 8;
-			int             off2 = off * 2;
-			
-			ldst[off2] = chromas1 | (row1luma & 0xff000000) >> 8 | (row1luma & 0xff0000) >> 16;
-			ldstr2[off2] = chromas1 | (row2luma & 0xff000000) >> 8 | (row2luma & 0xff0000) >> 16;
-			off2++;
-			ldst[off2] = chromas2 | (row1luma & 0xff00) << 8 | row1luma & 0xff;
-			ldstr2[off2] = chromas2 | (row2luma & 0xff00) << 8 | row2luma & 0xff;
-		}
-		
-		if (halfWidth % 4) {
-			UInt16         *ssrc = (UInt16 *) inY, *ssrcr2 = (UInt16 *) (inY + rB);
-			
-			ptrdiff_t       off = halfWidth - 2;
-			UInt32          chromas = inV[off] << 8 | (inU[off] << 24);
-			UInt16          row1luma = ssrc[off], row2luma = ssrcr2[off];
-			
-			ldst[off] = chromas | row1luma & 0xff | (row1luma & 0xff00) << 8;
-			ldstr2[off] = chromas | row2luma & 0xff | (row2luma & 0xff00) << 8;
-		}
-		inY += rB * 2;
-		inU += rbU;
-		inV += rbV;
-		baseAddr += outRB * 2;
-	}
-}
-#else
-static void 
-SlowY420(UInt8* o, int outRB, int width, int height, AVFrame * picture)
-{
-	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
-	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], y = 0, x, x2;
-	
-	for (; y < height; y++) {
-		for (x = 0, x2 = 0; x < width; x += 2, x2 += 4) {
-			int             hx = x >> 1;
-			o[x2] = u[hx];
-			o[x2 + 1] = yc[x];
-			o[x2 + 2] = v[hx];
-			o[x2 + 3] = yc[x + 1];
-		}
-		
-		o += outRB;
-		yc += rY;
-		if (y % 2) {
-			u += rU;
-			v += rV;
-		}
-	}
-}
-#endif
-
-static void BGR24toRGB24(UInt8 *baseAddr, long rowBump, long width, long height, AVFrame *picture)
-{
-	unsigned int i, j;
-	UInt8 *srcPtr = picture->data[0];
-
-	for (i = 0; i < height; ++i)
-	{
-		for (j = 0; j < width * 3; j += 3)
-		{
-			baseAddr[j] = srcPtr[j+2];
-			baseAddr[j+1] = srcPtr[j+1];
-			baseAddr[j+2] = srcPtr[j];
-		}
-		baseAddr += rowBump;
-		srcPtr += picture->linesize[0];
-	}
-}
-
-static void EndianSwapRow32(UInt32 *d, UInt32 *s, size_t n)
-{
-	while (n--) {*d++ = EndianU32_NtoB(*s); s++;}
 }
