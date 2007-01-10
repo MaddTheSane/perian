@@ -110,24 +110,30 @@ static void Y420_ppc_altivec(UInt8 * o, int outRB, int width, int height, AVFram
 {
 	UInt8          *yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
 	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
-	int				y,x,x2, vWidth = width >> 4, halfheight = height >> 1;
+	int				y,x,x2,x4, vWidth = width >> 5, halfheight = height >> 1;
 	
 	for (y = 0; y < halfheight; y ++) {
 		vUInt8 *ov = (vUInt8 *)o, *ov2 = (vUInt8 *)(o + outRB), *yv2 = (vUInt8 *)(yc + rY);
 		vUInt8 *uv  = (vUInt8 *)uc, *vv = (vUInt8 *)vc, *yv = (vUInt8 *)yc;
 		
-		for (x = 0,x2 = 0; x < vWidth; x++, x2 += 2) {
-			vUInt8 tmp_u = uv[x], tmp_v = vv[x], chroma = vec_mergeh(tmp_u, tmp_v), tmp_y = yv[x], tmp_y2 = yv2[x];
-			ov[x2] = vec_mergeh(chroma, tmp_y);
-			ov2[x2] = vec_mergeh(chroma, tmp_y2);
+		for (x = 0,x2 = 0,x4 =0; x < vWidth; x++, x2 += 2, x4 += 4) {
+			vUInt8 tmp_u = uv[x], tmp_v = vv[x], chroma = vec_mergeh(tmp_u, tmp_v), tmp_y = yv[x2], tmp_y2 = yv2[x2];
+			ov[x4] = vec_mergeh(chroma, tmp_y);
+			ov2[x4] = vec_mergeh(chroma, tmp_y2);
+			ov[x4+1] = vec_mergel(chroma, tmp_y);
+			ov2[x4+1] = vec_mergel(chroma, tmp_y2);
 			chroma = vec_mergel(tmp_u, tmp_v);
-			ov[x2+1] = vec_mergel(chroma, tmp_y);
-			ov2[x2+1] = vec_mergel(chroma, tmp_y2);
+			tmp_y = yv[x2+1];
+			tmp_y2 = yv2[x2+1];
+			ov[x4+2] = vec_mergeh(chroma, tmp_y);
+			ov2[x4+2] = vec_mergeh(chroma, tmp_y2);
+			ov[x4+3] = vec_mergel(chroma, tmp_y);
+			ov2[x4+3] = vec_mergel(chroma, tmp_y2);
 		}
 		
-		if (width % 16) { //spill to scalar for the end if the row isn't a multiple of 16
+		if (width % 32) { //spill to scalar for the end if the row isn't a multiple of 32
 			UInt8 *o2 = o + outRB, *yc2 = yc + rY;
-			for (x = vWidth * 16, x2 = x*2; x < width; x += 2, x2 += 4) {
+			for (x = vWidth * 32, x2 = x*2; x < width; x += 2, x2 += 4) {
 				int             hx = x >> 1;
 				o2[x2] = o[x2] = uc[hx];
 				o[x2 + 1] = yc[x];
@@ -153,10 +159,8 @@ void SlowY420(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 		int vType = 0; //0 == scalar only
 		size_t length = sizeof(vType);
 		int error = sysctl(sels, 2, &vType, &length, NULL, 0);
-#if 0
 		if( 0 == error ) y420_function = Y420_ppc_altivec;
 		else 
-#endif
 		y420_function = Y420_ppc_scalar;
 	}
 	
