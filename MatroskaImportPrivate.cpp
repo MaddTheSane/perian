@@ -387,7 +387,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	}
 	
 	OSStatus err = QTSoundDescriptionCreate(&asbd, pacl, acl_size, magicCookie, cookieSize, 
-											kQTSoundDescriptionKind_Movie_AnyVersion, &sndDesc);
+											kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndDesc);
 	if (err) return err;
 	
 	mkvTrack.desc = (SampleDescriptionHandle) sndDesc;
@@ -651,7 +651,7 @@ void MatroskaTrack::AddBlock(KaxBlockGroup &blockGroup)
 				SoundDescriptionHandle sndDesc = NULL;
 				
 				OSStatus err = QTSoundDescriptionCreate(&asbd, &acl, sizeof(AudioChannelLayout), NULL, 0, 
-														kQTSoundDescriptionKind_Movie_AnyVersion, &sndDesc);
+														kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndDesc);
 				if (err == noErr) {
 					DisposeHandle((Handle) desc);
 					desc = (SampleDescriptionHandle) sndDesc;

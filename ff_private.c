@@ -262,7 +262,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 		acl = GetDefaultChannelLayout(&asbd);
 		aclSize = sizeof(AudioChannelLayout);
 	}
-	err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, NULL, 0, kQTSoundDescriptionKind_Movie_Version2, &sndHdl);
+	err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, NULL, 0, kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndHdl);
 	if(err) fprintf(stderr, "AVI IMPORTER: Error creating the sound description\n");
 	
 	/* Create the magic cookie */
