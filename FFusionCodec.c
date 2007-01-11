@@ -923,7 +923,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	}
 	else if (myDrp->pixelFormat == k2vuyPixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUV420P)
 	{
-		SlowY420((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
+		Y420toY422((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
 	}
 	else if (myDrp->pixelFormat == k24RGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_BGR24)
 	{
@@ -932,6 +932,10 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	else if (myDrp->pixelFormat == k32ARGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_RGB32)
 	{
 		RGB32toRGB32((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
+	}
+	else if (myDrp->pixelFormat == k2vuyPixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUV422P)
+	{
+		Y422toY422((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
 	}
 	else
 	{

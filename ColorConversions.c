@@ -151,7 +151,7 @@ static void Y420_ppc_altivec(UInt8 * o, int outRB, int width, int height, AVFram
 	}
 }
 
-void SlowY420(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 {
 	static void (*y420_function)(UInt8* baseAddr, int outRB, int width, int height, AVFrame * picture) = NULL;
 	if (!y420_function) {
@@ -169,7 +169,7 @@ void SlowY420(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 #else
 #include <emmintrin.h>
 
-void SlowY420(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 {
 	UInt8          *yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
 	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
@@ -217,7 +217,7 @@ void SlowY420(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 }
 #endif
 
-void BGR24toRGB24(UInt8 *baseAddr, long rowBytes, long width, long height, AVFrame *picture)
+void BGR24toRGB24(UInt8 *baseAddr, int rowBytes, int width, int height, AVFrame *picture)
 {
 	int i, j;
 	UInt8 *srcPtr = picture->data[0];
@@ -235,7 +235,7 @@ void BGR24toRGB24(UInt8 *baseAddr, long rowBytes, long width, long height, AVFra
 	}
 }
 
-void RGB32toRGB32(UInt8 *baseAddr, long rowBytes, long width, long height, AVFrame *picture)
+void RGB32toRGB32(UInt8 *baseAddr, int rowBytes, int width, int height, AVFrame *picture)
 {
 	int x, y;
 	UInt8 *srcPtr = picture->data[0];
@@ -250,5 +250,26 @@ void RGB32toRGB32(UInt8 *baseAddr, long rowBytes, long width, long height, AVFra
 		
 		baseAddr += rowBytes;
 		srcPtr += picture->linesize[0];
+	}
+}
+
+void Y422toY422(UInt8* o, int outRB, int width, int height, AVFrame * picture)
+{
+	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
+	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], y = 0, x, x2;
+	
+	for (; y < height; y++) {
+		for (x = 0, x2 = 0; x < width; x += 2, x2 += 4) {
+			int             hx = x >> 1;
+			o[x2] = u[hx];
+			o[x2 + 1] = yc[x];
+			o[x2 + 2] = v[hx];
+			o[x2 + 3] = yc[x + 1];
+		}
+		
+		o += outRB;
+		yc += rY;
+		u += rU;
+		v += rV;
 	}
 }
