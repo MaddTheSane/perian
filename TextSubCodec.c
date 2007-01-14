@@ -47,6 +47,7 @@ typedef struct {
 
 static CFMutableStringRef CFStringCreateWithCStringMutable(CFAllocatorRef alloc, const char *cStr, CFStringEncoding encoding) {
 	CFStringRef		   s1 = CFStringCreateWithCString(alloc,cStr,encoding);
+	if (!s1) return NULL;
 	CFMutableStringRef s2 = CFStringCreateMutableCopy(alloc,0,s1);
 	CFRelease(s1);
 	return s2;
@@ -337,7 +338,6 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 		ATSUAttributeValuePtr vals[] = {&lf, &w};
 		ATSUCreateTextLayout(&glob->textLayout);
 		ATSUSetLayoutControls(glob->textLayout, 2, tags, sizes, vals);
-		ATSUSetTransientFontMatching(glob->textLayout,TRUE);
 	}
 	
 	// QuickTime doesn't like it if we complain too much
@@ -354,7 +354,7 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	ATSUAttributeValuePtr cgc_v[] = {&c};
 	
 	ATSUSetLayoutControls(glob->textLayout, 1, cgc, cgc_s, cgc_v);
-
+		
 	CFMutableStringRef cfsub = CFStringCreateWithCStringMutable(NULL, textBuffer, kCFStringEncodingUTF8);
 	if (cfsub == NULL)
 		return noErr;
@@ -575,6 +575,8 @@ static size_t ParseSrtStyles(TextSubGlobals glob, CFMutableStringRef cfsub, UniC
 	
 	CFStringGetCharacters(cfsub, all, uc);
 	ATSUSetTextPointerLocation(glob->textLayout,uc,kATSUFromTextBeginning,kATSUToTextEnd,sublen);
+	ATSUSetTransientFontMatching(glob->textLayout,TRUE);
+
 	ATSUSetRunStyle(glob->textLayout,glob->textStyle,kATSUFromTextBeginning,kATSUToTextEnd);
 	if (italics) {
 		for (i = 0; i < italiccount; i++) ATSUSetRunStyle(glob->textLayout,glob->italicStyle,italics[i].location,italics[i].length);
