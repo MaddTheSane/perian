@@ -1947,6 +1947,245 @@
 			};
 			name = Default;
 		};
+		3D4BBE460B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Version Macros and Static Libraries";
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE470B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = s;
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = ebml;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE480B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = matroska;
+				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE490B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					i386,
+					ppc,
+				);
+				DEAD_CODE_STRIPPING = YES;
+				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_2)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				HEADER_SEARCH_PATHS = (
+					ffmpeg/libavcodec,
+					ffmpeg/libavutil,
+					ffmpeg/libpostproc,
+					ffmpeg/libavformat,
+					libebml,
+					libmatroska,
+				);
+				INFOPLIST_FILE = "Perian-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/QuickTime";
+				LIBRARY_SEARCH_PATHS = (
+					$SYMROOT/Universal,
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Universal\"";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Carbon,
+					"-read_only_relocs",
+					suppress,
+				);
+				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
+				PREBINDING = NO;
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
+				PRODUCT_NAME = Perian;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				WRAPPER_EXTENSION = component;
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE4A0B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Debug In QuickTime Player";
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE4B0B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Setup Build Directories";
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE4C0B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = A52Codec;
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE4D0B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = "$(HOME)/bin";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianPanePListGenerator;
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE4E0B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = CreatePrefPanePlist;
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE4F0B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "PerianPane-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianPane;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				WRAPPER_EXTENSION = prefPane;
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE500B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "PerianUpdateChecker-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = PerianUpdateChecker;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3D4BBE510B59EE0A000EDE04 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = "Deployment+Debug";
+		};
 		61CB11040ACDF37C007994BD /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2349,6 +2588,7 @@
 			buildConfigurations = (
 				116C42560B5041BF00FB0738 /* Development */,
 				116C42570B5041BF00FB0738 /* Deployment */,
+				3D4BBE500B59EE0A000EDE04 /* Deployment+Debug */,
 				116C42580B5041BF00FB0738 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2359,6 +2599,7 @@
 			buildConfigurations = (
 				11A70AC90A3D0111002058D4 /* Development */,
 				11A70ACA0A3D0111002058D4 /* Deployment */,
+				3D4BBE490B59EE0A000EDE04 /* Deployment+Debug */,
 				11A70ACB0A3D0111002058D4 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2369,6 +2610,7 @@
 			buildConfigurations = (
 				11BA39B10A61E453008AF206 /* Development */,
 				11BA39B20A61E453008AF206 /* Deployment */,
+				3D4BBE460B59EE0A000EDE04 /* Deployment+Debug */,
 				11BA39B30A61E453008AF206 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2379,6 +2621,7 @@
 			buildConfigurations = (
 				11D4ED480A3CE59A0066D45F /* Development */,
 				11D4ED490A3CE59A0066D45F /* Deployment */,
+				3D4BBE510B59EE0A000EDE04 /* Deployment+Debug */,
 				11D4ED4A0A3CE59A0066D45F /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2389,6 +2632,7 @@
 			buildConfigurations = (
 				61CB11040ACDF37C007994BD /* Development */,
 				61CB11050ACDF37C007994BD /* Deployment */,
+				3D4BBE470B59EE0A000EDE04 /* Deployment+Debug */,
 				61CB11060ACDF37C007994BD /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2399,6 +2643,7 @@
 			buildConfigurations = (
 				61CB11B10ACDF4FF007994BD /* Development */,
 				61CB11B20ACDF4FF007994BD /* Deployment */,
+				3D4BBE480B59EE0A000EDE04 /* Deployment+Debug */,
 				61CB11B30ACDF4FF007994BD /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2409,6 +2654,7 @@
 			buildConfigurations = (
 				83D1D6CB0B4C794900E09EC9 /* Development */,
 				83D1D6CC0B4C794900E09EC9 /* Deployment */,
+				3D4BBE4F0B59EE0A000EDE04 /* Deployment+Debug */,
 				83D1D6CD0B4C794900E09EC9 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2419,6 +2665,7 @@
 			buildConfigurations = (
 				F59E0A0C0A670E950019A3F0 /* Development */,
 				F59E0A0D0A670E950019A3F0 /* Deployment */,
+				3D4BBE4A0B59EE0A000EDE04 /* Deployment+Debug */,
 				F59E0A0E0A670E950019A3F0 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2429,6 +2676,7 @@
 			buildConfigurations = (
 				F5CFD1B90B5000AF00616865 /* Development */,
 				F5CFD1BA0B5000AF00616865 /* Deployment */,
+				3D4BBE4D0B59EE0A000EDE04 /* Deployment+Debug */,
 				F5CFD1BB0B5000AF00616865 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2439,6 +2687,7 @@
 			buildConfigurations = (
 				F5CFD2660B500B9D00616865 /* Development */,
 				F5CFD2670B500B9D00616865 /* Deployment */,
+				3D4BBE4E0B59EE0A000EDE04 /* Deployment+Debug */,
 				F5CFD2680B500B9D00616865 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2449,6 +2698,7 @@
 			buildConfigurations = (
 				F5CFD2EB0B5012E800616865 /* Development */,
 				F5CFD2EC0B5012E800616865 /* Deployment */,
+				3D4BBE4C0B59EE0A000EDE04 /* Deployment+Debug */,
 				F5CFD2ED0B5012E800616865 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -2459,6 +2709,7 @@
 			buildConfigurations = (
 				F5CFD3C20B50144E00616865 /* Development */,
 				F5CFD3C30B50144E00616865 /* Deployment */,
+				3D4BBE4B0B59EE0A000EDE04 /* Deployment+Debug */,
 				F5CFD3C40B50144E00616865 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;

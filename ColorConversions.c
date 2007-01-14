@@ -176,8 +176,9 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 	int				y,x,x2, vWidth = width >> 4, halfheight = height >> 1;
 	
 	for (y = 0; y < halfheight; y ++) {
-		vSInt8 *ov = (vSInt8 *)o, *ov2 = (vSInt8 *)(o + outRB), *yv2 = (vSInt8 *)(yc + rY);
-		vSInt8 *yv = (vSInt8 *)yc;
+		__m128i *ov = (__m128i *)o, *ov2 = (__m128i *)(o + outRB), *yv2 = (__m128i *)(yc + rY);
+		__m128i *yv = (__m128i *)yc;
+		long long *uv = (long long *)uc, *vv = (long long*)vc;
 		
 		for (x = 0,x2 = 0; x < vWidth; x++, x2 += 2) {
 			/* read one chroma row, two luma rows, write two luma rows at once.
@@ -185,17 +186,21 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 			 * fun facts: 1. sse2 supports 64-bit as well as 128-bit loads, so we do that for chroma
 			 * 2: unrolling loops can be very bad. i think we could have done it here, but x86 is so OoO it doesn't really matter */
 			__builtin_prefetch(&yv[x+1], 0, 0); __builtin_prefetch(&yv2[x+1], 0, 0); // prefetch next y vectors, throw it out of cache immediately after use
-			vSInt8	tmp_y = yv[x], tmp_y2 = yv2[x],
-			chroma = _mm_unpacklo_epi8(_mm_loadl_epi64((__m128i*)&uc[8*x]), _mm_loadl_epi64((__m128i*)&vc[8*x]));
-			vSInt8 p1 = _mm_unpacklo_epi8(chroma, tmp_y), p2 = _mm_unpackhi_epi8(chroma, tmp_y),
-				p3 = _mm_unpacklo_epi8(chroma, tmp_y2), p4 = _mm_unpackhi_epi8(chroma, tmp_y2);
+			__builtin_prefetch(&uv[x+1], 0, 0); __builtin_prefetch(&vv[x+1], 0, 0); // and chroma too
+			__m128i	tmp_y = yv[x], 
+				tmp_y2 = yv2[x],
+				chroma = _mm_unpacklo_epi8(_mm_loadl_epi64((__m128i*)&uv[x]), _mm_loadl_epi64((__m128i*)&vv[x]));
+			__m128i p1 = _mm_unpacklo_epi8(chroma, tmp_y),
+				p2 = _mm_unpackhi_epi8(chroma, tmp_y),
+				p3 = _mm_unpacklo_epi8(chroma, tmp_y2),
+				p4 = _mm_unpackhi_epi8(chroma, tmp_y2);
 			ov[x2] = p1;
 			ov[x2+1] = p2;
 			ov2[x2] = p3;
 			ov2[x2+1] = p4;
 		}
 		
-		if (width % 16) { //spill to scalar for the end if the row isn't a multiple of 16
+		if (__builtin_expect(width % 16, FALSE)) { //spill to scalar for the end if the row isn't a multiple of 16
 			UInt8 *o2 = o + outRB, *yc2 = yc + rY;
 			for (x = vWidth * 16, x2 = x*2; x < width; x += 2, x2 += 4) {
 				int             hx = x >> 1;
