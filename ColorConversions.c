@@ -116,18 +116,20 @@ static void Y420_ppc_altivec(UInt8 * o, int outRB, int width, int height, AVFram
 		vUInt8 *uv  = (vUInt8 *)uc, *vv = (vUInt8 *)vc, *yv = (vUInt8 *)yc;
 		
 		for (x = 0,x2 = 0,x4 =0; x < vWidth; x++, x2 += 2, x4 += 4) {
-			vUInt8 tmp_u = uv[x], tmp_v = vv[x], chroma = vec_mergeh(tmp_u, tmp_v), tmp_y = yv[x2], tmp_y2 = yv2[x2];
+			__builtin_prefetch(&yv[x+1], 0, 0); __builtin_prefetch(&yv2[x+1], 0, 0);
+			__builtin_prefetch(&uv[x+1], 0, 0); __builtin_prefetch(&vv[x+1], 0, 0);
+			vUInt8 tmp_u = vec_ldl(0, &uv[x]), tmp_v = vec_ldl(0, &vv[x]), chroma = vec_mergeh(tmp_u, tmp_v),
+					tmp_y = vec_ldl(0, &yv[x2]), tmp_y2 = vec_ldl(0, &yv2[x2]),
+					tmp_y3 = vec_ldl(16, &yv[x2]), tmp_y4 = vec_ldl(16, &yv2[x2]), chromal = vec_mergel(tmp_u, tmp_v);
+			
 			ov[x4] = vec_mergeh(chroma, tmp_y);
-			ov2[x4] = vec_mergeh(chroma, tmp_y2);
 			ov[x4+1] = vec_mergel(chroma, tmp_y);
+			ov[x4+2] = vec_mergeh(chromal, tmp_y3);
+			ov[x4+3] = vec_mergel(chromal, tmp_y3);
+			ov2[x4] = vec_mergeh(chroma, tmp_y2);
 			ov2[x4+1] = vec_mergel(chroma, tmp_y2);
-			chroma = vec_mergel(tmp_u, tmp_v);
-			tmp_y = yv[x2+1];
-			tmp_y2 = yv2[x2+1];
-			ov[x4+2] = vec_mergeh(chroma, tmp_y);
-			ov2[x4+2] = vec_mergeh(chroma, tmp_y2);
-			ov[x4+3] = vec_mergel(chroma, tmp_y);
-			ov2[x4+3] = vec_mergel(chroma, tmp_y2);
+			ov2[x4+2] = vec_mergeh(chromal, tmp_y4);
+			ov2[x4+3] = vec_mergel(chromal, tmp_y4);
 		}
 		
 		if (width % 32) { //spill to scalar for the end if the row isn't a multiple of 32
@@ -172,18 +174,18 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 {
 	UInt8          *yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
 	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
-	int				y,x,x2, vWidth = width >> 4, halfheight = height >> 1;
+	int				y,x, vWidth = width >> 4, halfheight = height >> 1;
 	
 	for (y = 0; y < halfheight; y ++) {
 		__m128i *ov = (__m128i *)o, *ov2 = (__m128i *)(o + outRB), *yv2 = (__m128i *)(yc + rY);
 		__m128i *yv = (__m128i *)yc;
 		long long *uv = (long long *)uc, *vv = (long long*)vc;
 		
-		for (x = 0,x2 = 0; x < vWidth; x++, x2 += 2) {
-			/* read one chroma row, two luma rows, write two luma rows at once.
-			 * this avoids reading chroma twice but should we be doing strictly linear writes instead?
-			 * fun facts: 1. sse2 supports 64-bit as well as 128-bit loads, so we do that for chroma
-			 * 2: unrolling loops can be very bad. i think we could have done it here, but x86 is so OoO it doesn't really matter */
+		for (x = 0; x < vWidth; x++) {
+			/* read one chroma row, two luma rows, write two luma rows at once. this avoids reading chroma twice
+			* sse2 can do 64-bit loads, so we do that. (apple's h264 doesn't seem to, maybe we should copy them?)
+			* unrolling loops is very bad on x86 */
+			int x2 = x*2;
 			__builtin_prefetch(&yv[x+1], 0, 0); __builtin_prefetch(&yv2[x+1], 0, 0); // prefetch next y vectors, throw it out of cache immediately after use
 			__builtin_prefetch(&uv[x+1], 0, 0); __builtin_prefetch(&vv[x+1], 0, 0); // and chroma too
 			__m128i	tmp_y = yv[x], 
@@ -193,16 +195,17 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 				p2 = _mm_unpackhi_epi8(chroma, tmp_y),
 				p3 = _mm_unpacklo_epi8(chroma, tmp_y2),
 				p4 = _mm_unpackhi_epi8(chroma, tmp_y2);
-			ov[x2] = p1;
-			ov[x2+1] = p2;
-			ov2[x2] = p3;
-			ov2[x2+1] = p4;
+			
+			_mm_stream_si128(&ov[x2],p1); // store to memory rather than cache
+			_mm_stream_si128(&ov[x2+1],p2); 
+			_mm_stream_si128(&ov2[x2],p3); 
+			_mm_stream_si128(&ov2[x2+1],p4);
 		}
 		
 		if (__builtin_expect(width % 16, FALSE)) { //spill to scalar for the end if the row isn't a multiple of 16
 			UInt8 *o2 = o + outRB, *yc2 = yc + rY;
-			for (x = vWidth * 16, x2 = x*2; x < width; x += 2, x2 += 4) {
-				int             hx = x >> 1;
+			for (x = vWidth * 16; x < width; x += 2) {
+				int             hx = x>>1, x2 = x*2;
 				o2[x2] = o[x2] = uc[hx];
 				o[x2 + 1] = yc[x];
 				o2[x2 + 1] = yc2[x];
@@ -212,12 +215,12 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 			}			
 		}
 		
-		o += outRB; o += outRB;
-		yc += rY; yc += rY;
+		o += outRB*2;
+		yc += rY*2;
 		uc += rU;
 		vc += rV;
 	}
-	_mm_empty(); // leave mmx mode
+	_mm_sfence(); // complete all writes
 }
 #endif
 
