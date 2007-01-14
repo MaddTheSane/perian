@@ -105,7 +105,6 @@ static void Y420_ppc_scalar(UInt8* baseAddr, int outRB, int width, int height, A
 	 }
  }
 
-// The below function doesn't work. That's why it's disabled.
 static void Y420_ppc_altivec(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 {
 	UInt8          *yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
