@@ -10,7 +10,7 @@
 
 #include "TextSubCodec.h"
 
-#define SubFontName "Helvetica Neue"
+#define SubFontName "Helvetica"
 // basically random numbers i picked, font size is a factor of the diagonal of the movie window, border is a factor of that
 #define FontSizeRatio .035
 #define BorderSizeRatio FontSizeRatio * .11
@@ -298,7 +298,7 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	int i;
 	TextSubDecompressRecord *myDrp = (TextSubDecompressRecord *)drp->userDecompressRecord;
 	float diagonalLength = sqrtf(myDrp->width*myDrp->width+myDrp->height*myDrp->height);
-	ATSUTextMeasurement lineWidth = Long2Fix(myDrp->width), lineHeight = Long2Fix(20), ShadowDistFix = FloatToFixed(diagonalLength * ShadowDistance);
+	ATSUTextMeasurement lineWidth = Long2Fix(myDrp->width), lineHeight = Long2Fix(25), ShadowDistFix = FloatToFixed(diagonalLength * ShadowDistance);
 //	char *dataPtr = (char *)drp->codecData;
 //	ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
 	
@@ -400,7 +400,7 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 		lineHeight += ascent + descent;
 	}
 	
-	lineHeight = Long2Fix(20); // XXX constant
+	lineHeight = Long2Fix(25); // XXX constant
 	CGContextSetRGBFillColor(c, 1,1,1,1); // fill white
 	CGContextSetRGBStrokeColor(c, 0,0,0,1); // stroke black
 	CGContextSetLineWidth(c, diagonalLength * BorderSizeRatio);
