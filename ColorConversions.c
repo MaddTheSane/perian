@@ -160,7 +160,7 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 		int vType = 0; //0 == scalar only
 		size_t length = sizeof(vType);
 		int error = sysctl(sels, 2, &vType, &length, NULL, 0);
-		if( 0 == error ) y420_function = Y420_ppc_altivec;
+		if( 0 == error && vType ) y420_function = Y420_ppc_altivec;
 		else 
 		y420_function = Y420_ppc_scalar;
 	}
