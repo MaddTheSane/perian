@@ -629,11 +629,6 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 		
 		sampleNum = 0;
 		ncstr->sampleTable = calloc(stream->nb_index_entries, sizeof(SampleReference64Record));
-		
-		if (!ncstr->vbr && ncstr->asbd.mBytesPerPacket == 0) {
-			Codecprintf(NULL, "mBytesPerPacket 0 in apparently CBR stream\n");
-			continue;
-		}
 			
 		/* now parse the index entries */
 		for(k = 0; k < stream->nb_index_entries; k++) {
@@ -677,6 +672,10 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 				sampleRec->numberOfSamples = 1;
 			}
 			else if(codec->codec_type == CODEC_TYPE_AUDIO) {
+				
+				if (!ncstr->vbr && ncstr->asbd.mBytesPerPacket == 0) {
+					ncstr->asbd.mBytesPerPacket = 1; // FIXME is this the thing to do?
+				}
 				
 				/* FIXME: check if that's really the right thing to do here */
 				if(ncstr->vbr) {
@@ -830,8 +829,10 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		if(sampleRec.dataSize <= 0)
 			continue;
 		
-		if(codecContext->codec_type == CODEC_TYPE_AUDIO && !ncstream->vbr)
+		if(codecContext->codec_type == CODEC_TYPE_AUDIO && !ncstream->vbr) {
+			if (!ncstream->asbd.mBytesPerPacket) ncstream->asbd.mBytesPerPacket=1;
 			sampleRec.numberOfSamples = (packet.size * ncstream->asbd.mFramesPerPacket) / ncstream->asbd.mBytesPerPacket;
+		}
 		else
 			sampleRec.numberOfSamples = 1; //packet.duration;
 		

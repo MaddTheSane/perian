@@ -48,7 +48,7 @@ else
         make -C vhook       depend
 if [ "$BUILD_STYLE" = "Development" ] ; then
 	cd libavcodec
-	export CFLAGS="-O1 -fomit-frame-pointer"; make h264.o cabac.o i386/dsputil_mmx.o
+	export CFLAGS="-O1 -fomit-frame-pointer -funit-at-a-time"; make h264.o cabac.o i386/dsputil_mmx.o
 	unset CFLAGS;
 	cd ..
 fi
