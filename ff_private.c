@@ -223,6 +223,11 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	if (asbd.mBytesPerPacket == 0 && asbd.mFramesPerPacket == 0)
 		asbd.mFramesPerPacket = 1;
 	
+	// if we don't have mBytesPerPacket, we can't import as CBR. Probably should be VBR, and the codec
+	// either lied about kAudioFormatProperty_FormatIsVBR or isn't present
+	if (asbd.mBytesPerPacket == 0)
+		map->vbr = 1;
+	
 	/* If we have vbr audio, the media scale most likely has to be set to the time_base denumerator */
 	if(map->vbr) {
 		/* if we have mFramesPerPacket, set mBytesPerPacket to 0 as this can cause
@@ -673,10 +678,6 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 			}
 			else if(codec->codec_type == CODEC_TYPE_AUDIO) {
 				
-				if (!ncstr->vbr && ncstr->asbd.mBytesPerPacket == 0) {
-					ncstr->asbd.mBytesPerPacket = 1; // FIXME is this the thing to do?
-				}
-				
 				/* FIXME: check if that's really the right thing to do here */
 				if(ncstr->vbr) {
 					sampleRec->numberOfSamples = 1;
@@ -829,10 +830,8 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		if(sampleRec.dataSize <= 0)
 			continue;
 		
-		if(codecContext->codec_type == CODEC_TYPE_AUDIO && !ncstream->vbr) {
-			if (!ncstream->asbd.mBytesPerPacket) ncstream->asbd.mBytesPerPacket=1;
+		if(codecContext->codec_type == CODEC_TYPE_AUDIO && !ncstream->vbr)
 			sampleRec.numberOfSamples = (packet.size * ncstream->asbd.mFramesPerPacket) / ncstream->asbd.mBytesPerPacket;
-		}
 		else
 			sampleRec.numberOfSamples = 1; //packet.duration;
 		
