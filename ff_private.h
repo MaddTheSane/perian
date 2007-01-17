@@ -104,7 +104,7 @@ ComponentResult create_placeholder_track(Movie movie, Track *placeholderTrack, T
 void send_movie_changed_notification(Movie movie);
 
 OSType map_video_codec_to_mov_tag(enum CodecID codec_id);
-void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd);
+void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map);
 uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID);
 Handle create_strf_ext(AVCodecContext *codec);
 

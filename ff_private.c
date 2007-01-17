@@ -26,6 +26,7 @@
 #include "allformats.h"
 #include "Codecprintf.h"
 #include "CommonUtils.h"
+#include "CodecIDs.h"
 
 #include <CoreServices/CoreServices.h>
 #include <AudioToolbox/AudioToolbox.h>
@@ -197,7 +198,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	map->media = media;
 	
 	memset(&asbd,0,sizeof(asbd));
-	map_avi_to_mov_tag(codec->codec_id, &asbd);
+	map_avi_to_mov_tag(codec->codec_id, &asbd, map);
 	if(asbd.mFormatID == 0) /* no know codec, use the ms tag */
 		asbd.mFormatID = 'ms\0\0' + codec->codec_tag; /* the number is stored in the last byte => big endian */
 	
@@ -297,7 +298,7 @@ OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
 }
 
 /* maps the codec_id tag of libavformat to a constant the AudioToolbox can work with */
-void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd)
+void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map)
 {
 	switch(codec_id) {
 		case CODEC_ID_MP2:
@@ -308,6 +309,7 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 			break;
 		case CODEC_ID_AC3:
 			asbd->mFormatID = kAudioFormatAC3;
+			map->vbr = 1;
 			break;
 		case CODEC_ID_PCM_S16LE:
 			asbd->mFormatID = kAudioFormatLinearPCM;
@@ -333,6 +335,9 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 		case CODEC_ID_VORBIS:
 			asbd->mFormatID = 'OggV';
 			break;
+		case CODEC_ID_DTS:
+			asbd->mFormatID = kAudioFormatDTS;
+			map->vbr = 1;
 		default:
 			break;
 	}
