@@ -2,11 +2,7 @@
 PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
-generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-pthreads"
-
-if [ "$BUILD_STYLE" = "Development" ] ; then
-	extraConfigureOptions="--disable-opts"
-fi
+generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-pthreads --disable-opts"
 
 OUTPUT_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
 
@@ -26,11 +22,6 @@ if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
 else
 	echo "Static ffmpeg libs are out-of-date ; rebuilding"
 	
-	echo "Patching ffmpeg's broken linking"
-	cd "$SRCROOT"
-	svn revert ffmpeg/libavcodec/h264.c
-	patch -p0 < linkingFix.patch
-	
 	mkdir "$BUILT_PRODUCTS_DIR"
 	#######################
 	# Intel shlibs
@@ -38,11 +29,18 @@ else
 	BUILDDIR="$BUILT_PRODUCTS_DIR/intel"
 	mkdir "$BUILDDIR"
 	
+	#we override ffmpeg's optimization settings for slightly better ones
+	#this seems to cause spurious gcc errors...
+	export optCFlags="-O3 -march=nocona -mtune=nocona -fomit-frame-pointer -mdynamic-no-pic" 
+if [ "$BUILD_STYLE" = "Development" ] ; then
+	export optCFlags=""
+fi
+
 	cd "$BUILDDIR"
 	if [ `arch` != i386 ] ; then
-		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86_32 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86_32 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2 $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
 	else
-		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-ma --extra-cflags='-gdwarf-2'
+		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m --extra-cflags='-gdwarf-2 $optCFlags'
 	fi
         make -C libavutil   depend
         make -C libavcodec  depend
@@ -64,11 +62,15 @@ fi
 	BUILDDIR="$BUILT_PRODUCTS_DIR/ppc"
 	mkdir "$BUILDDIR"
 	
+	export optCFlags="-fastf -mcpu=G3 -mmultiple"
+if [ "$BUILD_STYLE" = "Development" ] ; then
+	export optCFlags=""
+fi
 	cd "$BUILDDIR"
 	if [ `arch` = ppc ] ; then
-		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --extra-cflags='-gdwarf-2'
+		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --extra-cflags='-gdwarf-2 $optCFlags'
 	else
-		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2' $extraConfigureOptions $generalConfigureOptions
+		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2 $optCFlags' $extraConfigureOptions $generalConfigureOptions
 	fi
         make -C libavutil   depend
         make -C libavcodec  depend
