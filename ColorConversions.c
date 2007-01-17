@@ -115,21 +115,24 @@ static void Y420_ppc_altivec(UInt8 * o, int outRB, int width, int height, AVFram
 		vUInt8 *ov = (vUInt8 *)o, *ov2 = (vUInt8 *)(o + outRB), *yv2 = (vUInt8 *)(yc + rY);
 		vUInt8 *uv  = (vUInt8 *)uc, *vv = (vUInt8 *)vc, *yv = (vUInt8 *)yc;
 		
-		for (x = 0,x2 = 0,x4 =0; x < vWidth; x++, x2 += 2, x4 += 4) {
+		for (x = 0; x < vWidth; x++) {
+			x2 = x*2; x4 = x*4;
+			// ldl/stl = mark data as least recently used in cache so they will be flushed out
 			__builtin_prefetch(&yv[x+1], 0, 0); __builtin_prefetch(&yv2[x+1], 0, 0);
 			__builtin_prefetch(&uv[x+1], 0, 0); __builtin_prefetch(&vv[x+1], 0, 0);
 			vUInt8 tmp_u = vec_ldl(0, &uv[x]), tmp_v = vec_ldl(0, &vv[x]), chroma = vec_mergeh(tmp_u, tmp_v),
 					tmp_y = vec_ldl(0, &yv[x2]), tmp_y2 = vec_ldl(0, &yv2[x2]),
 					tmp_y3 = vec_ldl(16, &yv[x2]), tmp_y4 = vec_ldl(16, &yv2[x2]), chromal = vec_mergel(tmp_u, tmp_v);
 			
-			ov[x4] = vec_mergeh(chroma, tmp_y);
-			ov[x4+1] = vec_mergel(chroma, tmp_y);
-			ov[x4+2] = vec_mergeh(chromal, tmp_y3);
-			ov[x4+3] = vec_mergel(chromal, tmp_y3);
-			ov2[x4] = vec_mergeh(chroma, tmp_y2);
-			ov2[x4+1] = vec_mergel(chroma, tmp_y2);
-			ov2[x4+2] = vec_mergeh(chromal, tmp_y4);
-			ov2[x4+3] = vec_mergel(chromal, tmp_y4);
+			vec_stl(vec_mergeh(chroma, tmp_y), 0, &ov[x4]);
+			vec_stl(vec_mergel(chroma, tmp_y), 16, &ov[x4]);
+			vec_stl(vec_mergeh(chromal, tmp_y3), 32, &ov[x4]);
+			vec_stl(vec_mergel(chromal, tmp_y3), 48, &ov[x4]);
+			
+			vec_stl(vec_mergeh(chroma, tmp_y2), 0, &ov2[x4]);
+			vec_stl(vec_mergel(chroma, tmp_y2), 16, &ov2[x4]);
+			vec_stl(vec_mergeh(chromal, tmp_y4), 32, &ov2[x4]);
+			vec_stl(vec_mergel(chromal, tmp_y4), 48, &ov2[x4]);
 		}
 		
 		if (width % 32) { //spill to scalar for the end if the row isn't a multiple of 32

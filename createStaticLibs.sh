@@ -2,7 +2,11 @@
 PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
-generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-pthreads --disable-opts"
+generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-pthreads"
+
+if [ "$BUILD_STYLE" = "Development" ] ; then
+	generalConfigureOptions="$generalConfigureOptions --disable-opts"
+fi
 
 OUTPUT_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
 
@@ -29,12 +33,7 @@ else
 	BUILDDIR="$BUILT_PRODUCTS_DIR/intel"
 	mkdir "$BUILDDIR"
 	
-	#we override ffmpeg's optimization settings for slightly better ones
-	#this seems to cause spurious gcc errors...
-	export optCFlags="-O3 -march=nocona -mtune=nocona -fomit-frame-pointer -mdynamic-no-pic" 
-if [ "$BUILD_STYLE" = "Development" ] ; then
-	export optCFlags=""
-fi
+	export optCFlags="-mtune=nocona" 
 
 	cd "$BUILDDIR"
 	if [ `arch` != i386 ] ; then
@@ -62,10 +61,8 @@ fi
 	BUILDDIR="$BUILT_PRODUCTS_DIR/ppc"
 	mkdir "$BUILDDIR"
 	
-	export optCFlags="-fastf -mcpu=G3 -mmultiple"
-if [ "$BUILD_STYLE" = "Development" ] ; then
-	export optCFlags=""
-fi
+	export optCFlags="-mcpu=G3 -mtune=G5 -mmultiple"
+	
 	cd "$BUILDDIR"
 	if [ `arch` = ppc ] ; then
 		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --extra-cflags='-gdwarf-2 $optCFlags'
