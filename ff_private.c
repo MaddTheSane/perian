@@ -630,6 +630,11 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 		sampleNum = 0;
 		ncstr->sampleTable = calloc(stream->nb_index_entries, sizeof(SampleReference64Record));
 		
+		if (!ncstr->vbr && ncstr->asbd.mBytesPerPacket == 0) {
+			Codecprintf(NULL, "mBytesPerPacket 0 in apparently CBR stream\n");
+			continue;
+		}
+			
 		/* now parse the index entries */
 		for(k = 0; k < stream->nb_index_entries; k++) {
 			
