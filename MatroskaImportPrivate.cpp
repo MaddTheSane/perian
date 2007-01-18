@@ -557,7 +557,7 @@ void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
 	cluster.InitTimecode(uint64(clusterTime), timecodeScale);
 	
 	KaxBlockGroup *blockGroup = FindChild<KaxBlockGroup>(cluster);
-	while (blockGroup->GetSize() > 0) {
+	while (blockGroup && blockGroup->GetSize() > 0) {
 		KaxBlock & block = GetChild<KaxBlock>(*blockGroup);
 		block.SetParent(cluster);
 		
