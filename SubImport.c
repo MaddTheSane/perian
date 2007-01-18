@@ -160,7 +160,10 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 		unsigned int endhour, endmin, endsec, endmsec;
 
 		// skip the line with the subtitle number in it
-		char *subTimecodeOffset = strchr(subOffset, '\n') + 1;
+		char *subTimecodeOffset = strchr(subOffset, '\n');
+		if (subTimecodeOffset == NULL)
+			break;
+		subTimecodeOffset++;
 
 		int ret = sscanf(subTimecodeOffset, "%u:%u:%u,%u --> %u:%u:%u,%u", 
 				         &starthour, &startmin, &startsec, &startmsec, 
