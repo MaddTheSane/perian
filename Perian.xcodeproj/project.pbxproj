@@ -230,9 +230,9 @@
 		8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */; };
 		8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */ = {isa = PBXBuildFile; fileRef = 8F483B8B0A642886002CCA73 /* PerianAviImporter.r */; };
 		F52286260B50625E00F8CF7D /* bitstream_info.c in Sources */ = {isa = PBXBuildFile; fileRef = F52286250B50625E00F8CF7D /* bitstream_info.c */; };
+		F539CD120B62BC82005A72C9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
 		F53E18E50B4F483C003A0471 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53E18E40B4F483C003A0471 /* Security.framework */; };
 		F57755F50B51EB1800C7D833 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
-		F57757650B52C34E00C7D833 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
 		F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		F5CFD1C10B5000DF00616865 /* GBPerianPanePListGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */; };
 		F5CFD3B20B5013EA00616865 /* A52Codec.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D60B5012A100616865 /* A52Codec.component */; };
@@ -586,6 +586,7 @@
 		F50D440703EAD8DF01B1D299 /* FFusion.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = FFusion.icns; sourceTree = "<group>"; };
 		F52286240B50625E00F8CF7D /* bitstream_info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bitstream_info.h; sourceTree = "<group>"; };
 		F52286250B50625E00F8CF7D /* bitstream_info.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bitstream_info.c; sourceTree = "<group>"; };
+		F539CD110B62BC82005A72C9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		F53E18E40B4F483C003A0471 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		F560DECD03D61B6101ABA332 /* Components.k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Components.k.h; sourceTree = "<group>"; };
 		F560DEFC03D61BE301ABA332 /* FFusionCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodec.h; sourceTree = "<group>"; };
@@ -593,7 +594,7 @@
 		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFusionCodec.c; sourceTree = "<group>"; };
 		F560DF0203D622D001ABA332 /* FFusionCodec.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = FFusionCodec.r; sourceTree = "<group>"; };
 		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
-		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBPerianPanePListGenerator.h; sourceTree = "<group>"; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
@@ -654,7 +655,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F57757650B52C34E00C7D833 /* CoreFoundation.framework in Frameworks */,
+				F539CD120B62BC82005A72C9 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -679,6 +680,7 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				F539CD110B62BC82005A72C9 /* Foundation.framework */,
 				1162A0530B51ECE1006591C8 /* WebKit.framework */,
 				11629EEA0B51E4F1006591C8 /* Cocoa.framework */,
 				11629EF30B51E4FB006591C8 /* AppKit.framework */,
