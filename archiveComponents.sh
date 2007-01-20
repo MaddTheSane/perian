@@ -20,6 +20,7 @@ done
 }
 
 cd "${BUILT_PRODUCTS_DIR}"
+mkdir -p "${BUILT_PRODUCTS_DIR}/PerianPane.prefPane/Contents/Resources/Components/"
 compressAndInsertComponent "Perian.component" "${BUILT_PRODUCTS_DIR}/PerianPane.prefPane/Contents/Resources/Components/"
 if [[ -d "${BUILT_PRODUCTS_DIR}/CoreAudio" ]] ; then
     compressComponents "${BUILT_PRODUCTS_DIR}/CoreAudio" "${BUILT_PRODUCTS_DIR}/PerianPane.prefPane/Contents/Resources/Components/CoreAudio"
