@@ -61,7 +61,7 @@ bool MatroskaImport::OpenFile()
 	
 	aStream = new EbmlStream(*ioHandler);
 	
-	el_l0 = aStream->FindNextID(EbmlHead::ClassInfos, 0xFFFFFFFFL);
+	el_l0 = aStream->FindNextID(EbmlHead::ClassInfos, ~0);
 	if (el_l0 != NULL) {
 		EbmlElement *dummyElt = NULL;
 		
@@ -95,7 +95,7 @@ void MatroskaImport::SetupMovie()
 	// we don't need to read any more of the file
 	bool done = false;
 	
-	el_l0 = aStream->FindNextID(KaxSegment::ClassInfos, 0xFFFFFFFFL);
+	el_l0 = aStream->FindNextID(KaxSegment::ClassInfos, ~0);
 	if (!el_l0) return;		// nothing in the file
 	
 	while (!done && NextLevel1Element()) {
