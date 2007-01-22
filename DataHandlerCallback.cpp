@@ -126,6 +126,9 @@ uint32 DataHandlerCallback::read(void *Buffer, size_t Size)
 {
 	ComponentResult err = noErr;
 	
+	if (mCurrentPosition + Size > filesize)
+		Size = filesize - mCurrentPosition;
+	
 	if (supportsWideOffsets) {
 		wide wideOffset = SInt64ToWide(mCurrentPosition);
 		
@@ -138,11 +141,6 @@ uint32 DataHandlerCallback::read(void *Buffer, size_t Size)
 		throw CRTError("Error reading data", err);
 	}
 	mCurrentPosition += Size;
-	
-	if (mCurrentPosition > filesize) {
-		Size -= mCurrentPosition - filesize;
-		mCurrentPosition = filesize;
-	}
 	
 	// does QuickTime tell us how much it's read?
 	return Size;
