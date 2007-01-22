@@ -373,6 +373,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	asbd.mFormatID = GetFourCC(&kaxTrack);
 	asbd.mSampleRate = Float64(sampleFreq);
 	asbd.mChannelsPerFrame = uint32(numChannels);
+	asbd.mFramesPerPacket = 1;		// needed for mp3 and v1 SoundDescription, maybe others
 	
 	MkvFinishASBD(&kaxTrack, &asbd);
 	
