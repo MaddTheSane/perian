@@ -250,6 +250,10 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 		
 		SetupMovie();
 		
+		// SetupMovie() couldn't find any level one elements, so nothing to import
+		if (el_l1 == NULL)
+			return noErr;
+		
 		if (inFlags & movieImportWithIdle) {
 			create_placeholder_track(theMovie, &baseTrack, movieDuration, dataRef, dataRefType);
 			
