@@ -290,24 +290,35 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	KaxVideoPixelWidth & pxl_width = GetChild<KaxVideoPixelWidth>(videoTrack);
 	KaxVideoPixelHeight & pxl_height = GetChild<KaxVideoPixelHeight>(videoTrack);
 	
-	// some files ignore the spec and treat display width/height as a ratio, not as pixels
-	// so scale the display size to be at least as large as the pixel size here
-	float horizRatio = float(uint32(pxl_width)) / uint32(disp_width);
-	float vertRatio = float(uint32(pxl_height)) / uint32(disp_height);
-	
-	if (vertRatio > horizRatio && vertRatio > 1) {
-		width = FloatToFixed(uint32(disp_width) * vertRatio);
-		height = FloatToFixed(uint32(disp_height) * vertRatio);
-	} else if (horizRatio > 1) {
-		width = FloatToFixed(uint32(disp_width) * horizRatio);
-		height = FloatToFixed(uint32(disp_height) * horizRatio);
+	// Use the PixelWidth if the DisplayWidth is not set
+	if (disp_width.ValueIsSet() && disp_height.ValueIsSet()) {
+		// some files ignore the spec and treat display width/height as a ratio, not as pixels
+		// so scale the display size to be at least as large as the pixel size here
+		float horizRatio = float(uint32(pxl_width)) / uint32(disp_width);
+		float vertRatio = float(uint32(pxl_height)) / uint32(disp_height);
+		
+		if (vertRatio > horizRatio && vertRatio > 1) {
+			width = FloatToFixed(uint32(disp_width) * vertRatio);
+			height = FloatToFixed(uint32(disp_height) * vertRatio);
+		} else if (horizRatio > 1) {
+			width = FloatToFixed(uint32(disp_width) * horizRatio);
+			height = FloatToFixed(uint32(disp_height) * horizRatio);
+		} else {
+			width = IntToFixed(uint32(disp_width));
+			height = IntToFixed(uint32(disp_height));
+		}
+		
+		**pasp = (PixelAspectRatio){uint32(disp_width) * uint32(pxl_height),uint32(disp_height) * uint32(pxl_width)};
+		if ((*pasp)->hSpacing == (*pasp)->vSpacing) **pasp = (PixelAspectRatio){1,1};
+	} else if (pxl_width.ValueIsSet() && pxl_height.ValueIsSet()) {
+		width = IntToFixed(uint32(pxl_width));
+		height = IntToFixed(uint32(pxl_height));
+		
+		**pasp = (PixelAspectRatio){1,1};
 	} else {
-		width = IntToFixed(uint32(disp_width));
-		height = IntToFixed(uint32(disp_height));
+		Codecprintf(NULL, "MKV: Video has unknown dimensions.\n");
+		return invalidTrack;
 	}
-	
-	**pasp = (PixelAspectRatio){uint32(disp_width) * uint32(pxl_height),uint32(disp_height) * uint32(pxl_width)};
-	if ((*pasp)->hSpacing == (*pasp)->vSpacing) **pasp = (PixelAspectRatio){1,1};
 	
 	mkvTrack.theTrack = NewMovieTrack(theMovie, width, height, kNoVolume);
 	if (mkvTrack.theTrack == NULL)
