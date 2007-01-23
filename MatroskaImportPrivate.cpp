@@ -236,7 +236,8 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 				case track_buttons:
 				case track_control:
 					// not likely to be implemented soon
-					break;
+				default:
+					continue;
 			}
 			
 			KaxTrackLanguage & trackLang = GetChild<KaxTrackLanguage>(track);
