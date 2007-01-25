@@ -506,12 +506,9 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 	return noErr;
 }
 
-// some default channel layouts for up to 8 channels
-// vorbis and aac should be correct unless extradata specifices something else for aac
-static const AudioChannelLayout vorbisChannelLayouts[9] = {
-	{ 0 },
-	{ kAudioChannelLayoutTag_Mono },
-	{ kAudioChannelLayoutTag_Stereo },
+// some default channel layouts for 3 to 8 channels
+// vorbis, flac and aac should be correct unless extradata specifices something else for aac
+static const AudioChannelLayout vorbisChannelLayouts[6] = {
 	{ kAudioChannelLayoutTag_UseChannelBitmap, kAudioChannelBit_Left | kAudioChannelBit_Right | kAudioChannelBit_CenterSurround },
 	{ kAudioChannelLayoutTag_Quadraphonic },
 	{ kAudioChannelLayoutTag_MPEG_5_0_C },
@@ -519,10 +516,7 @@ static const AudioChannelLayout vorbisChannelLayouts[9] = {
 };
 
 // these should be the default for the number of channels; esds can specify other mappings
-static const AudioChannelLayout aacChannelLayouts[9] = {
-	{ 0 },
-	{ kAudioChannelLayoutTag_Mono },
-	{ kAudioChannelLayoutTag_Stereo },
+static const AudioChannelLayout aacChannelLayouts[6] = {
 	{ kAudioChannelLayoutTag_MPEG_3_0_B },		// C L R according to wiki.multimedia.cx
 	{ kAudioChannelLayoutTag_AAC_4_0 },
 	{ kAudioChannelLayoutTag_AAC_5_0 },
@@ -531,12 +525,16 @@ static const AudioChannelLayout aacChannelLayouts[9] = {
 	{ kAudioChannelLayoutTag_AAC_7_1 }
 };
 
-static const AudioChannelLayout ac3ChannelLayouts[9] = {
-	{ 0 },
-	{ kAudioChannelLayoutTag_ITU_1_0 },
-	{ kAudioChannelLayoutTag_ITU_2_0 },
+static const AudioChannelLayout ac3ChannelLayouts[6] = {
 	{ kAudioChannelLayoutTag_ITU_3_0 },
 	{ kAudioChannelLayoutTag_ITU_3_1 },
+	{ kAudioChannelLayoutTag_ITU_3_2 },
+	{ kAudioChannelLayoutTag_ITU_3_2_1 }
+};
+
+static const AudioChannelLayout flacChannelLayouts[6] = {
+	{ kAudioChannelLayoutTag_ITU_3_0 },
+	{ kAudioChannelLayoutTag_Quadraphonic },
 	{ kAudioChannelLayoutTag_ITU_3_2 },
 	{ kAudioChannelLayoutTag_ITU_3_2_1 }
 };
@@ -544,22 +542,25 @@ static const AudioChannelLayout ac3ChannelLayouts[9] = {
 AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 {
 	AudioChannelLayout acl = {0};
+	int channelIndex = asbd->mChannelsPerFrame - 3;
 	
-	if (asbd->mChannelsPerFrame <= 8) {
+	if (channelIndex >= 0 && channelIndex < 6) {
 		switch (asbd->mFormatID) {
 			case kAudioFormatXiphVorbis:
-			case kAudioFormatXiphFLAC:		// FLAC doesn't have official mappings, but the author said Vorbis's were likely to be used
-				acl = vorbisChannelLayouts[asbd->mChannelsPerFrame];
+				acl = vorbisChannelLayouts[channelIndex];
+				break;
+				
+			case kAudioFormatXiphFLAC:
+				acl = flacChannelLayouts[channelIndex];
 				break;
 				
 			case kAudioFormatMPEG4AAC:
 				// TODO: use extradata to make ACL
-				acl = aacChannelLayouts[asbd->mChannelsPerFrame];
+				acl = aacChannelLayouts[channelIndex];
 				break;
 				
 			case kAudioFormatAC3:
-				// TODO: implement channel layout choosing based on an AC3 frame
-				acl = ac3ChannelLayouts[asbd->mChannelsPerFrame];
+				acl = ac3ChannelLayouts[channelIndex];
 				break;
 		}
 	}
