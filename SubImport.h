@@ -21,7 +21,7 @@ extern "C"
 ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie);
 
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, 
-                              TimeScale timescale, Handle dataRef, OSType dataRefType);
+                              TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType);
 
 #ifdef __cplusplus
 }

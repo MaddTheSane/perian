@@ -57,7 +57,7 @@ short GetFilenameLanguage(CFStringRef filename)
 }
 
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, 
-                              TimeScale timescale, Handle dataRef, OSType dataRefType)
+                              TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType)
 {
 	Rect movieBox;
 	Fixed trackWidth, trackHeight;
@@ -70,7 +70,7 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 	trackHeight = IntToFixed(movieBox.bottom - movieBox.top);
 
 	(*imgDesc)->idSize = sizeof(ImageDescription);
-	(*imgDesc)->cType = kSubFormatUTF8;
+	(*imgDesc)->cType = subType;
 	(*imgDesc)->width = FixedToInt(trackWidth);
 	(*imgDesc)->height = FixedToInt(trackHeight);
 	(*imgDesc)->frameCount = 1;
@@ -90,6 +90,8 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 
 	return theTrack;
 }
+
+extern ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack);
 
 ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
 {
@@ -137,7 +139,7 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 	data[fileSize] = '\0';
 
 	// millisecond accuracy
-	theTrack = CreatePlaintextSubTrack(theMovie, textDesc, 1000, dataRef, dataRefType);
+	theTrack = CreatePlaintextSubTrack(theMovie, textDesc, 1000, dataRef, dataRefType, kSubFormatUTF8);
 	if (theTrack == NULL) {
 		err = GetMoviesError();
 		goto bail;
@@ -293,6 +295,10 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".srt"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 			if (actRange.location == extRange.location)
 				LoadSubRipSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
+			
+			actRange = CFStringFind(cfFoundFilename, CFSTR(".ass"), kCFCompareCaseInsensitive | kCFCompareBackwards);
+			if (actRange.location == extRange.location)
+				LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
 
 			// VobSub
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".idx"), kCFCompareCaseInsensitive | kCFCompareBackwards);

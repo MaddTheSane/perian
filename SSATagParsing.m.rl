@@ -1,0 +1,409 @@
+//
+//  SSATagParsing.m
+//  SSAView
+//
+//  Created by Alexander Strange on 1/21/07.
+//  Copyright 2007 Perian Project. All rights reserved.
+//
+
+#import "SSATagParsing.h"
+#import "Categories.h"
+
+@implementation SSAStyleSpan
+-(void)dealloc
+{
+	ATSUDisposeStyle(astyle);
+	[super dealloc];
+}
+@end
+
+@implementation SSARenderEntity
+-(void)dealloc
+{
+	int i;
+	for (i=0; i < style_count; i++) [styles[i] release];
+	if (disposelayout) ATSUDisposeTextLayout(layout);
+	free(text);
+	free(styles);
+	[nstext release];
+	[super dealloc];
+}
+
+-(void)increasestyles
+{
+	style_count++;
+	styles = realloc(styles, sizeof(SSAStyleSpan*[style_count]));
+}
+@end
+
+%% machine SSAtag;
+%% write data;
+
+static void SetATSUStyleFlag(ATSUStyle style, ATSUAttributeTag t, Boolean v)
+{
+	ATSUAttributeTag tags[] = {t};
+	ByteCount		 sizes[] = {sizeof(v)};
+	ATSUAttributeValuePtr vals[] = {&v};
+	
+	ATSUSetAttributes(style,1,tags,sizes,vals);
+}
+
+static void SetATSUStyleOther(ATSUStyle style, ATSUAttributeTag t, ByteCount s, ATSUAttributeValuePtr v)
+{
+	ATSUAttributeTag tags[] = {t};
+	ByteCount		 sizes[] = {s};
+	ATSUAttributeValuePtr vals[] = {v};
+	
+	ATSUSetAttributes(style,1,tags,sizes,vals);
+}
+
+static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s, ATSUAttributeValuePtr v)
+{
+	ATSUAttributeTag tags[] = {t};
+	ByteCount		 sizes[] = {s};
+	ATSUAttributeValuePtr vals[] = {v};
+	
+	ATSUSetLayoutControls(l,1,tags,sizes,vals);
+}
+
+static ATSURGBAlphaColor ParseColorTag(unsigned long c, float a)
+{
+	unsigned char r,g,b;
+	r = c & 0xff;
+	g = (c >> 8) & 0xff;
+	b = (c >> 16) & 0xff;
+	return (ATSURGBAlphaColor){r/255.,g/255.,b/255.,a};
+}
+
+NSArray *ParseSubPacket(NSString *str, SSADocument *ssa)
+{
+	NSArray *linea = [str componentsSeparatedByString:@"\n"];
+	int i, pcount = [linea count]; unsigned len;
+	NSMutableArray *rentities = [NSMutableArray array];
+	
+	for (i = 0; i < pcount; i++) {
+		NSArray *ar = [[linea objectAtIndex:i] componentsSeparatedByString:@"," count:9];
+		SSARenderEntity *re;
+		BOOL ldirty = NO;
+		
+		if ([ar count] < 9) {continue;}
+		
+		re = [[[SSARenderEntity alloc] init] autorelease];
+		re->layer = [[ar objectAtIndex:1] intValue];
+		NSString *sn = [ar objectAtIndex:2];
+		int j;
+		for (j=0; j < ssa->stylecount; j++) {
+			if ([sn isEqualToString:ssa->styles[j].name])  {
+				re->style = &ssa->styles[j]; 
+				break;
+			}
+		}
+		
+		re->marginl = [[ar objectAtIndex:5] intValue];
+		re->marginr = [[ar objectAtIndex:6] intValue];
+		re->marginv = [[ar objectAtIndex:7] intValue];
+		
+		if (re->marginl == 0) re->marginl = re->style->marginl; else ldirty = TRUE;
+		if (re->marginr == 0) re->marginr = re->style->marginr; else ldirty = TRUE;
+		if (re->marginv == 0) re->marginv = re->style->marginv; else ldirty = TRUE;
+		
+		if (ldirty) {
+			ATSUTextMeasurement width;
+			ATSUAttributeTag tag[] = {kATSULineWidthTag};
+			ByteCount		 size[] = {sizeof(ATSUTextMeasurement)};
+			ATSUAttributeValuePtr val[] = {&width};
+			
+			re->usablewidth = ssa->resX - re->marginl - re->marginr; 
+			ATSUCreateAndCopyTextLayout(re->style->layout,&re->layout);
+			width = IntToFixed(re->usablewidth);
+			
+			ATSUSetLayoutControls(re->layout,1,tag,size,val);
+			re->disposelayout = YES;
+		} else {
+			re->usablewidth = re->style->usablewidth;
+			re->layout = re->style->layout;
+			re->disposelayout = NO;
+		}
+		
+		re->nstext = [ar objectAtIndex:8];
+		len = [re->nstext length];
+		re->text = malloc(sizeof(unichar[len]));
+		
+		[re->nstext getCharacters:re->text];
+		re->style_count = 0;
+		re->posx = re->posy = -1;
+		re->halign = re->style->halign;
+		re->valign = re->style->valign;
+		re->multipleruns=NO;
+		
+#define end_re \
+		cur_range = (NSRange){strbegin - pb, p - strbegin};\
+		cur_range.location -= outputoffset;\
+		cur_range.length -= lengthreduce;\
+		[re increasestyles];\
+		re->styles[re->style_count-1] = [[SSAStyleSpan alloc] init];\
+		re->styles[re->style_count-1]->outline = cur_outline;\
+		re->styles[re->style_count-1]->shadow = cur_shadow;\
+		re->styles[re->style_count-1]->astyle = cur_style;\
+		re->styles[re->style_count-1]->range = cur_range;\
+		parsetmp = [NSString stringWithCharacters:skipbegin length:p-skipbegin];\
+		[output appendString:parsetmp]; \
+		re->nstext = dtmp = output;\
+		re->text = malloc(sizeof(unichar[[re->nstext length]]));\
+		[re->nstext getCharacters:re->text];\
+		[re->nstext retain];
+		
+		{
+			NSRange cur_range = {0,0};
+			ATSUStyle cur_style;
+			ATSUTextLayout cur_layout;
+			NSMutableString *output = [NSMutableString string], *dtmp;
+			unichar *p = re->text, *pe = &re->text[len], *numbegin, *strbegin = p, *skipbegin = p, *intbegin, *pb = p, *posbegin, *strparambegin;
+			float num, cur_outline = re->style->outline, cur_shadow = re->style->shadow;
+			NSString *parsetmp;
+			int cs, cur_valign=re->valign, cur_halign=re->halign, cur_posx, cur_posy;
+			ssacolors cur_color = re->style->color;
+			
+			unsigned long inum;
+			unsigned outputoffset=0, lengthreduce=0;
+			BOOL flag, newLayout=FALSE, cur_be;
+			Fixed fixv;
+			
+			ATSUCreateAndCopyStyle(re->style->atsustyle,&cur_style);
+			
+			%%{
+				alphtype unsigned short;
+				
+				action bold {SetATSUStyleFlag(cur_style, kATSUQDBoldfaceTag, flag);}
+				
+				action italic {SetATSUStyleFlag(cur_style, kATSUQDItalicTag, flag);}
+				
+				action uline {SetATSUStyleFlag(cur_style, kATSUQDUnderlineTag, flag);}
+				
+				action strike {SetATSUStyleFlag(cur_style, kATSUStyleStrikeThroughTag, flag);}
+				
+				action bordersize {cur_outline = num; re->multipleruns = YES;}
+				
+				action shadowsize {cur_shadow = num; re->multipleruns = YES;}
+				
+				action bluredge {cur_be = flag;}
+				
+				action frot {
+					if (!newLayout) {
+						newLayout = TRUE;
+						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
+					}
+					fixv = FloatToFixed(num);
+					
+					SetATSULayoutOther(cur_layout, kATSULineRotationTag, sizeof(Fixed), &fixv);
+				}
+				
+				action fsize {
+					fixv = FloatToFixed(num);
+					SetATSUStyleOther(cur_style, kATSUSizeTag, sizeof(fixv), &fixv);
+				}
+				
+				action fn_begin {
+					strparambegin = p;
+				}
+				
+				
+				action fontname {
+					ATSUFontID	font;
+					font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)[NSString stringWithCharacters:strparambegin length:p-strparambegin],kATSOptionFlagsDefault));
+					SetATSUStyleOther(cur_style, kATSUFontTag, sizeof(ATSUFontID), &font);
+				}
+				
+				action alignment {
+					if (!newLayout) {
+						newLayout = TRUE;
+						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
+					}
+										
+					if (ssa->version == S_SSA) inum = SSA2ASSAlignment(inum);
+					
+					switch (inum) 
+					{case 1: case 4: case 7: cur_halign = S_LeftAlign; break;
+					case 2: case 5: case 8: default: cur_halign = S_CenterAlign; break;
+					case 3: case 6: case 9: cur_halign = S_RightAlign;}
+					
+					switch (inum)
+					{case 1: case 2: case 3: default: cur_valign = S_BottomAlign; break; 
+					case 4: case 5: case 6: cur_valign = S_MiddleAlign; break; 
+					case 7: case 8: case 9: cur_valign = S_TopAlign;}
+					
+					Fract alignment;
+
+					if (cur_posx != -1) {
+						switch(cur_halign) {
+							case S_LeftAlign:
+								alignment = FloatToFract(0.);
+								break;
+							case S_CenterAlign: default:
+								alignment = kATSUCenterAlignment;  
+								break;
+							case S_RightAlign: 
+								alignment = FloatToFract(1.);
+						}
+						SetATSULayoutOther(cur_layout, kATSULineFlushFactorTag, sizeof(Fract), &alignment);
+					} 
+				}
+				
+				action pos_begin {
+					posbegin=p;
+				}
+				
+				action pos_end {
+					if (!newLayout) {
+						newLayout = TRUE;
+						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
+					}
+					NSArray *coo = [[NSString stringWithCharacters:posbegin length:p-posbegin] componentsSeparatedByString:@","];
+					cur_posx = [[coo objectAtIndex:0] intValue];
+					cur_posy = [[coo objectAtIndex:1] intValue];
+					
+					Fract alignment = FloatToFract(0);
+					
+					SetATSULayoutOther(cur_layout, kATSULineFlushFactorTag, sizeof(Fract), &alignment);
+				}
+				
+				action primarycolor {
+					cur_color.primary = ParseColorTag(inum,cur_color.primary.alpha);
+					re->multipleruns = YES;
+				}
+				
+				action outlinecolor {
+					cur_color.outline = ParseColorTag(inum,cur_color.outline.alpha);
+					re->multipleruns = YES;
+				}
+				
+				action shadowcolor {
+					cur_color.shadow = ParseColorTag(inum,cur_color.shadow.alpha);
+					re->multipleruns = YES;
+				}
+				
+				action nl_handler {
+					parsetmp = [NSString stringWithCharacters:skipbegin length:(p-2)-skipbegin];
+					[output appendString:parsetmp];
+					
+					skipbegin = p;
+
+					[output appendString:@"\n"];
+					
+					lengthreduce++;
+				}
+				
+				action enter_tag {
+					parsetmp = [NSString stringWithCharacters:skipbegin length:p-skipbegin];
+					[output appendString:parsetmp];
+					
+					cur_range = (NSRange){strbegin - pb, p - strbegin};
+					cur_range.location -= outputoffset;
+					cur_range.length -= lengthreduce;
+					
+					outputoffset += lengthreduce;
+					lengthreduce = 0;
+					
+					skipbegin = p;
+
+					[re increasestyles];
+					re->styles[re->style_count-1] = [[SSAStyleSpan alloc] init];
+					re->styles[re->style_count-1]->outline = cur_outline;
+					re->styles[re->style_count-1]->shadow = cur_shadow;
+					re->styles[re->style_count-1]->astyle = cur_style;
+					re->styles[re->style_count-1]->range = cur_range;
+					re->styles[re->style_count-1]->outlineblur = cur_be;
+					re->styles[re->style_count-1]->color = cur_color;
+					ATSUCreateAndCopyStyle(cur_style,&cur_style);
+				}
+				
+				action exit_tag {
+					outputoffset += p - skipbegin;
+					skipbegin = p;
+					strbegin = p;
+
+					if (newLayout) {
+						newLayout = FALSE;
+						end_re;
+						
+						if ([re->nstext length] != 0) [rentities addObject:re];
+						
+						SSARenderEntity *nre = [[SSARenderEntity alloc] init];
+						nre->layer = re->layer;
+						nre->style = re->style;
+						nre->marginl = re->marginl; nre->marginr = re->marginr; nre->marginv = re->marginv; nre->usablewidth = re->usablewidth;
+						nre->posx = cur_posx; nre->posy = cur_posy; nre->halign = cur_halign; nre->valign = cur_valign;
+						nre->nstext = nil;
+						nre->text = nil;
+						nre->layout = cur_layout;
+						nre->styles = malloc(0);
+						nre->style_count = 0;
+						nre->disposelayout = YES;
+						nre->multipleruns = NO;
+						re = nre;
+					}
+				}
+				
+				action color_end {
+					NSString *hexn = [NSString stringWithCharacters:intbegin length:(p-1)-intbegin];
+					inum = strtoul([hexn UTF8String], NULL, 16);
+				}
+				
+				flag = [01] > {flag = *p - '0';};
+				num_ = digit+ ('.' digit*)?;
+				num = num_ > {numbegin = p;} % {num = [[NSString stringWithCharacters:numbegin length:p-numbegin] doubleValue];};
+				
+				intnum = digit* > {intbegin = p;} % {inum = [[NSString stringWithCharacters:intbegin length:p-intbegin] intValue];};
+				
+				color = "&H" xdigit* > {intbegin = p;} % color_end "&";
+
+				cmd_specific = (("pos(" [^)]+ > pos_begin ")" % pos_end)
+								|"bord" num %bordersize
+								|"b" :> flag %bold 
+								|"be" flag %bluredge
+								|"i" flag %italic 
+								|"u" flag %uline
+								|"s" flag %strike
+								|"fs" num %fsize 
+								|("fr" "z"? num %frot) 
+								|("fn" [^\\}]* > fn_begin %fontname) 
+								|"shad" num %shadowsize
+								|"an" intnum %alignment
+								|"1"? "c" color %primarycolor
+								|"3c" color %outlinecolor
+								|"4c" color %shadowcolor
+								);
+				
+				cmd = "\\" cmd_specific;
+				
+				tag = "{" cmd* "}";
+				
+				nl = "\\" [Nn];
+				
+				special = nl % nl_handler | 
+						 (tag > enter_tag % exit_tag);
+								
+				text = any*;
+				main := (text :> special?)*;
+			}%%
+				
+			%%write init;
+			%%write exec;
+			%%write eof;
+			
+			end_re;
+			for (j=0;j < re->style_count; j++)
+				if (re->styles[j]->range.length == 0) {
+					[re->styles[j] release];
+					if (j != re->style_count-1) re->styles[j] = re->styles[j+1];
+					re->style_count--;
+				}
+
+			free(pb);
+			if ([re->nstext length] != 0) [rentities addObject:re];
+		}
+		
+	}
+	
+	return rentities;
+}

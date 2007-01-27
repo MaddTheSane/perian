@@ -101,6 +101,10 @@
 		11C85FE60A64314500DF3D73 /* FFusionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = F560DF0203D622D001ABA332 /* FFusionCodec.r */; };
 		11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */; };
 		11F28DAD0B52EB75000AF78C /* SUUpdateAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */; };
+		3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
+		3D211A200B6B1A540051299D /* SSADocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SSADocument.m */; };
+		3D211A230B6B1A660051299D /* Categories.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* Categories.m */; };
+		3D211A300B6B1AD80051299D /* SSATagParsing.m.rl in Resources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */; };
 		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
@@ -238,6 +242,20 @@
 		F5CFD3B20B5013EA00616865 /* A52Codec.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D60B5012A100616865 /* A52Codec.component */; };
 		F5CFD3B70B5013EC00616865 /* AC3MovieImport.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D80B5012A100616865 /* AC3MovieImport.component */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXBuildRule section */
+		3D211A2D0B6B1A880051299D /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.c.rl *.cpp.rl *.cp.rl *.cxx.rl *.m.rl *.mm.rl";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
+			);
+			script = "RAGEL=${PROJECT_DIR}/ragel\nRLCODEGEN=${PROJECT_DIR}/rlcodegen\n\n${RAGEL} -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.ragel ${INPUT_FILE_PATH} || exit\n${RLCODEGEN} -T1 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.ragel || exit";
+		};
+/* End PBXBuildRule section */
 
 /* Begin PBXContainerItemProxy section */
 		11BA3DAF0A61EE90008AF206 /* PBXContainerItemProxy */ = {
@@ -416,6 +434,12 @@
 		11D4EFA30A3CE8C10066D45F /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpostproc.a; path = build/Universal/libpostproc.a; sourceTree = "<group>"; };
 		11F28DAB0B52EB75000AF78C /* SUUpdateAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUUpdateAlert.h; sourceTree = "<group>"; };
 		11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUUpdateAlert.m; sourceTree = "<group>"; };
+		3D211A1E0B6B1A540051299D /* SSADocument.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SSADocument.h; sourceTree = "<group>"; };
+		3D211A1F0B6B1A540051299D /* SSADocument.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SSADocument.m; sourceTree = "<group>"; };
+		3D211A210B6B1A660051299D /* Categories.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Categories.h; path = ../../SSAView/Categories.h; sourceTree = SOURCE_ROOT; };
+		3D211A220B6B1A660051299D /* Categories.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Categories.m; path = ../../SSAView/Categories.m; sourceTree = SOURCE_ROOT; };
+		3D211A2E0B6B1AD80051299D /* SSATagParsing.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SSATagParsing.h; sourceTree = "<group>"; };
+		3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 30; path = SSATagParsing.m.rl; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
 		6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACBaseCodec.cpp; sourceTree = "<group>"; };
@@ -594,7 +618,7 @@
 		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFusionCodec.c; sourceTree = "<group>"; };
 		F560DF0203D622D001ABA332 /* FFusionCodec.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = FFusionCodec.r; sourceTree = "<group>"; };
 		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
-		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBPerianPanePListGenerator.h; sourceTree = "<group>"; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
@@ -624,6 +648,7 @@
 				11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */,
 				8F483B550A642644002CCA73 /* libavformat.a in Frameworks */,
 				8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */,
+				3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -737,6 +762,8 @@
 				61D517710AE0402E00A671E1 /* CommonUtils.h */,
 				61D517720AE0402E00A671E1 /* CommonUtils.c */,
 				6116E74E0B4738CE0020F1CE /* CodecIDs.h */,
+				3D211A210B6B1A660051299D /* Categories.h */,
+				3D211A220B6B1A660051299D /* Categories.m */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -836,6 +863,10 @@
 		6123D61D0AD0A052003EDE52 /* Subtitles */ = {
 			isa = PBXGroup;
 			children = (
+				3D211A2E0B6B1AD80051299D /* SSATagParsing.h */,
+				3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */,
+				3D211A1E0B6B1A540051299D /* SSADocument.h */,
+				3D211A1F0B6B1A540051299D /* SSADocument.m */,
 				613CD51A0AD1FB650098A825 /* TextSubCodec.c */,
 				613CD51B0AD1FB650098A825 /* TextSubCodec.h */,
 				613CD51D0AD1FB650098A825 /* TextSubCodecDispatch.h */,
@@ -1171,6 +1202,7 @@
 				11BA3E510A61F2CE008AF206 /* ShellScript */,
 			);
 			buildRules = (
+				3D211A2D0B6B1A880051299D /* PBXBuildRule */,
 			);
 			dependencies = (
 				11BA3DB00A61EE90008AF206 /* PBXTargetDependency */,
@@ -1333,6 +1365,7 @@
 				11A70AD80A3D0149002058D4 /* InfoPlist.strings in Resources */,
 				11A70AD90A3D0149002058D4 /* FFusion.icns in Resources */,
 				11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */,
+				3D211A300B6B1AD80051299D /* SSATagParsing.m.rl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1476,6 +1509,8 @@
 				61FD41330B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp in Sources */,
 				F52286260B50625E00F8CF7D /* bitstream_info.c in Sources */,
 				3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */,
+				3D211A200B6B1A540051299D /* SSADocument.m in Sources */,
+				3D211A230B6B1A660051299D /* Categories.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
