@@ -57,15 +57,13 @@ short GetFilenameLanguage(CFStringRef filename)
 }
 
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, 
-                              TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType)
+                              TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox)
 {
-	Rect movieBox;
 	Fixed trackWidth, trackHeight;
 	Track theTrack;
 	Media theMedia;
 
 	// plain text subs have no size on their own
-	GetMovieBox(theMovie, &movieBox);
 	trackWidth = IntToFixed(movieBox.right - movieBox.left);
 	trackHeight = IntToFixed(movieBox.bottom - movieBox.top);
 
@@ -76,6 +74,8 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 	(*imgDesc)->frameCount = 1;
 	(*imgDesc)->depth = 32;
 	(*imgDesc)->clutID = -1;
+
+	if (imageExtension) AddImageDescriptionExtension(imgDesc, imageExtension, subType);
 
 	theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
 	if (theTrack != NULL) {
@@ -102,6 +102,7 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 	CFRange filenameLen;
 	Track theTrack = NULL;
 	Media theMedia = NULL;
+	Rect movieBox;
 
 	ComponentInstance dataHandler = NULL;
 	long filePos = 0;
@@ -138,8 +139,10 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 	if (err) goto bail;
 	data[fileSize] = '\0';
 
+	GetMovieBox(theMovie, &movieBox);
+
 	// millisecond accuracy
-	theTrack = CreatePlaintextSubTrack(theMovie, textDesc, 1000, dataRef, dataRefType, kSubFormatUTF8);
+	theTrack = CreatePlaintextSubTrack(theMovie, textDesc, 1000, dataRef, dataRefType, kSubFormatUTF8, NULL, movieBox);
 	if (theTrack == NULL) {
 		err = GetMoviesError();
 		goto bail;

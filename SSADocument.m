@@ -472,25 +472,78 @@ static int cmp_line(const void *a, const void *b)
 }
 @end
 
+//based on Apple sample code http://developer.apple.com/samplecode/QTKitCreateMovie/listing5.html
+
+static Movie CreateQuicktimeMovieFromTempFile(DataHandler * outDataHandler, OSErr *outErr, NSString **movieName)
+{
+	*outErr = -1;
+	char *c_tempName = tempnam(NULL,"perian-subtitle-");
+	
+	// generate a name for our movie file
+	NSString *tempName = [NSString stringWithCString:c_tempName 
+											encoding:[NSString defaultCStringEncoding]];
+	if (nil == tempName) goto nostring;
+	free(c_tempName);
+	
+	Handle  dataRefH    = nil;
+	OSType  dataRefType;
+	
+	// create a file data reference for our movie
+	*outErr = QTNewDataReferenceFromFullPathCFString((CFStringRef)tempName,
+													 kQTNativeDefaultPathStyle,
+													 0,
+													 &dataRefH,
+													 &dataRefType);
+	if (*outErr != noErr) goto nodataref;
+	
+	// create a QuickTime movie from our file data reference
+	Movie  qtMovie  = nil;
+	CreateMovieStorage (dataRefH,
+						dataRefType,
+						'TVOD',
+						smSystemScript,
+						newMovieActive, 
+						outDataHandler,
+						&qtMovie);
+	*outErr = GetMoviesError();
+	if (*outErr != noErr) goto cantcreatemovstorage;
+	
+	return qtMovie;
+	
+	// error handling
+cantcreatemovstorage:
+		DisposeHandle(dataRefH);
+nodataref:
+nostring:
+		
+		return nil;
+}
+
+/*
+ We import SSA by creating a temporary movie, adding samples to it, and copying it to the current movie, which can't have samples added to it as it's read-only.
+ 
+ I tried to use an in-memory temporary, but it completely failed to work.
+ 
+ This works except for saving reference movies, which include a dependency on the temporary file. They will break when it's deleted upon restart.
+ I don't see any apparent workaround.
+ */
 ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
 {
 	ComponentResult err = noErr;
-	Handle dataRef = NULL;
-	OSType dataRefType = rAliasType;
-	HFSUniStr255 hfsFilename;
-	CFRange filenameLen;
-	Track theTrack = NULL;
-	Media theMedia = NULL;
+	Track theTrack = NULL, track2 = NULL;
+	Media theMedia = NULL, media2 = NULL;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	SSADocument *ssa = [[SSADocument alloc] init];
 	static UInt8 path[PATH_MAX];
-	Handle sampleHndl = NULL, headerHndl=NULL, drefHndl = NewHandle(sizeof(Handle)), drefDataH = NewHandle(0);
-	ComponentInstance dataHandler = NULL;
-	long filePos = 0;
-	long fileSize;
+	Handle sampleHndl = NULL, headerHndl=NULL;
 	char *data = NULL; const char *header;
 	int i, packetCount, sampleLen;
 	ImageDescriptionHandle textDesc;
+	DataHandler tempStor;
+	Movie tempMovie;
+	OSErr oErr;
+	NSString *movieName;
+	Rect movieBox;
 	
 	FSRefMakePath(theDirectory, path, PATH_MAX);
 	
@@ -504,16 +557,16 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 	sampleLen = strlen(header);
 	PtrToHand(header, &headerHndl, sampleLen);
 	
-	*((Handle*)*drefHndl) = drefDataH;
-		
-	theTrack = CreatePlaintextSubTrack(theMovie, textDesc, 100, drefHndl, HandleDataHandlerSubType, (ssa->version==S_ASS) ? kSubFormatASS : kSubFormatSSA);
+	tempMovie = CreateQuicktimeMovieFromTempFile(&tempStor,&oErr,&movieName);
+
+	GetMovieBox(theMovie, &movieBox);
+	
+	theTrack = CreatePlaintextSubTrack(tempMovie, textDesc, 100, NULL, 0, kSubFormatSSA, headerHndl, movieBox);
 	if (theTrack == NULL) {
 		err = GetMoviesError();
 		goto bail;
 	}
-	
-	AddImageDescriptionExtension(textDesc,headerHndl, (ssa->version==S_ASS) ? kSubFormatASS : kSubFormatSSA);
-
+		
 	theMedia = GetTrackMedia(theTrack);
 	if (theMedia == NULL) {
 		err = GetMoviesError();
@@ -521,36 +574,43 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 	}
 	
 	BeginMediaEdits(theMedia);
-	
+
 	for (i = 0; i < packetCount; i++) {
 		SSAEvent *p = [ssa movPacket:i];
+		TimeRecord movieStartTime = { SInt64ToWide(p->begin_time), 100, 0 };
 		const char *str = [p->line UTF8String];
 		sampleLen = strlen(str);
 		
 		PtrToHand(str,&sampleHndl,sampleLen);
 
 		err=AddMediaSample(theMedia,sampleHndl,0,sampleLen, p->end_time - p->begin_time,(SampleDescriptionHandle)textDesc, 1, 0, NULL);
-		if (err != noErr) {NSLog(@"a %d",GetMoviesError()); goto bail;}
-		//note on -1: we sorted the subtitles already, so we know they can be added to the end of the track.
-		InsertMediaIntoTrack(theTrack,-1,p->begin_time,p->end_time - p->begin_time,fixed1);
-		if (err != noErr) NSLog(@"i %d",GetMoviesError());
+		if (err != noErr) {goto bail;}
 
 		DisposeHandle(sampleHndl);
 	}
 	
 	EndMediaEdits(theMedia);
 		
-	if (*firstSubTrack == NULL)
-		*firstSubTrack = theTrack;
-	else
-		SetTrackAlternate(*firstSubTrack, theTrack);
+	InsertMediaIntoTrack(theTrack,0,0,GetMediaDuration(theMedia),fixed1);
+	if (err != noErr) {goto bail;}
+
+	track2 = CreatePlaintextSubTrack(theMovie, textDesc, 100, NULL, 0, kSubFormatSSA, headerHndl, movieBox);
 	
-	SetMediaLanguage(theMedia, GetFilenameLanguage(filename));
+	media2 = GetTrackMedia(track2);
+	
+	BeginMediaEdits(media2);
+	err=InsertTrackSegment(theTrack,track2,0,GetTrackDuration(theTrack),0);
+	EndMediaEdits(media2);
+	
+	
+	if (*firstSubTrack == NULL)
+		*firstSubTrack = track2;
+	else
+		SetTrackAlternate(*firstSubTrack, track2);
+	
+	SetMediaLanguage(media2, GetFilenameLanguage(filename));
 	
 bail:
-		
-	[ssa release];
-	[pool release];
 	
 	if (err) {
 		if (theMedia)
@@ -564,8 +624,13 @@ bail:
 		DisposeHandle((Handle) textDesc);
 	
 	if (headerHndl) DisposeHandle((Handle)headerHndl);
-	//DisposeHandle((Handle)drefDataH);
-	DisposeHandle((Handle)drefHndl);
+	CloseMovieStorage(tempStor);
+	DisposeMovieTrack(theTrack);
+	DisposeMovie(tempMovie);
+	//unlink([movieName UTF8String]);
+	
+	[ssa release];
+	[pool release];
 	
 	return err;
 }

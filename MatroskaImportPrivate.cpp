@@ -455,7 +455,9 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
 		
 	} else if ((*imgDesc)->cType == kSubFormatUTF8) {
-		mkvTrack.theTrack = CreatePlaintextSubTrack(theMovie, imgDesc, GetMovieTimeScale(theMovie), dataRef, dataRefType, kSubFormatUTF8);
+		Rect movieBox;
+		GetMovieBox(theMovie,&movieBox);
+		mkvTrack.theTrack = CreatePlaintextSubTrack(theMovie, imgDesc, GetMovieTimeScale(theMovie), dataRef, dataRefType, kSubFormatUTF8, NULL, movieBox);
 		if (mkvTrack.theTrack == NULL)
 			return GetMoviesError();
 		
