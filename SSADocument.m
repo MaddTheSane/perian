@@ -57,7 +57,7 @@ static ATSURGBAlphaColor SSAParseColor(NSString *c)
 	
 	resX = rX; resY = rY;
 	
-	timescale = (field = [hDict objectForKey:@"Timer"])? [field doubleValue] / 100. : 1;
+	timescale = (field = [hDict objectForKey:@"Timer"])? [field doubleValue] / 100. : 1.;
 	collisiontype = Normal;
 	if ((field = [hDict objectForKey:@"Collisions"]) && [field isEqualToString:@"Reverse"]) collisiontype = Reverse;
 	if (field = [hDict objectForKey:@"ScriptType"]) {
@@ -336,7 +336,7 @@ static int cmp_line(const void *a, const void *b)
 	if (![(NSString*)[lenum nextObject] isEqualToString:@"[Script Info]"]) return;
 	while (1) {
 		ns = (NSString*)[lenum nextObject];
-		if ([ns length] == 0) continue;
+		if (!ns || [ns length] == 0) continue;
 		else {
 			cai = [ns characterAtIndex:0];
 			
@@ -385,11 +385,10 @@ static int cmp_line(const void *a, const void *b)
 	header = [ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location];
 }
 
--(void) loadHeader:(NSString*)path
+-(void) loadHeader:(NSString*)ssa
 {
 	NSError *err;
 	NSStringEncoding se = NSUTF8StringEncoding;
-	NSString *ssa = [[NSString stringWithContentsOfFile:path encoding:se error:&err] stringByStandardizingNewlines];
 	if (!ssa) return;
 	NSArray *lines = [ssa componentsSeparatedByString:@"\n"];
 	NSEnumerator *lenum = [lines objectEnumerator];
@@ -409,7 +408,7 @@ static int cmp_line(const void *a, const void *b)
 	if (![(NSString*)[lenum nextObject] isEqualToString:@"[Script Info]"]) return;
 	while (1) {
 		ns = (NSString*)[lenum nextObject];
-		if ([ns length] == 0) continue;
+		if (!ns || [ns length] == 0) continue;
 		else {
 			cai = [ns characterAtIndex:0];
 			
@@ -440,7 +439,8 @@ static int cmp_line(const void *a, const void *b)
 	formatc = [format count];
 	
 	while (1) {
-		if ([ns length] != 0) {
+		if (!ns) break;
+		else if ([ns length] != 0) {
 			cai = [ns characterAtIndex:0];
 			
 			if (cai == '[') {nextLine = ns; break;}
@@ -529,22 +529,26 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 	
 	for (i = 0; i < packetCount; i++) {
 		SSAEvent *p = [ssa movPacket:i];
+		TimeRecord movieStartTime = {SInt64ToWide(p->begin_time), 100, 0};
+		TimeValue sampleTime;
 		const char *str = [p->line UTF8String];
 		sampleLen = strlen(str);
 		
 		PtrToHand(str,&sampleHndl,sampleLen);
 		
-		err=AddMediaSample(theMedia,sampleHndl,0,sampleLen, p->end_time - p->begin_time,(SampleDescriptionHandle)textDesc, 1, 0, NULL);
-		if (err != noErr) {NSLog(@"a %d",GetMoviesError()); goto bail;}
+		err=AddMediaSample(theMedia,sampleHndl,0,sampleLen, p->end_time - p->begin_time,(SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
+		if (err != noErr) goto bail;
 		
+		ConvertTimeScale(&movieStartTime, GetMovieTimeScale(theMovie));
+
+		err = InsertMediaIntoTrack(theTrack, movieStartTime.value.lo, sampleTime, p->end_time - p->begin_time, fixed1);
+		if (err != noErr) {goto bail;}
+
 		DisposeHandle(sampleHndl);
 	}
 	
 	EndMediaEdits(theMedia);
 	
-	InsertMediaIntoTrack(theTrack,0,0,GetMediaDuration(theMedia),fixed1); 
-	if (err != noErr) NSLog(@"i %d",GetMoviesError());
-
 	if (*firstSubTrack == NULL)
 		*firstSubTrack = theTrack;
 	else

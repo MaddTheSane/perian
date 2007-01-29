@@ -9,6 +9,7 @@
 #endif
 
 #include "TextSubCodec.h"
+#include "SSARenderCodec.h"
 
 #define SubFontName "Helvetica"
 // basically random numbers i picked, font size is a factor of the diagonal of the movie window, border is a factor of that
@@ -31,7 +32,9 @@ typedef struct	{
 	
 	ATSUStyle				textStyle, italicStyle, boldStyle, biStyle;
 	ATSUTextLayout			textLayout;
-	//Ptr                     textBuffer;
+
+	SSARenderGlobalsPtr		ssa;
+	Boolean					useSSA;
 } TextSubGlobalsRecord, *TextSubGlobals;
 
 typedef struct {
@@ -80,7 +83,7 @@ static inline int min(int a, int b) {return (a<=b)?a:b;}
 	#include <ComponentDispatchHelper.c>
 #endif
 	
-/* -- This Image Decompressor User the Base Image Decompressor Component --
+/* -- This Image Decompressor Uses the Base Image Decompressor Component --
 	The base image decompressor is an Apple-supplied component
 	that makes it easier for developers to create new decompressors.
 	The base image decompressor does most of the housekeeping and
@@ -104,6 +107,8 @@ pascal ComponentResult TextSubCodecOpen(TextSubGlobals glob, ComponentInstance s
 	glob->wantedDestinationPixelTypeH = (OSType **)NewHandle(sizeof(OSType) * (kNumPixelFormatsSupportedTextSub + 1));
 	if (err = MemError()) goto bail;
 	glob->drawBandUPP = NULL;
+	glob->ssa = NULL;
+	glob->useSSA = false;
 	
 	// Open and target an instance of the base decompressor as we delegate
 	// most of our calls to the base decompressor instance
@@ -148,6 +153,7 @@ pascal ComponentResult TextSubCodecClose(TextSubGlobals glob, ComponentInstance 
 		if (glob->textLayout) {
 			ATSUDisposeTextLayout(glob->textLayout);
 		}
+		if (glob->useSSA) SSA_Dispose(glob->ssa);
 		DisposePtr((Ptr)glob);
 	}
 
@@ -278,6 +284,18 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 	myDrp->depth = (**p->imageDescription).depth;
     myDrp->dataSize = p->bufferSize;
 	
+	glob->useSSA = (**p->imageDescription).cType == kSubFormatSSA;
+	if (glob->useSSA) {
+		long count;
+		CountImageDescriptionExtensionType(p->imageDescription,kSubFormatSSA,&count);
+		if (count == 1) {
+			Handle ssaheader;
+			GetImageDescriptionExtension(p->imageDescription,&ssaheader,kSubFormatSSA,1);
+			
+			glob->ssa = SSA_Init(*ssaheader, GetHandleSize(ssaheader));
+		}
+	}
+	
 	return noErr;
 }
 
@@ -305,6 +323,11 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
     CGContextRef c = CGBitmapContextCreate(drp->baseAddr, myDrp->width, myDrp->height,
 										   8, drp->rowBytes,  glob->colorSpace,
 										   kCGImageAlphaPremultipliedFirst);
+	
+	if (glob->useSSA) {
+		SSA_RenderLine(glob->ssa,c,drp->codecData,myDrp->dataSize,myDrp->width,myDrp->height);
+		return noErr;
+	}
 	
 	if (!glob->textStyle) { //TODO: set language region based on track language... does that even matter?
 		ATSUAttributeTag tags[] = {kATSUSizeTag, kATSUStyleRenderingOptionsTag, kATSUFontTag};

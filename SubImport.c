@@ -200,6 +200,7 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 					ConvertTimeScale(&movieStartTime, GetMovieTimeScale(theMovie));
 
 					err = InsertMediaIntoTrack(theTrack, movieStartTime.value.lo, sampleTime, duration, fixed1);
+
 					if (err) goto bail;
 				}
 
@@ -299,10 +300,15 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 			if (actRange.location == extRange.location)
 				LoadSubRipSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
 			
+			// SubStationAlpha
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".ass"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 			if (actRange.location == extRange.location)
 				LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
 
+			actRange = CFStringFind(cfFoundFilename, CFSTR(".ssa"), kCFCompareCaseInsensitive | kCFCompareBackwards);
+			if (actRange.location == extRange.location)
+				LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
+			
 			// VobSub
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".idx"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 			if (actRange.location == extRange.location)

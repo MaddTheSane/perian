@@ -92,6 +92,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa)
 		re->layer = [[ar objectAtIndex:1] intValue];
 		NSString *sn = [ar objectAtIndex:2];
 		int j;
+
 		for (j=0; j < ssa->stylecount; j++) {
 			if ([sn isEqualToString:ssa->styles[j].name])  {
 				re->style = &ssa->styles[j]; 

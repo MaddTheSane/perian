@@ -54,6 +54,7 @@ typedef struct ssastyleline {
 }
 -(NSString *)header;
 -(SSAEvent *)movPacket:(int)i;
+-(void) loadHeader:(NSString*)path;
 -(unsigned)packetCount;
 @end
 

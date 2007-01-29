@@ -87,6 +87,28 @@ resource 'cdci' (kTextSubCodecResource) {
 	0						// Private Data
 };
 
+// Component Description
+resource 'cdci' (kSSASubCodecResource) {
+	kSSASubCodecFormatName,	// Type
+	1,						// Version
+	1,						// Revision level
+	kManufacturer,			// Manufacturer
+	kTextSubDecoFlags,		// Decompression Flags
+	0,						// Compression Flags
+	kTextSubFormatFlags,	// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,						// Reserved
+	1,						// Minimum Height
+	1,						// Minimum Width
+	0,						// Decompression Pipeline Latency
+	0,						// Compression Pipeline Latency
+	0						// Private Data
+};
+
 resource 'thng' (kTextSubCodecResource) {
 	decompressorComponentType,				// Type			
 	kSubFormatUTF8,							// SubType
@@ -137,14 +159,73 @@ resource 'thng' (kTextSubCodecResource) {
 	};
 };
 
+resource 'thng' (kSSASubCodecResource) {
+	decompressorComponentType,				// Type			
+	kSubFormatSSA,							// SubType
+	kManufacturer,							// Manufacturer
+											// - use componentHasMultiplePlatforms
+	0,										// not used Component flags
+	0,										// not used Component flags Mask
+	0,										// not used Code Type
+	0,										// not used Code ID
+	'STR ',									// Name Type
+	kSSASubCodecResource,					// Name ID
+	'STR ',									// Info Type
+	kSSASubCodecResource + 1,				// Info ID
+	0,										// Icon Type
+	0,										// Icon ID
+	kTextSubCodecVersion,					// Version
+	componentHasMultiplePlatforms +			// Registration Flags 
+	componentDoAutoVersion,
+	0,										// Resource ID of Icon Family
+{
+#if TARGET_OS_MAC
+#if TARGET_REZ_CARBON_MACHO
+#if !(TARGET_REZ_MAC_PPC || TARGET_REZ_MAC_X86)
+#error "Platform architecture not defined, TARGET_REZ_MAC_PPC and/or TARGET_REZ_MAC_X86 must be defined!"
+#endif
+#if TARGET_REZ_MAC_PPC
+	kTextSubDecoFlags, 
+	'dlle',								// Code Resource type - Entry point found by symbol name 'dlle' resource
+	kTextSubCodecResource,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,	// PPC
+#endif
+#if TARGET_REZ_MAC_X86
+	kTextSubDecoFlags, 
+	'dlle',
+	kTextSubCodecResource,
+	platformIA32NativeEntryPoint,		// INTEL
+#endif
+#else
+#error "At least one non-obsolete TARGET_REZ_XXX_XXX platform must be defined."
+#endif
+#endif
+#if TARGET_OS_WIN32
+	kTextSubDecoFlags, 
+	'dlle',
+	kTextSubCodecResource,
+	platformWin32,
+#endif
+};
+};
+
 // Component Name
 resource 'STR ' (kTextSubCodecResource) {
 	"Text Subtitle"
 };
 
+resource 'STR ' (kSSASubCodecResource) {
+	"SSA Text Subtitle"
+};
+
 // Component Information
+
 resource 'STR ' (kTextSubCodecResource + 1) {
 	"Renders subtitles stored as text."
+};
+
+resource 'STR ' (kSSASubCodecResource + 1) {
+	"Renders subtitles stored in SubStation Alpha format."
 };
 
 #if	TARGET_REZ_CARBON_MACHO || TARGET_REZ_WIN32

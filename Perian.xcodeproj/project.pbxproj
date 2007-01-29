@@ -104,8 +104,9 @@
 		3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
 		3D211A200B6B1A540051299D /* SSADocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SSADocument.m */; };
 		3D211A230B6B1A660051299D /* Categories.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* Categories.m */; };
-		3D211A300B6B1AD80051299D /* SSATagParsing.m.rl in Resources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */; };
+		3D211A300B6B1AD80051299D /* SSATagParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */; };
 		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; };
+		3DAD32DA0B6DB26100DA0A72 /* StdIOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB114D0ACDF3C2007994BD /* StdIOCallback.cpp */; };
 		3DB2BB290B6C92F000416863 /* SSARenderCodec.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SSARenderCodec.m */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
@@ -245,7 +246,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
-		3D211A2D0B6B1A880051299D /* PBXBuildRule */ = {
+		3D74F53C0B6DB50C0018BAC0 /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
 			filePatterns = "*.c.rl *.cpp.rl *.cp.rl *.cxx.rl *.m.rl *.mm.rl";
@@ -253,8 +254,9 @@
 			isEditable = 1;
 			outputFiles = (
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).dot",
 			);
-			script = "RAGEL=${PROJECT_DIR}/ragel\nRLCODEGEN=${PROJECT_DIR}/rlcodegen\n\n${RAGEL} -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.ragel ${INPUT_FILE_PATH} || exit\n${RLCODEGEN} -T1 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.ragel || exit";
+			script = "RAGEL=${PROJECT_DIR}/ragel\nRLCODEGEN=${PROJECT_DIR}/rlcodegen\n${RAGEL} -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.ragel ${INPUT_FILE_PATH} || exit\n${RLCODEGEN} -T1 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.ragel || exit\n${RLCODEGEN} -V ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.ragel > ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}.dot";
 		};
 /* End PBXBuildRule section */
 
@@ -440,7 +442,7 @@
 		3D211A210B6B1A660051299D /* Categories.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Categories.h; path = ../../SSAView/Categories.h; sourceTree = SOURCE_ROOT; };
 		3D211A220B6B1A660051299D /* Categories.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Categories.m; path = ../../SSAView/Categories.m; sourceTree = SOURCE_ROOT; };
 		3D211A2E0B6B1AD80051299D /* SSATagParsing.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SSATagParsing.h; sourceTree = "<group>"; };
-		3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 30; path = SSATagParsing.m.rl; sourceTree = "<group>"; };
+		3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = SSATagParsing.m.rl; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
 		3DB2BB270B6C92F000416863 /* SSARenderCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSARenderCodec.h; sourceTree = "<group>"; };
@@ -1207,7 +1209,7 @@
 				11BA3E510A61F2CE008AF206 /* ShellScript */,
 			);
 			buildRules = (
-				3D211A2D0B6B1A880051299D /* PBXBuildRule */,
+				3D74F53C0B6DB50C0018BAC0 /* PBXBuildRule */,
 			);
 			dependencies = (
 				11BA3DB00A61EE90008AF206 /* PBXTargetDependency */,
@@ -1370,7 +1372,6 @@
 				11A70AD80A3D0149002058D4 /* InfoPlist.strings in Resources */,
 				11A70AD90A3D0149002058D4 /* FFusion.icns in Resources */,
 				11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */,
-				3D211A300B6B1AD80051299D /* SSATagParsing.m.rl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1490,6 +1491,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D211A300B6B1AD80051299D /* SSATagParsing.m.rl in Sources */,
 				11C85ED80A641E6400DF3D73 /* ff_dataref.c in Sources */,
 				11C85EDA0A641E6400DF3D73 /* ff_private.c in Sources */,
 				11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */,
@@ -1517,6 +1519,7 @@
 				3D211A200B6B1A540051299D /* SSADocument.m in Sources */,
 				3D211A230B6B1A660051299D /* Categories.m in Sources */,
 				3DB2BB290B6C92F000416863 /* SSARenderCodec.m in Sources */,
+				3DAD32DA0B6DB26100DA0A72 /* StdIOCallback.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
