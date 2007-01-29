@@ -106,6 +106,7 @@
 		3D211A230B6B1A660051299D /* Categories.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* Categories.m */; };
 		3D211A300B6B1AD80051299D /* SSATagParsing.m.rl in Resources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */; };
 		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; };
+		3DB2BB290B6C92F000416863 /* SSARenderCodec.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SSARenderCodec.m */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
 		6116E5530B43C27B0020F1CE /* ACSimpleCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E53E0B43C27B0020F1CE /* ACSimpleCodec.cpp */; };
@@ -442,6 +443,8 @@
 		3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 30; path = SSATagParsing.m.rl; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
+		3DB2BB270B6C92F000416863 /* SSARenderCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSARenderCodec.h; sourceTree = "<group>"; };
+		3DB2BB280B6C92F000416863 /* SSARenderCodec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSARenderCodec.m; sourceTree = "<group>"; };
 		6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACBaseCodec.cpp; sourceTree = "<group>"; };
 		6116E5380B43C27B0020F1CE /* ACBaseCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACBaseCodec.h; sourceTree = "<group>"; };
 		6116E5390B43C27B0020F1CE /* ACCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACCodec.cpp; sourceTree = "<group>"; };
@@ -875,6 +878,8 @@
 				6123D6250AD0A3FF003EDE52 /* VobSubCodecDispatch.h */,
 				61D514DC0ADF3DBA00A671E1 /* SubImport.h */,
 				61D514DD0ADF3DBA00A671E1 /* SubImport.c */,
+				3DB2BB270B6C92F000416863 /* SSARenderCodec.h */,
+				3DB2BB280B6C92F000416863 /* SSARenderCodec.m */,
 			);
 			name = Subtitles;
 			sourceTree = "<group>";
@@ -1511,6 +1516,7 @@
 				3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */,
 				3D211A200B6B1A540051299D /* SSADocument.m in Sources */,
 				3D211A230B6B1A660051299D /* Categories.m in Sources */,
+				3DB2BB290B6C92F000416863 /* SSARenderCodec.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

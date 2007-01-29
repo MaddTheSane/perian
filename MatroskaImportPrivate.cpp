@@ -477,6 +477,7 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 void MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 {
 	KaxEditionEntry & edition = GetChild<KaxEditionEntry>(chapterEntries);
+	UInt32 emptyDataRefExtension[2];
 	
 	chapterTrack = NewMovieTrack(theMovie, 0, 0, kNoVolume);
 	if (chapterTrack == NULL) {
@@ -487,9 +488,13 @@ void MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 	// we use a handle data reference here because I don't see any way to add textual 
 	// sample references (TextMediaAddTextSample() will behave the same as AddSample()
 	// in that it modifies the original file if that's the data reference of the media)
-	Handle dataRef = NULL;
-	Handle dataRefData = NewHandle(0);
-	PtrToHand(&dataRefData, &dataRef, sizeof(Handle));
+	Handle dataRef = NewHandleClear(sizeof(Handle) + 1);
+
+	emptyDataRefExtension[0] = EndianU32_NtoB(sizeof(UInt32)*2);
+	emptyDataRefExtension[1] = EndianU32_NtoB(kDataRefExtensionInitializationData);
+	
+	PtrAndHand(&emptyDataRefExtension[0], dataRef, sizeof(emptyDataRefExtension));
+	
 	Media chapterMedia = NewTrackMedia(chapterTrack, TextMediaType, GetMovieTimeScale(theMovie), 
 									   dataRef, HandleDataHandlerSubType);
 	if (chapterMedia == NULL) {

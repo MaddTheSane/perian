@@ -86,7 +86,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa)
 		SSARenderEntity *re;
 		BOOL ldirty = NO;
 		
-		if ([ar count] < 9) {continue;}
+		if ([ar count] < 9) continue;
 		
 		re = [[[SSARenderEntity alloc] init] autorelease];
 		re->layer = [[ar objectAtIndex:1] intValue];
@@ -146,6 +146,8 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa)
 		re->styles[re->style_count-1]->shadow = cur_shadow;\
 		re->styles[re->style_count-1]->astyle = cur_style;\
 		re->styles[re->style_count-1]->range = cur_range;\
+		re->styles[re->style_count-1]->outlineblur = cur_be;\
+		re->styles[re->style_count-1]->color = cur_color;\
 		parsetmp = [NSString stringWithCharacters:skipbegin length:p-skipbegin];\
 		[output appendString:parsetmp]; \
 		re->nstext = dtmp = output;\
