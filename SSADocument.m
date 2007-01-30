@@ -20,6 +20,29 @@
 
 @implementation SSADocument
 
+static ssastyleline SSA_DefaultStyle = (ssastyleline){
+	@"Default",@"Helvetica",
+	32 * (96./72.),
+{{1,1,1,1},{1,1,1,1},{0,0,0,1},{0,0,0,1}}, // white on black
+	1,0,0,0,
+	100,100,0,0,
+	0,1.5,1.5,
+	2,1,0,
+	10,10,10,
+	NULL, NULL
+};
+
+-(void)dealloc
+{
+	int i;
+	if (disposedefaultstyle) free(defaultstyle);
+	for (i=0; i < stylecount; i++) {ATSUDisposeStyle(styles[i].atsustyle); ATSUDisposeTextLayout(styles[i].layout);}
+	
+	[_lines release];
+	[header release];
+	[super dealloc];
+}
+
 static ATSURGBAlphaColor SSAParseColor(NSString *c)
 {
 	const char *c_ = [c UTF8String];
@@ -146,6 +169,8 @@ int SSA2ASSAlignment(int a)
 
 -(void)setupStyles:(NSDictionary*)sDict
 {
+	defaultstyle = NULL;
+
 	if ([sDict count] > 0) {
 		NSEnumerator *sEnum = [sDict objectEnumerator];
 		NSDictionary *style; int i=0;
@@ -187,8 +212,16 @@ int SSA2ASSAlignment(int a)
 			[self makeATSUStylesForSSAStyle:&s];
 			
 			styles[i] = s;
+			if (!defaultstyle && [styles[i].name isEqualToString:@"Default"]) {defaultstyle = &styles[i]; disposedefaultstyle = NO;}
 			i++;
 		}
+	}
+	
+	if (!defaultstyle) {
+		disposedefaultstyle = YES;
+		defaultstyle = malloc(sizeof(ssastyleline));
+		*defaultstyle = SSA_DefaultStyle;
+		[self makeATSUStylesForSSAStyle:defaultstyle];
 	}
 }
 
@@ -214,7 +247,7 @@ static BOOL isinrange(unsigned base, unsigned test_s, unsigned test_e)
 static NSString *oneMKVPacket(NSDictionary *s)
 {
 	return [NSString stringWithFormat:@"%d,%d,%@,%@,%0.4d,%0.4d,%0.4d,%@,%@\n",
-		[s objectForKey:@"ReadOrder"],
+		[[s objectForKey:@"ReadOrder"] intValue],
 		[[s objectForKey:@"Layer"] intValue],
 		[s objectForKey:@"Style"],
 		[s objectForKey:@"Name"],
@@ -254,13 +287,13 @@ static int cmp_line(const void *a, const void *b)
 	unsigned times[num*2];
 	line_range lines[num];
 	unsigned i, j;
-	line_range li;
 	NSMutableArray *outa = [[NSMutableArray alloc] init];
 	
 	for (i = 0; i < num; i++) {
 		NSDictionary *l;
 		NSString *s,*e;
 		l = [linesa objectAtIndex:i];
+		line_range li;
 		
 		s = [l objectForKey:@"Start"];
 		e = [l objectForKey:@"End"];
@@ -268,6 +301,11 @@ static int cmp_line(const void *a, const void *b)
 		li.line = oneMKVPacket(l);
 		li.start = ParseSSATime(s);
 		li.end = ParseSSATime(e);
+		
+		if (timescale != 1.) {
+			li.start *= timescale;
+			li.end *= timescale;
+		}
 		
 		times[i*2] = li.start;
 		times[i*2+1] = li.end;
@@ -294,13 +332,6 @@ static int cmp_line(const void *a, const void *b)
 			[accum deleteCharactersInRange:NSMakeRange([accum length] - 1, 1)]; // delete last newline
 			SSAEvent *event = [[[SSAEvent alloc] init] autorelease];
 			
-			if (timescale != 1.) {
-				double ds = start, de = end;
-				ds *= timescale;
-				de *= timescale;
-				start = ds;
-				end = de;
-			}
 			event->begin_time = start;
 			event->end_time = end;
 			event->line = [accum retain];
@@ -461,6 +492,21 @@ static int cmp_line(const void *a, const void *b)
 	[self setupStyles:styleDict];
 }
 
+-(void)loadDefaultsWithWidth:(float)width height:(float)height
+{
+	stylecount = 0;
+	styles = malloc(0);
+	defaultstyle = malloc(sizeof(ssastyleline));
+	*defaultstyle = SSA_DefaultStyle;
+	disposedefaultstyle = YES;
+	resX = (width / height) * 480.; resY = 480;
+	timescale = 1;
+	collisiontype = Normal;
+	version = S_ASS;
+	
+	[self makeATSUStylesForSSAStyle:defaultstyle];
+}
+
 -(NSString*)header
 {
 	return header;
@@ -485,12 +531,15 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 	int i, packetCount, sampleLen;
 	ImageDescriptionHandle textDesc;
 	Rect movieBox;
-	static UInt8 path[PATH_MAX];
 	UInt32 emptyDataRefExtension[2];
+	TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
+	UInt8 *path = malloc(PATH_MAX);
 
 	FSRefMakePath(theDirectory, path, PATH_MAX);
 	
 	[ssa loadFile:[[NSString stringWithUTF8String:(char*)path] stringByAppendingPathComponent:(NSString*)filename]];
+	
+	free(path);
 	
 	packetCount = [ssa packetCount];
 	
@@ -539,7 +588,7 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 		err=AddMediaSample(theMedia,sampleHndl,0,sampleLen, p->end_time - p->begin_time,(SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
 		if (err != noErr) goto bail;
 		
-		ConvertTimeScale(&movieStartTime, GetMovieTimeScale(theMovie));
+		ConvertTimeScale(&movieStartTime, movieTimeScale);
 
 		err = InsertMediaIntoTrack(theTrack, movieStartTime.value.lo, sampleTime, p->end_time - p->begin_time, fixed1);
 		if (err != noErr) {goto bail;}

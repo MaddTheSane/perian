@@ -36,4 +36,4 @@
 }
 @end
 
-extern NSArray *ParseSubPacket(NSString *str, SSADocument *ssa);
+extern NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext);

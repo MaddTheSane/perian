@@ -29,12 +29,9 @@ typedef struct	{
 	ImageCodecMPDrawBandUPP drawBandUPP;
 	
 	CGColorSpaceRef         colorSpace;
-	
-	ATSUStyle				textStyle, italicStyle, boldStyle, biStyle;
-	ATSUTextLayout			textLayout;
 
 	SSARenderGlobalsPtr		ssa;
-	Boolean					useSSA;
+	Boolean					translateSRT;
 } TextSubGlobalsRecord, *TextSubGlobals;
 
 typedef struct {
@@ -47,17 +44,6 @@ typedef struct {
     // pointer to the data the context currently is drawing into
     Ptr             baseAddr;
 } TextSubDecompressRecord;
-
-static CFMutableStringRef CFStringCreateWithCStringMutable(CFAllocatorRef alloc, const char *cStr, CFStringEncoding encoding) {
-	CFStringRef		   s1 = CFStringCreateWithCString(alloc,cStr,encoding);
-	if (!s1) return NULL;
-	CFMutableStringRef s2 = CFStringCreateMutableCopy(alloc,0,s1);
-	CFRelease(s1);
-	return s2;
-}
-
-static size_t ParseSrtStyles(TextSubGlobals glob, CFMutableStringRef cfsub, UniChar *uc, size_t sublen);
-static inline int min(int a, int b) {return (a<=b)?a:b;}
 
 // Setup required for ComponentDispatchHelper.c
 #define IMAGECODEC_BASENAME() 		TextSubCodec
@@ -83,6 +69,14 @@ static inline int min(int a, int b) {return (a<=b)?a:b;}
 	#include <ComponentDispatchHelper.c>
 #endif
 	
+static CFMutableStringRef CFStringCreateMutableWithBytes(CFAllocatorRef alloc, char *cStr, size_t size, CFStringEncoding encoding) {
+	CFStringRef                s1 = CFStringCreateWithBytes(alloc,(UInt8*)cStr,size,encoding,false);
+	if (!s1) return NULL;
+	CFMutableStringRef s2 = CFStringCreateMutableCopy(alloc,0,s1);
+	CFRelease(s1);
+	return s2;
+}
+
 /* -- This Image Decompressor Uses the Base Image Decompressor Component --
 	The base image decompressor is an Apple-supplied component
 	that makes it easier for developers to create new decompressors.
@@ -108,7 +102,6 @@ pascal ComponentResult TextSubCodecOpen(TextSubGlobals glob, ComponentInstance s
 	if (err = MemError()) goto bail;
 	glob->drawBandUPP = NULL;
 	glob->ssa = NULL;
-	glob->useSSA = false;
 	
 	// Open and target an instance of the base decompressor as we delegate
 	// most of our calls to the base decompressor instance
@@ -138,22 +131,7 @@ pascal ComponentResult TextSubCodecClose(TextSubGlobals glob, ComponentInstance 
 		if (glob->colorSpace) {
 			CGColorSpaceRelease(glob->colorSpace);
 		}
-		if (glob->textStyle) {
-			ATSUDisposeStyle(glob->textStyle);
-		}
-		if (glob->italicStyle) {
-			ATSUDisposeStyle(glob->italicStyle);
-		}
-		if (glob->boldStyle) {
-			ATSUDisposeStyle(glob->boldStyle);
-		}
-		if (glob->boldStyle) {
-			ATSUDisposeStyle(glob->biStyle);
-		}
-		if (glob->textLayout) {
-			ATSUDisposeTextLayout(glob->textLayout);
-		}
-		if (glob->useSSA) SSA_Dispose(glob->ssa);
+		if (glob->ssa) SSA_Dispose(glob->ssa);
 		DisposePtr((Ptr)glob);
 	}
 
@@ -284,9 +262,12 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 	myDrp->depth = (**p->imageDescription).depth;
     myDrp->dataSize = p->bufferSize;
 	
-	glob->useSSA = (**p->imageDescription).cType == kSubFormatSSA;
-	if (glob->useSSA) {
+	glob->translateSRT = true;
+	
+	if ((**p->imageDescription).cType == kSubFormatSSA) {
 		long count;
+		glob->translateSRT = false;
+
 		CountImageDescriptionExtensionType(p->imageDescription,kSubFormatSSA,&count);
 		if (count == 1) {
 			Handle ssaheader;
@@ -294,7 +275,7 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 			
 			glob->ssa = SSA_Init(*ssaheader, GetHandleSize(ssaheader));
 		}
-	}
+	} else glob->ssa = SSA_InitNonSSA(myDrp->width,myDrp->height);
 	
 	return noErr;
 }
@@ -312,145 +293,33 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 // it may receive more than one ImageCodecBeginBand call before receiving an ImageCodecDrawBand call.
 pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDecompressRecord *drp)
 {
-	OSErr err = noErr;
-	int i;
 	TextSubDecompressRecord *myDrp = (TextSubDecompressRecord *)drp->userDecompressRecord;
-	float diagonalLength = sqrtf(myDrp->width*myDrp->width+myDrp->height*myDrp->height);
-	ATSUTextMeasurement lineWidth = Long2Fix(myDrp->width), lineHeight = Long2Fix(25), ShadowDistFix = FloatToFixed(diagonalLength * ShadowDistance);
-//	char *dataPtr = (char *)drp->codecData;
-//	ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
 	
     CGContextRef c = CGBitmapContextCreate(drp->baseAddr, myDrp->width, myDrp->height,
 										   8, drp->rowBytes,  glob->colorSpace,
 										   kCGImageAlphaPremultipliedFirst);
 	
-	if (glob->useSSA) {
-		SSA_RenderLine(glob->ssa,c,drp->codecData,myDrp->dataSize,myDrp->width,myDrp->height);
-		return noErr;
+	CFMutableStringRef buf;
+	
+	if (glob->translateSRT) {
+		buf = CFStringCreateMutableWithBytes(NULL, drp->codecData, myDrp->dataSize, kCFStringEncodingUTF8);
+		if (!buf) return noErr;
+		CFStringFindAndReplace(buf, CFSTR("<i>"),  CFSTR("{\\i}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
+		CFStringFindAndReplace(buf, CFSTR("<b>"),  CFSTR("{\\b}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
+		CFStringFindAndReplace(buf, CFSTR("</i>"), CFSTR("{\\i0}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
+		CFStringFindAndReplace(buf, CFSTR("</b>"), CFSTR("{\\b0}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
+	} else {
+		buf = (CFMutableStringRef)CFStringCreateWithBytes(NULL, (UInt8*)drp->codecData, myDrp->dataSize, kCFStringEncodingUTF8, false);
+		if (!buf) return noErr;
 	}
 	
-	if (!glob->textStyle) { //TODO: set language region based on track language... does that even matter?
-		ATSUAttributeTag tags[] = {kATSUSizeTag, kATSUStyleRenderingOptionsTag, kATSUFontTag};
-		ByteCount		 sizes[] = {sizeof(Fixed), sizeof(ATSStyleRenderingOptions), sizeof(ATSUFontID)};
-		Fixed			 size = X2Fix(diagonalLength * FontSizeRatio);
-		Boolean			 trueval = TRUE; ATSUFontID fid; ATSStyleRenderingOptions rend = kATSStyleApplyAntiAliasing;
-		ATSUAttributeValuePtr vals[] = {&size,&rend,&fid};
-		ATSUCreateStyle(&glob->textStyle);
-		if (err = ATSUFindFontFromName(SubFontName,strlen(SubFontName),kFontFullName,kFontNoPlatform,kFontNoScript,kFontNoLanguage,&fid))
-			fprintf(stderr,"Perian: ATSUFindFontFromName error %d for font \"%s\"\n", err, SubFontName);
-		ATSUSetAttributes(glob->textStyle,3, tags, sizes, vals);
-		
-		ATSUAttributeTag ext[] = {kATSUQDItalicTag};
-		ByteCount		 exs[] = {sizeof(Boolean)};
-		ATSUAttributeValuePtr exv[] = {&trueval};
-		ATSUCreateAndCopyStyle(glob->textStyle,&glob->italicStyle);
-		ATSUSetAttributes(glob->italicStyle,1,ext,exs,exv);
-		
-		ext[0] = kATSUQDBoldfaceTag;
-		ATSUCreateAndCopyStyle(glob->textStyle,&glob->boldStyle);
-		ATSUSetAttributes(glob->boldStyle,1,ext,exs,exv);
-		
-		ATSUCreateAndCopyStyle(glob->italicStyle,&glob->biStyle);
-		ATSUSetAttributes(glob->biStyle,1,ext,exs,exv);
-	}
+	SSA_RenderLine(glob->ssa,c,buf,myDrp->width,myDrp->height);
 	
-	if (!glob->textLayout) {
-		ATSUAttributeTag tags[] = {kATSULineFlushFactorTag, kATSULineWidthTag};
-		ByteCount		 sizes[] = {sizeof(Fract),sizeof(ATSUTextMeasurement)};
-		Fract			 lf = kATSUCenterAlignment; ATSUTextMeasurement w = Long2Fix(myDrp->width);
-		ATSUAttributeValuePtr vals[] = {&lf, &w};
-		ATSUCreateTextLayout(&glob->textLayout);
-		ATSUSetLayoutControls(glob->textLayout, 2, tags, sizes, vals);
-	}
-	
-	// QuickTime doesn't like it if we complain too much
-    if (!c || !glob->textStyle)
-		return noErr;
-
-	char textBuffer[myDrp->dataSize + 1];
-	
-	memcpy(textBuffer, drp->codecData, myDrp->dataSize);
-	textBuffer[myDrp->dataSize] = '\0';
-
-	ATSUAttributeTag cgc[] = {kATSUCGContextTag};
-	ByteCount cgc_s[] = {sizeof(CGContextRef)};
-	ATSUAttributeValuePtr cgc_v[] = {&c};
-	
-	ATSUSetLayoutControls(glob->textLayout, 1, cgc, cgc_s, cgc_v);
-		
-	CFMutableStringRef cfsub = CFStringCreateWithCStringMutable(NULL, textBuffer, kCFStringEncodingUTF8);
-	if (cfsub == NULL)
-		return noErr;
-	
-	size_t sublen = CFStringGetLength(cfsub);
-	
-	UniChar		uc[sublen];
-	
-	sublen = ParseSrtStyles(glob, cfsub, uc, sublen);
-	
-	ItemCount	breakCount;
-
-	ATSUBatchBreakLines(glob->textLayout,kATSUFromTextBeginning,kATSUToTextEnd,lineWidth,&breakCount); // line wrapping
-	ATSUGetSoftLineBreaks(glob->textLayout,kATSUFromTextBeginning,kATSUToTextEnd,0,NULL,&breakCount);
-	UniCharArrayOffset breaks[breakCount+2]; // 0 = beginning, 1...n-1 automatic line breaks, n end of text
-	ATSUGetSoftLineBreaks(glob->textLayout,kATSUFromTextBeginning,kATSUToTextEnd,breakCount,&breaks[1],&breakCount);
-
-	breaks[0] = 0;
-	breaks[breakCount+1] = sublen;
-	
-	CGContextSetLineJoin(c, kCGLineJoinRound);
-	CGContextSetLineCap(c, kCGLineCapRound);
-	
-	CGContextClearRect(c, CGRectMake(0, 0, myDrp->width, myDrp->height));
-	CGContextSetRGBFillColor(c, 0,0,0,1);
-	CGContextSetTextDrawingMode(c, kCGTextFill);
-
-	lineHeight -= ShadowDistFix;
-	
-	/* Problem here: there can be "holes" between the shadow and the text from thin strokes, which is ugly.
-	   I tried using CGContextSetShadow instead of this but it didn't seem to show up,
-	   probably because I have to apply it to the stroke pass only... (so don't use Hoefler Text with a shadow) */
-	
-	for (i = breakCount; i >= 0; i--) { // render shadow by drawing black text at an offset
-		int end = breaks[i+1];
-
-		ATSUDrawText(glob->textLayout, breaks[i], end-breaks[i], Long2Fix(0) + ShadowDistFix, lineHeight);
-		
-		ATSUTextMeasurement ascent, descent; ByteCount unused;
-		ATSUGetLineControl(glob->textLayout, breaks[i], kATSULineAscentTag, sizeof(ATSUTextMeasurement), &ascent, &unused);
-		ATSUGetLineControl(glob->textLayout, breaks[i], kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, &unused);
-
-		lineHeight += ascent + descent;
-	}
-	
-	lineHeight = Long2Fix(25); // XXX constant
-	CGContextSetRGBFillColor(c, 1,1,1,1); // fill white
-	CGContextSetRGBStrokeColor(c, 0,0,0,1); // stroke black
-	CGContextSetLineWidth(c, diagonalLength * BorderSizeRatio);
-	
-	for (i = breakCount; i >= 0; i--) {
-		int end = breaks[i+1];
-		
-		CGContextSetTextDrawingMode(c, kCGTextStroke); // render outline (ATSUI doesn't support outside stroke so we fake it)
-
-		ATSUDrawText(glob->textLayout, breaks[i], end-breaks[i], Long2Fix(0), lineHeight);
-
-		ATSUTextMeasurement ascent, descent; ByteCount unused;
-		ATSUGetLineControl(glob->textLayout, breaks[i], kATSULineAscentTag, sizeof(ATSUTextMeasurement), &ascent, &unused);
-		ATSUGetLineControl(glob->textLayout, breaks[i], kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, &unused);
-		
-		CGContextSetTextDrawingMode(c, kCGTextFill); // render filled text on top of stroke
-		
-		ATSUDrawText(glob->textLayout, breaks[i], end-breaks[i], Long2Fix(0), lineHeight);
-		
-		lineHeight += ascent + descent;
-	}
-
-	CFRelease(cfsub);
+	CFRelease(buf);
 	CGContextSynchronize(c);
 	CGContextRelease(c);
 	
-	return err;
+	return noErr;
 }
 
 // ImageCodecEndBand
@@ -532,106 +401,4 @@ pascal ComponentResult TextSubCodecGetCodecInfo(TextSubGlobals glob, CodecInfo *
 	}
 
 	return err;
-}
-
-// XXX the below code is really bad, though it works; it is impossible to scale it to any more tags. needs a real parser
-
-static CFRange *MakeStyleRanges(CFStringRef cfsub, CFStringRef open, CFStringRef close, size_t *rcount, size_t sublen) {
-	CFArrayRef begins, ends; size_t tagcount, tagoffset = 0, bs = CFStringGetLength(open), cs = CFStringGetLength(close), i, rcount_ = 0;
-	CFRange all = (CFRange){0,sublen};
-	begins = CFStringCreateArrayWithFindResults(NULL,cfsub,open,all,0);
-	CFRange *ranges = NULL;
-	if (begins) {
-		ends = CFStringCreateArrayWithFindResults(NULL,cfsub,close,all,0);
-		if (ends && CFArrayGetCount(begins) == CFArrayGetCount(ends)) {
-			tagcount = CFArrayGetCount(begins);
-			ranges = (CFRange*)malloc(sizeof(CFRange[tagcount]));
-			for (i = 0; i < tagcount; i++) {
-				CFRange *btag, *etag;
-				btag = (CFRange*)CFArrayGetValueAtIndex(begins,i);
-				etag = (CFRange*)CFArrayGetValueAtIndex(ends,i);
-				if (etag->location < btag->location) break; // something's messed up
-				ranges[i] = (CFRange){btag->location, etag->location};
-				ranges[i].length -= ranges[i].location; 
-				ranges[i].length -= bs;
-				ranges[i].location -= tagoffset; 
-				rcount_++;
-				tagoffset += bs + cs; // tracks sizes of tags we've encountered so far, so the ranges will be valid after we strip them
-			}
-			CFRelease(ends);
-		}
-		CFRelease(begins); 
-	}
-	*rcount = rcount_;
-	return ranges;
-}
-
-static size_t ParseSrtStyles(TextSubGlobals glob, CFMutableStringRef cfsub, UniChar *uc, size_t sublen)
-{
-	int i;
-	size_t italiccount=0, boldcount=0;
-	CFRange *italics = NULL, *bolds = NULL; CFRange all = (CFRange){0,sublen};
-	CFMutableStringRef cfsub_nob = CFStringCreateMutableCopy(NULL,0,cfsub);
-	
-	/*  Because I try to predict what the ranges will be after stripping tags, makestyleranges won't work if other
-		to-be-stripped tags are in its string, so we have to remove them... */
-	CFStringFindAndReplace(cfsub_nob, CFSTR("<b>"),CFSTR(""),all,0);
-	CFStringFindAndReplace(cfsub_nob, CFSTR("</b>"),CFSTR(""),CFRangeMake(0,CFStringGetLength(cfsub_nob)),0);
-	italics = MakeStyleRanges(cfsub_nob, CFSTR("<i>"), CFSTR("</i>"), &italiccount, CFStringGetLength(cfsub_nob));
-
-	if (italics) {
-		CFStringFindAndReplace(cfsub, CFSTR("<i>"),CFSTR(""),all,0);
-		all = (CFRange){0,CFStringGetLength(cfsub)};
-		CFStringFindAndReplace(cfsub, CFSTR("</i>"),CFSTR(""),all,0);
-		sublen = CFStringGetLength(cfsub);
-		all = (CFRange){0,sublen};
-	}
-	bolds	= MakeStyleRanges(cfsub, CFSTR("<b>"), CFSTR("</b>"), &boldcount, sublen);
-
-	if (bolds) {
-		CFStringFindAndReplace(cfsub, CFSTR("<b>"),CFSTR(""),all,0);
-		all = (CFRange){0,CFStringGetLength(cfsub)};
-		CFStringFindAndReplace(cfsub, CFSTR("</b>"),CFSTR(""),all,0);
-		sublen = CFStringGetLength(cfsub);
-		all = (CFRange){0,sublen};
-	}
-	
-	CFStringGetCharacters(cfsub, all, uc);
-	ATSUSetTextPointerLocation(glob->textLayout,uc,kATSUFromTextBeginning,kATSUToTextEnd,sublen);
-	ATSUSetTransientFontMatching(glob->textLayout,TRUE);
-
-	ATSUSetRunStyle(glob->textLayout,glob->textStyle,kATSUFromTextBeginning,kATSUToTextEnd);
-	if (italics) {
-		for (i = 0; i < italiccount; i++) ATSUSetRunStyle(glob->textLayout,glob->italicStyle,italics[i].location,italics[i].length);
-	}
-	if (bolds) {
-		for (i = 0; i < boldcount; i++) ATSUSetRunStyle(glob->textLayout,glob->boldStyle,bolds[i].location,bolds[i].length);
-	}
-	if (italics && bolds) { 
-		// <i><b></b></i>
-		for (i = 0; i < italiccount; i++) {
-			CFRange ir = italics[i]; int j;
-			for (j = 0; j < boldcount; j++) {
-				CFRange br = bolds[j];
-				if (br.location > ir.location && br.location < (ir.location + ir.length)) {
-					ATSUSetRunStyle(glob->textLayout,glob->biStyle,br.location,min(br.length, ir.length - (br.location - ir.location)));
-				}
-			}
-		}
-		
-		// <b><i></i></b>
-		for (i = 0; i < boldcount; i++) {
-			CFRange br = bolds[i]; int j;
-			for (j = 0; j < italiccount; j++) {
-				CFRange ir = italics[j];
-				if (ir.location > br.location && ir.location < (br.location + br.length)) {
-					ATSUSetRunStyle(glob->textLayout,glob->biStyle,ir.location,min(ir.length, br.length - (ir.location - br.location)));
-				}
-			}
-		}		
-	}
-	if (italics) free(italics);
-	if (bolds) free(bolds);
-	CFRelease(cfsub_nob);
-	return sublen;
 }

@@ -46,16 +46,19 @@ typedef struct ssastyleline {
 		
 	int stylecount;
 	ssastyleline *styles;
+	ssastyleline *defaultstyle;
 	
 	float resX, resY;
 	double timescale;
 	enum {Normal, Reverse} collisiontype;
 	enum {S_ASS, S_SSA} version;
+	Boolean disposedefaultstyle;
 }
 -(NSString *)header;
 -(SSAEvent *)movPacket:(int)i;
 -(void) loadHeader:(NSString*)path;
 -(unsigned)packetCount;
+-(void)loadDefaultsWithWidth:(float)width height:(float)height;
 @end
 
 extern int SSA2ASSAlignment(int a);

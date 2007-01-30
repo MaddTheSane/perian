@@ -69,64 +69,85 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 static ATSURGBAlphaColor ParseColorTag(unsigned long c, float a)
 {
 	unsigned char r,g,b;
+	c = EndianU32_NtoB(c);
 	r = c & 0xff;
 	g = (c >> 8) & 0xff;
 	b = (c >> 16) & 0xff;
 	return (ATSURGBAlphaColor){r/255.,g/255.,b/255.,a};
 }
 
-NSArray *ParseSubPacket(NSString *str, SSADocument *ssa)
+NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 {
 	NSArray *linea = [str componentsSeparatedByString:@"\n"];
-	int i, pcount = [linea count]; unsigned len;
+	int i, j, pcount = [linea count]; unsigned len;
 	NSMutableArray *rentities = [NSMutableArray array];
 	
 	for (i = 0; i < pcount; i++) {
-		NSArray *ar = [[linea objectAtIndex:i] componentsSeparatedByString:@"," count:9];
-		SSARenderEntity *re;
+		SSARenderEntity *re = [[[SSARenderEntity alloc] init] autorelease];
 		BOOL ldirty = NO;
 		
-		if ([ar count] < 9) continue;
-		
-		re = [[[SSARenderEntity alloc] init] autorelease];
-		re->layer = [[ar objectAtIndex:1] intValue];
-		NSString *sn = [ar objectAtIndex:2];
-		int j;
-
-		for (j=0; j < ssa->stylecount; j++) {
-			if ([sn isEqualToString:ssa->styles[j].name])  {
-				re->style = &ssa->styles[j]; 
-				break;
-			}
-		}
-		
-		re->marginl = [[ar objectAtIndex:5] intValue];
-		re->marginr = [[ar objectAtIndex:6] intValue];
-		re->marginv = [[ar objectAtIndex:7] intValue];
-		
-		if (re->marginl == 0) re->marginl = re->style->marginl; else ldirty = TRUE;
-		if (re->marginr == 0) re->marginr = re->style->marginr; else ldirty = TRUE;
-		if (re->marginv == 0) re->marginv = re->style->marginv; else ldirty = TRUE;
-		
-		if (ldirty) {
-			ATSUTextMeasurement width;
-			ATSUAttributeTag tag[] = {kATSULineWidthTag};
-			ByteCount		 size[] = {sizeof(ATSUTextMeasurement)};
-			ATSUAttributeValuePtr val[] = {&width};
-			
-			re->usablewidth = ssa->resX - re->marginl - re->marginr; 
-			ATSUCreateAndCopyTextLayout(re->style->layout,&re->layout);
-			width = IntToFixed(re->usablewidth);
-			
-			ATSUSetLayoutControls(re->layout,1,tag,size,val);
-			re->disposelayout = YES;
-		} else {
-			re->usablewidth = re->style->usablewidth;
+		if (plaintext) {
+			re->style = ssa->defaultstyle;
 			re->layout = re->style->layout;
+			re->layer = 0;
+			re->marginl = re->style->marginl;
+			re->marginr = re->style->marginl;
+			re->marginv = re->style->marginl;
+			re->usablewidth = re->style->usablewidth;
+			re->halign = 1;
+			re->valign = 0;
+			re->nstext = [linea objectAtIndex:i];
+			re->styles = NULL;
 			re->disposelayout = NO;
+		} else {
+			NSArray *ar = [[linea objectAtIndex:i] componentsSeparatedByString:@"," count:9];
+
+			if ([ar count] < 9) continue;
+			
+			re->layer = [[ar objectAtIndex:1] intValue];
+			NSString *sn = [ar objectAtIndex:2];
+			
+			re->style = NULL;
+			
+			for (j=0; j < ssa->stylecount; j++) {
+				if ([sn isEqualToString:ssa->styles[j].name])  {
+					re->style = &ssa->styles[j]; 
+					break;
+				}
+			}
+			
+			if (!re->style) {			
+				re->style = ssa->defaultstyle;
+			}
+			
+			re->marginl = [[ar objectAtIndex:5] intValue];
+			re->marginr = [[ar objectAtIndex:6] intValue];
+			re->marginv = [[ar objectAtIndex:7] intValue];
+			
+			if (re->marginl == 0) re->marginl = re->style->marginl; else ldirty = TRUE;
+			if (re->marginr == 0) re->marginr = re->style->marginr; else ldirty = TRUE;
+			if (re->marginv == 0) re->marginv = re->style->marginv; else ldirty = TRUE;
+			
+			if (ldirty) {
+				ATSUTextMeasurement width;
+				ATSUAttributeTag tag[] = {kATSULineWidthTag};
+				ByteCount		 size[] = {sizeof(ATSUTextMeasurement)};
+				ATSUAttributeValuePtr val[] = {&width};
+				
+				re->usablewidth = ssa->resX - re->marginl - re->marginr; 
+				ATSUCreateAndCopyTextLayout(re->style->layout,&re->layout);
+				width = IntToFixed(re->usablewidth);
+				
+				ATSUSetLayoutControls(re->layout,1,tag,size,val);
+				re->disposelayout = YES;
+			} else {
+				re->usablewidth = re->style->usablewidth;
+				re->layout = re->style->layout;
+				re->disposelayout = NO;
+			}
+			
+			re->nstext = [ar objectAtIndex:8];
 		}
-		
-		re->nstext = [ar objectAtIndex:8];
 		len = [re->nstext length];
 		re->text = malloc(sizeof(unichar[len]));
 		
@@ -169,7 +190,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa)
 			
 			unsigned long inum;
 			unsigned outputoffset=0, lengthreduce=0;
-			BOOL flag, newLayout=FALSE, cur_be;
+			BOOL flag, newLayout=FALSE, cur_be = FALSE;
 			Fixed fixv;
 			
 			ATSUCreateAndCopyStyle(re->style->atsustyle,&cur_style);
@@ -352,7 +373,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa)
 					inum = strtoul([hexn UTF8String], NULL, 16);
 				}
 				
-				flag = [01] > {flag = *p - '0';};
+				flag = [01]? > {flag = 1;} % {flag = *(p-1) - '0';};
 				num_ = digit+ ('.' digit*)?;
 				num = num_ > {numbegin = p;} % {num = [[NSString stringWithCharacters:numbegin length:p-numbegin] doubleValue];};
 				

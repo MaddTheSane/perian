@@ -13,6 +13,7 @@
 typedef struct SSARenderGlobals
 {
 	SSADocument *document;
+	Boolean plaintext;
 } SSARenderGlobals;
 
 SSARenderGlobalsPtr SSA_Init(const char *header, size_t size)
@@ -20,8 +21,18 @@ SSARenderGlobalsPtr SSA_Init(const char *header, size_t size)
 	SSARenderGlobalsPtr g = (SSARenderGlobalsPtr)NewPtr(sizeof(SSARenderGlobals));
 	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:size encoding:NSUTF8StringEncoding freeWhenDone:NO];
 	g->document = [[SSADocument alloc] init];
+	g->plaintext = false;
 	[g->document loadHeader:hdr];
 	[hdr release];
+	return g;
+}
+
+SSARenderGlobalsPtr SSA_InitNonSSA(float width, float height)
+{
+	SSARenderGlobalsPtr g = (SSARenderGlobalsPtr)NewPtr(sizeof(SSARenderGlobals));
+	g->document = [[SSADocument alloc] init];
+	g->plaintext = true;
+	[g->document loadDefaultsWithWidth:width height:height];
 	return g;
 }
 
@@ -76,7 +87,7 @@ static void GetTypographicRectangleForLayout(SSARenderEntity *re, UniCharArrayOf
 	*width = largeRect.right - largeRect.left;
 }
 
-void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, const char *data, size_t size, float cWidth, float cHeight)
+void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub, float cWidth, float cHeight)
 {
 	ItemCount breakCount;
 	Fixed penY,penX;
@@ -85,10 +96,11 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, const char *data, 
 	float outline, shadow;
 	SSADocument *ssa = glob->document;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSString *curSub = [[NSString alloc] initWithBytesNoCopy:(void*)data length:size encoding:NSUTF8StringEncoding freeWhenDone:NO];
-	NSArray *rentities = ParseSubPacket(curSub,ssa);
+	NSString *curSub = (NSString*)cfSub;
+	NSArray *rentities = ParseSubPacket(curSub,ssa,glob->plaintext);
 	OSStatus err;
 	
+	CGContextClearRect(c, CGRectMake(0,0,cWidth,cHeight));
 	CGContextScaleCTM(c, cWidth / ssa->resX, cHeight / ssa->resY);
 	subcount = [rentities count];
 	
@@ -99,7 +111,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, const char *data, 
 		outline = re->styles[0]->outline; shadow = re->styles[0]->shadow;
 		
 		size_t sublen = [re->nstext length];
-				
+						
 		err=ATSUSetTextPointerLocation(layout,re->text,kATSUFromTextBeginning,kATSUToTextEnd,sublen);
 		
 		ATSUSetTransientFontMatching(layout,TRUE);
@@ -131,7 +143,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, const char *data, 
 			{
 				case S_BottomAlign: default: //bottom
 					ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
-					penY = (lastBottomPenY!=-1)?lastBottomPenY:(MAX(IntToFixed(re->marginv), descent)); direction = 1;
+					penY = (lastBottomPenY!=-1)?lastBottomPenY:(MAX(IntToFixed(re->marginv), descent) + FloatToFixed(shadow)); direction = 1;
 					lstart = breakCount; lend = -1; lstep = -1;
 					storePenY = &lastBottomPenY;
 					break;
@@ -244,10 +256,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, const char *data, 
 		*storePenY = penY;
 	}
 	
-	[curSub release];
 	[pool release];
-	CGContextSynchronize(c);	
-	CGContextRelease(c);
 }
 
 void SSA_Dispose(SSARenderGlobalsPtr glob)
