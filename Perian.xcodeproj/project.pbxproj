@@ -439,8 +439,8 @@
 		11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUUpdateAlert.m; sourceTree = "<group>"; };
 		3D211A1E0B6B1A540051299D /* SSADocument.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SSADocument.h; sourceTree = "<group>"; };
 		3D211A1F0B6B1A540051299D /* SSADocument.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SSADocument.m; sourceTree = "<group>"; };
-		3D211A210B6B1A660051299D /* Categories.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Categories.h; path = ../../SSAView/Categories.h; sourceTree = SOURCE_ROOT; };
-		3D211A220B6B1A660051299D /* Categories.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = Categories.m; path = ../../SSAView/Categories.m; sourceTree = SOURCE_ROOT; };
+		3D211A210B6B1A660051299D /* Categories.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Categories.h; sourceTree = "<group>"; };
+		3D211A220B6B1A660051299D /* Categories.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = Categories.m; sourceTree = "<group>"; };
 		3D211A2E0B6B1AD80051299D /* SSATagParsing.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SSATagParsing.h; sourceTree = "<group>"; };
 		3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = SSATagParsing.m.rl; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
