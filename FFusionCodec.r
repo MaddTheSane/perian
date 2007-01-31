@@ -104,7 +104,7 @@
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
 
-#define kFFusionDecompressionFlags ( codecInfoDoes32 | codecInfoDoes16 | codecInfoDoes8 | codecInfoDoes1 )
+#define kFFusionDecompressionFlags ( codecInfoDoes32 | codecInfoDoes16 | codecInfoDoes8 | codecInfoDoes1 | cmpThreadSafe )
 
 // These flags specify the possible format of compressed data produced by the component
 // and the format of compressed files that the component can handle during decompression

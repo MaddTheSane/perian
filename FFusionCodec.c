@@ -366,6 +366,8 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 		cap->subCodecSupportsOutOfOrderDisplayTimes = true;
 		cap->baseCodecShouldCallDecodeBandForAllFrames = true;
 		cap->subCodecSupportsScheduledBackwardsPlaybackWithDifferenceFrames = true;
+		cap->subCodecSupportsDrawInDecodeOrder = true;
+		cap->subCodecSupportsDecodeSmoothing = true;
 	}
 	
     return noErr;
