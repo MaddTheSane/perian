@@ -228,6 +228,26 @@ ComponentResult DescExt_VobSub(KaxTrackEntry *tr_entry, SampleDescriptionHandle 
 	return noErr;
 }
 
+ComponentResult DescExt_SSA(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
+{
+	if (!tr_entry || !desc) return paramErr;
+	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
+	
+	if (dir == kToSampleDescription) {
+		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+		if (codecPrivate == NULL)
+			return invalidAtomErr;
+		
+		Handle imgDescExt = NewHandle(codecPrivate->GetSize());
+		memcpy(*imgDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
+		
+		AddImageDescriptionExtension(imgDesc, imgDescExt, kSubFormatSSA);
+		
+		DisposeHandle((Handle) imgDescExt);
+	}
+	return noErr;
+}
+
 ComponentResult DescExt_Real(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
 {
 	if (!tr_entry || !desc) return paramErr;
@@ -501,6 +521,9 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 				
 			case kMPEG4VisualCodecType:
 				return DescExt_mp4v(tr_entry, desc, dir);
+				
+			case kSubFormatSSA:
+				return DescExt_SSA(tr_entry, desc, dir);
 		}
 	}
 	return noErr;
@@ -637,10 +660,11 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	
 #if 0
 	{ kBMPCodecType, "S_IMAGE/BMP" },
-	{ kSubFormatSSA, "S_TEXT/SSA" },
-	{ kSubFormatASS, "S_TEXT/ASS" },
+
 	{ kSubFormatUSF, "S_TEXT/USF" },
 #endif
+	{ kSubFormatSSA, "S_TEXT/SSA" },
+	{ kSubFormatASS, "S_TEXT/ASS" },
 	{ kSubFormatUTF8, "S_TEXT/UTF8" },
 	{ kSubFormatVobSub, "S_VOBSUB" },
 };

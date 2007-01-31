@@ -263,6 +263,7 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
     myDrp->dataSize = p->bufferSize;
 	
 	glob->translateSRT = true;
+	glob->ssa = NULL;
 	
 	if ((**p->imageDescription).cType == kSubFormatSSA) {
 		long count;
@@ -274,8 +275,10 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 			GetImageDescriptionExtension(p->imageDescription,&ssaheader,kSubFormatSSA,1);
 			
 			glob->ssa = SSA_Init(*ssaheader, GetHandleSize(ssaheader));
-		}
-	} else glob->ssa = SSA_InitNonSSA(myDrp->width,myDrp->height);
+		} 
+	} 
+	
+	if (!glob->ssa) glob->ssa = SSA_InitNonSSA(myDrp->width,myDrp->height);
 	
 	return noErr;
 }

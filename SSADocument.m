@@ -421,7 +421,7 @@ static int cmp_line(const void *a, const void *b)
 	NSError *err;
 	NSStringEncoding se = NSUTF8StringEncoding;
 	if (!ssa) return;
-	NSArray *lines = [ssa componentsSeparatedByString:@"\n"];
+	NSArray *lines = [[ssa stringByStandardizingNewlines] componentsSeparatedByString:@"\n"];
 	NSEnumerator *lenum = [lines objectEnumerator];
 	NSString *nextLine, *styleType, *ns;
 	NSArray *format;
@@ -436,7 +436,12 @@ static int cmp_line(const void *a, const void *b)
 	styleDict = [NSMutableDictionary dictionary];
 	doclines = [NSMutableArray array];
 	
-	if (![(NSString*)[lenum nextObject] isEqualToString:@"[Script Info]"]) return;
+	nextLine = [[lenum nextObject] stringByTrimmingCharactersInSet:ws];
+	
+	if (![nextLine isEqualToString:@"[Script Info]"]) {
+		NSLog(@"\"%@\" is not a valid SSA header?",nextLine);
+		return;
+	}
 	while (1) {
 		ns = (NSString*)[lenum nextObject];
 		if (!ns || [ns length] == 0) continue;

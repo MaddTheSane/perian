@@ -69,10 +69,10 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 static ATSURGBAlphaColor ParseColorTag(unsigned long c, float a)
 {
 	unsigned char r,g,b;
-	c = EndianU32_NtoB(c);
 	r = c & 0xff;
 	g = (c >> 8) & 0xff;
 	b = (c >> 16) & 0xff;
+	
 	return (ATSURGBAlphaColor){r/255.,g/255.,b/255.,a};
 }
 
@@ -369,7 +369,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				}
 				
 				action color_end {
-					NSString *hexn = [NSString stringWithCharacters:intbegin length:(p-1)-intbegin];
+					NSString *hexn = [NSString stringWithCharacters:intbegin length:p-intbegin];
 					inum = strtoul([hexn UTF8String], NULL, 16);
 				}
 				

@@ -454,17 +454,16 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		mh = GetMediaHandler(mkvTrack.theMedia);
 		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
 		
-	} else if ((*imgDesc)->cType == kSubFormatUTF8) {
-		Rect movieBox;
-		GetMovieBox(theMovie,&movieBox);
-		mkvTrack.theTrack = CreatePlaintextSubTrack(theMovie, imgDesc, GetMovieTimeScale(theMovie), dataRef, dataRefType, kSubFormatUTF8, NULL, movieBox);
+	} else if ((*imgDesc)->cType == kSubFormatUTF8 || (*imgDesc)->cType == kSubFormatSSA || (*imgDesc)->cType == kSubFormatASS) {
+		if ((*imgDesc)->cType == kSubFormatASS) (*imgDesc)->cType = kSubFormatSSA; // no real reason to treat them differently
+		
+		mkvTrack.theTrack = CreatePlaintextSubTrack(theMovie, imgDesc, GetMovieTimeScale(theMovie), dataRef, dataRefType, (*imgDesc)->cType, NULL, movieBox);
 		if (mkvTrack.theTrack == NULL)
 			return GetMoviesError();
 		
 		mkvTrack.theMedia = GetTrackMedia(mkvTrack.theTrack);
 		mh = GetMediaHandler(mkvTrack.theMedia);
 		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
-		
 	} else {
 		Codecprintf(NULL, "MKV: Unsupported subtitle type\n");
 		return -2;
