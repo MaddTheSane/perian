@@ -16,13 +16,13 @@ typedef struct SSARenderGlobals
 	Boolean plaintext;
 } SSARenderGlobals;
 
-SSARenderGlobalsPtr SSA_Init(const char *header, size_t size)
+SSARenderGlobalsPtr SSA_Init(const char *header, size_t size, float width, float height)
 {
 	SSARenderGlobalsPtr g = (SSARenderGlobalsPtr)NewPtr(sizeof(SSARenderGlobals));
 	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:size encoding:NSUTF8StringEncoding freeWhenDone:NO];
 	g->document = [[SSADocument alloc] init];
 	g->plaintext = false;
-	[g->document loadHeader:hdr];
+	[g->document loadHeader:hdr width:width height:height];
 	[hdr release];
 	return g;
 }

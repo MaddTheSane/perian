@@ -234,6 +234,9 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 	if (glob->colorSpace == NULL)
 		glob->colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	
+	glob->translateSRT = true;
+	glob->ssa = NULL;
+	
 	return noErr;
 }
 
@@ -262,9 +265,7 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 	myDrp->depth = (**p->imageDescription).depth;
     myDrp->dataSize = p->bufferSize;
 	
-	glob->translateSRT = true;
-	glob->ssa = NULL;
-	
+	if (!glob->ssa) {
 	if ((**p->imageDescription).cType == kSubFormatSSA) {
 		long count;
 		glob->translateSRT = false;
@@ -274,11 +275,12 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 			Handle ssaheader;
 			GetImageDescriptionExtension(p->imageDescription,&ssaheader,kSubFormatSSA,1);
 			
-			glob->ssa = SSA_Init(*ssaheader, GetHandleSize(ssaheader));
+			glob->ssa = SSA_Init(*ssaheader, GetHandleSize(ssaheader), myDrp->width, myDrp->height);
 		} 
 	} 
 	
 	if (!glob->ssa) glob->ssa = SSA_InitNonSSA(myDrp->width,myDrp->height);
+	}
 	
 	return noErr;
 }

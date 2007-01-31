@@ -388,6 +388,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"i" flag %italic 
 								|"u" flag %uline
 								|"s" flag %strike
+								|"fad" [^\\}]*
 								|"fs" num %fsize 
 								|("fr" "z"? num %frot) 
 								|("fn" [^\\}]* > fn_begin %fontname) 

@@ -52,27 +52,28 @@ static ATSURGBAlphaColor SSAParseColor(NSString *c)
 		sscanf(c_ + 2,"%2hhx%2hhx%2hhx%2hhx",&a,&b,&g,&r);
 		a = 255-a; // have to reverse it
 	} else {
-		unsigned int rgb = EndianU32_BtoN(strtoul(c_,NULL,0));
+		unsigned int rgb = strtol(&c_[0],NULL,0);
 		
 		b = rgb & 0xff;
-		g = (rgb & 0xff00) >> 8;
-		r = rgb >> 16;
-		a = 0;
+		g = (rgb >> 8) & 0xff;
+		r = (rgb >> 16) & 0xff;
+		a = (rgb >> 24) & 0xff;
+		a = 255-a;
 	}
 	
 	return (ATSURGBAlphaColor){(float)r/255.,(float)g/255.,(float)b/255.,(float)a/255.};
 }
 
--(void)setupHeaders:(NSDictionary*)hDict
+-(void)setupHeaders:(NSDictionary*)hDict width:(float)width height:(float)height
 {
 	NSString *field;
-	float rX=-1, rY=-1;
+	float rX=-1, rY=-1, aspect = width / height;
 	if (field = [hDict objectForKey:@"PlayResX"]) rX = [field doubleValue];
 	if (field = [hDict objectForKey:@"PlayResY"]) rY = [field doubleValue];
 	if (rX > 0 && rY == -1) {
-		rY = rX * (3./4.);
+		rY = rX / aspect;
 	} else if (rX == -1 && rY > 0) {
-		rX = rY * (4./3.);
+		rX = rY * aspect;
 	} else if (rX == -1 && rY == -1) {
 		rX = 384; //magic numbers are ssa defaults
 		rY = 288;
@@ -85,8 +86,7 @@ static ATSURGBAlphaColor SSAParseColor(NSString *c)
 	if ((field = [hDict objectForKey:@"Collisions"]) && [field isEqualToString:@"Reverse"]) collisiontype = Reverse;
 	if (field = [hDict objectForKey:@"ScriptType"]) {
 		if ([field isEqualToString:@"v4.00+"]) version = S_ASS;
-		else if ([field isEqualToString:@"v3.00"]) version = S_SSA;
-		else {version = S_SSA; NSLog(@"unrecognized SSA version %@",field);}
+		else version = S_SSA;
 	}
 }
 
@@ -113,11 +113,11 @@ int SSA2ASSAlignment(int a)
 		ByteCount fl = 256;
 		
 		font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)s->font,kATSOptionFlagsDefault));
-		ATSUFindFontName(font,kFontFullName,kFontMacintoshPlatform,kFontNoScriptCode,kFontNoLanguage,fl,(char*)fname,&fl,NULL);
+		//ATSUFindFontName(font,kFontFullName,kFontMacintoshPlatform,kFontNoScriptCode,kFontNoLanguage,fl,(char*)fname,&fl,NULL);
 		//kFontUnicodePlatform and MicrosoftPlatform are both pretty broken. asian fonts aren't found sometimes. this is an apple bug.
 		
 		if (font == kInvalidFont)
-			NSLog(@"error finding font named \"%@\"",s->font);
+			font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault));
 		//else NSLog(@"found font \"%s\" for name \"%@\"",fname,s->font); 
 		
 		matrix = CGAffineTransformMakeScale(s->scalex/100.,s->scaley/100.);
@@ -180,12 +180,15 @@ int SSA2ASSAlignment(int a)
 		while (style = [sEnum nextObject]) {
 			ssastyleline s = {0}; NSString *field;
 			
+			s.scalex = s.scaley = 100;
+			
 			sv(Name, name)
 				sv(Fontname, font)
 				fv(Fontsize, fsize)
 				cv(PrimaryColour, primary)
 				cv(SecondaryColour, secondary)
 				cv(OutlineColour, outline)
+				cv(TertiaryColour, outline)
 				cv(BackColour, shadow)
 				bv(Bold, bold)
 				bv(Italic, italic)
@@ -379,7 +382,7 @@ static int cmp_line(const void *a, const void *b)
 		
 	}
 	
-	[self setupHeaders:headers];
+	[self setupHeaders:headers width:640 height:480];
 
 	while (![nextLine isEqualToString:@"[Events]"]) nextLine = [lenum nextObject];
 	while ([nextLine length] == 0) nextLine = [lenum nextObject];
@@ -416,7 +419,7 @@ static int cmp_line(const void *a, const void *b)
 	header = [ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location];
 }
 
--(void) loadHeader:(NSString*)ssa
+-(void) loadHeader:(NSString*)ssa width:(float)width height:(float)height
 {
 	NSError *err;
 	NSStringEncoding se = NSUTF8StringEncoding;
@@ -456,7 +459,7 @@ static int cmp_line(const void *a, const void *b)
 		
 	}
 	
-	[self setupHeaders:headers];
+	[self setupHeaders:headers width:width height:height];
 	
 	while (!([nextLine isEqualToString:@"[V4 Styles]"] || [nextLine isEqualToString:@"[V4+ Styles]"])) nextLine = [lenum nextObject];
 	styleType = nextLine;
