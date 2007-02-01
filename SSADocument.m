@@ -416,7 +416,7 @@ static int cmp_line(const void *a, const void *b)
 	
 	_lines = [self serializeSubLines:doclines];
 	
-	header = [ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location];
+	header = [[ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location] retain];
 }
 
 -(void) loadHeader:(NSString*)ssa width:(float)width height:(float)height
