@@ -38,6 +38,8 @@
 #include <matroska/KaxChapters.h>
 #include <matroska/KaxCluster.h>
 #include <matroska/KaxBlock.h>
+#include <matroska/KaxAttachments.h>
+#include <matroska/KaxAttached.h>
 
 #include "MatroskaImport.h"
 #include "MatroskaCodecIDs.h"
@@ -113,6 +115,10 @@ void MatroskaImport::SetupMovie()
 		} else if (EbmlId(*el_l1) == KaxChapters::ClassInfos.GlobalId) {
 			el_l1->Read(*aStream, KaxChapters::ClassInfos.Context, upperLevel, dummyElt, true);
 			ReadChapters(*static_cast<KaxChapters *>(el_l1));
+			
+		} else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
+			el_l1->Read(*aStream, KaxAttachments::ClassInfos.Context, upperLevel, dummyElt, true);
+			ReadAttachments(*static_cast<KaxAttachments *>(el_l1));
 			
 		} else if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
 			// all header elements are before clusters in sane files
@@ -564,6 +570,27 @@ void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
 			
 			InsertMediaIntoTrack(chapterTrack, start, inserted, 1, fixed1);
 		}
+	}
+}
+
+void MatroskaImport::ReadAttachments(KaxAttachments &attachments)
+{
+	KaxAttached *attachedFile = FindChild<KaxAttached>(attachments);
+	
+	while (attachedFile && attachedFile->GetSize() > 0) {
+		string fileMimeType = GetChild<KaxMimeType>(*attachedFile);
+		
+		if (fileMimeType == "application/x-truetype-font") {
+			KaxFileData & fontData = GetChild<KaxFileData>(*attachedFile);
+			
+			if (fontData.GetSize()) {
+				ATSFontContainerRef container;
+				ATSFontActivateFromMemory(fontData.GetBuffer(), fontData.GetSize(), kATSFontContextLocal, 
+				                          kATSFontFormatUnspecified, NULL, kATSOptionFlagsDefault, &container);
+			}
+		}
+		
+		attachedFile = &GetNextChild<KaxAttached>(attachments, *attachedFile);
 	}
 }
 

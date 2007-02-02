@@ -35,6 +35,7 @@
 #include <matroska/KaxTracks.h>
 #include <matroska/KaxChapters.h>
 #include <matroska/KaxBlock.h>
+#include <matroska/KaxAttachments.h>
 
 using namespace libmatroska;
 using namespace std;
@@ -154,6 +155,9 @@ private:
 	// Creates a chapter track, but doesn't actually add the chapter reference to the other
 	// enabled tracks in case some weird file has this element before the Tracks element
 	void ReadChapters(KaxChapters &chapterEntries);
+	
+	// Activates any attached fonts, ignores other attachment types for now
+	void ReadAttachments(KaxAttachments &attachments);
 	
 	// These three are called from ReadTracks to set up a track of the specific type, 
 	// modifying the MatroskaTrack structure to reflect the newly create track. 
