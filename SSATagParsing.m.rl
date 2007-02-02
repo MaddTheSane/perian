@@ -76,6 +76,28 @@ static ATSURGBAlphaColor ParseColorTag(unsigned long c, float a)
 	return (ATSURGBAlphaColor){r/255.,g/255.,b/255.,a};
 }
 
+static void PruneEmptyStyleSpans(SSARenderEntity *re)
+{
+	SSAStyleSpan *styles_new[re->style_count];
+	size_t style_count_new = 0;
+	int i;
+	
+	for (i = 0; i < re->style_count; i++) {
+		if (re->styles[i]->range.length == 0) {
+			[re->styles[i] release];
+		} else {
+			styles_new[style_count_new++] = re->styles[i];
+		}
+	}
+	
+	if (style_count_new != re->style_count) {
+		re->styles = realloc(re->styles, sizeof(SSAStyleSpan*) * style_count_new); 
+		memcpy(re->styles, styles_new, sizeof(SSAStyleSpan*) * style_count_new);
+		
+		re->style_count = style_count_new;
+	}
+}
+
 NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 {
 	NSArray *linea = [str componentsSeparatedByString:@"\n"];
@@ -373,7 +395,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					inum = strtoul([hexn UTF8String], NULL, 16);
 				}
 				
-				flag = [01]? > {flag = 1;} % {flag = *(p-1) - '0';};
+				flag = ([01] % {unichar fl = *(p-1); if (flag == '0' || flag == '1') flag = fl - '0';})? > {flag = 1;};
 				num_ = digit+ ('.' digit*)?;
 				num = num_ > {numbegin = p;} % {num = [[NSString stringWithCharacters:numbegin length:p-numbegin] doubleValue];};
 				
@@ -399,9 +421,9 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"4c" color %shadowcolor
 								);
 				
-				cmd = "\\" cmd_specific;
+				cmd = "\\"  cmd_specific ;
 				
-				tag = "{" cmd* "}";
+				tag = "{" ((cmd*) | ([^\\}]*)) "}";
 				
 				nl = "\\" [Nn];
 				
@@ -416,13 +438,11 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			%%write exec;
 			%%write eof;
 			
+			if (re->text[len-1] == '}') skipbegin = p; // make up for how exit_tag isn't called if the } is the last char in the line
+
 			end_re;
-			for (j=0;j < re->style_count; j++)
-				if (re->styles[j]->range.length == 0) {
-					[re->styles[j] release];
-					if (j != re->style_count-1) re->styles[j] = re->styles[j+1];
-					re->style_count--;
-				}
+
+			PruneEmptyStyleSpans(re);
 
 			free(pb);
 			if ([re->nstext length] != 0) [rentities addObject:re];
