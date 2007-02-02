@@ -126,6 +126,9 @@ uint32 DataHandlerCallback::read(void *Buffer, size_t Size)
 {
 	ComponentResult err = noErr;
 	
+    if (Size < 1 || mCurrentPosition > filesize)
+        return 0;
+	
 	if (mCurrentPosition + Size > filesize)
 		Size = filesize - mCurrentPosition;
 	
