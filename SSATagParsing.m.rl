@@ -100,9 +100,17 @@ static void PruneEmptyStyleSpans(SSARenderEntity *re)
 
 NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 {
-	NSArray *linea = [str componentsSeparatedByString:@"\n"];
-	int i, j, pcount = [linea count]; unsigned len;
+	NSArray *linea;
+	int i, j, pcount; unsigned len;
 	NSMutableArray *rentities = [NSMutableArray array];
+	
+	if (plaintext) {
+		linea = [NSArray arrayWithObject:str];
+		pcount = 1;
+	} else {
+		linea =  [str componentsSeparatedByString:@"\n"];
+		pcount = [linea count];
+	}
 	
 	for (i = 0; i < pcount; i++) {
 		SSARenderEntity *re = [[[SSARenderEntity alloc] init] autorelease];
