@@ -93,7 +93,7 @@
 resource 'thng' (kMkvImportResource) {
 	'eat ',									// Type
 	'MkvF',									// SubType
-	'Yuvi',									// Manufacturer
+	'vide',									// Manufacturer
 	                                        // For 'eat ' the media type supported by the component
 											// - use componentHasMultiplePlatforms
 	0,										// not used Component flags
@@ -146,7 +146,7 @@ resource 'thng' (kMkvImportResource) {
 resource 'thga' (kMkvImportResource + 1) {
 	'eat ',								// Type
 	'MKV ', 							// Subtype - this must be in uppercase. It will match an ".eim" suffix case-insensitively.
-	'Yuvi',								// Manufaturer - for 'eat ' the media type supported by the component
+	'vide',								// Manufaturer - for 'eat ' the media type supported by the component
 	kMatroskaImportFlags |				// Component Flags
 	movieImportSubTypeIsFileExtension,	// The subtype is a file name suffix
 	0,									// Component Flags Mask
@@ -161,7 +161,7 @@ resource 'thga' (kMkvImportResource + 1) {
 										// TARGET COMPONENT ---------------
 	'eat ',								// Type
 	'MkvF',								// SubType
-	'Yuvi',								// Manufaturer
+	'vide',								// Manufaturer
 	0,									// Component Flags
 	0,									// Component Flags Mask
 	'thnr', kMkvImportResource,						// Component public resource identifier
@@ -172,7 +172,7 @@ resource 'thga' (kMkvImportResource + 1) {
 resource 'thga' (kMkvImportResource + 2) {
 	'eat ',								// Type
 	'MKA ', 							// Subtype - this must be in uppercase. It will match an ".eim" suffix case-insensitively.
-	'Yuvi',								// Manufaturer - for 'eat ' the media type supported by the component
+	'soun',								// Manufaturer - for 'eat ' the media type supported by the component
 	kMatroskaImportFlags |				// Component Flags
 	movieImportSubTypeIsFileExtension,	// The subtype is a file name suffix
 	0,									// Component Flags Mask
@@ -187,7 +187,7 @@ resource 'thga' (kMkvImportResource + 2) {
 										// TARGET COMPONENT ---------------
 	'eat ',								// Type
 	'MkvF',								// SubType
-	'Yuvi',								// Manufaturer
+	'vide',								// Manufaturer
 	0,									// Component Flags
 	0,									// Component Flags Mask
 	'thnr', kMkvImportResource,						// Component public resource identifier
@@ -249,7 +249,7 @@ resource 'mcfg' (kMkvImportResource)
 		// Component information, used by the QuickTime plug-in to find the component to open this type of file
 		'eat ',								// Component type (OSType)
 		'MkvF',								// Component subtype (OSType)
-		'Yuvi',								// Component manufacturer (OSType)
+		'vide',								// Component manufacturer (OSType)
 		kMatroskaImportFlags,				// Component flags
 		0, 									// Flags mask
 
