@@ -745,8 +745,10 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	if (sampleTable) {
 		err = QTSampleTableAddSampleReferences(sampleTable, frame.offset, frame.size, frame.duration, 
 											   0, 1, frame.flags, qtSampleDesc, &sampleNum);
-		if (err)
+		if (err) {
 			Codecprintf(NULL, "MKV: error adding sample reference to table %d\n", err);
+			return;
+		}
 		
 		amountToAdd++;
 	} else {
@@ -759,8 +761,10 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 		
 		err = AddMediaSampleReferences64(theMedia, desc, 1, &sample, &sampleTime);
 		sampleNum = sampleTime;
-		if (err)
+		if (err) {
 			Codecprintf(NULL, "MKV: error adding sample reference to media %d\n", err);
+			return;
+		}
 		
 		amountToAdd += frame.duration;
 	}
@@ -772,12 +776,16 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 			TimeValue64 sampleTime64;
 			err = AddSampleTableToMedia(theMedia, sampleTable, sampleNum, 1, &sampleTime64);
 			sampleTime = sampleTime64;
-			if (err)
+			if (err) {
 				Codecprintf(NULL, "MKV: error adding sample table to media for subtitle %d\n", err);
+				return;
+			}
 		}
 		err = InsertMediaIntoTrack(theTrack, frame.timecode, sampleTime, frame.duration, fixed1);
-		if (err)
+		if (err) {
 			Codecprintf(NULL, "MKV: error adding subtitle media into track %d\n", err);
+			return;
+		}
 	}
 	
 	if (firstSample == -1)
