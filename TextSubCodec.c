@@ -11,12 +11,6 @@
 #include "TextSubCodec.h"
 #include "SSARenderCodec.h"
 
-#define SubFontName "Helvetica"
-// basically random numbers i picked, font size is a factor of the diagonal of the movie window, border is a factor of that
-#define FontSizeRatio .035
-#define BorderSizeRatio FontSizeRatio * .11
-#define ShadowDistance FontSizeRatio * .05
-
 // Constants
 const UInt8 kNumPixelFormatsSupportedTextSub = 1;
 
