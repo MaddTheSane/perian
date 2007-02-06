@@ -224,15 +224,15 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			ATSUStyle cur_style;
 			ATSUTextLayout cur_layout;
 			NSMutableString *output = [NSMutableString string], *dtmp;
-			unichar *p = re->text, *pe = &re->text[len], *numbegin, *strbegin = p, *skipbegin = p, *intbegin, *pb = p, *posbegin, *strparambegin;
+			unichar *p = re->text, *pe = &re->text[len], *numbegin = p, *strbegin = p, *skipbegin = p, *intbegin = p, *pb = p, *posbegin=p, *strparambegin=p;
 			float num, cur_outline = re->style->outline, cur_shadow = re->style->shadow;
 			NSString *parsetmp;
-			int cs, cur_valign=re->valign, cur_halign=re->halign, cur_posx, cur_posy;
+			int cs, cur_valign=re->valign, cur_halign=re->halign, cur_posx=-1, cur_posy=-1;
 			ssacolors cur_color = re->style->color;
 			
-			unsigned long inum;
+			unsigned long inum=0;
 			unsigned outputoffset=0, lengthreduce=0;
-			BOOL flag, newLayout=FALSE, cur_be = FALSE;
+			BOOL flag=0, newLayout=FALSE, cur_be = FALSE;
 			Fixed fixv;
 			
 			ATSUCreateAndCopyStyle(re->style->atsustyle,&cur_style);

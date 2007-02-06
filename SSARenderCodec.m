@@ -102,7 +102,7 @@ static void GetTypographicRectangleForLayout(SSARenderEntity *re, UniCharArrayOf
 void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub, float cWidth, float cHeight)
 {
 	ItemCount breakCount;
-	Fixed penY,penX;
+	Fixed penY=0,penX;
 	Fixed lastTopPenY=-1, lastBottomPenY=-1, lastCenterPenY=-1, *storePenY, ignoredPenY;
 	int i, lstart, lend, lstep, subcount, j; char direction;
 	float outline, shadow;

@@ -375,7 +375,7 @@ bail:
 ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, OSType dataRefType, Movie theMovie, Track targetTrack,
 										 Track *usedTrack, TimeValue atTime, TimeValue *addedDuration, long inFlags, long *outFlags)
 {
-	ComponentResult result;
+	ComponentResult result = noErr;
 	ByteIOContext byteContext;
 	AVFormatContext *ic = NULL;
 	AVFormatParameters params;
@@ -513,6 +513,7 @@ bail:
 
 ComponentResult FFAvi_MovieImportSetIdleManager(ff_global_ptr storage, IdleManager im) {
 	storage->idleManager = im;
+	return noErr;
 }
 
 ComponentResult FFAvi_MovieImportIdle(ff_global_ptr storage, long inFlags, long *outFlags) {

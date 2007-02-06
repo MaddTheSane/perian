@@ -367,8 +367,8 @@ static int cmp_line(id a, id b, void* unused)
 {			
 	SubLine *av = (SubLine*)a, *bv = (SubLine*)b;
 	
-	if (av->begin_time > bv->begin_time) return NSOrderedDescbegining;
-	if (av->begin_time < bv->begin_time) return NSOrderedAscbegining;
+	if (av->begin_time > bv->begin_time) return NSOrderedDescending;
+	if (av->begin_time < bv->begin_time) return NSOrderedAscending;
 	return NSOrderedSame;
 }
 

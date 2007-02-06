@@ -271,7 +271,7 @@ pascal ComponentResult VobSubCodecBeginBand(VobSubCodecGlobals glob, CodecDecomp
     // the header of a spu PS packet starts 0x000001bd
     // if it's raw spu data, the 1st 2 bytes are the length of the data
     if (data[0] + data[1] == 0) {
-        dprintf(" Extacting spu data from PS packets %d\n");
+        dprintf(" Extacting spu data from PS packets\n");
         
         data = (UInt8 *) NewPtr(p->bufferSize);
         memcpy((void *) data, (void *) drp->codecData, GetPtrSize((Ptr) data));

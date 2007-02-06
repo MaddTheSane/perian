@@ -167,6 +167,8 @@ short ISO639_1ToQTLangCode(const char *lang)
 		if (strcasecmp(lang, ISO_QTLanguages[i].twoChar) == 0)
 			return ISO_QTLanguages[i].qtLang;
 	}
+	
+	return langUnspecified;
 }
 
 short ISO639_2ToQTLangCode(const char *lang)
@@ -180,6 +182,8 @@ short ISO639_2ToQTLangCode(const char *lang)
 		if (strcasecmp(lang, ISO_QTLanguages[i].threeChar) == 0)
 			return ISO_QTLanguages[i].qtLang;
 	}
+	
+	return langUnspecified;
 }
 
 /* write the int32_t data to target & then return a pointer which points after that data */

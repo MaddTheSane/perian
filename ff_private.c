@@ -72,7 +72,7 @@ void register_parsers()
 int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSType dataRefType)
 {
 	int j;
-	AVStream *st;
+	AVStream *st = NULL;
 	AVStream *outstr = NULL;
 	Media media;
 	NCStream *map = NULL;
