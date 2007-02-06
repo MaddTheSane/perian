@@ -22,14 +22,6 @@
 #import "Categories.h"
 #include "SubImport.h"
 
-@implementation SSAEvent
--(void)dealloc
-{
-	[line release];
-	[super dealloc];
-}
-@end
-
 @implementation SSADocument
 
 // This line contains the default style, for SRT files.
@@ -242,7 +234,7 @@ int SSA2ASSAlignment(int a)
 	}
 }
 
--(SSAEvent *)movPacket:(int)i
+-(SubLine *)movPacket:(int)i
 {
 	return [_lines objectAtIndex:i];
 }
@@ -275,88 +267,38 @@ static NSString *oneMKVPacket(NSDictionary *s)
 		[s objectForKey:@"Text"]];	
 }
 
-static int cmp_uint(const void *a, const void *b)
-{
-	unsigned av = *(unsigned*)a, bv = *(unsigned*)b;
-	
-	if (av > bv) return 1;
-	if (av < bv) return -1;
-	return 0;
-}
-
-typedef struct {
-	NSString *line;
-	unsigned start, end;
-} line_range;
-
-static int cmp_line(const void *a, const void *b)
-{
-	const line_range *av = a, *bv = b;
-	
-	if (av->start > bv->start) return 1;
-	if (av->start < bv->start) return -1;
-	return 0;
-}
-
 -(NSArray *)serializeSubLines:(NSMutableArray*)linesa
 {
-	int num = [linesa count];
-	unsigned times[num*2];
-	line_range lines[num];
-	unsigned i, j;
+	int num = [linesa count], i;
 	NSMutableArray *outa = [[NSMutableArray alloc] init];
+	SubtitleSerializer *serializer = [[SubtitleSerializer alloc] init];
+	SubLine *sl;
 	
 	for (i = 0; i < num; i++) {
-		NSDictionary *l;
+		NSDictionary *l = [linesa objectAtIndex:i];;
 		NSString *s,*e;
-		l = [linesa objectAtIndex:i];
-		line_range li;
+		SubLine *li;
 		
 		s = [l objectForKey:@"Start"];
 		e = [l objectForKey:@"End"];
 		
-		li.line = oneMKVPacket(l);
-		li.start = ParseSSATime(s);
-		li.end = ParseSSATime(e);
+		li = [[[SubLine alloc] initWithLine:oneMKVPacket(l) start:ParseSSATime(s) end:ParseSSATime(e)] autorelease];
 		
 		if (timescale != 1.) {
-			li.start *= timescale;
-			li.end *= timescale;
+			li->begin_time *= timescale;
+			li->end_time *= timescale;
 		}
-		
-		times[i*2] = li.start;
-		times[i*2+1] = li.end;
-		
-		lines[i] = li;
+
+		[serializer addLine:li];
 	}
 	
-	qsort(times, num*2, sizeof(unsigned), cmp_uint);
-	qsort(lines, num, sizeof(line_range), cmp_line);
+	[serializer setFinished:YES];
 	
-	for (i = 0; i < num*2; i++) {
-		if (i > 0 && times[i-1] == times[i]) continue;
-		NSMutableString *accum = [NSMutableString string];
-		unsigned start = times[i], end;
-		
-		for (j = 0; j < num; j++) {
-			if (isinrange(times[i], lines[j].start, lines[j].end)) {
-				end = lines[j].end;
-				[accum appendString:lines[j].line];
-			}
-		}
-		
-		if ([accum length] > 0) {
-			[accum deleteCharactersInRange:NSMakeRange([accum length] - 1, 1)]; // delete last newline
-			SSAEvent *event = [[[SSAEvent alloc] init] autorelease];
-			
-			event->begin_time = start;
-			event->end_time = end;
-			event->line = [accum retain];
-			
-			[outa addObject:event];
-		}
+	while (sl = [serializer getSerializedPacket]) {
+		[outa addObject:sl];
 	}
 	
+	[serializer release];
 	return outa;
 }
 
@@ -599,7 +541,7 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 	BeginMediaEdits(theMedia);
 	
 	for (i = 0; i < packetCount; i++) {
-		SSAEvent *p = [ssa movPacket:i];
+		SubLine *p = [ssa movPacket:i];
 		TimeRecord movieStartTime = {SInt64ToWide(p->begin_time), 100, 0};
 		TimeValue sampleTime;
 		const char *str = [p->line UTF8String];
@@ -617,6 +559,8 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 
 		DisposeHandle(sampleHndl);
 	}
+	
+	sampleHndl = NULL;
 	
 	EndMediaEdits(theMedia);
 	
@@ -644,6 +588,7 @@ bail:
 		DisposeHandle((Handle) textDesc);
 	
 	if (headerHndl) DisposeHandle((Handle)headerHndl);
+	if (sampleHndl) DisposeHandle(sampleHndl);
 	DisposeHandle((Handle)drefHndl);
 	
 	return err;

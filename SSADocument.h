@@ -19,6 +19,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "SubImport.h"
 
 enum {S_LeftAlign = 0, S_CenterAlign, S_RightAlign};
 enum {S_BottomAlign = 0, S_MiddleAlign, S_TopAlign};
@@ -42,14 +43,6 @@ typedef struct ssastyleline {
 	int usablewidth;
 } ssastyleline;
 
-@interface SSAEvent : NSObject
-{
-	@public
-	NSString *line;
-	unsigned begin_time, end_time;
-}
-@end
-
 @interface SSADocument : NSObject {
 	NSArray *_lines;
 	NSString *header;
@@ -67,7 +60,7 @@ typedef struct ssastyleline {
 	Boolean disposedefaultstyle;
 }
 -(NSString *)header;
--(SSAEvent *)movPacket:(int)i;
+-(SubLine *)movPacket:(int)i;
 -(void) loadHeader:(NSString*)path width:(float)width height:(float)height;
 -(unsigned)packetCount;
 -(void)loadDefaultsWithWidth:(float)width height:(float)height;
