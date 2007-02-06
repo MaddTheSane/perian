@@ -458,7 +458,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			%%write exec;
 			%%write eof;
 			
-			if (re->text[len-1] == '}') skipbegin = p; // make up for how exit_tag isn't called if the } is the last char in the line
+			if (pb[len-1] == '}') skipbegin = p; // make up for how exit_tag isn't called if the } is the last char in the line
 
 			end_re;
 

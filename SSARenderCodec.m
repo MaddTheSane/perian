@@ -106,7 +106,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 	Fixed lastTopPenY=-1, lastBottomPenY=-1, lastCenterPenY=-1, *storePenY, ignoredPenY;
 	int i, lstart, lend, lstep, subcount, j; char direction;
 	float outline, shadow;
-	if (!(glob && glob->document)) {NSLog(@"Something wrong in SSA globals");}
+	if (!(glob && glob->document)) {NSLog(@"Something wrong in SSA globals"); return;}
 	SSADocument *ssa = glob->document;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *curSub = (NSString*)cfSub;

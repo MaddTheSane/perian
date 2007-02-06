@@ -548,14 +548,14 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 		sampleLen = strlen(str);
 		
 		PtrToHand(str,&sampleHndl,sampleLen);
-		
+
 		err=AddMediaSample(theMedia,sampleHndl,0,sampleLen, p->end_time - p->begin_time,(SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
-		if (err != noErr) goto bail;
+		if (err != noErr) {err = GetMoviesError(); goto bail;}
 		
 		ConvertTimeScale(&movieStartTime, movieTimeScale);
 
 		err = InsertMediaIntoTrack(theTrack, movieStartTime.value.lo, sampleTime, p->end_time - p->begin_time, fixed1);
-		if (err != noErr) {goto bail;}
+		if (err != noErr) {err = GetMoviesError(); goto bail;}
 
 		DisposeHandle(sampleHndl);
 	}
@@ -572,7 +572,7 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 	SetMediaLanguage(theMedia, GetFilenameLanguage(filename));
 	
 bail:
-		
+
 	[ssa release];
 	[pool release];
 	

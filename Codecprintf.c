@@ -38,6 +38,7 @@ static int Codecvprintf(FILE *fileLog, const char *format, va_list va, int print
 	}
 #endif
 	
+	return ret;
 }
 
 int Codecprintf(FILE *fileLog, const char *format, ...)

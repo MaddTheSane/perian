@@ -213,6 +213,8 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 		DisposeHandle(sampleHndl);
 	}
 
+	EndMediaEdits(theMedia);
+	
 	sampleHndl = NULL;
 
 	if (*firstSubTrack == NULL)
@@ -411,7 +413,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	for (int i=0;i < num*2; i++) {
 		if (i > 0 && times[i-1] == times[i]) continue;
 		NSMutableString *accum = [NSMutableString string];
-		unsigned start = times[i], end = times[i+1];
+		unsigned start = times[i], end = start;
 		bool startedOutput = false, finishedOutput = false;
 		
 		// Add on packets until we find one that marks it ending (by starting later)
@@ -420,6 +422,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 			
 		for (int j=0; j < num; j++) {
 			if (isinrange(times[i], slines[j]->begin_time, slines[j]->end_time)) {
+				end = slines[j]->end_time;
 				[accum appendString:slines[j]->line];
 				startedOutput = true;
 			} else if (startedOutput) {finishedOutput = true; break;}
