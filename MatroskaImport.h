@@ -28,6 +28,7 @@
 #include <vector>
 #include <QuickTime/QuickTime.h>
 #include "DataHandlerCallback.h"
+#include "SubImport.h"
 
 #include <ebml/EbmlStream.h>
 #include <matroska/KaxSeekHead.h>
@@ -48,6 +49,7 @@ struct MatroskaFrame {
 	SInt64			offset;
 	SInt64			size;
 	short			flags;
+	DataBuffer	   *buffer;
 };
 
 class MatroskaTrack {
@@ -69,6 +71,8 @@ public:
 	// added, e.g. from a previous call to AddSamplesToTrack()
 	void AddSamplesToTrack();
 	
+	void FinishTrack();
+	
 	UInt16					number;
 	UInt8					type;
 	Track					theTrack;
@@ -78,6 +82,8 @@ public:
 	QTSampleDescriptionID	qtSampleDesc;
 	SInt64					timecodeScale;
 	TimeValue64				maxLoadedTime;
+	CXXSubtitleSerializer	*subtitleSerializer;
+	Handle					subDataRefHandler;
 	
 private:
 	// adds an individual frame from a block group into the sample table if it exists,

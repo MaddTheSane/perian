@@ -462,14 +462,22 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		
 	} else if ((*imgDesc)->cType == kSubFormatUTF8 || (*imgDesc)->cType == kSubFormatSSA || (*imgDesc)->cType == kSubFormatASS) {
 		if ((*imgDesc)->cType == kSubFormatASS) (*imgDesc)->cType = kSubFormatSSA; // no real reason to treat them differently
+		UInt32 emptyDataRefExtension[2]; // XXX the various uses of this bit of code should be unified
+		mkvTrack.subDataRefHandler = NewHandleClear(sizeof(Handle) + 1);
+		emptyDataRefExtension[0] = EndianU32_NtoB(sizeof(UInt32)*2);
+		emptyDataRefExtension[1] = EndianU32_NtoB(kDataRefExtensionInitializationData);
 		
-		mkvTrack.theTrack = CreatePlaintextSubTrack(theMovie, imgDesc, GetMovieTimeScale(theMovie), dataRef, dataRefType, (*imgDesc)->cType, NULL, movieBox);
+		PtrAndHand(&emptyDataRefExtension[0], mkvTrack.subDataRefHandler, sizeof(emptyDataRefExtension));
+		
+		mkvTrack.theTrack = CreatePlaintextSubTrack(theMovie, imgDesc, GetMovieTimeScale(theMovie), mkvTrack.subDataRefHandler, HandleDataHandlerSubType, (*imgDesc)->cType, NULL, movieBox);
 		if (mkvTrack.theTrack == NULL)
 			return GetMoviesError();
 		
 		mkvTrack.theMedia = GetTrackMedia(mkvTrack.theTrack);
 		mh = GetMediaHandler(mkvTrack.theMedia);
 		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
+		
+		BeginMediaEdits(mkvTrack.theMedia);
 	} else {
 		Codecprintf(NULL, "MKV: Unsupported subtitle type\n");
 		return -2;
@@ -579,8 +587,9 @@ void MatroskaImport::ReadAttachments(KaxAttachments &attachments)
 	
 	while (attachedFile && attachedFile->GetSize() > 0) {
 		string fileMimeType = GetChild<KaxMimeType>(*attachedFile);
-		
-		if (fileMimeType == "application/x-truetype-font") {
+		/* The only attachments handled here are fonts, which currently can be truetype or opentype.
+		   application/x-* is probably not a permanent MIME type, but it is current practice... */
+		if (fileMimeType == "application/x-truetype-font" || fileMimeType == "application/x-font-otf") {
 			KaxFileData & fontData = GetChild<KaxFileData>(*attachedFile);
 			
 			if (fontData.GetSize()) {
@@ -640,6 +649,8 @@ MatroskaTrack::MatroskaTrack()
 	seenFirstFrame = false;
 	firstSample = -1;
 	amountToAdd = 0;
+	subtitleSerializer = new CXXSubtitleSerializer;
+	subDataRefHandler = NULL;
 }
 
 MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
@@ -669,6 +680,11 @@ MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
 	seenFirstFrame = copy.seenFirstFrame;
 	firstSample = copy.firstSample;
 	amountToAdd = copy.amountToAdd;
+	
+	subtitleSerializer = copy.subtitleSerializer;
+	subtitleSerializer->retain();
+		
+	subDataRefHandler = copy.subDataRefHandler;
 }
 
 MatroskaTrack::~MatroskaTrack()
@@ -678,6 +694,9 @@ MatroskaTrack::~MatroskaTrack()
 	
 	if (sampleTable)
 		QTSampleTableRelease(sampleTable);
+	
+	if (subtitleSerializer)
+		subtitleSerializer->release();
 }
 
 void MatroskaTrack::AddBlock(KaxBlockGroup &blockGroup)
@@ -728,11 +747,15 @@ void MatroskaTrack::AddBlock(KaxBlockGroup &blockGroup)
 		newFrame.offset = block.GetDataPosition(i);
 		newFrame.size = block.GetFrameSize(i);
 		newFrame.flags = blockGroup.ReferenceCount() > 0 ? mediaSampleNotSync : 0;
-		
-		if (type == track_subtitle)
+
+		if (type == track_subtitle) {
+			newFrame.buffer = &block.GetBuffer(i);
 			AddFrame(newFrame);
+		}
 		else
 			lastFrames.push_back(newFrame);
+		
+		newFrame.buffer = NULL;
 	}
 }
 
@@ -742,7 +765,24 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	SInt64 sampleNum = 0;
 	TimeValue sampleTime;
 	
-	if (sampleTable) {
+	if (type == track_subtitle) {
+		if (frame.size > 0) subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.timecode, frame.timecode + frame.duration);
+		const char *packet=NULL; size_t size=0; unsigned start=0, end=0;
+		packet = subtitleSerializer->popPacket(&size, &start, &end);
+		if (packet) {
+			Handle sampleH;
+			PtrToHand(packet, &sampleH, size);
+			err = AddMediaSample(theMedia, sampleH, 0, size, end - start, desc, 1, 0, &sampleTime);
+			if (err) {
+				Codecprintf(NULL, "MKV: error adding subtitle sample %d\n", err);
+				return;
+			}
+			DisposeHandle(sampleH);
+			frame.timecode = start;
+			frame.duration = end - start;
+			sampleNum = sampleTime;
+		} else return;
+	} else if (sampleTable) {
 		err = QTSampleTableAddSampleReferences(sampleTable, frame.offset, frame.size, frame.duration, 
 											   0, 1, frame.flags, qtSampleDesc, &sampleNum);
 		if (err) {
@@ -772,14 +812,8 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	// add to track immediately if subtitle, otherwise we let it be added elsewhere when we can do several at once
 	if (type == track_subtitle) {
 		if (sampleTable) {
-			// subtitle tracks shouldn't need sample tables, but just in case...
-			TimeValue64 sampleTime64;
-			err = AddSampleTableToMedia(theMedia, sampleTable, sampleNum, 1, &sampleTime64);
-			sampleTime = sampleTime64;
-			if (err) {
-				Codecprintf(NULL, "MKV: error adding sample table to media for subtitle %d\n", err);
-				return;
-			}
+			Codecprintf(NULL, "MKV: subtitle track has a sample table\n", err);
+			return;
 		}
 		err = InsertMediaIntoTrack(theTrack, frame.timecode, sampleTime, frame.duration, fixed1);
 		if (err) {
@@ -796,26 +830,41 @@ void MatroskaTrack::AddSamplesToTrack()
 {
 	OSStatus err = noErr;
 	
-	if (type == track_subtitle)
-		// subtitle tracks add the media in AddFrame() since there's gaps
-		return;
-	
-	if (sampleTable) {
-		TimeValue64 sampleTime64;
-		TimeValue mediaDuration = GetMediaDuration(theMedia);
-		
-		err = AddSampleTableToMedia(theMedia, sampleTable, firstSample, amountToAdd, &sampleTime64);
+	if (type != track_subtitle) {
+		if (sampleTable) {
+			TimeValue64 sampleTime64;
+			TimeValue mediaDuration = GetMediaDuration(theMedia);
+			
+			err = AddSampleTableToMedia(theMedia, sampleTable, firstSample, amountToAdd, &sampleTime64);
+			if (err)
+				Codecprintf(NULL, "MKV: error adding sample table to media %d\n", err);
+			
+			firstSample = sampleTime64;
+			amountToAdd = GetMediaDuration(theMedia) - mediaDuration;
+		}
+		err = InsertMediaIntoTrack(theTrack, -1, firstSample, amountToAdd, fixed1);
 		if (err)
-			Codecprintf(NULL, "MKV: error adding sample table to media %d\n", err);
-		
-		firstSample = sampleTime64;
-		amountToAdd = GetMediaDuration(theMedia) - mediaDuration;
+			Codecprintf(NULL, "MKV: error inserting media into track %d\n", err);
 	}
-	err = InsertMediaIntoTrack(theTrack, -1, firstSample, amountToAdd, fixed1);
-	if (err)
-		Codecprintf(NULL, "MKV: error inserting media into track %d\n", err);
-	
+
 	maxLoadedTime += amountToAdd;
 	firstSample = -1;
 	amountToAdd = 0;
+}
+
+void MatroskaTrack::FinishTrack()
+{
+	OSStatus err = noErr;
+	
+	if (type == track_subtitle)
+	{
+		 subtitleSerializer->setFinished();
+		 do {
+			 MatroskaFrame fr = {0};
+			 AddFrame(fr); // add empty frames to flush the subtitle packet queue
+		 } while (!subtitleSerializer->empty());
+		 EndMediaEdits(theMedia);
+	}
+	
+	AddSamplesToTrack();
 }

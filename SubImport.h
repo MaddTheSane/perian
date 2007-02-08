@@ -47,10 +47,26 @@ short GetFilenameLanguage(CFStringRef filename);
 	BOOL finished;
 }
 -(void)addLine:(SubLine *)sline;
--(void)addLineWithString:(NSString*)string start:(unsigned)start end:(unsigned)end;
 -(void)setFinished:(BOOL)finished;
 -(SubLine*)getSerializedPacket;
 @end
 #endif
 
+#ifdef __cplusplus
+class CXXSubtitleSerializer
+{
+	void *priv;
+	
+public:
+	CXXSubtitleSerializer();
+	~CXXSubtitleSerializer();
+	
+	void pushLine(const char *line, size_t size, unsigned start, unsigned end);
+	void setFinished();
+	const char *popPacket(size_t *size, unsigned *start, unsigned *end);
+	void release();
+	void retain();
+	bool empty();
+};
+#endif
 #endif

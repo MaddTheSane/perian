@@ -354,17 +354,6 @@ bail:
 	[lines addObject:sline];
 }
 
--(void)addLineWithString:(NSString*)string start:(unsigned)start end:(unsigned)end
-{
-	SubLine *sl = [[[SubLine alloc] init] autorelease];
-	
-	sl->line = [string retain];
-	sl->begin_time = start;
-	sl->end_time = end;
-	
-	[lines addObject:sl];
-}
-
 static int cmp_line(id a, id b, void* unused)
 {			
 	SubLine *av = (SubLine*)a, *bv = (SubLine*)b;
@@ -395,12 +384,12 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 -(void)refill
 {
 	unsigned num = [lines count];
+	if (num == 0) return;
 	unsigned times[num*2+1];
 	SubLine *slines[num];
-	
 	[lines sortUsingFunction:cmp_line context:nil];
 	[lines getObjects:slines];
-	//NSLog(@"%@",lines);
+	//NSLog(@"pre - %@",lines);
 	for (int i=0;i < num;i++) {
 		times[i*2]   = slines[i]->begin_time;
 		times[i*2+1] = slines[i]->end_time;
@@ -431,32 +420,52 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 		
 		if (finishedOutput && startedOutput) {
 			[accum deleteCharactersInRange:NSMakeRange([accum length] - 1, 1)]; // delete last newline
-			SubLine *event = [[[SubLine alloc] initWithLine:accum start:start end:end] autorelease];
+			SubLine *event = [[SubLine alloc] initWithLine:accum start:start end:end];
 			
 			[outpackets addObject:event];
 		}
 	}
 	
-	//NSLog(@"%@",outpackets);
+//	NSLog(@"%@",outpackets);
 
-	[lines removeAllObjects];
-	if (!finished) [lines addObject:slines[num-1]]; //keep the last packet in the queue
+	if (finished) [lines removeAllObjects];
+	else {
+		for (int i = 0; i < num-1; i++) {
+			if (isinrange(slines[num-1]->begin_time, slines[i]->begin_time, slines[i]->end_time)) break;
+			[lines removeObject:slines[i]];
+		}
+	}
+//	NSLog(@"post - %@",lines);
 }
 
 -(SubLine*)getSerializedPacket
 {
-	if ([outpackets count] == 0) [self refill];
-	if ([outpackets count] == 0) return nil;
+	if ([outpackets count] == 0)  {
+		[self refill];
+		if ([outpackets count] == 0) 
+			return nil;
+	}
 	
 	SubLine *sl = [outpackets objectAtIndex:0];
 	[outpackets removeObjectAtIndex:0];
 	
+	[sl autorelease];
 	return sl;
 }
 
 -(void)setFinished:(BOOL)f
 {
 	finished = f;
+}
+
+-(BOOL)isEmpty
+{
+	return [lines count] == 0 && [outpackets count] == 0;
+}
+
+-(NSString*)description
+{
+	return [NSString stringWithFormat:@"i: %d o: %d finished inputting: %d",[lines count],[outpackets count],finished];
 }
 @end
 
@@ -483,3 +492,63 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	return [NSString stringWithFormat:@"\"%@\", %d -> %d",line,begin_time,end_time];
 }
 @end
+
+CXXSubtitleSerializer::CXXSubtitleSerializer()
+{
+	priv = [[SubtitleSerializer alloc] init];
+}
+
+CXXSubtitleSerializer::~CXXSubtitleSerializer()
+{
+	if (priv) {[(SubtitleSerializer*)priv release]; priv = NULL;}
+}
+
+void CXXSubtitleSerializer::pushLine(const char *line, size_t size, unsigned start, unsigned end)
+{
+	NSString *str = [[NSString alloc] initWithBytes:line length:size encoding:NSUTF8StringEncoding];
+	NSString *strn = [str stringByAppendingString:@"\n"];
+	[str release];
+	
+	SubLine *sl = [[SubLine alloc] initWithLine:strn start:start end:end];
+	
+	[sl autorelease];
+	
+	[(SubtitleSerializer*)priv addLine:sl];
+}
+
+
+void CXXSubtitleSerializer::setFinished()
+{
+	[(SubtitleSerializer*)priv setFinished:YES];
+}
+
+const char *CXXSubtitleSerializer::popPacket(size_t *size, unsigned *start, unsigned *end)
+{
+	SubLine *sl = [(SubtitleSerializer*)priv getSerializedPacket];
+	if (!sl) return NULL;
+	const char *u = [sl->line UTF8String];
+	*start = sl->begin_time;
+	*end   = sl->end_time;
+	
+	*size = strlen(u);
+	return u;
+}
+
+void CXXSubtitleSerializer::release()
+{
+	SubtitleSerializer *s = (SubtitleSerializer*)priv;
+	int r = [s retainCount];
+	[s release];
+	
+	if (r == 1) {priv = nil; delete this;}
+}
+
+void CXXSubtitleSerializer::retain()
+{
+	[(SubtitleSerializer*)priv retain];
+}
+
+bool CXXSubtitleSerializer::empty()
+{
+	return [(SubtitleSerializer*)priv isEmpty];
+}

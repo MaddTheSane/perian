@@ -270,10 +270,11 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 			
 			if (!NextLevel1Element())
 				*outFlags |= movieImportResultComplete;
-			else
+			else {
 				*outFlags |= movieImportResultNeedIdles;
+				return noErr;
+			}
 			
-			return noErr;
 		}
 		
 		do {
@@ -290,7 +291,7 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 		
 		// insert the a/v tracks' samples
 		for (int i = 0; i < tracks.size(); i++)
-			tracks[i].AddSamplesToTrack();
+			tracks[i].FinishTrack();
 		
 	} catch (CRTError &err) {
 		return err.getError();
@@ -335,6 +336,9 @@ ComponentResult MatroskaImport::Idle(long inFlags, long *outFlags)
 			DisposeMovieTrack(baseTrack);
 		*outFlags |= movieImportResultComplete;
 		loadState = kMovieLoadStateComplete;
+		
+		for (int i = 0; i < tracks.size(); i++)
+			tracks[i].FinishTrack();
 	}
 	
 	return noErr;
