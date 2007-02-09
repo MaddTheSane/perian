@@ -386,10 +386,10 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	unsigned num = [lines count];
 	if (num == 0) return;
 	unsigned times[num*2+1];
-	SubLine *slines[num];
+	SubLine *slines[num], *last=nil;
 	[lines sortUsingFunction:cmp_line context:nil];
 	[lines getObjects:slines];
-	//NSLog(@"pre - %@",lines);
+//	NSLog(@"pre - %@",lines);
 	for (int i=0;i < num;i++) {
 		times[i*2]   = slines[i]->begin_time;
 		times[i*2+1] = slines[i]->end_time;
@@ -411,7 +411,8 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 			
 		for (int j=0; j < num; j++) {
 			if (isinrange(times[i], slines[j]->begin_time, slines[j]->end_time)) {
-				end = slines[j]->end_time;
+				unsigned next_start = (j == num-1)?slines[j]->end_time:slines[j+1]->begin_time;
+				end = MIN(slines[j]->end_time, next_start);
 				[accum appendString:slines[j]->line];
 				startedOutput = true;
 			} else if (startedOutput) {finishedOutput = true; break;}
@@ -420,13 +421,20 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 		
 		if (finishedOutput && startedOutput) {
 			[accum deleteCharactersInRange:NSMakeRange([accum length] - 1, 1)]; // delete last newline
-			SubLine *event = [[SubLine alloc] initWithLine:accum start:start end:end];
 			
+			if (last) { // ensure the last packet's end time isn't after this one's begin time
+				if (last->end_time > start) last->end_time = start;
+			}
+			
+			SubLine *event = [[SubLine alloc] initWithLine:accum start:start end:end];
+
 			[outpackets addObject:event];
+			
+			last = event;
 		}
 	}
 	
-//	NSLog(@"%@",outpackets);
+//	NSLog(@"out - %@",outpackets);
 
 	if (finished) [lines removeAllObjects];
 	else {

@@ -265,6 +265,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				}
 				
 				action fsize {
+					num *= (72./96.); // scale from Windows 96dpi
 					fixv = FloatToFixed(num);
 					SetATSUStyleOther(cur_style, kATSUSizeTag, sizeof(fixv), &fixv);
 				}

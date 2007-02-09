@@ -275,8 +275,7 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 				return noErr;
 			}
 			
-		}
-		
+		} else 
 		do {
 			if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
 				int upperLevel = 0;

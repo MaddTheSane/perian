@@ -62,7 +62,7 @@ void FastY420(UInt8 *baseAddr, AVFrame *picture)
 //hand-unrolled code is a bad idea on modern CPUs. luckily, this does not run on modern CPUs, only G3s.
 //also, big-endian only
 
-static void Y420_ppc_scalar(UInt8* baseAddr, int outRB, int width, int height, AVFrame * picture)
+static void Y420toY422_ppc_scalar(UInt8* baseAddr, int outRB, int width, int height, AVFrame * picture)
 {
 	 int             y = height >> 1;
 	 int             halfWidth = width >> 1, halfHalfWidth = halfWidth >> 1;
@@ -105,7 +105,7 @@ static void Y420_ppc_scalar(UInt8* baseAddr, int outRB, int width, int height, A
 	 }
  }
 
-static void Y420_ppc_altivec(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+static void Y420toY422_ppc_altivec(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 {
 	UInt8          *yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
 	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
@@ -163,9 +163,9 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 		int vType = 0; //0 == scalar only
 		size_t length = sizeof(vType);
 		int error = sysctl(sels, 2, &vType, &length, NULL, 0);
-		if( 0 == error && vType ) y420_function = Y420_ppc_altivec;
+		if( 0 == error && vType ) y420_function = Y420toY422_ppc_altivec;
 		else 
-		y420_function = Y420_ppc_scalar;
+		y420_function = Y420toY422_ppc_scalar;
 	}
 	
 	y420_function(o, outRB, width, height, picture);
@@ -173,11 +173,11 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 #else
 #include <emmintrin.h>
 
-void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+static void Y420toY422_sse2(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 {
 	UInt8          *yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
 	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
-	int				y,x, vWidth = width >> 4, halfheight = height >> 1;
+	int				y,x, vWidth = width >> 4, halfheight = height >> 1, halfwidth = width >> 1;
 	
 	for (y = 0; y < halfheight; y ++) {
 		__m128i *ov = (__m128i *)o, *ov2 = (__m128i *)(o + outRB), *yv2 = (__m128i *)(yc + rY);
@@ -205,9 +205,9 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 			_mm_stream_si128(&ov2[x2+1],p4);
 		}
 		
-		if (__builtin_expect(width % 16, FALSE)) { //spill to scalar for the end if the row isn't a multiple of 16
+		if (__builtin_expect(width & 15, FALSE)) { //spill to scalar for the end if the row isn't a multiple of 16
 			UInt8 *o2 = o + outRB, *yc2 = yc + rY;
-			for (x = vWidth * 16; x < width; x += 2) {
+			for (x = vWidth * 16; x < halfwidth; x ++) {
 				int             hx = x>>1, x2 = x*2;
 				o2[x2] = o[x2] = uc[hx];
 				o[x2 + 1] = yc[x];
@@ -223,7 +223,45 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 		uc += rU;
 		vc += rV;
 	}
-	_mm_sfence(); // complete all writes
+	_mm_sfence(); // complete all writes (probably not really needed)
+}
+
+
+static void Y420toY422_x86_scalar(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+{
+	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
+	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], halfheight = height >> 1, halfwidth = width >> 1;
+	int				y, x;
+	
+	for (y = 0; y < halfheight; y ++) {
+		UInt8 *o2 = o + outRB, *yc2 = yc + rY;
+		
+		for (x = 0; x < halfwidth; x ++) {
+			int             hx = x>>1, x2 = x*2;
+			o2[x2] = o[x2] = u[hx];
+			o[x2 + 1] = yc[x];
+			o2[x2 + 1] = yc2[x];
+			o2[x2 + 2] = o[x2 + 2] = v[hx];
+			o[x2 + 3] = yc[x + 1];
+			o2[x2 + 3] = yc2[x + 1];
+		}
+		
+		o += outRB*2;
+		yc += rY*2;
+		u += rU;
+		v += rV;
+	}
+}
+
+void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+{
+	uintptr_t yc = (uintptr_t)picture->data[0];
+
+	//make sure the ffmpeg picture buffers are aligned enough, they're only guaranteed to be 8-byte for some reason...
+	//if input y isn't 16 byte aligned, sse2 crashes
+
+	if (__builtin_expect((yc % 16) == 0 && (picture->linesize[0] % 16) == 0, TRUE)) Y420toY422_sse2(o, outRB, width, height, picture);
+	else Y420toY422_x86_scalar(o, outRB, width, height, picture);
 }
 #endif
 
