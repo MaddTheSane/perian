@@ -20,4 +20,5 @@
 - (NSString *)stringByStandardizingNewlines;
 - (NSArray *)pairSeparatedByString:(NSString *)str;
 - (NSArray *)componentsSeparatedByString:(NSString *)str count:(int)count;
++ (NSString *)stringFromUnknownEncodingFile:(NSString *)file;
 @end

@@ -117,9 +117,10 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 	
 	FSRefMakePath(theDirectory, path, PATH_MAX);
 	srtfile = [[NSString stringWithUTF8String:(char*)path] stringByAppendingPathComponent:(NSString*)filename];
-	data = [[[NSString stringWithContentsOfFile:srtfile encoding:NSUTF8StringEncoding error:&nserr] stringByStandardizingNewlines] UTF8String];
 	free(path);
 	
+	data = [[[NSString stringFromUnknownEncodingFile:srtfile] stringByStandardizingNewlines] UTF8String];
+
 	dataRef = NewHandleClear(sizeof(Handle) + 1);
 	emptyDataRefExtension[0] = EndianU32_NtoB(sizeof(UInt32)*2);
 	emptyDataRefExtension[1] = EndianU32_NtoB(kDataRefExtensionInitializationData);
@@ -143,7 +144,12 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 	char subNumStr[10];
 
 	snprintf(subNumStr, 10, "%u", subNum);
-	char *subOffset = strstr(data, subNumStr);
+	char *subOffset; 
+	if (data != NULL) {
+		subOffset = strstr(data, subNumStr);
+	} else {
+		subOffset = NULL;
+	}
 
 	while (subOffset != NULL) {
 		unsigned int starthour, startmin, startsec, startmsec;
@@ -304,16 +310,28 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 			// SubRip
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".srt"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 			if (actRange.location == extRange.location)
-				LoadSubRipSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
+				{
+				err = LoadSubRipSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
+				if (err) NSLog(@"Perian: loading .srt, error %d",err);
+				goto bail;
+				}
 			
 			// SubStationAlpha
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".ass"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 			if (actRange.location == extRange.location)
-				LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
-
+			{
+				err = LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
+				if (err) NSLog(@"Perian: loading .ass, error %d",err);
+				goto bail;
+			}
+			
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".ssa"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 			if (actRange.location == extRange.location)
-				LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
+			{
+				err = LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
+				if (err) NSLog(@"Perian: loading .ssa, error %d",err);
+				goto bail;
+			}			
 			
 			// VobSub
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".idx"), kCFCompareCaseInsensitive | kCFCompareBackwards);
@@ -351,6 +369,7 @@ bail:
 
 -(void)addLine:(SubLine *)sline
 {
+	if (sline->begin_time < sline->end_time)
 	[lines addObject:sline];
 }
 
@@ -377,16 +396,14 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	return (base >= test_s) && (base < test_e);
 }
 
-/* FIXME: This algorithm is not nearly good enough.
-   It works for trivial overlaps, but not [  [   ]   [   ]  ] (where [] are subtitle lines).
-   Many other cases may fail. */
-
 -(void)refill
 {
 	unsigned num = [lines count];
 	if (num == 0) return;
 	unsigned times[num*2+1];
 	SubLine *slines[num], *last=nil;
+	bool last_has_invalid_end = false;
+	
 	[lines sortUsingFunction:cmp_line context:nil];
 	[lines getObjects:slines];
 //	NSLog(@"pre - %@",lines);
@@ -402,7 +419,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	for (int i=0;i < num*2; i++) {
 		if (i > 0 && times[i-1] == times[i]) continue;
 		NSMutableString *accum = [NSMutableString string];
-		unsigned start = times[i], end = start;
+		unsigned start = times[i], last_end = start, next_start=UINT_MAX, end = start;
 		bool startedOutput = false, finishedOutput = false;
 		
 		// Add on packets until we find one that marks it ending (by starting later)
@@ -411,23 +428,30 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 			
 		for (int j=0; j < num; j++) {
 			if (isinrange(times[i], slines[j]->begin_time, slines[j]->end_time)) {
-				unsigned next_start = (j == num-1)?slines[j]->end_time:slines[j+1]->begin_time;
-				end = MIN(slines[j]->end_time, next_start);
+				unsigned ns = (j == num-1)?slines[j]->end_time:slines[j+1]->begin_time;
+				last_end = MAX(slines[j]->end_time, last_end);
+				next_start = MIN(next_start, ns);
 				[accum appendString:slines[j]->line];
 				startedOutput = true;
-			} else if (startedOutput) {finishedOutput = true; break;}
+			} else if (j == num-1) finishedOutput = true;
 		}
-		
-		
+				
 		if (finishedOutput && startedOutput) {
 			[accum deleteCharactersInRange:NSMakeRange([accum length] - 1, 1)]; // delete last newline
-			
-			if (last) { // ensure the last packet's end time isn't after this one's begin time
-				if (last->end_time > start) last->end_time = start;
+						
+			if (last_has_invalid_end) {
+				if (last_end < next_start) { 
+					int j, set;
+					for (j=i; j >= 0; j--) if (times[j] == last->begin_time) break;
+					set = times[j+1];
+					last->end_time = set;
+				} else last->end_time = start; 
+				last_has_invalid_end = false;
 			}
-			
+			end = last_end;
+			if (last_end > next_start) last_has_invalid_end = true;
 			SubLine *event = [[SubLine alloc] initWithLine:accum start:start end:end];
-
+			
 			[outpackets addObject:event];
 			
 			last = event;

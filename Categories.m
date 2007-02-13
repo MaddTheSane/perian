@@ -68,4 +68,21 @@
 
 	return ar;
 }
+
++ (NSString *)stringFromUnknownEncodingFile:(NSString *)file
+{
+	NSString *content = nil;
+    NSError *err = nil;
+    
+	/* Try to get the file contents as UTF-8, or ISO-Latin1, or WinLatin1 */
+	content = [NSString stringWithContentsOfFile:file encoding:NSUTF8StringEncoding error:&err];
+	if (content == nil) {
+		content = [NSString stringWithContentsOfFile:file encoding:NSISOLatin1StringEncoding error:&err];
+	}
+	if (content == nil) {
+		content = [NSString stringWithContentsOfFile:file encoding:NSWindowsCP1252StringEncoding error:&err];
+		if (content == nil) NSLog(@"Perian: file %@ has unknown character encoding",file);
+	}
+	return content;
+}
 @end

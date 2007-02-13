@@ -304,9 +304,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 
 -(void) loadFile:(NSString*)path
 {
-	NSError *err;
-	NSStringEncoding se = NSUTF8StringEncoding;
-	NSString *ssa = [[NSString stringWithContentsOfFile:path encoding:se error:&err] stringByStandardizingNewlines];
+	NSString *ssa = [[NSString stringFromUnknownEncodingFile:path] stringByStandardizingNewlines];
 	if (!ssa) return;
 	NSArray *lines = [ssa componentsSeparatedByString:@"\n"];
 	NSEnumerator *lenum = [lines objectEnumerator];
@@ -550,13 +548,14 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 		PtrToHand(str,&sampleHndl,sampleLen);
 
 		err=AddMediaSample(theMedia,sampleHndl,0,sampleLen, p->end_time - p->begin_time,(SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
-		if (err != noErr) {err = GetMoviesError(); goto bail;}
+		if (err != noErr) {NSLog(@"error adding %d-%d",p->begin_time, p->end_time); err = GetMoviesError(); goto loopend;}
 		
 		ConvertTimeScale(&movieStartTime, movieTimeScale);
 
 		err = InsertMediaIntoTrack(theTrack, movieStartTime.value.lo, sampleTime, p->end_time - p->begin_time, fixed1);
 		if (err != noErr) {err = GetMoviesError(); goto bail;}
 
+loopend:
 		DisposeHandle(sampleHndl);
 	}
 	
