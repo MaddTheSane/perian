@@ -68,5 +68,13 @@ public:
 	void retain();
 	bool empty();
 };
+
+class CXXAutoreleasePool
+{
+	void *pool;
+public:
+	CXXAutoreleasePool();
+	~CXXAutoreleasePool();
+};
 #endif
 #endif

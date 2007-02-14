@@ -45,6 +45,7 @@
 	SSAStyleSpan **styles;
 	size_t style_count;
 	BOOL disposelayout, multipleruns;
+	int is_shape;
 }
 @end
 

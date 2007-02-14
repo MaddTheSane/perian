@@ -111,6 +111,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *curSub = (NSString*)cfSub;
 	NSArray *rentities = ParseSubPacket(curSub,ssa,glob->plaintext);
+	SSARenderEntity *last_re = nil;
 	OSStatus err;
 	
 	CGContextClearRect(c, CGRectMake(0,0,cWidth,cHeight));
@@ -119,8 +120,11 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 	
 	for (j = 0; j < subcount; j++) {
 		SSARenderEntity *re = (SSARenderEntity*)[rentities objectAtIndex:j];
+		if (re->is_shape) continue;
 		ATSUTextLayout layout = re->layout;
 		
+		if (last_re && re->marginv != last_re->marginv) {lastTopPenY = lastBottomPenY = lastCenterPenY = -1;}
+			
 		outline = re->styles[0]->outline; shadow = re->styles[0]->shadow;
 		
 		size_t sublen = [re->nstext length];
@@ -267,6 +271,8 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 		}
 		
 		*storePenY = penY;
+		
+		last_re = re;
 	}
 	
 	[pool release];

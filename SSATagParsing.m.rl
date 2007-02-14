@@ -110,6 +110,39 @@ static void PruneEmptyStyleSpans(SSARenderEntity *re)
 	}
 }
 
+static void UpdateAlignment(int inum, int cur_posx, int *valign, int *halign, ATSUTextLayout cur_layout)
+{
+	int cur_halign, cur_valign;
+	
+	switch (inum) 
+	{case 1: case 4: case 7: cur_halign = S_LeftAlign; break;
+	case 2: case 5: case 8: default: cur_halign = S_CenterAlign; break;
+	case 3: case 6: case 9: cur_halign = S_RightAlign;}
+	
+	switch (inum)
+	{case 1: case 2: case 3: default: cur_valign = S_BottomAlign; break; 
+	case 4: case 5: case 6: cur_valign = S_MiddleAlign; break; 
+	case 7: case 8: case 9: cur_valign = S_TopAlign;}
+	
+	*halign = cur_halign;
+	*valign = cur_valign;
+	Fract alignment;
+	
+	if (cur_posx != -1) {
+		switch(cur_halign) {
+			case S_LeftAlign:
+				alignment = FloatToFract(0.);
+				break;
+			case S_CenterAlign: default:
+				alignment = kATSUCenterAlignment;  
+				break;
+			case S_RightAlign: 
+				alignment = FloatToFract(1.);
+		}
+		SetATSULayoutOther(cur_layout, kATSULineFlushFactorTag, sizeof(Fract), &alignment);
+	} 
+}
+
 NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 {
 	NSArray *linea;
@@ -149,7 +182,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			re->layer = [[ar objectAtIndex:1] intValue];
 			NSString *sn = [ar objectAtIndex:2];
 			
-			re->style = NULL;
+			re->style = ssa->defaultstyle;
 			
 			for (j=0; j < ssa->stylecount; j++) {
 				if ([sn isEqualToString:ssa->styles[j].name])  {
@@ -157,11 +190,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					break;
 				}
 			}
-			
-			if (!re->style) {			
-				re->style = ssa->defaultstyle;
-			}
-			
+
 			re->marginl = [[ar objectAtIndex:5] intValue];
 			re->marginr = [[ar objectAtIndex:6] intValue];
 			re->marginv = [[ar objectAtIndex:7] intValue];
@@ -199,6 +228,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 		re->halign = re->style->halign;
 		re->valign = re->style->valign;
 		re->multipleruns=NO;
+		re->is_shape=NO;
 		
 #define end_re \
 		cur_range = (NSRange){strbegin - pb, p - strbegin};\
@@ -270,10 +300,14 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					SetATSUStyleOther(cur_style, kATSUSizeTag, sizeof(fixv), &fixv);
 				}
 				
-				action fn_begin {
-					strparambegin = p;
+				action ftrack {
+					fixv = FloatToFixed(num);
+					SetATSUStyleOther(cur_style, kATSUTrackingTag, sizeof(fixv), &fixv);
 				}
 				
+				action strp_begin {
+					strparambegin = p;
+				}
 				
 				action fontname {
 					ATSUFontID	font;
@@ -286,34 +320,17 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 						newLayout = TRUE;
 						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
 					}
-										
-					if (ssa->version == S_SSA) inum = SSA2ASSAlignment(inum);
 					
-					switch (inum) 
-					{case 1: case 4: case 7: cur_halign = S_LeftAlign; break;
-					case 2: case 5: case 8: default: cur_halign = S_CenterAlign; break;
-					case 3: case 6: case 9: cur_halign = S_RightAlign;}
-					
-					switch (inum)
-					{case 1: case 2: case 3: default: cur_valign = S_BottomAlign; break; 
-					case 4: case 5: case 6: cur_valign = S_MiddleAlign; break; 
-					case 7: case 8: case 9: cur_valign = S_TopAlign;}
-					
-					Fract alignment;
+					UpdateAlignment(inum, cur_posx, &cur_valign, &cur_halign, cur_layout);
+				}
 
-					if (cur_posx != -1) {
-						switch(cur_halign) {
-							case S_LeftAlign:
-								alignment = FloatToFract(0.);
-								break;
-							case S_CenterAlign: default:
-								alignment = kATSUCenterAlignment;  
-								break;
-							case S_RightAlign: 
-								alignment = FloatToFract(1.);
-						}
-						SetATSULayoutOther(cur_layout, kATSULineFlushFactorTag, sizeof(Fract), &alignment);
-					} 
+				action ssa_alignment {
+					if (!newLayout) {
+						newLayout = TRUE;
+						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
+					}
+					
+					UpdateAlignment(SSA2ASSAlignment(inum), cur_posx, &cur_valign, &cur_halign, cur_layout);
 				}
 				
 				action pos_begin {
@@ -339,6 +356,11 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					re->multipleruns = YES;
 				}
 				
+				action secondarycolor {
+					cur_color.secondary = ParseColorTag(inum,cur_color.secondary.alpha);
+					re->multipleruns = YES;
+				}
+				
 				action outlinecolor {
 					cur_color.outline = ParseColorTag(inum,cur_color.outline.alpha);
 					re->multipleruns = YES;
@@ -346,6 +368,26 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				
 				action shadowcolor {
 					cur_color.shadow = ParseColorTag(inum,cur_color.shadow.alpha);
+					re->multipleruns = YES;
+				}
+				
+				action primaryalpha {
+					cur_color.primary.alpha = (255 - inum) / 255.f;
+					re->multipleruns = YES;
+				}
+				
+				action secondaryalpha {
+					cur_color.secondary.alpha = (255 - inum) / 255.f;
+					re->multipleruns = YES;
+				}
+				
+				action outlinealpha {
+					cur_color.outline.alpha = (255 - inum) / 255.f;
+					re->multipleruns = YES;
+				}
+				
+				action shadowalpha {
+					cur_color.shadow.alpha = (255 - inum) / 255.f;
 					re->multipleruns = YES;
 				}
 				
@@ -407,6 +449,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 						nre->style_count = 0;
 						nre->disposelayout = YES;
 						nre->multipleruns = NO;
+						nre->is_shape = re->is_shape;
 						re = nre;
 					}
 				}
@@ -414,6 +457,40 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				action color_end {
 					NSString *hexn = [NSString stringWithCharacters:intbegin length:p-intbegin];
 					inum = strtoul([hexn UTF8String], NULL, 16);
+				}
+				
+				action styleset {
+					if (!newLayout) {
+						newLayout = TRUE;
+						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
+					}
+					re->multipleruns = YES;
+					ssastyleline *the_style = re->style;
+					NSString *searchsn = [NSString stringWithCharacters:strparambegin length:p-strparambegin];
+					
+					if ([searchsn length] > 0) {
+						for (j=0; j < ssa->stylecount; j++) {
+							if ([searchsn isEqualToString:ssa->styles[j].name])  {
+								the_style = &ssa->styles[j]; 
+								break;
+							}
+						}
+					}
+					
+					ATSUCopyAttributes(the_style->atsustyle,cur_style);
+					cur_color = the_style->color;
+					cur_outline = the_style->outline;
+					cur_shadow = the_style->shadow;
+					cur_posx = cur_posy = -1;
+				}
+				
+				action skip_t_tag {
+					while (p != pe && *p != ')' && *p != '}') p++;
+					p++;
+				}
+				
+				action draw_mode {
+					re->is_shape = inum != 0;
 				}
 				
 				flag = ([01] % {unichar fl = *(p-1); if (flag == '0' || flag == '1') flag = fl - '0';})? > {flag = 1;};
@@ -431,15 +508,26 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"i" flag %italic 
 								|"u" flag %uline
 								|"s" flag %strike
-								|"fad" [^\\}]*
 								|"fs" num %fsize 
+								|"fsp" num %ftrack
 								|("fr" "z"? num %frot) 
-								|("fn" [^\\}]* > fn_begin %fontname) 
+								|("fn" [^\\}]* > strp_begin %fontname) 
 								|"shad" num %shadowsize
+								|"a" intnum %ssa_alignment
 								|"an" intnum %alignment
 								|"1"? "c" color %primarycolor
+								|"2c" color %secondarycolor
 								|"3c" color %outlinecolor
 								|"4c" color %shadowcolor
+								|"1a" color %primaryalpha
+								|"2a" color %secondaryalpha
+								|"3a" color %outlinealpha
+								|"4a" color %shadowalpha
+								|("r" [^\\}]* > strp_begin %styleset)
+								|("k"|"kf"|"K"|"ko"|"q"|"fr"|"fad"|"move"|"clip") [^\\}]*
+								|"p" num %draw_mode
+								#|"t" [^)}]* # enabling this crashes ragel
+								|"t(" % skip_t_tag
 								);
 				
 				cmd = "\\"  cmd_specific ;

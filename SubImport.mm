@@ -570,9 +570,9 @@ void CXXSubtitleSerializer::release()
 {
 	SubtitleSerializer *s = (SubtitleSerializer*)priv;
 	int r = [s retainCount];
-	[s release];
 	
-	if (r == 1) {priv = nil; delete this;}
+	if (r == 1) delete this;
+	else [s release];
 }
 
 void CXXSubtitleSerializer::retain()
@@ -583,4 +583,14 @@ void CXXSubtitleSerializer::retain()
 bool CXXSubtitleSerializer::empty()
 {
 	return [(SubtitleSerializer*)priv isEmpty];
+}
+
+CXXAutoreleasePool::CXXAutoreleasePool()
+{
+	pool = [[NSAutoreleasePool alloc] init];
+}
+
+CXXAutoreleasePool::~CXXAutoreleasePool()
+{
+	[(NSAutoreleasePool*)pool release];
 }

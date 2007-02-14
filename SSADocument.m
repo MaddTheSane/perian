@@ -53,19 +53,20 @@ static ATSURGBAlphaColor SSAParseColor(NSString *c)
 {
 	const char *c_ = [c UTF8String];
 	unsigned char r, g, b, a;
+	unsigned int rgb;
 	
 	if (c_[0] == '&') {
-		sscanf(c_ + 2,"%2hhx%2hhx%2hhx%2hhx",&a,&b,&g,&r);
-		a = 255-a; // have to reverse it
+		rgb = strtoul(&c_[2],NULL,16);
 	} else {
-		unsigned int rgb = strtol(&c_[0],NULL,0);
-		
-		b = rgb & 0xff;
-		g = (rgb >> 8) & 0xff;
-		r = (rgb >> 16) & 0xff;
-		a = (rgb >> 24) & 0xff;
-		a = 255-a;
+		rgb = strtoul(c_,NULL,0);
 	}
+	
+	a = (rgb >> 24) & 0xff;
+	b = (rgb >> 16) & 0xff;
+	g = (rgb >> 8) & 0xff;
+	r = rgb & 0xff;
+
+	a = 255-a;
 	
 	return (ATSURGBAlphaColor){(float)r/255.,(float)g/255.,(float)b/255.,(float)a/255.};
 }
