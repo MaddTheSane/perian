@@ -201,6 +201,7 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			KaxTrackEntry & track = *static_cast<KaxTrackEntry *>(trackEntries[i]);
 			KaxTrackNumber & number = GetChild<KaxTrackNumber>(track);
 			KaxTrackType & type = GetChild<KaxTrackType>(track);
+			KaxTrackFlagDefault & enabled = GetChild<KaxTrackFlagDefault>(track);
 			MatroskaTrack mkvTrack;
 			
 			mkvTrack.number = uint16(number);
@@ -251,6 +252,8 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			
 			long qtLang = ISO639_2ToQTLangCode(string(trackLang).c_str());
 			SetMediaLanguage(mkvTrack.theMedia, qtLang);
+			
+			SetTrackEnabled(mkvTrack.theTrack,uint8(enabled));
 			
 			if (!trackName.IsDefaultValue()) {
 				QTMetaDataRef trackMetaData;

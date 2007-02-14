@@ -399,14 +399,27 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 -(void)refill
 {
 	unsigned num = [lines count];
-	if (num == 0) return;
+	unsigned min_allowed = finished ? 1 : 2;
+	if (num < min_allowed) return;
 	unsigned times[num*2+1];
 	SubLine *slines[num], *last=nil;
-	bool last_has_invalid_end = false;
+	bool last_has_invalid_end = false, all_overlap = true;
 	
 	[lines sortUsingFunction:cmp_line context:nil];
 	[lines getObjects:slines];
 //	NSLog(@"pre - %@",lines);
+	
+	//leave early if all subtitle lines overlap
+	if (finished) all_overlap = false;
+	else {
+		for (int i=0;i < num-1;i++) {
+			SubLine *c = slines[i], *n = slines[i+1];
+			if (c->end_time < n->begin_time) {all_overlap = false; break;}
+		}
+	}
+	
+	if (all_overlap) return;
+	
 	for (int i=0;i < num;i++) {
 		times[i*2]   = slines[i]->begin_time;
 		times[i*2+1] = slines[i]->end_time;
@@ -428,7 +441,12 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 			
 		for (int j=0; j < num; j++) {
 			if (isinrange(times[i], slines[j]->begin_time, slines[j]->end_time)) {
-				unsigned ns = (j == num-1)?slines[j]->end_time:slines[j+1]->begin_time;
+				unsigned ns = slines[j]->end_time;
+				
+				// find the next line that starts after this one
+				if (j != num-1)
+					for (int h = j; h < num; h++) if (slines[h]->begin_time != slines[j]->begin_time) {ns = slines[h]->begin_time; break;}
+					
 				last_end = MAX(slines[j]->end_time, last_end);
 				next_start = MIN(next_start, ns);
 				[accum appendString:slines[j]->line];
@@ -438,7 +456,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 				
 		if (finishedOutput && startedOutput) {
 			[accum deleteCharactersInRange:NSMakeRange([accum length] - 1, 1)]; // delete last newline
-						
+//			NSLog(@"%d - %d %d",start,last_end,next_start);			
 			if (last_has_invalid_end) {
 				if (last_end < next_start) { 
 					int j, set;
@@ -446,9 +464,9 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 					set = times[j+1];
 					last->end_time = set;
 				} else last->end_time = start; 
-				last_has_invalid_end = false;
 			}
 			end = last_end;
+			last_has_invalid_end = false;
 			if (last_end > next_start) last_has_invalid_end = true;
 			SubLine *event = [[SubLine alloc] initWithLine:accum start:start end:end];
 			
@@ -458,6 +476,9 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 		}
 	}
 	
+	if (last_has_invalid_end) {
+		last->end_time = slines[num-1]->begin_time;
+	}
 //	NSLog(@"out - %@",outpackets);
 
 	if (finished) [lines removeAllObjects];

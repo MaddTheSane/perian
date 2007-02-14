@@ -255,10 +255,11 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			ATSUTextLayout cur_layout;
 			NSMutableString *output = [NSMutableString string], *dtmp;
 			unichar *p = re->text, *pe = &re->text[len], *numbegin = p, *strbegin = p, *skipbegin = p, *intbegin = p, *pb = p, *posbegin=p, *strparambegin=p;
-			float num, cur_outline = re->style->outline, cur_shadow = re->style->shadow;
+			float num, cur_outline = re->style->outline, cur_shadow = re->style->shadow, cur_scalex = re->style->scalex, cur_scaley = re->style->scaley;
 			NSString *parsetmp;
 			int cs, cur_valign=re->valign, cur_halign=re->halign, cur_posx=-1, cur_posy=-1;
 			ssacolors cur_color = re->style->color;
+			CGAffineTransform matrix;
 			
 			unsigned long inum=0;
 			unsigned outputoffset=0, lengthreduce=0;
@@ -303,6 +304,18 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				action ftrack {
 					fixv = FloatToFixed(num);
 					SetATSUStyleOther(cur_style, kATSUTrackingTag, sizeof(fixv), &fixv);
+				}
+				
+				action fscalex {
+					cur_scalex = num;
+					matrix = CGAffineTransformMakeScale(cur_scalex/100.,cur_scaley/100.);		
+					SetATSUStyleOther(cur_style, kATSUFontMatrixTag, sizeof(matrix), &matrix);
+				}
+				
+				action fscaley {
+					cur_scaley = num;
+					matrix = CGAffineTransformMakeScale(cur_scalex/100.,cur_scaley/100.);	
+					SetATSUStyleOther(cur_style, kATSUFontMatrixTag, sizeof(matrix), &matrix);
 				}
 				
 				action strp_begin {
@@ -510,6 +523,8 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"s" flag %strike
 								|"fs" num %fsize 
 								|"fsp" num %ftrack
+								|"fscx" num %fscalex
+								|"fscy" num %fscaley
 								|("fr" "z"? num %frot) 
 								|("fn" [^\\}]* > strp_begin %fontname) 
 								|"shad" num %shadowsize
@@ -524,7 +539,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"3a" color %outlinealpha
 								|"4a" color %shadowalpha
 								|("r" [^\\}]* > strp_begin %styleset)
-								|("k"|"kf"|"K"|"ko"|"q"|"fr"|"fad"|"move"|"clip") [^\\}]*
+								|("k"|"kf"|"K"|"ko"|"q"|"fr"|"fad"|"move"|"clip"|"o") [^\\}]*
 								|"p" num %draw_mode
 								#|"t" [^)}]* # enabling this crashes ragel
 								|"t(" % skip_t_tag
