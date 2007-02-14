@@ -102,5 +102,5 @@
 		ComponentDelegate (0x020C)
 		ComponentDelegate (0x020D)
 		ComponentDelegate (0x020E)
-		ComponentDelegate (DecodeBand)
+		ComponentCall (DecodeBand)
 	ComponentRangeEnd (3)
