@@ -84,18 +84,23 @@ public:
 	TimeValue64				maxLoadedTime;
 	CXXSubtitleSerializer	*subtitleSerializer;
 	Handle					subDataRefHandler;
+	uint8					isEnabled;
 	
 private:
 	// adds an individual frame from a block group into the sample table if it exists,
 	// the media otherwise, and into the track if the track is a subtitle track.
 	void AddFrame(MatroskaFrame &frame);
 	
+	// parses the first frame of a supported data format to determine codec parameters,
+	// which can be more correct than the codec headers.
+	void ParseFirstBlock(KaxBlock &block);
+	
 	// Since the duration in Matroska files is generally rather unreliable, rely only on
 	// the difference in timestamps between two frames. Thus, AddBlock() buffers frames
 	// from one block group until the next block group is found to set the duration of the
 	// previous ones to be the difference in timestamps.
 	vector<MatroskaFrame>	lastFrames;
-	bool					seenFirstFrame;
+	bool					seenFirstBlock;
 	
 	// this is the first sample number (if sample table) or sample time that we haven't 
 	// yet added to the media/track. A value of -1 means the value is invalid/unset.

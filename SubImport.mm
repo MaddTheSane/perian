@@ -86,6 +86,9 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 			// finally, say that we're transparent
 			MediaHandler mh = GetMediaHandler(theMedia);
 			MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
+			
+			// subtitle tracks should be above the video track, which should be layer 0
+			SetTrackLayer(theTrack, -1);
 		}
 	}
 

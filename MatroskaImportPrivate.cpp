@@ -253,7 +253,7 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			long qtLang = ISO639_2ToQTLangCode(string(trackLang).c_str());
 			SetMediaLanguage(mkvTrack.theMedia, qtLang);
 			
-			SetTrackEnabled(mkvTrack.theTrack,uint8(enabled));
+			mkvTrack.isEnabled = uint8(enabled);
 			
 			if (!trackName.IsDefaultValue()) {
 				QTMetaDataRef trackMetaData;
@@ -284,6 +284,10 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			}
 			tracks.push_back(mkvTrack);
 		}
+	}
+	
+	for (int i = 0; i < tracks.size(); i++) {
+		SetTrackEnabled(tracks[i].theTrack, tracks[i].isEnabled);
 	}
 }
 
@@ -451,6 +455,11 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		(*imgDesc)->width = width;
 		(*imgDesc)->height = height;
 		
+		if (trackWidth == 0 || trackHeight == 0) {
+			trackWidth = IntToFixed(width);
+			trackHeight = IntToFixed(height);
+		}
+		
 		mkvTrack.theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
 		if (mkvTrack.theTrack == NULL)
 			return GetMoviesError();
@@ -462,6 +471,9 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		// finally, say that we're transparent
 		mh = GetMediaHandler(mkvTrack.theMedia);
 		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
+		
+		// subtitle tracks should be above the video track, which should be layer 0
+		SetTrackLayer(mkvTrack.theTrack, -1);
 		
 		mkvTrack.is_vobsub = true;
 		
@@ -654,12 +666,13 @@ MatroskaTrack::MatroskaTrack()
 	qtSampleDesc = 0;
 	timecodeScale = 1000000;
 	maxLoadedTime = 0;
-	seenFirstFrame = false;
+	seenFirstBlock = false;
 	firstSample = -1;
 	amountToAdd = 0;
 	subtitleSerializer = new CXXSubtitleSerializer;
 	subDataRefHandler = NULL;
 	is_vobsub = false;
+	isEnabled = true;
 }
 
 MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
@@ -686,7 +699,7 @@ MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
 	for (int i = 0; i < copy.lastFrames.size(); i++)
 		lastFrames.push_back(copy.lastFrames[i]);
 	
-	seenFirstFrame = copy.seenFirstFrame;
+	seenFirstBlock = copy.seenFirstBlock;
 	firstSample = copy.firstSample;
 	amountToAdd = copy.amountToAdd;
 	
@@ -696,6 +709,7 @@ MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
 	subDataRefHandler = copy.subDataRefHandler;
 	
 	is_vobsub = copy.is_vobsub;
+	isEnabled = copy.isEnabled;
 }
 
 MatroskaTrack::~MatroskaTrack()
@@ -710,31 +724,40 @@ MatroskaTrack::~MatroskaTrack()
 		subtitleSerializer->release();
 }
 
+void MatroskaTrack::ParseFirstBlock(KaxBlock &block)
+{
+	AudioStreamBasicDescription asbd = {0};
+	AudioChannelLayout acl = {0};
+	bool replaceSoundDesc = false;
+	
+	switch ((*desc)->dataFormat) {
+		case kAudioFormatAC3:
+			replaceSoundDesc = parse_ac3_bitstream(&asbd, &acl, block.GetBuffer(0).Buffer(), block.GetFrameSize(0));
+			break;
+	}
+	
+	if (replaceSoundDesc) {
+		// successful in parsing, so the acl and asbd are more correct than what we generated in 
+		// AddAudioTrack() so replace our sound description
+		SoundDescriptionHandle sndDesc = NULL;
+		
+		OSStatus err = QTSoundDescriptionCreate(&asbd, &acl, sizeof(AudioChannelLayout), NULL, 0, 
+		                                        kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndDesc);
+		if (err == noErr) {
+			DisposeHandle((Handle) desc);
+			desc = (SampleDescriptionHandle) sndDesc;
+		}
+	}
+}
+
 void MatroskaTrack::AddBlock(KaxBlockGroup &blockGroup)
 {
 	KaxBlock & block = GetChild<KaxBlock>(blockGroup);
 	KaxBlockDuration & blockDuration = GetChild<KaxBlockDuration>(blockGroup);
 	
-	if (!seenFirstFrame) {
-		// we want to parse the first ac3 frame so that we can get a more correct channel layout
-		if ((*desc)->dataFormat == kAudioFormatAC3) {
-			AudioStreamBasicDescription asbd = {0};
-			AudioChannelLayout acl = {0};
-			
-			if (parse_ac3_bitstream(&asbd, &acl, block.GetBuffer(0).Buffer(), block.GetFrameSize(0))) {
-				// successful in parsing, so the acl and asbd are more correct than what we generated in 
-				// AddAudioTrack() so replace our sound description
-				SoundDescriptionHandle sndDesc = NULL;
-				
-				OSStatus err = QTSoundDescriptionCreate(&asbd, &acl, sizeof(AudioChannelLayout), NULL, 0, 
-														kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndDesc);
-				if (err == noErr) {
-					DisposeHandle((Handle) desc);
-					desc = (SampleDescriptionHandle) sndDesc;
-				}
-			}
-		}
-		seenFirstFrame = true;
+	if (!seenFirstBlock) {
+		ParseFirstBlock(block);
+		seenFirstBlock = true;
 	}
 	
 	for (int i = 0; i < lastFrames.size(); i++) {

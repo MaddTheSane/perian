@@ -85,7 +85,7 @@
 
 #define kMatroskaExportFlags \
 	(canMovieExportFiles | canMovieExportFromProcedures | movieExportMustGetSourceMediaType | \
-	 canMovieExportValidateMovie)
+	 canMovieExportValidateMovie | cmpThreadSafe)
 //   hasMovieExportUserInterface 
 
 // Component Manager Thing
