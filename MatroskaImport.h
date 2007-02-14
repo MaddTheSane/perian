@@ -71,10 +71,10 @@ public:
 	// added, e.g. from a previous call to AddSamplesToTrack()
 	void AddSamplesToTrack();
 	
-	void FinishTrack();
+	void FinishTrack(bool addSamples);
 	
 	UInt16					number;
-	UInt8					type;
+	UInt8					type, is_vobsub;
 	Track					theTrack;
 	Media					theMedia;
 	SampleDescriptionHandle desc;

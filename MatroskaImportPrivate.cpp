@@ -463,6 +463,8 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		mh = GetMediaHandler(mkvTrack.theMedia);
 		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
 		
+		mkvTrack.is_vobsub = true;
+		
 	} else if ((*imgDesc)->cType == kSubFormatUTF8 || (*imgDesc)->cType == kSubFormatSSA || (*imgDesc)->cType == kSubFormatASS) {
 		if ((*imgDesc)->cType == kSubFormatASS) (*imgDesc)->cType = kSubFormatSSA; // no real reason to treat them differently
 		UInt32 emptyDataRefExtension[2]; // XXX the various uses of this bit of code should be unified
@@ -481,6 +483,8 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
 		
 		BeginMediaEdits(mkvTrack.theMedia);
+		
+		mkvTrack.is_vobsub = false;
 	} else {
 		Codecprintf(NULL, "MKV: Unsupported subtitle type\n");
 		return -2;
@@ -655,6 +659,7 @@ MatroskaTrack::MatroskaTrack()
 	amountToAdd = 0;
 	subtitleSerializer = new CXXSubtitleSerializer;
 	subDataRefHandler = NULL;
+	is_vobsub = false;
 }
 
 MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
@@ -689,6 +694,8 @@ MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
 	subtitleSerializer->retain();
 		
 	subDataRefHandler = copy.subDataRefHandler;
+	
+	is_vobsub = copy.is_vobsub;
 }
 
 MatroskaTrack::~MatroskaTrack()
@@ -769,7 +776,7 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	SInt64 sampleNum = 0;
 	TimeValue sampleTime;
 	
-	if (type == track_subtitle) {
+	if (type == track_subtitle && !is_vobsub) {
 		if (frame.size > 0) subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.timecode, frame.timecode + frame.duration);
 		const char *packet=NULL; size_t size=0; unsigned start=0, end=0;
 		packet = subtitleSerializer->popPacket(&size, &start, &end);
@@ -841,26 +848,26 @@ void MatroskaTrack::AddSamplesToTrack()
 			
 			err = AddSampleTableToMedia(theMedia, sampleTable, firstSample, amountToAdd, &sampleTime64);
 			if (err)
-				Codecprintf(NULL, "MKV: error adding sample table to media %d\n", err);
+				Codecprintf(NULL, "MKV: error adding sample table to media %d (type %x #%d)\n", err);
 			
 			firstSample = sampleTime64;
 			amountToAdd = GetMediaDuration(theMedia) - mediaDuration;
 		}
 		err = InsertMediaIntoTrack(theTrack, -1, firstSample, amountToAdd, fixed1);
 		if (err)
-			Codecprintf(NULL, "MKV: error inserting media into track %d\n", err);
+			Codecprintf(NULL, "MKV: error inserting media into track %d (type %x #%d)\n", err, type, number);
+		
+		maxLoadedTime += amountToAdd;
+		firstSample = -1;
+		amountToAdd = 0;
 	}
-
-	maxLoadedTime += amountToAdd;
-	firstSample = -1;
-	amountToAdd = 0;
 }
 
-void MatroskaTrack::FinishTrack()
+void MatroskaTrack::FinishTrack(bool addSamples)
 {
 	OSStatus err = noErr;
 	
-	if (type == track_subtitle)
+	if (type == track_subtitle && !is_vobsub)
 	{
 		 subtitleSerializer->setFinished();
 		 do {
@@ -870,5 +877,5 @@ void MatroskaTrack::FinishTrack()
 		 EndMediaEdits(theMedia);
 	}
 	
-	AddSamplesToTrack();
+	if (addSamples) AddSamplesToTrack();
 }

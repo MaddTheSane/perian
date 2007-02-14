@@ -414,7 +414,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	else {
 		for (int i=0;i < num-1;i++) {
 			SubLine *c = slines[i], *n = slines[i+1];
-			if (c->end_time < n->begin_time) {all_overlap = false; break;}
+			if (c->end_time <= n->begin_time) {all_overlap = false; break;}
 		}
 	}
 	

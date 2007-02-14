@@ -58,7 +58,7 @@ static ATSURGBAlphaColor SSAParseColor(NSString *c)
 	if (c_[0] == '&') {
 		rgb = strtoul(&c_[2],NULL,16);
 	} else {
-		rgb = strtoul(c_,NULL,0);
+		rgb = strtol(c_,NULL,0);
 	}
 	
 	a = (rgb >> 24) & 0xff;
@@ -195,7 +195,8 @@ int SSA2ASSAlignment(int a)
 				cv(PrimaryColour, primary)
 				cv(SecondaryColour, secondary)
 				cv(OutlineColour, outline)
-				cv(TertiaryColour, outline)
+			//	cv(TertiaryColour, outline)
+				cv(BackColour, outline)
 				cv(BackColour, shadow)
 				bv(Bold, bold)
 				bv(Italic, italic)

@@ -516,7 +516,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 
 				cmd_specific = (("pos(" [^)]+ > pos_begin ")" % pos_end)
 								|"bord" num %bordersize
-								|"b" :> flag %bold 
+								|"b" flag %bold 
 								|"be" flag %bluredge
 								|"i" flag %italic 
 								|"u" flag %uline
@@ -530,7 +530,8 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"shad" num %shadowsize
 								|"a" intnum %ssa_alignment
 								|"an" intnum %alignment
-								|"1"? "c" color %primarycolor
+								|"c" color %primarycolor
+								|"1c" color %primarycolor
 								|"2c" color %secondarycolor
 								|"3c" color %outlinecolor
 								|"4c" color %shadowcolor
@@ -539,7 +540,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"3a" color %outlinealpha
 								|"4a" color %shadowalpha
 								|("r" [^\\}]* > strp_begin %styleset)
-								|("k"|"kf"|"K"|"ko"|"q"|"fr"|"fad"|"move"|"clip"|"o") [^\\}]*
+								|("fe"|"k"|"kf"|"K"|"ko"|"q"|"fr"|"fad"|"move"|"clip"|"o") [^\\}]*
 								|"p" num %draw_mode
 								#|"t" [^)}]* # enabling this crashes ragel
 								|"t(" % skip_t_tag

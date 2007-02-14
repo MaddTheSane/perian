@@ -268,14 +268,19 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 				ImportCluster(cluster, true);
 			}
 			
-			if (!NextLevel1Element())
+			if (!NextLevel1Element()) {
 				*outFlags |= movieImportResultComplete;
+
+				for (int i = 0; i < tracks.size(); i++)
+					tracks[i].FinishTrack(false);
+			}
 			else {
 				*outFlags |= movieImportResultNeedIdles;
-				return noErr;
 			}
 			
-		} else 
+			return noErr;
+			
+		}
 		do {
 			if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
 				int upperLevel = 0;
@@ -290,7 +295,7 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 		
 		// insert the a/v tracks' samples
 		for (int i = 0; i < tracks.size(); i++)
-			tracks[i].FinishTrack();
+			tracks[i].FinishTrack(true);
 		
 	} catch (CRTError &err) {
 		return err.getError();
@@ -337,7 +342,7 @@ ComponentResult MatroskaImport::Idle(long inFlags, long *outFlags)
 		loadState = kMovieLoadStateComplete;
 		
 		for (int i = 0; i < tracks.size(); i++)
-			tracks[i].FinishTrack();
+			tracks[i].FinishTrack(false);
 	}
 	
 	return noErr;
