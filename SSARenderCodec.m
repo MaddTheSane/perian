@@ -173,7 +173,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 					ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineAscentTag, sizeof(ATSUTextMeasurement), &ascent, NULL); // pen has to be positioned below the first line
 					ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
 					
-					penY = (lastTopPenY!=-1)?lastTopPenY:(FloatToFixed(cHeight - re->marginv) - ascent - descent); direction = -1;
+					penY = (lastTopPenY!=-1)?lastTopPenY:(FloatToFixed(ssa->resY - re->marginv) - ascent - descent); direction = -1;
 					lstart = 0; lend = breakCount+1; lstep = 1;
 					storePenY = &lastTopPenY;
 					break;

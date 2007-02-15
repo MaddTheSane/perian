@@ -110,6 +110,39 @@ static void PruneEmptyStyleSpans(SSARenderEntity *re)
 	}
 }
 
+static void PruneIdenticalStyleSpans(SSARenderEntity *re)
+{
+	SSAStyleSpan *styles_new[re->style_count];
+	size_t style_count_new = 1, remaining = re->style_count-1;
+	int i=1;
+	
+	if (re->multipleruns) return;
+	
+	styles_new[0] = re->styles[0];
+	
+	while (remaining) {
+		ATSUStyleComparison asc;
+		ATSUCompareStyles(styles_new[style_count_new-1]->astyle,re->styles[i]->astyle,&asc);
+		
+		if (asc == kATSUStyleEquals) {
+			styles_new[style_count_new-1]->range.length += re->styles[i]->range.length;
+			[re->styles[i] release];
+		} else {
+			styles_new[style_count_new++] = re->styles[i];
+		}
+		
+		i++;
+		remaining--;
+	}
+	
+	if (style_count_new != re->style_count) {
+		re->styles = realloc(re->styles, sizeof(SSAStyleSpan*) * style_count_new); 
+		memcpy(re->styles, styles_new, sizeof(SSAStyleSpan*) * style_count_new);
+		
+		re->style_count = style_count_new;
+	}
+}
+
 static void UpdateAlignment(int inum, int cur_posx, int *valign, int *halign, ATSUTextLayout cur_layout)
 {
 	int cur_halign, cur_valign;
@@ -419,15 +452,15 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					parsetmp = [NSString stringWithCharacters:skipbegin length:p-skipbegin];
 					[output appendString:parsetmp];
 					
-					cur_range = (NSRange){strbegin - pb, p - strbegin};
-					cur_range.location -= outputoffset;
-					cur_range.length -= lengthreduce;
-					
 					outputoffset += lengthreduce;
 					lengthreduce = 0;
 					
 					skipbegin = p;
-
+					
+					cur_range = (NSRange){strbegin - pb, p - strbegin};
+					cur_range.location -= outputoffset;
+					cur_range.length -= lengthreduce;
+					
 					[re increasestyles];
 					re->styles[re->style_count-1] = [[SSAStyleSpan alloc] init];
 					re->styles[re->style_count-1]->outline = cur_outline;
@@ -568,6 +601,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			end_re;
 
 			PruneEmptyStyleSpans(re);
+			PruneIdenticalStyleSpans(re);
 
 			free(pb);
 			if ([re->nstext length] != 0) [rentities addObject:re];

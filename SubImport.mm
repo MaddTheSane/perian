@@ -404,7 +404,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	unsigned num = [lines count];
 	unsigned min_allowed = finished ? 1 : 2;
 	if (num < min_allowed) return;
-	unsigned times[num*2+1];
+	unsigned times[num*2+1], last_last_end = 0;
 	SubLine *slines[num], *last=nil;
 	bool last_has_invalid_end = false, all_overlap = true;
 	
@@ -413,16 +413,24 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 //	NSLog(@"pre - %@",lines);
 	
 	//leave early if all subtitle lines overlap
-	if (finished) all_overlap = false;
-	else {
-		for (int i=0;i < num-1;i++) {
+	if (!finished) {
+		bool all_overlap = true;
+		int i;
+		
+		for (i=0;i < num-1;i++) {
 			SubLine *c = slines[i], *n = slines[i+1];
 			if (c->end_time <= n->begin_time) {all_overlap = false; break;}
 		}
+		
+		if (all_overlap) return;
+		
+		for (i=0;i < num-1;i++) {
+			if (isinrange(slines[num-1]->begin_time, slines[i]->begin_time, slines[i]->end_time)) {
+				num = i + 1; break;
+			}
+		}
 	}
-	
-	if (all_overlap) return;
-	
+		
 	for (int i=0;i < num;i++) {
 		times[i*2]   = slines[i]->begin_time;
 		times[i*2+1] = slines[i]->end_time;
@@ -435,7 +443,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	for (int i=0;i < num*2; i++) {
 		if (i > 0 && times[i-1] == times[i]) continue;
 		NSMutableString *accum = [NSMutableString string];
-		unsigned start = times[i], last_end = start, next_start=UINT_MAX, end = start;
+		unsigned start = times[i], last_end = start, next_start=slines[num-1]->begin_time, end = start;
 		bool startedOutput = false, finishedOutput = false;
 		
 		// Add on packets until we find one that marks it ending (by starting later)
@@ -459,14 +467,14 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 				
 		if (finishedOutput && startedOutput) {
 			[accum deleteCharactersInRange:NSMakeRange([accum length] - 1, 1)]; // delete last newline
-//			NSLog(@"%d - %d %d",start,last_end,next_start);			
+		//	NSLog(@"%d - %d %d",start,last_end,next_start);			
 			if (last_has_invalid_end) {
 				if (last_end < next_start) { 
 					int j, set;
 					for (j=i; j >= 0; j--) if (times[j] == last->begin_time) break;
 					set = times[j+1];
 					last->end_time = set;
-				} else last->end_time = start; 
+				} else last->end_time = MIN(last_last_end,start); 
 			}
 			end = last_end;
 			last_has_invalid_end = false;
@@ -475,6 +483,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 			
 			[outpackets addObject:event];
 			
+			last_last_end = last_end;
 			last = event;
 		}
 	}
@@ -486,6 +495,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 
 	if (finished) [lines removeAllObjects];
 	else {
+		num = [lines count];
 		for (int i = 0; i < num-1; i++) {
 			if (isinrange(slines[num-1]->begin_time, slines[i]->begin_time, slines[i]->end_time)) break;
 			[lines removeObject:slines[i]];
