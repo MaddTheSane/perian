@@ -460,7 +460,7 @@ static void ExtractData(UInt8 *dest, UInt8 *framedSrc, int srcSize) {
     while (currentPacket - framedSrc < srcSize) {
         // 3-byte start code: 0x00 00 01
         if (currentPacket[0] + currentPacket[1] != 0 || currentPacket[2] != 1) {
-            Codecprintf("VobSub Codec: !! Unknown header: %02x %02x %02x\n", currentPacket[0], currentPacket[1], currentPacket[2]);
+            Codecprintf(NULL, "VobSub Codec: !! Unknown header: %02x %02x %02x\n", currentPacket[0], currentPacket[1], currentPacket[2]);
             return;
         }
         
@@ -506,7 +506,7 @@ static void ExtractData(UInt8 *dest, UInt8 *framedSrc, int srcSize) {
                 
             default:
                 // unknown packet, probably video, return for now
-                Codecprintf("VobSubCodec - Unknown packet type %x, aborting\n", (int)currentPacket[3]);
+                Codecprintf(NULL, "VobSubCodec - Unknown packet type %x, aborting\n", (int)currentPacket[3]);
                 return;
         } // switch (currentPacket[3])
     } // while (currentPacket - framedSrc < srcSize)
@@ -623,7 +623,7 @@ static ComponentResult ProcessControlSequence(UInt8 *controlSeq, UInt32 palette[
                 break;
                 
             default:
-                Codecprintf(" !! Unknown control sequence 0x%02x  aborting (offset %x)\n", controlSeq[i], i);
+                Codecprintf(NULL, " !! Unknown control sequence 0x%02x  aborting (offset %x)\n", controlSeq[i], i);
                 loop = FALSE;
                 break;
         }
