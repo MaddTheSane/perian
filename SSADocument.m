@@ -550,14 +550,15 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 		PtrToHand(str,&sampleHndl,sampleLen);
 
 		err=AddMediaSample(theMedia,sampleHndl,0,sampleLen, p->end_time - p->begin_time,(SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
-		if (err != noErr) {NSLog(@"error adding %d-%d",p->begin_time, p->end_time); err = GetMoviesError(); goto loopend;}
+		if (err != noErr) {err = GetMoviesError(); NSLog(@"external SSA: error %d adding %d-%d line",err, p->begin_time, p->end_time); goto loopend;}
 		
 		ConvertTimeScale(&movieStartTime, movieTimeScale);
 
 		err = InsertMediaIntoTrack(theTrack, movieStartTime.value.lo, sampleTime, p->end_time - p->begin_time, fixed1);
-		if (err != noErr) {err = GetMoviesError(); goto bail;}
+		if (err != noErr) {goto loopend;}
 
 loopend:
+		err = noErr;
 		DisposeHandle(sampleHndl);
 	}
 	

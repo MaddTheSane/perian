@@ -12,6 +12,8 @@
 #import "Categories.h"
 #include "CommonUtils.h"
 
+//#define SS_DEBUG
+
 // if the subtitle filename is something like title.en.srt or movie.fre.srt
 // this function detects it and returns the subtitle language
 short GetFilenameLanguage(CFStringRef filename)
@@ -404,14 +406,15 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	unsigned num = [lines count];
 	unsigned min_allowed = finished ? 1 : 2;
 	if (num < min_allowed) return;
-	unsigned times[num*2+1], last_last_end = 0;
+	unsigned times[num*2], last_last_end = 0;
 	SubLine *slines[num], *last=nil;
 	bool last_has_invalid_end = false, all_overlap = true;
 	
 	[lines sortUsingFunction:cmp_line context:nil];
 	[lines getObjects:slines];
-//	NSLog(@"pre - %@",lines);
-	
+#ifdef SS_DEBUG
+	NSLog(@"pre - %@",lines);
+#endif	
 	//leave early if all subtitle lines overlap
 	if (!finished) {
 		bool all_overlap = true;
@@ -435,39 +438,39 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 		times[i*2]   = slines[i]->begin_time;
 		times[i*2+1] = slines[i]->end_time;
 	}
-	
-	times[num * 2] = times[num * 2 - 1];
-	
+		
 	qsort(times, num*2, sizeof(unsigned), cmp_uint);
 	
 	for (int i=0;i < num*2; i++) {
 		if (i > 0 && times[i-1] == times[i]) continue;
-		NSMutableString *accum = [NSMutableString string];
-		unsigned start = times[i], last_end = start, next_start=slines[num-1]->begin_time, end = start;
-		bool startedOutput = false, finishedOutput = false;
+		NSMutableString *accum = nil;
+		unsigned start = times[i], last_end = start, next_start=times[num*2-1], end = start;
+		bool finishedOutput = false, is_last_line = false;
 		
 		// Add on packets until we find one that marks it ending (by starting later)
 		// ...except if we know this is the last input packet from the stream, then we have to explicitly flush it
-		if (finished && i >= (num*2)-2) finishedOutput = true; 
+		if (finished && (times[i] == slines[num-1]->begin_time || times[i] == slines[num-1]->end_time)) finishedOutput = is_last_line = true;
 			
 		for (int j=0; j < num; j++) {
 			if (isinrange(times[i], slines[j]->begin_time, slines[j]->end_time)) {
-				unsigned ns = slines[j]->end_time;
 				
 				// find the next line that starts after this one
-				if (j != num-1)
+				if (j != num-1) {
+					unsigned ns = slines[j]->end_time;
 					for (int h = j; h < num; h++) if (slines[h]->begin_time != slines[j]->begin_time) {ns = slines[h]->begin_time; break;}
+					next_start = MIN(next_start, ns);
+				} else next_start = slines[j]->end_time;
 					
 				last_end = MAX(slines[j]->end_time, last_end);
-				next_start = MIN(next_start, ns);
-				[accum appendString:slines[j]->line];
-				startedOutput = true;
+				if (accum) [accum appendString:slines[j]->line]; else accum = [slines[j]->line mutableCopy];
 			} else if (j == num-1) finishedOutput = true;
 		}
 				
-		if (finishedOutput && startedOutput) {
+		if (accum && finishedOutput) {
 			[accum deleteCharactersInRange:NSMakeRange([accum length] - 1, 1)]; // delete last newline
-		//	NSLog(@"%d - %d %d",start,last_end,next_start);			
+#ifdef SS_DEBUG
+			NSLog(@"%d - %d %d",start,last_end,next_start);	
+#endif
 			if (last_has_invalid_end) {
 				if (last_end < next_start) { 
 					int j, set;
@@ -478,7 +481,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 			}
 			end = last_end;
 			last_has_invalid_end = false;
-			if (last_end > next_start) last_has_invalid_end = true;
+			if (last_end > next_start && !is_last_line) last_has_invalid_end = true;
 			SubLine *event = [[SubLine alloc] initWithLine:accum start:start end:end];
 			
 			[outpackets addObject:event];
@@ -491,8 +494,10 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	if (last_has_invalid_end) {
 		last->end_time = slines[num-1]->begin_time;
 	}
-//	NSLog(@"out - %@",outpackets);
-
+#ifdef SS_DEBUG
+	NSLog(@"out - %@",outpackets);
+#endif
+	
 	if (finished) [lines removeAllObjects];
 	else {
 		num = [lines count];
@@ -501,7 +506,9 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 			[lines removeObject:slines[i]];
 		}
 	}
-//	NSLog(@"post - %@",lines);
+#ifdef SS_DEBUG
+	NSLog(@"post - %@",lines);
+#endif
 }
 
 -(SubLine*)getSerializedPacket

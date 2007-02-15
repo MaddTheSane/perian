@@ -67,22 +67,13 @@ static void GetTypographicRectangleForLayout(SSARenderEntity *re, UniCharArrayOf
 		FixedRect rect;
 		OSStatus err;
 		
-		//[[NSColor redColor] set];
-		//NSBezierPath *path = [NSBezierPath bezierPath];
 		err=ATSUGetGlyphBounds(re->layout,baseX,FloatToFixed(iheight) - baseY,breaks[i],end-breaks[i],kATSUseDeviceOrigins,1,&trap,&trapCount);
 		
 		ATSUGetLineControl(re->layout, breaks[i], kATSULineAscentTag, sizeof(ATSUTextMeasurement), &ascent, NULL);
 		ATSUGetLineControl(re->layout, breaks[i], kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
 		
 		baseY += ascent + descent;
-		/*	
-			[path moveToPoint:np(trap.lowerLeft)];
-		 [path lineToPoint:np(trap.lowerRight)];
-		 [path lineToPoint:np(trap.upperRight)];
-		 [path lineToPoint:np(trap.upperLeft)];
-		 [path closePath];
-		 [path stroke];
-		 */
+
 		rect.bottom = MAX(trap.lowerLeft.y, trap.lowerRight.y);
 		rect.left = MIN(trap.lowerLeft.x, trap.upperLeft.x);
 		rect.top = MIN(trap.upperLeft.y, trap.upperRight.y);
@@ -165,7 +156,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 					storePenY = &lastBottomPenY;
 					break;
 				case S_MiddleAlign: // center
-					penY = (lastCenterPenY!=-1)?lastCenterPenY:(FloatToFixed((cHeight - FixedToFloat(total)) / 2.));  direction = -1;
+					penY = (lastCenterPenY!=-1)?lastCenterPenY:(FloatToFixed((ssa->resY - FixedToFloat(total)) / 2.));  direction = -1;
 					lstart = 0; lend = breakCount+1; lstep = 1;
 					storePenY = &lastCenterPenY;
 					break;
@@ -184,20 +175,9 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 			
 			GetTypographicRectangleForLayout(re,breaks,breakCount,&imageHeight,&imageWidth,penX,penY,ssa->resY);
 			
-			storePenY = &ignoredPenY;
 			penX = IntToFixed(re->posx);
 			penY = FloatToFixed((ssa->resY - re->posy));
-			/*			
-				NSBezierPath *posPath = [NSBezierPath bezierPath];
-			[[NSColor redColor] set];
-			[posPath setLineWidth:2.5];
-			[posPath moveToPoint:NSMakePoint(re->posx,0)];
-			[posPath lineToPoint:NSMakePoint(re->posx,ssa->resY)];
-			[posPath moveToPoint:NSMakePoint(0,re->posy)];
-			[posPath lineToPoint:NSMakePoint(ssa->resX,re->posy)];
-			[posPath closePath];
-			[posPath stroke];
-			*/
+//			NSLog(@"pos (%d,%d) w %d (image: %f, %f)",re->posx,re->posy,re->usablewidth,FixedToFloat(imageWidth),FixedToFloat(imageHeight));			
 			switch(re->halign) {
 				case S_CenterAlign:
 					penX -= imageWidth / 2;
@@ -216,6 +196,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 			
 			direction = 1;
 			lstart = breakCount; lend = -1; lstep = -1;
+			storePenY = &ignoredPenY;
 		}
 		
 		CGContextSetLineJoin(c, kCGLineJoinRound);

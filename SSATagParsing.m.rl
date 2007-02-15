@@ -540,12 +540,12 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				}
 				
 				flag = ([01] % {unichar fl = *(p-1); if (flag == '0' || flag == '1') flag = fl - '0';})? > {flag = 1;};
-				num_ = digit+ ('.' digit*)?;
+				num_ = "-"? digit* ('.' digit*)?;
 				num = num_ > {numbegin = p;} % {num = [[NSString stringWithCharacters:numbegin length:p-numbegin] doubleValue];};
 				
-				intnum = digit* > {intbegin = p;} % {inum = [[NSString stringWithCharacters:intbegin length:p-intbegin] intValue];};
+				intnum = "-"? (digit*) > {intbegin = p;} % {inum = [[NSString stringWithCharacters:intbegin length:p-intbegin] intValue];};
 				
-				color = "&H" xdigit* > {intbegin = p;} % color_end "&";
+				color = ("H"|"&"){,2} (xdigit*) > {intbegin = p;} % color_end "&";
 
 				cmd_specific = (("pos(" [^)]+ > pos_begin ")" % pos_end)
 								|"bord" num %bordersize
