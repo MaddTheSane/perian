@@ -94,6 +94,8 @@ static void PruneEmptyStyleSpans(SSARenderEntity *re)
 	size_t style_count_new = 0;
 	int i;
 	
+	if (re->style_count <= 1) return;
+	
 	for (i = 0; i < re->style_count; i++) {
 		if (re->styles[i]->range.length == 0) {
 			[re->styles[i] release];
@@ -113,10 +115,12 @@ static void PruneEmptyStyleSpans(SSARenderEntity *re)
 static void PruneIdenticalStyleSpans(SSARenderEntity *re)
 {
 	SSAStyleSpan *styles_new[re->style_count];
+	
+	if (re->multipleruns || re->style_count <= 1) return;
+
 	size_t style_count_new = 1, remaining = re->style_count-1;
 	int i=1;
 	
-	if (re->multipleruns) return;
 	
 	styles_new[0] = re->styles[0];
 	
