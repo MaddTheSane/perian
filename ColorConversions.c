@@ -62,10 +62,10 @@ void FastY420(UInt8 *baseAddr, AVFrame *picture)
 //hand-unrolled code is a bad idea on modern CPUs. luckily, this does not run on modern CPUs, only G3s.
 //also, big-endian only
 
-static void Y420toY422_ppc_scalar(UInt8* baseAddr, int outRB, int width, int height, AVFrame * picture)
+static void Y420toY422_ppc_scalar(UInt8* baseAddr, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
-	 int             y = height >> 1;
-	 int             halfWidth = width >> 1, halfHalfWidth = halfWidth >> 1;
+	 unsigned             y = height / 2;
+	 unsigned             halfWidth = width / 2, halfHalfWidth = width / 4;
 	 UInt8          *inY = picture->data[0], *inU = picture->data[1], *inV = picture->data[2];
 	 int             rB = picture->linesize[0], rbU = picture->linesize[1], rbV = picture->linesize[2];
 	 
@@ -105,11 +105,11 @@ static void Y420toY422_ppc_scalar(UInt8* baseAddr, int outRB, int width, int hei
 	 }
  }
 
-static void Y420toY422_ppc_altivec(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+static void Y420toY422_ppc_altivec(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
-	UInt8          *yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
-	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
-	int				y,x,x2,x4, vWidth = width >> 5, halfheight = height >> 1;
+	UInt8			*yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
+	unsigned		rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
+	unsigned		y,x,x2,x4, vWidth = width / 32, halfheight = height / 2;
 	
 	for (y = 0; y < halfheight; y ++) {
 		vUInt8 *ov = (vUInt8 *)o, *ov2 = (vUInt8 *)(o + outRB), *yv2 = (vUInt8 *)(yc + rY);
@@ -138,7 +138,7 @@ static void Y420toY422_ppc_altivec(UInt8 * o, int outRB, int width, int height, 
 		if (width % 32) { //spill to scalar for the end if the row isn't a multiple of 32
 			UInt8 *o2 = o + outRB, *yc2 = yc + rY;
 			for (x = vWidth * 32, x2 = x*2; x < width; x += 2, x2 += 4) {
-				int             hx = x >> 1;
+				unsigned             hx = x / 2;
 				o2[x2] = o[x2] = uc[hx];
 				o[x2 + 1] = yc[x];
 				o2[x2 + 1] = yc2[x];
@@ -155,9 +155,9 @@ static void Y420toY422_ppc_altivec(UInt8 * o, int outRB, int width, int height, 
 	}
 }
 
-void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
-	static void (*y420_function)(UInt8* baseAddr, int outRB, int width, int height, AVFrame * picture) = NULL;
+	static void (*y420_function)(UInt8* baseAddr, unsigned outRB, unsigned width, unsigned height, AVFrame * picture) = NULL;
 	if (!y420_function) {
 		int sels[2] = { CTL_HW, HW_VECTORUNIT }; // from http://developer.apple.com/hardwaredrivers/ve/g3_compatibility.html
 		int vType = 0; //0 == scalar only
@@ -173,11 +173,13 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 #else
 #include <emmintrin.h>
 
-static void Y420toY422_sse2(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+#define TRUNCATE(x, power) (x & ~(power-1))
+
+static void Y420toY422_sse2(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
 	UInt8          *yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
-	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
-	int				y,x, vWidth = width >> 4, halfheight = height >> 1, halfwidth = width >> 1;
+	unsigned		rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
+	unsigned		y,x, vWidth = width / 16, halfheight = height / 2, halfwidth = width / 2;
 	
 	for (y = 0; y < halfheight; y ++) {
 		__m128i *ov = (__m128i *)o, *ov2 = (__m128i *)(o + outRB), *yv2 = (__m128i *)(yc + rY);
@@ -188,7 +190,7 @@ static void Y420toY422_sse2(UInt8 * o, int outRB, int width, int height, AVFrame
 			/* read one chroma row, two luma rows, write two luma rows at once. this avoids reading chroma twice
 			* sse2 can do 64-bit loads, so we do that. (apple's h264 doesn't seem to, maybe we should copy them?)
 			* unrolling loops is very bad on x86 */
-			int x2 = x*2;
+			unsigned x2 = x*2;
 			__builtin_prefetch(&yv[x+1], 0, 0); __builtin_prefetch(&yv2[x+1], 0, 0); // prefetch next y vectors, throw it out of cache immediately after use
 			__builtin_prefetch(&uv[x+1], 0, 0); __builtin_prefetch(&vv[x+1], 0, 0); // and chroma too
 			__m128i	tmp_y = yv[x], 
@@ -205,16 +207,16 @@ static void Y420toY422_sse2(UInt8 * o, int outRB, int width, int height, AVFrame
 			_mm_stream_si128(&ov2[x2+1],p4);
 		}
 		
-		if (__builtin_expect(width & 15, FALSE)) { //spill to scalar for the end if the row isn't a multiple of 16
-			UInt8 *o2 = o + outRB, *yc2 = yc + rY;
-			for (x = vWidth * 16; x < halfwidth; x ++) {
-				int             hx = x>>1, x2 = x*2;
-				o2[x2] = o[x2] = uc[hx];
-				o[x2 + 1] = yc[x];
-				o2[x2 + 1] = yc2[x];
-				o2[x2 + 2] = o[x2 + 2] = vc[hx];
-				o[x2 + 3] = yc[x + 1];
-				o2[x2 + 3] = yc2[x + 1];
+		if (__builtin_expect(width % 16 != 0, FALSE)) { //spill to scalar for the end if the row isn't a multiple of 16
+			UInt8 *o2 = (UInt8*)ov2, *yc2 = (UInt8*)yv2;
+			for (x = TRUNCATE(width, 16) / 2; x < halfwidth; x++) {
+				unsigned x4 = x*4, x2 = x*2;
+				o2[x4] = o[x4] = uc[x];
+				o[x4 + 1] = yc[x2];
+				o2[x4 + 1] = yc2[x2];
+				o2[x4 + 2] = o[x4 + 2] = vc[x];
+				o[x4 + 3] = yc[x2 + 1];
+				o2[x4 + 3] = yc2[x2 + 1];
 			}			
 		}
 		
@@ -227,23 +229,23 @@ static void Y420toY422_sse2(UInt8 * o, int outRB, int width, int height, AVFrame
 }
 
 
-static void Y420toY422_x86_scalar(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+static void Y420toY422_x86_scalar(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
-	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
-	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], halfheight = height >> 1, halfwidth = width >> 1;
-	int				y, x;
+	UInt8		*yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
+	unsigned	rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], halfheight = height / 2, halfwidth = width / 2;
+	unsigned	y, x;
 	
 	for (y = 0; y < halfheight; y ++) {
 		UInt8 *o2 = o + outRB, *yc2 = yc + rY;
 		
-		for (x = 0; x < halfwidth; x ++) {
-			int             hx = x>>1, x2 = x*2;
-			o2[x2] = o[x2] = u[hx];
-			o[x2 + 1] = yc[x];
-			o2[x2 + 1] = yc2[x];
-			o2[x2 + 2] = o[x2 + 2] = v[hx];
-			o[x2 + 3] = yc[x + 1];
-			o2[x2 + 3] = yc2[x + 1];
+		for (x = 0; x < halfwidth; x++) {
+			unsigned x4 = x*4, x2 = x*2;
+			o2[x4] = o[x4] = u[x];
+			o[x4 + 1] = yc[x2];
+			o2[x4 + 1] = yc2[x2];
+			o2[x4 + 2] = o[x4 + 2] = v[x];
+			o[x4 + 3] = yc[x2 + 1];
+			o2[x4 + 3] = yc2[x2 + 1];
 		}
 		
 		o += outRB*2;
@@ -253,7 +255,7 @@ static void Y420toY422_x86_scalar(UInt8 * o, int outRB, int width, int height, A
 	}
 }
 
-void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
+void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
 	uintptr_t yc = (uintptr_t)picture->data[0];
 
@@ -265,9 +267,9 @@ void Y420toY422(UInt8 * o, int outRB, int width, int height, AVFrame * picture)
 }
 #endif
 
-void BGR24toRGB24(UInt8 *baseAddr, int rowBytes, int width, int height, AVFrame *picture)
+void BGR24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture)
 {
-	int i, j;
+	unsigned i, j;
 	UInt8 *srcPtr = picture->data[0];
 	
 	for (i = 0; i < height; ++i)
@@ -283,9 +285,9 @@ void BGR24toRGB24(UInt8 *baseAddr, int rowBytes, int width, int height, AVFrame 
 	}
 }
 
-void RGB32toRGB32(UInt8 *baseAddr, int rowBytes, int width, int height, AVFrame *picture)
+void RGB32toRGB32(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture)
 {
-	int x, y;
+	unsigned x, y;
 	UInt8 *srcPtr = picture->data[0];
 	
 	for (y = 0; y < height; y++) {
@@ -301,18 +303,18 @@ void RGB32toRGB32(UInt8 *baseAddr, int rowBytes, int width, int height, AVFrame 
 	}
 }
 
-void Y422toY422(UInt8* o, int outRB, int width, int height, AVFrame * picture)
+void Y422toY422(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
 	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
-	int             rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], y = 0, x, x2;
+	unsigned       rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], y, x, x2, halfwidth = width / 2;
 	
-	for (; y < height; y++) {
-		for (x = 0, x2 = 0; x < width; x += 2, x2 += 4) {
-			int             hx = x >> 1;
-			o[x2] = u[hx];
-			o[x2 + 1] = yc[x];
-			o[x2 + 2] = v[hx];
-			o[x2 + 3] = yc[x + 1];
+	for (y = 0; y < height; y++) {
+		for (x = 0; x < halfwidth; x++) {
+			unsigned x2 = x * 2, x4 = x * 4;
+			o[x4] = u[x];
+			o[x4 + 1] = yc[x2];
+			o[x4 + 2] = v[x];
+			o[x4 + 3] = yc[x2 + 1];
 		}
 		
 		o += outRB;
