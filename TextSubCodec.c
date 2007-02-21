@@ -303,8 +303,8 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	if (glob->translateSRT) {
 		buf = CFStringCreateMutableWithBytes(NULL, drp->codecData, myDrp->dataSize, kCFStringEncodingUTF8);
 		if (!buf) return noErr;
-		CFStringFindAndReplace(buf, CFSTR("<i>"),  CFSTR("{\\i}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
-		CFStringFindAndReplace(buf, CFSTR("<b>"),  CFSTR("{\\b}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
+		CFStringFindAndReplace(buf, CFSTR("<i>"),  CFSTR("{\\i1}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
+		CFStringFindAndReplace(buf, CFSTR("<b>"),  CFSTR("{\\b1}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
 		CFStringFindAndReplace(buf, CFSTR("</i>"), CFSTR("{\\i0}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
 		CFStringFindAndReplace(buf, CFSTR("</b>"), CFSTR("{\\b0}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
 	} else {

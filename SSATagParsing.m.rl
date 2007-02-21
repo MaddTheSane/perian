@@ -543,7 +543,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					re->is_shape = inum != 0;
 				}
 				
-				flag = ([01] % {unichar fl = *(p-1); if (flag == '0' || flag == '1') flag = fl - '0';})? > {flag = 1;};
+				flag = ([01] % {unichar fl = *(p-1); if (fl == '0' || fl == '1') flag = fl - '0';})? > {flag = 0;};
 				num_ = "-"? digit+ ('.' digit*)?;
 				num = num_ > {numbegin = p;} % {num = [[NSString stringWithCharacters:numbegin length:p-numbegin] doubleValue];};
 				
@@ -583,7 +583,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"t(" % skip_t_tag
 								);
 				
-				cmd = "\\"  cmd_specific ;
+				cmd = "\\"  cmd_specific;
 				
 				tag = "{" ((cmd*) | ([^\\}]*)) "}";
 				
