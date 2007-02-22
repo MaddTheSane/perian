@@ -294,8 +294,6 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	uint8_t buf[PROBE_BUF_SIZE];
 	AVProbeData *pd = (AVProbeData *)malloc(sizeof(AVProbeData));
 	ByteIOContext byteContext;
-	AVFormatParameters params;
-	int success, i;
 
 	/* default */
 	*valid = 0;
@@ -379,10 +377,9 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	ByteIOContext byteContext;
 	AVFormatContext *ic = NULL;
 	AVFormatParameters params;
-	AVPacket pkt;
 	OSType mediaType;
 	Media media;
-	int count, hadIndex, i, j;
+	int count, hadIndex, j;
 		
 	/* make sure that in case of error, the flag movieImportResultComplete is not set */
 	*outFlags = 0;
@@ -481,7 +478,6 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		
 	} else if(inFlags & movieImportWithIdle) {
 		if(addedDuration && ic->duration > 0) {
-			TimeValue sampleTime;
 			TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
 			*addedDuration = movieTimeScale * ic->duration / AV_TIME_BASE;
 			

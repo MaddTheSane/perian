@@ -116,8 +116,8 @@ int SSA2ASSAlignment(int a)
 		Fixed size, tracking;
 		
 		ATSUAttributeValuePtr vals[] = {&font, &matrix, &opt, &size, &tracking, &s->bold, &s->italic, &s->underline, &s->strikeout};
-		char fname[256] = {0};
-		ByteCount fl = 256;
+//		char fname[256] = {0};
+//		ByteCount fl = 256;
 		
 		font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)s->font,kATSOptionFlagsDefault));
 		//ATSUFindFontName(font,kFontFullName,kFontMacintoshPlatform,kFontNoScriptCode,kFontNoLanguage,fl,(char*)fname,&fl,NULL);
@@ -310,7 +310,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	if (!ssa) return;
 	NSArray *lines = [ssa componentsSeparatedByString:@"\n"];
 	NSEnumerator *lenum = [lines objectEnumerator];
-	NSString *nextLine, *styleType, *ns;
+	NSString *nextLine, *ns;
 	NSArray *format;
 	NSMutableDictionary *headers, *styleDict;
 	NSMutableArray *doclines;
@@ -377,8 +377,6 @@ static NSString *oneMKVPacket(NSDictionary *s)
 
 -(void) loadHeader:(NSString*)ssa width:(float)width height:(float)height
 {
-	NSError *err;
-	NSStringEncoding se = NSUTF8StringEncoding;
 	if (!ssa) return;
 	NSArray *lines = [[ssa stringByStandardizingNewlines] componentsSeparatedByString:@"\n"];
 	NSEnumerator *lenum = [lines objectEnumerator];
@@ -389,7 +387,6 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
 	unichar cai;
 	int formatc;
-	int readorder = 0;
 	
 	headers = [[NSMutableDictionary alloc] init];
 	styleDict = [NSMutableDictionary dictionary];
@@ -490,7 +487,6 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	SSADocument *ssa = [[SSADocument alloc] init];
 	Handle sampleHndl = NULL, headerHndl=NULL, drefHndl;
-	Ptr initData = NewPtr(0);
 	const char *header;
 	int i, packetCount, sampleLen;
 	ImageDescriptionHandle textDesc;

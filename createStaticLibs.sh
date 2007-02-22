@@ -33,7 +33,7 @@ else
 	BUILDDIR="$BUILT_PRODUCTS_DIR/intel"
 	mkdir "$BUILDDIR"
 	
-	export optCFlags="-mtune=nocona" 
+	export optCFlags="-mtune=nocona -fstrict-aliasing" 
 
 	cd "$BUILDDIR"
 	if [ `arch` != i386 ] ; then
@@ -41,6 +41,7 @@ else
 	else
 		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m --extra-cflags='-gdwarf-2 $optCFlags'
 	fi
+	
         make -C libavutil   depend
         make -C libavcodec  depend
         make -C libavformat depend
@@ -61,7 +62,7 @@ fi
 	BUILDDIR="$BUILT_PRODUCTS_DIR/ppc"
 	mkdir "$BUILDDIR"
 	
-	export optCFlags="-mcpu=G3 -mtune=G5 -mmultiple"
+	export optCFlags="-mcpu=G3 -mtune=G5 -mmultiple -fstrict-aliasing"
 	
 	cd "$BUILDDIR"
 	if [ `arch` = ppc ] ; then
@@ -69,6 +70,7 @@ fi
 	else
 		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2 $optCFlags' $extraConfigureOptions $generalConfigureOptions
 	fi
+	
         make -C libavutil   depend
         make -C libavcodec  depend
         make -C libavformat depend

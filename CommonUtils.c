@@ -229,7 +229,6 @@ static int readDescrLen(UInt8 **buffer)
 // based off of mov_mp4_read_descr from mov.c in ffmpeg's libavformat
 static int readDescr(UInt8 **buffer, int *tag)
 {
-	int len;
 	*tag = *(*buffer)++;
 	return readDescrLen(buffer);
 }

@@ -235,8 +235,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 
 pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance self)
 {
-    // Make sure to close the base component and dealocate our storage
-    int i;
+    // Make sure to close the base component and deallocate our storage
     
     if (glob) 
     {
@@ -389,10 +388,8 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompressParams *p)
 {
     OSType *pos;
-    int index, i;
+    int index;
     CodecCapabilities *capabilities = p->capabilities;
-    long bitfield;
-    char altivec = 0;
     Byte* myptr;
 	long count = 0;
 	Handle imgDescExt;
@@ -714,7 +711,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
 	
     //////
-    IBNibRef 		nibRef;
+  /*  IBNibRef 		nibRef;
     WindowRef 		window;
     OSStatus		err;
     CFBundleRef		bundleRef;
@@ -723,7 +720,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     ControlID		controlID;
     ControlRef		theControl;
     KeyMap		currentKeyMap;
-    int			userPreference;
+    int			userPreference; */
     ///////
 	
     offsetH = (long)(p->dstRect.left - p->dstPixMap.bounds.left) * (long)(p->dstPixMap.pixelSize >> 3);
@@ -1230,7 +1227,7 @@ static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic)
 
 static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic)
 {
-	FFusionGlobals glob = s->opaque;
+//	FFusionGlobals glob = s->opaque;
 	FFusionBuffer *buf = pic->opaque;
 	
 	buf->used = false;

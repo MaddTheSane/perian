@@ -117,8 +117,7 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 	unsigned int subNum = 1;
 	UInt8 *path = (UInt8*)malloc(PATH_MAX);
 	NSString *srtfile;
-	NSError *nserr = nil;
-	Handle sampleHndl = NULL;
+	Handle sampleHndl;
 	
 	FSRefMakePath(theDirectory, path, PATH_MAX);
 	srtfile = [[NSString stringWithUTF8String:(char*)path] stringByAppendingPathComponent:(NSString*)filename];
@@ -408,7 +407,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	if (num < min_allowed) return;
 	unsigned times[num*2], last_last_end = 0;
 	SubLine *slines[num], *last=nil;
-	bool last_has_invalid_end = false, all_overlap = true;
+	bool last_has_invalid_end = false;
 	
 	[lines sortUsingFunction:cmp_line context:nil];
 	[lines getObjects:slines];

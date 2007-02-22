@@ -888,7 +888,6 @@ void MatroskaTrack::AddSamplesToTrack()
 
 void MatroskaTrack::FinishTrack(bool addSamples)
 {
-	OSStatus err = noErr;
 	
 	if (type == track_subtitle && !is_vobsub)
 	{

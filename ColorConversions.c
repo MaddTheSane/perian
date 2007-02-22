@@ -287,13 +287,14 @@ void BGR24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned h
 
 void RGB32toRGB32(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture)
 {
-	unsigned x, y;
+	unsigned y;
 	UInt8 *srcPtr = picture->data[0];
 	
 	for (y = 0; y < height; y++) {
 #ifdef __BIG_ENDIAN__
 		memcpy(baseAddr, srcPtr, width * 4);
 #else
+		unsigned x;
 		UInt32 *oRow = (UInt32 *)baseAddr, *iRow = (UInt32 *)srcPtr;
 		for (x = 0; x < width; x++) {oRow[x] = EndianU32_BtoN(iRow[x]);}
 #endif
@@ -306,7 +307,7 @@ void RGB32toRGB32(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned h
 void Y422toY422(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
 	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
-	unsigned       rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], y, x, x2, halfwidth = width / 2;
+	unsigned       rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], y, x, halfwidth = width / 2;
 	
 	for (y = 0; y < height; y++) {
 		for (x = 0; x < halfwidth; x++) {
