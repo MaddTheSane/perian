@@ -2,7 +2,7 @@
 PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
-generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-pthreads"
+generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay"
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
 	generalConfigureOptions="$generalConfigureOptions --disable-opts"
@@ -41,12 +41,9 @@ else
 	else
 		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m --extra-cflags='-gdwarf-2 $optCFlags'
 	fi
+
 	
-        make -C libavutil   depend
-        make -C libavcodec  depend
-        make -C libavformat depend
-        make -C libpostproc depend
-        make -C vhook       depend
+		make depend > /dev/null 2>&1 || true
 if [ "$BUILD_STYLE" = "Development" ] ; then
 	cd libavcodec
 	export CFLAGS="-O1 -fomit-frame-pointer -funit-at-a-time"; make h264.o cabac.o i386/dsputil_mmx.o
@@ -71,11 +68,9 @@ fi
 		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2 $optCFlags' $extraConfigureOptions $generalConfigureOptions
 	fi
 	
-        make -C libavutil   depend
-        make -C libavcodec  depend
-        make -C libavformat depend
-        make -C libpostproc depend
-        make -C vhook       depend
+		
+
+        make depend > /dev/null 2>&1 || true
         make -j3            lib
 	
 	#######################
