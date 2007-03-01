@@ -491,7 +491,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 	}
 	
 	if (last_has_invalid_end) {
-		last->end_time = slines[num-1]->begin_time;
+		last->end_time = times[num*2 - 3]; // end time of line before last
 	}
 #ifdef SS_DEBUG
 	NSLog(@"out - %@",outpackets);

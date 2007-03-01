@@ -99,10 +99,11 @@ static ATSURGBAlphaColor SSAParseColor(NSString *c)
 
 int SSA2ASSAlignment(int a)
 {
-	if (a >= 7 && a <= 9) return a-3;
-	if (a >= 4 && a <= 6) return a+3;
-	if (a > 9 || a < 1) return 2;
-	return a;
+    int h = 1, v = 0;
+	if (a >= 9 && a <= 11) {v = S_MiddleAlign; h = a-8;}
+	if (a >= 5 && a <= 7)  {v = S_TopAlign;    h = a-4;}
+	if (a >= 1 && a <= 3)  {v = S_BottomAlign; h = a;}
+	return v * 3 + h;
 }
 
 -(void) makeATSUStylesForSSAStyle:(ssastyleline *)s

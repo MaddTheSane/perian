@@ -664,6 +664,7 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kSubFormatUSF, "S_TEXT/USF" },
 #endif
 	{ kSubFormatSSA, "S_TEXT/SSA" },
+    { kSubFormatSSA, "S_SSA" },
 	{ kSubFormatASS, "S_TEXT/ASS" },
 	{ kSubFormatUTF8, "S_TEXT/UTF8" },
 	{ kSubFormatVobSub, "S_VOBSUB" },
