@@ -329,7 +329,6 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 			asbd->mFormatID = kMicrosoftADPCMFormat;
 			break;
 		case CODEC_ID_AAC:
-		case CODEC_ID_MPEG4AAC:
 			asbd->mFormatID = kAudioFormatMPEG4AAC;
 			break;
 		case CODEC_ID_VORBIS:
