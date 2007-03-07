@@ -33,7 +33,7 @@ else
 	BUILDDIR="$BUILT_PRODUCTS_DIR/intel"
 	mkdir "$BUILDDIR"
 	
-	export optCFlags="-mtune=nocona -fstrict-aliasing -frerun-cse-after-loop -fweb -fgcse-las" 
+	export optCFlags="-mtune=nocona -fstrict-aliasing -frerun-cse-after-loop -fweb" 
 
 	cd "$BUILDDIR"
 	if [ `arch` != i386 ] ; then
@@ -59,7 +59,7 @@ fi
 	BUILDDIR="$BUILT_PRODUCTS_DIR/ppc"
 	mkdir "$BUILDDIR"
 	
-	export optCFlags="-mcpu=G3 -mtune=G5 -fstrict-aliasing -funroll-loops -fgcse-las"
+	export optCFlags="-mcpu=G3 -mtune=G5 -fstrict-aliasing -funroll-loops -mmultiple"
 	
 	cd "$BUILDDIR"
 	if [ `arch` = ppc ] ; then
