@@ -51,7 +51,7 @@
 %% machine SSAtag;
 %% write data;
 
-static void SetATSUStyleFlag(ATSUStyle style, ATSUAttributeTag t, Boolean v)
+void SetATSUStyleFlag(ATSUStyle style, ATSUAttributeTag t, Boolean v)
 {
 	ATSUAttributeTag tags[] = {t};
 	ByteCount		 sizes[] = {sizeof(v)};
@@ -60,7 +60,7 @@ static void SetATSUStyleFlag(ATSUStyle style, ATSUAttributeTag t, Boolean v)
 	ATSUSetAttributes(style,1,tags,sizes,vals);
 }
 
-static void SetATSUStyleOther(ATSUStyle style, ATSUAttributeTag t, ByteCount s, ATSUAttributeValuePtr v)
+void SetATSUStyleOther(ATSUStyle style, ATSUAttributeTag t, ByteCount s, const ATSUAttributeValuePtr v)
 {
 	ATSUAttributeTag tags[] = {t};
 	ByteCount		 sizes[] = {s};
@@ -69,7 +69,7 @@ static void SetATSUStyleOther(ATSUStyle style, ATSUAttributeTag t, ByteCount s, 
 	ATSUSetAttributes(style,1,tags,sizes,vals);
 }
 
-static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s, ATSUAttributeValuePtr v)
+void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s, const ATSUAttributeValuePtr v)
 {
 	ATSUAttributeTag tags[] = {t};
 	ByteCount		 sizes[] = {s};
@@ -395,10 +395,6 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					NSArray *coo = [[NSString stringWithCharacters:posbegin length:p-posbegin] componentsSeparatedByString:@","];
 					cur_posx = [[coo objectAtIndex:0] intValue];
 					cur_posy = [[coo objectAtIndex:1] intValue];
-					
-					Fract alignment = FloatToFract(0);
-					
-					SetATSULayoutOther(cur_layout, kATSULineFlushFactorTag, sizeof(Fract), &alignment);
 				}
 				
 				action primarycolor {

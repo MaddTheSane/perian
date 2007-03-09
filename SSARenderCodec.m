@@ -90,6 +90,11 @@ static void GetTypographicRectangleForLayout(SSARenderEntity *re, UniCharArrayOf
 	*width = largeRect.right - largeRect.left;
 }
 
+static void DrawMultiStyleText(SSARenderEntity *re, UniCharArrayOffset linepos, UniCharCount lineclength, ATSUTextMeasurement baseX, ATSUTextMeasurement baseY)
+{
+	
+}
+
 void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub, float cWidth, float cHeight)
 {
 	ItemCount breakCount;
@@ -97,7 +102,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 	Fixed lastTopPenY=-1, lastBottomPenY=-1, lastCenterPenY=-1, *storePenY, ignoredPenY;
 	int i, lstart, lend, lstep, subcount, j; char direction;
 	float outline, shadow;
-	if (!(glob && glob->document)) {NSLog(@"Something wrong in SSA globals"); return;}
+	if (!(glob && glob->document)) return;
 	SSADocument *ssa = glob->document;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *curSub = (NSString*)cfSub;
@@ -113,6 +118,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 		SSARenderEntity *re = (SSARenderEntity*)[rentities objectAtIndex:j];
 		if (re->is_shape) continue;
 		ATSUTextLayout layout = re->layout;
+		BOOL dirty_layout = NO;
 		
 		if (last_re && re->marginv != last_re->marginv) {lastTopPenY = lastBottomPenY = lastCenterPenY = -1;}
 			
@@ -126,13 +132,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 		
 		for (i = 0; i < re->style_count; i++) ATSUSetRunStyle(layout,re->styles[i]->astyle,re->styles[i]->range.location,re->styles[i]->range.length);
 		
-		{
-			ATSUAttributeTag ct[] = {kATSUCGContextTag};
-			ByteCount		 cs[] = {sizeof(CGContextRef)};
-			ATSUAttributeValuePtr cv[] = {&c};
-			
-			ATSUSetLayoutControls(layout,1,ct,cs,cv);
-		}
+		SetATSULayoutOther(layout,kATSUCGContextTag,sizeof(CGContextRef),&c);
 		
 		ATSUBatchBreakLines(layout,kATSUFromTextBeginning,kATSUToTextEnd,IntToFixed(re->usablewidth),&breakCount); 
 		ATSUGetSoftLineBreaks(layout,kATSUFromTextBeginning,kATSUToTextEnd,0,NULL,&breakCount);
@@ -194,6 +194,9 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 					penY -= imageHeight;
 			}
 			
+			SetATSULayoutOther(layout,kATSULineWidthTag,sizeof(Fixed),&imageWidth);
+			dirty_layout = YES;
+			
 			direction = 1;
 			lstart = breakCount; lend = -1; lstep = -1;
 			storePenY = &ignoredPenY;
@@ -249,6 +252,11 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 			ATSUGetLineControl(layout, breaks[i], kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
 			
 			penY += direction * (ascent + descent);
+		}
+		
+		if (dirty_layout) {
+			Fixed fwidth = IntToFixed(re->usablewidth);
+			SetATSULayoutOther(layout,kATSULineWidthTag,sizeof(Fixed),&fwidth);
 		}
 		
 		*storePenY = penY;

@@ -50,3 +50,6 @@
 @end
 
 extern NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext);
+extern void SetATSUStyleFlag(ATSUStyle style, ATSUAttributeTag t, Boolean v);
+extern void SetATSUStyleOther(ATSUStyle style, ATSUAttributeTag t, ByteCount s, const ATSUAttributeValuePtr v);
+extern void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s, const ATSUAttributeValuePtr v);
