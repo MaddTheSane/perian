@@ -48,6 +48,6 @@
 #define kMPEG1CodecInfoResID		271
 #define kMPEG2CodecInfoResID		272
 
-#define kFFusionCodecManufacturer	'SNE2'
+#define kFFusionCodecManufacturer	'Peri'
 
 #define kOptionKeyModifier		0x04

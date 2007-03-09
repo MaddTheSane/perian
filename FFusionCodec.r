@@ -2794,71 +2794,71 @@ resource 'thng' (328) {
 //---------------------------------------------------------------------------
 
 resource 'STR ' (kDivX1NameResID) {
-	"MS-MPEG4 v1 Decoder"
+	"MS-MPEG4 v1 (Perian)"
 };
 
 resource 'STR ' (kDivX2NameResID) {
-	"MS-MPEG4 v2 Decoder"
+	"MS-MPEG4 v2 (Perian)"
 };
 
 resource 'STR ' (kDivX3NameResID) {
-	"DivX 3 Decoder"
+	"DivX 3 (Perian)"
 };
 
 resource 'STR ' (kDivX4NameResID) {
-	"DivX 4 Decoder"
+	"DivX 4 (Perian)"
 };
 
 resource 'STR ' (kDivX5NameResID) {
-	"DivX 5 Decoder"
+	"DivX 5 (Perian)"
 };
 
 resource 'STR ' (k3ivxNameResID) {
-	"3ivx Decoder"
+	"3ivx (Perian)"
 };
 
 resource 'STR ' (kXVIDNameResID) {
-	"Xvid Decoder"
+	"Xvid (Perian)"
 };
 
 resource 'STR ' (kMPEG4NameResID) {
-	"MPEG-4 Decoder"
+	"MPEG-4 (Perian)"
 };
 
 resource 'STR ' (kH264NameResID) {
-	"H264 Decoder"
+	"H264 (Perian)"
 };
 
 resource 'STR ' (kFLV1NameResID) {
-	"Sorenson H.263 Decoder"
+	"Sorenson H.263 (Perian)"
 };
 
 resource 'STR ' (kFlashSVNameResID) {
-	"Flash Screen Video Decoder"
+	"Flash Screen Video (Perian)"
 };
 
 resource 'STR ' (kVP6NameResID) {
-	"TrueMotion VP6 Decoder"
+	"TrueMotion VP6 (Perian)"
 };
 
 resource 'STR ' (kI263NameResID) {
-	"Intel H.263 Decoder"
+	"Intel H.263 (Perian)"
 };
 
 resource 'STR ' (kVP3NameResID) {
-	"On2 VP3 Decoder"
+	"On2 VP3 (Perian)"
 };
 
 resource 'STR ' (kHuffYUVNameResID) {
-	"HuffYUV Decoder"
+	"HuffYUV (Perian)"
 };
 
 resource 'STR ' (kMPEG1NameResID) {
-	"MPEG-1 Decoder"
+	"MPEG-1 (Perian)"
 };
 
 resource 'STR ' (kMPEG2NameResID) {
-	"MPEG-2 Decoder"
+	"MPEG-2 (Perian)"
 };
 
 //---------------------------------------------------------------------------

@@ -83,6 +83,8 @@
 #define	kMatroskaExportNameRes					1024
 #define	kMatroskaExportInfoRes					1025
 
+#define kComponentManufacturer 'Peri'
+
 #define kMatroskaExportFlags \
 	(canMovieExportFiles | canMovieExportFromProcedures | movieExportMustGetSourceMediaType | \
 	 canMovieExportValidateMovie | cmpThreadSafe)
@@ -92,7 +94,7 @@
 resource 'thng' (kMatroskaExportThingRes) {
 	'spit',									// Type
 	'MkvF',									// SubType
-	'Yuvi',									// Manufacturer
+	kComponentManufacturer,					// Manufacturer
 											// - use componentHasMultiplePlatforms
 	0,										// not used Component flags
 	0,										// not used Component flags Mask
