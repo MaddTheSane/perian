@@ -626,6 +626,7 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kVideoFormatReal9, "V_REAL/RV40" },
 	{ kVideoFormatXiphTheora, "V_THEORA" },
 	
+	{ kAudioFormatMPEG4AAC, "A_AAC" },
 	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/LC" },
 	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/MAIN" },
 	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/LC/SBR" },
