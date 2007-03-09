@@ -2826,7 +2826,7 @@ resource 'STR ' (kMPEG4NameResID) {
 };
 
 resource 'STR ' (kH264NameResID) {
-	"H264 (Perian)"
+	"H.264 (Perian)"
 };
 
 resource 'STR ' (kFLV1NameResID) {
@@ -2898,7 +2898,7 @@ resource 'STR ' (kMPEG4InfoResID) {
 };
 
 resource 'STR ' (kH264InfoResID) {
-	"Decompresses video stored in H264 format."
+	"Decompresses video stored in H.264 format."
 };
 
 resource 'STR ' (kFLV1InfoResID) {
