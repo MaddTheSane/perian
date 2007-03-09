@@ -11,6 +11,7 @@
 // we can be more sure that the update won't get run twice accidentaly.
 
 #import "UpdateCheckerAppDelegate.h"
+#include <stdlib.h>
 
 @implementation UpdateCheckerAppDelegate
 
@@ -145,13 +146,60 @@
 	[[NSApplication sharedApplication] terminate:self];
 }
 
+//Stolen from sprakle
+- (BOOL)extractDMG:(NSString *)archivePath
+{
+	// First, we internet-enable the volume.
+	NSTask *hdiTask = [NSTask launchedTaskWithLaunchPath:@"/usr/bin/env" arguments:[NSArray arrayWithObjects:@"hdiutil", @"internet-enable", @"-quiet", archivePath, nil]];
+	[hdiTask waitUntilExit];
+	if ([hdiTask terminationStatus] != 0) { return NO; }
+	
+	// Now, open the volume; it'll extract into its own directory.
+	hdiTask = [NSTask launchedTaskWithLaunchPath:@"/usr/bin/env" arguments:[NSArray arrayWithObjects:@"hdiutil", @"attach", @"-idme", @"-noidmereveal", @"-noidmetrash", @"-noverify", @"-nobrowse", @"-noautoopen", @"-quiet", archivePath, nil]];
+	[hdiTask waitUntilExit];
+	if ([hdiTask terminationStatus] != 0) { return NO; }
+	
+	return YES;
+}
+
+extern char **environ;
+
 - (void)downloadDidFinish:(NSURLDownload *)download
 {
 	[download release];
 	downloader = nil;
-	NSLog(@"EXTRACT!");
-	NSBeep();
-#warning we should actually extract and not do this bogosity.
+	
+	if(![self extractDMG:downloadPath])
+		; //print error
+	
+	NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:[downloadPath stringByDeletingLastPathComponent]];
+	NSString *file = nil;
+	NSString *prefpanelocation = nil;
+	while((file = [dirEnum nextObject]) != nil)
+	{
+		if([[[dirEnum fileAttributes] objectForKey:NSFileTypeSymbolicLink] boolValue])
+			[dirEnum skipDescendents];
+		if([[file pathExtension] isEqualToString:@"prefPane"])
+		{
+			NSString *containingLocation = [downloadPath stringByDeletingLastPathComponent];
+			NSString *oldLocation = [containingLocation stringByAppendingPathComponent:file];
+			prefpanelocation = [[containingLocation stringByDeletingLastPathComponent] stringByAppendingPathComponent:[file lastPathComponent]];
+			[[NSFileManager defaultManager] movePath:oldLocation toPath:prefpanelocation handler:nil];
+		}
+	}
+	
+	char *buf = NULL;
+	asprintf(&buf, "open \"$PREFPANE_LOCATION\"; rm -rf \"$TEMP_FOLDER\"");
+	if(!buf)
+		;//error
+		
+	char *args[] = {"/bin/sh", "-c", buf, NULL};
+	setenv("PREFPANE_LOCATION", [prefpanelocation fileSystemRepresentation], 1);
+	setenv("TEMP_FOLDER", [[downloadPath stringByDeletingLastPathComponent] fileSystemRepresentation], 1);
+	if(fork() == 0)
+		execve("/bin/sh", args, environ);
+	[NSApp terminate:self];
+	//And, we are out of here!!!
 }	
 
 - (BOOL)showsReleaseNotes
