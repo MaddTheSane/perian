@@ -116,7 +116,7 @@ static void PruneIdenticalStyleSpans(SSARenderEntity *re)
 {
 	SSAStyleSpan *styles_new[re->style_count];
 	
-	if (re->multipleruns || re->style_count <= 1) return;
+	if (re->multipart_drawing || re->style_count <= 1) return;
 
 	size_t style_count_new = 1, remaining = re->style_count-1;
 	int i=1;
@@ -264,7 +264,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 		re->posx = re->posy = -1;
 		re->halign = re->style->halign;
 		re->valign = re->style->valign;
-		re->multipleruns=NO;
+		re->multipart_drawing=NO;
 		re->is_shape=NO;
 		
 #define end_re \
@@ -316,9 +316,9 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				
 				action strike {SetATSUStyleFlag(cur_style, kATSUStyleStrikeThroughTag, flag);}
 				
-				action bordersize {cur_outline = num; re->multipleruns = YES;}
+				action bordersize {cur_outline = num; re->multipart_drawing = YES;}
 				
-				action shadowsize {cur_shadow = num; re->multipleruns = YES;}
+				action shadowsize {cur_shadow = num; re->multipart_drawing = YES;}
 				
 				action bluredge {cur_be = flag;}
 				
@@ -399,42 +399,42 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				
 				action primarycolor {
 					cur_color.primary = ParseColorTag(inum,cur_color.primary.alpha);
-					re->multipleruns = YES;
+					re->multipart_drawing = YES;
 				}
 				
 				action secondarycolor {
 					cur_color.secondary = ParseColorTag(inum,cur_color.secondary.alpha);
-					re->multipleruns = YES;
+					re->multipart_drawing = YES;
 				}
 				
 				action outlinecolor {
 					cur_color.outline = ParseColorTag(inum,cur_color.outline.alpha);
-					re->multipleruns = YES;
+					re->multipart_drawing = YES;
 				}
 				
 				action shadowcolor {
 					cur_color.shadow = ParseColorTag(inum,cur_color.shadow.alpha);
-					re->multipleruns = YES;
+					re->multipart_drawing = YES;
 				}
 				
 				action primaryalpha {
 					cur_color.primary.alpha = (255 - inum) / 255.f;
-					re->multipleruns = YES;
+					re->multipart_drawing = YES;
 				}
 				
 				action secondaryalpha {
 					cur_color.secondary.alpha = (255 - inum) / 255.f;
-					re->multipleruns = YES;
+					re->multipart_drawing = YES;
 				}
 				
 				action outlinealpha {
 					cur_color.outline.alpha = (255 - inum) / 255.f;
-					re->multipleruns = YES;
+					re->multipart_drawing = YES;
 				}
 				
 				action shadowalpha {
 					cur_color.shadow.alpha = (255 - inum) / 255.f;
-					re->multipleruns = YES;
+					re->multipart_drawing = YES;
 				}
 				
 				action nl_handler {
@@ -452,8 +452,6 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					parsetmp = [NSString stringWithCharacters:skipbegin length:p-skipbegin];
 					[output appendString:parsetmp];
 					
-					outputoffset += lengthreduce;
-					lengthreduce = 0;
 					
 					skipbegin = p;
 					
@@ -461,6 +459,9 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					cur_range.location -= outputoffset;
 					cur_range.length -= lengthreduce;
 					
+					outputoffset += lengthreduce;
+					lengthreduce = 0;
+
 					[re increasestyles];
 					re->styles[re->style_count-1] = [[SSAStyleSpan alloc] init];
 					re->styles[re->style_count-1]->outline = cur_outline;
@@ -494,7 +495,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 						nre->styles = malloc(0);
 						nre->style_count = 0;
 						nre->disposelayout = YES;
-						nre->multipleruns = NO;
+						nre->multipart_drawing = NO;
 						nre->is_shape = re->is_shape;
 						re = nre;
 					}
@@ -510,7 +511,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 						newLayout = TRUE;
 						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
 					}
-					re->multipleruns = YES;
+					re->multipart_drawing = YES;
 					ssastyleline *the_style = re->style;
 					NSString *searchsn = [NSString stringWithCharacters:strparambegin length:p-strparambegin];
 					

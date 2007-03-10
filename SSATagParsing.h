@@ -44,7 +44,7 @@
 	unichar *text;
 	SSAStyleSpan **styles;
 	size_t style_count;
-	BOOL disposelayout, multipleruns;
+	BOOL disposelayout, multipart_drawing;
 	int is_shape;
 }
 @end

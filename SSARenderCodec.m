@@ -48,12 +48,6 @@ SSARenderGlobalsPtr SSA_InitNonSSA(float width, float height)
 	return g;
 }
 
-static NSPoint np(FixedPoint fp)
-{
-	float x = FixedToFloat(fp.x), y = (480. - FixedToFloat(fp.y));
-	return NSMakePoint(x,y);
-}
-
 static void GetTypographicRectangleForLayout(SSARenderEntity *re, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed *height, Fixed *width, unsigned baseX, unsigned baseY, float iheight)
 {
 	ATSTrapezoid trap = {0};
@@ -89,19 +83,151 @@ static void GetTypographicRectangleForLayout(SSARenderEntity *re, UniCharArrayOf
 	*height = largeRect.bottom - largeRect.top;
 	*width = largeRect.right - largeRect.left;
 }
+/*
+typedef struct CurveCallbackData {
+	Float32Point origin, current;
+	float		 windowHeight;
+	CGContextRef c;
+} CurveCallbackData;
 
-static void DrawMultiStyleText(SSARenderEntity *re, UniCharArrayOffset linepos, UniCharCount lineclength, ATSUTextMeasurement baseX, ATSUTextMeasurement baseY)
+static OSStatus SSA_CubicMoveTo(const Float32Point *p, void *callBackDataPtr)
 {
+	CurveCallbackData *cd = callBackDataPtr;
+	float x, y;
 	
+	x = cd->origin.x + p->x;
+	y = cd->windowHeight - (cd->origin.y + p->y);
+	
+	CGContextMoveToPoint(cd->c,x,y);
+	
+	cd->current.x = x;
+	cd->current.y = y;
+	return noErr;
 }
 
+static OSStatus SSA_CubicLineTo(const Float32Point *p, void *callBackDataPtr)
+{
+	CurveCallbackData *cd = callBackDataPtr;
+	float x, y;
+	
+	x = cd->origin.x + p->x;
+	y = cd->windowHeight - (cd->origin.y + p->y);
+	
+	if (x == cd->current.x && y == cd->current.y) return noErr;
+	
+	CGContextAddLineToPoint(cd->c,x,y);
+	
+	cd->current.x = x;
+	cd->current.y = y;
+	return noErr;	
+}
+
+static OSStatus SSA_CubicCurveTo(const Float32Point *p1, const Float32Point *p2, const Float32Point *p3, void *callBackDataPtr)
+{
+	CurveCallbackData *cd = callBackDataPtr;
+	float x[3] = {p1->x,p2->x,p3->x};
+	float y[3] = {p1->y,p2->y,p3->y};
+	int i;
+	for (i = 0; i < 3; i++) x[i] += cd->origin.x;
+	for (i = 0; i < 3; i++) y[i] = cd->windowHeight - (cd->origin.y + y[i]);
+	
+	CGContextAddCurveToPoint(cd->c,x[0],y[0],x[1],y[1],x[2],y[2]);
+	
+	cd->current.x = x[2];
+	cd->current.y = y[2];
+	return noErr;
+}
+*/
+
+typedef enum DrawingMode {shadowtext, foreground} DrawingMode;
+
+static void DrawOneStyleSpan(SSARenderEntity *re, SSAStyleSpan *span, CGContextRef c, UniCharArrayOffset linepos, UniCharCount lineclength, ATSUTextMeasurement baseX, ATSUTextMeasurement baseY, DrawingMode mode)
+{
+	if (span->shadow > 0 && span->outline == 0) span->outline = 1;
+	
+	CGContextSetLineWidth(c,span->outline * 2.);
+
+	if (mode == shadowtext) {
+		Fixed shadOffset = FloatToFixed(span->shadow);
+		if (span->shadow == 0) return;
+		
+		CGContextSetRGBFillColor(c,span->color.shadow.red,span->color.shadow.green,span->color.shadow.blue,span->color.shadow.alpha);
+		CGContextSetRGBStrokeColor(c,span->color.shadow.red,span->color.shadow.green,span->color.shadow.blue,span->color.shadow.alpha);
+		CGContextSetTextDrawingMode(c, kCGTextFillStroke);	
+
+		ATSUDrawText(re->layout,linepos,lineclength,baseX + shadOffset,baseY - shadOffset);
+	} else {
+		CGContextSetRGBFillColor(c,span->color.primary.red,span->color.primary.green,span->color.primary.blue,span->color.primary.alpha);
+		CGContextSetRGBStrokeColor(c,span->color.outline.red,span->color.outline.green,span->color.outline.blue,span->color.outline.alpha);
+
+		if (span->outline > 0) {
+			CGContextSetTextDrawingMode(c,kCGTextStroke);
+			ATSUDrawText(re->layout,linepos,lineclength,baseX,baseY);
+			CGContextSetTextDrawingMode(c,kCGTextFill);
+		}
+		
+		ATSUDrawText(re->layout,linepos,lineclength,baseX,baseY);
+	}
+}
+
+static void SSA_DrawTextLine(SSARenderEntity *re, UniCharArrayOffset linepos, UniCharCount lineclength, ATSUTextMeasurement baseX, ATSUTextMeasurement baseY, DrawingMode mode, CGContextRef c)
+{
+	int i;
+	//ATSCubicMoveToUPP cmoveP;
+	//ATSCubicLineToUPP clineP;
+	//ATSCubicCurveToUPP ccurveP;
+	
+	if (!re->multipart_drawing) {
+		DrawOneStyleSpan(re,re->styles[0],c,linepos,lineclength,baseX,baseY,mode);
+	} else {
+		for (i = 0; i < re->style_count; i++) {
+			SSAStyleSpan *span = re->styles[i];
+			UniCharArrayOffset spanst, spanl;
+			
+			if ((span->range.location + span->range.length) < linepos) continue;
+			if (span->range.location >= (linepos + lineclength)) break;
+			
+			spanl = span->range.length;
+			
+			if (span->range.location < linepos) {
+				spanst = linepos;
+				spanl -= linepos - span->range.location;
+			} else spanst = span->range.location;
+			
+			DrawOneStyleSpan(re,re->styles[i],c,spanst,spanl,baseX,baseY,mode);
+		}
+	}
+}
+
+static Fixed GetLineHeight(ATSUTextLayout layout, UniCharArrayOffset lpos)
+{
+	ATSUTextMeasurement ascent, descent;
+	
+	ATSUGetLineControl(layout, lpos, kATSULineAscentTag,  sizeof(ATSUTextMeasurement), &ascent,  NULL);
+	ATSUGetLineControl(layout, lpos, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
+	
+	return ascent + descent;
+}
+
+static Fixed SSA_DrawLineArray(SSARenderEntity *re, int lstart, int lend, int lstep, char direction, UniCharArrayOffset *breaks, Fixed penX, Fixed penY, DrawingMode mode, CGContextRef c)
+{
+	int i;
+	
+	for (i = lstart; i != lend; i += lstep) {		
+		SSA_DrawTextLine(re, breaks[i], breaks[i+1] - breaks[i], penX, penY, mode, c);
+		
+		penY += direction * GetLineHeight(re->layout, breaks[i]);
+	}
+	
+	return penY;
+}
+							   
 void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub, float cWidth, float cHeight)
 {
 	ItemCount breakCount;
 	Fixed penY=0,penX;
 	Fixed lastTopPenY=-1, lastBottomPenY=-1, lastCenterPenY=-1, *storePenY, ignoredPenY;
 	int i, lstart, lend, lstep, subcount, j; char direction;
-	float outline, shadow;
 	if (!(glob && glob->document)) return;
 	SSADocument *ssa = glob->document;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -121,9 +247,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 		BOOL dirty_layout = NO;
 		
 		if (last_re && re->marginv != last_re->marginv) {lastTopPenY = lastBottomPenY = lastCenterPenY = -1;}
-			
-		outline = re->styles[0]->outline; shadow = re->styles[0]->shadow;
-		
+					
 		size_t sublen = [re->nstext length];
 						
 		err=ATSUSetTextPointerLocation(layout,re->text,kATSUFromTextBeginning,kATSUToTextEnd,sublen);
@@ -145,7 +269,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 		penX = IntToFixed(re->marginl);
 		
 		if (re->posx == -1) {
-			ATSUTextMeasurement ascent, descent, total = 0;
+			ATSUTextMeasurement descent, total = 0;
 			
 			switch (re->valign)
 			{
@@ -160,11 +284,8 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 					lstart = 0; lend = breakCount+1; lstep = 1;
 					storePenY = &lastCenterPenY;
 					break;
-				case S_TopAlign: //top
-					ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineAscentTag, sizeof(ATSUTextMeasurement), &ascent, NULL); // pen has to be positioned below the first line
-					ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
-					
-					penY = (lastTopPenY!=-1)?lastTopPenY:(FloatToFixed(ssa->resY - re->marginv) - ascent - descent); direction = -1;
+				case S_TopAlign: //top					
+					penY = (lastTopPenY!=-1)?lastTopPenY:(FloatToFixed(ssa->resY - re->marginv) - GetLineHeight(layout, kATSUFromTextBeginning)); direction = -1;
 					lstart = 0; lend = breakCount+1; lstep = 1;
 					storePenY = &lastTopPenY;
 					break;
@@ -204,55 +325,10 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 		
 		CGContextSetLineJoin(c, kCGLineJoinRound);
 		CGContextSetLineCap(c, kCGLineCapRound);
-		CGContextSetLineWidth(c,outline * 2.);
-		CGContextSetTextDrawingMode(c, kCGTextFillStroke);	
+				
+		SSA_DrawLineArray(re, lstart, lend, lstep, direction, breaks, penX, penY, shadowtext, c);
 		
-		if (shadow > 0) {
-			if (outline == 0) outline = 1;
-			
-			CGContextSetRGBFillColor(c,re->styles[0]->color.shadow.red,re->styles[0]->color.shadow.green,re->styles[0]->color.shadow.blue,re->styles[0]->color.shadow.alpha);
-			CGContextSetRGBStrokeColor(c,re->styles[0]->color.shadow.red,re->styles[0]->color.shadow.green,re->styles[0]->color.shadow.blue,re->styles[0]->color.shadow.alpha);
-			
-			Fixed shadowX = FloatToFixed(re->styles[0]->shadow) + penX, oldY = penY;
-			penY -= FloatToFixed(re->styles[0]->shadow);
-			
-			for (i = lstart; i != lend; i += lstep) {
-				int end = breaks[i+1];
-				
-				ATSUDrawText(layout,breaks[i],end-breaks[i],shadowX,penY);
-				
-				ATSUTextMeasurement ascent, descent;
-				ATSUGetLineControl(layout, breaks[i], kATSULineAscentTag, sizeof(ATSUTextMeasurement), &ascent, NULL);
-				ATSUGetLineControl(layout, breaks[i], kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
-				
-				penY += direction * (ascent + descent);
-			}
-			
-			penY = oldY;
-		}
-		
-		CGContextSetRGBFillColor(c,re->styles[0]->color.primary.red,re->styles[0]->color.primary.green,re->styles[0]->color.primary.blue,re->styles[0]->color.primary.alpha);
-		CGContextSetRGBStrokeColor(c,re->styles[0]->color.outline.red,re->styles[0]->color.outline.green,re->styles[0]->color.outline.blue,re->styles[0]->color.outline.alpha);
-		
-		for (i = lstart; i != lend; i += lstep) {
-			int end = breaks[i+1];
-			
-			if (outline > 0) {
-				CGContextSetTextDrawingMode(c, kCGTextStroke);
-				
-				ATSUDrawText(layout,breaks[i],end-breaks[i],penX,penY);
-				
-				CGContextSetTextDrawingMode(c, kCGTextFill);			
-			}
-			
-			err=ATSUDrawText(layout,breaks[i],end-breaks[i],penX,penY);
-			
-			ATSUTextMeasurement ascent, descent;
-			ATSUGetLineControl(layout, breaks[i], kATSULineAscentTag, sizeof(ATSUTextMeasurement), &ascent, NULL);
-			ATSUGetLineControl(layout, breaks[i], kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
-			
-			penY += direction * (ascent + descent);
-		}
+		penY = SSA_DrawLineArray(re, lstart, lend, lstep, direction, breaks, penX, penY, foreground, c);
 		
 		if (dirty_layout) {
 			Fixed fwidth = IntToFixed(re->usablewidth);
