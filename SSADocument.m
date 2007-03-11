@@ -89,8 +89,8 @@ static ATSURGBAlphaColor SSAParseColor(NSString *c)
 	resX = rX; resY = rY;
 	
 	timescale = (field = [hDict objectForKey:@"Timer"])? [field doubleValue] / 100. : 1.;
-	collisiontype = Normal;
-	if ((field = [hDict objectForKey:@"Collisions"]) && [field isEqualToString:@"Reverse"]) collisiontype = Reverse;
+	collisiontype = NormalCollisions;
+	if ((field = [hDict objectForKey:@"Collisions"]) && [field isEqualToString:@"ReverseCollisions"]) collisiontype = ReverseCollisions;
 	if (field = [hDict objectForKey:@"ScriptType"]) {
 		if ([field isEqualToString:@"v4.00+"]) version = S_ASS;
 		else version = S_SSA;
@@ -463,7 +463,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	disposedefaultstyle = YES;
 	resX = (width / height) * 480.; resY = 480;
 	timescale = 1;
-	collisiontype = Normal;
+	collisiontype = NormalCollisions;
 	version = S_ASS;
 	
 	[self makeATSUStylesForSSAStyle:defaultstyle];

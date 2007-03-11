@@ -183,18 +183,17 @@ static void UpdateAlignment(int inum, int cur_posx, int *valign, int *halign, AT
 NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 {
 	NSArray *linea;
-	int i, j, pcount; unsigned len;
+	int i=0, j, pcount = 1; unsigned len;
 	NSMutableArray *rentities = [NSMutableArray array];
 	
 	if (plaintext) {
 		linea = [NSArray arrayWithObject:str];
-		pcount = 1;
 	} else {
 		linea =  [str componentsSeparatedByString:@"\n"];
 		pcount = [linea count];
 	}
 	
-	for (i = 0; i < pcount; i++) {
+	for (; i < pcount; i ++) {
 		SSARenderEntity *re = [[[SSARenderEntity alloc] init] autorelease];
 		BOOL ldirty = NO;
 		
@@ -212,7 +211,8 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			re->styles = NULL;
 			re->disposelayout = NO;
 		} else {
-			NSArray *ar = [[linea objectAtIndex:i] componentsSeparatedByString:@"," count:9];
+			NSArray *ar = [[linea objectAtIndex:(ssa->collisiontype == NormalCollisions) ? i : (pcount - i - 1)]
+						   componentsSeparatedByString:@"," count:9];
 
 			if ([ar count] < 9) continue;
 			

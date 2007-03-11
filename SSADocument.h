@@ -55,7 +55,7 @@ typedef struct ssastyleline {
 	
 	float resX, resY;
 	double timescale;
-	enum {Normal, Reverse} collisiontype;
+	enum {NormalCollisions, ReverseCollisions} collisiontype;
 	enum {S_ASS, S_SSA} version;
 	Boolean disposedefaultstyle;
 }
