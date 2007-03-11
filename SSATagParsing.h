@@ -24,7 +24,7 @@
 @interface SSAStyleSpan : NSObject
 {
 	@public
-	float outline, shadow;
+	float outline, shadow, angle;
 	ATSUStyle astyle;
 	NSRange range;
 	BOOL outlineblur;

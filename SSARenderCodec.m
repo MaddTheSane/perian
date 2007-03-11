@@ -143,10 +143,13 @@ typedef enum DrawingMode {shadowtext, foreground} DrawingMode;
 
 static void DrawOneStyleSpan(SSARenderEntity *re, SSAStyleSpan *span, CGContextRef c, UniCharArrayOffset linepos, UniCharCount lineclength, ATSUTextMeasurement baseX, ATSUTextMeasurement baseY, DrawingMode mode)
 {
+	Fixed lineRot = FloatToFixed(span->angle - re->style->angle);
 	if (span->shadow > 0 && span->outline == 0) span->outline = 1;
 	
 	CGContextSetLineWidth(c,span->outline * 2.);
 
+	if (re->multipart_drawing) SetATSULayoutOther(re->layout,kATSULineRotationTag,sizeof(Fixed),&lineRot);
+		
 	if (mode == shadowtext) {
 		Fixed shadOffset = FloatToFixed(span->shadow);
 		if (span->shadow == 0) return;
@@ -168,6 +171,7 @@ static void DrawOneStyleSpan(SSARenderEntity *re, SSAStyleSpan *span, CGContextR
 		
 		ATSUDrawText(re->layout,linepos,lineclength,baseX,baseY);
 	}
+	
 }
 
 static void SSA_DrawTextLine(SSARenderEntity *re, UniCharArrayOffset linepos, UniCharCount lineclength, ATSUTextMeasurement baseX, ATSUTextMeasurement baseY, DrawingMode mode, CGContextRef c)
@@ -257,6 +261,10 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 		for (i = 0; i < re->style_count; i++) ATSUSetRunStyle(layout,re->styles[i]->astyle,re->styles[i]->range.location,re->styles[i]->range.length);
 		
 		SetATSULayoutOther(layout,kATSUCGContextTag,sizeof(CGContextRef),&c);
+		if (!re->multipart_drawing) {
+			Fixed lineRot = FloatToFixed(re->styles[0]->angle);
+			SetATSULayoutOther(re->layout,kATSULineRotationTag,sizeof(Fixed),&lineRot);
+		}
 		
 		ATSUBatchBreakLines(layout,kATSUFromTextBeginning,kATSUToTextEnd,IntToFixed(re->usablewidth),&breakCount); 
 		ATSUGetSoftLineBreaks(layout,kATSUFromTextBeginning,kATSUToTextEnd,0,NULL,&breakCount);

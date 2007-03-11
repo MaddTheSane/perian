@@ -275,6 +275,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 		re->styles[re->style_count-1] = [[SSAStyleSpan alloc] init];\
 		re->styles[re->style_count-1]->outline = cur_outline;\
 		re->styles[re->style_count-1]->shadow = cur_shadow;\
+		re->styles[re->style_count-1]->angle = cur_frz;\
 		re->styles[re->style_count-1]->astyle = cur_style;\
 		re->styles[re->style_count-1]->range = cur_range;\
 		re->styles[re->style_count-1]->outlineblur = cur_be;\
@@ -292,7 +293,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			ATSUTextLayout cur_layout;
 			NSMutableString *output = [NSMutableString string], *dtmp;
 			unichar *p = re->text, *pe = &re->text[len], *numbegin = p, *strbegin = p, *skipbegin = p, *intbegin = p, *pb = p, *posbegin=p, *strparambegin=p;
-			float num, cur_outline = re->style->outline, cur_shadow = re->style->shadow, cur_scalex = re->style->scalex, cur_scaley = re->style->scaley;
+			float num, cur_outline = re->style->outline, cur_shadow = re->style->shadow, cur_scalex = re->style->scalex, cur_scaley = re->style->scaley, cur_frz=re->style->angle;
 			NSString *parsetmp;
 			int cs, cur_valign=re->valign, cur_halign=re->halign, cur_posx=-1, cur_posy=-1;
 			ssacolors cur_color = re->style->color;
@@ -322,15 +323,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				
 				action bluredge {cur_be = flag;}
 				
-				action frot {
-					if (!newLayout) {
-						newLayout = TRUE;
-						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
-					}
-					fixv = FloatToFixed(num);
-					
-					SetATSULayoutOther(cur_layout, kATSULineRotationTag, sizeof(Fixed), &fixv);
-				}
+				action frot {cur_frz = num; re->multipart_drawing = YES;}
 				
 				action fsize {
 					num *= (72./96.); // scale from Windows 96dpi
@@ -466,6 +459,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					re->styles[re->style_count-1] = [[SSAStyleSpan alloc] init];
 					re->styles[re->style_count-1]->outline = cur_outline;
 					re->styles[re->style_count-1]->shadow = cur_shadow;
+					re->styles[re->style_count-1]->angle = cur_frz;
 					re->styles[re->style_count-1]->astyle = cur_style;
 					re->styles[re->style_count-1]->range = cur_range;
 					re->styles[re->style_count-1]->outlineblur = cur_be;
@@ -528,6 +522,8 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					cur_color = the_style->color;
 					cur_outline = the_style->outline;
 					cur_shadow = the_style->shadow;
+					cur_frz = the_style->angle;
+					cur_scalex = cur_scaley = 1;
 					cur_posx = cur_posy = -1;
 				}
 				
@@ -574,7 +570,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"3a" color %outlinealpha
 								|"4a" color %shadowalpha
 								|("r" [^\\}]* > strp_begin %styleset)
-								|("fe"|"k"|"kf"|"K"|"ko"|"q"|"fr"|"fad"|"move"|"clip"|"o") [^\\}]*
+								|("fe"|"k"|"kf"|"K"|"ko"|"q"|"fr"|"fad"|"move"|"clip"|"o"|"frx"|"fry") [^\\}]*
 								|"p" num %draw_mode
 								#|"t" [^)}]* # enabling this crashes ragel
 								|"t(" % skip_t_tag

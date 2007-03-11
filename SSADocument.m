@@ -145,11 +145,11 @@ int SSA2ASSAlignment(int a)
 	}
 	
 	{
-		ATSUAttributeTag tags[] = {kATSULineFlushFactorTag, kATSULineRotationTag, kATSULineWidthTag};
-		ByteCount		 sizes[] = {sizeof(Fract), sizeof(Fract), sizeof(ATSUTextMeasurement)};
-		Fract alignment, rotation = FloatToFract(s->angle);
+		ATSUAttributeTag tags[] = {kATSULineFlushFactorTag, kATSULineWidthTag};
+		ByteCount		 sizes[] = {sizeof(Fract), sizeof(ATSUTextMeasurement)};
+		Fract alignment;
 		ATSUTextMeasurement width;
-		ATSUAttributeValuePtr vals[] = {&alignment, &rotation, &width};
+		ATSUAttributeValuePtr vals[] = {&alignment, &width};
 		
 		switch(s->halign) {
 			case S_LeftAlign:
