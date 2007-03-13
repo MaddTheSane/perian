@@ -15,10 +15,18 @@
 
 @implementation UpdateCheckerAppDelegate
 
+- (void)dealloc
+{
+    [downloader release];
+    [downloadPath release];
+    [lastRunDate release];
+    [super dealloc];
+}
+
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	NSDate *nextRunDate = [[NSUserDefaults standardUserDefaults] objectForKey:NEXT_RUN_KEY];
-	if (nextRunDate == nil || [nextRunDate laterDate:[NSDate date]] != nextRunDate) {
+	lastRunDate = [[[NSUserDefaults standardUserDefaults] objectForKey:NEXT_RUN_KEY] retain];
+	if (lastRunDate == nil || [lastRunDate laterDate:[NSDate date]] != lastRunDate) {
 		//this means we should in fact run
 		[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:NEXT_RUN_KEY];
 		[self doUpdateCheck];
@@ -45,6 +53,7 @@
 	
 	if (![latest fileVersion])
 	{
+        [self updateFailed];
 		[NSException raise:@"SUAppcastException" format:@"Can't extract a version string from the appcast feed. The filenames should look like YourApp_1.5.tgz, where 1.5 is the version number."];
 	}
 	
@@ -55,8 +64,8 @@
 	NSString *currentSystemVersion = [[[NSDictionary dictionaryWithContentsOfFile:versionPlistPath] objectForKey:@"ProductVersion"] retain];
 
 	BOOL updateAvailable = SUStandardVersionComparison([latest minimumSystemVersion], currentSystemVersion);
-#warning This should compare against the Perian.prefpane version, not the SUHostAppVersion, but I didn't do that yet - RAF
-	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], SUHostAppVersion()) == NSOrderedAscending));
+    NSString *panePath = [[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
+	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	NSString *skippedVersion = [[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY];
 	if (updateAvailable && (!skippedVersion || 
 		(skippedVersion && ![skippedVersion isEqualToString:[latest versionString]]))) {
@@ -85,6 +94,7 @@
 
 - (void)showUpdateErrorAlertWithInfo:(NSString *)info
 {
+    [self updateFailed];
 	NSRunAlertPanel(SULocalizedString(@"Update Error!", nil), info, SULocalizedString(@"Cancel", nil), nil, nil);
 }
 
@@ -140,7 +150,7 @@
 
 - (void)download:(NSURLDownload *)download didFailWithError:(NSError *)error
 {
-	
+	[self updateFailed];
 	NSLog(@"Download error: %@", [error localizedDescription]);
 	[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to download the file. Please try again later.", nil)];
 	[[NSApplication sharedApplication] terminate:self];
@@ -170,7 +180,7 @@ extern char **environ;
 	downloader = nil;
 	
 	if(![self extractDMG:downloadPath])
-		; //print error
+		[self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Extract Downloaded File",@"")];
 	
 	NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:[downloadPath stringByDeletingLastPathComponent]];
 	NSString *file = nil;
@@ -191,12 +201,15 @@ extern char **environ;
 	char *buf = NULL;
 	asprintf(&buf, "open \"$PREFPANE_LOCATION\"; rm -rf \"$TEMP_FOLDER\"");
 	if(!buf)
-		;//error
+		[self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Create Extraction Script",@"")];
 		
 	char *args[] = {"/bin/sh", "-c", buf, NULL};
 	setenv("PREFPANE_LOCATION", [prefpanelocation fileSystemRepresentation], 1);
 	setenv("TEMP_FOLDER", [[downloadPath stringByDeletingLastPathComponent] fileSystemRepresentation], 1);
-	if(fork() == 0)
+    int forkVal = fork();
+    if(forkVal == -1)
+        [self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Run Update",@"")];
+	if(forkVal == 0)
 		execve("/bin/sh", args, environ);
 	[NSApp terminate:self];
 	//And, we are out of here!!!
@@ -205,6 +218,14 @@ extern char **environ;
 - (BOOL)showsReleaseNotes
 {
 	return YES;
+}
+
+- (void)updateFailed
+{
+    if(lastRunDate == nil)
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:NEXT_RUN_KEY];
+    else
+        [[NSUserDefaults standardUserDefaults] setObject:lastRunDate forKey:NEXT_RUN_KEY];
 }
 
 

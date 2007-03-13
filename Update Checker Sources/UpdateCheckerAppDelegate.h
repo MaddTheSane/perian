@@ -23,10 +23,12 @@
 	SUStatusController *statusController;
 	NSURLDownload *downloader;
 	NSString *downloadPath;
+    NSDate *lastRunDate;
 }
 
 - (void)doUpdateCheck;
 - (void)showUpdatePanelForItem:(SUAppcastItem *)updateItem;
 - (void)beginDownload;
+- (void)updateFailed;
 
 @end
