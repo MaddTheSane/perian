@@ -243,6 +243,7 @@
 		F5CFD1C10B5000DF00616865 /* GBPerianPanePListGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */; };
 		F5CFD3B20B5013EA00616865 /* A52Codec.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D60B5012A100616865 /* A52Codec.component */; };
 		F5CFD3B70B5013EC00616865 /* AC3MovieImport.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D80B5012A100616865 /* AC3MovieImport.component */; };
+		F5EB823E0BA7221F001064E5 /* PerianUpdateChecker.app in Resources */ = {isa = PBXBuildFile; fileRef = 116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -358,6 +359,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = F5CFD3BA0B50142100616865;
 			remoteInfo = "Setup Build Directories";
+		};
+		F5EB82350BA72208001064E5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 116C42510B5041BD00FB0738 /* PerianUpdateChecker */;
+			remoteInfo = PerianUpdateChecker;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -623,7 +631,7 @@
 		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFusionCodec.c; sourceTree = "<group>"; };
 		F560DF0203D622D001ABA332 /* FFusionCodec.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = FFusionCodec.r; sourceTree = "<group>"; };
 		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
-		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBPerianPanePListGenerator.h; sourceTree = "<group>"; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
@@ -1104,7 +1112,7 @@
 			children = (
 				F5CFD2D60B5012A100616865 /* A52Codec.component */,
 				F5CFD2D80B5012A100616865 /* AC3MovieImport.component */,
-				F5CFD2DA0B5012A100616865 /* Preferences.app */,
+				F5CFD2DA0B5012A100616865 /* A52Preferences.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1270,6 +1278,7 @@
 				F5CFD2C70B50128200616865 /* PBXTargetDependency */,
 				F5CFD2F10B50132E00616865 /* PBXTargetDependency */,
 				F5CFD25E0B500B9400616865 /* PBXTargetDependency */,
+				F5EB82360BA72208001064E5 /* PBXTargetDependency */,
 			);
 			name = PerianPane;
 			productName = PerianPane;
@@ -1345,10 +1354,10 @@
 			remoteRef = F5CFD2D70B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F5CFD2DA0B5012A100616865 /* Preferences.app */ = {
+		F5CFD2DA0B5012A100616865 /* A52Preferences.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = Preferences.app;
+			path = A52Preferences.app;
 			remoteRef = F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1379,6 +1388,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5EB823E0BA7221F001064E5 /* PerianUpdateChecker.app in Resources */,
 				83D1D6DE0B4C7F8300E09EC9 /* PerianPrefPane.nib in Resources */,
 				83D1D6F50B4C85AB00E09EC9 /* Perian_icon.icns in Resources */,
 			);
@@ -1453,7 +1463,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$BUILT_PRODUCTS_DIR\"\n./PerianPanePListGenerator \"${SRCROOT}/PerianPane-Info.plist\" \"${BUILT_PRODUCTS_DIR}\" \"${SRCROOT}/PerianPaneReal-Info.plist\"";
+			shellScript = "cd \"$BUILT_PRODUCTS_DIR\"\n./PerianPanePListGenerator \"${SRCROOT}/Plists/PerianPane-Info.plist\" \"${BUILT_PRODUCTS_DIR}\" \"${SRCROOT}/Plists/PerianPaneReal-Info.plist\"";
 		};
 		F5CFD3B90B50142100616865 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1656,6 +1666,11 @@
 			target = F5CFD3BA0B50142100616865 /* Setup Build Directories */;
 			targetProxy = F5CFD3BB0B50142C00616865 /* PBXContainerItemProxy */;
 		};
+		F5EB82360BA72208001064E5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 116C42510B5041BD00FB0738 /* PerianUpdateChecker */;
+			targetProxy = F5EB82350BA72208001064E5 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -1700,7 +1715,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "PerianUpdateChecker-Info.plist";
+				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1734,7 +1749,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "PerianUpdateChecker-Info.plist";
+				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1766,7 +1781,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "PerianUpdateChecker-Info.plist";
+				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1817,7 +1832,7 @@
 					libebml,
 					libmatroska,
 				);
-				INFOPLIST_FILE = "Perian-Info.plist";
+				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = (
 					$SYMROOT/Universal,
@@ -1876,7 +1891,7 @@
 					libebml,
 					libmatroska,
 				);
-				INFOPLIST_FILE = "Perian-Info.plist";
+				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = (
 					$SYMROOT/Universal,
@@ -1932,7 +1947,7 @@
 					libebml,
 					libmatroska,
 				);
-				INFOPLIST_FILE = "Perian-Info.plist";
+				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = (
 					$SYMROOT/Universal,
@@ -2094,7 +2109,7 @@
 					libebml,
 					libmatroska,
 				);
-				INFOPLIST_FILE = "Perian-Info.plist";
+				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = (
 					$SYMROOT/Universal,
@@ -2196,7 +2211,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "PerianPane-Info.plist";
+				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2231,7 +2246,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "PerianUpdateChecker-Info.plist";
+				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2396,7 +2411,7 @@
 				GCC_WARN_UNUSED_PARAMETER = NO;
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "PerianPaneReal-Info.plist";
+				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2425,7 +2440,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "PerianPane-Info.plist";
+				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2452,7 +2467,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "PerianPane-Info.plist";
+				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				OTHER_LDFLAGS = (
 					"-framework",
