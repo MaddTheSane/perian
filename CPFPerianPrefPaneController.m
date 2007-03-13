@@ -3,14 +3,19 @@
 
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
 #define AC3StereoOverDolbyKey CFSTR("useStereoOverDolby")
+#define LastInstalledVersionKey CFSTR("LastInstalledVersion")
+
+@interface CPFPerianPrefPaneController(_private)
+- (void)setAC3DynamicRange:(float)newVal;
+@end
 
 @implementation CPFPerianPrefPaneController
 
-#pragma mark Private Functions
+#pragma mark Preferences Functions
 
 - (void)setButton:(NSButton *)button fromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(BOOL)defaultValue
 {
-	CFPropertyListRef value;	
+	CFPropertyListRef value;
 	value = CFPreferencesCopyAppValue(key, appID);
 	if(value && CFGetTypeID(value) == CFBooleanGetTypeID())
 		[button setState:CFBooleanGetValue(value)];
@@ -28,6 +33,50 @@
 	else
 		CFPreferencesSetAppValue(key, kCFBooleanFalse, appID);
 }
+
+- (float)getFloatFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(float)defaultValue
+{
+    CFPropertyListRef value;
+    float ret = defaultValue;
+    
+	value = CFPreferencesCopyAppValue(key, appID);
+	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
+		CFNumberGetValue(value, kCFNumberFloatType, &ret);
+	
+	if(value)
+		CFRelease(value);
+    
+    return ret;
+}
+
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromString:(NSString *)value
+{
+    CFPreferencesSetAppValue(key, value, appID);
+}
+
+- (NSString *)getStringFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
+{
+    CFPropertyListRef value;
+    NSString *ret = nil;
+    
+	value = CFPreferencesCopyAppValue(key, appID);
+	if(value && CFGetTypeID(value) == CFStringGetTypeID())
+		ret = [NSString stringWithString:(NSString *)value];
+	
+	if(value)
+		CFRelease(value);
+    
+    return ret;
+}
+
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromFloat:(float)value
+{
+    CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberFloatType, &value);
+    CFPreferencesSetAppValue(key, numRef, appID);
+    CFRelease(numRef);
+}
+
+#pragma mark Private Functions
 
 - (NSString *)installationBasePath:(BOOL)userInstallation
 {
@@ -107,7 +156,7 @@
 		perianDonateURL = [[NSURL alloc] initWithString:@"http://perian.org/donate.php"];
 		perianWebSiteURL = [[NSURL alloc] initWithString:@"http://perian.org"];
 		
-		perianAppID = CFSTR("org.perian.perian");
+		perianAppID = CFSTR("org.perian.Perian");
 		a52AppID = CFSTR("com.cod3r.a52codec");
 		
 		NSString *myPath = [[self bundle] bundlePath];
@@ -189,10 +238,17 @@
 {
 	/* General */
 	[self checkForInstallation];
+    NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
+    NSString *myVersion = [[[self bundle] infoDictionary] objectForKey:BundleVersionKey];
+    if((lastInstVersion == nil || [lastInstVersion compare:myVersion] == NSOrderedAscending) && installStatus != InstallStatusInstalled)
+    {
+        [self installUninstall:nil];
+        [self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
+    }
 	
 	/* A52 Prefs */
-	[self setButton:button_ac3DynamicRange fromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:NO];
 	[self setButton:button_ac3StereoOverDolby fromKey:AC3StereoOverDolbyKey forAppID:a52AppID withDefault:NO];
+    [self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
 }
 
 - (void)didUnselect
@@ -497,6 +553,13 @@
 #pragma mark Check Updates
 - (IBAction)updateCheck:(id)sender 
 {
+    FSRef updateCheckRef;
+    
+    OSStatus status = FSPathMakeRef((UInt8 *)[[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Resources/PerianUpdateChecker.app"] fileSystemRepresentation], &updateCheckRef, NULL);
+    if(status != noErr)
+        return;
+    
+    LSOpenFSRef(&updateCheckRef, NULL);
 } 
 
 - (IBAction)setAutoUpdateCheck:(id)sender 
@@ -505,15 +568,35 @@
 
 
 #pragma mark AC3 
-- (IBAction)setAC3DynamicRange:(id)sender 
-{
-	[self setKey:AC3DynamicRangeKey forAppID:a52AppID fromButton:button_ac3DynamicRange];
-} 
-
 - (IBAction)setAC3StereoOverDolby:(id)sender 
 {
 	[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromButton:button_ac3StereoOverDolby];
-} 
+}
+
+- (void)setAC3DynamicRange:(float)newVal
+{
+    if(newVal > 1.0)
+        newVal = 1.0;
+    if(newVal < 0.0)
+        newVal = 0.0;
+    
+    [self setKey:AC3DynamicRangeKey forAppID:a52AppID fromFloat:newVal];
+    [textField_ac3DynamicRangeValue setFloatValue:newVal];
+    [slider_ac3DynamicRangeSlider setFloatValue:newVal];
+}
+
+- (IBAction)setAC3DynamicRangeValue:(id)sender
+{
+    float newVal = [textField_ac3DynamicRangeValue floatValue];
+    
+    [self setAC3DynamicRange:newVal];
+}
+- (IBAction)setAC3DynamicRangeSlider:(id)sender
+{
+    float newVal = [slider_ac3DynamicRangeSlider floatValue];
+    
+    [self setAC3DynamicRange:newVal];
+}
 
 #pragma mark About 
 - (IBAction)launchWebsite:(id)sender 

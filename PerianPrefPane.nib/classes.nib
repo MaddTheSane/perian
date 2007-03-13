@@ -6,7 +6,8 @@
                 launchDonate = id; 
                 launchForum = id; 
                 launchWebsite = id; 
-                setAC3DynamicRange = id; 
+                setAC3DynamicRangeSlider = id; 
+                setAC3DynamicRangeValue = id; 
                 setAC3StereoOverDolby = id; 
                 setAutoUpdateCheck = id; 
                 updateCheck = id; 
@@ -14,7 +15,6 @@
             CLASS = CPFPerianPrefPaneController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                "button_ac3DynamicRange" = NSButton; 
                 "button_ac3StereoOverDolby" = NSButton; 
                 "button_autoUpdateCheck" = NSButton; 
                 "button_donate" = NSButton; 
@@ -24,6 +24,8 @@
                 "button_website" = NSButton; 
                 "progress_install" = NSProgressIndicator; 
                 "progress_updateCheck" = NSProgressIndicator; 
+                "slider_ac3DynamicRangeSlider" = NSSlider; 
+                "textField_ac3DynamicRangeValue" = NSTextField; 
                 "textField_currentVersion" = NSTextField; 
                 "textField_installStatus" = NSTextField; 
                 "textView_about" = NSTextView; 

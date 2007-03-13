@@ -55,7 +55,8 @@ typedef enum
 	IBOutlet NSButton					*button_autoUpdateCheck;
 	
 	//AC3
-	IBOutlet NSButton					*button_ac3DynamicRange;
+    IBOutlet NSTextField                *textField_ac3DynamicRangeValue;
+    IBOutlet NSSlider                   *slider_ac3DynamicRangeSlider;
 	IBOutlet NSButton					*button_ac3StereoOverDolby;
 	
 	//About
@@ -83,8 +84,9 @@ typedef enum
 - (IBAction)setAutoUpdateCheck:(id)sender;
 
 //AC3
-- (IBAction)setAC3DynamicRange:(id)sender;
 - (IBAction)setAC3StereoOverDolby:(id)sender;
+- (IBAction)setAC3DynamicRangeValue:(id)sender;
+- (IBAction)setAC3DynamicRangeSlider:(id)sender;
 
 //About
 - (IBAction)launchWebsite:(id)sender;
