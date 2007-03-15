@@ -192,7 +192,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 		linea =  [str componentsSeparatedByString:@"\n"];
 		pcount = [linea count];
 	}
-	
+
 	for (; i < pcount; i ++) {
 		SSARenderEntity *re = [[[SSARenderEntity alloc] init] autorelease];
 		BOOL ldirty = NO;
@@ -578,7 +578,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				
 				cmd = "\\"  cmd_specific;
 				
-				tag = "{" ((cmd*) | ([^\\}]*)) "}";
+				tag = "{" :> ((cmd*) | ([^\\}]*)) "}";
 				
 				nl = "\\" [Nn];
 				
@@ -586,7 +586,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 						 (tag > enter_tag % exit_tag);
 								
 				text = any*;
-				main := (text :> special?)*;
+				main := (text special?)*;
 			}%%
 				
 			%%write init;

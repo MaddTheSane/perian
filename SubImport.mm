@@ -371,6 +371,13 @@ bail:
 	return self;
 }
 
+-(void)dealloc
+{
+	[outpackets release];
+	[lines release];
+	[super dealloc];
+}
+
 -(void)addLine:(SubLine *)sline
 {
 	if (sline->begin_time < sline->end_time)
@@ -461,7 +468,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 				} else next_start = slines[j]->end_time;
 					
 				last_end = MAX(slines[j]->end_time, last_end);
-				if (accum) [accum appendString:slines[j]->line]; else accum = [slines[j]->line mutableCopy];
+				if (accum) [accum appendString:slines[j]->line]; else accum = [[slines[j]->line mutableCopy] autorelease];
 			} else if (j == num-1) finishedOutput = true;
 		}
 				
