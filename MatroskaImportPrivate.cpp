@@ -568,14 +568,21 @@ void MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
 {
 	KaxChapterAtom *subChapter = FindChild<KaxChapterAtom>(*atom);
+	bool addThisChapter = true;
 	
 	// since QuickTime only supports linear chapter tracks (no nesting), only add chapter leaves
 	if (subChapter && subChapter->GetSize() > 0) {
 		while (subChapter && subChapter->GetSize() > 0) {
-			AddChapterAtom(subChapter, chapterTrack);
+			KaxChapterFlagHidden &hideChapter = GetChild<KaxChapterFlagHidden>(*subChapter);
+			
+			if (!uint8_t(hideChapter)) {
+				AddChapterAtom(subChapter, chapterTrack);
+				addThisChapter = false;
+			}
 			subChapter = &GetNextChild(*atom, *subChapter);
 		}
-	} else {
+	} 
+	if (addThisChapter) {
 		// add the chapter to the track if it has no children
 		KaxChapterTimeStart & startTime = GetChild<KaxChapterTimeStart>(*atom);
 		KaxChapterDisplay & chapDisplay = GetChild<KaxChapterDisplay>(*atom);
