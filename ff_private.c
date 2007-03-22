@@ -155,7 +155,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	else
 		// need to lookup the fourcc from the codec_id
 		(*imgHdl)->cType = map_video_codec_to_mov_tag(codec->codec_id);
-	FourCCprintf("fourcc: ", (*imgHdl)->cType);
+//	FourCCprintf("fourcc: ", (*imgHdl)->cType);
 	
 	(*imgHdl)->temporalQuality = codecMaxQuality;
 	(*imgHdl)->spatialQuality = codecMaxQuality;

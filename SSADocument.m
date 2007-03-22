@@ -21,6 +21,7 @@
 #import "SSADocument.h"
 #import "Categories.h"
 #include "SubImport.h"
+#include "Codecprintf.h"
 
 @implementation SSADocument
 
@@ -396,7 +397,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	nextLine = [[lenum nextObject] stringByTrimmingCharactersInSet:ws];
 	
 	if (![nextLine isEqualToString:@"[Script Info]"]) {
-		NSLog(@"\"%@\" is not a valid SSA header?",nextLine);
+		Codecprintf(stderr,"The line \"%s\" isn't a valid SSA header\n",[nextLine UTF8String]);
 		return;
 	}
 	while (1) {
@@ -547,7 +548,7 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 		PtrToHand(str,&sampleHndl,sampleLen);
 
 		err=AddMediaSample(theMedia,sampleHndl,0,sampleLen, p->end_time - p->begin_time,(SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
-		if (err != noErr) {err = GetMoviesError(); NSLog(@"external SSA: error %d adding %d-%d line",err, p->begin_time, p->end_time); goto loopend;}
+		if (err != noErr) {err = GetMoviesError(); Codecprintf(stderr,"external SSA: error %d adding %d-%d line\n",err, p->begin_time, p->end_time); goto loopend;}
 		
 		ConvertTimeScale(&movieStartTime, movieTimeScale);
 

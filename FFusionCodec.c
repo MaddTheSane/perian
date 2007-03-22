@@ -165,7 +165,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
     
     GetComponentInfo((Component)self, &descout, 0, 0, 0);
 	
-    FourCCprintf("Opening component for type ", descout.componentSubType);
+  //  FourCCprintf("Opening component for type ", descout.componentSubType);
 	
     // Allocate memory for our globals, set them up and inform the component manager that we've done so
 	
@@ -203,13 +203,13 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
             
             if (bitfield >= 0x1010)
             {
-                Codecprintf(glob->fileLog, "Use speedy y420 component\n");
+  //              Codecprintf(glob->fileLog, "Use speedy y420 component\n");
                 glob->hasy420 = 1;
             }
         }
         else
         {
-            Codecprintf(glob->fileLog, "Use slow y420 component\n");
+  //          Codecprintf(glob->fileLog, "Use slow y420 component\n");
         }
 		
         // Open and target an instance of the base decompressor as we delegate

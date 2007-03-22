@@ -316,7 +316,6 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 			if (actRange.location == extRange.location)
 				{
 				err = LoadSubRipSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
-				if (err) NSLog(@"Perian: loading .srt, error %d",err);
 				goto bail;
 				}
 			
@@ -325,7 +324,6 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 			if (actRange.location == extRange.location)
 			{
 				err = LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
-				if (err) NSLog(@"Perian: loading .ass, error %d",err);
 				goto bail;
 			}
 			
@@ -333,7 +331,6 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 			if (actRange.location == extRange.location)
 			{
 				err = LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
-				if (err) NSLog(@"Perian: loading .ssa, error %d",err);
 				goto bail;
 			}			
 			
