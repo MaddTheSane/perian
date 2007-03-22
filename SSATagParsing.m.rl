@@ -431,21 +431,23 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				}
 				
 				action nl_handler {
+					NSString *append = @"\n";
 					parsetmp = [NSString stringWithCharacters:skipbegin length:(p-2)-skipbegin];
 					[output appendString:parsetmp];
 					
 					skipbegin = p;
 
-					[output appendString:@"\n"];
+					if (*(p - 1) == 'h') append = @" ";
+                    
+					[output appendString:append];
 					
 					lengthreduce++;
 				}
 				
 				action enter_tag {
-					parsetmp = [NSString stringWithCharacters:skipbegin length:p-skipbegin];
+					unsigned taglen = p - skipbegin;
+					parsetmp = [NSString stringWithCharacters:skipbegin length:taglen];
 					[output appendString:parsetmp];
-					
-					
 					skipbegin = p;
 					
 					cur_range = (NSRange){strbegin - pb, p - strbegin};
@@ -468,6 +470,8 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				}
 				
 				action exit_tag {
+					// XXX exit_tag ideally should run one char later, so we just pretend it does
+					p++;
 					outputoffset += p - skipbegin;
 					skipbegin = p;
 					strbegin = p;
@@ -493,6 +497,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 						nre->is_shape = re->is_shape;
 						re = nre;
 					}
+					p--;
 				}
 				
 				action color_end {
@@ -576,14 +581,15 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"t(" % skip_t_tag
 								);
 				
-				cmd = "\\"  cmd_specific;
+				cmd = ("\\" :> cmd_specific)+;
 				
-				tag = "{" :> ((cmd*) | ([^\\}]*)) "}";
+				plaintext = [^}]*;
+
+				tag = "{" (cmd | plaintext) % exit_tag "}";
 				
-				nl = "\\" [Nn];
+				nl = "\\" [Nnh];
 				
-				special = nl % nl_handler | 
-						 (tag > enter_tag % exit_tag);
+				special = nl % nl_handler | (tag > enter_tag);
 								
 				text = any*;
 				main := (text special?)*;
@@ -605,6 +611,5 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 		}
 		
 	}
-	
 	return rentities;
 }
