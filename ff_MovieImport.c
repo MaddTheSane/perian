@@ -80,6 +80,7 @@ void initLib()
 		register_avcodec(&ffvhuff_decoder);
 		register_avcodec(&mpeg1video_decoder);
 		register_avcodec(&mpeg2video_decoder);
+		register_avcodec(&fraps_decoder);
 		
 		register_avcodec(&wmav1_decoder);
 		register_avcodec(&wmav2_decoder);

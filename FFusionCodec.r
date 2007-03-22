@@ -60,6 +60,7 @@
 #define kHuffYUVName		"HuffYUV"
 #define kMPEG1Name		"MPEG-1 Video"
 #define kMPEG2Name		"MPEG-2 Video"
+#define kFRAPSName		"Fraps"
 
 // Codec names Resource ID
 
@@ -80,6 +81,7 @@
 #define kHuffYUVNameResID	270
 #define kMPEG1NameResID		271
 #define kMPEG2NameResID		272
+#define kFRAPSNameResID		273
 
 // Codec infos Resource ID
 
@@ -100,6 +102,7 @@
 #define kHuffYUVInfoResID		299
 #define kMPEG1InfoResID		300
 #define kMPEG2InfoResID		301
+#define kFRAPSInfoResID		302
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -518,6 +521,31 @@ resource 'cdci' (kMPEG1CodecInfoResID) {
 
 resource 'cdci' (kMPEG2CodecInfoResID) {
 	kMPEG2Name,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// Fraps Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kFRAPSCodecInfoResID) {
+	kFRAPSName,				// Type
 	1,					// Version
 	1,					// Revision level
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2790,6 +2818,39 @@ resource 'thng' (328) {
 };
 
 //---------------------------------------------------------------------------
+// Fraps Components
+//---------------------------------------------------------------------------
+resource 'thng' (329) {
+	decompressorComponentType,              // Type
+	'FPS1',                                 // SubType
+	kFFusionCodecManufacturer,                      // Manufacturer
+	0,                                      // - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',                                 // Name Type
+	kFRAPSNameResID,                        // Name ID
+	'STR ',                                 // Info Type
+	kFRAPSInfoResID,                        // Info ID
+	0,                                      // Icon Type
+	0,                                      // Icon ID
+	kFFusionCodecVersion,                   // Version
+	componentHasMultiplePlatforms +         // Registration Flags 
+	componentDoAutoVersion,                 // Registration Flags
+	0,                                      // Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',                         // Entry point found by symbol name 'dlle' resource
+	256,                            // ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+//---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
 
@@ -2859,6 +2920,10 @@ resource 'STR ' (kMPEG1NameResID) {
 
 resource 'STR ' (kMPEG2NameResID) {
 	"MPEG-2 (Perian)"
+};
+
+resource 'STR ' (kFRAPSNameResID) {
+	"Fraps (Perian)"
 };
 
 //---------------------------------------------------------------------------
@@ -2931,6 +2996,10 @@ resource 'STR ' (kMPEG1InfoResID) {
 
 resource 'STR ' (kMPEG2InfoResID) {
 	"Decompresses video stored in MPEG-2 format."
+};
+
+resource 'STR ' (kFRAPSInfoResID) {
+	"Decompresses video stored in Fraps format."
 };
 
 //---------------------------------------------------------------------------

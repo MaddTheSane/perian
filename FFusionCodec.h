@@ -47,6 +47,7 @@
 #define kHuffYUVCodecInfoResID		270
 #define kMPEG1CodecInfoResID		271
 #define kMPEG2CodecInfoResID		272
+#define kFRAPSCodecInfoResID		273
 
 #define kFFusionCodecManufacturer	'Peri'
 

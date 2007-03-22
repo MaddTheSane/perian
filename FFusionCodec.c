@@ -523,6 +523,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				glob->avCodec = avcodec_find_decoder(CODEC_ID_MPEG2VIDEO);
 				break;
 				
+			case 'FPS1':
+				glob->avCodec = avcodec_find_decoder(CODEC_ID_FRAPS);
+				break;
+				
             default:
 			Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
                 
@@ -1183,6 +1187,10 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 			case 'MPG2':
 			case 'mpg2':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kMPEG2CodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
+				
+			case 'FPS1':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kFRAPSCodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
             default:	// should never happen but we have to handle the case
