@@ -52,6 +52,27 @@ struct MatroskaFrame {
 	DataBuffer	   *buffer;
 };
 
+struct MatroskaSeekContext {
+	EbmlElement		*el_l1;
+	uint64_t		position;
+};
+
+// a list of level one elements and their offsets in the segment
+class MatroskaSeek {
+public:
+	EbmlId GetID() const { return EbmlId(ebmlID, idLength); }
+	bool operator<(const MatroskaSeek &rhs) const { return segmentPos < rhs.segmentPos; }
+	bool operator>(const MatroskaSeek &rhs) const { return segmentPos > rhs.segmentPos; }
+	
+	MatroskaSeekContext GetSeekContext(uint64_t segmentOffset = 0) const {
+		return (MatroskaSeekContext){ NULL, segmentPos + segmentOffset };
+	}
+	
+	uint32_t		ebmlID;
+	uint8_t			idLength;
+	uint64_t		segmentPos;
+};
+
 class MatroskaTrack {
 public:
 	MatroskaTrack();
@@ -170,6 +191,9 @@ private:
 	// Activates any attached fonts, ignores other attachment types for now
 	void ReadAttachments(KaxAttachments &attachments);
 	
+	// Fills the levelOneElements vector with the positions of the elements in the seek head
+	void ReadMetaSeek(KaxSeekHead &seekHead);
+	
 	// These three are called from ReadTracks to set up a track of the specific type, 
 	// modifying the MatroskaTrack structure to reflect the newly create track. 
 	// They return an error if the track couldn't be created or noErr on success.
@@ -184,6 +208,15 @@ private:
 	// assumes cluster has been read already, and cycles through the contained blocks and
 	// adds the frames to the media/sample table, and to the track if addToTrack is true
 	void ImportCluster(KaxCluster &cluster, bool addToTrack);
+	
+	// we need to save a bit of context when seeking if we're going to seek back
+	// This function saves el_l1 and the current file position to the returned context
+	// and clears el_l1 to null in preparation for a seek.
+	MatroskaSeekContext SaveContext();
+	
+	// This function restores el_l1 to what is saved in the context, deleting the current
+	// value if not null, and seeks to the specified point in the file.
+	void SetContext(MatroskaSeekContext context);
 		
 	ComponentInstance		self;
 	Handle					dataRef;
@@ -204,8 +237,10 @@ private:
 	
 	EbmlElement				*el_l0;
 	EbmlElement				*el_l1;
+	uint64_t				segmentOffset;
 	
 	vector<MatroskaTrack>	tracks;
+	vector<MatroskaSeek>	levelOneElements;
 };
 
 #endif

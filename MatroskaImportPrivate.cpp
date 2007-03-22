@@ -100,6 +100,8 @@ void MatroskaImport::SetupMovie()
 	el_l0 = aStream->FindNextID(KaxSegment::ClassInfos, ~0);
 	if (!el_l0) return;		// nothing in the file
 	
+	segmentOffset = static_cast<KaxSegment *>(el_l0)->GetDataStart();
+	
 	while (!done && NextLevel1Element()) {
 		int upperLevel = 0;
 		EbmlElement *dummyElt = NULL;
@@ -119,6 +121,10 @@ void MatroskaImport::SetupMovie()
 		} else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
 			el_l1->Read(*aStream, KaxAttachments::ClassInfos.Context, upperLevel, dummyElt, true);
 			ReadAttachments(*static_cast<KaxAttachments *>(el_l1));
+			
+		} else if (EbmlId(*el_l1) == KaxSeekHead::ClassInfos.GlobalId) {
+			el_l1->Read(*aStream, KaxSeekHead::ClassInfos.Context, upperLevel, dummyElt, true);
+			ReadMetaSeek(*static_cast<KaxSeekHead *>(el_l1));
 			
 		} else if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
 			// all header elements are before clusters in sane files
@@ -147,6 +153,20 @@ EbmlElement * MatroskaImport::NextLevel1Element()
 	}
 	
 	el_l1 = aStream->FindNextElement(el_l0->Generic().Context, upperLevel, 0xFFFFFFFFL, true);
+	
+	// dummy element -> probably corrupt file, search for next element in meta seek and continue from there
+	if (el_l1 && el_l1->IsDummy()) {
+		vector<MatroskaSeek>::iterator nextElt;
+		MatroskaSeek currElt;
+		currElt.segmentPos = el_l1->GetElementPosition();
+		currElt.idLength = currElt.ebmlID = 0;
+		
+		nextElt = find_if(levelOneElements.begin(), levelOneElements.end(), bind2nd(greater<MatroskaSeek>(), currElt));
+		if (nextElt != levelOneElements.end()) {
+			SetContext(nextElt->GetSeekContext(segmentOffset));
+			NextLevel1Element();
+		}
+	}
 	
 	return el_l1;
 }
@@ -629,6 +649,50 @@ void MatroskaImport::ReadAttachments(KaxAttachments &attachments)
 	}
 }
 
+void MatroskaImport::ReadMetaSeek(KaxSeekHead &seekHead)
+{
+	KaxSeek *seekEntry = FindChild<KaxSeek>(seekHead);
+	
+	// don't re-read a seek head that's already been read
+	uint64_t currPos = seekHead.GetElementPosition();
+	vector<MatroskaSeek>::iterator itr = levelOneElements.begin();
+	for (; itr != levelOneElements.end(); itr++) {
+		if (itr->GetID() == KaxSeekHead::ClassInfos.GlobalId && 
+			itr->segmentPos + segmentOffset == currPos)
+			return;
+	}
+	
+	while (seekEntry && seekEntry->GetSize() > 0) {
+		MatroskaSeek newSeekEntry;
+		KaxSeekID & seekID = GetChild<KaxSeekID>(*seekEntry);
+		KaxSeekPosition & position = GetChild<KaxSeekPosition>(*seekEntry);
+		EbmlId elementID = EbmlId(seekID.GetBuffer(), seekID.GetSize());
+		
+		newSeekEntry.ebmlID = elementID.Value;
+		newSeekEntry.idLength = elementID.Length;
+		newSeekEntry.segmentPos = position;
+		
+		// recursively read seek heads that are pointed to by the current one
+		if (elementID == KaxSeekHead::ClassInfos.GlobalId) {
+			MatroskaSeekContext savedContext = SaveContext();
+			SetContext(newSeekEntry.GetSeekContext(segmentOffset));
+			
+			if (NextLevel1Element() && EbmlId(*el_l1) == KaxSeekHead::ClassInfos.GlobalId) {
+				int upperLevel = 0;
+				EbmlElement *dummyElt = NULL;
+				el_l1->Read(*aStream, KaxSeekHead::ClassInfos.Context, upperLevel, dummyElt, true);
+				ReadMetaSeek(*static_cast<KaxSeekHead *>(el_l1));
+			}
+			SetContext(savedContext);
+		}
+		
+		levelOneElements.push_back(newSeekEntry);
+		seekEntry = &GetNextChild<KaxSeek>(seekHead, *seekEntry);
+	}
+	
+	sort(levelOneElements.begin(), levelOneElements.end());
+}
+
 void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
 {
 	KaxSegment & segment = *static_cast<KaxSegment *>(el_l0);
@@ -659,6 +723,22 @@ void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
 		
 		loadState = kMovieLoadStatePlayable;
 	}
+}
+
+MatroskaSeekContext MatroskaImport::SaveContext()
+{
+	MatroskaSeekContext ret = { el_l1, ioHandler->getFilePointer() };
+	el_l1 = NULL;
+	return ret;
+}
+
+void MatroskaImport::SetContext(MatroskaSeekContext context)
+{
+	if (el_l1)
+		delete el_l1;
+	
+	el_l1 = context.el_l1;
+	ioHandler->setFilePointer(context.position);
 }
 
 
