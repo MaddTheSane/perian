@@ -55,6 +55,7 @@ typedef struct
 {
 	AVFrame		*frame;
 	bool		used;
+	long		frameNumber;
 } FFusionBuffer;
 
 typedef struct
@@ -713,6 +714,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 {	
     long offsetH, offsetV;
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
+	int i;
 	
     //////
   /*  IBNibRef 		nibRef;
@@ -740,6 +742,12 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	myDrp->frameNumber = p->frameNumber - 1;
 	myDrp->buffer = NULL;
 	
+	if (myDrp->decoded) {
+		for (i = 0; i < FFUSION_MAX_BUFFERS; i++) {
+			if (glob->buffers[i].used && glob->buffers[i].frameNumber == myDrp->frameNumber)
+				myDrp->buffer = &glob->buffers[i];
+		}
+	}
     return noErr;
 }
 
@@ -783,6 +791,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	
 	if (glob->quicktimeDoesReorder) {
 		myDrp->buffer = &glob->buffers[glob->lastAllocatedBuffer];
+		myDrp->buffer->frameNumber = myDrp->frameNumber;
 		myDrp->decoded = true;
 		return err;
 	}

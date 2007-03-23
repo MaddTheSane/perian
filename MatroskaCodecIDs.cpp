@@ -207,6 +207,78 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandl
 	return noErr;
 }
 
+ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
+{
+	if (!tr_entry || !desc) return paramErr;
+	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
+	
+	if (dir == kToSampleDescription) {
+		Handle imgDescExt = NewHandle(0);
+		unsigned char *privateBuf;
+		int i;
+		int numPackets;
+		int *packetSizes;
+		int offset = 1;
+		UInt32 uid = 0;
+		
+		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+		if (codecPrivate == NULL)
+			return invalidAtomErr;
+		
+		KaxTrackUID *trackUID = FindChild<KaxTrackUID>(*tr_entry);
+		if (trackUID != NULL)
+			uid = uint32(*trackUID);
+		
+		privateBuf = (unsigned char *) codecPrivate->GetBuffer();
+		numPackets = privateBuf[0] + 1;
+		packetSizes = (int *) NewPtrClear(sizeof(int) * numPackets);
+		
+		// get the sizes of the packets
+		packetSizes[numPackets - 1] = codecPrivate->GetSize() - 1;
+		int packetNum = 0;
+		for (i = 1; packetNum < numPackets - 1; i++) {
+			packetSizes[packetNum] += privateBuf[i];
+			if (privateBuf[i] < 255) {
+				packetSizes[numPackets - 1] -= packetSizes[packetNum];
+				packetNum++;
+			}
+			offset++;
+		}
+		
+		// first packet
+		unsigned long serialnoatom[3] = { EndianU32_NtoB(sizeof(serialnoatom)), 
+			EndianU32_NtoB(kCookieTypeOggSerialNo), EndianU32_NtoB(uid) };
+		unsigned long atomhead[2] = { EndianU32_NtoB(packetSizes[0] + sizeof(atomhead)), 
+			EndianU32_NtoB(kCookieTypeTheoraHeader) };
+		
+		PtrAndHand(serialnoatom, imgDescExt, sizeof(serialnoatom)); //check errors?
+		PtrAndHand(atomhead, imgDescExt, sizeof(atomhead)); //check errors?
+		PtrAndHand(&privateBuf[offset], imgDescExt, packetSizes[0]);
+		
+		// second packet
+		unsigned long atomhead2[2] = { EndianU32_NtoB(packetSizes[1] + sizeof(atomhead)), 
+			EndianU32_NtoB(kCookieTypeTheoraComments) };
+		PtrAndHand(atomhead2, imgDescExt, sizeof(atomhead2));
+		PtrAndHand(&privateBuf[offset + packetSizes[0]], imgDescExt, packetSizes[1]);
+		
+		// third packet
+		unsigned long atomhead3[2] = { EndianU32_NtoB(packetSizes[2] + sizeof(atomhead)), 
+			EndianU32_NtoB(kCookieTypeTheoraCodebooks) };
+		PtrAndHand(atomhead3, imgDescExt, sizeof(atomhead3));
+		PtrAndHand(&privateBuf[offset + packetSizes[1] + packetSizes[0]], imgDescExt, packetSizes[2]);
+		
+		// add the extension
+		unsigned long endAtom[2] = { EndianU32_NtoB(sizeof(endAtom)), EndianU32_NtoB(kAudioTerminatorAtomType) };
+		PtrAndHand(endAtom, imgDescExt, sizeof(endAtom));
+		
+		AddImageDescriptionExtension(imgDesc, imgDescExt, kSampleDescriptionExtensionTheora);
+		
+		DisposePtr((Ptr)packetSizes);
+		DisposeHandle(imgDescExt);
+	}
+	return noErr;
+}
+
 // VobSub stores the .idx file in the codec private, pass it as an .IDX extension
 ComponentResult DescExt_VobSub(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
 {
@@ -478,27 +550,7 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 		(*imgDesc)->frameCount = EndianS16_BtoN((*imgDesc)->frameCount);
 		(*imgDesc)->depth = EndianS16_BtoN((*imgDesc)->depth);
 		(*imgDesc)->clutID = EndianS16_BtoN((*imgDesc)->clutID);
-#if 0
-	} else if (codecString == MKV_V_THEORA) {
-		// we need 3 setup packets for the image description extension, but
-		// the sample files I muxed have only 2 packets in the Codec Private element.
-		// Despite the Matroska specs agreeing with me about the 3 packets.
-		// Will figure out later.
-	} else if (codecString.compare(0, strlen(MKV_A_AAC), string(MKV_A_AAC)) == 0) {
-		// esds extension gives us the channel mapping for AAC
-		SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
-		
-		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		if (codecPrivate == NULL)
-			return;
-		
-		Handle sndDescExt = NewHandle(codecPrivate->GetSize());
-		memcpy(*sndDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
-		
-		AddSoundDescriptionExtension(sndDesc, sndDescExt, 'esds');
-		
-		DisposeHandle((Handle) sndDescExt);
-#endif
+
 	} else {
 		switch ((*desc)->dataFormat) {
 			case kH264CodecType:
@@ -509,6 +561,9 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 				
 			case kAudioFormatXiphFLAC:
 				return DescExt_XiphFLAC(tr_entry, desc, dir);
+				
+			case kVideoFormatXiphTheora:
+				return DescExt_XiphTheora(tr_entry, desc, dir);
 				
 			case kSubFormatVobSub:
 				return DescExt_VobSub(tr_entry, desc, dir);
