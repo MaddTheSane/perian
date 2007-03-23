@@ -30,20 +30,26 @@
 static ssastyleline SSA_DefaultStyle = (ssastyleline){
 	@"Default",@"Helvetica",
 	32 * (96./72.),
-{{1,1,1,1},{1,1,1,1},{0,0,0,1},{0,0,0,1}}, // white on black
+	{{1,1,1,1},{1,1,1,1},{0,0,0,1},{0,0,0,1}}, // white on black
 	1,0,0,0,
 	100,100,0,0,
 	0,1.5,1.5,
 	2,1,0,
 	10,10,10,
-	NULL, NULL
+	NULL, NULL, 0
 };
 
 -(void)dealloc
 {
 	int i;
 	if (disposedefaultstyle) free(defaultstyle);
-	for (i=0; i < stylecount; i++) {ATSUDisposeStyle(styles[i].atsustyle); ATSUDisposeTextLayout(styles[i].layout);}
+	for (i=0; i < stylecount; i++) {
+		ATSUDisposeStyle(styles[i].atsustyle);
+		ATSUDisposeTextLayout(styles[i].layout);
+		[styles[i].name release];
+		[styles[i].font release];
+	}
+	free(styles);
 	
 	[_lines release];
 	[header release];
@@ -390,7 +396,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	unichar cai;
 	int formatc;
 	
-	headers = [[NSMutableDictionary alloc] init];
+	headers = [NSMutableDictionary dictionary];
 	styleDict = [NSMutableDictionary dictionary];
 	doclines = [NSMutableArray array];
 	

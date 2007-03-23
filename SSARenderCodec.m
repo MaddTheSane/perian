@@ -30,21 +30,25 @@ typedef struct SSARenderGlobals
 
 SSARenderGlobalsPtr SSA_Init(const char *header, size_t size, float width, float height)
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	SSARenderGlobalsPtr g = (SSARenderGlobalsPtr)NewPtr(sizeof(SSARenderGlobals));
 	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:size encoding:NSUTF8StringEncoding freeWhenDone:NO];
 	g->document = [[SSADocument alloc] init];
 	g->plaintext = false;
 	[g->document loadHeader:hdr width:width height:height];
 	[hdr release];
+	[pool release];
 	return g;
 }
 
 SSARenderGlobalsPtr SSA_InitNonSSA(float width, float height)
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	SSARenderGlobalsPtr g = (SSARenderGlobalsPtr)NewPtr(sizeof(SSARenderGlobals));
 	g->document = [[SSADocument alloc] init];
 	g->plaintext = true;
 	[g->document loadDefaultsWithWidth:width height:height];
+	[pool release];
 	return g;
 }
 
@@ -257,7 +261,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 		err=ATSUSetTextPointerLocation(layout,re->text,kATSUFromTextBeginning,kATSUToTextEnd,sublen);
 		
 		ATSUSetTransientFontMatching(layout,TRUE);
-		
+
 		for (i = 0; i < re->style_count; i++) ATSUSetRunStyle(layout,re->styles[i]->astyle,re->styles[i]->range.location,re->styles[i]->range.length);
 		
 		SetATSULayoutOther(layout,kATSUCGContextTag,sizeof(CGContextRef),&c);

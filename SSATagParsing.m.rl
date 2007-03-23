@@ -88,30 +88,8 @@ static ATSURGBAlphaColor ParseColorTag(unsigned long c, float a)
 	return (ATSURGBAlphaColor){r/255.,g/255.,b/255.,a};
 }
 
-static void PruneEmptyStyleSpans(SSARenderEntity *re)
-{
-	SSAStyleSpan *styles_new[re->style_count];
-	size_t style_count_new = 0;
-	int i;
-	
-	if (re->style_count <= 1) return;
-	
-	for (i = 0; i < re->style_count; i++) {
-		if (re->styles[i]->range.length == 0) {
-			[re->styles[i] release];
-		} else {
-			styles_new[style_count_new++] = re->styles[i];
-		}
-	}
-	
-	if (style_count_new != re->style_count) {
-		re->styles = realloc(re->styles, sizeof(SSAStyleSpan*) * style_count_new); 
-		memcpy(re->styles, styles_new, sizeof(SSAStyleSpan*) * style_count_new);
-		
-		re->style_count = style_count_new;
-	}
-}
-
+//not worth it
+/*
 static void PruneIdenticalStyleSpans(SSARenderEntity *re)
 {
 	SSAStyleSpan *styles_new[re->style_count];
@@ -129,8 +107,9 @@ static void PruneIdenticalStyleSpans(SSARenderEntity *re)
 		ATSUCompareStyles(styles_new[style_count_new-1]->astyle,re->styles[i]->astyle,&asc);
 		
 		if (asc == kATSUStyleEquals) {
-			styles_new[style_count_new-1]->range.length += re->styles[i]->range.length;
+            styles_new[style_count_new-1]->range.length += re->styles[i]->range.length;
 			[re->styles[i] release];
+            re->styles[i] = nil;
 		} else {
 			styles_new[style_count_new++] = re->styles[i];
 		}
@@ -146,6 +125,7 @@ static void PruneIdenticalStyleSpans(SSARenderEntity *re)
 		re->style_count = style_count_new;
 	}
 }
+*/
 
 static void UpdateAlignment(int inum, int cur_posx, int *valign, int *halign, ATSUTextLayout cur_layout)
 {
@@ -271,7 +251,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 		cur_range = (NSRange){strbegin - pb, p - strbegin};\
 		cur_range.location -= outputoffset;\
 		cur_range.length -= lengthreduce;\
-		[re increasestyles];\
+		if (cur_range.length) {[re increasestyles];\
 		re->styles[re->style_count-1] = [[SSAStyleSpan alloc] init];\
 		re->styles[re->style_count-1]->outline = cur_outline;\
 		re->styles[re->style_count-1]->shadow = cur_shadow;\
@@ -279,7 +259,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 		re->styles[re->style_count-1]->astyle = cur_style;\
 		re->styles[re->style_count-1]->range = cur_range;\
 		re->styles[re->style_count-1]->outlineblur = cur_be;\
-		re->styles[re->style_count-1]->color = cur_color;\
+		re->styles[re->style_count-1]->color = cur_color;}\
 		parsetmp = [NSString stringWithCharacters:skipbegin length:p-skipbegin];\
 		[output appendString:parsetmp]; \
 		re->nstext = dtmp = output;\
@@ -456,17 +436,19 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					
 					outputoffset += lengthreduce;
 					lengthreduce = 0;
-
-					[re increasestyles];
-					re->styles[re->style_count-1] = [[SSAStyleSpan alloc] init];
-					re->styles[re->style_count-1]->outline = cur_outline;
-					re->styles[re->style_count-1]->shadow = cur_shadow;
-					re->styles[re->style_count-1]->angle = cur_frz;
-					re->styles[re->style_count-1]->astyle = cur_style;
-					re->styles[re->style_count-1]->range = cur_range;
-					re->styles[re->style_count-1]->outlineblur = cur_be;
-					re->styles[re->style_count-1]->color = cur_color;
-					ATSUCreateAndCopyStyle(cur_style,&cur_style);
+                    
+                    if (cur_range.length) {
+                        [re increasestyles];
+                        re->styles[re->style_count-1] = [[SSAStyleSpan alloc] init];
+                        re->styles[re->style_count-1]->outline = cur_outline;
+                        re->styles[re->style_count-1]->shadow = cur_shadow;
+                        re->styles[re->style_count-1]->angle = cur_frz;
+                        re->styles[re->style_count-1]->astyle = cur_style;
+                        re->styles[re->style_count-1]->range = cur_range;
+                        re->styles[re->style_count-1]->outlineblur = cur_be;
+                        re->styles[re->style_count-1]->color = cur_color;
+                        ATSUCreateAndCopyStyle(cur_style,&cur_style);
+                    }
 				}
 				
 				action exit_tag {
@@ -479,10 +461,10 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					if (newLayout) {
 						newLayout = FALSE;
 						end_re;
-						
+                        
 						if ([re->nstext length] != 0) [rentities addObject:re];
 						
-						SSARenderEntity *nre = [[SSARenderEntity alloc] init];
+						SSARenderEntity *nre = [[[SSARenderEntity alloc] init] autorelease];
 						nre->layer = re->layer;
 						nre->style = re->style;
 						nre->marginl = re->marginl; nre->marginr = re->marginr; nre->marginv = re->marginv; nre->usablewidth = re->usablewidth;
@@ -602,9 +584,8 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			if (pb[len-1] == '}') skipbegin = p; // make up for how exit_tag isn't called if the } is the last char in the line
 
 			end_re;
-
-			PruneEmptyStyleSpans(re);
-			PruneIdenticalStyleSpans(re);
+			if (!cur_range.length) ATSUDisposeStyle(cur_style);
+            //PruneIdenticalStyleSpans(re);
 
 			free(pb);
 			if ([re->nstext length] != 0) [rentities addObject:re];
