@@ -2,7 +2,7 @@
 PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
-generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay"
+generalConfigureOptions="--disable-encoders --disable-muxers --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook"
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
 	generalConfigureOptions="$generalConfigureOptions --disable-opts"
@@ -33,13 +33,13 @@ else
 	BUILDDIR="$BUILT_PRODUCTS_DIR/intel"
 	mkdir "$BUILDDIR"
 	
-	export optCFlags="-mtune=nocona -fstrict-aliasing -frerun-cse-after-loop -fweb" 
+	export optCFlags="-mtune=nocona -fstrict-aliasing -frerun-cse-after-loop -fweb -gstabs+" 
 
 	cd "$BUILDDIR"
 	if [ `arch` != i386 ] ; then
-		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86_32 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2 $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86_32 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
 	else
-		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m --extra-cflags='-gdwarf-2 $optCFlags'
+		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m --extra-cflags='$optCFlags'
 	fi
 
 	
@@ -59,13 +59,13 @@ fi
 	BUILDDIR="$BUILT_PRODUCTS_DIR/ppc"
 	mkdir "$BUILDDIR"
 	
-	export optCFlags="-mcpu=G3 -mtune=G5 -fstrict-aliasing -funroll-loops -mmultiple"
+	export optCFlags="-mcpu=G3 -mtune=G5 -fstrict-aliasing -funroll-loops -mmultiple -gstabs+"
 	
 	cd "$BUILDDIR"
 	if [ `arch` = ppc ] ; then
-		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --extra-cflags='-gdwarf-2 $optCFlags'
+		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --extra-cflags='$optCFlags'
 	else
-		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -gdwarf-2 $optCFlags' $extraConfigureOptions $generalConfigureOptions
+		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk $optCFlags' $extraConfigureOptions $generalConfigureOptions
 	fi
 	
 		
