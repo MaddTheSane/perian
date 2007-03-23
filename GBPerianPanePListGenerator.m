@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	NSArray *extensions = [NSArray arrayWithObjects:@"component", @"component", @"framework", nil];
 	int i;
 	
-	for(i=0; i<3; i++)
+	for(i=0; i<[types count]; i++)
 	{
 		NSString *directory = [componentDir stringByAppendingPathComponent:[types objectAtIndex:i]];
 		NSString *extension = [extensions objectAtIndex:i];

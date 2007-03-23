@@ -94,12 +94,12 @@
 	// We're gonna do some frame magic to match the window's size to the description field and the presence of the release notes view.
 	NSRect frame = [[self window] frame];
 	
-	// Resize the window to be appropriate for not having a huge release notes view.
+/*	// Resize the window to be appropriate for not having a huge release notes view.
 	frame.size.height -= [releaseNotesView frame].size.height;
 	// No resizing!
 	[[self window] setShowsResizeIndicator:NO];
 	[[self window] setMinSize:frame.size];
-	[[self window] setMaxSize:frame.size];
+	[[self window] setMaxSize:frame.size];*/
 
 	NSRect boxFrame = [[[releaseNotesView superview] superview] frame];
 	boxFrame.origin.y -= 20;

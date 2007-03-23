@@ -242,6 +242,14 @@
     NSString *myVersion = [[[self bundle] infoDictionary] objectForKey:BundleVersionKey];
     if((lastInstVersion == nil || [lastInstVersion compare:myVersion] == NSOrderedAscending) && installStatus != InstallStatusInstalled)
     {
+        /*Check for temp after an update */
+        BOOL isDir = NO;
+        NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
+        int tag;
+        
+        if([[NSFileManager defaultManager] fileExistsAtPath:tempPrefPane isDirectory:&isDir] && isDir)
+            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[tempPrefPane stringByDeletingLastPathComponent] destination:@"" files:[NSArray arrayWithObject:[tempPrefPane lastPathComponent]] tag:&tag];
+        
         [self installUninstall:nil];
         [self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
     }
