@@ -92,7 +92,7 @@ public:
 	// added, e.g. from a previous call to AddSamplesToTrack()
 	void AddSamplesToTrack();
 	
-	void FinishTrack(bool addSamples);
+	void FinishTrack();
 	
 	UInt16					number;
 	UInt8					type, is_vobsub;
@@ -231,6 +231,9 @@ private:
 	
 	IdleManager				idleManager;
 	long					loadState;
+	TimeValue				lastIdleTime;	// the playback time of the movie when last idled
+	int						idlesSinceLastAdd;	// number of idles since the last time
+												// samples were added to the tracks
 	
 	DataHandlerCallback		*ioHandler;
 	EbmlStream				*aStream;

@@ -205,10 +205,13 @@ MatroskaImport::MatroskaImport(ComponentInstance self)
 	movieDuration = 0;
 	idleManager = NULL;
 	loadState = kMovieLoadStateLoading;
+	lastIdleTime = 0;
+	idlesSinceLastAdd = 0;
 	ioHandler = NULL;
 	aStream = NULL;
 	el_l0 = NULL;
 	el_l1 = NULL;
+	segmentOffset = 0;
 }
 
 MatroskaImport::~MatroskaImport()
@@ -272,7 +275,7 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 				*outFlags |= movieImportResultComplete;
 
 				for (int i = 0; i < tracks.size(); i++)
-					tracks[i].FinishTrack(false);
+					tracks[i].FinishTrack();
 			}
 			else {
 				*outFlags |= movieImportResultNeedIdles;
@@ -295,7 +298,7 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 		
 		// insert the a/v tracks' samples
 		for (int i = 0; i < tracks.size(); i++)
-			tracks[i].FinishTrack(true);
+			tracks[i].FinishTrack();
 		
 	} catch (CRTError &err) {
 		return err.getError();
@@ -325,6 +328,13 @@ ComponentResult MatroskaImport::ValidateDataRef(Handle dataRef, OSType dataRefTy
 
 ComponentResult MatroskaImport::Idle(long inFlags, long *outFlags)
 {
+	TimeValue currentIdleTime = GetMovieTime(theMovie, NULL);
+	TimeValue maxLoadedTime;
+	GetMaxLoadedTime(&maxLoadedTime);
+	TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
+	
+	idlesSinceLastAdd++;
+	
 	if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
 		int upperLevel = 0;
 		EbmlElement *dummyElt = NULL;
@@ -332,7 +342,17 @@ ComponentResult MatroskaImport::Idle(long inFlags, long *outFlags)
 		el_l1->Read(*aStream, KaxCluster::ClassInfos.Context, upperLevel, dummyElt, true);
 		KaxCluster & cluster = *static_cast<KaxCluster *>(el_l1);
 		
-		ImportCluster(cluster, true);
+		// Only add samples every 20 idles when paused
+		// or if we're playing and only have 5 seconds away from the end of 
+		// what's already been added
+		if (currentIdleTime == lastIdleTime && idlesSinceLastAdd > 20 || 
+			maxLoadedTime < currentIdleTime + 5*movieTimeScale)
+		{
+			idlesSinceLastAdd = 0;
+			ImportCluster(cluster, true);
+		}
+		else
+			ImportCluster(cluster, false);
 	}
 	
 	if (!NextLevel1Element()) {
@@ -342,9 +362,10 @@ ComponentResult MatroskaImport::Idle(long inFlags, long *outFlags)
 		loadState = kMovieLoadStateComplete;
 		
 		for (int i = 0; i < tracks.size(); i++)
-			tracks[i].FinishTrack(false);
+			tracks[i].FinishTrack();
 	}
 	
+	lastIdleTime = currentIdleTime;
 	return noErr;
 }
 

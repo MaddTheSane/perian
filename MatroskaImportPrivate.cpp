@@ -951,6 +951,10 @@ void MatroskaTrack::AddSamplesToTrack()
 {
 	OSStatus err = noErr;
 	
+	if (firstSample == -1)
+		// nothing to add
+		return;
+	
 	if (type != track_subtitle) {
 		if (sampleTable) {
 			TimeValue64 sampleTime64;
@@ -973,7 +977,7 @@ void MatroskaTrack::AddSamplesToTrack()
 	}
 }
 
-void MatroskaTrack::FinishTrack(bool addSamples)
+void MatroskaTrack::FinishTrack()
 {
 	
 	if (type == track_subtitle && !is_vobsub)
@@ -986,5 +990,5 @@ void MatroskaTrack::FinishTrack(bool addSamples)
 		 EndMediaEdits(theMedia);
 	}
 	
-	if (addSamples) AddSamplesToTrack();
+	AddSamplesToTrack();
 }
