@@ -312,10 +312,10 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	return outa;
 }
 
--(void) loadFile:(NSString*)path
+-(ComponentResult) loadFile:(NSString*)path
 {
 	NSString *ssa = [[NSString stringFromUnknownEncodingFile:path] stringByStandardizingNewlines];
-	if (!ssa) return;
+	if (!ssa) return -1;
 	NSArray *lines = [ssa componentsSeparatedByString:@"\n"];
 	NSEnumerator *lenum = [lines objectEnumerator];
 	NSString *nextLine, *ns;
@@ -331,7 +331,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	styleDict = [NSMutableDictionary dictionary];
 	doclines = [NSMutableArray array];
 	
-	if (![(NSString*)[lenum nextObject] isEqualToString:@"[Script Info]"]) return;
+	if (![(NSString*)[lenum nextObject] isEqualToString:@"[Script Info]"]) return -1;
 	while (1) {
 		ns = (NSString*)[lenum nextObject];
 		if (!ns || [ns length] == 0) continue;
@@ -381,6 +381,8 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	_lines = [self serializeSubLines:doclines];
 	
 	header = [[ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location] retain];
+	
+	return noErr;
 }
 
 -(void) loadHeader:(NSString*)ssa width:(float)width height:(float)height
@@ -494,20 +496,25 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 	Media theMedia = NULL;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	SSADocument *ssa = [[SSADocument alloc] init];
-	Handle sampleHndl = NULL, headerHndl=NULL, drefHndl;
+	Handle sampleHndl = NULL, headerHndl=NULL, drefHndl = NULL;
 	const char *header;
 	int i, packetCount, sampleLen;
-	ImageDescriptionHandle textDesc;
+	ImageDescriptionHandle textDesc = NULL;
 	Rect movieBox;
 	UInt32 emptyDataRefExtension[2];
 	TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
 	UInt8 *path = malloc(PATH_MAX);
+	NSString *nspath;
 
 	FSRefMakePath(theDirectory, path, PATH_MAX);
-	
-	[ssa loadFile:[[NSString stringWithUTF8String:(char*)path] stringByAppendingPathComponent:(NSString*)filename]];
-	
+	nspath = [NSString stringWithUTF8String:(char*)path];
 	free(path);
+	
+	if ([ssa loadFile:[nspath stringByAppendingPathComponent:(NSString*)filename]]) {
+		NSLog(@"Perian: unable to load SSA file %@",nspath);
+		err = -1;
+		goto bail;
+	}
 	
 	packetCount = [ssa packetCount];
 	
@@ -595,7 +602,7 @@ bail:
 	
 	if (headerHndl) DisposeHandle((Handle)headerHndl);
 	if (sampleHndl) DisposeHandle(sampleHndl);
-	DisposeHandle((Handle)drefHndl);
+	if (drefHndl)   DisposeHandle((Handle)drefHndl);
 	
 	return err;
 }

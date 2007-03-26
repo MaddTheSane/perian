@@ -124,6 +124,7 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 	free(path);
 	
 	data = [[[NSString stringFromUnknownEncodingFile:srtfile] stringByStandardizingNewlines] UTF8String];
+	if (!data) {err = -1; goto bail;}
 
 	dataRef = NewHandleClear(sizeof(Handle) + 1);
 	emptyDataRefExtension[0] = EndianU32_NtoB(sizeof(UInt32)*2);
