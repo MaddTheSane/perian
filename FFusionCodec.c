@@ -744,8 +744,10 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	
 	if (myDrp->decoded) {
 		for (i = 0; i < FFUSION_MAX_BUFFERS; i++) {
-			if (glob->buffers[i].used && glob->buffers[i].frameNumber == myDrp->frameNumber)
+			if (glob->buffers[i].used && glob->buffers[i].frameNumber == myDrp->frameNumber) {
 				myDrp->buffer = &glob->buffers[i];
+				break;
+			}
 		}
 	}
     return noErr;
