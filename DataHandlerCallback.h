@@ -30,8 +30,12 @@
 
 #include <stdexcept>
 #include <cerrno>
+#include <sys/param.h>
 
-       // ------------------------------------------------
+using namespace std;
+using namespace libebml;
+
+#define READ_SIZE 32*1024
 
 class CRTError:public std::runtime_error
 {
@@ -47,9 +51,34 @@ public:
 	int getError() const throw() {return Error;}
 };
 
+class DataHBuffer {
+private:
+	uint8_t *buffer;
+	size_t allocatedSize;
+	int64_t fileOffset;
+	size_t dataSize;
+	
+	// this clears the buffer
+	void Realloc(size_t bufferSize);
+	
+public:
+	DataHBuffer(size_t bufferSize = READ_SIZE);
+	
+	~DataHBuffer();
+	
+	bool ContainsOffset(uint64_t offset);
+	
+	// this returns a pointer to a buffer at least as big as size, and saves
+	// the given offset and size of data that will be stored
+	uint8_t * GetBuffer(uint64_t offset, size_t size);
+	
+	// this copies as much data from the buffer as possible from the given file offset,
+	// returning the number of bytes actually copied.
+	size_t Read(uint64_t offset, size_t size, uint8_t *store);
+};
 
 // QuickTime Data Handler callback for libmatroska
-class DataHandlerCallback:public LIBEBML_NAMESPACE::IOCallback
+class DataHandlerCallback:public IOCallback
 {
 private:
 	ComponentInstance dataHandler;
@@ -58,10 +87,13 @@ private:
 	bool supportsWideOffsets;
 	open_mode aMode;
 	SInt64 filesize;
+	DataHBuffer dataBuffer;
+	
+	void Initialize(const open_mode aMode);
     
 public:
-	DataHandlerCallback::DataHandlerCallback(ComponentInstance dataHandler, const open_mode aMode);
-    DataHandlerCallback::DataHandlerCallback(Handle dataRef, OSType dataRefType, const open_mode aMode);
+	DataHandlerCallback(ComponentInstance dataHandler, const open_mode aMode);
+	DataHandlerCallback(Handle dataRef, OSType dataRefType, const open_mode aMode);
 	virtual ~DataHandlerCallback() throw();
     
 	virtual uint32 read(void *Buffer, size_t Size);
@@ -69,7 +101,7 @@ public:
 	// Seek to the specified position. The mode can have either SEEK_SET, SEEK_CUR
 	// or SEEK_END. The callback should return true(1) if the seek operation succeeded
 	// or false (0), when the seek fails.
-	virtual void setFilePointer(int64 Offset, LIBEBML_NAMESPACE::seek_mode Mode=LIBEBML_NAMESPACE::seek_beginning);
+	virtual void setFilePointer(int64 Offset, seek_mode Mode=seek_beginning);
     
 	// This callback just works like its read pendant. It returns the number of bytes written.
 	virtual size_t write(const void *Buffer, size_t Size);

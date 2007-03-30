@@ -42,14 +42,62 @@ CRTError::CRTError(const std::string & Description,int nError)
 {
 }
 
+
+DataHBuffer::DataHBuffer(size_t bufferSize)
+{
+	buffer = new uint8_t[bufferSize];
+	allocatedSize = bufferSize;
+	fileOffset = -1;
+	dataSize = 0;
+}
+
+DataHBuffer::~DataHBuffer()
+{
+	if (buffer)
+		delete[] buffer;
+}
+
+void DataHBuffer::Realloc(size_t bufferSize)
+{
+	if (buffer)
+		delete[] buffer;
+	
+	buffer = new uint8_t[bufferSize];
+	allocatedSize = bufferSize;
+	fileOffset = -1;
+	dataSize = 0;
+}
+
+bool DataHBuffer::ContainsOffset(uint64_t offset)
+{
+	return offset >= fileOffset && offset < fileOffset + dataSize;
+}
+
+uint8_t * DataHBuffer::GetBuffer(uint64_t offset, size_t size)
+{
+	if (size > allocatedSize)
+		Realloc(size);
+	
+	fileOffset = offset;
+	dataSize = size;
+	return buffer;
+}
+
+size_t DataHBuffer::Read(uint64_t offset, size_t size, uint8_t *store)
+{
+	if (!ContainsOffset(offset))
+		return 0;
+	
+	uint8_t *dataStart = buffer + (offset - fileOffset);
+	size_t amountToRead = MIN(fileOffset + dataSize - offset, size);
+	memcpy(store, dataStart, amountToRead);
+	return amountToRead;
+}
+
+
 DataHandlerCallback::DataHandlerCallback(ComponentInstance dataHandler, const open_mode aMode)
 {	
-	closeHandler = false;
-	supportsWideOffsets = true;
-	this->dataHandler = NULL;
-	mCurrentPosition = 0;
-	filesize = 0;
-	this->aMode = aMode;
+	Initialize(aMode);
 	
 	switch (aMode)
 	{
@@ -70,14 +118,9 @@ DataHandlerCallback::DataHandlerCallback(ComponentInstance dataHandler, const op
 DataHandlerCallback::DataHandlerCallback(Handle dataRef, OSType dataRefType, const open_mode aMode)
 {
     ComponentResult err = noErr;
-    Component dataHComponent = NULL;
+	Component dataHComponent = NULL;
 	
-	closeHandler = true;
-	supportsWideOffsets = true;
-	dataHComponent = NULL;
-	mCurrentPosition = 0;
-	filesize = 0;
-	this->aMode = aMode;
+	Initialize(aMode);
 	
 	if (aMode == MODE_READ)
 		dataHComponent = GetDataHandler(dataRef, dataRefType, kDataHCanRead);
@@ -110,46 +153,72 @@ DataHandlerCallback::DataHandlerCallback(Handle dataRef, OSType dataRefType, con
 		throw 0;
 	}
 	
+	closeHandler = true;
+	
 	// figure out if we support wide offesets
 	getFileSize();
 }
 
+void DataHandlerCallback::Initialize(const open_mode aMode)
+{
+	closeHandler = false;
+	supportsWideOffsets = true;
+	this->dataHandler = NULL;
+	mCurrentPosition = 0;
+	filesize = 0;
+	this->aMode = aMode;
+}
 
 DataHandlerCallback::~DataHandlerCallback() throw()
 {
 	close();
 }
 
-
-
-uint32 DataHandlerCallback::read(void *Buffer, size_t Size)
+uint32 DataHandlerCallback::read(void *buffer, size_t size)
 {
 	ComponentResult err = noErr;
+	size_t amountRead = 0;
+	uint64_t oldPos = mCurrentPosition;
+	uint8_t *internalBuffer, *myBuffer = (uint8_t *)buffer;
 	
-    if (Size < 1 || mCurrentPosition > filesize)
+    if (size < 1 || mCurrentPosition > filesize)
         return 0;
 	
-	if (mCurrentPosition + Size > filesize)
-		Size = filesize - mCurrentPosition;
+	if (mCurrentPosition + size > filesize)
+		size = filesize - mCurrentPosition;
 	
-	if (supportsWideOffsets) {
-		wide wideOffset = SInt64ToWide(mCurrentPosition);
+	while (size > 0) {
+		if (dataBuffer.ContainsOffset(mCurrentPosition)) {
+			amountRead = dataBuffer.Read(mCurrentPosition, size, myBuffer);
+			myBuffer += amountRead;
+			mCurrentPosition += amountRead;
+			size -= amountRead;
+		}
 		
-		err = DataHScheduleData64(dataHandler, (Ptr)Buffer, &wideOffset, Size, 0, NULL, NULL);
-	} else {
-		err = DataHScheduleData(dataHandler, (Ptr)Buffer, mCurrentPosition, Size, 0, NULL, NULL);
+		if (size <= 0)
+			break;
+		
+		internalBuffer = dataBuffer.GetBuffer(mCurrentPosition, READ_SIZE);
+		
+		if (supportsWideOffsets) {
+			wide wideOffset = SInt64ToWide(mCurrentPosition);
+			
+			err = DataHScheduleData64(dataHandler, (Ptr)internalBuffer, &wideOffset, 
+									  READ_SIZE, 0, NULL, NULL);
+		} else {
+			err = DataHScheduleData(dataHandler, (Ptr)internalBuffer, mCurrentPosition, 
+									READ_SIZE, 0, NULL, NULL);
+		}
+	
+		if (err) {
+			throw CRTError("Error reading data", err);
+		}
 	}
 	
-	if (err) {
-		throw CRTError("Error reading data", err);
-	}
-	mCurrentPosition += Size;
-	
-	// does QuickTime tell us how much it's read?
-	return Size;
+	return mCurrentPosition - oldPos;
 }
 
-void DataHandlerCallback::setFilePointer(int64 Offset, LIBEBML_NAMESPACE::seek_mode Mode)
+void DataHandlerCallback::setFilePointer(int64 Offset, seek_mode Mode)
 {
 	switch ( Mode )
 	{
