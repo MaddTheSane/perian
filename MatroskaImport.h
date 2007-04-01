@@ -86,7 +86,7 @@ public:
 	
 	// adds the all the frames in the block group to the sample table if it exists, 
 	// the media otherwise. If this track type is subtitle, also inserts it into the track.
-	void AddBlock(KaxBlockGroup &blockGroup);
+	void AddBlock(KaxInternalBlock &block, uint32 duration, short flags);
 	
 	// this adds all the samples added through AddBlock() to the track that aren't already
 	// added, e.g. from a previous call to AddSamplesToTrack()
@@ -114,7 +114,7 @@ private:
 	
 	// parses the first frame of a supported data format to determine codec parameters,
 	// which can be more correct than the codec headers.
-	void ParseFirstBlock(KaxBlock &block);
+	void ParseFirstBlock(KaxInternalBlock &block);
 	
 	// Since the duration in Matroska files is generally rather unreliable, rely only on
 	// the difference in timestamps between two frames. Thus, AddBlock() buffers frames

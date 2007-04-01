@@ -702,19 +702,37 @@ void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
 	cluster.SetParent(segment);
 	cluster.InitTimecode(uint64(clusterTime), timecodeScale);
 	
-	KaxBlockGroup *blockGroup = FindChild<KaxBlockGroup>(cluster);
-	while (blockGroup && blockGroup->GetSize() > 0) {
-		KaxBlock & block = GetChild<KaxBlock>(*blockGroup);
-		block.SetParent(cluster);
+	for (int i = 0; i < cluster.ListSize(); i++) {
+		const EbmlId & elementID = EbmlId(*cluster[i]);
+		KaxInternalBlock *block = NULL;
+		uint32_t duration = 0;
+		short flags = 0;
 		
-		for (int i = 0; i < tracks.size(); i++) {
-			if (tracks[i].number == block.TrackNum()) {
-				tracks[i].AddBlock(*blockGroup);
-				break;
-			}
+		if (elementID == KaxBlockGroup::ClassInfos.GlobalId) {
+			KaxBlockGroup & blockGroup = *static_cast<KaxBlockGroup *>(cluster[i]);
+			block = &GetChild<KaxBlock>(blockGroup);
+			duration = uint32(GetChild<KaxBlockDuration>(blockGroup));
+			flags = blockGroup.ReferenceCount() > 0 ? mediaSampleNotSync : 0;
+			
+		} else if (elementID == KaxSimpleBlock::ClassInfos.GlobalId) {
+			KaxSimpleBlock & simpleBlock = *static_cast<KaxSimpleBlock *>(cluster[i]);
+			block = &simpleBlock;
+			if (!simpleBlock.IsKeyframe())
+				flags |= mediaSampleNotSync;
+			if (simpleBlock.IsDiscardable())
+				flags |= mediaSampleDroppable;
 		}
 		
-		blockGroup = &GetNextChild<KaxBlockGroup>(cluster, *blockGroup);
+		if (block) {
+			block->SetParent(cluster);
+			
+			for (int i = 0; i < tracks.size(); i++) {
+				if (tracks[i].number == block->TrackNum()) {
+					tracks[i].AddBlock(*block, duration, flags);
+					break;
+				}
+			}
+		}
 	}
 	
 	if (addToTrack) {
@@ -811,7 +829,7 @@ MatroskaTrack::~MatroskaTrack()
 		subtitleSerializer->release();
 }
 
-void MatroskaTrack::ParseFirstBlock(KaxBlock &block)
+void MatroskaTrack::ParseFirstBlock(KaxInternalBlock &block)
 {
 	AudioStreamBasicDescription asbd = {0};
 	AudioChannelLayout acl = {0};
@@ -837,11 +855,8 @@ void MatroskaTrack::ParseFirstBlock(KaxBlock &block)
 	}
 }
 
-void MatroskaTrack::AddBlock(KaxBlockGroup &blockGroup)
+void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short flags)
 {
-	KaxBlock & block = GetChild<KaxBlock>(blockGroup);
-	KaxBlockDuration & blockDuration = GetChild<KaxBlockDuration>(blockGroup);
-	
 	if (!seenFirstBlock) {
 		ParseFirstBlock(block);
 		seenFirstBlock = true;
@@ -864,10 +879,10 @@ void MatroskaTrack::AddBlock(KaxBlockGroup &blockGroup)
 	for (int i = 0; i < block.NumberFrames(); i++) {
 		MatroskaFrame newFrame;
 		newFrame.timecode = block.GlobalTimecode() / timecodeScale;
-		newFrame.duration = uint32(blockDuration);
+		newFrame.duration = duration;
 		newFrame.offset = block.GetDataPosition(i);
 		newFrame.size = block.GetFrameSize(i);
-		newFrame.flags = blockGroup.ReferenceCount() > 0 ? mediaSampleNotSync : 0;
+		newFrame.flags = flags;
 
 		if (type == track_subtitle) {
 			newFrame.buffer = &block.GetBuffer(i);
