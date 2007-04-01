@@ -153,7 +153,7 @@
 {
     if ( ( self = [super initWithBundle:bundle] ) != nil ) {
 		perianForumURL = [[NSURL alloc] initWithString:@"http://forums.cocoaforge.com/index.php?c=12"];
-		perianDonateURL = [[NSURL alloc] initWithString:@"http://perian.org/donate.php"];
+		perianDonateURL = [[NSURL alloc] initWithString:@"http://perian.org"];
 		perianWebSiteURL = [[NSURL alloc] initWithString:@"http://perian.org"];
 		
 		perianAppID = CFSTR("org.perian.Perian");
