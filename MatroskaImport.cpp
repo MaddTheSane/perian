@@ -234,7 +234,6 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 											  TimeValue atTime, TimeValue *durationAdded,
 											  long inFlags, long *outFlags)
 {
-	ComponentResult err = noErr;
 	this->dataRef = dataRef;
 	this->dataRefType = dataRefType;
 	this->theMovie = theMovie;

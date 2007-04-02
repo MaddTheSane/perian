@@ -106,6 +106,11 @@ public:
 	CXXSubtitleSerializer	*subtitleSerializer;
 	Handle					subDataRefHandler;
 	uint8					isEnabled;
+	uint32_t				defaultDuration;
+	
+	// laced tracks can have multiple frames per block, it's easier to ignore them
+	// for pts -> dts conversion (and laced tracks can't have non-keyframes anyways)
+	bool					usesLacing;
 	
 private:
 	// adds an individual frame from a block group into the sample table if it exists,

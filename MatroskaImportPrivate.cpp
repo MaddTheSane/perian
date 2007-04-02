@@ -221,11 +221,14 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			KaxTrackEntry & track = *static_cast<KaxTrackEntry *>(trackEntries[i]);
 			KaxTrackNumber & number = GetChild<KaxTrackNumber>(track);
 			KaxTrackType & type = GetChild<KaxTrackType>(track);
+			KaxTrackDefaultDuration & defaultDuration = GetChild<KaxTrackDefaultDuration>(track);
 			KaxTrackFlagDefault & enabled = GetChild<KaxTrackFlagDefault>(track);
+			KaxTrackFlagLacing & lacing = GetChild<KaxTrackFlagLacing>(track);
 			MatroskaTrack mkvTrack;
 			
 			mkvTrack.number = uint16(number);
 			mkvTrack.type = uint8(type);
+			mkvTrack.defaultDuration = uint32(defaultDuration) / float(timecodeScale) + .5;
 			
 			switch (uint8(type)) {
 				case track_video:
@@ -274,6 +277,7 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			SetMediaLanguage(mkvTrack.theMedia, qtLang);
 			
 			mkvTrack.isEnabled = uint8(enabled);
+			mkvTrack.usesLacing = uint8(lacing);
 			
 			if (!trackName.IsDefaultValue()) {
 				QTMetaDataRef trackMetaData;
@@ -705,13 +709,15 @@ void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
 	for (int i = 0; i < cluster.ListSize(); i++) {
 		const EbmlId & elementID = EbmlId(*cluster[i]);
 		KaxInternalBlock *block = NULL;
-		uint32_t duration = 0;
+		uint32_t duration = 0;		// set to track's default duration in AddBlock if 0
 		short flags = 0;
 		
 		if (elementID == KaxBlockGroup::ClassInfos.GlobalId) {
 			KaxBlockGroup & blockGroup = *static_cast<KaxBlockGroup *>(cluster[i]);
+			KaxBlockDuration & blkDuration = GetChild<KaxBlockDuration>(blockGroup);
 			block = &GetChild<KaxBlock>(blockGroup);
-			duration = uint32(GetChild<KaxBlockDuration>(blockGroup));
+			if (blkDuration.ValueIsSet())
+				duration = uint32(blkDuration);
 			flags = blockGroup.ReferenceCount() > 0 ? mediaSampleNotSync : 0;
 			
 		} else if (elementID == KaxSimpleBlock::ClassInfos.GlobalId) {
@@ -778,6 +784,8 @@ MatroskaTrack::MatroskaTrack()
 	subDataRefHandler = NULL;
 	is_vobsub = false;
 	isEnabled = true;
+	defaultDuration = 0;
+	usesLacing = true;
 }
 
 MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
@@ -815,6 +823,8 @@ MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
 	
 	is_vobsub = copy.is_vobsub;
 	isEnabled = copy.isEnabled;
+	defaultDuration = copy.defaultDuration;
+	usesLacing = copy.usesLacing;
 }
 
 MatroskaTrack::~MatroskaTrack()
@@ -879,7 +889,10 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 	for (int i = 0; i < block.NumberFrames(); i++) {
 		MatroskaFrame newFrame;
 		newFrame.timecode = block.GlobalTimecode() / timecodeScale;
-		newFrame.duration = duration;
+		if (duration > 0)
+			newFrame.duration = duration;
+		else
+			newFrame.duration = defaultDuration;
 		newFrame.offset = block.GetDataPosition(i);
 		newFrame.size = block.GetFrameSize(i);
 		newFrame.flags = flags;
