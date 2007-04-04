@@ -107,6 +107,7 @@ public:
 	Handle					subDataRefHandler;
 	uint8					isEnabled;
 	uint32_t				defaultDuration;
+	uint8					passthrough;
 	
 	// laced tracks can have multiple frames per block, it's easier to ignore them
 	// for pts -> dts conversion (and laced tracks can't have non-keyframes anyways)

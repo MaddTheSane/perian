@@ -63,7 +63,7 @@ static int ac3_synchronize(uint8_t *buf, int buf_size)
  * @return 1 if successfull, 0 otherwise
  */
 
-int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *acl, uint8_t *buffer, int buff_size)
+int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *acl, uint8_t *buffer, int buff_size, int passthrough)
 {
 	int offset = ac3_synchronize(buffer, buff_size);
 	if(offset == -1)
@@ -101,6 +101,12 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	if(bsid > 8)
 		shift = bsid - 8;
 	
+	if(passthrough)
+	{
+		if(acmod > 2)
+			acmod = 0;
+		lfe = 0;
+	}
 	/* Setup the AudioStreamBasicDescription and AudioChannelLayout */
 	memset(asbd, 0, sizeof(AudioStreamBasicDescription));
 	asbd->mSampleRate = sample_rate >> shift;

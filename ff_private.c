@@ -105,7 +105,7 @@ int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSTy
 	if(st->codec->codec_type == CODEC_TYPE_VIDEO)
 		initialize_video_map(map, targetTrack, dataRef, dataRefType, storage->firstFrames + st->index);
 	else if(st->codec->codec_type == CODEC_TYPE_AUDIO)
-		initialize_audio_map(map, targetTrack, dataRef, dataRefType, storage->firstFrames + st->index);
+		initialize_audio_map(map, targetTrack, dataRef, dataRefType, storage->firstFrames + st->index, storage->passthrough);
 	
 	/* return the map */
 	storage->stream_map = map;
@@ -178,7 +178,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 } /* initialize_video_map() */
 
 /* Initializes the map & targetTrack to receive audio data */
-void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame)
+void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame, int passthrough)
 {
 	Media media;
 	SoundDescriptionHandle sndHdl;
@@ -257,7 +257,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	int useDefault = 1;
 	if(asbd.mFormatID == kAudioFormatAC3 || asbd.mFormatID == 'ms \0')
 	{
-		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size))
+		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size, passthrough))
 		{
 			useDefault = 0;
 			aclSize = sizeof(AudioChannelLayout);
@@ -524,7 +524,7 @@ int prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OSType 
 			initialize_video_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
 		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
 			track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
-			initialize_audio_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
+			initialize_audio_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j, storage->passthrough);
 			
 			if (first_audio_track == NULL)
 				first_audio_track = track;
