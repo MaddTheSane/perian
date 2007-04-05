@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *acl, uint8_t *buffer, int buff_size, int passthrough);
+int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *acl, uint8_t *buffer, int buff_size);
 
 #ifdef __cplusplus
 }

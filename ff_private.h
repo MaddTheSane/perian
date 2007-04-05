@@ -77,7 +77,6 @@ struct _ff_global_context {
 	int map_count;
 	int64_t header_offset;
 	
-	int passthrough;
 	AVPacket firstFrames[MAX_STREAMS];
 };
 typedef struct _ff_global_context ff_global_context;
@@ -96,7 +95,7 @@ OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType,
 int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSType dataRefType);
 int prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OSType dataRefType);
 void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame);
-void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame, int passthrough);
+void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame);
 
 int determine_header_offset(ff_global_ptr storage);
 int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDuration);
