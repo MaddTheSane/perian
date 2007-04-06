@@ -234,7 +234,7 @@
 	}
 }
 
-- (void)mainViewDidLoad
+- (void)didSelect
 {
 	/* General */
 	[self checkForInstallation];
@@ -583,8 +583,8 @@
 
 - (void)setAC3DynamicRange:(float)newVal
 {
-    if(newVal > 1.0)
-        newVal = 1.0;
+    if(newVal > 4.0)
+        newVal = 4.0;
     if(newVal < 0.0)
         newVal = 0.0;
     
