@@ -3,35 +3,36 @@
 
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
 #define AC3StereoOverDolbyKey CFSTR("useStereoOverDolby")
+#define AC3ProLogicIIKey CFSTR("useDolbyProLogicII")
 #define LastInstalledVersionKey CFSTR("LastInstalledVersion")
 
 @interface CPFPerianPrefPaneController(_private)
 - (void)setAC3DynamicRange:(float)newVal;
+- (void)saveAC3DynamicRange:(float)newVal;
 @end
 
 @implementation CPFPerianPrefPaneController
 
 #pragma mark Preferences Functions
 
-- (void)setButton:(NSButton *)button fromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(BOOL)defaultValue
+- (BOOL)getBoolFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(BOOL)defaultValue
 {
 	CFPropertyListRef value;
+	BOOL ret = defaultValue;
+	
 	value = CFPreferencesCopyAppValue(key, appID);
 	if(value && CFGetTypeID(value) == CFBooleanGetTypeID())
-		[button setState:CFBooleanGetValue(value)];
-	else
-		[button setState:defaultValue];
+		ret = CFBooleanGetValue(value);
 	
 	if(value)
 		CFRelease(value);
+	
+	return ret;
 }
 
-- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromButton:(NSButton *)button
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromBool:(BOOL)value
 {
-	if([button state])
-		CFPreferencesSetAppValue(key, kCFBooleanTrue, appID);
-	else
-		CFPreferencesSetAppValue(key, kCFBooleanFalse, appID);
+	CFPreferencesSetAppValue(key, value ? kCFBooleanTrue : kCFBooleanFalse, appID);
 }
 
 - (float)getFloatFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(float)defaultValue
@@ -255,7 +256,18 @@
     }
 	
 	/* A52 Prefs */
-	[self setButton:button_ac3StereoOverDolby fromKey:AC3StereoOverDolbyKey forAppID:a52AppID withDefault:NO];
+	if([self getBoolFromKey:AC3StereoOverDolbyKey forAppID:a52AppID withDefault:NO])
+	{
+		[popup_2ChannelMode selectItemAtIndex:0];
+	}
+	else if([self getBoolFromKey:AC3ProLogicIIKey forAppID:a52AppID withDefault:NO])
+	{
+		[popup_2ChannelMode selectItemAtIndex:2];
+	}
+	else
+	{
+		[popup_2ChannelMode selectItemAtIndex:1];		
+	}	
     [self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
 }
 
@@ -576,9 +588,45 @@
 
 
 #pragma mark AC3 
-- (IBAction)setAC3StereoOverDolby:(id)sender 
+- (IBAction)setAC3DynamicRangePopup:(id)sender
 {
-	[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromButton:button_ac3StereoOverDolby];
+	int selected = [popup_ac3DynamicRangeType indexOfSelectedItem];
+	switch(selected)
+	{
+		case 0:
+			[self saveAC3DynamicRange:1.0];
+			break;
+		case 1:
+			[self saveAC3DynamicRange:2.0];
+			break;
+		case 3:
+			[NSApp beginSheet:window_dynRangeSheet modalForWindow:[[self mainView] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
+			break;
+		default:
+			break;
+	}
+}
+
+- (IBAction)set2ChannelModePopup:(id)sender;
+{
+	int selected = [popup_2ChannelMode indexOfSelectedItem];
+	switch(selected)
+	{
+		case 0:
+			[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromBool:YES];
+			[self setKey:AC3ProLogicIIKey forAppID:a52AppID fromBool:NO];
+			break;
+		case 1:
+			[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromBool:NO];
+			[self setKey:AC3ProLogicIIKey forAppID:a52AppID fromBool:NO];
+			break;
+		case 2:
+			[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromBool:NO];
+			[self setKey:AC3ProLogicIIKey forAppID:a52AppID fromBool:YES];
+			break;
+		default:
+			break;
+	}	
 }
 
 - (void)setAC3DynamicRange:(float)newVal
@@ -588,9 +636,21 @@
     if(newVal < 0.0)
         newVal = 0.0;
     
-    [self setKey:AC3DynamicRangeKey forAppID:a52AppID fromFloat:newVal];
+	nextDynValue = newVal;
     [textField_ac3DynamicRangeValue setFloatValue:newVal];
     [slider_ac3DynamicRangeSlider setFloatValue:newVal];
+	if(newVal == 1.0)
+		[popup_ac3DynamicRangeType selectItemAtIndex:0];
+	else if(newVal == 2.0)
+		[popup_ac3DynamicRangeType selectItemAtIndex:1];
+	else
+		[popup_ac3DynamicRangeType selectItemAtIndex:3];
+}
+
+- (void)saveAC3DynamicRange:(float)newVal
+{
+	[self setKey:AC3DynamicRangeKey forAppID:a52AppID fromFloat:newVal];
+	[self setAC3DynamicRange:newVal];
 }
 
 - (IBAction)setAC3DynamicRangeValue:(id)sender
@@ -599,11 +659,26 @@
     
     [self setAC3DynamicRange:newVal];
 }
+
 - (IBAction)setAC3DynamicRangeSlider:(id)sender
 {
     float newVal = [slider_ac3DynamicRangeSlider floatValue];
     
     [self setAC3DynamicRange:newVal];
+}
+
+- (IBAction)cancelDynRangeSheet:(id)sender
+{
+	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
+	[NSApp endSheet:window_dynRangeSheet];
+	[window_dynRangeSheet orderOut:self];
+}
+
+- (IBAction)saveDynRangeSheet:(id)sender;
+{
+	[NSApp endSheet:window_dynRangeSheet];
+	[self saveAC3DynamicRange:nextDynValue];
+	[window_dynRangeSheet orderOut:self];
 }
 
 #pragma mark About 

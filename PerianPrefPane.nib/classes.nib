@@ -2,26 +2,30 @@
     IBClasses = (
         {
             ACTIONS = {
+                cancelDynRangeSheet = id; 
                 installUninstall = id; 
                 launchDonate = id; 
                 launchForum = id; 
                 launchWebsite = id; 
+                saveDynRangeSheet = id; 
+                set2ChannelModePopup = id; 
+                setAC3DynamicRangePopup = id; 
                 setAC3DynamicRangeSlider = id; 
                 setAC3DynamicRangeValue = id; 
-                setAC3StereoOverDolby = id; 
                 setAutoUpdateCheck = id; 
                 updateCheck = id; 
             }; 
             CLASS = CPFPerianPrefPaneController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                "button_ac3StereoOverDolby" = NSButton; 
                 "button_autoUpdateCheck" = NSButton; 
                 "button_donate" = NSButton; 
                 "button_forum" = NSButton; 
                 "button_install" = NSButton; 
                 "button_updateCheck" = NSButton; 
                 "button_website" = NSButton; 
+                "popup_2ChannelMode" = NSPopUpButton; 
+                "popup_ac3DynamicRangeType" = NSPopUpButton; 
                 "progress_install" = NSProgressIndicator; 
                 "progress_updateCheck" = NSProgressIndicator; 
                 "slider_ac3DynamicRangeSlider" = NSSlider; 
@@ -29,6 +33,7 @@
                 "textField_currentVersion" = NSTextField; 
                 "textField_installStatus" = NSTextField; 
                 "textView_about" = NSTextView; 
+                "window_dynRangeSheet" = NSWindow; 
             }; 
             SUPERCLASS = NSPreferencePane; 
         }, 

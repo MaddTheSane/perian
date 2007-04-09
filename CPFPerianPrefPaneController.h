@@ -54,10 +54,13 @@ typedef enum
 	IBOutlet NSProgressIndicator		*progress_updateCheck;
 	IBOutlet NSButton					*button_autoUpdateCheck;
 	
-	//AC3
+	//AC3 Settings in General Pane
+	IBOutlet NSPopUpButton				*popup_ac3DynamicRangeType;
+	IBOutlet NSPopUpButton				*popup_2ChannelMode;
+	
+	IBOutlet NSWindow					*window_dynRangeSheet;
     IBOutlet NSTextField                *textField_ac3DynamicRangeValue;
     IBOutlet NSSlider                   *slider_ac3DynamicRangeSlider;
-	IBOutlet NSButton					*button_ac3StereoOverDolby;
 	
 	//About
 	IBOutlet NSTextView					*textView_about;
@@ -77,16 +80,21 @@ typedef enum
 	CFStringRef							perianAppID;
 	CFStringRef							a52AppID;
 	
+	float								nextDynValue;
 }
 //General Pane
 - (IBAction)installUninstall:(id)sender;
 - (IBAction)updateCheck:(id)sender;
 - (IBAction)setAutoUpdateCheck:(id)sender;
 
-//AC3
-- (IBAction)setAC3StereoOverDolby:(id)sender;
+//AC3 Settings
+- (IBAction)setAC3DynamicRangePopup:(id)sender;
+- (IBAction)set2ChannelModePopup:(id)sender;
+
 - (IBAction)setAC3DynamicRangeValue:(id)sender;
 - (IBAction)setAC3DynamicRangeSlider:(id)sender;
+- (IBAction)cancelDynRangeSheet:(id)sender;
+- (IBAction)saveDynRangeSheet:(id)sender;
 
 //About
 - (IBAction)launchWebsite:(id)sender;
