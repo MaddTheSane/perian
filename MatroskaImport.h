@@ -26,6 +26,8 @@
 #define __MATROSKAIMPORT_H__
 
 #include <vector>
+#include <list>
+
 #include <QuickTime/QuickTime.h>
 #include "DataHandlerCallback.h"
 #include "SubImport.h"
@@ -41,11 +43,16 @@
 using namespace libmatroska;
 using namespace std;
 
+// the maximum number of frames that have to be decoded between decoding
+// any single frame and displaying it, used to cap the maximum size of the
+// pts -> dts reorder buffer. Set to 4 since that's what it is in FFmpeg; 
+// shouldn't be more than 2 with current codecs
+#define MAX_DECODE_DELAY 4
 
 struct MatroskaFrame {
-	TimeValue64		timecode;
-//	TimeValue64		duration;
-	UInt32			duration;		// hack so that H.264 tracks kinda work
+	TimeValue64		dts;			// decode timestamp
+	TimeValue64		pts;			// presentation/display timestamp
+	TimeValue		duration;
 	SInt64			offset;
 	SInt64			size;
 	short			flags;
@@ -126,6 +133,9 @@ private:
 	// from one block group until the next block group is found to set the duration of the
 	// previous ones to be the difference in timestamps.
 	vector<MatroskaFrame>	lastFrames;
+	
+	// insert pts values, sort, then smallest value is current dts if size > decode delay
+	list<TimeValue64>		ptsReorder;
 	bool					seenFirstBlock;
 	
 	// this is the first sample number (if sample table) or sample time that we haven't 

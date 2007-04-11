@@ -872,23 +872,43 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 		seenFirstBlock = true;
 	}
 	
-	for (int i = 0; i < lastFrames.size(); i++) {
-		// all the frames in the vector should have the same timecode at the moment
-		TimeValue64 duration = block.GlobalTimecode() / timecodeScale - lastFrames[i].timecode;
+	// tracks w/ lacing can't have b-frames, and neither can any known audio codec
+	if (usesLacing || type != track_video) {
+		for (int i = 0; i < lastFrames.size(); i++) {
+			// all the frames in the vector should have the same timecode at the moment
+			TimeValue64 duration = block.GlobalTimecode() / timecodeScale - lastFrames[i].pts;
+			
+			// since there can be multiple frames in one block, split the duration evenly between them
+			// giving the remainder to the latter blocks
+			int remainder = duration % lastFrames.size() >= lastFrames.size() - i ? 1 : 0;
+			
+			lastFrames[i].duration = duration / lastFrames.size() + remainder;
+			
+			AddFrame(lastFrames[i]);
+		}
+		lastFrames.clear();
+	} else if (ptsReorder.size() > 1) {
+		ptsReorder.sort();
+		list<TimeValue64>::iterator actualDTS = ++ptsReorder.begin();
 		
-		// since there can be multiple frames in one block, split the duration evenly between them
-		// giving the remainder to the latter blocks
-		int remainder = duration % lastFrames.size() >= lastFrames.size() - i ? 1 : 0;
+		// first frame has correct dts (we start at a keyframe thus pts = dts and don't
+		// remove that frame until it has correct duration, for which the next frame must
+		// have correct dts.) So, we're looking for a pts of no more than dts + duration + 1
+		TimeValue64 expectedDTS = lastFrames[0].dts + lastFrames[0].duration + 1;
 		
-		lastFrames[i].duration = duration / lastFrames.size() + remainder;
-		
-		AddFrame(lastFrames[i]);
+		if (*actualDTS <= expectedDTS || ptsReorder.size() > MAX_DECODE_DELAY + 1) {
+			lastFrames[1].dts = *actualDTS;
+			lastFrames[0].duration = lastFrames[1].dts - lastFrames[0].dts;
+			AddFrame(lastFrames[0]);
+			lastFrames.erase(lastFrames.begin());
+			ptsReorder.pop_front();
+		}
 	}
-	lastFrames.clear();
 	
 	for (int i = 0; i < block.NumberFrames(); i++) {
 		MatroskaFrame newFrame;
-		newFrame.timecode = block.GlobalTimecode() / timecodeScale;
+		newFrame.pts = block.GlobalTimecode() / timecodeScale;
+		newFrame.dts = newFrame.pts;
 		if (duration > 0)
 			newFrame.duration = duration;
 		else
@@ -901,8 +921,11 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 			newFrame.buffer = &block.GetBuffer(i);
 			AddFrame(newFrame);
 		}
-		else
+		else {
 			lastFrames.push_back(newFrame);
+			if (!usesLacing && type == track_video)
+				ptsReorder.push_back(newFrame.pts);
+		}
 		
 		newFrame.buffer = NULL;
 	}
@@ -915,7 +938,7 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	TimeValue sampleTime;
 	
 	if (type == track_subtitle && !is_vobsub) {
-		if (frame.size > 0) subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.timecode, frame.timecode + frame.duration);
+		if (frame.size > 0) subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.pts, frame.pts + frame.duration);
 		const char *packet=NULL; size_t size=0; unsigned start=0, end=0;
 		packet = subtitleSerializer->popPacket(&size, &start, &end);
 		if (packet) {
@@ -927,13 +950,15 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 				return;
 			}
 			DisposeHandle(sampleH);
-			frame.timecode = start;
+			frame.pts = start;
 			frame.duration = end - start;
 			sampleNum = sampleTime;
 		} else return;
 	} else if (sampleTable) {
+		TimeValue64 displayOffset = frame.pts - frame.dts;
+		
 		err = QTSampleTableAddSampleReferences(sampleTable, frame.offset, frame.size, frame.duration, 
-											   0, 1, frame.flags, qtSampleDesc, &sampleNum);
+											   displayOffset, 1, frame.flags, qtSampleDesc, &sampleNum);
 		if (err) {
 			Codecprintf(NULL, "MKV: error adding sample reference to table %d\n", err);
 			return;
@@ -964,7 +989,7 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 			Codecprintf(NULL, "MKV: subtitle track has a sample table\n", err);
 			return;
 		}
-		err = InsertMediaIntoTrack(theTrack, frame.timecode, sampleTime, frame.duration, fixed1);
+		err = InsertMediaIntoTrack(theTrack, frame.pts, sampleTime, frame.duration, fixed1);
 		if (err) {
 			Codecprintf(NULL, "MKV: error adding subtitle media into track %d\n", err);
 			return;
@@ -986,14 +1011,15 @@ void MatroskaTrack::AddSamplesToTrack()
 	if (type != track_subtitle) {
 		if (sampleTable) {
 			TimeValue64 sampleTime64;
-			TimeValue mediaDuration = GetMediaDuration(theMedia);
+			TimeValue mediaDuration = GetMediaDisplayDuration(theMedia);
 			
 			err = AddSampleTableToMedia(theMedia, sampleTable, firstSample, amountToAdd, &sampleTime64);
 			if (err)
 				Codecprintf(NULL, "MKV: error adding sample table to media %d (type %x #%d)\n", err);
 			
 			firstSample = sampleTime64;
-			amountToAdd = GetMediaDuration(theMedia) - mediaDuration;
+			// FIXME: not correct...
+			amountToAdd = GetMediaDisplayDuration(theMedia) - mediaDuration - 1;
 		}
 		err = InsertMediaIntoTrack(theTrack, -1, firstSample, amountToAdd, fixed1);
 		if (err)
