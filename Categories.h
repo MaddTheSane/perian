@@ -10,6 +10,7 @@
 
 @interface NSCharacterSet (STAdditions)
 + (NSCharacterSet *)newlineCharacterSet;
++ (NSCharacterSet *)whitespaceAndBomCharacterSet;
 @end
 
 @interface NSScanner (STAdditions)

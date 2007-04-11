@@ -187,7 +187,6 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 				{
 					NSString *l = [[NSString alloc] initWithBytes:subTextOffset length:subOffset - subTextOffset encoding:NSUTF8StringEncoding];
 					sl = [[SubLine alloc] initWithLine:l start:startTime end:endTime];
-					
 					[l autorelease];
 					[sl autorelease];
 

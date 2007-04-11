@@ -7,12 +7,26 @@
 //
 
 #import "Categories.h"
+#import "UniversalDetector.h"
+#import "Codecprintf.h"
 
 @implementation NSCharacterSet(STUtilities)
 + (NSCharacterSet *)newlineCharacterSet
 {
 	const unichar chars[] = {'\r','\n',0x0085,0x2028,0x2029};
 	return [NSCharacterSet characterSetWithCharactersInString:[NSString stringWithCharacters:chars length:5]];
+}
+
++ (NSCharacterSet *)whitespaceAndBomCharacterSet
+{
+	const unichar bom = 0xfeff;
+	NSMutableCharacterSet *cs = [[NSMutableCharacterSet alloc] init]; 
+
+	[cs addCharactersInString:[NSString stringWithCharacters:&bom length:1]];
+	
+	[cs formUnionWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
+	
+	return [cs autorelease];
 }
 @end
 
@@ -72,17 +86,22 @@
 + (NSString *)stringFromUnknownEncodingFile:(NSString *)file
 {
 	NSData *data = [NSData dataWithContentsOfMappedFile:file];
-	NSStringEncoding encodings[] = {NSUTF8StringEncoding, NSUnicodeStringEncoding, NSWindowsCP1252StringEncoding, NSWindowsCP1251StringEncoding};
-	NSString *str = nil;
-	int i;
+	UniversalDetector *ud = [[UniversalDetector alloc] init];
+	NSString *res;
+	CFStringEncoding enc;
 	
-	for (i = 0; i < sizeof(encodings) / sizeof(NSStringEncoding); i++) {
-		str = [[NSString alloc] initWithData:data encoding:encodings[i]];
+	[ud analyzeData:data];
+	
+	enc = [ud encoding];
+	
+	if ([ud confidence] < .7) 
+		Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[[ud MIMECharset] UTF8String],[file UTF8String],[ud confidence]*100.);
 		
-		if (str) return [str autorelease];
-	}
+	res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
 	
-	NSLog(@"Perian: unable to determine character encoding of %@",file);
-	return nil;
+	if (!res) Codecprintf(NULL,"Failed to load file as guessed encoding %s.\n",[[ud MIMECharset] UTF8String]);
+	[ud release];
+
+	return res;
 }
 @end

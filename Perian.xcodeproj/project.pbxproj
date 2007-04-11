@@ -105,6 +105,7 @@
 		3D211A200B6B1A540051299D /* SSADocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SSADocument.m */; };
 		3D211A230B6B1A660051299D /* Categories.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* Categories.m */; };
 		3D211A300B6B1AD80051299D /* SSATagParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */; };
+		3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
 		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; };
 		3DAD32DA0B6DB26100DA0A72 /* StdIOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB114D0ACDF3C2007994BD /* StdIOCallback.cpp */; };
 		3DB2BB290B6C92F000416863 /* SSARenderCodec.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SSARenderCodec.m */; };
@@ -268,6 +269,27 @@
 			proxyType = 1;
 			remoteGlobalIDString = 11BA39A80A61E450008AF206;
 			remoteInfo = "ffmpeg Static Libraries";
+		};
+		3D41BE950BCD3B330069E7C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
+			remoteInfo = UniversalDetector;
+		};
+		3D41BE970BCD3B330069E7C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1B0DDCAB0A2D0AD10009B697;
+			remoteInfo = DetectorTest;
+		};
+		3D41BE990BCD3B330069E7C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3DBF4F570BCD396800DA401A;
+			remoteInfo = universaldetector;
 		};
 		61CB120F0ACE0FB1007994BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -451,6 +473,8 @@
 		3D211A220B6B1A660051299D /* Categories.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = Categories.m; sourceTree = "<group>"; };
 		3D211A2E0B6B1AD80051299D /* SSATagParsing.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SSATagParsing.h; sourceTree = "<group>"; };
 		3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = SSATagParsing.m.rl; sourceTree = "<group>"; };
+		3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UniversalDetector.xcodeproj; path = UniversalDetector/UniversalDetector.xcodeproj; sourceTree = "<group>"; };
+		3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = UniversalDetector.h; path = UniversalDetector/UniversalDetector.h; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
 		3DB2BB270B6C92F000416863 /* SSARenderCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSARenderCodec.h; sourceTree = "<group>"; };
@@ -662,6 +686,7 @@
 				8F483B550A642644002CCA73 /* libavformat.a in Frameworks */,
 				8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */,
 				3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */,
+				3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -777,6 +802,7 @@
 				6116E74E0B4738CE0020F1CE /* CodecIDs.h */,
 				3D211A210B6B1A660051299D /* Categories.h */,
 				3D211A220B6B1A660051299D /* Categories.m */,
+				3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -824,6 +850,16 @@
 				83D1D6C80B4C794700E09EC9 /* PerianPane.prefPane */,
 				F5CFD1B40B50009000616865 /* PerianPanePListGenerator */,
 				116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3D41BE8D0BCD3B330069E7C2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3D41BE960BCD3B330069E7C2 /* UniversalDetector.framework */,
+				3D41BE980BCD3B330069E7C2 /* DetectorTest */,
+				3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -876,6 +912,7 @@
 		6123D61D0AD0A052003EDE52 /* Subtitles */ = {
 			isa = PBXGroup;
 			children = (
+				3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */,
 				3D211A2E0B6B1AD80051299D /* SSATagParsing.h */,
 				3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */,
 				3D211A1E0B6B1A540051299D /* SSADocument.h */,
@@ -1322,6 +1359,10 @@
 					ProductGroup = F5CFD2CA0B5012A100616865 /* Products */;
 					ProjectRef = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
 				},
+				{
+					ProductGroup = 3D41BE8D0BCD3B330069E7C2 /* Products */;
+					ProjectRef = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
+				},
 			);
 			targets = (
 				11A70AC00A3D0105002058D4 /* Perian */,
@@ -1340,6 +1381,27 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		3D41BE960BCD3B330069E7C2 /* UniversalDetector.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = UniversalDetector.framework;
+			remoteRef = 3D41BE950BCD3B330069E7C2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3D41BE980BCD3B330069E7C2 /* DetectorTest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = DetectorTest;
+			remoteRef = 3D41BE970BCD3B330069E7C2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libuniversaldetector.a;
+			remoteRef = 3D41BE990BCD3B330069E7C2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		F5CFD2D60B5012A100616865 /* A52Codec.component */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;

@@ -322,7 +322,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	NSArray *format;
 	NSMutableDictionary *headers, *styleDict;
 	NSMutableArray *doclines;
-	NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+	NSCharacterSet *ws = [NSCharacterSet whitespaceAndBomCharacterSet];
 	unichar cai;
 	int formatc;
 	int readorder = 0;
@@ -331,7 +331,8 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	styleDict = [NSMutableDictionary dictionary];
 	doclines = [NSMutableArray array];
 	
-	if (![(NSString*)[lenum nextObject] isEqualToString:@"[Script Info]"]) return -1;
+	ns = [(NSString*)[lenum nextObject] stringByTrimmingCharactersInSet:ws];
+	if (![ns isEqualToString:@"[Script Info]"]) return -1;
 	while (1) {
 		ns = (NSString*)[lenum nextObject];
 		if (!ns || [ns length] == 0) continue;
@@ -507,11 +508,11 @@ ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFString
 	NSString *nspath;
 
 	FSRefMakePath(theDirectory, path, PATH_MAX);
-	nspath = [NSString stringWithUTF8String:(char*)path];
+	nspath = [[NSString stringWithUTF8String:(char*)path] stringByAppendingPathComponent:(NSString*)filename];
 	free(path);
 	
-	if ([ssa loadFile:[nspath stringByAppendingPathComponent:(NSString*)filename]]) {
-		NSLog(@"Perian: unable to load SSA file %@",nspath);
+	if ([ssa loadFile:nspath]) {
+		Codecprintf(NULL,"Unable to load SSA file \"%s\"\n",[nspath UTF8String]);
 		err = -1;
 		goto bail;
 	}
