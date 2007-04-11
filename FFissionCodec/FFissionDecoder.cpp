@@ -116,18 +116,18 @@ void FFissionDecoder::SetupExtradata(OSType formatID)
 }
 
 void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData) {
-	switch(inPropertyID)
-	{
+	switch (inPropertyID) {
 		case kAudioCodecPropertyNameCFString:
-		{
-			if (ioPropertyDataSize != sizeof(CFStringRef)) {
+			if (ioPropertyDataSize != sizeof(CFStringRef))
 				CODEC_THROW(kAudioCodecBadPropertySizeError);
-			}
-			
+			break;
+	}
+	switch (inPropertyID) {
+		case kAudioCodecPropertyNameCFString:
 			CFStringRef name = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian FFmpeg audio decoder"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
 			*(CFStringRef*)outPropertyData = name;
 			break; 
-		}
+			
 		default:
 			FFissionCodec::GetProperty(inPropertyID, ioPropertyDataSize, outPropertyData);
 	}

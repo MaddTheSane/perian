@@ -93,53 +93,49 @@ void FFissionCodec::GetPropertyInfo(AudioCodecPropertyID inPropertyID, UInt32& o
 	}
 }
 
-void FFissionCodec::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData) {	
+void FFissionCodec::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData)
+{
 	switch(inPropertyID) {
 		case kAudioCodecPropertyManufacturerCFString:
-			if (ioPropertyDataSize != sizeof(CFStringRef)) {
+			if (ioPropertyDataSize != sizeof(CFStringRef))
 				CODEC_THROW(kAudioCodecBadPropertySizeError);
-			}
-			
-			CFStringRef name = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian Project"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
-			*(CFStringRef*)outPropertyData = name;
 			break; 
 			
 		case kAudioCodecPropertyMaximumPacketByteSize:
-			if(ioPropertyDataSize == sizeof(UInt32)) {
-				if (avContext)
-					*reinterpret_cast<UInt32*>(outPropertyData) = avContext->block_align;
-				else
-					*reinterpret_cast<UInt32*>(outPropertyData) = 0;
-            } else {
+		case kAudioCodecPropertyRequiresPacketDescription:
+		case kAudioCodecPropertyHasVariablePacketByteSizes:
+		case kAudioCodecPropertyPacketFrameSize:
+			if(ioPropertyDataSize != sizeof(UInt32))
 				CODEC_THROW(kAudioCodecBadPropertySizeError);
-			}
-            break;
+			break;
+	}
+	
+	switch (inPropertyID) {
+		case kAudioCodecPropertyManufacturerCFString:
+			CFStringRef name = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian Project"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
+			*(CFStringRef*)outPropertyData = name;
+			break;
 			
-        case kAudioCodecPropertyRequiresPacketDescription:
-			if(ioPropertyDataSize == sizeof(UInt32)) {
-                *reinterpret_cast<UInt32*>(outPropertyData) = false; 
-            } else {
-				CODEC_THROW(kAudioCodecBadPropertySizeError);
-			}
-            break;
+		case kAudioCodecPropertyMaximumPacketByteSize:
+			if (avContext)
+				*reinterpret_cast<UInt32*>(outPropertyData) = avContext->block_align;
+			else
+				*reinterpret_cast<UInt32*>(outPropertyData) = mInputFormat.mBytesPerPacket;
+			break;
 			
-        case kAudioCodecPropertyHasVariablePacketByteSizes:
-			if(ioPropertyDataSize == sizeof(UInt32)) {
-                *reinterpret_cast<UInt32*>(outPropertyData) = false;
-            } else {
-				CODEC_THROW(kAudioCodecBadPropertySizeError);
-			}
-            break;
+		case kAudioCodecPropertyRequiresPacketDescription:
+			*reinterpret_cast<UInt32*>(outPropertyData) = false;
+			break;
+			
+		case kAudioCodecPropertyHasVariablePacketByteSizes:
+			*reinterpret_cast<UInt32*>(outPropertyData) = false;
+			break;
 			
 		case kAudioCodecPropertyPacketFrameSize:
-			if(ioPropertyDataSize == sizeof(UInt32)) {
-				if (avContext)
-					*reinterpret_cast<UInt32*>(outPropertyData) = avContext->frame_size;
-				else
-					*reinterpret_cast<UInt32*>(outPropertyData) = 0;
-            } else {
-				CODEC_THROW(kAudioCodecBadPropertySizeError);
-			}
+			if (avContext)
+				*reinterpret_cast<UInt32*>(outPropertyData) = avContext->frame_size;
+			else
+				*reinterpret_cast<UInt32*>(outPropertyData) = mInputFormat.mFramesPerPacket;
 			break;
 			
 		default:
