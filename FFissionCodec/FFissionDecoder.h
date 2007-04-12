@@ -24,6 +24,7 @@
 
 #include "FFissionCodec.h"
 #include "avcodec.h"
+#include "RingBuffer.h"
 
 class FFissionDecoder : public FFissionCodec
 {
@@ -32,6 +33,8 @@ public:
 	virtual ~FFissionDecoder();
 	
 	virtual void Initialize(const AudioStreamBasicDescription* inInputFormat, const AudioStreamBasicDescription* inOutputFormat, const void* inMagicCookie, UInt32 inMagicCookieByteSize);
+	virtual void Uninitialize();
+	virtual void Reset();
 	
 	virtual void GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData);
 	virtual void SetMagicCookie(const void* inMagicCookieData, UInt32 inMagicCookieDataByteSize);
@@ -40,6 +43,7 @@ public:
 	virtual void SetCurrentOutputFormat(const AudioStreamBasicDescription& inOutputFormat);
 	virtual UInt32 GetVersion() const;
 
+	virtual void AppendInputData(const void* inInputData, UInt32& ioInputDataByteSize, UInt32& ioNumberPackets, const AudioStreamPacketDescription* inPacketDescription);
 	virtual UInt32 ProduceOutputPackets(void* outOutputData, UInt32& ioOutputDataByteSize, UInt32& ioNumberPackets, AudioStreamPacketDescription* outPacketDescription);
 	
 private:
@@ -48,6 +52,11 @@ private:
 	UInt32 kIntPCMOutFormatFlag;
 	Byte *magicCookie;
 	UInt32 magicCookieSize;
+	
+	RingBuffer inputBuffer;
+	Byte *outputBuffer;
+	int outBufSize;
+	int outBufUsed;
 };
 
 #endif

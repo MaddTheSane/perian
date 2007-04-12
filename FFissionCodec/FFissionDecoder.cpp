@@ -47,7 +47,7 @@ static CodecID GetCodecID(OSType formatID)
 }
 
 
-FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(inInputBufferByteSize)
+FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0)
 {
 	kIntPCMOutFormatFlag = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
 	magicCookie = NULL;
@@ -61,12 +61,19 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(i
 	// libavcodec outputs 16-bit native-endian integer pcm, so why do conversions ourselves?
 	CAStreamBasicDescription theOutputFormat(kAudioStreamAnyRate, kAudioFormatLinearPCM, 0, 1, 0, 0, 16, kIntPCMOutFormatFlag);
 	AddOutputFormat(theOutputFormat);
+	
+	inputBuffer.Initialize(inInputBufferByteSize);
+	outBufUsed = 0;
+	outBufSize = AVCODEC_MAX_AUDIO_FRAME_SIZE;
+	outputBuffer = new Byte[outBufSize];
 }
 
 FFissionDecoder::~FFissionDecoder()
 {
 	if (magicCookie)
 		delete[] magicCookie;
+	
+	delete[] outputBuffer;
 }
 
 void FFissionDecoder::Initialize(const AudioStreamBasicDescription* inInputFormat, const AudioStreamBasicDescription* inOutputFormat, const void* inMagicCookie, UInt32 inMagicCookieByteSize)
@@ -75,6 +82,22 @@ void FFissionDecoder::Initialize(const AudioStreamBasicDescription* inInputForma
 		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
 	
 	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
+}
+
+void FFissionDecoder::Uninitialize()
+{
+	outBufUsed = 0;
+	inputBuffer.Zap(inputBuffer.GetDataAvailable());
+	
+	FFissionCodec::Uninitialize();
+}
+
+void FFissionDecoder::Reset()
+{
+	outBufUsed = 0;
+	inputBuffer.Zap(inputBuffer.GetDataAvailable());
+	
+	FFissionCodec::Reset();
 }
 
 void FFissionDecoder::SetMagicCookie(const void* inMagicCookieData, UInt32 inMagicCookieDataByteSize)
@@ -121,12 +144,27 @@ void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioP
 			if (ioPropertyDataSize != sizeof(CFStringRef))
 				CODEC_THROW(kAudioCodecBadPropertySizeError);
 			break;
+			
+		case kAudioCodecPropertyInputBufferSize:
+		case kAudioCodecPropertyUsedInputBufferSize:
+			if (ioPropertyDataSize != sizeof(UInt32))
+				CODEC_THROW(kAudioCodecBadPropertySizeError);
+			break;
 	}
+	
 	switch (inPropertyID) {
 		case kAudioCodecPropertyNameCFString:
 			CFStringRef name = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian FFmpeg audio decoder"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
 			*(CFStringRef*)outPropertyData = name;
 			break; 
+			
+		case kAudioCodecPropertyInputBufferSize:
+			*reinterpret_cast<UInt32*>(outPropertyData) = inputBuffer.GetBufferByteSize();
+			break;
+			
+		case kAudioCodecPropertyUsedInputBufferSize:
+			*reinterpret_cast<UInt32*>(outPropertyData) = inputBuffer.GetDataAvailable();
+			break;
 			
 		default:
 			FFissionCodec::GetProperty(inPropertyID, ioPropertyDataSize, outPropertyData);
@@ -202,70 +240,96 @@ void FFissionDecoder::SetCurrentOutputFormat(const AudioStreamBasicDescription& 
 	FFissionCodec::SetCurrentOutputFormat(inOutputFormat);
 }
 
-UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
-											  UInt32& ioOutputDataByteSize,	// number of bytes written to outOutputData
-											  UInt32& ioNumberPackets, 
-											  AudioStreamPacketDescription* outPacketDescription)
+void FFissionDecoder::AppendInputData(const void* inInputData, UInt32& ioInputDataByteSize, 
+									  UInt32& ioNumberPackets, const AudioStreamPacketDescription* inPacketDescription)
 {
-	// setup the return value, by assuming that everything is going to work
-	UInt32 theAnswer = kAudioCodecProduceOutputPacketSuccess;
+	const Byte *inData = (const Byte *)inInputData;
+	
+	if (inPacketDescription && ioNumberPackets) {
+		for (int i = 0; i < ioNumberPackets; i++) {
+			UInt32 packetSize = inPacketDescription[i].mDataByteSize;
+			inputBuffer.In(inData + inPacketDescription[i].mStartOffset, packetSize);
+		}
+	} else {
+		// no packet description, assume cbr
+		UInt32 amountToCopy = FFMIN(mInputFormat.mBytesPerPacket * ioNumberPackets, ioInputDataByteSize);
+		UInt32 numPackets = amountToCopy / mInputFormat.mBytesPerPacket;
+		
+		ioInputDataByteSize = amountToCopy;
+		ioNumberPackets = numPackets;
+		
+		for (int i = 0; i < numPackets; i++) {
+			UInt32 packetSize = mInputFormat.mBytesPerPacket;
+			inputBuffer.In(inData, packetSize);
+			inData += mInputFormat.mBytesPerPacket;
+		}
+	}
+}
+
+UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
+											 UInt32& ioOutputDataByteSize,	// number of bytes written to outOutputData
+											 UInt32& ioNumberPackets, 
+											 AudioStreamPacketDescription* outPacketDescription)
+{
+	UInt32 ans = kAudioCodecProduceOutputPacketSuccess;
 	
 	if (!mIsInitialized)
 		CODEC_THROW(kAudioCodecStateError);
 	
-	// clamp the number of packets to produce based on what is available in the input buffer
-	UInt32 inputPacketSize = avContext->channels * avContext->block_align;
-	UInt32 numberOfInputPackets = GetUsedInputBufferByteSize() / inputPacketSize;
+	UInt32 written = 0;
+	ioNumberPackets = 0;
+	Byte *outData = (Byte *) outOutputData;
 	
-	if (ioNumberPackets < numberOfInputPackets)
-	{
-		numberOfInputPackets = ioNumberPackets;
-	}
-	else if (ioNumberPackets > numberOfInputPackets)
-	{
-		ioNumberPackets = numberOfInputPackets;
+	// we have leftovers from the last packet, use that first
+	if (outBufUsed > 0) {
+		int amountToCopy = FFMIN(outBufUsed, ioOutputDataByteSize);
+		memcpy(outData, outputBuffer, amountToCopy);
+		outBufUsed -= amountToCopy;
+		written += amountToCopy;
 		
-		//	this also means we need more input to satisfy the request so set the return value
-		theAnswer = kAudioCodecProduceOutputPacketNeedsMoreInputData;
-	}
-	
-	UInt32 inputByteSize = numberOfInputPackets * inputPacketSize;
-	
-	if(ioNumberPackets > 0)
-	{
-		// make sure that there is enough space in the output buffer for the encoded data
-		// it is an error to ask for more output than you pass in buffer space for
-		UInt32 theOutputByteSize = ioNumberPackets * avContext->frame_size * mOutputFormat.mBytesPerFrame;
-		ThrowIf(ioOutputDataByteSize < theOutputByteSize, static_cast<ComponentResult>(kAudioCodecNotEnoughBufferSpaceError), "ACAppleIMA4Decoder::ProduceOutputPackets: not enough space in the output buffer");
-		
-		// set the return value
-		ioOutputDataByteSize = theOutputByteSize;
-		
-		// decode the input data for each channel
-		Byte* theInputData = GetBytes(inputByteSize);
-		
-		int out_size = 0;
-		SInt16* theOutputData = reinterpret_cast<SInt16*>(outOutputData);
-		
-		int len = avcodec_decode_audio(avContext, theOutputData, &out_size, theInputData, inputByteSize);
-		ioOutputDataByteSize = out_size;
-		
-		ConsumeInputData(len);
-	}
-	else
-	{
-		// set the return value since we're not actually doing any work
-		ioOutputDataByteSize = 0;
+		if (outBufUsed > 0)
+			memmove(outputBuffer, outputBuffer + amountToCopy, outBufUsed);
 	}
 	
-	if((theAnswer == kAudioCodecProduceOutputPacketSuccess) && (GetUsedInputBufferByteSize() >= inputPacketSize))
-	{
-		// we satisfied the request, and there's at least one more full packet of data we can decode
-		// so set the return value
-		theAnswer = kAudioCodecProduceOutputPacketSuccessHasMore;
+	// loop until we satisfy the request or run out of input data
+	while (written < ioOutputDataByteSize && inputBuffer.GetNumPackets() > 0) {
+		int packetSize = inputBuffer.GetCurrentPacketSize();
+		uint8_t *packet = inputBuffer.GetData();
+		
+		// decode one packet to our buffer
+		outBufUsed = outBufSize;
+		int len = avcodec_decode_audio2(avContext, (int16_t *)outputBuffer, &outBufUsed, packet, packetSize);
+		inputBuffer.Zap(len);
+		
+		if (len < 0) {
+			Codecprintf(NULL, "Error decoding audio frame\n");
+			inputBuffer.Zap(packetSize);
+			outBufUsed = 0;
+			ioOutputDataByteSize = written;
+			return kAudioCodecProduceOutputPacketFailure;
+		}
+		
+		// copy up to the amount requested
+		int amountToCopy = FFMIN(outBufUsed, ioOutputDataByteSize - written);
+		memcpy(outData + written, outputBuffer, amountToCopy);
+		outBufUsed -= amountToCopy;
+		written += amountToCopy;
+		ioNumberPackets++;
+		
+		// and save what's left over
+		if (outBufUsed > 0)
+			memmove(outputBuffer, outputBuffer + amountToCopy, outBufUsed);
 	}
 	
-	return theAnswer;
+	if (written < ioOutputDataByteSize)
+		ans = kAudioCodecProduceOutputPacketNeedsMoreInputData;
+	else if (outBufUsed > written || inputBuffer.GetNumPackets() > 0)
+		// we have more left than what we wrote, or an entire other packet
+		ans = kAudioCodecProduceOutputPacketSuccessHasMore;
+	
+	ioOutputDataByteSize = written;
+	
+	return ans;
 }
 
 UInt32 FFissionDecoder::GetVersion() const
