@@ -68,6 +68,7 @@ enum {
 	kAudioFormatAC3MS                       = 0x6D732000,
 	kAudioFormatWMA1MS                      = 0x6D730160,
 	kAudioFormatWMA2MS                      = 0x6D730161,
+	kAudioFormatFlashADPCM                  = 'FlAd',
 	kVideoFormatMSMPEG4v3                   = 'MP43',
 	kMPEG1VisualCodecType                   = 'MPEG',
 	kMPEG2VisualCodecType                   = 'MPG2',

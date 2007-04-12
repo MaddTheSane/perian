@@ -338,6 +338,9 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 			asbd->mFormatID = kAudioFormatDTS;
 			map->vbr = 1;
 			break;
+		case CODEC_ID_ADPCM_SWF:
+			asbd->mFormatID = kAudioFormatFlashADPCM;
+			break;
 		default:
 			break;
 	}

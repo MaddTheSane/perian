@@ -45,3 +45,10 @@
 #define kComponentName					"Windows Media Audio 2"
 #define kComponentInfo					"An AudioCodec that decodes WMA v2 into linear PCM"
 #include "XCAResources.r"
+
+#define kPrimaryResourceID				132
+#define kComponentType					'adec'
+#define kComponentSubtype				kAudioFormatFlashADPCM
+#define kComponentName					"Flash ADPCM"
+#define kComponentInfo					"An AudioCodec that decodes Flash ADPCM into linear PCM"
+#include "XCAResources.r"
