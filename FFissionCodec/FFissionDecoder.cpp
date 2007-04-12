@@ -25,6 +25,12 @@
 #include "Codecprintf.h"
 #include "CodecIDs.h"
 
+typedef struct CookieAtomHeader {
+    long           size;
+    long           type;
+    unsigned char  data[1];
+} CookieAtomHeader;
+
 struct CodecPair {
 	OSType mFormatID;
 	CodecID codecID;
@@ -35,6 +41,7 @@ static const CodecPair kAllInputFormats[] =
 	{ kAudioFormatWMA1MS, CODEC_ID_WMAV1 },
 	{ kAudioFormatWMA2MS, CODEC_ID_WMAV2 },
 	{ kAudioFormatFlashADPCM, CODEC_ID_ADPCM_SWF },
+	{ kAudioFormatXiphVorbis, CODEC_ID_VORBIS },
 	{ 0, CODEC_ID_NONE }
 };
 
@@ -131,12 +138,74 @@ void FFissionDecoder::SetupExtradata(OSType formatID)
 			avContext->extradata_size = magicCookieSize - 12 - 18 - 8 - 8;
 			break;
 			
+		case kAudioFormatXiphVorbis:
+			avContext->extradata_size = ConvertXiphVorbisCookie();
+			avContext->extradata = magicCookie;
+			break;
+			
 		default:
 			return;
 	}
 	
 	// this is safe because we always allocate this amount of additional memory for our copy of the magic cookie
 	memset(avContext->extradata + avContext->extradata_size, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+}
+
+int FFissionDecoder::ConvertXiphVorbisCookie()
+{
+	Byte *ptr = magicCookie;
+	Byte *cend = magicCookie + magicCookieSize;
+	Byte *headerData[3] = {NULL};
+	int headerSize[3] = {0};
+	
+	while (ptr < cend) {
+		CookieAtomHeader *aheader = reinterpret_cast<CookieAtomHeader *>(ptr);
+		int size = EndianU32_BtoN(aheader->size);
+		ptr += size;
+		if (ptr > cend || size <= 0)
+			break;
+		
+		switch(EndianS32_BtoN(aheader->type)) {
+			case kCookieTypeVorbisHeader:
+				headerData[0] = aheader->data;
+				headerSize[0] = size - 8;
+				break;
+				
+			case kCookieTypeVorbisComments:
+				headerData[1] = aheader->data;
+				headerSize[1] = size - 8;
+				break;
+				
+			case kCookieTypeVorbisCodebooks:
+				headerData[2] = aheader->data;
+				headerSize[2] = size - 8;
+				break;
+		}
+	}
+	
+    if (headerSize[0] <= 0 || headerSize[1] <= 0 || headerSize[2] <= 0) {
+		Codecprintf(NULL, "Invalid Vorbis extradata\n");
+		return 0;
+	}
+	
+	int len = headerSize[0] + headerSize[1] + headerSize[2];
+	Byte *newCookie = new Byte[len + len/255 + 64];
+	ptr = newCookie;
+	
+	ptr[0] = 2;		// number of packets minus 1
+	int offset = 1;
+	offset += av_xiphlacing(&ptr[offset], headerSize[0]);
+	offset += av_xiphlacing(&ptr[offset], headerSize[1]);
+	for (int i = 0; i < 3; i++) {
+		memcpy(&ptr[offset], headerData[i], headerSize[i]);
+		offset += headerSize[i];
+	}
+	
+	delete[] magicCookie;
+	magicCookie = newCookie;
+	magicCookieSize = offset;
+	
+	return offset;
 }
 
 void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData) {
@@ -348,8 +417,40 @@ UInt32 FFissionDecoder::GetVersion() const
 	return kFFusionCodecVersion;
 }
 
+
+void FFissionVBRDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData)
+{
+	switch (inPropertyID) {
+		case kAudioCodecPropertyPacketFrameSize:
+		case kAudioCodecPropertyHasVariablePacketByteSizes:
+			if (ioPropertyDataSize != sizeof(UInt32))
+				CODEC_THROW(kAudioCodecBadPropertySizeError);
+			break;
+	}
+	
+	switch (inPropertyID) {
+		case kAudioCodecPropertyPacketFrameSize:
+			*reinterpret_cast<UInt32*>(outPropertyData) = 0;
+			break;
+			
+		case kAudioCodecPropertyHasVariablePacketByteSizes:
+			*reinterpret_cast<UInt32*>(outPropertyData) = true;
+			break;
+			
+		default:
+			FFissionDecoder::GetProperty(inPropertyID, ioPropertyDataSize, outPropertyData);
+	}
+}
+
+
 extern "C"
 ComponentResult	FFissionDecoderEntry(ComponentParameters* inParameters, FFissionDecoder* inThis)
+{
+	return ACCodecDispatch(inParameters, inThis);
+}
+
+extern "C"
+ComponentResult	FFissionVBRDecoderEntry(ComponentParameters* inParameters, FFissionVBRDecoder* inThis)
 {
 	return ACCodecDispatch(inParameters, inThis);
 }

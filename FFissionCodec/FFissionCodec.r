@@ -52,3 +52,13 @@
 #define kComponentName					"Flash ADPCM"
 #define kComponentInfo					"An AudioCodec that decodes Flash ADPCM into linear PCM"
 #include "XCAResources.r"
+
+
+#define kComponentEntryPoint			"FFissionVBRDecoderEntry"
+
+#define kPrimaryResourceID				134
+#define kComponentType					'adec'
+#define kComponentSubtype				kAudioFormatXiphVorbis
+#define kComponentName					"Vorbis"
+#define kComponentInfo					"An AudioCodec that decodes Vorbis audio into linear PCM"
+#include "XCAResources.r"

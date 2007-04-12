@@ -48,6 +48,7 @@ public:
 	
 private:
 	void SetupExtradata(OSType formatID);
+	int ConvertXiphVorbisCookie();
 	void OpenAVCodec();
 	
 	UInt32 kIntPCMOutFormatFlag;
@@ -58,6 +59,15 @@ private:
 	Byte *outputBuffer;
 	int outBufSize;
 	int outBufUsed;
+};
+
+// kAudioCodecPropertyHasVariablePacketByteSizes is queried before our input format is set,
+// so we can't use that to determine our answer...
+class FFissionVBRDecoder : public FFissionDecoder
+{
+public:
+	FFissionVBRDecoder() : FFissionDecoder() { }
+	virtual void GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData);
 };
 
 #endif

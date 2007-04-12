@@ -4,3 +4,4 @@ _MatroskaImportComponentDispatch
 _VobSubCodecComponentDispatch
 _TextSubCodecComponentDispatch
 _FFissionDecoderEntry
+_FFissionVBRDecoderEntry
