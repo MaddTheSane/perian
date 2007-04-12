@@ -185,21 +185,32 @@ void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& i
 	
 	CodecID codecID = GetCodecID(inInputFormat.mFormatID);
 	
-	avCodec = avcodec_find_decoder(codecID);
-	
 	// check to make sure the input format is legal
-	if (avCodec == NULL) {
+	if (avcodec_find_decoder(codecID) == NULL) {
 		Codecprintf(NULL, "Unsupported input format id %4.4s\n", &inInputFormat.mFormatID);
 		CODEC_THROW(kAudioCodecUnsupportedFormatError);
 	}
 	
+	// tell our base class about the new format
+	FFissionCodec::SetCurrentInputFormat(inInputFormat);
+}
+	
+void FFissionDecoder::OpenAVCodec()
+{
+	if (!mIsInitialized)
+		CODEC_THROW(kAudioCodecStateError);
+	
+	CodecID codecID = GetCodecID(mInputFormat.mFormatID);
+	
+	avCodec = avcodec_find_decoder(codecID);
+	
 	avcodec_get_context_defaults(avContext);
 	
-	avContext->sample_rate = inInputFormat.mSampleRate;
-	avContext->channels = inInputFormat.mChannelsPerFrame;
-	avContext->block_align = inInputFormat.mBytesPerPacket;
-	avContext->frame_size = inInputFormat.mFramesPerPacket;
-	avContext->bits_per_sample = inInputFormat.mBitsPerChannel;
+	avContext->sample_rate = mInputFormat.mSampleRate;
+	avContext->channels = mInputFormat.mChannelsPerFrame;
+	avContext->block_align = mInputFormat.mBytesPerPacket;
+	avContext->frame_size = mInputFormat.mFramesPerPacket;
+	avContext->bits_per_sample = mInputFormat.mBitsPerChannel;
 	
 	if (avContext->sample_rate == 0) {
 		Codecprintf(NULL, "Invalid sample rate %d\n", avContext->sample_rate);
@@ -208,18 +219,14 @@ void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& i
 	}
 	
 	if (magicCookie) {
-		SetupExtradata(inInputFormat.mFormatID);
+		SetupExtradata(mInputFormat.mFormatID);
 	}
 	
 	if (avcodec_open(avContext, avCodec)) {
 		Codecprintf(NULL, "error opening audio avcodec\n");
-		
 		avCodec = NULL;
-		CODEC_THROW(kAudioCodecIllegalOperationError);
+		CODEC_THROW(kAudioCodecUnsupportedFormatError);
 	}
-	
-	// tell our base class about the new format
-	FFissionCodec::SetCurrentInputFormat(inInputFormat);
 }
 
 void FFissionDecoder::SetCurrentOutputFormat(const AudioStreamBasicDescription& inOutputFormat)
@@ -274,7 +281,10 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 {
 	UInt32 ans = kAudioCodecProduceOutputPacketSuccess;
 	
-	if (!mIsInitialized)
+	if (!avCodec)
+		OpenAVCodec();
+	
+	if (!mIsInitialized || !avCodec)
 		CODEC_THROW(kAudioCodecStateError);
 	
 	UInt32 written = 0;

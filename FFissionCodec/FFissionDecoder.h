@@ -48,6 +48,7 @@ public:
 	
 private:
 	void SetupExtradata(OSType formatID);
+	void OpenAVCodec();
 	
 	UInt32 kIntPCMOutFormatFlag;
 	Byte *magicCookie;
