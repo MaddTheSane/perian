@@ -276,6 +276,8 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 	if (!glob->ssa) glob->ssa = SSA_InitNonSSA(myDrp->width,myDrp->height);
 	}
 	
+	SSA_PrerollFonts(glob->ssa);
+	
 	return noErr;
 }
 
@@ -306,7 +308,7 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 		CFStringFindAndReplace(buf, CFSTR("<i>"),  CFSTR("{\\i1}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
 		CFStringFindAndReplace(buf, CFSTR("</i>"), CFSTR("{\\i0}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
 		CFStringFindAndReplace(buf, CFSTR("<"),    CFSTR("{"),      CFRangeMake(0,CFStringGetLength(buf)), 0);
-		CFStringFindAndReplace(buf, CFSTR(">"),   CFSTR("}"),      CFRangeMake(0,CFStringGetLength(buf)), 0);
+		CFStringFindAndReplace(buf, CFSTR(">"),    CFSTR("}"),      CFRangeMake(0,CFStringGetLength(buf)), 0);
 	} else {
 		buf = (CFMutableStringRef)CFStringCreateWithBytes(NULL, (UInt8*)drp->codecData, myDrp->dataSize, kCFStringEncodingUTF8, false);
 		if (!buf) return noErr;

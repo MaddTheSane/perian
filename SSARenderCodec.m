@@ -360,3 +360,27 @@ void SSA_Dispose(SSARenderGlobalsPtr glob)
 	[glob->document release];
 	DisposePtr((Ptr)glob);
 }
+
+void SSA_PrerollFonts(SSARenderGlobalsPtr glob)
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	CGColorSpaceRef csp = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+	void *fakebuf = malloc(640 * 480 * 4); // set up an offscreen buffer
+	CGContextRef c = CGBitmapContextCreate(fakebuf,640,480,8,640 * 4,csp,kCGImageAlphaPremultipliedFirst);
+	
+	if (glob->plaintext) {
+		SSA_RenderLine(glob,c,(CFStringRef)@"Hello World!",640,480);
+	} else {
+		int i;
+		for (i = 0; i < glob->document->stylecount; i++) {
+			ssastyleline *s = &glob->document->styles[i];
+			NSString *line = [NSString stringWithFormat:@"0,0,%@,,0000,0000,0000,,Hello World!",s->name];
+			SSA_RenderLine(glob,c,(CFStringRef)line,640,480);
+		}
+	}
+	
+	CGContextRelease(c);
+	free(fakebuf);
+	CGColorSpaceRelease(csp);
+	[pool release];
+}
