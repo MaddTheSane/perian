@@ -327,7 +327,7 @@ void FFissionDecoder::AppendInputData(const void* inInputData, UInt32& ioInputDa
 			UInt32 packetSize = inPacketDescription[i].mDataByteSize;
 			inputBuffer.In(inData + inPacketDescription[i].mStartOffset, packetSize);
 		}
-	} else if (mInputFormat.mBytesPerFrame != 0) {
+	} else if (mInputFormat.mBytesPerPacket != 0) {
 		// no packet description, assume cbr
 		UInt32 amountToCopy = FFMIN(mInputFormat.mBytesPerPacket * ioNumberPackets, ioInputDataByteSize);
 		UInt32 numPackets = amountToCopy / mInputFormat.mBytesPerPacket;
