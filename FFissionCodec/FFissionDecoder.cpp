@@ -327,7 +327,7 @@ void FFissionDecoder::AppendInputData(const void* inInputData, UInt32& ioInputDa
 			UInt32 packetSize = inPacketDescription[i].mDataByteSize;
 			inputBuffer.In(inData + inPacketDescription[i].mStartOffset, packetSize);
 		}
-	} else {
+	} else if (mInputFormat.mBytesPerFrame != 0) {
 		// no packet description, assume cbr
 		UInt32 amountToCopy = FFMIN(mInputFormat.mBytesPerPacket * ioNumberPackets, ioInputDataByteSize);
 		UInt32 numPackets = amountToCopy / mInputFormat.mBytesPerPacket;
@@ -340,6 +340,10 @@ void FFissionDecoder::AppendInputData(const void* inInputData, UInt32& ioInputDa
 			inputBuffer.In(inData, packetSize);
 			inData += mInputFormat.mBytesPerPacket;
 		}
+	} else {
+		// XiphQT throws this in this situation (we need packet descriptions, but don't get them)
+		// is there a better error to throw?
+		CODEC_THROW(kAudioCodecNotEnoughBufferSpaceError);
 	}
 }
 
@@ -433,6 +437,7 @@ void FFissionVBRDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& 
 	switch (inPropertyID) {
 		case kAudioCodecPropertyPacketFrameSize:
 		case kAudioCodecPropertyHasVariablePacketByteSizes:
+		case kAudioCodecPropertyRequiresPacketDescription:
 			if (ioPropertyDataSize != sizeof(UInt32))
 				CODEC_THROW(kAudioCodecBadPropertySizeError);
 			break;
@@ -444,6 +449,7 @@ void FFissionVBRDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& 
 			break;
 			
 		case kAudioCodecPropertyHasVariablePacketByteSizes:
+		case kAudioCodecPropertyRequiresPacketDescription:
 			*reinterpret_cast<UInt32*>(outPropertyData) = true;
 			break;
 			
