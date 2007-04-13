@@ -217,7 +217,7 @@
 					break;
 				case InstallStatusInstalled:
 					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed", @"")];
-					[button_install setTitle:NSLocalizedString(@"Uninstall Perian", @"")];
+					[button_install setTitle:NSLocalizedString(@"Remove Perian", @"")];
 					break;
 			}
 		}
@@ -229,7 +229,7 @@
 		else
 		{
 			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed", @"")];
-			[button_install setTitle:NSLocalizedString(@"Uninstall Perian", @"")];
+			[button_install setTitle:NSLocalizedString(@"Remove Perian", @"")];
 		}
 		
 	}
