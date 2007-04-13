@@ -292,6 +292,13 @@
 			remoteGlobalIDString = 3DBF4F570BCD396800DA401A;
 			remoteInfo = universaldetector;
 		};
+		3DB3517E0BCF004B009357B8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DBF4F560BCD396800DA401A /* universaldetector */;
+			remoteInfo = universaldetector;
+		};
 		61CB120F0ACE0FB1007994BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
@@ -1265,6 +1272,7 @@
 				11BA3DB00A61EE90008AF206 /* PBXTargetDependency */,
 				61CB12100ACE0FB1007994BD /* PBXTargetDependency */,
 				61CB12120ACE0FB1007994BD /* PBXTargetDependency */,
+				3DB3517F0BCF004B009357B8 /* PBXTargetDependency */,
 			);
 			name = Perian;
 			productName = Perian;
@@ -1683,6 +1691,11 @@
 			isa = PBXTargetDependency;
 			target = 11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */;
 			targetProxy = 11BA3DAF0A61EE90008AF206 /* PBXContainerItemProxy */;
+		};
+		3DB3517F0BCF004B009357B8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = universaldetector;
+			targetProxy = 3DB3517E0BCF004B009357B8 /* PBXContainerItemProxy */;
 		};
 		61CB12100ACE0FB1007994BD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
