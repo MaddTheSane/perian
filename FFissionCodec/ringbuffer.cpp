@@ -136,7 +136,7 @@ void RingBuffer::In(const void* data, UInt32& ioBytes) {
 	UInt32 copiedBytes = ioBytes;
 
 	UInt32 sizeNeeded = GetDataAvailable() + ioBytes;
-	if (sizeNeeded < GetBufferByteSize())
+	if (sizeNeeded > GetBufferByteSize())
 		if (Reallocate(sizeNeeded) < sizeNeeded)
 			copiedBytes = GetSpaceAvailable();
 
