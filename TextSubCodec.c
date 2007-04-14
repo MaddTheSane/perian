@@ -260,23 +260,23 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
     myDrp->dataSize = p->bufferSize;
 	
 	if (!glob->ssa) {
-	if ((**p->imageDescription).cType == kSubFormatSSA) {
-		long count;
-		glob->translateSRT = false;
-
-		CountImageDescriptionExtensionType(p->imageDescription,kSubFormatSSA,&count);
-		if (count == 1) {
-			Handle ssaheader;
-			GetImageDescriptionExtension(p->imageDescription,&ssaheader,kSubFormatSSA,1);
+		if ((**p->imageDescription).cType == kSubFormatSSA) {
+			long count;
+			glob->translateSRT = false;
 			
-			glob->ssa = SSA_Init(*ssaheader, GetHandleSize(ssaheader), myDrp->width, myDrp->height);
+			CountImageDescriptionExtensionType(p->imageDescription,kSubFormatSSA,&count);
+			if (count == 1) {
+				Handle ssaheader;
+				GetImageDescriptionExtension(p->imageDescription,&ssaheader,kSubFormatSSA,1);
+				
+				glob->ssa = SSA_Init(*ssaheader, GetHandleSize(ssaheader), myDrp->width, myDrp->height);
+			} 
 		} 
-	} 
-	
-	if (!glob->ssa) glob->ssa = SSA_InitNonSSA(myDrp->width,myDrp->height);
+		
+		if (!glob->ssa) glob->ssa = SSA_InitNonSSA(myDrp->width,myDrp->height);
+		
+		SSA_PrerollFonts(glob->ssa);
 	}
-	
-	SSA_PrerollFonts(glob->ssa);
 	
 	return noErr;
 }
