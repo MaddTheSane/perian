@@ -12,7 +12,6 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <QuickTime/QuickTime.h>
 
-#include "ac3.h"
 static const int nfchans_tbl[8] = { 2, 1, 2, 3, 3, 4, 4, 5 };
 static const int ac3_layout_no_lfe[8] = {
 	kAudioChannelLayoutTag_Stereo,
@@ -33,6 +32,8 @@ static const int ac3_layout_lfe[8] = {
 	kAudioChannelLayoutTag_DVD_11,
 	kAudioChannelLayoutTag_DVD_6,
 	kAudioChannelLayoutTag_ITU_3_2_1};
+
+static const uint16_t ac3_freqs[3] = { 48000, 44100, 32000 };
 
 /* From: http://svn.mplayerhq.hu/ac3/ (LGPL)
  * Synchronize to ac3 bitstream.
@@ -106,7 +107,7 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	
 	/* This is a valid frame!!! */
 //	uint8_t bitrate = ac3_bitratetab[frmsizecod >> 1];
-	int sample_rate = ff_ac3_freqs[fscod];
+	int sample_rate = ac3_freqs[fscod];
 	
 	shift = 0;
 	if(bsid > 8)
