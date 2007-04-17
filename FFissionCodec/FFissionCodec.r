@@ -62,3 +62,10 @@
 #define kComponentName					"Vorbis"
 #define kComponentInfo					"An AudioCodec that decodes Vorbis audio into linear PCM"
 #include "XCAResources.r"
+
+#define kPrimaryResourceID				136
+#define kComponentType					'adec'
+#define kComponentSubtype				'.mp2'
+#define kComponentName					"MPEG Layer 2"
+#define kComponentInfo					"An AudioCodec that decodes MP2 audio into linear PCM"
+#include "XCAResources.r"

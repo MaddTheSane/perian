@@ -42,6 +42,7 @@ static const CodecPair kAllInputFormats[] =
 	{ kAudioFormatWMA2MS, CODEC_ID_WMAV2 },
 	{ kAudioFormatFlashADPCM, CODEC_ID_ADPCM_SWF },
 	{ kAudioFormatXiphVorbis, CODEC_ID_VORBIS },
+	{ kAudioFormatMPEGLayer2, CODEC_ID_MP2 },
 	{ 0, CODEC_ID_NONE }
 };
 

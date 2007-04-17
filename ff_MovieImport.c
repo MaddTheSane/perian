@@ -86,6 +86,7 @@ void initLib()
 		register_avcodec(&wmav2_decoder);
 		register_avcodec(&adpcm_swf_decoder);
 		register_avcodec(&vorbis_decoder);
+		register_avcodec(&mp2_decoder);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
