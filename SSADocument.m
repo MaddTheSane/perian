@@ -395,7 +395,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	NSArray *format;
 	NSMutableDictionary *headers, *styleDict;
 	NSMutableArray *doclines;
-	NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+	NSCharacterSet *ws = [NSCharacterSet whitespaceAndBomCharacterSet];
 	unichar cai;
 	int formatc;
 	
@@ -453,7 +453,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 					NSArray *style = [(NSString*)[pair objectAtIndex:1] componentsSeparatedByString:@"," count:formatc]; // bug in SSA: font names with , break it
 					int count = MIN([format count], [style count]), i;
 					NSMutableDictionary *styled = [NSMutableDictionary dictionary];
-					for (i=0; i < count; i++) [styled setObject:[style objectAtIndex:i] forKey:[format objectAtIndex:i]];
+					for (i=0; i < count; i++) [styled setObject:[[style objectAtIndex:i] stringByTrimmingCharactersInSet:ws] forKey:[format objectAtIndex:i]];
 					[styleDict setObject:styled forKey:[styled objectForKey:@"Name"]];
 				}
 			}
