@@ -20,11 +20,11 @@ done
 }
 
 cd "${BUILT_PRODUCTS_DIR}"
-mkdir -p "${BUILT_PRODUCTS_DIR}/PerianPane.prefPane/Contents/Resources/Components/"
-compressAndInsertComponent "Perian.component" "${BUILT_PRODUCTS_DIR}/PerianPane.prefPane/Contents/Resources/Components/"
+mkdir -p "${BUILT_PRODUCTS_DIR}/Perian.prefPane/Contents/Resources/Components/"
+compressAndInsertComponent "Perian.component" "${BUILT_PRODUCTS_DIR}/Perian.prefPane/Contents/Resources/Components/"
 if [[ -d "${BUILT_PRODUCTS_DIR}/CoreAudio" ]] ; then
-    compressComponents "${BUILT_PRODUCTS_DIR}/CoreAudio" "${BUILT_PRODUCTS_DIR}/PerianPane.prefPane/Contents/Resources/Components/CoreAudio"
+    compressComponents "${BUILT_PRODUCTS_DIR}/CoreAudio" "${BUILT_PRODUCTS_DIR}/Perian.prefPane/Contents/Resources/Components/CoreAudio"
 fi
 if [[ -d "${BUILT_PRODUCTS_DIR}/QuickTime" ]] ; then
-    compressComponents "${BUILT_PRODUCTS_DIR}/QuickTime" "${BUILT_PRODUCTS_DIR}/PerianPane.prefPane/Contents/Resources/Components/QuickTime"
+    compressComponents "${BUILT_PRODUCTS_DIR}/QuickTime" "${BUILT_PRODUCTS_DIR}/Perian.prefPane/Contents/Resources/Components/QuickTime"
 fi
