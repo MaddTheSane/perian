@@ -1,0 +1,10 @@
+1.0
+- Added support for Matroska/mkv
+- Integrated a52codec
+- Added subtitle support
+- Added support for .gvi (avi wrapper from Google Video)
+- Changed distribution to a Preference Pane in order to make installation simpler and configuration possible in the long term.
+- Changed installation directory from /Library/QuickTime to ~/Library/QuickTime.
+
+0.5 - Initial Release
+
