@@ -135,6 +135,43 @@ extern void initLib();
 #include <QuickTime/ImageCodec.k.h>
 #include <QuickTime/ComponentDispatchHelper.c>
 
+void FFusionRunUpdateCheck()
+{
+    CFDateRef lastRunDate = CFPreferencesCopyAppValue(CFSTR("NextRunDate"), CFSTR("org.perian.Perian"));
+    CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
+    
+	if (lastRunDate != nil && CFDateGetAbsoluteTime(lastRunDate) > now)
+        return;
+
+    if(lastRunDate != nil)
+        CFRelease(lastRunDate);
+    
+    //Two places to check, home dir and /
+    
+    CFStringRef home = (CFStringRef)NSHomeDirectory();
+    CFMutableStringRef location = CFStringCreateMutableCopy(NULL, 0, home);
+    CFStringAppend(location, CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app"));
+    
+    char fileRep[1024];
+    FSRef updateCheckRef;
+    Boolean doCheck = FALSE;
+    
+    if(CFStringGetFileSystemRepresentation(location, fileRep, 1024))
+        if(FSPathMakeRef((UInt8 *)fileRep, &updateCheckRef, NULL) == noErr)
+            doCheck = TRUE;
+    
+    CFRelease(location);
+    if(doCheck == FALSE)
+    {
+        CFStringRef absLocation = CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app");
+        if(CFStringGetFileSystemRepresentation(absLocation, fileRep, 1024))
+            if(FSPathMakeRef((UInt8 *)fileRep, &updateCheckRef, NULL) != noErr)
+                return;  //We have failed
+    }
+    
+    LSOpenFSRef(&updateCheckRef, NULL);    
+}
+
 //---------------------------------------------------------------------------
 // Component Routines
 //---------------------------------------------------------------------------
@@ -225,6 +262,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         {
             Codecprintf(glob->fileLog, "Error opening the base image decompressor! Exiting.\n");
         }
+        FFusionRunUpdateCheck();
     }
     
     return err;

@@ -16,6 +16,7 @@
 #define NEXT_RUN_KEY @"NextRunDate"
 #define UPDATE_URL_KEY @"UpdateFeedURL"
 #define SKIPPED_VERSION_KEY @"SkippedVersion"
+#define TIME_INTERVAL_TIL_NEXT_RUN 7*24*60*60
 
 @interface UpdateCheckerAppDelegate : NSObject {
 	SUUpdateAlert *updateAlert;

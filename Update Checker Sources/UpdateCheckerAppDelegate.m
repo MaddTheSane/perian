@@ -28,7 +28,7 @@
 	lastRunDate = [[[NSUserDefaults standardUserDefaults] objectForKey:NEXT_RUN_KEY] retain];
 	if (lastRunDate == nil || [lastRunDate laterDate:[NSDate date]] != lastRunDate) {
 		//this means we should in fact run
-		[[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:NEXT_RUN_KEY];
+		[[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN] forKey:NEXT_RUN_KEY];
 		[self doUpdateCheck];
 	} else {
 		//another instance was already started and therefore we don't need to do this again

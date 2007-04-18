@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.perian.PerianUpdateChecker</string>
+	<string>org.perian.Perian</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
@@ -23,6 +23,6 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>UpdateFeedURL</key>
-	<string>http://10.42.42.11/~durin/appcast.xml</string>
+	<string>http://www.perian.org/appcast.xml</string>
 </dict>
 </plist>
