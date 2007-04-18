@@ -1,4 +1,4 @@
-VERSION=0.5
+VERSION=1.0b1
 BETA=FALSE
 SRC_DIR=..
 BUILD_DIR=build
@@ -11,6 +11,7 @@ ifeq ($(BETA),TRUE)
 else
     BUILDSTYLE=Deployment
 endif
+
 
 ifeq ($(strip $(PRODUCT_DIR)),)
 	PERIAN_BUILD_DIR=$(SRC_DIR)/build/$(BUILDSTYLE)
@@ -35,8 +36,8 @@ createfolder:
 	mkdir $(PERIAN_DIR)
 	
 	@# copy the app
-	cp -R $(PERIAN_BUILD_DIR)/Perian.component $(PERIAN_DIR)
-	strip -s $(SRC_DIR)/exportedSymbols -u $(PERIAN_DIR)/Perian.component/Contents/MacOS/Perian
+	cp -R $(PERIAN_BUILD_DIR)/Perian.prefPane $(PERIAN_DIR)
+#	strip -s $(SRC_DIR)/exportedSymbols -u $(PERIAN_DIR)/Perian.component/Contents/MacOS/Perian
 
 	@# copy the text files
 #	cp $(SRC_DIR)/Changes.txt $(PERIAN_DIR)
@@ -45,7 +46,7 @@ createfolder:
 	cp $(SRC_DIR)/Release/License.txt $(PERIAN_DIR)
 	
 	@# symlink /Library/QuickTime
-	ln -s /Library/QuickTime $(PERIAN_DIR)/QuickTime
+#	ln -s /Library/QuickTime $(PERIAN_DIR)/QuickTime
 
 	@# delete svn  and backup files
 	find $(BUILD_DIR) -name ".svn" -type d -exec rm -rf {} \; -prune
