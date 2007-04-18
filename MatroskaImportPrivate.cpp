@@ -888,16 +888,16 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 		}
 		lastFrames.clear();
 	} else if (ptsReorder.size() > 1) {
-		ptsReorder.sort();
-		list<TimeValue64>::iterator actualDTS = ++ptsReorder.begin();
 		
-		// first frame has correct dts (we start at a keyframe thus pts = dts and don't
-		// remove that frame until it has correct duration, for which the next frame must
-		// have correct dts.) So, we're looking for a pts of no more than dts + duration + 1
-		TimeValue64 expectedDTS = lastFrames[0].dts + lastFrames[0].duration + 1;
+		// pts -> dts works this way: we assume that the first frame has correct dts 
+		// (we start at a keyframe, so pts = dts), and then we fill up a buffer with
+		// frames until we have the frame whose pts is equal to the next dts
+		// Then, we sort this buffer, extract the pts as dts, and calculate the duration.
 		
-		if (*actualDTS <= expectedDTS || ptsReorder.size() > MAX_DECODE_DELAY + 1) {
-			lastFrames[1].dts = *actualDTS;
+		if (ptsReorder.size() > MAX_DECODE_DELAY + 1) {
+			ptsReorder.sort();
+			
+			lastFrames[1].dts = *(++ptsReorder.begin());
 			lastFrames[0].duration = lastFrames[1].dts - lastFrames[0].dts;
 			AddFrame(lastFrames[0]);
 			lastFrames.erase(lastFrames.begin());
