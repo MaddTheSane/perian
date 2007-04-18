@@ -5,6 +5,24 @@
 - Added support for .gvi (avi wrapper from Google Video)
 - Changed distribution to a Preference Pane in order to make installation simpler and configuration possible in the long term.
 - Changed installation directory from /Library/QuickTime to ~/Library/QuickTime.
+- Fixed avi/flv over http
+- Added support for Windows Media Audio in AVI
+- Added support for MPEG-1 layer 2 audio
+- Added support for the ADPCM audio codec in FLV
+- Added Vorbis decoder
+- Added support for Fraps FPS1
+- Added support for VP3
+- Added support for i263
+- Added support for HuffYUV
+- Added support for MPEG-1/2 video in AVI/MKV
+- Fix opening AVIs with VBR audio for which there is no available decoder
+- Fix crash with DVI ADPCM
+- Fix multichannel audio descriptions in AVI
+- Faster opening of AVI files
+- High profile H.264 support
+- Full MPEG-4 video support in .mp4
+- Altivec & SSE2 colorspace conversion
+- Fix DV in type 1 AVIs
 
 0.5 - Initial Release
 
