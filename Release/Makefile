@@ -43,7 +43,7 @@ createfolder:
 #	cp $(SRC_DIR)/Changes.txt $(PERIAN_DIR)
 #	cp $(SRC_DIR)/License.txt $(PERIAN_DIR)
 	cp $(SRC_DIR)/Release/Read\ Me.rtf $(PERIAN_DIR)
-	cp $(SRC_DIR)/Release/License.txt $(PERIAN_DIR)
+	cp $(SRC_DIR)/Release/Changes.txt $(PERIAN_DIR)
 	
 	@# symlink /Library/QuickTime
 #	ln -s /Library/QuickTime $(PERIAN_DIR)/QuickTime
