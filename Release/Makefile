@@ -9,7 +9,7 @@ ART_DIR=Artwork
 ifeq ($(BETA),TRUE)
     BUILDSTYLE=Development
 else
-    BUILDSTYLE=Deployment
+    BUILDSTYLE=Deployment+Debug
 endif
 
 
