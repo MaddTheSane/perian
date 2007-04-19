@@ -874,19 +874,23 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 	
 	// tracks w/ lacing can't have b-frames, and neither can any known audio codec
 	if (usesLacing || type != track_video) {
-		for (int i = 0; i < lastFrames.size(); i++) {
-			// all the frames in the vector should have the same timecode at the moment
-			TimeValue64 duration = block.GlobalTimecode() / timecodeScale - lastFrames[i].pts;
-			
-			// since there can be multiple frames in one block, split the duration evenly between them
-			// giving the remainder to the latter blocks
-			int remainder = duration % lastFrames.size() >= lastFrames.size() - i ? 1 : 0;
-			
-			lastFrames[i].duration = duration / lastFrames.size() + remainder;
-			
-			AddFrame(lastFrames[i]);
+		// don't add the blocks until we get one with a new timecode
+		TimeValue64 duration = 0;
+		if (lastFrames.size() > 0)
+			duration = block.GlobalTimecode() / timecodeScale - lastFrames[0].pts;
+		
+		if (duration > 0) {
+			for (int i = 0; i < lastFrames.size(); i++) {
+				// since there can be multiple frames in one block, split the duration evenly between them
+				// giving the remainder to the latter blocks
+				int remainder = duration % lastFrames.size() >= lastFrames.size() - i ? 1 : 0;
+				
+				lastFrames[i].duration = duration / lastFrames.size() + remainder;
+				
+				AddFrame(lastFrames[i]);
+			}
+			lastFrames.clear();
 		}
-		lastFrames.clear();
 	} else if (ptsReorder.size() > 1) {
 		
 		// pts -> dts works this way: we assume that the first frame has correct dts 
