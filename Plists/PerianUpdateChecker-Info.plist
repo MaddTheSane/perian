@@ -22,6 +22,8 @@
 	<string>UpdateCheckerMainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>LSUIElement</key>
+	<string>1</string>
 	<key>UpdateFeedURL</key>
 	<string>http://www.perian.org/appcast.xml</string>
 </dict>
