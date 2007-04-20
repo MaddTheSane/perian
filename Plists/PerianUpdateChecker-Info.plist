@@ -17,7 +17,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>0.5</string>
+	<string>1.0b1</string>
 	<key>NSMainNibFile</key>
 	<string>UpdateCheckerMainMenu</string>
 	<key>NSPrincipalClass</key>
