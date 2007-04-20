@@ -1,4 +1,5 @@
 #import "CPFPerianPrefPaneController.h"
+#import "UpdateCheckerAppDelegate.h"
 #include <sys/stat.h>
 
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
@@ -53,44 +54,44 @@
 
 - (float)getFloatFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(float)defaultValue
 {
-    CFPropertyListRef value;
-    float ret = defaultValue;
-    
+	CFPropertyListRef value;
+	float ret = defaultValue;
+	
 	value = CFPreferencesCopyAppValue(key, appID);
 	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
 		CFNumberGetValue(value, kCFNumberFloatType, &ret);
 	
 	if(value)
 		CFRelease(value);
-    
-    return ret;
+	
+	return ret;
 }
 
 - (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromString:(NSString *)value
 {
-    CFPreferencesSetAppValue(key, value, appID);
+	CFPreferencesSetAppValue(key, value, appID);
 }
 
 - (NSString *)getStringFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
 {
-    CFPropertyListRef value;
-    NSString *ret = nil;
-    
+	CFPropertyListRef value;
+	NSString *ret = nil;
+	
 	value = CFPreferencesCopyAppValue(key, appID);
 	if(value && CFGetTypeID(value) == CFStringGetTypeID())
 		ret = [NSString stringWithString:(NSString *)value];
 	
 	if(value)
 		CFRelease(value);
-    
-    return ret;
+	
+	return ret;
 }
 
 - (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromFloat:(float)value
 {
-    CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberFloatType, &value);
-    CFPreferencesSetAppValue(key, numRef, appID);
-    CFRelease(numRef);
+	CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberFloatType, &value);
+	CFPreferencesSetAppValue(key, numRef, appID);
+	CFRelease(numRef);
 }
 
 #pragma mark Private Functions
@@ -182,7 +183,7 @@
 
 - (id)initWithBundle:(NSBundle *)bundle
 {
-    if ( ( self = [super initWithBundle:bundle] ) != nil ) {
+	if ( ( self = [super initWithBundle:bundle] ) != nil ) {
 		perianForumURL = [[NSURL alloc] initWithString:@"http://forums.cocoaforge.com/index.php?c=12"];
 		perianDonateURL = [[NSURL alloc] initWithString:@"http://perian.org"];
 		perianWebSiteURL = [[NSURL alloc] initWithString:@"http://perian.org"];
@@ -196,9 +197,9 @@
 			userInstalled = NO;
 		else
 			userInstalled = YES;
-    }
-    
-    return self;
+	}
+	
+	return self;
 }
 
 - (void)checkForInstallation
@@ -272,21 +273,28 @@
 {
 	/* General */
 	[self checkForInstallation];
-    NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
-    NSString *myVersion = [[[self bundle] infoDictionary] objectForKey:BundleVersionKey];
-    if((lastInstVersion == nil || [lastInstVersion isVersionStringOlderThan:myVersion]) && installStatus != InstallStatusInstalled)
-    {
-        /*Check for temp after an update */
-        BOOL isDir = NO;
-        NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
-        int tag;
-        
-        if([[NSFileManager defaultManager] fileExistsAtPath:tempPrefPane isDirectory:&isDir] && isDir)
-            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[tempPrefPane stringByDeletingLastPathComponent] destination:@"" files:[NSArray arrayWithObject:[tempPrefPane lastPathComponent]] tag:&tag];
-        
-        [self installUninstall:nil];
-        [self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
-    }
+	NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
+	NSString *myVersion = [[[self bundle] infoDictionary] objectForKey:BundleVersionKey];
+	if((lastInstVersion == nil || [lastInstVersion isVersionStringOlderThan:myVersion]) && installStatus != InstallStatusInstalled)
+	{
+		/*Check for temp after an update */
+		BOOL isDir = NO;
+		NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
+		int tag;
+		
+		if([[NSFileManager defaultManager] fileExistsAtPath:tempPrefPane isDirectory:&isDir] && isDir)
+			[[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[tempPrefPane stringByDeletingLastPathComponent] destination:@"" files:[NSArray arrayWithObject:[tempPrefPane lastPathComponent]] tag:&tag];
+		
+		[self installUninstall:nil];
+		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
+	}
+	
+	NSDate *updateDate = (NSDate *)CFPreferencesCopyAppValue((CFStringRef)NEXT_RUN_KEY, perianAppID);
+	if([updateDate timeIntervalSinceNow] > 1000000000) //futureDate
+		[button_autoUpdateCheck setIntValue:0];
+	else
+		[button_autoUpdateCheck setIntValue:1];
+	[updateDate release];
 	
 	/* A52 Prefs */
 	if([self getBoolFromKey:AC3StereoOverDolbyKey forAppID:a52AppID withDefault:NO])
@@ -301,7 +309,7 @@
 	{
 		[popup_2ChannelMode selectItemAtIndex:1];		
 	}	
-    [self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
+	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
 }
 
 - (void)didUnselect
@@ -323,19 +331,24 @@
 #pragma mark Install/Uninstall
 
 /* Shamelessly ripped from Sparkle */
-- (BOOL)_extractArchivePath:archivePath toDestination:(NSString *)destination
+- (BOOL)_extractArchivePath:archivePath toDestination:(NSString *)destination finalPath:(NSString *)finalPath
 {
-	BOOL ret = NO;
+	BOOL ret = NO, oldExist = NO;
 	struct stat sb;
-	if(stat([destination fileSystemRepresentation], &sb) != 0)
-	{
-		[errorString appendFormat:NSLocalizedString(@"No such directory %@\n", @""), destination];
-		return FALSE;
-	}
+	
+	if(stat([finalPath fileSystemRepresentation], &sb) == 0)
+		oldExist = YES;
 	
 	char *buf = NULL;
-	asprintf(&buf,
-			 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"");
+	if(oldExist)
+		asprintf(&buf,
+				 "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
+				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
+				 "rm -rf \"$TMP_PATH\"");
+	else
+		asprintf(&buf,
+				 "mkdir -p \"$DST_PATH\" && "
+				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"");
 	if(!buf)
 	{
 		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for extraction command\n", @"")];
@@ -344,7 +357,9 @@
 	
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
-	
+	setenv("DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
+	setenv("TMP_PATH", [[finalPath stringByAppendingPathExtension:@"old"] fileSystemRepresentation], 1);
+
 	int status = system(buf);
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		ret = YES;
@@ -353,6 +368,8 @@
 
 	free(buf);
 	unsetenv("SRC_ARCHIVE");
+	unsetenv("$DST_COMPONENT");
+	unsetenv("TMP_PATH");
 	unsetenv("DST_PATH");
 	return ret;
 }
@@ -364,12 +381,6 @@
 	if(stat([finalPath fileSystemRepresentation], &sb) == 0)
 		oldExist = YES;
 	
-	if(stat([destination fileSystemRepresentation], &sb) != 0)
-	{
-		[errorString appendFormat:NSLocalizedString(@"No such directory %@\n", @""), destination];
-		return FALSE;
-	}
-	
 	char *buf = NULL;
 	if(oldExist)
 		asprintf(&buf,
@@ -380,6 +391,7 @@
 				 sb.st_uid, sb.st_gid);
 	else
 		asprintf(&buf,
+				 "mkdir -p \"$DST_PATH\" && "
 				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
 				 "chown -R %d:%d \"$DST_COMPONENT\"",
 				 sb.st_uid, sb.st_gid);
@@ -478,7 +490,7 @@
 		if(currentInstallStatus(pieceStatus) != InstallStatusInstalled)
 		{
 			//Decompress and install new one
-			BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir];
+			BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir finalPath:[containingDir stringByAppendingPathComponent:component]];
 			if(result == NO)
 				ret = NO;
 		}		
@@ -562,7 +574,7 @@
 	
 	int tag = 0;
 	BOOL result = NO;
-	if(auth != nil)
+	if(auth != nil && !userInstalled)
 		[self _authenticatedRemove:[[self quickTimeComponentDir:userInstalled] stringByAppendingPathComponent:@"Perian.component"]];
 	else
 		result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[self quickTimeComponentDir:userInstalled] destination:@"" files:[NSArray arrayWithObject:@"Perian.component"] tag:&tag];
@@ -573,7 +585,7 @@
 	{
 		ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
 		NSString *directory = [self basePathForType:type user:userInstalled];
-		if(auth != nil)
+		if(auth != nil && !userInstalled)
 			[self _authenticatedRemove:[directory stringByAppendingPathComponent:[myComponent objectForKey:ComponentNameKey]]];
 		else
 			result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:directory destination:@"" files:[NSArray arrayWithObject:[myComponent objectForKey:ComponentNameKey]] tag:&tag];
@@ -606,17 +618,22 @@
 #pragma mark Check Updates
 - (IBAction)updateCheck:(id)sender 
 {
-    FSRef updateCheckRef;
-    
-    OSStatus status = FSPathMakeRef((UInt8 *)[[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Resources/PerianUpdateChecker.app"] fileSystemRepresentation], &updateCheckRef, NULL);
-    if(status != noErr)
-        return;
-    
-    LSOpenFSRef(&updateCheckRef, NULL);
+	FSRef updateCheckRef;
+	
+	OSStatus status = FSPathMakeRef((UInt8 *)[[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Resources/PerianUpdateChecker.app"] fileSystemRepresentation], &updateCheckRef, NULL);
+	if(status != noErr)
+		return;
+	
+	LSOpenFSRef(&updateCheckRef, NULL);
 } 
 
 - (IBAction)setAutoUpdateCheck:(id)sender 
 {
+	CFStringRef key = (CFStringRef)NEXT_RUN_KEY;
+	if([button_autoUpdateCheck intValue])
+		CFPreferencesSetAppValue(key, [NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN], perianAppID);
+	else
+		CFPreferencesSetAppValue(key, [NSDate distantFuture], perianAppID);
 } 
 
 
@@ -664,14 +681,14 @@
 
 - (void)setAC3DynamicRange:(float)newVal
 {
-    if(newVal > 4.0)
-        newVal = 4.0;
-    if(newVal < 0.0)
-        newVal = 0.0;
-    
+	if(newVal > 4.0)
+		newVal = 4.0;
+	if(newVal < 0.0)
+		newVal = 0.0;
+	
 	nextDynValue = newVal;
-    [textField_ac3DynamicRangeValue setFloatValue:newVal];
-    [slider_ac3DynamicRangeSlider setFloatValue:newVal];
+	[textField_ac3DynamicRangeValue setFloatValue:newVal];
+	[slider_ac3DynamicRangeSlider setFloatValue:newVal];
 	if(newVal == 1.0)
 		[popup_ac3DynamicRangeType selectItemAtIndex:0];
 	else if(newVal == 2.0)
@@ -688,16 +705,16 @@
 
 - (IBAction)setAC3DynamicRangeValue:(id)sender
 {
-    float newVal = [textField_ac3DynamicRangeValue floatValue];
-    
-    [self setAC3DynamicRange:newVal];
+	float newVal = [textField_ac3DynamicRangeValue floatValue];
+	
+	[self setAC3DynamicRange:newVal];
 }
 
 - (IBAction)setAC3DynamicRangeSlider:(id)sender
 {
-    float newVal = [slider_ac3DynamicRangeSlider floatValue];
-    
-    [self setAC3DynamicRange:newVal];
+	float newVal = [slider_ac3DynamicRangeSlider floatValue];
+	
+	[self setAC3DynamicRange:newVal];
 }
 
 - (IBAction)cancelDynRangeSheet:(id)sender
