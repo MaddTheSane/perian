@@ -381,7 +381,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	
 	_lines = [self serializeSubLines:doclines];
 	
-	header = [[ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location] retain];
+	header = [[[ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location] stringByTrimmingCharactersInSet:ws] retain];
 	
 	return noErr;
 }
