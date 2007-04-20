@@ -6,6 +6,22 @@
 #define AC3ProLogicIIKey CFSTR("useDolbyProLogicII")
 #define LastInstalledVersionKey CFSTR("LastInstalledVersion")
 
+@interface NSString (VersionStringCompare)
+- (BOOL)isVersionStringOlderThan:(NSString *)older;
+@end
+
+@implementation NSString (VersionStringCompare)
+- (BOOL)isVersionStringOlderThan:(NSString *)older
+{
+	if([self compare:older] == NSOrderedAscending)
+		return TRUE;
+	if([self hasPrefix:older] && [self length] > [older length] && [self characterAtIndex:[older length]] == 'b')
+		//1.0b1 < 1.0, so check for it.
+		return TRUE;
+	return FALSE;
+}
+@end
+
 @interface CPFPerianPrefPaneController(_private)
 - (void)setAC3DynamicRange:(float)newVal;
 - (void)saveAC3DynamicRange:(float)newVal;
@@ -131,10 +147,10 @@
 	if(infoDict != nil)
 	{
 		NSString *currentVersion = [infoDict objectForKey:BundleVersionKey];
-		if([currentVersion compare:myVersion] == NSOrderedAscending)
+		if([currentVersion isVersionStringOlderThan:myVersion])
 			ret = InstallStatusOutdated;
-		
-		ret = InstallStatusInstalled;		
+		else
+			ret = InstallStatusInstalled;
 	}
 	
 	/* Check other installation type */
@@ -146,6 +162,20 @@
 		return ret;
 	
 	return setWrongLocationInstalled(ret);
+}
+
+- (void)setInstalledVersionString
+{
+	NSString *path = [[self basePathForType:ComponentTypeQuickTime user:userInstalled] stringByAppendingPathComponent:@"Perian.component"];
+	
+	NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
+	if(infoDict != nil)
+	{
+		NSString *currentVersion = [infoDict objectForKey:BundleVersionKey];
+		[textField_currentVersion setStringValue:currentVersion];
+	}
+	else
+		[textField_currentVersion setStringValue:@"-"];
 }
 
 #pragma mark Preference Pane Support
@@ -174,7 +204,10 @@
 - (void)checkForInstallation
 {
 	NSDictionary *infoDict = [[self bundle] infoDictionary];
-	installStatus = [self installStatusForComponent:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey]];
+	NSString *myVersion = [infoDict objectForKey:BundleVersionKey];
+	
+	[self setInstalledVersionString];
+	installStatus = [self installStatusForComponent:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:myVersion];
 	if(currentInstallStatus(installStatus) == InstallStatusNotInstalled)
 	{
 		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is not Installed", @"")];
@@ -241,7 +274,7 @@
 	[self checkForInstallation];
     NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
     NSString *myVersion = [[[self bundle] infoDictionary] objectForKey:BundleVersionKey];
-    if((lastInstVersion == nil || [lastInstVersion compare:myVersion] == NSOrderedAscending) && installStatus != InstallStatusInstalled)
+    if((lastInstVersion == nil || [lastInstVersion isVersionStringOlderThan:myVersion]) && installStatus != InstallStatusInstalled)
     {
         /*Check for temp after an update */
         BOOL isDir = NO;
