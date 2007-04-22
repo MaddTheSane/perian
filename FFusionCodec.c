@@ -941,7 +941,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 			picture = glob->picture;
 	}
 	
-	if(picture->data[0] == 0)
+	if(!picture || picture->data[0] == 0)
 	{
 		if(glob->lastDisplayedFrame.data[0] != NULL)
 			//Display last frame
