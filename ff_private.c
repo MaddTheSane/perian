@@ -565,15 +565,19 @@ int determine_header_offset(ff_global_ptr storage) {
 	else
 	{
 		int streamsRead = 0;
+		AVStream *st;
+		
 		result = av_seek_frame(formatContext, -1, 0, 0);
 		if(result < 0) goto bail;
 		
-		formatContext->iformat->read_packet(formatContext, &packet);
+		av_read_frame(formatContext, &packet);
+		st = formatContext->streams[packet.stream_index];
+		
 		/* read_packet will give the first decodable packet. However, that isn't necessarily
 			the first entry in the index, so look for an entry with a matching size. */
-		for (i = 0; i < formatContext->streams[packet.stream_index]->nb_index_entries; i++) {
-			if (packet.size == formatContext->streams[packet.stream_index]->index_entries[i].size) {
-				storage->header_offset = packet.pos - formatContext->streams[packet.stream_index]->index_entries[i].pos;
+		for (i = 0; i < st->nb_index_entries; i++) {
+			if (packet.dts == st->index_entries[i].timestamp) {
+				storage->header_offset = packet.pos - st->index_entries[i].pos;
 				break;
 			}
 		}
