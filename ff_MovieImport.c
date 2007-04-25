@@ -397,6 +397,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	/* Prepare the iocontext structure */
 	memset(&byteContext, 0, sizeof(byteContext));
 	result = url_open_dataref(&byteContext, dataRef, dataRefType, &storage->dataHandler, &storage->dataHandlerSupportsWideOffsets, &storage->dataSize);
+	storage->isStreamed = dataRefType == URLDataHandlerSubType;
 	require_noerr(result, bail);
 	
 	/* Open the Format Context */
@@ -496,10 +497,10 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		}
 			
 		//import with idle. Decode a little bit of data now.
-		import_with_idle(storage, inFlags, outFlags, 10, 300);
+		import_with_idle(storage, inFlags, outFlags, 10, 300, true);
 	} else {
 		//QuickTime didn't request import with idle, so do it all now.
-		import_with_idle(storage, inFlags, outFlags, 0, 0);			
+		import_with_idle(storage, inFlags, outFlags, 0, 0, true);			
 	}
 	
 bail:
@@ -517,7 +518,24 @@ ComponentResult FFAvi_MovieImportSetIdleManager(ff_global_ptr storage, IdleManag
 }
 
 ComponentResult FFAvi_MovieImportIdle(ff_global_ptr storage, long inFlags, long *outFlags) {
-	return(import_with_idle(storage, inFlags | movieImportWithIdle, outFlags, 0, 1000));	
+	ComponentResult err = noErr;
+	TimeValue currentIdleTime = GetMovieTime(storage->movie, NULL);
+	TimeScale movieTimeScale = GetMovieTimeScale(storage->movie);
+	int addSamples = false;
+	
+	storage->idlesSinceLastAdd++;
+	
+	if (currentIdleTime == storage->lastIdleTime && storage->idlesSinceLastAdd > 5 || 
+		storage->loadedTime < currentIdleTime + 5*movieTimeScale)
+	{
+		storage->idlesSinceLastAdd = 0;
+		addSamples = true;
+	}
+	
+	err = import_with_idle(storage, inFlags | movieImportWithIdle, outFlags, 0, 1000, addSamples);
+	
+	storage->lastIdleTime = currentIdleTime;
+	return err;
 }
 
 ComponentResult FFAvi_MovieImportGetLoadState(ff_global_ptr storage, long *importerLoadState) {

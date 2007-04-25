@@ -521,6 +521,7 @@ int prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OSType 
 		st = ic->streams[j];
 		map[j].index = st->index;
 		map[j].str = st;
+		map[j].duration = -1;
 		
 		if(st->codec->codec_type == CODEC_TYPE_VIDEO) {
 			track = NewMovieTrack(theMovie, st->codec->width << 16, st->codec->height << 16, kNoVolume);
@@ -779,7 +780,7 @@ bail:
 /* Import function for movies that lack an index.
  * Supports progressive importing, but will not idle if maxFrames == 0.
  */
-ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames) {
+ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames, bool addSamples) {
 	SampleReference64Record sampleRec;
 	DataHandler dataHandler;
 	AVFormatContext *formatContext;
@@ -825,7 +826,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		ncstream = &storage->stream_map[i];
 		Media media = ncstream->media;
 		
-		if(media)
+		if(media && ncstream->duration == -1)
 			ncstream->duration = GetMediaDuration(media);
 	}
 	
@@ -913,7 +914,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		ncstream = &storage->stream_map[i];
 		Media media = ncstream->media;
 		
-		if(media) {
+		if(media && (addSamples || readResult != 0)) {
 			Track track = GetMediaTrack(media);
 			TimeScale mediaTimeScale = GetMediaTimeScale(media);
 			TimeValue prevDuration = ncstream->duration;
@@ -927,6 +928,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			if(addedDuration > 0) {
 				result = InsertMediaIntoTrack(track, -1, prevDuration, addedDuration, fixed1);
 			}
+			ncstream->duration = -1;
 		}
 	}
 	
@@ -968,7 +970,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 	send_movie_changed_notification(storage->movie);
 	
 	//tell the idle manager to idle us again in 500ms.
-	if(idling && storage->idleManager)
+	if(idling && storage->idleManager && storage->isStreamed)
 		QTIdleManagerSetNextIdleTimeDelta(storage->idleManager, 1, 2);
 	
 	return(result);

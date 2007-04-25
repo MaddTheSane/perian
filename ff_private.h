@@ -59,6 +59,7 @@ struct _ff_global_context {
 	// things needed for idling support
 	Track placeholderTrack;
 	DataHandler dataHandler;
+	bool isStreamed;
 	Boolean dataHandlerSupportsWideOffsets;
 	int64_t dataSize;
 	int largestPacketSize;
@@ -66,6 +67,8 @@ struct _ff_global_context {
 	IdleManager idleManager;
 	long movieLoadState;
 	TimeValue loadedTime;
+	TimeValue lastIdleTime;
+	int idlesSinceLastAdd;
 	
 	//the "atTime" parameter to the initial import.
 	TimeValue atTime;
@@ -99,7 +102,7 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 
 int determine_header_offset(ff_global_ptr storage);
 int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDuration);
-ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames);
+ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames, bool addSamples);
 ComponentResult create_placeholder_track(Movie movie, Track *placeholderTrack, TimeValue duration, Handle dataRef, OSType dataRefType);
 void send_movie_changed_notification(Movie movie);
 
