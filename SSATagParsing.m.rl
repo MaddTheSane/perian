@@ -488,10 +488,6 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				}
 				
 				action styleset {
-					if (!newLayout) {
-						newLayout = TRUE;
-						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
-					}
 					re->multipart_drawing = YES;
 					ssastyleline *the_style = re->style;
 					NSString *searchsn = [NSString stringWithCharacters:strparambegin length:p-strparambegin];
@@ -511,7 +507,6 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					cur_shadow = the_style->shadow;
 					cur_frz = the_style->angle;
 					cur_scalex = cur_scaley = 1;
-					cur_posx = cur_posy = -1;
 				}
 				
 				action skip_t_tag {
