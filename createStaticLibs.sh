@@ -16,6 +16,12 @@ else
 	oldbuildid_ffmpeg="buildme"
 fi
 
+QUICKBUILD="$BUILT_PRODUCTS_DIR/Universal/quickbuild"
+if [[ -e "$QUICKBUILD" ]] ; then
+    oldbuildid_ffmpeg="quick"
+    rm "$QUICKBUILD"
+fi
+
 if [[ $buildid == "r" ]] ; then
 	echo "error: you're using svk. Please ask someone to add svk support to the build system. There's a script in Adium svn that can do this."
 	exit 1;
@@ -36,21 +42,22 @@ else
 	export optCFlags="-mtune=nocona -fstrict-aliasing -frerun-cse-after-loop -fweb -gstabs+ -mdynamic-no-pic" 
 
 	cd "$BUILDDIR"
-	if [ `arch` != i386 ] ; then
-		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86_32 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
-	else
-		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m --extra-cflags='$optCFlags'
-	fi
-
-	
-		make depend > /dev/null 2>&1 || true
-if [ "$BUILD_STYLE" = "Development" ] ; then
-	cd libavcodec
-	export CFLAGS="-O1 -fomit-frame-pointer -funit-at-a-time"; make h264.o cabac.o i386/dsputil_mmx.o
-	unset CFLAGS;
-	cd ..
-fi
-        make -j3            lib
+	if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
+        if [ `arch` != i386 ] ; then
+            "$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86_32 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+        else
+            "$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m --extra-cflags='$optCFlags'
+        fi
+        
+        make depend > /dev/null 2>&1 || true
+    fi
+    if [ "$BUILD_STYLE" = "Development" ] ; then
+        cd libavcodec
+        export CFLAGS="-O1 -fomit-frame-pointer -funit-at-a-time"; make h264.o cabac.o
+        unset CFLAGS;
+        cd ..
+    fi
+    make -j3            lib
 	
 	
 	#######################
@@ -62,16 +69,16 @@ fi
 	export optCFlags="-mcpu=G3 -mtune=G5 -fstrict-aliasing -funroll-loops -mmultiple -gstabs+ -mdynamic-no-pic"
 	
 	cd "$BUILDDIR"
-	if [ `arch` = ppc ] ; then
-		"$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --extra-cflags='$optCFlags'
-	else
-		"$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk $optCFlags' $extraConfigureOptions $generalConfigureOptions
-	fi
-	
-		
-
+	if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
+        if [ `arch` = ppc ] ; then
+            "$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --extra-cflags='$optCFlags'
+        else
+            "$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk $optCFlags' $extraConfigureOptions $generalConfigureOptions
+        fi
+        
         make depend > /dev/null 2>&1 || true
-        make -j3            lib
+    fi
+    make -j3            lib
 	
 	#######################
 	# lipo shlibs
