@@ -113,6 +113,12 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	if(bsid > 8)
 		shift = bsid - 8;
 	
+	if(passthrough)
+	{
+		if(acmod > 2)
+			acmod = 0;
+		lfe = 0;
+	}
 	/* Setup the AudioStreamBasicDescription and AudioChannelLayout */
 	memset(asbd, 0, sizeof(AudioStreamBasicDescription));
 	asbd->mSampleRate = sample_rate >> shift;
