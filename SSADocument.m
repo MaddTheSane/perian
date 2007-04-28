@@ -265,11 +265,15 @@ static BOOL isinrange(unsigned base, unsigned test_s, unsigned test_e)
 
 static NSString *oneMKVPacket(NSDictionary *s)
 {
+	NSString *name = [s objectForKey:@"Name"];
+	if (!name) name = [s objectForKey:@"Actor"];
+	if (!name) name = @"";
+	
 	return [NSString stringWithFormat:@"%d,%d,%@,%@,%0.4d,%0.4d,%0.4d,%@,%@\n",
 		[[s objectForKey:@"ReadOrder"] intValue],
 		[[s objectForKey:@"Layer"] intValue],
 		[s objectForKey:@"Style"],
-		[s objectForKey:@"Name"],
+		name,
 		[[s objectForKey:@"MarginL"] intValue],
 		[[s objectForKey:@"MarginR"] intValue],
 		[[s objectForKey:@"MarginV"] intValue],

@@ -46,6 +46,12 @@
 	style_count++;
 	styles = realloc(styles, sizeof(SSAStyleSpan*[style_count]));
 }
+
+-(NSString*)description
+{
+	return [NSString stringWithFormat:@"\"%@\", %d styles, %@", nstext, style_count,
+		   (posx != 1) ? [NSString stringWithFormat:@"pos (%d,%d)",posx,posy] : [NSString stringWithFormat:@"h %d v %d", halign, valign]];
+}
 @end
 
 %% machine SSAtag;
@@ -352,7 +358,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 						newLayout = TRUE;
 						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
 					}
-					
+
 					UpdateAlignment(SSA2ASSAlignment(inum), cur_posx, &cur_valign, &cur_halign, cur_layout);
 				}
 				
@@ -547,7 +553,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"2c" color %secondarycolor
 								|"3c" color %outlinecolor
 								|"4c" color %shadowcolor
-								|"1a" color %primaryalpha
+								|("1a"|"alpha") color %primaryalpha
 								|"2a" color %secondaryalpha
 								|"3a" color %outlinealpha
 								|"4a" color %shadowalpha
@@ -556,6 +562,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"p" num %draw_mode
 								#|"t" [^)}]* # enabling this crashes ragel
 								|"t(" % skip_t_tag
+								|""
 								);
 				
 				cmd = ("\\" :> cmd_specific)+;
