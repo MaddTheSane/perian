@@ -620,6 +620,7 @@
 {
 	FSRef updateCheckRef;
 	
+	CFPreferencesSetAppValue((CFStringRef)NEXT_RUN_KEY, NULL, perianAppID);
 	OSStatus status = FSPathMakeRef((UInt8 *)[[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Resources/PerianUpdateChecker.app"] fileSystemRepresentation], &updateCheckRef, NULL);
 	if(status != noErr)
 		return;
