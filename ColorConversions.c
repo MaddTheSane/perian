@@ -191,14 +191,14 @@ static void Y420toY422_sse2(UInt8 * o, unsigned outRB, unsigned width, unsigned 
 			* sse2 can do 64-bit loads, so we do that. (apple's h264 doesn't seem to, maybe we should copy them?)
 			* unrolling loops is very bad on x86 */
 			unsigned x2 = x*2;
-			__builtin_prefetch(&yv[x+1], 0, 0); __builtin_prefetch(&yv2[x+1], 0, 0); // prefetch next y vectors, throw it out of cache immediately after use
-			__builtin_prefetch(&uv[x+1], 0, 0); __builtin_prefetch(&vv[x+1], 0, 0); // and chroma too
+//			__builtin_prefetch(&yv[x+1], 0, 0); __builtin_prefetch(&yv2[x+1], 0, 0); // prefetch next y vectors, throw it out of cache immediately after use
+//			__builtin_prefetch(&uv[x+1], 0, 0); __builtin_prefetch(&vv[x+1], 0, 0); // and chroma too
 			__m128i	tmp_y = yv[x], 
 				tmp_y2 = yv2[x],
 				chroma = _mm_unpacklo_epi8(_mm_loadl_epi64((__m128i*)&uv[x]), _mm_loadl_epi64((__m128i*)&vv[x]));
 			__m128i p1 = _mm_unpacklo_epi8(chroma, tmp_y),
-				p2 = _mm_unpackhi_epi8(chroma, tmp_y),
 				p3 = _mm_unpacklo_epi8(chroma, tmp_y2),
+				p2 = _mm_unpackhi_epi8(chroma, tmp_y),
 				p4 = _mm_unpackhi_epi8(chroma, tmp_y2);
 			
 			_mm_stream_si128(&ov[x2],p1); // store to memory rather than cache
