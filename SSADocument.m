@@ -470,15 +470,19 @@ static NSString *oneMKVPacket(NSDictionary *s)
 
 -(void)loadDefaultsWithWidth:(float)width height:(float)height
 {
+	float sdDiagonal = sqrt(640 * 640 + 480 * 480), movDiagonal = sqrt(width * width + height * height);
 	stylecount = 0;
 	styles = malloc(0);
 	defaultstyle = malloc(sizeof(ssastyleline));
 	*defaultstyle = SSA_DefaultStyle;
 	disposedefaultstyle = YES;
-	resX = (width / height) * 480.; resY = 480;
+	resY = 480; resX = (width / height) * resY; 
 	timescale = 1;
 	collisiontype = NormalCollisions;
 	version = S_ASS;
+	
+	resX *= movDiagonal / sdDiagonal;
+	resY *= movDiagonal / sdDiagonal;
 	
 	[self makeATSUStylesForSSAStyle:defaultstyle];
 }
