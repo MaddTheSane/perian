@@ -74,6 +74,14 @@
 		[[NSApplication sharedApplication] terminate:self];
 }
 
+- (void)appcastDidFailToLoad:(SUAppcast *)appcast
+{
+	[self updateFailed];
+	NSLog(@"Download error: %@", [error localizedDescription]);
+	[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to load Perian's version info. Please try again later.", nil)];
+	[[NSApplication sharedApplication] terminate:self];	
+}
+
 - (void)showUpdatePanelForItem:(SUAppcastItem *)updateItem
 {
 	updateAlert = [[SUUpdateAlert alloc] initWithAppcastItem:updateItem];
@@ -152,7 +160,7 @@
 {
 	[self updateFailed];
 	NSLog(@"Download error: %@", [error localizedDescription]);
-	[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to download the file. Please try again later.", nil)];
+	[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to download the newest version of Perian. Please try again later.", nil)];
 	[[NSApplication sharedApplication] terminate:self];
 }
 
