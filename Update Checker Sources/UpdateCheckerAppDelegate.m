@@ -13,6 +13,10 @@
 #import "UpdateCheckerAppDelegate.h"
 #include <stdlib.h>
 
+@interface UpdateCheckerAppDelegate (private)
+- (void)showUpdateErrorAlertWithInfo:(NSString *)info;
+@end
+
 @implementation UpdateCheckerAppDelegate
 
 - (void)dealloc
@@ -64,7 +68,7 @@
 	NSString *currentSystemVersion = [[[NSDictionary dictionaryWithContentsOfFile:versionPlistPath] objectForKey:@"ProductVersion"] retain];
 
 	BOOL updateAvailable = SUStandardVersionComparison([latest minimumSystemVersion], currentSystemVersion);
-    NSString *panePath = [[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
+    NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	NSString *skippedVersion = [[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY];
 	if (updateAvailable && (!skippedVersion || 
@@ -77,7 +81,6 @@
 - (void)appcastDidFailToLoad:(SUAppcast *)appcast
 {
 	[self updateFailed];
-	NSLog(@"Download error: %@", [error localizedDescription]);
 	[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to load Perian's version info. Please try again later.", nil)];
 	[[NSApplication sharedApplication] terminate:self];	
 }
