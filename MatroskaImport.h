@@ -27,6 +27,7 @@
 
 #include <vector>
 #include <list>
+#include <map>
 
 #include <QuickTime/QuickTime.h>
 #include "DataHandlerCallback.h"
@@ -133,15 +134,31 @@ private:
 	// from one block group until the next block group is found to set the duration of the
 	// previous ones to be the difference in timestamps.
 	vector<MatroskaFrame>	lastFrames;
+	int currentFrame;						// the frame we're currently determining the dts for
 	
 	// insert pts values, sort, then smallest value is current dts if size > decode delay
 	list<TimeValue64>		ptsReorder;
+	
+	// We calculate the duration at a given dts, and have to save it until we find a 
+	// frame with the same pts. This makes it such that we are actually calculating
+	// the duration between display timestamps instead of decode timestamps.
+	map<TimeValue64, TimeValue> durationForPTS;
+	
 	bool					seenFirstBlock;
 	
-	// this is the first sample number (if sample table) or sample time that we haven't 
-	// yet added to the media/track. A value of -1 means the value is invalid/unset.
-	SInt64					firstSample;
-	SInt64					amountToAdd;	// num samples if sampleTable, duration otherwise
+	// When using a sample table, these store the range of samples that are in the 
+	// sample table but not yet added to the media.
+	SInt64					firstSample;		// -1 means it's not set
+	SInt64					numSamples;
+	
+	// the amount of the media that needs to be added to the track
+	TimeValue64				durationToAdd;
+	
+	// We don't want to add regions with frames that are displayed after the region.
+	// Assume that when the sum of the display offsets is zero, this is true, and
+	// update durationToAdd by adding durationSinceZeroSum.
+	int						displayOffsetSum;
+	SInt64					durationSinceZeroSum;
 };
 
 
