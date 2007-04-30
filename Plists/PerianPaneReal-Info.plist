@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>MyDocumentType</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>XML</string>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleIconFile</key>
+	<string>Perian_icon</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.perian.PerianPane</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Perian</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0b2</string>
+	<key>Components</key>
+	<array>
+		<dict>
+			<key>ArchiveName</key>
+			<string>AC3MovieImport.zip</string>
+			<key>CFBundleVersion</key>
+			<string>1.7.5</string>
+			<key>Name</key>
+			<string>AC3MovieImport.component</string>
+			<key>Type</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>ArchiveName</key>
+			<string>A52Codec.zip</string>
+			<key>CFBundleVersion</key>
+			<string>1.7.5</string>
+			<key>Name</key>
+			<string>A52Codec.component</string>
+			<key>Type</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>NSMainNibFile</key>
+	<string>PerianPrefPane</string>
+	<key>NSPrefPaneIconFile</key>
+	<string>Perian_icon</string>
+	<key>NSPrincipalClass</key>
+	<string>CPFPerianPrefPaneController</string>
+</dict>
+</plist>
