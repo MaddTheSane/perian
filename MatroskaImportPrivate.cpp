@@ -214,9 +214,10 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	Track firstAudioTrack = NULL;
 	Track firstSubtitleTrack = NULL;
 	
-	// first pass: audio/video
-	// second pass: subtitles, which depend on the size of the video track being set atm
-	for (int pass = 1; pass <= 2; pass++) {
+	// Since creating a subtitle track requires a video track to have already been created
+    // (so that it can be sized to fit exactly over the video track), we go through the 
+    // track entries in two passes, first to add audio/video, second to add subtitle tracks.
+    for (int pass = 1; pass <= 2; pass++) {
 		for (int i = 0; i < trackEntries.ListSize(); i++) {
 			KaxTrackEntry & track = *static_cast<KaxTrackEntry *>(trackEntries[i]);
 			KaxTrackNumber & number = GetChild<KaxTrackNumber>(track);
