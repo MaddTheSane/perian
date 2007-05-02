@@ -102,6 +102,8 @@ void MatroskaImport::SetupMovie()
 	
 	segmentOffset = static_cast<KaxSegment *>(el_l0)->GetDataStart();
 	
+	SetAutoTrackAlternatesEnabled(theMovie, false);
+	
 	while (!done && NextLevel1Element()) {
 		int upperLevel = 0;
 		EbmlElement *dummyElt = NULL;
