@@ -39,7 +39,7 @@ else
 	BUILDDIR="$BUILT_PRODUCTS_DIR/intel"
 	mkdir "$BUILDDIR"
 	
-	export optCFlags="-mtune=nocona -fstrict-aliasing -frerun-cse-after-loop -fweb -gstabs+ -mdynamic-no-pic" 
+	export optCFlags="-mtune=nocona -fstrict-aliasing -frerun-cse-after-loop -fweb -gstabs+ -mdynamic-no-pic -Dattribute_deprecated=" 
 
 	cd "$BUILDDIR"
 	if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
@@ -66,7 +66,7 @@ else
 	BUILDDIR="$BUILT_PRODUCTS_DIR/ppc"
 	mkdir "$BUILDDIR"
 	
-	export optCFlags="-mcpu=G3 -mtune=G5 -fstrict-aliasing -funroll-loops -mmultiple -gstabs+ -mdynamic-no-pic"
+	export optCFlags="-mcpu=G3 -mtune=G5 -fstrict-aliasing -funroll-loops -mmultiple -gstabs+ -mdynamic-no-pic -Dattribute_deprecated="
 	
 	cd "$BUILDDIR"
 	if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
