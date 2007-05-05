@@ -217,7 +217,7 @@ void nsSBCSGroupProber::DumpStatus()
     else
       mProbers[i]->DumpStatus();
   }
-  printf(" SBCS Group found best match [%s] confidence %f.\r\n",  
+  if (mProbers[mBestGuess]) printf(" SBCS Group found best match [%s] confidence %f.\r\n",  
          mProbers[mBestGuess]->GetCharSetName(), cf);
 }
 #endif

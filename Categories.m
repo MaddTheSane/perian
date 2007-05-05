@@ -87,21 +87,29 @@
 {
 	NSData *data = [NSData dataWithContentsOfMappedFile:file];
 	UniversalDetector *ud = [[UniversalDetector alloc] init];
-	NSString *res;
-	CFStringEncoding enc;
+	NSString *res = nil;
+	NSStringEncoding enc;
+	float conf;
+	NSString *enc_str;
 	
 	[ud analyzeData:data];
 	
 	enc = [ud encoding];
+	conf = [ud confidence];
+	enc_str = [ud MIMECharset];
 	
-	if ([ud confidence] < .7) 
-		Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[[ud MIMECharset] UTF8String],[file UTF8String],[ud confidence]*100.);
-		
+	if (conf < .5) {
+		if ([enc_str isEqualToString:@"windows-1251"]) { // this may or may not be a good idea...
+			enc = NSWindowsCP1250StringEncoding; // UD is bad at guessing latin2, so if it has a poor match for 1251 we change it to this
+            Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but confidence only %f%%. Trying windows-1250.\n",[enc_str UTF8String],[file UTF8String],conf*100.);
+		} else if (![enc_str isEqualToString:@"US-ASCII"]) Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[enc_str UTF8String],[file UTF8String],conf*100.);
+	}
+	
 	res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
 	
-	if (!res) Codecprintf(NULL,"Failed to load file as guessed encoding %s.\n",[[ud MIMECharset] UTF8String]);
+	if (!res) Codecprintf(NULL,"Failed to load file as guessed encoding %s.\n",[enc_str UTF8String]);
 	[ud release];
-
+	
 	return res;
 }
 @end
