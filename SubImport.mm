@@ -114,7 +114,6 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 
 	const char *data = NULL;
 	ImageDescriptionHandle textDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
-	unsigned int subNum = 1;
 	UInt8 *path = (UInt8*)malloc(PATH_MAX);
 	NSString *srtfile;
 	Handle sampleHndl;
@@ -146,15 +145,7 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 		goto bail;
 	}
 
-	char subNumStr[10];
-
-	snprintf(subNumStr, 10, "%u", subNum);
-	char *subOffset; 
-	if (data != NULL) {
-		subOffset = strstr(data, subNumStr);
-	} else {
-		subOffset = NULL;
-	}
+	const char *subOffset = data;
 
 	while (subOffset != NULL) {
 		unsigned int starthour, startmin, startsec, startmsec;
@@ -172,8 +163,7 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 
 		// find the next subtitle
 		// setting subOffset to point the end of the current subtitle text
-		snprintf(subNumStr, 10, "\n%u", ++subNum);
-		subOffset = strstr(subTimecodeOffset, subNumStr);
+		subOffset = strstr(subOffset, "\n\n");
 
 		if (ret == 8) {
 			// skip to the beginning of the subtitle text
@@ -194,8 +184,8 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 				}
 
 				// with the subtitle offset, we want the number at the beginning
-				// so advance past the newline in the stream
-				subOffset += 1;
+				// so advance past the newlines in the stream
+				subOffset += 2;
 			}
 		}
 	}
