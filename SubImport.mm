@@ -353,6 +353,7 @@ bail:
 		lines = [[NSMutableArray alloc] init];
 		outpackets = [[NSMutableArray alloc] init];
 		finished = NO;
+		write_gap = NO;
 	}
 	
 	return self;
@@ -368,7 +369,7 @@ bail:
 -(void)addLine:(SubLine *)sline
 {
 	if (sline->begin_time < sline->end_time)
-	[lines addObject:sline];
+		[lines addObject:sline];
 }
 
 static int cmp_line(id a, id b, void* unused)
@@ -506,17 +507,40 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 
 -(SubLine*)getSerializedPacket
 {
+	int packetcount;
+	
 	if ([outpackets count] == 0)  {
 		[self refill];
 		if ([outpackets count] == 0) 
 			return nil;
 	}
 	
-	SubLine *sl = [outpackets objectAtIndex:0];
-	[outpackets removeObjectAtIndex:0];
+	packetcount = [outpackets count];
+	if (!finished && packetcount < 2) return nil;
+	else if (finished && packetcount == 1) {
+		SubLine *sl = [outpackets objectAtIndex:0];
+		[outpackets removeObjectAtIndex:0];
+		[sl autorelease];
+		return sl;
+	}
 	
-	[sl autorelease];
-	return sl;
+	SubLine *bl = [outpackets objectAtIndex:0], *el;
+		
+	if (write_gap) {
+		el = [outpackets objectAtIndex:1];
+		write_gap = false;
+		[bl autorelease];
+		[outpackets removeObjectAtIndex:0];
+		if (el->begin_time > bl->end_time) {
+			SubLine *ret = [[[SubLine alloc] initWithLine:@"\n" start:bl->end_time end:el->begin_time] autorelease];
+			return ret;
+		}
+		return nil;
+	}
+	
+	
+	write_gap = true;
+	return bl;
 }
 
 -(void)setFinished:(BOOL)f
@@ -597,6 +621,7 @@ const char *CXXSubtitleSerializer::popPacket(size_t *size, unsigned *start, unsi
 	*end   = sl->end_time;
 	
 	*size = strlen(u);
+	
 	return u;
 }
 

@@ -64,7 +64,7 @@
 {
 	NSMutableArray *ar = [NSMutableArray arrayWithCapacity:count];
 	NSScanner *sc = [NSScanner scannerWithString:self];
-	NSString *scv;
+	NSString *scv=nil;
 	[sc setCharactersToBeSkipped:nil];
 	[sc setCaseSensitive:TRUE];
 	
@@ -72,13 +72,15 @@
 		count--;
 		[sc scanUpToString:str intoString:&scv];
 		[sc scanString:str intoString:nil];
-		if (scv) [ar addObject:scv]; else [ar addObject:[NSString string]];
+		if (!scv) scv = [NSString string];
+		[ar addObject:scv];
 		if ([sc isAtEnd]) break;
 		scv = nil;
 	}
 	
 	[sc scanUpToString:@"" intoString:&scv];
-	if (scv) [ar addObject:scv]; else [ar addObject:[NSString string]];
+	if (!scv) scv = [NSString string];
+	[ar addObject:scv];
 
 	return ar;
 }
