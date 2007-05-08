@@ -159,8 +159,8 @@ static ComponentResult ReadSRTFile(NSString *srt, SampleDescriptionHandle desc, 
 	
 	BeginMediaEdits(theMedia);
 	
-	while (sl = [serializer getSerializedPacket]) {
-		NSLog(@"%@", sl);
+	while (![serializer isEmpty]) {
+		sl = [serializer getSerializedPacket];
 		sampleHndl = NewHandle(0);
 		TimeRecord movieStartTime = {SInt64ToWide(sl->begin_time), 1000, 0};
 		TimeValue sampleTime;
@@ -540,7 +540,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 			SubLine *ret = [[[SubLine alloc] initWithLine:@"\n" start:bl->end_time end:el->begin_time] autorelease];
 			return ret;
 		}
-		return nil;
+		return [self getSerializedPacket]; // this is not so clean
 	}
 	
 	

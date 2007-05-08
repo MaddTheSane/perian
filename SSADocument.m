@@ -286,7 +286,6 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	int num = [linesa count], i;
 	NSMutableArray *outa = [[NSMutableArray alloc] init];
 	SubtitleSerializer *serializer = [[SubtitleSerializer alloc] init];
-	SubLine *sl;
 	
 	for (i = 0; i < num; i++) {
 		NSDictionary *l = [linesa objectAtIndex:i];;
@@ -308,8 +307,8 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	
 	[serializer setFinished:YES];
 	
-	while (sl = [serializer getSerializedPacket]) {
-		[outa addObject:sl];
+	while (![serializer isEmpty]) {
+		[outa addObject:[serializer getSerializedPacket]];
 	}
 	
 	[serializer release];

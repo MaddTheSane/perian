@@ -49,6 +49,7 @@ short GetFilenameLanguage(CFStringRef filename);
 -(void)addLine:(SubLine *)sline;
 -(void)setFinished:(BOOL)finished;
 -(SubLine*)getSerializedPacket;
+-(BOOL)isEmpty;
 @end
 #endif
 
