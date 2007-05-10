@@ -79,8 +79,8 @@ nsSBCSGroupProber::nsSBCSGroupProber()
 
   // disable latin2 before latin1 is available, otherwise all latin1 
   // will be detected as latin2 because of their similarity.
-  //mProbers[10] = new nsSingleByteCharSetProber(&Latin2HungarianModel);
-  //mProbers[11] = new nsSingleByteCharSetProber(&Win1250HungarianModel);
+//  mProbers[10] = new nsSingleByteCharSetProber(&Latin2HungarianModel);
+  mProbers[11] = new nsSingleByteCharSetProber(&Win1250HungarianModel);
 
   Reset();
 }

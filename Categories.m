@@ -85,6 +85,37 @@
 	return ar;
 }
 
+static BOOL DifferentiateLatin12(const char *data, int length)
+{
+	// generated from french/german (latin1) and hungarian/slovak (latin2)
+	
+	const short frequencies[] = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		513, 1000, -196, -338, 497, -1420, -1356, -850, 452, -1961, -1513, 726, -2247, -367, 1490, -1300, 
+		-158, -2306, -1420, 16, 352, 226, -330, -1495, 0, 959, 1308, 0, 0, 0, 0, 0, 
+		0, 1845, 1743, 2658, 234, -4533, -1098, -1782, -1138, 2185, 3159, 4390, -1125, 2217, -2643, 647, 
+		297, -4997, -3176, -4854, -505, -1176, 744, -1243, -2163, 3706, 763, 0, 0, 0, 0, 0, 
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 628, 0, 0, 0, 363, 0, 
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3989, 0, -1279, 513, 4714, 0, 
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2405, 0, 0, 0, 0, 0, 
+		0, 0, 0, 0, 0, 0, 1777, 0, 0, 0, 6035, 0, 0, 0, 0, 0, 
+		-1107, 0, 0, 811, -639, 0, 0, -1107, 725, -745, 0, 0, 0, 0, 1986, 0, 
+		0, 0, 0, 0, 0, 0, 0, 0, 888, 0, 0, 0, 0, 0, 725, -1567, 
+		-3675, 6477, 2190, 10702, -1107, 0, 0, -2306, -824, -2951, -3262, 0, 5665, 6755, 2178, 1622, 
+		0, 0, 811, 1088, -1430, 0, -1567, 0, 4352, 1048, 725, -904, -1107, 3343, 4616, 0};
+	
+	int frcount = 0;
+	
+	while (length--) {
+		frcount += frequencies[*data++];
+	}
+	
+	return frcount <= 0;
+}
+
 + (NSString *)stringFromUnknownEncodingFile:(NSString *)file
 {
 	NSData *data = [NSData dataWithContentsOfMappedFile:file];
@@ -93,20 +124,26 @@
 	NSStringEncoding enc;
 	float conf;
 	NSString *enc_str;
+	BOOL latin2;
 	
 	[ud analyzeData:data];
 	
 	enc = [ud encoding];
 	conf = [ud confidence];
 	enc_str = [ud MIMECharset];
+	latin2 = [enc_str isEqualToString:@"windows-1250"];
 	
-	if (conf < .5) {
-		if ([enc_str isEqualToString:@"windows-1251"]) { // this may or may not be a good idea...
-			enc = NSWindowsCP1250StringEncoding; // UD is bad at guessing latin2, so if it has a poor match for 1251 we change it to this
-            Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but confidence only %f%%. Trying windows-1250.\n",[enc_str UTF8String],[file UTF8String],conf*100.);
-		} else if (![enc_str isEqualToString:@"US-ASCII"]) Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[enc_str UTF8String],[file UTF8String],conf*100.);
+	if (latin2) {
+		if (DifferentiateLatin12([data bytes], [data length])) { // seems to actually be latin1
+			enc = NSWindowsCP1252StringEncoding;
+			enc_str = @"windows-1252";
+		}
 	}
 	
+	if (conf < .6 || latin2) {
+		Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[enc_str UTF8String],[file UTF8String],conf*100.);
+	}
+
 	res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
 	
 	if (!res) Codecprintf(NULL,"Failed to load file as guessed encoding %s.\n",[enc_str UTF8String]);
