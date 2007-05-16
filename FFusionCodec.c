@@ -38,6 +38,25 @@
 #include "Codecprintf.h"
 #include "ColorConversions.h"
 
+int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type)
+{
+	ImageDescriptionPtr d = *desc;
+	int offset = sizeof(ImageDescription);
+	uint8_t *p = (uint8_t *)d;
+	
+	//read next description, need 8 bytes for size and type
+	while(offset < d->idSize - 8)
+	{
+		long len = *(p+offset) << 24 | *(p+offset+1) << 16 | *(p+offset+2) << 8 | *(p+offset+3);
+		offset += 4;
+		long rtype = *(p+offset) << 24 | *(p+offset+1) << 16 | *(p+offset+2) << 8 | *(p+offset+3);
+		if(rtype == type && offset + len - 4 <= d->idSize)
+			return 1;
+		offset += len;
+	}
+	return 0;
+}
+
 void inline swapFrame(AVFrame * *a, AVFrame * *b)
 {
 	AVFrame *t = *a;
@@ -600,7 +619,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         
 		// avc1 requires the avcC extension
 		if (glob->componentType == 'avc1') {
-			CountImageDescriptionExtensionType(p->imageDescription, 'avcC', &count);
+			count = isImageDescriptionExtensionPresent(p->imageDescription, 'avcC');
 			
 			if (count >= 1) {
 				imgDescExt = NewHandle(0);
@@ -613,7 +632,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				DisposeHandle(imgDescExt);
 			}
 		} else if (glob->componentType == 'mp4v') {
-			CountImageDescriptionExtensionType(p->imageDescription, 'esds', &count);
+			count = isImageDescriptionExtensionPresent(p->imageDescription, 'esds');
 			
 			if (count >= 1) {
 				imgDescExt = NewHandle(0);
@@ -624,7 +643,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				DisposeHandle(imgDescExt);
 			}
 		} else {
-			CountImageDescriptionExtensionType(p->imageDescription, 'strf', &count);
+			count = isImageDescriptionExtensionPresent(p->imageDescription, 'strf');
 			
 			if (count >= 1) {
 				imgDescExt = NewHandle(0);
