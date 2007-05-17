@@ -202,9 +202,14 @@
 	return self;
 }
 
+- (NSDictionary *)myInfoDict;
+{
+	return [NSDictionary dictionaryWithContentsOfFile:[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Info.plist"]];
+}
+
 - (void)checkForInstallation
 {
-	NSDictionary *infoDict = [[self bundle] infoDictionary];
+	NSDictionary *infoDict = [self myInfoDict];
 	NSString *myVersion = [infoDict objectForKey:BundleVersionKey];
 	
 	[self setInstalledVersionString];
@@ -274,7 +279,7 @@
 	/* General */
 	[self checkForInstallation];
 	NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
-	NSString *myVersion = [[[self bundle] infoDictionary] objectForKey:BundleVersionKey];
+	NSString *myVersion = [[self myInfoDict] objectForKey:BundleVersionKey];
 	if((lastInstVersion == nil || [lastInstVersion isVersionStringOlderThan:myVersion]) && installStatus != InstallStatusInstalled)
 	{
 		/*Check for temp after an update */
@@ -514,7 +519,7 @@
 - (void)install:(id)sender
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *infoDict = [[self bundle] infoDictionary];
+	NSDictionary *infoDict = [self myInfoDict];
 	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
 	NSString *componentPath = [[[self bundle] resourcePath] stringByAppendingPathComponent:@"Components"];
 	NSString *coreAudioComponentPath = [componentPath stringByAppendingPathComponent:@"CoreAudio"];
@@ -562,7 +567,7 @@
 - (void)uninstall:(id)sender
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *infoDict = [[self bundle] infoDictionary];
+	NSDictionary *infoDict = [self myInfoDict];
 	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
 
 	[errorString release];
