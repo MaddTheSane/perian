@@ -101,10 +101,10 @@
 	[[self window] setMinSize:frame.size];
 	[[self window] setMaxSize:frame.size];*/
 
-	NSRect boxFrame = [[[releaseNotesView superview] superview] frame];
+/*	NSRect boxFrame = [[[releaseNotesView superview] superview] frame];
 	boxFrame.origin.y -= 20;
 	boxFrame.size.height += 20;
-	[[[releaseNotesView superview] superview] setFrame:boxFrame];
+	[[[releaseNotesView superview] superview] setFrame:boxFrame];*/
 	
 	[[self window] setFrame:frame display:NO];
 	[[self window] center];

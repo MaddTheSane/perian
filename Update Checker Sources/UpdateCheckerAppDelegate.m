@@ -190,6 +190,10 @@ extern char **environ;
 	[download release];
 	downloader = nil;
 	
+	//Indeterminate progress bar
+	[statusController setMaxProgressValue:0];
+	[statusController setStatusText:SULocalizedString(@"Extracting...", nil)];
+	
 	if(![self extractDMG:downloadPath])
 		[self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Extract Downloaded File",@"")];
 	
