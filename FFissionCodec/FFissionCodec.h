@@ -23,7 +23,9 @@
 #define __FFISSIONCODEC_H__
 
 #include "ACSimpleCodec.h"
+extern "C" {
 #include "avcodec.h"
+}
 
 //=============================================================================
 //	ACffAudioCodec

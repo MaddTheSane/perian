@@ -19,7 +19,9 @@
  *
  */
 
+extern "C" {
 #include "avcodec.h"
+}
 #include "FFissionCodec.h"
 
 extern "C" void initLib();
