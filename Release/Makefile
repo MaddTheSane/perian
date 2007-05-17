@@ -14,7 +14,7 @@ ART_DIR=Artwork
 ifeq ($(BETA),TRUE)
     BUILDSTYLE=Development
 else
-    BUILDSTYLE=Deployment+Debug
+    BUILDSTYLE=Deployment
 endif
 
 
