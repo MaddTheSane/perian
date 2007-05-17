@@ -665,7 +665,7 @@
 		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFusionCodec.c; sourceTree = "<group>"; };
 		F560DF0203D622D001ABA332 /* FFusionCodec.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = FFusionCodec.r; sourceTree = "<group>"; };
 		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
-		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBPerianPanePListGenerator.h; sourceTree = "<group>"; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
