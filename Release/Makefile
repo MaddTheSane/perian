@@ -1,4 +1,9 @@
-VERSION=1.0b2
+#Things to change for version upgrades:
+# Makefiles - Change this makefile, the VERSION declaration.
+# Plists - Modify all plists, they should all have version numbers.
+# Check the Perian.component target and PerianPane target.
+
+VERSION=1.0b3
 BETA=FALSE
 SRC_DIR=..
 BUILD_DIR=build
