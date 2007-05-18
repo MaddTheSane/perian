@@ -134,10 +134,13 @@ void FFissionCodec::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPro
 			break;
 			
 		case kAudioCodecPropertyPacketFrameSize:
-			if (avContext)
+			if (avContext && avContext->frame_size)
 				*reinterpret_cast<UInt32*>(outPropertyData) = avContext->frame_size;
-			else
+			else if (mInputFormat.mFramesPerPacket)
 				*reinterpret_cast<UInt32*>(outPropertyData) = mInputFormat.mFramesPerPacket;
+			else
+				// not perfect but returning 0 can crash on intel
+				*reinterpret_cast<UInt32*>(outPropertyData) = 1;
 			break;
 			
 		default:
