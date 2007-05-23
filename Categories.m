@@ -85,7 +85,7 @@
 	return ar;
 }
 
-static BOOL DifferentiateLatin12(const char *data, int length)
+static BOOL DifferentiateLatin12(const unsigned char *data, int length)
 {
 	// generated from french/german (latin1) and hungarian/slovak (latin2)
 	
