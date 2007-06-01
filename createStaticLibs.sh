@@ -44,7 +44,7 @@ else
 	cd "$BUILDDIR"
 	if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
         if [ `arch` != i386 ] ; then
-            "$SRCROOT/ffmpeg/configure" --cross-compile --arch=x86_32 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+            "$SRCROOT/ffmpeg/configure" --cross-compile --arch=i386 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
         else
             "$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m --extra-cflags='$optCFlags'
         fi
