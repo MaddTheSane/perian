@@ -32,7 +32,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0b4</string>
+	<string>1.0b5</string>
 	<key>CFBundleName</key>
 	<string>Perian</string>
 	<key>NSMainNibFile</key>
