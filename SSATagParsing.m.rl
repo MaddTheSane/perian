@@ -151,19 +151,17 @@ static void UpdateAlignment(int inum, int cur_posx, int *valign, int *halign, AT
 	*valign = cur_valign;
 	Fract alignment;
 	
-	if (cur_posx != -1) {
-		switch(cur_halign) {
-			case S_LeftAlign:
-				alignment = FloatToFract(0.);
-				break;
-			case S_CenterAlign: default:
-				alignment = kATSUCenterAlignment;  
-				break;
-			case S_RightAlign: 
-				alignment = FloatToFract(1.);
-		}
-		SetATSULayoutOther(cur_layout, kATSULineFlushFactorTag, sizeof(Fract), &alignment);
-	} 
+	switch(cur_halign) {
+		case S_LeftAlign:
+			alignment = FloatToFract(0.);
+			break;
+		case S_CenterAlign: default:
+			alignment = kATSUCenterAlignment;  
+			break;
+		case S_RightAlign: 
+			alignment = FloatToFract(1.);
+	}
+	SetATSULayoutOther(cur_layout, kATSULineFlushFactorTag, sizeof(Fract), &alignment);
 }
 
 NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
