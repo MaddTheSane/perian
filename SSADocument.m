@@ -145,8 +145,8 @@ int SSA2ASSAlignment(int a)
 		ATSUCreateStyle(&s->atsustyle);
 		ATSUSetAttributes(s->atsustyle,sizeof(vals) / sizeof(ATSUAttributeValuePtr),tags,sizes,vals);
 		
-		ATSUFontFeatureType		ftype[] = {kLigaturesType,kLigaturesType};
-		ATSUFontFeatureSelector fsel[] = {kCommonLigaturesOnSelector,kRareLigaturesOnSelector};
+		ATSUFontFeatureType		ftype[] = {kLigaturesType};
+		ATSUFontFeatureSelector fsel[] = {kCommonLigaturesOnSelector};
 		
 		ATSUSetFontFeatures(s->atsustyle,sizeof(fsel) / sizeof(ATSUFontFeatureSelector),ftype,fsel);
 	}
