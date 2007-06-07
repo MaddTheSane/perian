@@ -71,11 +71,16 @@
     NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	NSString *skippedVersion = [[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY];
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	BOOL manualRun = [defaults boolForKey:MANUAL_RUN_KEY];
 	if (updateAvailable && (!skippedVersion || 
 		(skippedVersion && ![skippedVersion isEqualToString:[latest versionString]]))) {
 		[self showUpdatePanelForItem:latest];
-	} else //nothing to see here, so we move along
+	} else {
+		if(manualRun)
+			NSRunAlertPanel(SULocalizedString(@"No Update Found!", nil), SULocalizedString(@"Your copy of Perian is up to date", nil), nil, nil, nil);
 		[[NSApplication sharedApplication] terminate:self];
+	}
 }
 
 - (void)appcastDidFailToLoad:(SUAppcast *)appcast
