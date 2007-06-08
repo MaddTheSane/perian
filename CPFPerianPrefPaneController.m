@@ -168,15 +168,11 @@
 - (void)setInstalledVersionString
 {
 	NSString *path = [[self basePathForType:ComponentTypeQuickTime user:userInstalled] stringByAppendingPathComponent:@"Perian.component"];
-	
+	NSString *currentVersion = @"-";
 	NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
-	if(infoDict != nil)
-	{
-		NSString *currentVersion = [infoDict objectForKey:BundleVersionKey];
-		[textField_currentVersion setStringValue:currentVersion];
-	}
-	else
-		[textField_currentVersion setStringValue:@"-"];
+	if (infoDict != nil)
+		currentVersion = [infoDict objectForKey:BundleVersionKey];
+	[textField_currentVersion setStringValue:[NSLocalizedString(@"Installed Version: ", @"") stringByAppendingString:currentVersion]];
 }
 
 #pragma mark Preference Pane Support
@@ -280,6 +276,14 @@
 	[self checkForInstallation];
 	NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
 	NSString *myVersion = [[self myInfoDict] objectForKey:BundleVersionKey];
+	
+	NSAttributedString		*about;
+    about = [[[NSAttributedString alloc] initWithPath:[[self bundle] pathForResource:@"Read Me" ofType:@"rtf"] 
+									 documentAttributes:nil] autorelease];
+	[[textView_about textStorage] setAttributedString:about];
+	[[textView_about enclosingScrollView] setLineScroll:0];
+	[[textView_about enclosingScrollView] setPageScroll:0];
+	
 	if((lastInstVersion == nil || [lastInstVersion isVersionStringOlderThan:myVersion]) && installStatus != InstallStatusInstalled)
 	{
 		/*Check for temp after an update */
@@ -288,7 +292,11 @@
 		int tag;
 		
 		if([[NSFileManager defaultManager] fileExistsAtPath:tempPrefPane isDirectory:&isDir] && isDir)
-			[[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[tempPrefPane stringByDeletingLastPathComponent] destination:@"" files:[NSArray arrayWithObject:[tempPrefPane lastPathComponent]] tag:&tag];
+			[[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation 
+														 source:[tempPrefPane stringByDeletingLastPathComponent] 
+													destination:@"" 
+														  files:[NSArray arrayWithObject:[tempPrefPane lastPathComponent]] 
+															tag:&tag];
 		
 		[self installUninstall:nil];
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
