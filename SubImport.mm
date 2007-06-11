@@ -91,6 +91,9 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 			
 			// subtitle tracks should be above the video track, which should be layer 0
 			SetTrackLayer(theTrack, -1);
+		} else {
+			DisposeMovieTrack(theTrack);
+			theTrack = NULL;
 		}
 	}
 
