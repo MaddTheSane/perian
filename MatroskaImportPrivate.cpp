@@ -267,6 +267,7 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					if (pass == 1) continue;
 					err = AddSubtitleTrack(track, mkvTrack);
 					if (err) return err;
+					if (mkvTrack.theTrack == NULL) continue;
 					
 					if (firstSubtitleTrack)
 						SetTrackAlternate(firstSubtitleTrack, mkvTrack.theTrack);
@@ -541,7 +542,7 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		mkvTrack.is_vobsub = false;
 	} else {
 		Codecprintf(NULL, "MKV: Unsupported subtitle type\n");
-		return -2;
+		return noErr;
 	}
 	
 	// this sets up anything else needed in the description for the specific codec.
