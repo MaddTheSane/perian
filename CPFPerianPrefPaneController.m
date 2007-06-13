@@ -3,9 +3,20 @@
 #include <sys/stat.h>
 
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
+#define LastInstalledVersionKey CFSTR("LastInstalledVersion")
+#define AC3TwoChannelModeKey CFSTR("twoChannelMode")
+
+//Old
 #define AC3StereoOverDolbyKey CFSTR("useStereoOverDolby")
 #define AC3ProLogicIIKey CFSTR("useDolbyProLogicII")
-#define LastInstalledVersionKey CFSTR("LastInstalledVersion")
+
+//A52 Constants
+#define A52_STEREO 2
+#define A52_DOLBY 10
+#define A52_CHANNEL_MASK 15
+#define A52_LFE 16
+#define A52_ADJUST_LEVEL 32
+#define A52_USE_DPLII 64
 
 @interface NSString (VersionStringCompare)
 - (BOOL)isVersionStringOlderThan:(NSString *)older;
@@ -67,9 +78,33 @@
 	return ret;
 }
 
-- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromString:(NSString *)value
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromFloat:(float)value
 {
-	CFPreferencesSetAppValue(key, value, appID);
+	CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberFloatType, &value);
+	CFPreferencesSetAppValue(key, numRef, appID);
+	CFRelease(numRef);
+}
+
+- (int)getIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(int)defaultValue
+{
+	CFPropertyListRef value;
+	int ret = defaultValue;
+	
+	value = CFPreferencesCopyAppValue(key, appID);
+	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
+		CFNumberGetValue(value, kCFNumberIntType, &ret);
+	
+	if(value)
+		CFRelease(value);
+	
+	return ret;
+}
+
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromInt:(int)value
+{
+	CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberIntType, &value);
+	CFPreferencesSetAppValue(key, numRef, appID);
+	CFRelease(numRef);
 }
 
 - (NSString *)getStringFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
@@ -87,11 +122,9 @@
 	return ret;
 }
 
-- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromFloat:(float)value
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromString:(NSString *)value
 {
-	CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberFloatType, &value);
-	CFPreferencesSetAppValue(key, numRef, appID);
-	CFRelease(numRef);
+	CFPreferencesSetAppValue(key, value, appID);
 }
 
 #pragma mark Private Functions
@@ -270,6 +303,20 @@
 	}
 }
 
+- (int)upgradeA52Prefs
+{
+	int twoChannelMode;
+	if([self getBoolFromKey:AC3StereoOverDolbyKey forAppID:a52AppID withDefault:NO])
+		twoChannelMode = A52_STEREO;
+	else if([self getBoolFromKey:AC3ProLogicIIKey forAppID:a52AppID withDefault:NO])
+		twoChannelMode = A52_DOLBY | A52_USE_DPLII;
+	else
+		twoChannelMode = A52_DOLBY;
+	
+	[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:twoChannelMode];
+	return twoChannelMode;
+}
+
 - (void)didSelect
 {
 	/* General */
@@ -310,18 +357,37 @@
 	[updateDate release];
 	
 	/* A52 Prefs */
-	if([self getBoolFromKey:AC3StereoOverDolbyKey forAppID:a52AppID withDefault:NO])
+	int twoChannelMode = [self getIntFromKey:AC3TwoChannelModeKey forAppID:a52AppID withDefault:0xffffffff];
+	if(twoChannelMode != 0xffffffff)
 	{
-		[popup_2ChannelMode selectItemAtIndex:0];
-	}
-	else if([self getBoolFromKey:AC3ProLogicIIKey forAppID:a52AppID withDefault:NO])
-	{
-		[popup_2ChannelMode selectItemAtIndex:2];
+		/* sanity checks */
+		if(twoChannelMode & A52_CHANNEL_MASK & 0xf7 != 2)
+		{
+			/* matches 2 and 10, which is Stereo and Dolby */
+			twoChannelMode = A52_DOLBY;
+		}
+		twoChannelMode &= ~A52_ADJUST_LEVEL & ~A52_LFE;		
 	}
 	else
+		twoChannelMode = [self upgradeA52Prefs];
+	CFPreferencesSetAppValue(AC3StereoOverDolbyKey, NULL, a52AppID);
+	CFPreferencesSetAppValue(AC3ProLogicIIKey, NULL, a52AppID);
+	switch(twoChannelMode)
 	{
-		[popup_2ChannelMode selectItemAtIndex:1];		
-	}	
+		case A52_STEREO:
+			[popup_outputMode selectItemAtIndex:0];
+			break;
+		case A52_DOLBY:
+			[popup_outputMode selectItemAtIndex:1];
+			break;
+		case A52_DOLBY | A52_USE_DPLII:
+			[popup_outputMode selectItemAtIndex:2];
+			break;
+		default:
+			[popup_outputMode selectItemAtIndex:3];
+			break;			
+	}
+	
 	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
 }
 
@@ -675,20 +741,20 @@
 
 - (IBAction)set2ChannelModePopup:(id)sender;
 {
-	int selected = [popup_2ChannelMode indexOfSelectedItem];
+	int selected = [popup_outputMode indexOfSelectedItem];
 	switch(selected)
 	{
 		case 0:
-			[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromBool:YES];
-			[self setKey:AC3ProLogicIIKey forAppID:a52AppID fromBool:NO];
+			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:A52_STEREO];
 			break;
 		case 1:
-			[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromBool:NO];
-			[self setKey:AC3ProLogicIIKey forAppID:a52AppID fromBool:NO];
+			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:A52_DOLBY];
 			break;
 		case 2:
-			[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromBool:NO];
-			[self setKey:AC3ProLogicIIKey forAppID:a52AppID fromBool:YES];
+			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:A52_DOLBY | A52_USE_DPLII];
+			break;
+		case 3:
+			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:0];
 			break;
 		default:
 			break;
