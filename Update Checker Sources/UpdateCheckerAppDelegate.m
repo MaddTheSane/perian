@@ -78,7 +78,10 @@
 		[self showUpdatePanelForItem:latest];
 	} else {
 		if(manualRun)
+		{
 			NSRunAlertPanel(SULocalizedString(@"No Update Found!", nil), SULocalizedString(@"Your copy of Perian is up to date", nil), nil, nil, nil);
+			[defaults removeObjectForKey:MANUAL_RUN_KEY];
+		}
 		[[NSApplication sharedApplication] terminate:self];
 	}
 }
