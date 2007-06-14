@@ -24,6 +24,7 @@
 #include "avformat.h"
 #include "ff_private.h"
 #include "allformats.h"
+#include "allcodecs.h"
 #include "Codecprintf.h"
 #include "riff.h"
 #include "SubImport.h"
