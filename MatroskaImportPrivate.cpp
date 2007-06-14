@@ -607,6 +607,7 @@ ComponentResult MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 	
 	EndMediaEdits(chapterMedia);
 	SetTrackEnabled(chapterTrack, false);
+	return noErr;
 }
 
 void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
