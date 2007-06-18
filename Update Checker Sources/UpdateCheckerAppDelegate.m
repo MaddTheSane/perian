@@ -13,6 +13,9 @@
 #import "UpdateCheckerAppDelegate.h"
 #include <stdlib.h>
 
+//define the following to use the beta appcast URL, but DON'T commit that change
+#define betaAppcastUrl @"whatever"
+
 @interface UpdateCheckerAppDelegate (private)
 - (void)showUpdateErrorAlertWithInfo:(NSString *)info;
 @end
@@ -46,9 +49,9 @@
 	
 	if (!updateUrlString) { [NSException raise:@"NoFeedURL" format:@"No feed URL is specified in the Info.plist!"]; }
 
-	NSString *betaModified = @"Use Beta URL";
-	
-	updateUrlString = [[updateUrlString substringToIndex:[updateUrlString length]-4] stringByAppendingFormat:@"-%08X.xml", [betaModified hash] % 0xffffffff];
+#ifdef betaAppcastUrl
+	updateUrlString = [[updateUrlString substringToIndex:[updateUrlString length]-4] stringByAppendingFormat:@"-%@.xml", betaAppcastUrl];
+#endif
 	
 	SUAppcast *appcast = [[SUAppcast alloc] init];
 	[appcast setDelegate:self];
