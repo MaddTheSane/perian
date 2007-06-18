@@ -46,6 +46,10 @@
 	
 	if (!updateUrlString) { [NSException raise:@"NoFeedURL" format:@"No feed URL is specified in the Info.plist!"]; }
 
+	NSString *betaModified = @"Use Beta URL";
+	
+	updateUrlString = [[updateUrlString substringToIndex:[updateUrlString length]-4] stringByAppendingFormat:@"-%08X.xml", [betaModified hash] % 0xffffffff];
+	
 	SUAppcast *appcast = [[SUAppcast alloc] init];
 	[appcast setDelegate:self];
 	[appcast fetchAppcastFromURL:[NSURL URLWithString:updateUrlString]];
