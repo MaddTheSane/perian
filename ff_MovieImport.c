@@ -21,8 +21,8 @@
 ****************************************************************************/
 
 #include "ff_MovieImportVersion.h"
-#include "avformat.h"
 #include "ff_private.h"
+#include "allcodecs.h"
 #include "allformats.h"
 #include "allcodecs.h"
 #include "Codecprintf.h"
