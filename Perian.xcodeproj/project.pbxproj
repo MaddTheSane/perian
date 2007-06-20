@@ -95,6 +95,7 @@
 		11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EED50A3CE7EC0066D45F /* QuickTime.framework */; };
 		11A70AD80A3D0149002058D4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		11A70AD90A3D0149002058D4 /* FFusion.icns in Resources */ = {isa = PBXBuildFile; fileRef = F50D440703EAD8DF01B1D299 /* FFusion.icns */; };
+		11BEFB2D0C18E23E00BC9324 /* Read Me.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */; };
 		11C85ED80A641E6400DF3D73 /* ff_dataref.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED30A641E6400DF3D73 /* ff_dataref.c */; };
 		11C85EDA0A641E6400DF3D73 /* ff_private.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED60A641E6400DF3D73 /* ff_private.c */; };
 		11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */; };
@@ -463,6 +464,7 @@
 		1184A38C0B505A9800C8452A /* SUStatusController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUStatusController.m; sourceTree = "<group>"; };
 		11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "Perian-Info.plist"; path = "Plists/Perian-Info.plist"; sourceTree = "<group>"; };
 		11A70AC10A3D0105002058D4 /* Perian.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.component; sourceTree = BUILT_PRODUCTS_DIR; };
+		11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = "Read Me.rtf"; path = "Release/Read Me.rtf"; sourceTree = "<group>"; };
 		11C85ED30A641E6400DF3D73 /* ff_dataref.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_dataref.c; sourceTree = "<group>"; };
 		11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_MovieImport.c; sourceTree = "<group>"; };
 		11C85ED50A641E6400DF3D73 /* ff_MovieImportVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_MovieImportVersion.h; sourceTree = "<group>"; };
@@ -776,6 +778,7 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */,
 				116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */,
 				83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */,
 				83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */,
@@ -1161,7 +1164,7 @@
 			children = (
 				F5CFD2D60B5012A100616865 /* A52Codec.component */,
 				F5CFD2D80B5012A100616865 /* AC3MovieImport.component */,
-				F5CFD2DA0B5012A100616865 /* Preferences.app */,
+				F5CFD2DA0B5012A100616865 /* A52Preferences.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1429,10 +1432,10 @@
 			remoteRef = F5CFD2D70B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F5CFD2DA0B5012A100616865 /* Preferences.app */ = {
+		F5CFD2DA0B5012A100616865 /* A52Preferences.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = Preferences.app;
+			path = A52Preferences.app;
 			remoteRef = F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1466,6 +1469,7 @@
 				F5EB823E0BA7221F001064E5 /* PerianUpdateChecker.app in Resources */,
 				83D1D6DE0B4C7F8300E09EC9 /* PerianPrefPane.nib in Resources */,
 				83D1D6F50B4C85AB00E09EC9 /* Perian_icon.icns in Resources */,
+				11BEFB2D0C18E23E00BC9324 /* Read Me.rtf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2135,6 +2139,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = ebml;
+				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
 				ZERO_LINK = NO;
 			};
@@ -2154,6 +2159,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = matroska;
+				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
 				ZERO_LINK = NO;
 			};
@@ -2178,9 +2184,11 @@
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_FAST_MATH = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_STRICT_ALIASING = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -2200,6 +2208,9 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Universal\"";
+				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
+				OTHER_CFLAGS_i386 = "-march=pentium-m -mtune=nocona $(OTHER_CFLAGS)";
+				OTHER_CFLAGS_ppc = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -2373,6 +2384,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = ebml;
+				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
 				ZERO_LINK = NO;
 			};
@@ -2393,6 +2405,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = ebml;
+				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
 				ZERO_LINK = NO;
 			};
@@ -2410,8 +2423,9 @@
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = ebml;
+				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
-				ZERO_LINK = YES;
+				ZERO_LINK = NO;
 			};
 			name = Default;
 		};
@@ -2431,6 +2445,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = matroska;
+				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
 				ZERO_LINK = NO;
 			};
@@ -2450,6 +2465,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = matroska;
+				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
 				ZERO_LINK = NO;
 			};
@@ -2467,8 +2483,9 @@
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = matroska;
+				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
-				ZERO_LINK = YES;
+				ZERO_LINK = NO;
 			};
 			name = Default;
 		};

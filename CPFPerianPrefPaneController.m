@@ -1,10 +1,22 @@
 #import "CPFPerianPrefPaneController.h"
+#import "UpdateCheckerAppDelegate.h"
 #include <sys/stat.h>
 
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
+#define LastInstalledVersionKey CFSTR("LastInstalledVersion")
+#define AC3TwoChannelModeKey CFSTR("twoChannelMode")
+
+//Old
 #define AC3StereoOverDolbyKey CFSTR("useStereoOverDolby")
 #define AC3ProLogicIIKey CFSTR("useDolbyProLogicII")
-#define LastInstalledVersionKey CFSTR("LastInstalledVersion")
+
+//A52 Constants
+#define A52_STEREO 2
+#define A52_DOLBY 10
+#define A52_CHANNEL_MASK 15
+#define A52_LFE 16
+#define A52_ADJUST_LEVEL 32
+#define A52_USE_DPLII 64
 
 @interface NSString (VersionStringCompare)
 - (BOOL)isVersionStringOlderThan:(NSString *)older;
@@ -53,44 +65,66 @@
 
 - (float)getFloatFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(float)defaultValue
 {
-    CFPropertyListRef value;
-    float ret = defaultValue;
-    
+	CFPropertyListRef value;
+	float ret = defaultValue;
+	
 	value = CFPreferencesCopyAppValue(key, appID);
 	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
 		CFNumberGetValue(value, kCFNumberFloatType, &ret);
 	
 	if(value)
 		CFRelease(value);
-    
-    return ret;
+	
+	return ret;
 }
 
-- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromString:(NSString *)value
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromFloat:(float)value
 {
-    CFPreferencesSetAppValue(key, value, appID);
+	CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberFloatType, &value);
+	CFPreferencesSetAppValue(key, numRef, appID);
+	CFRelease(numRef);
+}
+
+- (int)getIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(int)defaultValue
+{
+	CFPropertyListRef value;
+	int ret = defaultValue;
+	
+	value = CFPreferencesCopyAppValue(key, appID);
+	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
+		CFNumberGetValue(value, kCFNumberIntType, &ret);
+	
+	if(value)
+		CFRelease(value);
+	
+	return ret;
+}
+
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromInt:(int)value
+{
+	CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberIntType, &value);
+	CFPreferencesSetAppValue(key, numRef, appID);
+	CFRelease(numRef);
 }
 
 - (NSString *)getStringFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
 {
-    CFPropertyListRef value;
-    NSString *ret = nil;
-    
+	CFPropertyListRef value;
+	NSString *ret = nil;
+	
 	value = CFPreferencesCopyAppValue(key, appID);
 	if(value && CFGetTypeID(value) == CFStringGetTypeID())
 		ret = [NSString stringWithString:(NSString *)value];
 	
 	if(value)
 		CFRelease(value);
-    
-    return ret;
+	
+	return ret;
 }
 
-- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromFloat:(float)value
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromString:(NSString *)value
 {
-    CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberFloatType, &value);
-    CFPreferencesSetAppValue(key, numRef, appID);
-    CFRelease(numRef);
+	CFPreferencesSetAppValue(key, value, appID);
 }
 
 #pragma mark Private Functions
@@ -167,22 +201,18 @@
 - (void)setInstalledVersionString
 {
 	NSString *path = [[self basePathForType:ComponentTypeQuickTime user:userInstalled] stringByAppendingPathComponent:@"Perian.component"];
-	
+	NSString *currentVersion = @"-";
 	NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
-	if(infoDict != nil)
-	{
-		NSString *currentVersion = [infoDict objectForKey:BundleVersionKey];
-		[textField_currentVersion setStringValue:currentVersion];
-	}
-	else
-		[textField_currentVersion setStringValue:@"-"];
+	if (infoDict != nil)
+		currentVersion = [infoDict objectForKey:BundleVersionKey];
+	[textField_currentVersion setStringValue:[NSLocalizedString(@"Installed Version: ", @"") stringByAppendingString:currentVersion]];
 }
 
 #pragma mark Preference Pane Support
 
 - (id)initWithBundle:(NSBundle *)bundle
 {
-    if ( ( self = [super initWithBundle:bundle] ) != nil ) {
+	if ( ( self = [super initWithBundle:bundle] ) != nil ) {
 		perianForumURL = [[NSURL alloc] initWithString:@"http://forums.cocoaforge.com/index.php?c=12"];
 		perianDonateURL = [[NSURL alloc] initWithString:@"http://perian.org"];
 		perianWebSiteURL = [[NSURL alloc] initWithString:@"http://perian.org"];
@@ -196,14 +226,19 @@
 			userInstalled = NO;
 		else
 			userInstalled = YES;
-    }
-    
-    return self;
+	}
+	
+	return self;
+}
+
+- (NSDictionary *)myInfoDict;
+{
+	return [NSDictionary dictionaryWithContentsOfFile:[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Info.plist"]];
 }
 
 - (void)checkForInstallation
 {
-	NSDictionary *infoDict = [[self bundle] infoDictionary];
+	NSDictionary *infoDict = [self myInfoDict];
 	NSString *myVersion = [infoDict objectForKey:BundleVersionKey];
 	
 	[self setInstalledVersionString];
@@ -268,40 +303,92 @@
 	}
 }
 
+- (int)upgradeA52Prefs
+{
+	int twoChannelMode;
+	if([self getBoolFromKey:AC3StereoOverDolbyKey forAppID:a52AppID withDefault:NO])
+		twoChannelMode = A52_STEREO;
+	else if([self getBoolFromKey:AC3ProLogicIIKey forAppID:a52AppID withDefault:NO])
+		twoChannelMode = A52_DOLBY | A52_USE_DPLII;
+	else
+		twoChannelMode = A52_DOLBY;
+	
+	[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:twoChannelMode];
+	return twoChannelMode;
+}
+
 - (void)didSelect
 {
 	/* General */
 	[self checkForInstallation];
-    NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
-    NSString *myVersion = [[[self bundle] infoDictionary] objectForKey:BundleVersionKey];
-    if((lastInstVersion == nil || [lastInstVersion isVersionStringOlderThan:myVersion]) && installStatus != InstallStatusInstalled)
-    {
-        /*Check for temp after an update */
-        BOOL isDir = NO;
-        NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
-        int tag;
-        
-        if([[NSFileManager defaultManager] fileExistsAtPath:tempPrefPane isDirectory:&isDir] && isDir)
-            [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[tempPrefPane stringByDeletingLastPathComponent] destination:@"" files:[NSArray arrayWithObject:[tempPrefPane lastPathComponent]] tag:&tag];
-        
-        [self installUninstall:nil];
-        [self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
-    }
+	NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
+	NSString *myVersion = [[self myInfoDict] objectForKey:BundleVersionKey];
+	
+	NSAttributedString		*about;
+    about = [[[NSAttributedString alloc] initWithPath:[[self bundle] pathForResource:@"Read Me" ofType:@"rtf"] 
+									 documentAttributes:nil] autorelease];
+	[[textView_about textStorage] setAttributedString:about];
+	[[textView_about enclosingScrollView] setLineScroll:0];
+	[[textView_about enclosingScrollView] setPageScroll:0];
+	
+	if((lastInstVersion == nil || [lastInstVersion isVersionStringOlderThan:myVersion]) && installStatus != InstallStatusInstalled)
+	{
+		/*Check for temp after an update */
+		BOOL isDir = NO;
+		NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
+		int tag;
+		
+		if([[NSFileManager defaultManager] fileExistsAtPath:tempPrefPane isDirectory:&isDir] && isDir)
+			[[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation 
+														 source:[tempPrefPane stringByDeletingLastPathComponent] 
+													destination:@"" 
+														  files:[NSArray arrayWithObject:[tempPrefPane lastPathComponent]] 
+															tag:&tag];
+		
+		[self installUninstall:nil];
+		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
+	}
+	
+	NSDate *updateDate = (NSDate *)CFPreferencesCopyAppValue((CFStringRef)NEXT_RUN_KEY, perianAppID);
+	if([updateDate timeIntervalSinceNow] > 1000000000) //futureDate
+		[button_autoUpdateCheck setIntValue:0];
+	else
+		[button_autoUpdateCheck setIntValue:1];
+	[updateDate release];
 	
 	/* A52 Prefs */
-	if([self getBoolFromKey:AC3StereoOverDolbyKey forAppID:a52AppID withDefault:NO])
+	int twoChannelMode = [self getIntFromKey:AC3TwoChannelModeKey forAppID:a52AppID withDefault:0xffffffff];
+	if(twoChannelMode != 0xffffffff)
 	{
-		[popup_2ChannelMode selectItemAtIndex:0];
-	}
-	else if([self getBoolFromKey:AC3ProLogicIIKey forAppID:a52AppID withDefault:NO])
-	{
-		[popup_2ChannelMode selectItemAtIndex:2];
+		/* sanity checks */
+		if(twoChannelMode & A52_CHANNEL_MASK & 0xf7 != 2)
+		{
+			/* matches 2 and 10, which is Stereo and Dolby */
+			twoChannelMode = A52_DOLBY;
+		}
+		twoChannelMode &= ~A52_ADJUST_LEVEL & ~A52_LFE;		
 	}
 	else
+		twoChannelMode = [self upgradeA52Prefs];
+	CFPreferencesSetAppValue(AC3StereoOverDolbyKey, NULL, a52AppID);
+	CFPreferencesSetAppValue(AC3ProLogicIIKey, NULL, a52AppID);
+	switch(twoChannelMode)
 	{
-		[popup_2ChannelMode selectItemAtIndex:1];		
-	}	
-    [self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
+		case A52_STEREO:
+			[popup_outputMode selectItemAtIndex:0];
+			break;
+		case A52_DOLBY:
+			[popup_outputMode selectItemAtIndex:1];
+			break;
+		case A52_DOLBY | A52_USE_DPLII:
+			[popup_outputMode selectItemAtIndex:2];
+			break;
+		default:
+			[popup_outputMode selectItemAtIndex:3];
+			break;			
+	}
+	
+	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
 }
 
 - (void)didUnselect
@@ -323,19 +410,24 @@
 #pragma mark Install/Uninstall
 
 /* Shamelessly ripped from Sparkle */
-- (BOOL)_extractArchivePath:archivePath toDestination:(NSString *)destination
+- (BOOL)_extractArchivePath:archivePath toDestination:(NSString *)destination finalPath:(NSString *)finalPath
 {
-	BOOL ret = NO;
+	BOOL ret = NO, oldExist = NO;
 	struct stat sb;
-	if(stat([destination fileSystemRepresentation], &sb) != 0)
-	{
-		[errorString appendFormat:NSLocalizedString(@"No such directory %@\n", @""), destination];
-		return FALSE;
-	}
+	
+	if(stat([finalPath fileSystemRepresentation], &sb) == 0)
+		oldExist = YES;
 	
 	char *buf = NULL;
-	asprintf(&buf,
-			 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"");
+	if(oldExist)
+		asprintf(&buf,
+				 "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
+				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
+				 "rm -rf \"$TMP_PATH\"");
+	else
+		asprintf(&buf,
+				 "mkdir -p \"$DST_PATH\" && "
+				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"");
 	if(!buf)
 	{
 		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for extraction command\n", @"")];
@@ -344,7 +436,9 @@
 	
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
-	
+	setenv("DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
+	setenv("TMP_PATH", [[finalPath stringByAppendingPathExtension:@"old"] fileSystemRepresentation], 1);
+
 	int status = system(buf);
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		ret = YES;
@@ -353,6 +447,8 @@
 
 	free(buf);
 	unsetenv("SRC_ARCHIVE");
+	unsetenv("$DST_COMPONENT");
+	unsetenv("TMP_PATH");
 	unsetenv("DST_PATH");
 	return ret;
 }
@@ -364,12 +460,6 @@
 	if(stat([finalPath fileSystemRepresentation], &sb) == 0)
 		oldExist = YES;
 	
-	if(stat([destination fileSystemRepresentation], &sb) != 0)
-	{
-		[errorString appendFormat:NSLocalizedString(@"No such directory %@\n", @""), destination];
-		return FALSE;
-	}
-	
 	char *buf = NULL;
 	if(oldExist)
 		asprintf(&buf,
@@ -380,6 +470,7 @@
 				 sb.st_uid, sb.st_gid);
 	else
 		asprintf(&buf,
+				 "mkdir -p \"$DST_PATH\" && "
 				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
 				 "chown -R %d:%d \"$DST_COMPONENT\"",
 				 sb.st_uid, sb.st_gid);
@@ -478,7 +569,7 @@
 		if(currentInstallStatus(pieceStatus) != InstallStatusInstalled)
 		{
 			//Decompress and install new one
-			BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir];
+			BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir finalPath:[containingDir stringByAppendingPathComponent:component]];
 			if(result == NO)
 				ret = NO;
 		}		
@@ -502,7 +593,7 @@
 - (void)install:(id)sender
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *infoDict = [[self bundle] infoDictionary];
+	NSDictionary *infoDict = [self myInfoDict];
 	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
 	NSString *componentPath = [[[self bundle] resourcePath] stringByAppendingPathComponent:@"Components"];
 	NSString *coreAudioComponentPath = [componentPath stringByAppendingPathComponent:@"CoreAudio"];
@@ -550,7 +641,7 @@
 - (void)uninstall:(id)sender
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *infoDict = [[self bundle] infoDictionary];
+	NSDictionary *infoDict = [self myInfoDict];
 	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
 
 	[errorString release];
@@ -562,7 +653,7 @@
 	
 	int tag = 0;
 	BOOL result = NO;
-	if(auth != nil)
+	if(auth != nil && !userInstalled)
 		[self _authenticatedRemove:[[self quickTimeComponentDir:userInstalled] stringByAppendingPathComponent:@"Perian.component"]];
 	else
 		result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[self quickTimeComponentDir:userInstalled] destination:@"" files:[NSArray arrayWithObject:@"Perian.component"] tag:&tag];
@@ -573,7 +664,7 @@
 	{
 		ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
 		NSString *directory = [self basePathForType:type user:userInstalled];
-		if(auth != nil)
+		if(auth != nil && !userInstalled)
 			[self _authenticatedRemove:[directory stringByAppendingPathComponent:[myComponent objectForKey:ComponentNameKey]]];
 		else
 			result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:directory destination:@"" files:[NSArray arrayWithObject:[myComponent objectForKey:ComponentNameKey]] tag:&tag];
@@ -606,17 +697,25 @@
 #pragma mark Check Updates
 - (IBAction)updateCheck:(id)sender 
 {
-    FSRef updateCheckRef;
-    
-    OSStatus status = FSPathMakeRef((UInt8 *)[[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Resources/PerianUpdateChecker.app"] fileSystemRepresentation], &updateCheckRef, NULL);
-    if(status != noErr)
-        return;
-    
-    LSOpenFSRef(&updateCheckRef, NULL);
+	FSRef updateCheckRef;
+	
+	CFPreferencesSetAppValue((CFStringRef)NEXT_RUN_KEY, NULL, perianAppID);
+	CFPreferencesSetAppValue((CFStringRef)MANUAL_RUN_KEY, [NSNumber numberWithBool:YES], perianAppID);
+	CFPreferencesAppSynchronize(perianAppID);
+	OSStatus status = FSPathMakeRef((UInt8 *)[[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Resources/PerianUpdateChecker.app"] fileSystemRepresentation], &updateCheckRef, NULL);
+	if(status != noErr)
+		return;
+	
+	LSOpenFSRef(&updateCheckRef, NULL);
 } 
 
 - (IBAction)setAutoUpdateCheck:(id)sender 
 {
+	CFStringRef key = (CFStringRef)NEXT_RUN_KEY;
+	if([button_autoUpdateCheck intValue])
+		CFPreferencesSetAppValue(key, [NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN], perianAppID);
+	else
+		CFPreferencesSetAppValue(key, [NSDate distantFuture], perianAppID);
 } 
 
 
@@ -642,20 +741,20 @@
 
 - (IBAction)set2ChannelModePopup:(id)sender;
 {
-	int selected = [popup_2ChannelMode indexOfSelectedItem];
+	int selected = [popup_outputMode indexOfSelectedItem];
 	switch(selected)
 	{
 		case 0:
-			[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromBool:YES];
-			[self setKey:AC3ProLogicIIKey forAppID:a52AppID fromBool:NO];
+			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:A52_STEREO];
 			break;
 		case 1:
-			[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromBool:NO];
-			[self setKey:AC3ProLogicIIKey forAppID:a52AppID fromBool:NO];
+			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:A52_DOLBY];
 			break;
 		case 2:
-			[self setKey:AC3StereoOverDolbyKey forAppID:a52AppID fromBool:NO];
-			[self setKey:AC3ProLogicIIKey forAppID:a52AppID fromBool:YES];
+			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:A52_DOLBY | A52_USE_DPLII];
+			break;
+		case 3:
+			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:0];
 			break;
 		default:
 			break;
@@ -664,14 +763,14 @@
 
 - (void)setAC3DynamicRange:(float)newVal
 {
-    if(newVal > 4.0)
-        newVal = 4.0;
-    if(newVal < 0.0)
-        newVal = 0.0;
-    
+	if(newVal > 4.0)
+		newVal = 4.0;
+	if(newVal < 0.0)
+		newVal = 0.0;
+	
 	nextDynValue = newVal;
-    [textField_ac3DynamicRangeValue setFloatValue:newVal];
-    [slider_ac3DynamicRangeSlider setFloatValue:newVal];
+	[textField_ac3DynamicRangeValue setFloatValue:newVal];
+	[slider_ac3DynamicRangeSlider setFloatValue:newVal];
 	if(newVal == 1.0)
 		[popup_ac3DynamicRangeType selectItemAtIndex:0];
 	else if(newVal == 2.0)
@@ -688,16 +787,16 @@
 
 - (IBAction)setAC3DynamicRangeValue:(id)sender
 {
-    float newVal = [textField_ac3DynamicRangeValue floatValue];
-    
-    [self setAC3DynamicRange:newVal];
+	float newVal = [textField_ac3DynamicRangeValue floatValue];
+	
+	[self setAC3DynamicRange:newVal];
 }
 
 - (IBAction)setAC3DynamicRangeSlider:(id)sender
 {
-    float newVal = [slider_ac3DynamicRangeSlider floatValue];
-    
-    [self setAC3DynamicRange:newVal];
+	float newVal = [slider_ac3DynamicRangeSlider floatValue];
+	
+	[self setAC3DynamicRange:newVal];
 }
 
 - (IBAction)cancelDynRangeSheet:(id)sender

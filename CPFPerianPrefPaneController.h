@@ -56,7 +56,7 @@ typedef enum
 	
 	//AC3 Settings in General Pane
 	IBOutlet NSPopUpButton				*popup_ac3DynamicRangeType;
-	IBOutlet NSPopUpButton				*popup_2ChannelMode;
+	IBOutlet NSPopUpButton				*popup_outputMode;
 	
 	IBOutlet NSWindow					*window_dynRangeSheet;
     IBOutlet NSTextField                *textField_ac3DynamicRangeValue;

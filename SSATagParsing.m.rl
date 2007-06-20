@@ -46,6 +46,12 @@
 	style_count++;
 	styles = realloc(styles, sizeof(SSAStyleSpan*[style_count]));
 }
+
+-(NSString*)description
+{
+	return [NSString stringWithFormat:@"\"%@\", %d styles, %@", nstext, style_count,
+		   (posx != 1) ? [NSString stringWithFormat:@"pos (%d,%d)",posx,posy] : [NSString stringWithFormat:@"h %d v %d", halign, valign]];
+}
 @end
 
 %% machine SSAtag;
@@ -145,19 +151,17 @@ static void UpdateAlignment(int inum, int cur_posx, int *valign, int *halign, AT
 	*valign = cur_valign;
 	Fract alignment;
 	
-	if (cur_posx != -1) {
-		switch(cur_halign) {
-			case S_LeftAlign:
-				alignment = FloatToFract(0.);
-				break;
-			case S_CenterAlign: default:
-				alignment = kATSUCenterAlignment;  
-				break;
-			case S_RightAlign: 
-				alignment = FloatToFract(1.);
-		}
-		SetATSULayoutOther(cur_layout, kATSULineFlushFactorTag, sizeof(Fract), &alignment);
-	} 
+	switch(cur_halign) {
+		case S_LeftAlign:
+			alignment = FloatToFract(0.);
+			break;
+		case S_CenterAlign: default:
+			alignment = kATSUCenterAlignment;  
+			break;
+		case S_RightAlign: 
+			alignment = FloatToFract(1.);
+	}
+	SetATSULayoutOther(cur_layout, kATSULineFlushFactorTag, sizeof(Fract), &alignment);
 }
 
 NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
@@ -352,7 +356,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 						newLayout = TRUE;
 						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
 					}
-					
+
 					UpdateAlignment(SSA2ASSAlignment(inum), cur_posx, &cur_valign, &cur_halign, cur_layout);
 				}
 				
@@ -488,10 +492,6 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				}
 				
 				action styleset {
-					if (!newLayout) {
-						newLayout = TRUE;
-						ATSUCreateAndCopyTextLayout(re->layout,&cur_layout);
-					}
 					re->multipart_drawing = YES;
 					ssastyleline *the_style = re->style;
 					NSString *searchsn = [NSString stringWithCharacters:strparambegin length:p-strparambegin];
@@ -511,7 +511,6 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 					cur_shadow = the_style->shadow;
 					cur_frz = the_style->angle;
 					cur_scalex = cur_scaley = 1;
-					cur_posx = cur_posy = -1;
 				}
 				
 				action skip_t_tag {
@@ -552,7 +551,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"2c" color %secondarycolor
 								|"3c" color %outlinecolor
 								|"4c" color %shadowcolor
-								|"1a" color %primaryalpha
+								|("1a"|"alpha") color %primaryalpha
 								|"2a" color %secondaryalpha
 								|"3a" color %outlinealpha
 								|"4a" color %shadowalpha
@@ -561,6 +560,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|"p" num %draw_mode
 								#|"t" [^)}]* # enabling this crashes ragel
 								|"t(" % skip_t_tag
+								|""
 								);
 				
 				cmd = ("\\" :> cmd_specific)+;

@@ -91,6 +91,9 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 			
 			// subtitle tracks should be above the video track, which should be layer 0
 			SetTrackLayer(theTrack, -1);
+		} else {
+			DisposeMovieTrack(theTrack);
+			theTrack = NULL;
 		}
 	}
 
@@ -99,32 +102,117 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 
 extern "C" ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack);
 
-ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
+static ComponentResult ReadSRTFile(NSString *srt, SampleDescriptionHandle desc, Track theTrack, TimeScale movieTimeScale)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	SubtitleSerializer *serializer = [[SubtitleSerializer alloc] init];
+	ComponentResult err = noErr;
+	NSScanner *sc = [NSScanner scannerWithString:srt];
+	NSString *res=nil;
+	SubLine *sl;
+	Media theMedia = GetTrackMedia(theTrack);
+	Handle sampleHndl;
+	int index;
+	int h,m,s,ms;
+	TimeValue start = 0, end = 0;
+	enum {
+		INITIAL,
+		TIMESTAMP,
+		LINES
+	} state = INITIAL;
+	
+	[sc setCharactersToBeSkipped:nil];
+	
+	do {
+		switch (state) {
+			case INITIAL:
+				if ([sc scanInt:&index] == TRUE && [sc scanUpToString:@"\n" intoString:&res] == FALSE) {
+					state = TIMESTAMP;
+					[sc scanString:@"\n" intoString:nil];
+				} else
+					[sc setScanLocation:[sc scanLocation]+1];
+				break;
+			case TIMESTAMP:
+				h = [sc scanInt]; [sc scanString:@":" intoString:nil];
+				m = [sc scanInt]; [sc scanString:@":" intoString:nil];				
+				s = [sc scanInt]; [sc scanString:@"," intoString:nil];				
+				ms = [sc scanInt]; [sc scanString:@" --> " intoString:nil];
+				start = ms + s*1000 + m*1000*60 + h*1000*60*60;
+				h = [sc scanInt]; [sc scanString:@":" intoString:nil];
+				m = [sc scanInt]; [sc scanString:@":" intoString:nil];				
+				s = [sc scanInt]; [sc scanString:@"," intoString:nil];				
+				ms = [sc scanInt]; [sc scanString:@"\n" intoString:nil];	
+				end = ms + s*1000 + m*1000*60 + h*1000*60*60;
+				state = LINES;
+				break;
+			case LINES:
+				[sc scanUpToString:@"\n\n" intoString:&res];
+				[sc scanString:@"\n\n" intoString:nil];
+				
+				sl = [[SubLine alloc] initWithLine:res start:start end:end];
+				[sl autorelease];
+				
+				[serializer addLine:sl];
+				state = INITIAL;
+				break;
+		}
+	} while (![sc isAtEnd]);
+	
+	[serializer setFinished:YES];
+	
+	BeginMediaEdits(theMedia);
+	
+	while (![serializer isEmpty]) {
+		sl = [serializer getSerializedPacket];
+		sampleHndl = NewHandle(0);
+		TimeRecord movieStartTime = {SInt64ToWide(sl->begin_time), 1000, 0};
+		TimeValue sampleTime;
+		const char *str = [sl->line UTF8String];
+		size_t sampleLen = strlen(str);
+		
+		PtrToHand(str,&sampleHndl,sampleLen);
+		
+		err=AddMediaSample(theMedia,sampleHndl,0,sampleLen, sl->end_time - sl->begin_time, desc, 1, 0, &sampleTime);
+		if (err != noErr) goto bail;
+		
+		ConvertTimeScale(&movieStartTime, movieTimeScale);
+		
+		err = InsertMediaIntoTrack(theTrack, movieStartTime.value.lo, sampleTime, sl->end_time - sl->begin_time, fixed1);
+		if (err != noErr) goto bail;
+		
+		DisposeHandle(sampleHndl);
+		sampleHndl = NULL;
+	}
+	
+	EndMediaEdits(theMedia);
+	
+bail:
+	[serializer release];
+	[pool release];
+	if (sampleHndl) DisposeHandle(sampleHndl);
+	return err;
+}
+
+ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
+{
 	ComponentResult err = noErr;
 	Handle dataRef = NULL;
 	Track theTrack = NULL;
 	Media theMedia = NULL;
 	Rect movieBox;
-	SubLine *sl;
 	TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
 	UInt32 emptyDataRefExtension[2];
 
-	const char *data = NULL;
 	ImageDescriptionHandle textDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
-	unsigned int subNum = 1;
 	UInt8 *path = (UInt8*)malloc(PATH_MAX);
-	NSString *srtfile;
-	Handle sampleHndl;
+	NSString *srtfile, *srt;
 	
 	FSRefMakePath(theDirectory, path, PATH_MAX);
 	srtfile = [[NSString stringWithUTF8String:(char*)path] stringByAppendingPathComponent:(NSString*)filename];
 	free(path);
 	
-	data = [[[NSString stringFromUnknownEncodingFile:srtfile] stringByStandardizingNewlines] UTF8String];
-	if (!data) {err = -1; goto bail;}
+	srt = [[NSString stringFromUnknownEncodingFile:srtfile] stringByStandardizingNewlines];
+	if (!srt) {err = -1; goto bail;}
 
 	dataRef = NewHandleClear(sizeof(Handle) + 1);
 	emptyDataRefExtension[0] = EndianU32_NtoB(sizeof(UInt32)*2);
@@ -146,86 +234,7 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 		goto bail;
 	}
 
-	char subNumStr[10];
-
-	snprintf(subNumStr, 10, "%u", subNum);
-	char *subOffset; 
-	if (data != NULL) {
-		subOffset = strstr(data, subNumStr);
-	} else {
-		subOffset = NULL;
-	}
-
-	while (subOffset != NULL) {
-		unsigned int starthour, startmin, startsec, startmsec;
-		unsigned int endhour, endmin, endsec, endmsec;
-
-		// skip the line with the subtitle number in it
-		char *subTimecodeOffset = strchr(subOffset, '\n');
-		if (subTimecodeOffset == NULL)
-			break;
-		subTimecodeOffset++;
-
-		int ret = sscanf(subTimecodeOffset, "%u:%u:%u,%u --> %u:%u:%u,%u", 
-				         &starthour, &startmin, &startsec, &startmsec, 
-				         &endhour, &endmin, &endsec, &endmsec);
-
-		// find the next subtitle
-		// setting subOffset to point the end of the current subtitle text
-		snprintf(subNumStr, 10, "\n%u", ++subNum);
-		subOffset = strstr(subTimecodeOffset, subNumStr);
-
-		if (ret == 8) {
-			// skip to the beginning of the subtitle text
-			char *subTextOffset = strchr(subTimecodeOffset, '\n') + 1;
-
-			TimeValue startTime = startmsec + 1000*startsec + 60*1000*startmin + 60*60*1000*starthour;
-			TimeValue endTime = endmsec + 1000*endsec + 60*1000*endmin + 60*60*1000*endhour;
-
-			if (subOffset != NULL) {
-				if(subOffset - subTextOffset - 1 > 0 && endTime > startTime) //Make sure subtitle is not empty
-				{
-					NSString *l = [[NSString alloc] initWithBytes:subTextOffset length:subOffset - subTextOffset encoding:NSUTF8StringEncoding];
-					sl = [[SubLine alloc] initWithLine:l start:startTime end:endTime];
-					[l autorelease];
-					[sl autorelease];
-
-					[serializer addLine:sl];
-				}
-
-				// with the subtitle offset, we want the number at the beginning
-				// so advance past the newline in the stream
-				subOffset += 1;
-			}
-		}
-	}
-	
-	[serializer setFinished:YES];
-	
-	BeginMediaEdits(theMedia);
-	
-	while (sl = [serializer getSerializedPacket]) {
-		TimeRecord movieStartTime = {SInt64ToWide(sl->begin_time), 1000, 0};
-		TimeValue sampleTime;
-		const char *str = [sl->line UTF8String];
-		size_t sampleLen = strlen(str);
-		
-		PtrToHand(str,&sampleHndl,sampleLen);
-		
-		err=AddMediaSample(theMedia,sampleHndl,0,sampleLen, sl->end_time - sl->begin_time,(SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
-		if (err != noErr) goto bail;
-		
-		ConvertTimeScale(&movieStartTime, movieTimeScale);
-		
-		err = InsertMediaIntoTrack(theTrack, movieStartTime.value.lo, sampleTime, sl->end_time - sl->begin_time, fixed1);
-		if (err != noErr) goto bail;
-		
-		DisposeHandle(sampleHndl);
-	}
-
-	EndMediaEdits(theMedia);
-	
-	sampleHndl = NULL;
+	err = ReadSRTFile(srt, (SampleDescriptionHandle)textDesc, theTrack, movieTimeScale);
 
 	if (*firstSubTrack == NULL)
 		*firstSubTrack = theTrack;
@@ -235,8 +244,6 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 	SetMediaLanguage(theMedia, GetFilenameLanguage(filename));
 
 bail:
-	[serializer release];
-	[pool release];
 	if (err) {
 		if (theMedia)
 			DisposeTrackMedia(theMedia);
@@ -249,8 +256,6 @@ bail:
 		DisposeHandle((Handle) textDesc);
 
 	DisposeHandle(dataRef);
-	if (sampleHndl) DisposeHandle(sampleHndl);
-
 
 	return err;
 }
@@ -314,30 +319,23 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 			// SubRip
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".srt"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 			if (actRange.location == extRange.location)
-				{
 				err = LoadSubRipSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
-				goto bail;
-				}
 			
 			// SubStationAlpha
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".ass"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 			if (actRange.location == extRange.location)
-			{
 				err = LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
-				goto bail;
-			}
 			
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".ssa"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 			if (actRange.location == extRange.location)
-			{
 				err = LoadSubStationAlphaSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
-				goto bail;
-			}			
 			
 			// VobSub
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".idx"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 			if (actRange.location == extRange.location)
-				LoadVobSubSubtitles(&foundFileRef, cfFoundFilename, theMovie, &firstSubTrack);
+				err = LoadVobSubSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
+			
+			if (err) goto bail;
 		}
 
 		CFRelease(cfFoundFilename);
@@ -363,6 +361,7 @@ bail:
 		lines = [[NSMutableArray alloc] init];
 		outpackets = [[NSMutableArray alloc] init];
 		finished = NO;
+		write_gap = NO;
 	}
 	
 	return self;
@@ -378,7 +377,7 @@ bail:
 -(void)addLine:(SubLine *)sline
 {
 	if (sline->begin_time < sline->end_time)
-	[lines addObject:sline];
+		[lines addObject:sline];
 }
 
 static int cmp_line(id a, id b, void* unused)
@@ -516,17 +515,40 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 
 -(SubLine*)getSerializedPacket
 {
+	int packetcount;
+	
 	if ([outpackets count] == 0)  {
 		[self refill];
 		if ([outpackets count] == 0) 
 			return nil;
 	}
 	
-	SubLine *sl = [outpackets objectAtIndex:0];
-	[outpackets removeObjectAtIndex:0];
+	packetcount = [outpackets count];
+	if (!finished && packetcount < 2) return nil;
+	else if (finished && packetcount == 1) {
+		SubLine *sl = [outpackets objectAtIndex:0];
+		[outpackets removeObjectAtIndex:0];
+		[sl autorelease];
+		return sl;
+	}
 	
-	[sl autorelease];
-	return sl;
+	SubLine *bl = [outpackets objectAtIndex:0], *el;
+		
+	if (write_gap) {
+		el = [outpackets objectAtIndex:1];
+		write_gap = false;
+		[bl autorelease];
+		[outpackets removeObjectAtIndex:0];
+		if (el->begin_time > bl->end_time) {
+			SubLine *ret = [[[SubLine alloc] initWithLine:@"\n" start:bl->end_time end:el->begin_time] autorelease];
+			return ret;
+		}
+		return [self getSerializedPacket]; // this is not so clean
+	}
+	
+	
+	write_gap = true;
+	return bl;
 }
 
 -(void)setFinished:(BOOL)f
@@ -549,6 +571,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 -(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e
 {
 	if (self = [super init]) {
+		if ([l characterAtIndex:[l length]-1] != '\n') l = [l stringByAppendingString:@"\n"];
 		line = [l retain];
 		begin_time = s;
 		end_time = e;
@@ -607,6 +630,7 @@ const char *CXXSubtitleSerializer::popPacket(size_t *size, unsigned *start, unsi
 	*end   = sl->end_time;
 	
 	*size = strlen(u);
+	
 	return u;
 }
 

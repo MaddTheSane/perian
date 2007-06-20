@@ -40,7 +40,7 @@
 
 #include "nscore.h"
 
-//#define DEBUG_chardet // Uncomment this for debug dump.
+#define DEBUG_chardet // Uncomment this for debug dump.
 
 typedef enum {
   eDetecting = 0,   //We are still detecting, no sure answer yet, but caller can ask for confidence.

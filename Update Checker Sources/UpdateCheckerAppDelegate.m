@@ -13,6 +13,13 @@
 #import "UpdateCheckerAppDelegate.h"
 #include <stdlib.h>
 
+//define the following to use the beta appcast URL, but DON'T commit that change
+#define betaAppcastUrl @"whatever"
+
+@interface UpdateCheckerAppDelegate (private)
+- (void)showUpdateErrorAlertWithInfo:(NSString *)info;
+@end
+
 @implementation UpdateCheckerAppDelegate
 
 - (void)dealloc
@@ -42,6 +49,10 @@
 	
 	if (!updateUrlString) { [NSException raise:@"NoFeedURL" format:@"No feed URL is specified in the Info.plist!"]; }
 
+#ifdef betaAppcastUrl
+	updateUrlString = [[updateUrlString substringToIndex:[updateUrlString length]-4] stringByAppendingFormat:@"-%@.xml", betaAppcastUrl];
+#endif
+	
 	SUAppcast *appcast = [[SUAppcast alloc] init];
 	[appcast setDelegate:self];
 	[appcast fetchAppcastFromURL:[NSURL URLWithString:updateUrlString]];
@@ -64,14 +75,29 @@
 	NSString *currentSystemVersion = [[[NSDictionary dictionaryWithContentsOfFile:versionPlistPath] objectForKey:@"ProductVersion"] retain];
 
 	BOOL updateAvailable = SUStandardVersionComparison([latest minimumSystemVersion], currentSystemVersion);
-    NSString *panePath = [[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
+    NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	NSString *skippedVersion = [[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY];
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	BOOL manualRun = [defaults boolForKey:MANUAL_RUN_KEY];
 	if (updateAvailable && (!skippedVersion || 
 		(skippedVersion && ![skippedVersion isEqualToString:[latest versionString]]))) {
 		[self showUpdatePanelForItem:latest];
-	} else //nothing to see here, so we move along
+	} else {
+		if(manualRun)
+		{
+			NSRunAlertPanel(SULocalizedString(@"No Update Found!", nil), SULocalizedString(@"Your copy of Perian is up to date", nil), nil, nil, nil);
+			[defaults removeObjectForKey:MANUAL_RUN_KEY];
+		}
 		[[NSApplication sharedApplication] terminate:self];
+	}
+}
+
+- (void)appcastDidFailToLoad:(SUAppcast *)appcast
+{
+	[self updateFailed];
+	[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to load Perian's version info. Please try again later.", nil)];
+	[[NSApplication sharedApplication] terminate:self];	
 }
 
 - (void)showUpdatePanelForItem:(SUAppcastItem *)updateItem
@@ -152,7 +178,7 @@
 {
 	[self updateFailed];
 	NSLog(@"Download error: %@", [error localizedDescription]);
-	[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to download the file. Please try again later.", nil)];
+	[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to download the newest version of Perian. Please try again later.", nil)];
 	[[NSApplication sharedApplication] terminate:self];
 }
 
@@ -178,6 +204,10 @@ extern char **environ;
 {
 	[download release];
 	downloader = nil;
+	
+	//Indeterminate progress bar
+	[statusController setMaxProgressValue:0];
+	[statusController setStatusText:SULocalizedString(@"Extracting...", nil)];
 	
 	if(![self extractDMG:downloadPath])
 		[self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Extract Downloaded File",@"")];

@@ -44,11 +44,12 @@ short GetFilenameLanguage(CFStringRef filename);
 @interface SubtitleSerializer : NSObject
 {
 	NSMutableArray *lines, *outpackets;
-	BOOL finished;
+	BOOL finished, write_gap;
 }
 -(void)addLine:(SubLine *)sline;
 -(void)setFinished:(BOOL)finished;
 -(SubLine*)getSerializedPacket;
+-(BOOL)isEmpty;
 @end
 #endif
 

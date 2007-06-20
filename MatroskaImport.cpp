@@ -234,6 +234,7 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 											  TimeValue atTime, TimeValue *durationAdded,
 											  long inFlags, long *outFlags)
 {
+	ComponentResult err = noErr;
 	this->dataRef = dataRef;
 	this->dataRefType = dataRefType;
 	this->theMovie = theMovie;
@@ -250,7 +251,8 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 			// invalid file, validate should catch this
 			return invalidMovie;
 		
-		SetupMovie();
+		err = SetupMovie();
+		if (err) return err;
 		
 		// SetupMovie() couldn't find any level one elements, so nothing to import
 		if (el_l1 == NULL)

@@ -145,8 +145,8 @@ int SSA2ASSAlignment(int a)
 		ATSUCreateStyle(&s->atsustyle);
 		ATSUSetAttributes(s->atsustyle,sizeof(vals) / sizeof(ATSUAttributeValuePtr),tags,sizes,vals);
 		
-		ATSUFontFeatureType		ftype[] = {kLigaturesType,kLigaturesType};
-		ATSUFontFeatureSelector fsel[] = {kCommonLigaturesOnSelector,kRareLigaturesOnSelector};
+		ATSUFontFeatureType		ftype[] = {kLigaturesType};
+		ATSUFontFeatureSelector fsel[] = {kCommonLigaturesOnSelector};
 		
 		ATSUSetFontFeatures(s->atsustyle,sizeof(fsel) / sizeof(ATSUFontFeatureSelector),ftype,fsel);
 	}
@@ -265,11 +265,15 @@ static BOOL isinrange(unsigned base, unsigned test_s, unsigned test_e)
 
 static NSString *oneMKVPacket(NSDictionary *s)
 {
+	NSString *name = [s objectForKey:@"Name"];
+	if (!name) name = [s objectForKey:@"Actor"];
+	if (!name) name = @"";
+	
 	return [NSString stringWithFormat:@"%d,%d,%@,%@,%0.4d,%0.4d,%0.4d,%@,%@\n",
 		[[s objectForKey:@"ReadOrder"] intValue],
 		[[s objectForKey:@"Layer"] intValue],
 		[s objectForKey:@"Style"],
-		[s objectForKey:@"Name"],
+		name,
 		[[s objectForKey:@"MarginL"] intValue],
 		[[s objectForKey:@"MarginR"] intValue],
 		[[s objectForKey:@"MarginV"] intValue],
@@ -282,7 +286,6 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	int num = [linesa count], i;
 	NSMutableArray *outa = [[NSMutableArray alloc] init];
 	SubtitleSerializer *serializer = [[SubtitleSerializer alloc] init];
-	SubLine *sl;
 	
 	for (i = 0; i < num; i++) {
 		NSDictionary *l = [linesa objectAtIndex:i];;
@@ -304,8 +307,8 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	
 	[serializer setFinished:YES];
 	
-	while (sl = [serializer getSerializedPacket]) {
-		[outa addObject:sl];
+	while (![serializer isEmpty]) {
+		[outa addObject:[serializer getSerializedPacket]];
 	}
 	
 	[serializer release];
@@ -381,7 +384,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	
 	_lines = [self serializeSubLines:doclines];
 	
-	header = [[ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location] retain];
+	header = [[[ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location] stringByTrimmingCharactersInSet:ws] retain];
 	
 	return noErr;
 }
@@ -466,15 +469,19 @@ static NSString *oneMKVPacket(NSDictionary *s)
 
 -(void)loadDefaultsWithWidth:(float)width height:(float)height
 {
+	float sdDiagonal = sqrt(640 * 640 + 480 * 480), movDiagonal = sqrt(width * width + height * height);
 	stylecount = 0;
 	styles = malloc(0);
 	defaultstyle = malloc(sizeof(ssastyleline));
 	*defaultstyle = SSA_DefaultStyle;
 	disposedefaultstyle = YES;
-	resX = (width / height) * 480.; resY = 480;
+	resY = 480; resX = (width / height) * resY; 
 	timescale = 1;
 	collisiontype = NormalCollisions;
 	version = S_ASS;
+	
+	resX *= movDiagonal / sdDiagonal;
+	resY *= movDiagonal / sdDiagonal;
 	
 	[self makeATSUStylesForSSAStyle:defaultstyle];
 }

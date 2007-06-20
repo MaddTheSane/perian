@@ -24,8 +24,8 @@
                 "button_install" = NSButton; 
                 "button_updateCheck" = NSButton; 
                 "button_website" = NSButton; 
-                "popup_2ChannelMode" = NSPopUpButton; 
                 "popup_ac3DynamicRangeType" = NSPopUpButton; 
+                "popup_outputMode" = NSPopUpButton; 
                 "progress_install" = NSProgressIndicator; 
                 "progress_updateCheck" = NSProgressIndicator; 
                 "slider_ac3DynamicRangeSlider" = NSSlider; 

@@ -91,16 +91,19 @@ bool MatroskaImport::OpenFile()
 	return valid;
 }
 
-void MatroskaImport::SetupMovie()
+ComponentResult MatroskaImport::SetupMovie()
 {
+	ComponentResult err = noErr;
 	// once we've read the Tracks and Segment Info elements and Chapters if it's in the seek head,
 	// we don't need to read any more of the file
 	bool done = false;
 	
 	el_l0 = aStream->FindNextID(KaxSegment::ClassInfos, ~0);
-	if (!el_l0) return;		// nothing in the file
+	if (!el_l0) return err;		// nothing in the file
 	
 	segmentOffset = static_cast<KaxSegment *>(el_l0)->GetDataStart();
+	
+	SetAutoTrackAlternatesEnabled(theMovie, false);
 	
 	while (!done && NextLevel1Element()) {
 		int upperLevel = 0;
@@ -108,28 +111,30 @@ void MatroskaImport::SetupMovie()
 		
 		if (EbmlId(*el_l1) == KaxInfo::ClassInfos.GlobalId) {
 			el_l1->Read(*aStream, KaxInfo::ClassInfos.Context, upperLevel, dummyElt, true);
-			ReadSegmentInfo(*static_cast<KaxInfo *>(el_l1));
+			err = ReadSegmentInfo(*static_cast<KaxInfo *>(el_l1));
 			
 		} else if (EbmlId(*el_l1) == KaxTracks::ClassInfos.GlobalId) {
 			el_l1->Read(*aStream, KaxTracks::ClassInfos.Context, upperLevel, dummyElt, true);
-			ReadTracks(*static_cast<KaxTracks *>(el_l1));
+			err = ReadTracks(*static_cast<KaxTracks *>(el_l1));
 			
 		} else if (EbmlId(*el_l1) == KaxChapters::ClassInfos.GlobalId) {
 			el_l1->Read(*aStream, KaxChapters::ClassInfos.Context, upperLevel, dummyElt, true);
-			ReadChapters(*static_cast<KaxChapters *>(el_l1));
+			err = ReadChapters(*static_cast<KaxChapters *>(el_l1));
 			
 		} else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
 			el_l1->Read(*aStream, KaxAttachments::ClassInfos.Context, upperLevel, dummyElt, true);
-			ReadAttachments(*static_cast<KaxAttachments *>(el_l1));
+			err = ReadAttachments(*static_cast<KaxAttachments *>(el_l1));
 			
 		} else if (EbmlId(*el_l1) == KaxSeekHead::ClassInfos.GlobalId) {
 			el_l1->Read(*aStream, KaxSeekHead::ClassInfos.Context, upperLevel, dummyElt, true);
-			ReadMetaSeek(*static_cast<KaxSeekHead *>(el_l1));
+			err = ReadMetaSeek(*static_cast<KaxSeekHead *>(el_l1));
 			
 		} else if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
 			// all header elements are before clusters in sane files
 			done = true;
 		}
+		
+		if (err) return err;
 	}
 	
 	// some final setup of info across elements since they can come in any order
@@ -141,6 +146,8 @@ void MatroskaImport::SetupMovie()
 			AddTrackReference(tracks[i].theTrack, chapterTrack, kTrackReferenceChapterList, NULL);
 		}
 	}
+	
+	return err;
 }
 
 EbmlElement * MatroskaImport::NextLevel1Element()
@@ -171,7 +178,7 @@ EbmlElement * MatroskaImport::NextLevel1Element()
 	return el_l1;
 }
 
-void MatroskaImport::ReadSegmentInfo(KaxInfo &segmentInfo)
+ComponentResult MatroskaImport::ReadSegmentInfo(KaxInfo &segmentInfo)
 {
 	KaxDuration & duration = GetChild<KaxDuration>(segmentInfo);
 	KaxTimecodeScale & timecodeScale = GetChild<KaxTimecodeScale>(segmentInfo);
@@ -206,17 +213,20 @@ void MatroskaImport::ReadSegmentInfo(KaxInfo &segmentInfo)
 		}
 		QTMetaDataRelease(movieMetaData);
 	}
+	return noErr;
 }
 
-void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
+ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 {
 	Track firstVideoTrack = NULL;
 	Track firstAudioTrack = NULL;
 	Track firstSubtitleTrack = NULL;
+	ComponentResult err = noErr;
 	
-	// first pass: audio/video
-	// second pass: subtitles, which depend on the size of the video track being set atm
-	for (int pass = 1; pass <= 2; pass++) {
+	// Since creating a subtitle track requires a video track to have already been created
+    // (so that it can be sized to fit exactly over the video track), we go through the 
+    // track entries in two passes, first to add audio/video, second to add subtitle tracks.
+    for (int pass = 1; pass <= 2; pass++) {
 		for (int i = 0; i < trackEntries.ListSize(); i++) {
 			KaxTrackEntry & track = *static_cast<KaxTrackEntry *>(trackEntries[i]);
 			KaxTrackNumber & number = GetChild<KaxTrackNumber>(track);
@@ -233,7 +243,8 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			switch (uint8(type)) {
 				case track_video:
 					if (pass == 2) continue;
-					if (AddVideoTrack(track, mkvTrack) != noErr) continue;
+					err = AddVideoTrack(track, mkvTrack);
+					if (err) return err;
 					
 					if (firstVideoTrack)
 						SetTrackAlternate(firstVideoTrack, mkvTrack.theTrack);
@@ -243,7 +254,8 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					
 				case track_audio:
 					if (pass == 2) continue;
-					if (AddAudioTrack(track, mkvTrack) != noErr) continue;
+					err = AddAudioTrack(track, mkvTrack);
+					if (err) return err;
 					
 					if (firstAudioTrack)
 						SetTrackAlternate(firstAudioTrack, mkvTrack.theTrack);
@@ -253,7 +265,9 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					
 				case track_subtitle:
 					if (pass == 1) continue;
-					if (AddSubtitleTrack(track, mkvTrack) != noErr) continue;
+					err = AddSubtitleTrack(track, mkvTrack);
+					if (err) return err;
+					if (mkvTrack.theTrack == NULL) continue;
 					
 					if (firstSubtitleTrack)
 						SetTrackAlternate(firstSubtitleTrack, mkvTrack.theTrack);
@@ -281,7 +295,7 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			
 			if (!trackName.IsDefaultValue()) {
 				QTMetaDataRef trackMetaData;
-				OSStatus err = QTCopyTrackMetaData(mkvTrack.theTrack, &trackMetaData);
+				err = QTCopyTrackMetaData(mkvTrack.theTrack, &trackMetaData);
 				
 				if (err == noErr) {
 					OSType key = 'name';
@@ -313,6 +327,7 @@ void MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	for (int i = 0; i < tracks.size(); i++) {
 		SetTrackEnabled(tracks[i].theTrack, tracks[i].isEnabled);
 	}
+	return noErr;
 }
 
 ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
@@ -363,8 +378,10 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 		return GetMoviesError();
 	
 	mkvTrack.theMedia = NewTrackMedia(mkvTrack.theTrack, 'vide', GetMovieTimeScale(theMovie), dataRef, dataRefType);
-	if (mkvTrack.theMedia == NULL)
+	if (mkvTrack.theMedia == NULL) {
+		DisposeMovieTrack(mkvTrack.theTrack);
 		return GetMoviesError();
+	}
 	
 	imgDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
 	(*imgDesc)->idSize = sizeof(ImageDescription);
@@ -410,8 +427,10 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 		return GetMoviesError();
 	
 	mkvTrack.theMedia = NewTrackMedia(mkvTrack.theTrack, 'soun', GetMovieTimeScale(theMovie), dataRef, dataRefType);
-	if (mkvTrack.theMedia == NULL)
+	if (mkvTrack.theMedia == NULL) {
+		DisposeMovieTrack(mkvTrack.theTrack);
 		return GetMoviesError();
+	}
 	
 	KaxTrackAudio & audioTrack = GetChild<KaxTrackAudio>(kaxTrack);
 	KaxAudioSamplingFreq & sampleFreq = GetChild<KaxAudioSamplingFreq>(audioTrack);
@@ -523,14 +542,14 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		mkvTrack.is_vobsub = false;
 	} else {
 		Codecprintf(NULL, "MKV: Unsupported subtitle type\n");
-		return -2;
+		return noErr;
 	}
 	
 	// this sets up anything else needed in the description for the specific codec.
 	return MkvFinishSampleDescription(&kaxTrack, (SampleDescriptionHandle) imgDesc, kToSampleDescription);
 }
 
-void MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
+ComponentResult MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 {
 	KaxEditionEntry & edition = GetChild<KaxEditionEntry>(chapterEntries);
 	UInt32 emptyDataRefExtension[2];
@@ -538,7 +557,7 @@ void MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 	chapterTrack = NewMovieTrack(theMovie, 0, 0, kNoVolume);
 	if (chapterTrack == NULL) {
 		Codecprintf(NULL, "MKV: Error creating chapter track %d\n", GetMoviesError());
-		return;
+		return GetMoviesError();
 	}
 	
 	// we use a handle data reference here because I don't see any way to add textual 
@@ -555,7 +574,8 @@ void MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 									   dataRef, HandleDataHandlerSubType);
 	if (chapterMedia == NULL) {
 		Codecprintf(NULL, "MKV: Error creating chapter media %d\n", GetMoviesError());
-		return;
+		DisposeMovieTrack(chapterTrack);
+		return GetMoviesError();
 	}
 	
 	// Name the chapter track "Chapters" for easy distinguishing
@@ -587,6 +607,7 @@ void MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 	
 	EndMediaEdits(chapterMedia);
 	SetTrackEnabled(chapterTrack, false);
+	return noErr;
 }
 
 void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
@@ -631,7 +652,7 @@ void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
 	}
 }
 
-void MatroskaImport::ReadAttachments(KaxAttachments &attachments)
+ComponentResult MatroskaImport::ReadAttachments(KaxAttachments &attachments)
 {
 	KaxAttached *attachedFile = FindChild<KaxAttached>(attachments);
 	
@@ -651,9 +672,10 @@ void MatroskaImport::ReadAttachments(KaxAttachments &attachments)
 		
 		attachedFile = &GetNextChild<KaxAttached>(attachments, *attachedFile);
 	}
+	return noErr;
 }
 
-void MatroskaImport::ReadMetaSeek(KaxSeekHead &seekHead)
+ComponentResult MatroskaImport::ReadMetaSeek(KaxSeekHead &seekHead)
 {
 	KaxSeek *seekEntry = FindChild<KaxSeek>(seekHead);
 	
@@ -663,7 +685,7 @@ void MatroskaImport::ReadMetaSeek(KaxSeekHead &seekHead)
 	for (; itr != levelOneElements.end(); itr++) {
 		if (itr->GetID() == KaxSeekHead::ClassInfos.GlobalId && 
 			itr->segmentPos + segmentOffset == currPos)
-			return;
+			return noErr;
 	}
 	
 	while (seekEntry && seekEntry->GetSize() > 0) {
@@ -695,6 +717,8 @@ void MatroskaImport::ReadMetaSeek(KaxSeekHead &seekHead)
 	}
 	
 	sort(levelOneElements.begin(), levelOneElements.end());
+	
+	return noErr;
 }
 
 void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
@@ -779,13 +803,17 @@ MatroskaTrack::MatroskaTrack()
 	maxLoadedTime = 0;
 	seenFirstBlock = false;
 	firstSample = -1;
-	amountToAdd = 0;
+	numSamples = 0;
+	durationToAdd = 0;
+	displayOffsetSum = 0;
+	durationSinceZeroSum = 0;
 	subtitleSerializer = new CXXSubtitleSerializer;
 	subDataRefHandler = NULL;
 	is_vobsub = false;
 	isEnabled = true;
 	defaultDuration = 0;
 	usesLacing = true;
+	currentFrame = 0;
 }
 
 MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
@@ -814,7 +842,10 @@ MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
 	
 	seenFirstBlock = copy.seenFirstBlock;
 	firstSample = copy.firstSample;
-	amountToAdd = copy.amountToAdd;
+	numSamples = copy.numSamples;
+	durationToAdd = copy.durationToAdd;
+	displayOffsetSum = copy.displayOffsetSum;
+	durationSinceZeroSum = copy.durationSinceZeroSum;
 	
 	subtitleSerializer = copy.subtitleSerializer;
 	subtitleSerializer->retain();
@@ -825,6 +856,7 @@ MatroskaTrack::MatroskaTrack(const MatroskaTrack &copy)
 	isEnabled = copy.isEnabled;
 	defaultDuration = copy.defaultDuration;
 	usesLacing = copy.usesLacing;
+	currentFrame = copy.currentFrame;
 }
 
 MatroskaTrack::~MatroskaTrack()
@@ -891,21 +923,34 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 			}
 			lastFrames.clear();
 		}
-	} else if (ptsReorder.size() > 1) {
+	} else if (ptsReorder.size() - currentFrame > MAX_DECODE_DELAY + 1) {
+		map<TimeValue64, TimeValue>::iterator duration;
+		MatroskaFrame &curr = lastFrames[currentFrame];
+		MatroskaFrame &next = lastFrames[currentFrame+1];
+		currentFrame++;
 		
 		// pts -> dts works this way: we assume that the first frame has correct dts 
 		// (we start at a keyframe, so pts = dts), and then we fill up a buffer with
 		// frames until we have the frame whose pts is equal to the next dts
 		// Then, we sort this buffer, extract the pts as dts, and calculate the duration.
 		
-		if (ptsReorder.size() > MAX_DECODE_DELAY + 1) {
-			ptsReorder.sort();
-			
-			lastFrames[1].dts = *(++ptsReorder.begin());
-			lastFrames[0].duration = lastFrames[1].dts - lastFrames[0].dts;
+		ptsReorder.sort();
+		next.dts = *(++ptsReorder.begin());
+		ptsReorder.pop_front();
+		
+		// Duration calculation has to be done between consecutive pts. Since we reorder
+		// the pts into the dts, which have to be in order, we calculate the duration then
+		// from the dts, then save it for the frame with the same pts.
+		
+		durationForPTS[curr.dts] = next.dts - curr.dts;
+		
+		duration = durationForPTS.find(lastFrames[0].pts);
+		if (duration != durationForPTS.end()) {
+			lastFrames[0].duration = duration->second;
 			AddFrame(lastFrames[0]);
 			lastFrames.erase(lastFrames.begin());
-			ptsReorder.pop_front();
+			durationForPTS.erase(duration);
+			currentFrame--;
 		}
 	}
 	
@@ -938,8 +983,8 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 {
 	ComponentResult err = noErr;
-	SInt64 sampleNum = 0;
 	TimeValue sampleTime;
+	TimeValue64 displayOffset = frame.pts - frame.dts;
 	
 	if (type == track_subtitle && !is_vobsub) {
 		if (frame.size > 0) subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.pts, frame.pts + frame.duration);
@@ -956,10 +1001,9 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 			DisposeHandle(sampleH);
 			frame.pts = start;
 			frame.duration = end - start;
-			sampleNum = sampleTime;
 		} else return;
 	} else if (sampleTable) {
-		TimeValue64 displayOffset = frame.pts - frame.dts;
+		SInt64 sampleNum;
 		
 		err = QTSampleTableAddSampleReferences(sampleTable, frame.offset, frame.size, frame.duration, 
 											   displayOffset, 1, frame.flags, qtSampleDesc, &sampleNum);
@@ -968,7 +1012,9 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 			return;
 		}
 		
-		amountToAdd++;
+		if (firstSample == -1)
+			firstSample = sampleNum;
+		numSamples++;
 	} else {
 		SampleReference64Record sample;
 		sample.dataOffset = SInt64ToWide(frame.offset);
@@ -978,65 +1024,62 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 		sample.sampleFlags = frame.flags;
 		
 		err = AddMediaSampleReferences64(theMedia, desc, 1, &sample, &sampleTime);
-		sampleNum = sampleTime;
 		if (err) {
 			Codecprintf(NULL, "MKV: error adding sample reference to media %d\n", err);
 			return;
 		}
-		
-		amountToAdd += frame.duration;
 	}
 	
 	// add to track immediately if subtitle, otherwise we let it be added elsewhere when we can do several at once
 	if (type == track_subtitle) {
-		if (sampleTable) {
-			Codecprintf(NULL, "MKV: subtitle track has a sample table\n", err);
-			return;
-		}
 		err = InsertMediaIntoTrack(theTrack, frame.pts, sampleTime, frame.duration, fixed1);
 		if (err) {
 			Codecprintf(NULL, "MKV: error adding subtitle media into track %d\n", err);
 			return;
 		}
+	} else {
+		durationSinceZeroSum += frame.duration;
+		displayOffsetSum += displayOffset;
+		if (displayOffsetSum == 0) {
+			durationToAdd += durationSinceZeroSum;
+			durationSinceZeroSum = 0;
+		}
 	}
-	
-	if (firstSample == -1)
-		firstSample = sampleNum;
 }
 
 void MatroskaTrack::AddSamplesToTrack()
 {
 	OSStatus err = noErr;
 	
-	if (firstSample == -1)
-		// nothing to add
-		return;
-	
-	if (type != track_subtitle) {
-		if (sampleTable) {
-			TimeValue64 sampleTime64;
-			TimeValue mediaDuration = GetMediaDisplayDuration(theMedia);
-			
-			err = AddSampleTableToMedia(theMedia, sampleTable, firstSample, amountToAdd, &sampleTime64);
-			if (err)
-				Codecprintf(NULL, "MKV: error adding sample table to media %d (type %x #%d)\n", err);
-			
-			firstSample = sampleTime64;
-			// FIXME: not correct...
-			amountToAdd = GetMediaDisplayDuration(theMedia) - mediaDuration - 1;
-		}
-		err = InsertMediaIntoTrack(theTrack, -1, firstSample, amountToAdd, fixed1);
-		if (err)
-			Codecprintf(NULL, "MKV: error inserting media into track %d (type %x #%d)\n", err, type, number);
+	if (type == track_subtitle)
+		return;			// handled in AddFrame()
+
+	if (sampleTable) {
+		if (firstSample == -1)
+			return;		// nothing to add
 		
-		maxLoadedTime += amountToAdd;
+		err = AddSampleTableToMedia(theMedia, sampleTable, firstSample, numSamples, NULL);
 		firstSample = -1;
-		amountToAdd = 0;
+		numSamples = 0;
+		if (err) {
+			Codecprintf(NULL, "MKV: error adding sample table to the media %d\n", err);
+			durationToAdd = 0;
+			return;
+		}
 	}
+	
+	err = InsertMediaIntoTrack(theTrack, -1, maxLoadedTime, durationToAdd, fixed1);
+	if (err)
+		Codecprintf(NULL, "MKV: error inserting media into track %d\n", err);
+	else
+		maxLoadedTime += durationToAdd;
+	
+	durationToAdd = 0;
 }
 
 void MatroskaTrack::FinishTrack()
 {
+	CXXAutoreleasePool pool;
 	
 	if (type == track_subtitle && !is_vobsub)
 	{

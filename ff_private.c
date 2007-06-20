@@ -521,6 +521,7 @@ int prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OSType 
 		st = ic->streams[j];
 		map[j].index = st->index;
 		map[j].str = st;
+		map[j].duration = -1;
 		
 		if(st->codec->codec_type == CODEC_TYPE_VIDEO) {
 			track = NewMovieTrack(theMovie, st->codec->width << 16, st->codec->height << 16, kNoVolume);
@@ -565,15 +566,19 @@ int determine_header_offset(ff_global_ptr storage) {
 	else
 	{
 		int streamsRead = 0;
+		AVStream *st;
+		
 		result = av_seek_frame(formatContext, -1, 0, 0);
 		if(result < 0) goto bail;
 		
-		formatContext->iformat->read_packet(formatContext, &packet);
+		av_read_frame(formatContext, &packet);
+		st = formatContext->streams[packet.stream_index];
+		
 		/* read_packet will give the first decodable packet. However, that isn't necessarily
 			the first entry in the index, so look for an entry with a matching size. */
-		for (i = 0; i < formatContext->streams[packet.stream_index]->nb_index_entries; i++) {
-			if (packet.size == formatContext->streams[packet.stream_index]->index_entries[i].size) {
-				storage->header_offset = packet.pos - formatContext->streams[packet.stream_index]->index_entries[i].pos;
+		for (i = 0; i < st->nb_index_entries; i++) {
+			if (packet.dts == st->index_entries[i].timestamp) {
+				storage->header_offset = packet.pos - st->index_entries[i].pos;
 				break;
 			}
 		}
@@ -775,7 +780,7 @@ bail:
 /* Import function for movies that lack an index.
  * Supports progressive importing, but will not idle if maxFrames == 0.
  */
-ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames) {
+ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames, bool addSamples) {
 	SampleReference64Record sampleRec;
 	DataHandler dataHandler;
 	AVFormatContext *formatContext;
@@ -821,7 +826,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		ncstream = &storage->stream_map[i];
 		Media media = ncstream->media;
 		
-		if(media)
+		if(media && ncstream->duration == -1)
 			ncstream->duration = GetMediaDuration(media);
 	}
 	
@@ -909,7 +914,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		ncstream = &storage->stream_map[i];
 		Media media = ncstream->media;
 		
-		if(media) {
+		if(media && (addSamples || readResult != 0)) {
 			Track track = GetMediaTrack(media);
 			TimeScale mediaTimeScale = GetMediaTimeScale(media);
 			TimeValue prevDuration = ncstream->duration;
@@ -923,6 +928,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			if(addedDuration > 0) {
 				result = InsertMediaIntoTrack(track, -1, prevDuration, addedDuration, fixed1);
 			}
+			ncstream->duration = -1;
 		}
 	}
 	
@@ -964,7 +970,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 	send_movie_changed_notification(storage->movie);
 	
 	//tell the idle manager to idle us again in 500ms.
-	if(idling && storage->idleManager)
+	if(idling && storage->idleManager && storage->isStreamed)
 		QTIdleManagerSetNextIdleTimeDelta(storage->idleManager, 1, 2);
 	
 	return(result);
