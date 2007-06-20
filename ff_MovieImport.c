@@ -63,6 +63,7 @@ void initLib()
 		inited = TRUE;
 		av_register_input_format(&avi_demuxer);
 		av_register_input_format(&flv_demuxer);
+		av_register_input_format(&tta_demuxer);
 		register_parsers();
 		
 		avcodec_init();
@@ -88,6 +89,7 @@ void initLib()
 		register_avcodec(&adpcm_swf_decoder);
 		register_avcodec(&vorbis_decoder);
 		register_avcodec(&mp2_decoder);
+		register_avcodec(&tta_decoder);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}

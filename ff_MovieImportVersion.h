@@ -29,5 +29,6 @@
 
 #define kAVIthngResID 512
 #define kFLVthngResID 515
+#define kTTAthngResID 517
 
 #endif

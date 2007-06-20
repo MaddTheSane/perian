@@ -269,6 +269,58 @@ resource 'STR ' (kFLVthngResID) {
 	"Flash Video Importer"
 };
 
+/* Component Manager Things - 
+	TTA */
+resource 'thng' (kTTAthngResID) {
+	'eat ',					// Type
+	'TTA ',					// SubType
+	'soun',					// Manufacturer
+	0,
+	0,
+	0,
+	0,
+	'STR ',						// Name Type
+	kTTAthngResID,						// Name ID
+	0,							// Info Type
+	0,							// Info ID
+	0,							// Icon Type
+	0,							// Icon ID
+	kFFAviComponentVersion,		// Version
+	componentHasMultiplePlatforms +
+	componentDoAutoVersion,		// Registratin Flags
+	0,							// Resource ID of Icon Family
+{
+	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
+	'dlle',					// Code Resource type
+	512,
+	platformIA32NativeEntryPoint,		// IA32
+	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
+	'dlle',
+	512,
+	platformPowerPCNativeEntryPoint,	// PowerPC
+},
+'thnr', kTTAthngResID
+};
+
+resource 'thnr' (kTTAthngResID) {
+{
+	'mime', 1, 0,
+	'mime', kTTAthngResID, 0,
+}
+};
+
+resource 'mime' (kTTAthngResID) {
+{
+	kMimeInfoMimeTypeTag,		1, "audio/x-tta";
+	kMimeInfoFileExtensionTag,	1, "tta";
+	kMimeInfoDescriptionTag,	1, "True Audio";
+};
+};
+
+resource 'STR ' (kTTAthngResID) {
+	"True Audio Importer"
+};
+
 resource 'dlle' (512) {
 	"FFAvi_MovieImportComponentDispatch"
 };

@@ -69,3 +69,10 @@
 #define kComponentName					"MPEG Layer 2"
 #define kComponentInfo					"An AudioCodec that decodes MP2 audio into linear PCM"
 #include "XCAResources.r"
+
+#define kPrimaryResourceID				138
+#define kComponentType					'adec'
+#define kComponentSubtype				kAudioFormatTTA
+#define kComponentName					"True Audio"
+#define kComponentInfo					"An AudioCodec that decodes True Audio into linear PCM"
+#include "XCAResources.r"

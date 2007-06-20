@@ -341,6 +341,9 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 		case CODEC_ID_ADPCM_SWF:
 			asbd->mFormatID = kAudioFormatFlashADPCM;
 			break;
+		case CODEC_ID_TTA:
+			asbd->mFormatID = kAudioFormatTTA;
+			break;
 		default:
 			break;
 	}

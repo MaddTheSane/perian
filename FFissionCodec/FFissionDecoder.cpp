@@ -43,6 +43,7 @@ static const CodecPair kAllInputFormats[] =
 	{ kAudioFormatFlashADPCM, CODEC_ID_ADPCM_SWF },
 	{ kAudioFormatXiphVorbis, CODEC_ID_VORBIS },
 	{ kAudioFormatMPEGLayer2, CODEC_ID_MP2 },
+	{ kAudioFormatTTA, CODEC_ID_TTA },
 	{ 0, CODEC_ID_NONE }
 };
 
@@ -132,6 +133,7 @@ void FFissionDecoder::SetupExtradata(OSType formatID)
 	switch (formatID) {
 		case kAudioFormatWMA1MS:
 		case kAudioFormatWMA2MS:
+		case kAudioFormatTTA:
 			if (magicCookieSize < 12 + 18 + 8 + 8)
 				return;
 			
