@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 //define the following to use the beta appcast URL, but DON'T commit that change
-#define betaAppcastUrl @"whatever"
+//#define betaAppcastUrl @"whatever"
 
 @interface UpdateCheckerAppDelegate (private)
 - (void)showUpdateErrorAlertWithInfo:(NSString *)info;
