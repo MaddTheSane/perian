@@ -173,26 +173,24 @@ void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFr
 #else
 #include <emmintrin.h>
 
-#define TRUNCATE(x, power) (x & ~(power-1))
-
-static void Y420toY422_sse2(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
-	UInt8          *yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
-	unsigned		rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
-	unsigned		y,x, vWidth = width / 16, halfheight = height / 2, halfwidth = width / 2;
+	UInt8	*yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
+	unsigned	rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
+	unsigned	y,x, vWidth = width / 16, halfheight = height / 2;
+	unsigned	halfwidth = width / 2; 
 	
-	for (y = 0; y < halfheight; y ++) {
-		__m128i *ov = (__m128i *)o, *ov2 = (__m128i *)(o + outRB), *yv2 = (__m128i *)(yc + rY);
-		__m128i *yv = (__m128i *)yc;
-		long long *uv = (long long *)uc, *vv = (long long*)vc;
+	for (y = 0; y < halfheight; y++) {
+		UInt8   * o2 = o + outRB,   * yc2 = yc + rY;
+		__m128i * ov = (__m128i*)o, * ov2 = (__m128i*)o2, * yv = (__m128i*)yc, * yv2 = (__m128i*)yc2;
+		__m64   * uv = (__m64*)uc,  * vv = (__m64*)vc;
 		
 		for (x = 0; x < vWidth; x++) {
 			/* read one chroma row, two luma rows, write two luma rows at once. this avoids reading chroma twice
-			* sse2 can do 64-bit loads, so we do that. (apple's h264 doesn't seem to, maybe we should copy them?)
-			* unrolling loops is very bad on x86 */
+			* sse2 can do 64-bit loads, so we do that. maybe we shouldn't?
+			* also this loop could be unrolled serially */
 			unsigned x2 = x*2;
-//			__builtin_prefetch(&yv[x+1], 0, 0); __builtin_prefetch(&yv2[x+1], 0, 0); // prefetch next y vectors, throw it out of cache immediately after use
-//			__builtin_prefetch(&uv[x+1], 0, 0); __builtin_prefetch(&vv[x+1], 0, 0); // and chroma too
+
 			__m128i	tmp_y = yv[x], 
 				tmp_y2 = yv2[x],
 				chroma = _mm_unpacklo_epi8(_mm_loadl_epi64((__m128i*)&uv[x]), _mm_loadl_epi64((__m128i*)&vv[x]));
@@ -207,29 +205,25 @@ static void Y420toY422_sse2(UInt8 * o, unsigned outRB, unsigned width, unsigned 
 			_mm_stream_si128(&ov2[x2+1],p4);
 		}
 		
-		if (__builtin_expect(width % 16 != 0, FALSE)) { //spill to scalar for the end if the row isn't a multiple of 16
-			UInt8 *o2 = (UInt8*)ov2, *yc2 = (UInt8*)yv2;
-			for (x = TRUNCATE(width, 16) / 2; x < halfwidth; x++) {
-				unsigned x4 = x*4, x2 = x*2;
-				o2[x4] = o[x4] = uc[x];
-				o[x4 + 1] = yc[x2];
-				o2[x4 + 1] = yc2[x2];
-				o2[x4 + 2] = o[x4 + 2] = vc[x];
-				o[x4 + 3] = yc[x2 + 1];
-				o2[x4 + 3] = yc2[x2 + 1];
-			}			
-		}
+		for (x = x * 8; x < halfwidth; x++) {
+			unsigned x4 = x*4, x2 = x*2;
+			o2[x4] = o[x4] = uc[x];
+			o[x4 + 1] = yc[x2];
+			o2[x4 + 1] = yc2[x2];
+			o2[x4 + 2] = o[x4 + 2] = vc[x];
+			o[x4 + 3] = yc[x2 + 1];
+			o2[x4 + 3] = yc2[x2 + 1];
+		}			
 		
 		o += outRB*2;
 		yc += rY*2;
 		uc += rU;
 		vc += rV;
 	}
-	_mm_sfence(); // complete all writes (probably not really needed)
 }
 
 
-static void Y420toY422_x86_scalar(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+static void __attribute__((noinline)) Y420toY422_x86_scalar(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
 	UInt8		*yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
 	unsigned	rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], halfheight = height / 2, halfwidth = width / 2;
@@ -260,10 +254,10 @@ void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFr
 	uintptr_t yc = (uintptr_t)picture->data[0];
 
 	//make sure the ffmpeg picture buffers are aligned enough, they're only guaranteed to be 8-byte for some reason...
-	//if input y isn't 16 byte aligned, sse2 crashes
-
-	if (__builtin_expect((yc % 16) == 0 && (picture->linesize[0] % 16) == 0, TRUE)) Y420toY422_sse2(o, outRB, width, height, picture);
-	else Y420toY422_x86_scalar(o, outRB, width, height, picture);
+	if ((yc | picture->linesize[0]) % 16 == 0) {
+		Y420toY422_sse2(o, outRB, width, height, picture);
+		_mm_sfence();
+	} else Y420toY422_x86_scalar(o, outRB, width, height, picture);
 }
 #endif
 
