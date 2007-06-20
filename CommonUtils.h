@@ -10,6 +10,8 @@
 #ifndef __COMMONUTILS_H__
 #define __COMMONUTILS_H__
 
+#include <QuickTime/QuickTime.h>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -33,6 +35,8 @@ uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size);
 // mallocs the buffer and copies the codec-specific description to it, in the same format
 // as is specified in Matroska and is used in libavcodec
 ComponentResult ReadESDSDescExt(Handle descExt, UInt8 **buffer, int *size);
+
+int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type);
 
 #ifdef __cplusplus
 }

@@ -267,3 +267,21 @@ ComponentResult ReadESDSDescExt(Handle descExt, UInt8 **buffer, int *size)
 	
 	return noErr;
 }
+
+int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type)
+{
+	ImageDescriptionPtr d = *desc;
+	int offset = sizeof(ImageDescription);
+	uint8_t *p = (uint8_t *)d;
+	
+	//read next description, need 8 bytes for size and type
+	while(offset < d->idSize - 8)
+	{
+		long len = *(p+offset) << 24 | *(p+offset+1) << 16 | *(p+offset+2) << 8 | *(p+offset+3);
+		long rtype = *(p+offset + 4) << 24 | *(p+offset+5) << 16 | *(p+offset+6) << 8 | *(p+offset+7);
+		if(rtype == type && offset + len <= d->idSize)
+			return 1;
+		offset += len;
+	}
+	return 0;
+}
