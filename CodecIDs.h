@@ -56,6 +56,7 @@ enum {
 	kSampleDescriptionExtensionTheora = 'XdxT',
 	kSampleDescriptionExtensionVobSubIdx = '.IDX',
 	kSampleDescriptionExtensionReal = 'RVex',
+	kSampleDescriptionExtensionMKVCompression = 'Comp',
 };
 
 

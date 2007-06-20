@@ -10,6 +10,9 @@
 
 #include "VobSubCodec.h"
 #include "Codecprintf.h"
+#include <zlib.h>
+#include "avcodec.h"
+#include "intreadwrite.h"
 
 // Constants
 const UInt8 kNumPixelFormatsSupportedVobSub = 1;
@@ -25,7 +28,8 @@ typedef struct	{
     UInt32                  palette[16];
 	
 	uint8_t					*codecData;
-	long					bufferSize;
+	unsigned int			bufferSize;
+	int						compressed;
 } VobSubCodecGlobalsRecord, *VobSubCodecGlobals;
 
 typedef struct {
@@ -231,6 +235,9 @@ pascal ComponentResult VobSubCodecPreflight(VobSubCodecGlobals glob, CodecDecomp
 	// get the color palette info from the image description
     SetupColorPalette(glob, p->imageDescription);
 
+	if (isImageDescriptionExtensionPresent(p->imageDescription, kSampleDescriptionExtensionMKVCompression))
+		glob->compressed = 1;
+	
 	return noErr;
 }
 
@@ -264,25 +271,57 @@ pascal ComponentResult VobSubCodecBeginBand(VobSubCodecGlobals glob, CodecDecomp
 	return noErr;
 }
 
+void DecompressZlib(VobSubCodecGlobals glob, uint8_t *data, int bufferSize)
+{
+	ComponentResult err = noErr;
+	z_stream strm;
+	strm.zalloc = Z_NULL;
+	strm.zfree = Z_NULL;
+	strm.opaque = Z_NULL;
+	strm.avail_in = 0;
+	strm.next_in = Z_NULL;
+	err = inflateInit(&strm);
+	if (err != Z_OK) return;
+	
+	strm.avail_in = bufferSize;
+	strm.next_in = data;
+	
+	// first, get the size of the decompressed data
+	strm.avail_out = 2;
+	strm.next_out = glob->codecData;
+	
+	err = inflate(&strm, Z_SYNC_FLUSH);
+	if (err < Z_OK) goto bail;
+	if (strm.avail_out != 0) goto bail;
+	
+	glob->codecData = av_fast_realloc(glob->codecData, &glob->bufferSize, AV_RB16(glob->codecData));
+	
+	// then decompress the rest of it
+	strm.avail_out = glob->bufferSize - 2;
+	strm.next_out = glob->codecData + 2;
+	
+	inflate(&strm, Z_SYNC_FLUSH);
+bail:
+	inflateEnd(&strm);
+}
+
 pascal ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCodecDecompressRecord *drp, unsigned long flags)
 {
 	VobSubDecompressRecord *myDrp = (VobSubDecompressRecord *)drp->userDecompressRecord;
     UInt8 *data = (UInt8 *) drp->codecData;
 	
 	if (glob->codecData == NULL) {
-		glob->codecData = malloc(myDrp->bufferSize);
-		glob->bufferSize = myDrp->bufferSize;
+		glob->codecData = malloc(myDrp->bufferSize + 2);
+		glob->bufferSize = myDrp->bufferSize + 2;
 	}
 	
-	if (glob->bufferSize < myDrp->bufferSize) {
-		free(glob->codecData);
-		glob->codecData = malloc(myDrp->bufferSize);
-		glob->bufferSize = myDrp->bufferSize;
-	}
+	glob->codecData = av_fast_realloc(glob->codecData, &glob->bufferSize, myDrp->bufferSize + 2);
 	
+	if (glob->compressed)
+		DecompressZlib(glob, data, myDrp->bufferSize);
     // the header of a spu PS packet starts 0x000001bd
     // if it's raw spu data, the 1st 2 bytes are the length of the data
-	if (data[0] + data[1] == 0)
+	else if (data[0] + data[1] == 0)
 		// remove the MPEG framing
 		ExtractData(glob->codecData, data, myDrp->bufferSize);
 	else
@@ -317,7 +356,7 @@ pascal ComponentResult VobSubCodecDrawBand(VobSubCodecGlobals glob, ImageSubCode
 	// clear the buffer to pure transparent
 	memset(drp->baseAddr, 0, myDrp->height * drp->rowBytes);
 	
-	if (EndianU16_BtoN(*(UInt16 *) glob->codecData) > myDrp->bufferSize)
+	if (EndianU16_BtoN(*(UInt16 *) glob->codecData) > glob->bufferSize)
 		// invalid packet, not enough data
 		return err;
 	

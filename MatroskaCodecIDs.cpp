@@ -26,7 +26,6 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <matroska/KaxTracks.h>
 #include <matroska/KaxTrackEntryData.h>
-#include <matroska/KaxContentEncoding.h>
 #include "MatroskaCodecIDs.h"
 #include "CommonUtils.h"
 #include "Codecprintf.h"
@@ -734,17 +733,6 @@ FourCharCode GetFourCC(KaxTrackEntry *tr_entry)
 		return 0;
 	
 	string codecString(*tr_codec);
-	
-	// how should we handle compressed tracks in general?
-	KaxContentEncodings *contentEncs = FindChild<KaxContentEncodings>(*tr_entry);
-	if (contentEncs) {
-		OSType subtype = 0;
-		for (int i = 0; i < sizeof(kMatroskaCodecIDs) / sizeof(MatroskaQT_Codec); i++) {
-			if (codecString == kMatroskaCodecIDs[i].mkvID)
-				subtype = kMatroskaCodecIDs[i].cType;
-		}
-		return 'COMP';
-	}
 	
 	if (codecString == MKV_V_MS) {
 		// avi compatibility mode, 4cc is in private info

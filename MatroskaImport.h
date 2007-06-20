@@ -40,6 +40,7 @@
 #include <matroska/KaxChapters.h>
 #include <matroska/KaxBlock.h>
 #include <matroska/KaxAttachments.h>
+#include <matroska/KaxContentEncoding.h>
 
 using namespace libmatroska;
 using namespace std;
@@ -225,6 +226,10 @@ private:
 	
 	// Fills the levelOneElements vector with the positions of the elements in the seek head
 	ComponentResult ReadMetaSeek(KaxSeekHead &seekHead);
+	
+	// Adds a sample description extension if the content is compressed
+	// should only be the case for VobSub data.
+	ComponentResult ReadContentEncodings(KaxContentEncodings &encodings, MatroskaTrack &mkvTrack);
 	
 	// These three are called from ReadTracks to set up a track of the specific type, 
 	// modifying the MatroskaTrack structure to reflect the newly create track. 

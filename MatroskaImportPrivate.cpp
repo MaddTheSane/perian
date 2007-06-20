@@ -286,6 +286,13 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			
 			KaxTrackLanguage & trackLang = GetChild<KaxTrackLanguage>(track);
 			KaxTrackName & trackName = GetChild<KaxTrackName>(track);
+			KaxContentEncodings * encodings = FindChild<KaxContentEncodings>(track);
+			
+			if (encodings) {
+				err = ReadContentEncodings(*encodings, mkvTrack);
+				// just ignore the track if there's some problem with this element
+				if (err) continue;
+			}
 			
 			long qtLang = ISO639_2ToQTLangCode(string(trackLang).c_str());
 			SetMediaLanguage(mkvTrack.theMedia, qtLang);
@@ -327,6 +334,41 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	for (int i = 0; i < tracks.size(); i++) {
 		SetTrackEnabled(tracks[i].theTrack, tracks[i].isEnabled);
 	}
+	return noErr;
+}
+
+ComponentResult MatroskaImport::ReadContentEncodings(KaxContentEncodings &encodings, MatroskaTrack &mkvTrack)
+{
+	KaxContentEncoding & encoding = GetChild<KaxContentEncoding>(encodings);
+	int scope = uint32(GetChild<KaxContentEncodingScope>(encoding));
+	int type = uint32(GetChild<KaxContentEncodingType>(encoding));
+	
+	if (scope != 1) {
+		Codecprintf(NULL, "Content encoding scope of %d not expected\n", scope);
+		return -1;
+	}
+	if (type != 0) {
+		Codecprintf(NULL, "Encrypted track\n");
+		return -2;
+	}
+	
+	KaxContentCompression & comp = GetChild<KaxContentCompression>(encoding);
+	int algo = uint32(GetChild<KaxContentCompAlgo>(comp));
+	
+	if (algo != 0)
+		Codecprintf(NULL, "MKV: warning, track compression algorithm %d not zlib\n", algo);
+	
+	if ((*mkvTrack.desc)->dataFormat != kSubFormatVobSub)
+		Codecprintf(NULL, "MKV: warning, compressed track %4.4s probably won't work (not VobSub)\n", &(*mkvTrack.desc)->dataFormat);
+	
+	Handle ext = NewHandle(1);
+	**ext = algo;
+	
+	if (mkvTrack.type == track_audio)
+		AddSoundDescriptionExtension((SoundDescriptionHandle)mkvTrack.desc, ext, kSampleDescriptionExtensionMKVCompression);
+	else
+		AddImageDescriptionExtension((ImageDescriptionHandle)mkvTrack.desc, ext, kSampleDescriptionExtensionMKVCompression);
+	
 	return noErr;
 }
 
