@@ -750,6 +750,20 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     return noErr;
 }
 
+static int qtTypeForFrameInfo(int original, int fftype, int skippable)
+{
+	if(fftype == FF_I_TYPE)
+	{
+		if(!skippable)
+			return kCodecFrameTypeKey;
+	}
+	else if(skippable)
+		return kCodecFrameTypeDroppableDifference;
+	else if(fftype != 0)
+		return kCodecFrameTypeDifference;	
+	return original;
+}
+
 //-----------------------------------------------------------------
 // ImageCodecBeginBand
 //-----------------------------------------------------------------
@@ -793,136 +807,6 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     myDrp->pixelFormat = p->dstPixMap.pixelFormat;
 	myDrp->decoded = p->frameTime ? (0 != (p->frameTime->flags & icmFrameAlreadyDecoded)) : false;
 	myDrp->frameData = NULL;
-	if(!myDrp->decoded)
-	{
-		myDrp->frameData = NULL;
-		if(glob->packedType != PACKED_QUICKTIME_KNOWS_ORDER && p->frameNumber != glob->begin.lastFrame + 1)
-		{
-			/* Safe marking in such a case */
-			glob->begin.lastFrameType = FF_I_TYPE;
-			glob->data.unparsedFrames.dataSize = 0;
-			glob->begin.lastPFrameData = NULL;
-			redisplayFirstFrame = 1;
-		}
-		
-		if(glob->begin.parser != NULL)
-		{
-			int parsedBufSize;
-			int type = 0;
-			int skippable = 0;
-			uint8_t *buffer = (uint8_t *)drp->codecData;
-			int bufferSize = p->bufferSize;
-			
-			if(glob->data.unparsedFrames.dataSize != 0)
-			{
-				buffer = glob->data.unparsedFrames.buffer;
-				bufferSize = glob->data.unparsedFrames.dataSize;
-			}
-			
-			if(ffusionParse(glob->begin.parser, buffer, bufferSize, &parsedBufSize, &type, &skippable) == 0)
-			{
-				/* parse failed */
-				myDrp->bufferSize = bufferSize;
-				if(glob->begin.futureType != 0)
-				{
-					/* Assume our previously decoded P frame */
-					type = glob->begin.futureType;
-					glob->begin.futureType = 0;
-					myDrp->frameData = glob->begin.lastPFrameData;
-				}
-				Codecprintf(NULL, "parse failed frame %d with size %d\n", p->frameNumber, bufferSize);
-				if(glob->data.unparsedFrames.dataSize != 0)
-					Codecprintf(NULL, ", parser had extra data\n");
-			}
-			else if(glob->packedType != PACKED_QUICKTIME_KNOWS_ORDER)
-			{
-				if(type == FF_B_TYPE && glob->packedType == PACKED_ALL_IN_FIRST_FRAME && glob->begin.futureType == 0)
-					/* Badly framed.  We hit a B frame after it was supposed to be displayed, switch to delaying by a frame */
-					glob->packedType = PACKED_DELAY_BY_ONE_FRAME;
-				
-				if(FFusionCreateDataBuffer(&(glob->data), (uint8_t *)drp->codecData, parsedBufSize))
-					myDrp->frameData = FFusionDataAppend(&(glob->data), parsedBufSize, type);
-				if(type == FF_B_TYPE)
-					myDrp->frameData->prereqFrame = glob->begin.lastPFrameData;
-				else if(glob->packedType == PACKED_DELAY_BY_ONE_FRAME)
-				{
-					FrameData *nextPFrame = myDrp->frameData;
-					FrameData *lastPFrame = glob->begin.lastPFrameData;
-					if(lastPFrame != NULL)
-						/* Mark the next P or I frame, predictive decoding */
-						lastPFrame->nextFrame = nextPFrame;
-					myDrp->frameData = lastPFrame;
-					glob->begin.lastPFrameData = nextPFrame;
-					
-					int displayType = glob->begin.lastFrameType;
-					glob->begin.lastFrameType = type;
-					type = displayType;
-
-					if(redisplayFirstFrame)
-						myDrp->frameData = glob->begin.lastPFrameData;
-				}
-				else
-				{
-					glob->begin.lastPFrameData = myDrp->frameData;
-					glob->begin.lastFrameType = type;
-				}
-				if(type == FF_I_TYPE && glob->packedType == PACKED_ALL_IN_FIRST_FRAME)
-					/* Wipe memory of past P frames */
-					glob->begin.futureType = 0;
-				
-				if(parsedBufSize < p->bufferSize)
-				{
-					int oldType = type;
-					
-					buffer += parsedBufSize;
-					bufferSize -= parsedBufSize;
-					int success = ffusionParse(glob->begin.parser, buffer, bufferSize, &parsedBufSize, &type, &skippable);
-					if(success && type == FF_B_TYPE)
-					{
-						/* A B frame follows us, so setup the P frame for the future and set dependencies */
-						glob->begin.futureType = oldType;
-						if(glob->begin.lastPFrameData != NULL)
-							/* Mark the next P or I frame, predictive decoding */
-							glob->begin.lastPFrameData->nextFrame = myDrp->frameData;
-						glob->begin.lastPFrameData = myDrp->frameData;
-						if(FFusionCreateDataBuffer(&(glob->data), buffer, parsedBufSize))
-							myDrp->frameData = FFusionDataAppend(&(glob->data), parsedBufSize, type);
-						myDrp->frameData->prereqFrame = glob->begin.lastPFrameData;
-						buffer += parsedBufSize;
-						bufferSize -= parsedBufSize;
-					}
-					if(bufferSize > 0)
-						FFusionDataSetUnparsed(&(glob->data), buffer, bufferSize);
-					else
-						glob->data.unparsedFrames.dataSize = 0;
-				}
-				else
-					glob->data.unparsedFrames.dataSize = 0;
-				myDrp->bufferSize = 0;
-			}
-			else
-			{
-				myDrp->bufferSize = bufferSize;
-			}
-			
-			if(type == FF_I_TYPE)
-			{
-				if(!skippable)
-					drp->frameType = kCodecFrameTypeKey;
-			}
-			else if(skippable)
-				drp->frameType = kCodecFrameTypeDroppableDifference;
-			else if(type != 0)
-				drp->frameType = kCodecFrameTypeDifference;
-		}
-		else
-			myDrp->bufferSize = p->bufferSize;
-	}
-	glob->begin.lastFrame = p->frameNumber;
-	if(drp->frameType == kCodecFrameTypeKey)
-		glob->begin.lastIFrame = p->frameNumber;
-	myDrp->frameNumber = p->frameNumber;
-	myDrp->GOPStartFrameNumber = glob->begin.lastIFrame;
 	myDrp->buffer = NULL;
 	
 	if(myDrp->decoded)
@@ -934,7 +818,146 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 				break;
 			}
 		}
+		return noErr;
 	}
+	
+	if(glob->packedType != PACKED_QUICKTIME_KNOWS_ORDER && p->frameNumber != glob->begin.lastFrame + 1)
+	{
+		if(glob->decode.lastFrame < p->frameNumber && p->frameNumber < glob->begin.lastFrame + 1)
+		{
+			/* We already began this sucker, but haven't decoded it yet, find the data */
+			myDrp->frameData = FFusionDataFind(&glob->data, p->frameNumber);
+			if(myDrp->frameData != NULL)
+			{
+				drp->frameType = qtTypeForFrameInfo(drp->frameType, myDrp->frameData->type, myDrp->frameData->skippabble);
+				myDrp->frameNumber = p->frameNumber;
+				myDrp->GOPStartFrameNumber = glob->begin.lastIFrame;
+				return noErr;
+			}
+		}
+		else
+		{
+			/* Reset context, safe marking in such a case */
+			glob->begin.lastFrameType = FF_I_TYPE;
+			glob->data.unparsedFrames.dataSize = 0;
+			glob->begin.lastPFrameData = NULL;
+			redisplayFirstFrame = 1;
+			Codecprintf(glob->fileLog, "began frame %d as start of GOP\n", p->frameNumber);
+		}
+	}
+	
+	if(glob->begin.parser != NULL)
+	{
+		int parsedBufSize;
+		int type = 0;
+		int skippable = 0;
+		uint8_t *buffer = (uint8_t *)drp->codecData;
+		int bufferSize = p->bufferSize;
+		
+		if(glob->data.unparsedFrames.dataSize != 0)
+		{
+			buffer = glob->data.unparsedFrames.buffer;
+			bufferSize = glob->data.unparsedFrames.dataSize;
+		}
+		
+		if(ffusionParse(glob->begin.parser, buffer, bufferSize, &parsedBufSize, &type, &skippable) == 0)
+		{
+			/* parse failed */
+			myDrp->bufferSize = bufferSize;
+			if(glob->begin.futureType != 0)
+			{
+				/* Assume our previously decoded P frame */
+				type = glob->begin.futureType;
+				glob->begin.futureType = 0;
+				myDrp->frameData = glob->begin.lastPFrameData;
+			}
+			Codecprintf(NULL, "parse failed frame %d with size %d\n", p->frameNumber, bufferSize);
+			if(glob->data.unparsedFrames.dataSize != 0)
+				Codecprintf(NULL, ", parser had extra data\n");
+		}
+		else if(glob->packedType != PACKED_QUICKTIME_KNOWS_ORDER)
+		{
+			if(type == FF_B_TYPE && glob->packedType == PACKED_ALL_IN_FIRST_FRAME && glob->begin.futureType == 0)
+				/* Badly framed.  We hit a B frame after it was supposed to be displayed, switch to delaying by a frame */
+				glob->packedType = PACKED_DELAY_BY_ONE_FRAME;
+			
+			if(FFusionCreateDataBuffer(&(glob->data), (uint8_t *)drp->codecData, parsedBufSize))
+				myDrp->frameData = FFusionDataAppend(&(glob->data), parsedBufSize, type);
+			if(type == FF_B_TYPE)
+				myDrp->frameData->prereqFrame = glob->begin.lastPFrameData;
+			else if(glob->packedType == PACKED_DELAY_BY_ONE_FRAME)
+			{
+				FrameData *nextPFrame = myDrp->frameData;
+				FrameData *lastPFrame = glob->begin.lastPFrameData;
+				if(lastPFrame != NULL)
+					/* Mark the next P or I frame, predictive decoding */
+					lastPFrame->nextFrame = nextPFrame;
+				myDrp->frameData = lastPFrame;
+				glob->begin.lastPFrameData = nextPFrame;
+				
+				int displayType = glob->begin.lastFrameType;
+				glob->begin.lastFrameType = type;
+				type = displayType;
+
+				if(redisplayFirstFrame)
+					myDrp->frameData = glob->begin.lastPFrameData;
+			}
+			else
+			{
+				glob->begin.lastPFrameData = myDrp->frameData;
+				glob->begin.lastFrameType = type;
+			}
+			if(type == FF_I_TYPE && glob->packedType == PACKED_ALL_IN_FIRST_FRAME)
+				/* Wipe memory of past P frames */
+				glob->begin.futureType = 0;
+			
+			if(parsedBufSize < p->bufferSize)
+			{
+				int oldType = type;
+				
+				buffer += parsedBufSize;
+				bufferSize -= parsedBufSize;
+				int success = ffusionParse(glob->begin.parser, buffer, bufferSize, &parsedBufSize, &type, &skippable);
+				if(success && type == FF_B_TYPE)
+				{
+					/* A B frame follows us, so setup the P frame for the future and set dependencies */
+					glob->begin.futureType = oldType;
+					if(glob->begin.lastPFrameData != NULL)
+						/* Mark the next P or I frame, predictive decoding */
+						glob->begin.lastPFrameData->nextFrame = myDrp->frameData;
+					glob->begin.lastPFrameData = myDrp->frameData;
+					if(FFusionCreateDataBuffer(&(glob->data), buffer, parsedBufSize))
+						myDrp->frameData = FFusionDataAppend(&(glob->data), parsedBufSize, type);
+					myDrp->frameData->prereqFrame = glob->begin.lastPFrameData;
+					buffer += parsedBufSize;
+					bufferSize -= parsedBufSize;
+				}
+				if(bufferSize > 0)
+					FFusionDataSetUnparsed(&(glob->data), buffer, bufferSize);
+				else
+					glob->data.unparsedFrames.dataSize = 0;
+			}
+			else
+				glob->data.unparsedFrames.dataSize = 0;
+			myDrp->bufferSize = 0;
+		}
+		else
+		{
+			myDrp->bufferSize = bufferSize;
+		}
+		
+		drp->frameType = qtTypeForFrameInfo(drp->frameType, type, skippable);
+		myDrp->frameData->frameNumber = p->frameNumber;
+		myDrp->frameData->skippabble = skippable;
+		Codecprintf(glob->fileLog, "began frame %d as %d:%d\n", p->frameNumber, type, skippable);
+	}
+	else
+		myDrp->bufferSize = p->bufferSize;
+	glob->begin.lastFrame = p->frameNumber;
+	if(drp->frameType == kCodecFrameTypeKey)
+		glob->begin.lastIFrame = p->frameNumber;
+	myDrp->frameNumber = p->frameNumber;
+	myDrp->GOPStartFrameNumber = glob->begin.lastIFrame;
     return noErr;
 }
 
@@ -957,6 +980,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 			/* If this is a key frame or the P frame before us is after the last frame (skip ahead), or we are before the last decoded frame (skip back) *
 			 * then we are in a whole new GOP */
 			avcodec_flush_buffers(glob->avContext);
+			Codecprintf(glob->fileLog, "decode frame %d as start of GOP\n", myDrp->frameNumber);
 		}
 	}
 	

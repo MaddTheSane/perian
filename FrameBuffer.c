@@ -137,3 +137,14 @@ void FFusionDataMarkRead(FFusionData *data, FrameData *toData)
 		}		
 	}
 }
+
+FrameData *FFusionDataFind(FFusionData *data, int frameNumber)
+{
+	int i;
+	for(i=data->read; i!=data->write; i = (i + 1) % data->size)
+	{
+		if(data->frames[i]->frameNumber == frameNumber)
+			return data->frames[i];
+	}
+	return NULL;
+}
