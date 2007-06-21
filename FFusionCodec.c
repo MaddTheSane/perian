@@ -947,8 +947,11 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 		}
 		
 		drp->frameType = qtTypeForFrameInfo(drp->frameType, type, skippable);
-		myDrp->frameData->frameNumber = p->frameNumber;
-		myDrp->frameData->skippabble = skippable;
+		if(myDrp->frameData != NULL)
+		{
+			myDrp->frameData->frameNumber = p->frameNumber;
+			myDrp->frameData->skippabble = skippable;
+		}
 		Codecprintf(glob->fileLog, "began frame %d as %d:%d\n", p->frameNumber, type, skippable);
 	}
 	else

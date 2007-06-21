@@ -140,6 +140,22 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	return 1;
 }
 
+static int parse_mpeg4_extra(FFusionParserContext *parser, const uint8_t *buf, int buf_size)
+{
+	ParseContext1 *pc1 = (ParseContext1 *)parser->pc->priv_data;
+	pc1->pc.frame_start_found = 0;
+	
+	MpegEncContext *s = pc1->enc;
+	GetBitContext gb1, *gb = &gb1;
+	
+	s->avctx = parser->avctx;
+	s->current_picture_ptr = &s->current_picture;
+	
+	init_get_bits(gb, buf, 8 * buf_size);
+	ff_mpeg4_decode_picture_header(s, gb);
+	return 1;
+}
+
 /*
  * Long story short, FFMpeg's parsers suck for our use.  This function parses an mpeg4 bitstream,
  * and assumes that it is given at least a full frame of data.
@@ -207,7 +223,7 @@ FFusionParser ffusionMpeg4VideoParser = {
 	&mpeg4video_parser,
 	sizeof(uint64_t),
 	NULL,
-	NULL,
+	parse_mpeg4_extra,
 	parse_mpeg4_stream,
 };
 
@@ -215,9 +231,7 @@ typedef struct H264ParserContext_s
 {
 	int is_avc;
 	int nal_length_size;
-#if 0 /*this was an attempt to figure out the PTS information and detect an out of order P frame before we hit its B frame */
 	int prevPts;
-#endif
 	
 	int poc_type;
 	int log2_max_frame_num;
@@ -225,10 +239,8 @@ typedef struct H264ParserContext_s
 	int pic_order_present_flag;
 
 	int log2_max_poc_lsb;
-#if 0 /*this was an attempt to figure out the PTS information and detect an out of order P frame before we hit its B frame */
 	int poc_msb;
 	int prev_poc_lsb;
-#endif
 
 	int delta_pic_order_always_zero_flag;
 	int offset_for_non_ref_pic;
@@ -361,12 +373,11 @@ static int inline decode_slice_header(H264ParserContext *context, const uint8_t 
 {
 	GetBitContext getbit, *gb = &getbit;
 	int slice_type;
-#if 0 /*this was an attempt to figure out the PTS information and detect an out of order P frame before we hit its B frame */
 	int field_pic_flag = 0;
 	int bottom_field_flag = 0;
 	int frame_number;
-#endif
-	static const uint8_t slice_type_map[5] = {FF_P_TYPE, FF_B_TYPE, FF_I_TYPE, FF_SP_TYPE, FF_SI_TYPE};
+//	static const uint8_t slice_type_map[5] = {FF_P_TYPE, FF_B_TYPE, FF_I_TYPE, FF_SP_TYPE, FF_SI_TYPE};
+	static const uint8_t slice_type_map[5] = {FF_P_TYPE, FF_P_TYPE, FF_I_TYPE, FF_SP_TYPE, FF_SI_TYPE};
 	
 	init_get_bits(gb, buf, 8 * buf_size);
 	
@@ -381,7 +392,6 @@ static int inline decode_slice_header(H264ParserContext *context, const uint8_t 
 	*type = slice_type_map[slice_type];
 	if(just_type)
 		return 1;
-#if 0 /*this was an attempt to figure out the PTS information and detect an out of order P frame before we hit its B frame */
 	
 	get_ue_golomb(gb); //pic_parameter_set_id
 	frame_number = get_bits(gb, context->log2_max_frame_num);
@@ -448,7 +458,6 @@ static int inline decode_slice_header(H264ParserContext *context, const uint8_t 
 			expectedpoc = expectedpoc + context->offset_for_non_ref_pic;
 		*pts = expectedpoc + delta_pic_order_cnt[0];
 	}
-#endif
 	
 	return 1;
 }
@@ -460,7 +469,7 @@ static int inline decode_nals(H264ParserContext *context, const uint8_t *buf, in
 	int nalsize = 0;
 	int buf_index = 0;
 	int ret = 0;
-	int pts_decoded = 1;
+	int pts_decoded = 0;
 	int lowestType = 20;
 	
 	*skippable = 1;
@@ -556,22 +565,16 @@ static int inline decode_nals(H264ParserContext *context, const uint8_t *buf, in
 						lowestType = slice_type;
 					if(nal_ref_idc)
 						*skippable = 0;
-#if 0 /*this was an attempt to figure out the PTS information and detect an out of order P frame before we hit its B frame */
 					if(pts_decoded == 0)
 					{
 						pts_decoded = 1;
 						if(pts > context->prevPts)
 						{
-							if(pts > context->prevPts + 1)
-								*precedesAPastFrame = 1;
-							else
-								*precedesAPastFrame = 0;
+							if(pts < context->prevPts)
+								lowestType = FF_B_TYPE;
 							context->prevPts = pts;
 						}
-						else
-							*precedesAPastFrame = 0;
 					}
-#endif
 				}
 			}
 			else if(nalType == 5)
