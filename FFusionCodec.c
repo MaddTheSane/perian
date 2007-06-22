@@ -872,9 +872,12 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 				glob->begin.futureType = 0;
 				myDrp->frameData = glob->begin.lastPFrameData;
 			}
-			Codecprintf(NULL, "parse failed frame %d with size %d\n", p->frameNumber, bufferSize);
-			if(glob->data.unparsedFrames.dataSize != 0)
-				Codecprintf(NULL, ", parser had extra data\n");
+			else
+			{
+				Codecprintf(NULL, "parse failed frame %d with size %d\n", p->frameNumber, bufferSize);
+				if(glob->data.unparsedFrames.dataSize != 0)
+					Codecprintf(NULL, ", parser had extra data\n");				
+			}
 		}
 		else if(glob->packedType != PACKED_QUICKTIME_KNOWS_ORDER)
 		{
