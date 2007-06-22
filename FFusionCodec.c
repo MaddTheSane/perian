@@ -844,7 +844,6 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 			glob->data.unparsedFrames.dataSize = 0;
 			glob->begin.lastPFrameData = NULL;
 			redisplayFirstFrame = 1;
-			Codecprintf(glob->fileLog, "began frame %d as start of GOP\n", p->frameNumber);
 		}
 	}
 	
@@ -885,30 +884,31 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 			
 			if(FFusionCreateDataBuffer(&(glob->data), (uint8_t *)drp->codecData, parsedBufSize))
 				myDrp->frameData = FFusionDataAppend(&(glob->data), parsedBufSize, type);
-			if(type == FF_B_TYPE)
+			if(type != FF_I_TYPE)
 				myDrp->frameData->prereqFrame = glob->begin.lastPFrameData;
-			else if(glob->packedType == PACKED_DELAY_BY_ONE_FRAME)
+			if(glob->packedType == PACKED_DELAY_BY_ONE_FRAME)
 			{
-				FrameData *nextPFrame = myDrp->frameData;
-				FrameData *lastPFrame = glob->begin.lastPFrameData;
-				if(lastPFrame != NULL)
-					/* Mark the next P or I frame, predictive decoding */
-					lastPFrame->nextFrame = nextPFrame;
-				myDrp->frameData = lastPFrame;
-				glob->begin.lastPFrameData = nextPFrame;
+				if(type != FF_B_TYPE)
+				{
+					FrameData *nextPFrame = myDrp->frameData;
+					FrameData *lastPFrame = glob->begin.lastPFrameData;
+					if(lastPFrame != NULL)
+						/* Mark the next P or I frame, predictive decoding */
+						lastPFrame->nextFrame = nextPFrame;
+					myDrp->frameData = lastPFrame;
+					glob->begin.lastPFrameData = nextPFrame;
+
+					if(redisplayFirstFrame)
+						myDrp->frameData = nextPFrame;
+				}
 				
 				int displayType = glob->begin.lastFrameType;
 				glob->begin.lastFrameType = type;
 				type = displayType;
-
-				if(redisplayFirstFrame)
-					myDrp->frameData = glob->begin.lastPFrameData;
 			}
-			else
-			{
+			else if(type != FF_B_TYPE)
 				glob->begin.lastPFrameData = myDrp->frameData;
-				glob->begin.lastFrameType = type;
-			}
+
 			if(type == FF_I_TYPE && glob->packedType == PACKED_ALL_IN_FIRST_FRAME)
 				/* Wipe memory of past P frames */
 				glob->begin.futureType = 0;
@@ -954,7 +954,6 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 			myDrp->frameData->frameNumber = p->frameNumber;
 			myDrp->frameData->skippabble = skippable;
 		}
-		Codecprintf(glob->fileLog, "began frame %d as %d:%d\n", p->frameNumber, type, skippable);
 	}
 	else
 		myDrp->bufferSize = p->bufferSize;
@@ -964,6 +963,19 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	myDrp->frameNumber = p->frameNumber;
 	myDrp->GOPStartFrameNumber = glob->begin.lastIFrame;
     return noErr;
+}
+
+static OSErr PrereqDecompress(FrameData *prereq, AVCodecContext *context, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture)
+{
+	if(prereq->prereqFrame)
+		PrereqDecompress(prereq->prereqFrame, context, dataProc, width, height, picture);
+	
+	unsigned char *dataPtr = (unsigned char *)prereq->buffer;
+	int dataSize = prereq->dataSize;
+	
+	OSErr err = FFusionDecompress(context, dataPtr, dataProc, width, height, picture, dataSize);
+	
+	return err;
 }
 
 pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodecDecompressRecord *drp, unsigned long flags)
@@ -985,7 +997,6 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 			/* If this is a key frame or the P frame before us is after the last frame (skip ahead), or we are before the last decoded frame (skip back) *
 			 * then we are in a whole new GOP */
 			avcodec_flush_buffers(glob->avContext);
-			Codecprintf(glob->fileLog, "decode frame %d as start of GOP\n", myDrp->frameNumber);
 		}
 	}
 	
@@ -1027,7 +1038,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 			dataPtr = (unsigned char *)prereq->buffer;
 			dataSize = prereq->dataSize;
 			
-			err = FFusionDecompress(glob->avContext, dataPtr, NULL, myDrp->width, myDrp->height, &tempFrame, dataSize);
+			err = PrereqDecompress(prereq, glob->avContext, NULL, myDrp->width, myDrp->height, &tempFrame);
 			if(tempFrame.data[0] != NULL)
 			{
 				glob->decode.futureBuffer = (FFusionBuffer *)tempFrame.opaque;
