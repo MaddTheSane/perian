@@ -1440,7 +1440,7 @@
 		F5CFD2DA0B5012A100616865 /* A52Preferences.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = A52Preferences.app;
+			path = Preferences.app;
 			remoteRef = F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1989,6 +1989,9 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Universal\"";
+				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
+				OTHER_CFLAGS_i386 = "-march=pentium-m -mtune=nocona $(OTHER_CFLAGS)";
+				OTHER_CFLAGS_ppc = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
