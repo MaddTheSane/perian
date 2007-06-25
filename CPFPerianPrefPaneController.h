@@ -4,6 +4,10 @@
 #import <PreferencePanes/NSPreferencePane.h>
 #import <Security/Security.h>
 
+#define ComponentInfoPlist @"ComponentInfo.plist"
+#define ObsoletesKey @"obsoletes"
+#define HumanReadableNameKey @"HumanReadableName"
+
 #define ComponentInfoDictionaryKey	@"Components"
 
 #define BundleVersionKey @"CFBundleVersion"
@@ -75,6 +79,8 @@ typedef enum
 	BOOL								userInstalled;
 	AuthorizationRef					auth;
 	NSMutableString						*errorString;
+	
+	NSArray								*componentReplacementInfo;
 	
 	NSURL								*perianForumURL;
 	NSURL								*perianDonateURL;

@@ -226,6 +226,8 @@
 			userInstalled = NO;
 		else
 			userInstalled = YES;
+		
+		componentReplacementInfo = [[NSArray alloc] initWithContentsOfFile:[[[self bundle] resourcePath] stringByAppendingPathComponent:ComponentInfoPlist]];
 	}
 	
 	return self;
@@ -404,6 +406,7 @@
 	if(auth != nil)
 		AuthorizationFree(auth, 0);
 	[errorString release];
+	[componentReplacementInfo release];
 	[super dealloc];
 }
 
@@ -746,21 +749,29 @@
 	NSMutableArray *components = [[NSMutableArray alloc] initWithCapacity:numComponents];
 	NSEnumerator *compEnum = [userComponents objectEnumerator];
 	NSString *compName;
-	while ((compName = [compEnum nextObject])) {
+	while ((compName = [compEnum nextObject]))
 		[components addObject:[self componentInfoForComponent:compName userInstalled:YES]];
-	}
+	
 	compEnum = [systemComponents objectEnumerator];
-	while ((compName = [compEnum nextObject])) {
+	while ((compName = [compEnum nextObject]))
 		[components addObject:[self componentInfoForComponent:compName userInstalled:NO]];
-	}
 	return [components autorelease];
 }
 
 - (NSString *)checkComponentStatusByBundleIdentifier:(NSString *)bundleID
 {
-	if ([bundleID rangeOfString:@"perian"].location != NSNotFound)
-		return @"Internal";
-	return @"External";
+	NSString *status = @"OK";
+	NSEnumerator *infoEnum = [componentReplacementInfo objectEnumerator];
+	NSDictionary *infoDict;
+	while ((infoDict = [infoEnum nextObject])) {
+		NSEnumerator *stringsEnum = [[infoDict objectForKey:ObsoletesKey] objectEnumerator];
+		NSString *obsoletedID;
+		while ((obsoletedID = [stringsEnum nextObject])) {
+			if ([obsoletedID isEqualToString:bundleID])
+				status = [NSString stringWithFormat:@"Obsoleted by %@",[infoDict objectForKey:HumanReadableNameKey]];
+			}
+	}
+	return status;
 }
 
 #pragma mark Check Updates

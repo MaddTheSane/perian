@@ -72,6 +72,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		11207C730C2F4A4E002A0FF0 /* ComponentInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */; };
 		112E0C820A6436BA00DB4C29 /* FFusionCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F560DF0003D61D0101ABA332 /* FFusionCodec.c */; };
 		113F589A0A6B091600509987 /* Codecprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 113F58990A6B091600509987 /* Codecprintf.c */; };
 		11629EE10B51E482006591C8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629EE00B51E482006591C8 /* main.m */; };
@@ -437,6 +438,7 @@
 /* Begin PBXFileReference section */
 		02CA1BD20513A38D00D00256 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; name = ComponentInfo.plist; path = Plists/ComponentInfo.plist; sourceTree = "<group>"; };
 		113F58980A6B091600509987 /* Codecprintf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Codecprintf.h; sourceTree = "<group>"; };
 		113F58990A6B091600509987 /* Codecprintf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Codecprintf.c; sourceTree = "<group>"; };
 		1156DBD80A3CE9F500963B0E /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
@@ -781,6 +783,7 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */,
 				11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */,
 				116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */,
 				83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */,
@@ -1475,6 +1478,7 @@
 				83D1D6DE0B4C7F8300E09EC9 /* PerianPrefPane.nib in Resources */,
 				83D1D6F50B4C85AB00E09EC9 /* Perian_icon.icns in Resources */,
 				11BEFB2D0C18E23E00BC9324 /* Read Me.rtf in Resources */,
+				11207C730C2F4A4E002A0FF0 /* ComponentInfo.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
