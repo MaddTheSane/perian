@@ -5,7 +5,10 @@
 #import <Security/Security.h>
 
 #define ComponentInfoDictionaryKey	@"Components"
+
 #define BundleVersionKey @"CFBundleVersion"
+#define BundleIdentifierKey @"CFBundleIdentifier"
+
 #define ComponentNameKey @"Name"
 #define ComponentArchiveNameKey @"ArchiveName"
 #define ComponentTypeKey @"Type"
@@ -95,6 +98,9 @@ typedef enum
 - (IBAction)setAC3DynamicRangeSlider:(id)sender;
 - (IBAction)cancelDynRangeSheet:(id)sender;
 - (IBAction)saveDynRangeSheet:(id)sender;
+
+//Component List
+- (NSString *)checkComponentStatusByBundleIdentifier:(NSString *)bundleID;
 
 //About
 - (IBAction)launchWebsite:(id)sender;

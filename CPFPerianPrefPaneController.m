@@ -694,6 +694,75 @@
 	[self checkForInstallation];
 }
 
+#pragma mark Component Version List
+- (NSArray *)installedComponentsForUser:(BOOL)user
+{
+	NSString *path = [self basePathForType:ComponentTypeQuickTime user:user];
+	NSArray *installedComponents = [[NSFileManager defaultManager] directoryContentsAtPath:path];
+	NSMutableArray *retArray = [[NSMutableArray alloc] initWithCapacity:[installedComponents count]]; 
+	NSEnumerator *componentEnum = [installedComponents objectEnumerator];
+	NSString *component;
+	while ((component = [componentEnum nextObject])) {
+		if ([[component pathExtension] isEqualToString:@"component"])
+			[retArray addObject:component];
+	}
+	return [retArray autorelease];
+}
+
+- (NSDictionary *)componentInfoForComponent:(NSString *)component userInstalled:(BOOL)user
+{
+	NSString *compName = component;
+	if ([[component pathExtension] isEqualToString:@"component"])
+		compName = [component stringByDeletingPathExtension];
+	NSMutableDictionary *componentInfo = [[NSMutableDictionary alloc] initWithObjectsAndKeys:compName, @"name", NULL];
+	NSBundle *componentBundle = [NSBundle bundleWithPath:[[self basePathForType:ComponentTypeQuickTime 
+																		   user:user] stringByAppendingPathComponent:component]];
+	NSDictionary *infoDictionary = nil;
+	if (componentBundle)
+		infoDictionary = [componentBundle infoDictionary];
+	if (infoDictionary && [infoDictionary objectForKey:BundleIdentifierKey]) {
+		NSString *componentVersion = [infoDictionary objectForKey:BundleVersionKey];
+		if (componentVersion)
+			[componentInfo setObject:componentVersion forKey:@"version"];
+		else
+			[componentInfo setObject:@"Unknown" forKey:@"version"];
+		[componentInfo setObject:(user ? @"User" : @"System") forKey:@"installType"];
+		[componentInfo setObject:[self checkComponentStatusByBundleIdentifier:[componentBundle bundleIdentifier]] forKey:@"status"];
+		[componentInfo setObject:[componentBundle bundleIdentifier] forKey:@"bundleID"];
+	} else {
+		[componentInfo setObject:@"Unknown" forKey:@"version"];
+		[componentInfo setObject:(user ? @"User" : @"System") forKey:@"installType"];
+		[componentInfo setObject:@"NO BUNDLE" forKey:@"status"];
+		[componentInfo setObject:@"NO BUNDLE" forKey:@"bundleID"];
+	}
+	return [componentInfo autorelease];
+}
+
+- (NSArray *)installedComponents
+{
+	NSArray *userComponents = [self installedComponentsForUser:YES];
+	NSArray *systemComponents = [self installedComponentsForUser:NO];
+	unsigned numComponents = [userComponents count] + [systemComponents count];
+	NSMutableArray *components = [[NSMutableArray alloc] initWithCapacity:numComponents];
+	NSEnumerator *compEnum = [userComponents objectEnumerator];
+	NSString *compName;
+	while ((compName = [compEnum nextObject])) {
+		[components addObject:[self componentInfoForComponent:compName userInstalled:YES]];
+	}
+	compEnum = [systemComponents objectEnumerator];
+	while ((compName = [compEnum nextObject])) {
+		[components addObject:[self componentInfoForComponent:compName userInstalled:NO]];
+	}
+	return [components autorelease];
+}
+
+- (NSString *)checkComponentStatusByBundleIdentifier:(NSString *)bundleID
+{
+	if ([bundleID rangeOfString:@"perian"].location != NSNotFound)
+		return @"Internal";
+	return @"External";
+}
+
 #pragma mark Check Updates
 - (IBAction)updateCheck:(id)sender 
 {
