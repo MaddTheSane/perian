@@ -9,6 +9,10 @@
 		<string>Perian</string>
 		<key>obsoletes</key>
 		<array>
+			<string>com.theoryllc.FLVComponentBundle</string>
+			<string>com.DivXInc.DivXDecoder</string>
+			<string>com.insaneness.XVIDDelegate</string>
+			<string>org.perian.No.Bundle.ID.OpenDivX</string>
 			<string>net.aldorande.component.FFusion</string>
 			<string>com.jamby.ffmpeg</string>
 		</array>

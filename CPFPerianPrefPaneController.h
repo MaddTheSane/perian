@@ -7,6 +7,7 @@
 #define ComponentInfoPlist @"ComponentInfo.plist"
 #define ObsoletesKey @"obsoletes"
 #define HumanReadableNameKey @"HumanReadableName"
+#define PERIAN_NO_BUNDLE_ID_FORMAT @"org.perian.No.Bundle.ID.%@"
 
 #define ComponentInfoDictionaryKey	@"Components"
 

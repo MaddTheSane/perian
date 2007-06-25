@@ -226,7 +226,8 @@
 			userInstalled = NO;
 		else
 			userInstalled = YES;
-		
+
+#warning TODO(durin42) Should filter out components that aren't installed from this list.
 		componentReplacementInfo = [[NSArray alloc] initWithContentsOfFile:[[[self bundle] resourcePath] stringByAppendingPathComponent:ComponentInfoPlist]];
 	}
 	
@@ -735,8 +736,9 @@
 	} else {
 		[componentInfo setObject:@"Unknown" forKey:@"version"];
 		[componentInfo setObject:(user ? @"User" : @"System") forKey:@"installType"];
-		[componentInfo setObject:@"NO BUNDLE" forKey:@"status"];
-		[componentInfo setObject:@"NO BUNDLE" forKey:@"bundleID"];
+		NSString *bundleIdent = [NSString stringWithFormat:PERIAN_NO_BUNDLE_ID_FORMAT,compName];
+		[componentInfo setObject:[self checkComponentStatusByBundleIdentifier:bundleIdent] forKey:@"status"];
+		[componentInfo setObject:bundleIdent forKey:@"bundleID"];
 	}
 	return [componentInfo autorelease];
 }
@@ -766,10 +768,9 @@
 	while ((infoDict = [infoEnum nextObject])) {
 		NSEnumerator *stringsEnum = [[infoDict objectForKey:ObsoletesKey] objectEnumerator];
 		NSString *obsoletedID;
-		while ((obsoletedID = [stringsEnum nextObject])) {
+		while ((obsoletedID = [stringsEnum nextObject]))
 			if ([obsoletedID isEqualToString:bundleID])
 				status = [NSString stringWithFormat:@"Obsoleted by %@",[infoDict objectForKey:HumanReadableNameKey]];
-			}
 	}
 	return status;
 }
