@@ -331,8 +331,8 @@
     about = [[[NSAttributedString alloc] initWithPath:[[self bundle] pathForResource:@"Read Me" ofType:@"rtf"] 
 									 documentAttributes:nil] autorelease];
 	[[textView_about textStorage] setAttributedString:about];
-	[[textView_about enclosingScrollView] setLineScroll:0];
-	[[textView_about enclosingScrollView] setPageScroll:0];
+	[[textView_about enclosingScrollView] setLineScroll:10];
+	[[textView_about enclosingScrollView] setPageScroll:20];
 	
 	if((lastInstVersion == nil || [lastInstVersion isVersionStringOlderThan:myVersion]) && installStatus != InstallStatusInstalled)
 	{
