@@ -1535,8 +1535,5 @@ static void SetupMultithreadedDecoding(AVCodecContext *s)
 	// (vmware or power saving may disable some CPUs)
 	if (sysctlbyname("hw.activecpu", &nthreads, &len, NULL, 0) == -1) nthreads = 1;
 	
-	nthreads--; // each thread is "in addition" to the main thread
-				// but 1 thread doesn't do anything? need to investigate
-	
-	if (nthreads) avcodec_thread_init(s, nthreads);
+	if (nthreads > 1) avcodec_thread_init(s, nthreads);
 }
