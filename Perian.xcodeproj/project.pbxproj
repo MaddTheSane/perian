@@ -1172,7 +1172,7 @@
 			children = (
 				F5CFD2D60B5012A100616865 /* A52Codec.component */,
 				F5CFD2D80B5012A100616865 /* AC3MovieImport.component */,
-				F5CFD2DA0B5012A100616865 /* Preferences.app */,
+				F5CFD2DA0B5012A100616865 /* A52Preferences.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1440,10 +1440,10 @@
 			remoteRef = F5CFD2D70B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F5CFD2DA0B5012A100616865 /* Preferences.app */ = {
+		F5CFD2DA0B5012A100616865 /* A52Preferences.app */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.application;
-			path = Preferences.app;
+			path = A52Preferences.app;
 			remoteRef = F5CFD2D90B5012A100616865 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1859,38 +1859,6 @@
 			};
 			name = Deployment;
 		};
-		116C42580B5041BF00FB0738 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = PerianUpdateChecker;
-				WRAPPER_EXTENSION = app;
-				ZERO_LINK = YES;
-			};
-			name = Default;
-		};
 		11A70AC90A3D0111002058D4 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2012,62 +1980,6 @@
 			};
 			name = Deployment;
 		};
-		11A70ACB0A3D0111002058D4 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = (
-					i386,
-					ppc,
-				);
-				DEAD_CODE_STRIPPING = YES;
-				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_2)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
-				GCC_DYNAMIC_NO_PIC = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					ffmpeg/libavcodec,
-					ffmpeg/libavutil,
-					ffmpeg/libpostproc,
-					ffmpeg/libavformat,
-					libebml,
-					libmatroska,
-				);
-				INFOPLIST_FILE = "Plists/Perian-Info.plist";
-				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = (
-					$SYMROOT/Universal,
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
-				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Universal\"";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
-					"-read_only_relocs",
-					suppress,
-				);
-				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
-				PREBINDING = NO;
-				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_NAME = Perian;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
-			};
-			name = Default;
-		};
 		11BA39B10A61E453008AF206 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2090,13 +2002,6 @@
 			};
 			name = Deployment;
 		};
-		11BA39B30A61E453008AF206 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Version Macros and Static Libraries";
-			};
-			name = Default;
-		};
 		11D4ED480A3CE59A0066D45F /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2117,15 +2022,6 @@
 				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Deployment;
-		};
-		11D4ED4A0A3CE59A0066D45F /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_MODEL_TUNING = G5;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-			};
-			name = Default;
 		};
 		3D4BBE460B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
@@ -2426,24 +2322,6 @@
 			};
 			name = Deployment;
 		};
-		61CB11060ACDF37C007994BD /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = /usr/local/lib;
-				PREBINDING = NO;
-				PRODUCT_NAME = ebml;
-				STRIP_STYLE = "non-global";
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
-				ZERO_LINK = NO;
-			};
-			name = Default;
-		};
 		61CB11B10ACDF4FF007994BD /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2485,24 +2363,6 @@
 				ZERO_LINK = NO;
 			};
 			name = Deployment;
-		};
-		61CB11B30ACDF4FF007994BD /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = /usr/local/lib;
-				PREBINDING = NO;
-				PRODUCT_NAME = matroska;
-				STRIP_STYLE = "non-global";
-				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
-				ZERO_LINK = NO;
-			};
-			name = Default;
 		};
 		83D1D6CB0B4C794900E09EC9 /* Development */ = {
 			isa = XCBuildConfiguration;
@@ -2574,33 +2434,6 @@
 			};
 			name = Deployment;
 		};
-		83D1D6CD0B4C794900E09EC9 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
-				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = Perian;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				WRAPPER_EXTENSION = prefPane;
-				ZERO_LINK = YES;
-			};
-			name = Default;
-		};
 		F59E0A0C0A670E950019A3F0 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2622,13 +2455,6 @@
 				ZERO_LINK = NO;
 			};
 			name = Deployment;
-		};
-		F59E0A0E0A670E950019A3F0 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Debug In QuickTime Player";
-			};
-			name = Default;
 		};
 		F5CFD1B90B5000AF00616865 /* Development */ = {
 			isa = XCBuildConfiguration;
@@ -2676,26 +2502,6 @@
 			};
 			name = Deployment;
 		};
-		F5CFD1BB0B5000AF00616865 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INSTALL_PATH = "$(HOME)/bin";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = PerianPanePListGenerator;
-				ZERO_LINK = YES;
-			};
-			name = Default;
-		};
 		F5CFD2660B500B9D00616865 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2717,13 +2523,6 @@
 				ZERO_LINK = NO;
 			};
 			name = Deployment;
-		};
-		F5CFD2680B500B9D00616865 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = CreatePrefPanePlist;
-			};
-			name = Default;
 		};
 		F5CFD2EB0B5012E800616865 /* Development */ = {
 			isa = XCBuildConfiguration;
@@ -2747,13 +2546,6 @@
 			};
 			name = Deployment;
 		};
-		F5CFD2ED0B5012E800616865 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = A52Codec;
-			};
-			name = Default;
-		};
 		F5CFD3C20B50144E00616865 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2776,13 +2568,6 @@
 			};
 			name = Deployment;
 		};
-		F5CFD3C40B50144E00616865 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Setup Build Directories";
-			};
-			name = Default;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2792,10 +2577,9 @@
 				116C42560B5041BF00FB0738 /* Development */,
 				116C42570B5041BF00FB0738 /* Deployment */,
 				3D4BBE500B59EE0A000EDE04 /* Deployment+Debug */,
-				116C42580B5041BF00FB0738 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */ = {
 			isa = XCConfigurationList;
@@ -2803,10 +2587,9 @@
 				11A70AC90A3D0111002058D4 /* Development */,
 				11A70ACA0A3D0111002058D4 /* Deployment */,
 				3D4BBE490B59EE0A000EDE04 /* Deployment+Debug */,
-				11A70ACB0A3D0111002058D4 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		11BA39B00A61E453008AF206 /* Build configuration list for PBXAggregateTarget "ffmpeg Static Libraries" */ = {
 			isa = XCConfigurationList;
@@ -2814,10 +2597,9 @@
 				11BA39B10A61E453008AF206 /* Development */,
 				11BA39B20A61E453008AF206 /* Deployment */,
 				3D4BBE460B59EE0A000EDE04 /* Deployment+Debug */,
-				11BA39B30A61E453008AF206 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		11D4ED470A3CE59A0066D45F /* Build configuration list for PBXProject "Perian" */ = {
 			isa = XCConfigurationList;
@@ -2825,10 +2607,9 @@
 				11D4ED480A3CE59A0066D45F /* Development */,
 				11D4ED490A3CE59A0066D45F /* Deployment */,
 				3D4BBE510B59EE0A000EDE04 /* Deployment+Debug */,
-				11D4ED4A0A3CE59A0066D45F /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		61CB11030ACDF37C007994BD /* Build configuration list for PBXNativeTarget "ebml" */ = {
 			isa = XCConfigurationList;
@@ -2836,10 +2617,9 @@
 				61CB11040ACDF37C007994BD /* Development */,
 				61CB11050ACDF37C007994BD /* Deployment */,
 				3D4BBE470B59EE0A000EDE04 /* Deployment+Debug */,
-				61CB11060ACDF37C007994BD /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		61CB11B00ACDF4FF007994BD /* Build configuration list for PBXNativeTarget "matroska" */ = {
 			isa = XCConfigurationList;
@@ -2847,10 +2627,9 @@
 				61CB11B10ACDF4FF007994BD /* Development */,
 				61CB11B20ACDF4FF007994BD /* Deployment */,
 				3D4BBE480B59EE0A000EDE04 /* Deployment+Debug */,
-				61CB11B30ACDF4FF007994BD /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		83D1D6CA0B4C794900E09EC9 /* Build configuration list for PBXNativeTarget "PerianPane" */ = {
 			isa = XCConfigurationList;
@@ -2858,10 +2637,9 @@
 				83D1D6CB0B4C794900E09EC9 /* Development */,
 				83D1D6CC0B4C794900E09EC9 /* Deployment */,
 				3D4BBE4F0B59EE0A000EDE04 /* Deployment+Debug */,
-				83D1D6CD0B4C794900E09EC9 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		F59E0A0B0A670E950019A3F0 /* Build configuration list for PBXAggregateTarget "Debug In QuickTime Player" */ = {
 			isa = XCConfigurationList;
@@ -2869,10 +2647,9 @@
 				F59E0A0C0A670E950019A3F0 /* Development */,
 				F59E0A0D0A670E950019A3F0 /* Deployment */,
 				3D4BBE4A0B59EE0A000EDE04 /* Deployment+Debug */,
-				F59E0A0E0A670E950019A3F0 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		F5CFD1B80B5000AF00616865 /* Build configuration list for PBXNativeTarget "PerianPanePListGenerator" */ = {
 			isa = XCConfigurationList;
@@ -2880,10 +2657,9 @@
 				F5CFD1B90B5000AF00616865 /* Development */,
 				F5CFD1BA0B5000AF00616865 /* Deployment */,
 				3D4BBE4D0B59EE0A000EDE04 /* Deployment+Debug */,
-				F5CFD1BB0B5000AF00616865 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		F5CFD2650B500B9D00616865 /* Build configuration list for PBXAggregateTarget "CreatePrefPanePlist" */ = {
 			isa = XCConfigurationList;
@@ -2891,10 +2667,9 @@
 				F5CFD2660B500B9D00616865 /* Development */,
 				F5CFD2670B500B9D00616865 /* Deployment */,
 				3D4BBE4E0B59EE0A000EDE04 /* Deployment+Debug */,
-				F5CFD2680B500B9D00616865 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		F5CFD2EA0B5012E800616865 /* Build configuration list for PBXAggregateTarget "A52Codec" */ = {
 			isa = XCConfigurationList;
@@ -2902,10 +2677,9 @@
 				F5CFD2EB0B5012E800616865 /* Development */,
 				F5CFD2EC0B5012E800616865 /* Deployment */,
 				3D4BBE4C0B59EE0A000EDE04 /* Deployment+Debug */,
-				F5CFD2ED0B5012E800616865 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 		F5CFD3C10B50144E00616865 /* Build configuration list for PBXAggregateTarget "Setup Build Directories" */ = {
 			isa = XCConfigurationList;
@@ -2913,10 +2687,9 @@
 				F5CFD3C20B50144E00616865 /* Development */,
 				F5CFD3C30B50144E00616865 /* Deployment */,
 				3D4BBE4B0B59EE0A000EDE04 /* Deployment+Debug */,
-				F5CFD3C40B50144E00616865 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Development;
 		};
 /* End XCConfigurationList section */
 	};
