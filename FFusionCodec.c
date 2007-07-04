@@ -133,6 +133,7 @@ typedef struct
 static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length);
 static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic);
 static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
+static void SetupMultithreadedDecoding(AVCodecContext *s);
 
 int GetPPUserPreference();
 void SetPPUserPreference(int value);
@@ -663,6 +664,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		glob->avContext->opaque = glob;
 		glob->avContext->get_buffer = FFusionGetBuffer;
 		glob->avContext->release_buffer = FFusionReleaseBuffer;
+		
+		// multi-slice decoding
+		SetupMultithreadedDecoding(glob->avContext);
 		
         // Finally we open the avcodec 
         
@@ -1520,4 +1524,19 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
 		length -= len;
     }
     return err;
+}
+
+static void SetupMultithreadedDecoding(AVCodecContext *s)
+{
+	int nthreads;
+	size_t len = 4;
+	
+	// one thread per usable CPU
+	// (vmware or power saving may disable some CPUs)
+	if (sysctlbyname("hw.activecpu", &nthreads, &len, NULL, 0) == -1) nthreads = 1;
+	
+	nthreads--; // each thread is "in addition" to the main thread
+				// but 1 thread doesn't do anything? need to investigate
+	
+	if (nthreads) avcodec_thread_init(s, nthreads);
 }
