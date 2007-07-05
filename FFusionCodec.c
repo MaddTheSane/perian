@@ -553,6 +553,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				break;
 
 			case 'VP6F':
+			case 'FLV4':
 				codecID = CODEC_ID_VP6F;
 				break;
 
@@ -1397,6 +1398,7 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 			case 'VP61':
 			case 'VP62':
 			case 'VP6F':
+			case 'FLV4':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kVP6CodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				

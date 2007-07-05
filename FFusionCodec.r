@@ -2850,6 +2850,36 @@ resource 'thng' (329) {
 };
 };
 
+resource 'thng' (330) {
+	decompressorComponentType,		// Type			
+	'FLV4',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kVP6NameResID,			// Name ID
+	'STR ',					// Info Type
+	kVP6InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
