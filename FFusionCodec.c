@@ -317,6 +317,7 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         
         if (glob->avCodec)
         {
+			avcodec_thread_free(glob->avContext);
             avcodec_close(glob->avContext);
         }
 				
@@ -324,7 +325,7 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         {
 			if (glob->avContext->extradata)
 				free(glob->avContext->extradata);
-			
+						
             av_free(glob->avContext);
         }
 		
@@ -1537,5 +1538,5 @@ static void SetupMultithreadedDecoding(AVCodecContext *s)
 	// (vmware or power saving may disable some CPUs)
 	if (sysctlbyname("hw.activecpu", &nthreads, &len, NULL, 0) == -1) nthreads = 1;
 	
-	if (nthreads > 1) avcodec_thread_init(s, nthreads);
+	avcodec_thread_init(s, nthreads);
 }
