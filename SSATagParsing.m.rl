@@ -94,58 +94,21 @@ static ATSURGBAlphaColor ParseColorTag(unsigned long c, float a)
 	return (ATSURGBAlphaColor){r/255.,g/255.,b/255.,a};
 }
 
-//not worth it
-/*
-static void PruneIdenticalStyleSpans(SSARenderEntity *re)
-{
-	SSAStyleSpan *styles_new[re->style_count];
-	
-	if (re->multipart_drawing || re->style_count <= 1) return;
-
-	size_t style_count_new = 1, remaining = re->style_count-1;
-	int i=1;
-	
-	
-	styles_new[0] = re->styles[0];
-	
-	while (remaining) {
-		ATSUStyleComparison asc;
-		ATSUCompareStyles(styles_new[style_count_new-1]->astyle,re->styles[i]->astyle,&asc);
-		
-		if (asc == kATSUStyleEquals) {
-            styles_new[style_count_new-1]->range.length += re->styles[i]->range.length;
-			[re->styles[i] release];
-            re->styles[i] = nil;
-		} else {
-			styles_new[style_count_new++] = re->styles[i];
-		}
-		
-		i++;
-		remaining--;
-	}
-	
-	if (style_count_new != re->style_count) {
-		re->styles = realloc(re->styles, sizeof(SSAStyleSpan*) * style_count_new); 
-		memcpy(re->styles, styles_new, sizeof(SSAStyleSpan*) * style_count_new);
-		
-		re->style_count = style_count_new;
-	}
-}
-*/
-
 static void UpdateAlignment(int inum, int cur_posx, int *valign, int *halign, ATSUTextLayout cur_layout)
 {
 	int cur_halign, cur_valign;
 	
-	switch (inum) 
-	{case 1: case 4: case 7: cur_halign = S_LeftAlign; break;
-	case 2: case 5: case 8: default: cur_halign = S_CenterAlign; break;
-	case 3: case 6: case 9: cur_halign = S_RightAlign;}
+	switch (inum) {
+		case 1: case 4: case 7: cur_halign = S_LeftAlign; break;
+		case 2: case 5: case 8: default: cur_halign = S_CenterAlign; break;
+		case 3: case 6: case 9: cur_halign = S_RightAlign;
+	}
 	
-	switch (inum)
-	{case 1: case 2: case 3: default: cur_valign = S_BottomAlign; break; 
-	case 4: case 5: case 6: cur_valign = S_MiddleAlign; break; 
-	case 7: case 8: case 9: cur_valign = S_TopAlign;}
+	switch (inum) {
+		case 1: case 2: case 3: default: cur_valign = S_BottomAlign; break; 
+		case 4: case 5: case 6: cur_valign = S_MiddleAlign; break; 
+		case 7: case 8: case 9: cur_valign = S_TopAlign;
+	}
 	
 	*halign = cur_halign;
 	*valign = cur_valign;
@@ -244,6 +207,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 		re->text = malloc(sizeof(unichar[len]));
 		
 		[re->nstext getCharacters:re->text];
+			
 		re->style_count = 0;
 		re->posx = re->posy = -1;
 		re->halign = re->style->halign;
@@ -277,7 +241,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			ATSUTextLayout cur_layout;
 			NSMutableString *output = [NSMutableString string], *dtmp;
 			unichar *p = re->text, *pe = &re->text[len], *numbegin = p, *strbegin = p, *skipbegin = p, *intbegin = p, *pb = p, *posbegin=p, *strparambegin=p;
-			float num, cur_outline = re->style->outline, cur_shadow = re->style->shadow, cur_scalex = re->style->scalex, cur_scaley = re->style->scaley, cur_frz=re->style->angle;
+			float num = 0, cur_outline = re->style->outline, cur_shadow = re->style->shadow, cur_scalex = re->style->scalex, cur_scaley = re->style->scaley, cur_frz=re->style->angle;
 			NSString *parsetmp;
 			int cs, cur_valign=re->valign, cur_halign=re->halign, cur_posx=-1, cur_posy=-1;
 			ssacolors cur_color = re->style->color;
@@ -456,8 +420,8 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				}
 				
 				action exit_tag {
-					// XXX exit_tag ideally should run one char later, so we just pretend it does
-					p++;
+					p++; // exit_tag uses > rather than % because ragel ordering is opposite of what we want
+					
 					outputoffset += p - skipbegin;
 					skipbegin = p;
 					strbegin = p;
@@ -483,6 +447,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 						nre->is_shape = re->is_shape;
 						re = nre;
 					}
+					
 					p--;
 				}
 				
@@ -558,7 +523,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 								|("r" [^\\}]* > strp_begin %styleset)
 								|("fe"|"k"|"kf"|"K"|"ko"|"q"|"fr"|"fad"|"move"|"clip"|"o"|"frx"|"fry") [^\\}]*
 								|"p" num %draw_mode
-								#|"t" [^)}]* # enabling this crashes ragel
+								#|"t" [^)}]* # enabling this causes ragel to malloc forever
 								|"t(" % skip_t_tag
 								|""
 								);
@@ -567,11 +532,11 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 				
 				plaintext = [^}]*;
 
-				tag = "{" (cmd | plaintext) % exit_tag "}";
+				tag = "{" > enter_tag (cmd | plaintext) "}" > exit_tag;
 				
 				nl = "\\" [Nnh];
 				
-				special = nl % nl_handler | (tag > enter_tag);
+				special = (nl % nl_handler %/ nl_handler) | tag;
 								
 				text = any*;
 				main := (text special?)*;
@@ -581,14 +546,11 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			%%write exec;
 			%%write eof;
 			
-			if (pb[len-1] == '}') skipbegin = p; // make up for how exit_tag isn't called if the } is the last char in the line
-
 			end_re;
 			if (!cur_range.length) ATSUDisposeStyle(cur_style);
-            //PruneIdenticalStyleSpans(re);
 
 			free(pb);
-			if ([re->nstext length] != 0) [rentities addObject:re];
+			if ([re->nstext length]) [rentities addObject:re];
 		}
 		
 	}
