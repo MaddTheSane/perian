@@ -26,7 +26,29 @@ typedef struct SSARenderGlobals
 {
 	SSADocument *document;
 	Boolean plaintext;
+	CGColorSpaceRef sourceColor;
 } SSARenderGlobals;
+
+// Windows color (i apologize for the hardcoded path)
+static CGColorSpaceRef GetSRGBColorSpace() {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSData *d = [NSData dataWithContentsOfMappedFile:@"/System/Library/ColorSync/Profiles/sRGB Profile.icc"];
+	CGColorSpaceRef ret;
+	
+	if (d) {
+		CMProfileLocation loc;
+		loc.locType = cmPtrBasedProfile;
+		loc.u.ptrLoc.p = (char*)[d bytes];
+		CMProfileRef prof;
+		
+		CMOpenProfile(&prof,&loc);
+		ret = CGColorSpaceCreateWithPlatformColorSpace(prof);
+		CMCloseProfile(prof);
+	} else ret = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+	
+	[pool release];
+	return ret;
+}
 
 SSARenderGlobalsPtr SSA_Init(const char *header, size_t size, float width, float height)
 {
@@ -36,6 +58,8 @@ SSARenderGlobalsPtr SSA_Init(const char *header, size_t size, float width, float
 	g->document = [[SSADocument alloc] init];
 	g->plaintext = false;
 	[g->document loadHeader:hdr width:width height:height];
+	g->sourceColor = GetSRGBColorSpace();
+	
 	[hdr release];
 	[pool release];
 	return g;
@@ -48,6 +72,8 @@ SSARenderGlobalsPtr SSA_InitNonSSA(float width, float height)
 	g->document = [[SSADocument alloc] init];
 	g->plaintext = true;
 	[g->document loadDefaultsWithWidth:width height:height];
+	g->sourceColor = GetSRGBColorSpace();
+
 	[pool release];
 	return g;
 }
@@ -246,6 +272,9 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 	
 	CGContextClearRect(c, CGRectMake(0,0,cWidth,cHeight));
 	CGContextScaleCTM(c, cWidth / ssa->resX, cHeight / ssa->resY);
+	
+	CGContextSetFillColorSpace(c, glob->sourceColor);
+	CGContextSetStrokeColorSpace(c, glob->sourceColor);
 	subcount = [rentities count];
 	
 	for (j = 0; j < subcount; j++) {
@@ -358,6 +387,7 @@ void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub,
 void SSA_Dispose(SSARenderGlobalsPtr glob)
 {
 	[glob->document release];
+	CGColorSpaceRelease(glob->sourceColor);
 	DisposePtr((Ptr)glob);
 }
 
