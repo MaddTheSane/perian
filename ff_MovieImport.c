@@ -331,8 +331,8 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 			
 			OSType fourcc = get_avi_strf_fourcc(&byteContext);
 			
-			if (codec_get_bmp_id(BSWAP(fourcc)) == CODEC_ID_MJPEG || 
-				codec_get_bmp_id(BSWAP(fourcc)) == CODEC_ID_DVVIDEO)
+			if (codec_get_id(codec_bmp_tags, BSWAP(fourcc)) == CODEC_ID_MJPEG || 
+				codec_get_id(codec_bmp_tags, BSWAP(fourcc)) == CODEC_ID_DVVIDEO)
 				*valid = 0;
 			
 			url_fclose(&byteContext);
