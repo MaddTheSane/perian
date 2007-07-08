@@ -32,10 +32,13 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	lastRunDate = [[[NSUserDefaults standardUserDefaults] objectForKey:NEXT_RUN_KEY] retain];
+	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	lastRunDate = [[defaults objectForKey:NEXT_RUN_KEY] retain];
 	if (lastRunDate == nil || [lastRunDate laterDate:[NSDate date]] != lastRunDate) {
 		//this means we should in fact run
-		[[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN] forKey:NEXT_RUN_KEY];
+		[defaults setObject:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN] forKey:NEXT_RUN_KEY];
+		manualRun = [defaults boolForKey:MANUAL_RUN_KEY];
+		[defaults removeObjectForKey:MANUAL_RUN_KEY];
 		[self doUpdateCheck];
 	} else {
 		//another instance was already started and therefore we don't need to do this again
@@ -79,16 +82,12 @@
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	NSString *skippedVersion = [[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY];
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	BOOL manualRun = [defaults boolForKey:MANUAL_RUN_KEY];
 	if (updateAvailable && (!skippedVersion || 
 		(skippedVersion && ![skippedVersion isEqualToString:[latest versionString]]))) {
 		[self showUpdatePanelForItem:latest];
 	} else {
 		if(manualRun)
-		{
 			NSRunAlertPanel(SULocalizedString(@"No Update Found!", nil), SULocalizedString(@"Your copy of Perian is up to date", nil), nil, nil, nil);
-			[defaults removeObjectForKey:MANUAL_RUN_KEY];
-		}
 		[[NSApplication sharedApplication] terminate:self];
 	}
 }
@@ -96,7 +95,8 @@
 - (void)appcastDidFailToLoad:(SUAppcast *)appcast
 {
 	[self updateFailed];
-	[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to load Perian's version info. Please try again later.", nil)];
+	if(manualRun)
+		[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to load Perian's version info. Please try again later.", nil)];
 	[[NSApplication sharedApplication] terminate:self];	
 }
 
@@ -120,7 +120,6 @@
 
 - (void)showUpdateErrorAlertWithInfo:(NSString *)info
 {
-    [self updateFailed];
 	NSRunAlertPanel(SULocalizedString(@"Update Error!", nil), info, SULocalizedString(@"Cancel", nil), nil, nil);
 }
 
@@ -210,7 +209,10 @@ extern char **environ;
 	[statusController setStatusText:SULocalizedString(@"Extracting...", nil)];
 	
 	if(![self extractDMG:downloadPath])
+	{
+		[self updateFailed];
 		[self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Extract Downloaded File",@"")];
+	}
 	
 	NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:[downloadPath stringByDeletingLastPathComponent]];
 	NSString *file = nil;
@@ -231,14 +233,20 @@ extern char **environ;
 	char *buf = NULL;
 	asprintf(&buf, "open \"$PREFPANE_LOCATION\"; rm -rf \"$TEMP_FOLDER\"");
 	if(!buf)
+	{
+		[self updateFailed];
 		[self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Create Extraction Script",@"")];
+	}
 		
 	char *args[] = {"/bin/sh", "-c", buf, NULL};
 	setenv("PREFPANE_LOCATION", [prefpanelocation fileSystemRepresentation], 1);
 	setenv("TEMP_FOLDER", [[downloadPath stringByDeletingLastPathComponent] fileSystemRepresentation], 1);
     int forkVal = fork();
     if(forkVal == -1)
-        [self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Run Update",@"")];
+	{
+		[self updateFailed];
+		[self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Run Update",@"")];
+	}
 	if(forkVal == 0)
 		execve("/bin/sh", args, environ);
 	[NSApp terminate:self];

@@ -26,6 +26,7 @@
 	NSURLDownload *downloader;
 	NSString *downloadPath;
     NSDate *lastRunDate;
+	BOOL	manualRun;
 }
 
 - (void)doUpdateCheck;
