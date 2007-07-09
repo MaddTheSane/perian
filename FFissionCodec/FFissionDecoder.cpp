@@ -386,7 +386,6 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 		// decode one packet to our buffer
 		outBufUsed = outBufSize;
 		int len = avcodec_decode_audio2(avContext, (int16_t *)outputBuffer, &outBufUsed, packet, packetSize);
-		inputBuffer.Zap(len);
 		
 		if (len < 0) {
 			Codecprintf(NULL, "Error decoding audio frame\n");
@@ -395,6 +394,7 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 			ioOutputDataByteSize = written;
 			return kAudioCodecProduceOutputPacketFailure;
 		}
+		inputBuffer.Zap(len);
 		
 		// copy up to the amount requested
 		int amountToCopy = FFMIN(outBufUsed, ioOutputDataByteSize - written);
