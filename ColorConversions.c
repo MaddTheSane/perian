@@ -177,35 +177,44 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 {
 	UInt8	*yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
 	unsigned	rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
-	unsigned	y,x, vWidth = width / 16, halfheight = height / 2;
+	unsigned	y,x, vWidth = width / 32, halfheight = height / 2;
 	unsigned	halfwidth = width / 2; 
 	
 	for (y = 0; y < halfheight; y++) {
 		UInt8   * o2 = o + outRB,   * yc2 = yc + rY;
 		__m128i * ov = (__m128i*)o, * ov2 = (__m128i*)o2, * yv = (__m128i*)yc, * yv2 = (__m128i*)yc2;
-		__m64   * uv = (__m64*)uc,  * vv = (__m64*)vc;
+		__m128i * uv = (__m128i*)uc,* vv  = (__m128i*)vc;
 		
 		for (x = 0; x < vWidth; x++) {
-			/* read one chroma row, two luma rows, write two luma rows at once. this avoids reading chroma twice
-			* sse2 can do 64-bit loads, so we do that. maybe we shouldn't?
-			* also this loop could be unrolled serially */
-			unsigned x2 = x*2;
+			unsigned x2 = x*2, x4 = x*4;
 
-			__m128i	tmp_y = yv[x], 
-				tmp_y2 = yv2[x],
-				chroma = _mm_unpacklo_epi8(_mm_loadl_epi64((__m128i*)&uv[x]), _mm_loadl_epi64((__m128i*)&vv[x]));
-			__m128i p1 = _mm_unpacklo_epi8(chroma, tmp_y),
-				p3 = _mm_unpacklo_epi8(chroma, tmp_y2),
-				p2 = _mm_unpackhi_epi8(chroma, tmp_y),
-				p4 = _mm_unpackhi_epi8(chroma, tmp_y2);
+			__m128i	tmp_y = yv[x2], tmp_y3 = yv[x2+1],
+					tmp_y2 = yv2[x2], tmp_y4 = yv2[x2+1],
+					tmp_u = _mm_loadu_si128(&uv[x]), tmp_v = _mm_loadu_si128(&vv[x]),
+					chroma_l = _mm_unpacklo_epi8(tmp_u, tmp_v),
+					chroma_h = _mm_unpackhi_epi8(tmp_u, tmp_v);
 			
-			_mm_stream_si128(&ov[x2],p1); // store to memory rather than cache
-			_mm_stream_si128(&ov[x2+1],p2); 
-			_mm_stream_si128(&ov2[x2],p3); 
-			_mm_stream_si128(&ov2[x2+1],p4);
+			__m128i r1 = _mm_unpacklo_epi8(chroma_l, tmp_y),
+					r3 = _mm_unpacklo_epi8(chroma_h, tmp_y3),
+					r2 = _mm_unpackhi_epi8(chroma_l, tmp_y),
+					r4 = _mm_unpackhi_epi8(chroma_h, tmp_y3),
+					r5 = _mm_unpacklo_epi8(chroma_l, tmp_y2),
+					r7 = _mm_unpacklo_epi8(chroma_h, tmp_y4),
+					r6 = _mm_unpackhi_epi8(chroma_l, tmp_y2),
+					r8 = _mm_unpackhi_epi8(chroma_h, tmp_y4);
+			
+			_mm_stream_si128(&ov[x4],   r1); 
+			_mm_stream_si128(&ov[x4+1], r2); 
+			_mm_stream_si128(&ov[x4+2], r3); 
+			_mm_stream_si128(&ov[x4+3], r4); 
+
+			_mm_stream_si128(&ov2[x4],  r5); 
+			_mm_stream_si128(&ov2[x4+1],r6);
+			_mm_stream_si128(&ov2[x4+2],r7);
+			_mm_stream_si128(&ov2[x4+3],r8);
 		}
 		
-		for (x = x * 8; x < halfwidth; x++) {
+		for (x = x * 16; x < halfwidth; x++) {
 			unsigned x4 = x*4, x2 = x*2;
 			o2[x4] = o[x4] = uc[x];
 			o[x4 + 1] = yc[x2];
