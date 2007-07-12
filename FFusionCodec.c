@@ -578,11 +578,13 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				
 			case 'MPEG':
 			case 'mpg1':
+			case 'mp1v':
 				codecID = CODEC_ID_MPEG1VIDEO;
 				break;
 				
 			case 'MPG2':
 			case 'mpg2':
+			case 'mp2v':
 				codecID = CODEC_ID_MPEG2VIDEO;
 				break;
 				
@@ -1420,11 +1422,13 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 				
 			case 'MPEG':
 			case 'mpg1':
+			case 'mp1v':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kMPEG1CodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
 			case 'MPG2':
 			case 'mpg2':
+			case 'mp2v':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kMPEG2CodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				

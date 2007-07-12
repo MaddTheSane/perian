@@ -2754,10 +2754,40 @@ resource 'thng' (326) {
 };
 };
 
+resource 'thng' (327) {
+	decompressorComponentType,		// Type			
+	'mp1v',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG1NameResID,			// Name ID
+	'STR ',					// Info Type
+	kMPEG1InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
 //---------------------------------------------------------------------------
 // MPEG-2 Components
 //---------------------------------------------------------------------------
-resource 'thng' (327) {
+resource 'thng' (328) {
 	decompressorComponentType,		// Type			
 	'MPG2',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2787,9 +2817,39 @@ resource 'thng' (327) {
 };
 };
 
-resource 'thng' (328) {
+resource 'thng' (329) {
 	decompressorComponentType,		// Type			
 	'mpg2',					// SubType
+	kFFusionCodecManufacturer,			// Manufacturer
+	0,					// - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',					// Name Type
+	kMPEG2NameResID,			// Name ID
+	'STR ',					// Info Type
+	kMPEG2InfoResID,			// Info ID
+	0,					// Icon Type
+	0,					// Icon ID
+	kFFusionCodecVersion,			// Version
+	componentHasMultiplePlatforms +		// Registration Flags 
+	componentDoAutoVersion,			// Registration Flags
+	0,					// Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',				// Entry point found by symbol name 'dlle' resource
+	256,				// ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+resource 'thng' (330) {
+	decompressorComponentType,		// Type			
+	'mp2v',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
 	0,					// - use componentHasMultiplePlatforms
 	0,
@@ -2820,7 +2880,7 @@ resource 'thng' (328) {
 //---------------------------------------------------------------------------
 // Fraps Components
 //---------------------------------------------------------------------------
-resource 'thng' (329) {
+resource 'thng' (331) {
 	decompressorComponentType,              // Type
 	'FPS1',                                 // SubType
 	kFFusionCodecManufacturer,                      // Manufacturer
@@ -2850,7 +2910,7 @@ resource 'thng' (329) {
 };
 };
 
-resource 'thng' (330) {
+resource 'thng' (332) {
 	decompressorComponentType,		// Type			
 	'FLV4',					// SubType
 	kFFusionCodecManufacturer,			// Manufacturer
