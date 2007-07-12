@@ -65,12 +65,26 @@
 
 #define kPrimaryResourceID				136
 #define kComponentType					'adec'
-#define kComponentSubtype				'.mp2'
-#define kComponentName					"MPEG Layer 2"
-#define kComponentInfo					"An AudioCodec that decodes MP2 audio into linear PCM"
+#define kComponentSubtype				'.mp1'
+#define kComponentName					"MPEG-1 Layer 1"
+#define kComponentInfo					"An AudioCodec that decodes MPEG-1 layer 1 audio into linear PCM"
 #include "XCAResources.r"
 
 #define kPrimaryResourceID				138
+#define kComponentType					'adec'
+#define kComponentSubtype				0x6d730050
+#define kComponentName					"MPEG-1 Layer 1/2"
+#define kComponentInfo					"An AudioCodec that decodes MPEG-1 layer 1 or 2 audio into linear PCM"
+#include "XCAResources.r"
+
+#define kPrimaryResourceID				140
+#define kComponentType					'adec'
+#define kComponentSubtype				'.mp2'
+#define kComponentName					"MPEG-1 Layer 2"
+#define kComponentInfo					"An AudioCodec that decodes MPEG-1 layer 2 audio into linear PCM"
+#include "XCAResources.r"
+
+#define kPrimaryResourceID				142
 #define kComponentType					'adec'
 #define kComponentSubtype				kAudioFormatTTA
 #define kComponentName					"True Audio"
