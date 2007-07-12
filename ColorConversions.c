@@ -194,24 +194,15 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 					chroma_l = _mm_unpacklo_epi8(tmp_u, tmp_v),
 					chroma_h = _mm_unpackhi_epi8(tmp_u, tmp_v);
 			
-			__m128i r1 = _mm_unpacklo_epi8(chroma_l, tmp_y),
-					r3 = _mm_unpacklo_epi8(chroma_h, tmp_y3),
-					r2 = _mm_unpackhi_epi8(chroma_l, tmp_y),
-					r4 = _mm_unpackhi_epi8(chroma_h, tmp_y3),
-					r5 = _mm_unpacklo_epi8(chroma_l, tmp_y2),
-					r7 = _mm_unpacklo_epi8(chroma_h, tmp_y4),
-					r6 = _mm_unpackhi_epi8(chroma_l, tmp_y2),
-					r8 = _mm_unpackhi_epi8(chroma_h, tmp_y4);
+			_mm_stream_si128(&ov[x4],   _mm_unpacklo_epi8(chroma_l, tmp_y)); 
+			_mm_stream_si128(&ov[x4+1], _mm_unpackhi_epi8(chroma_l, tmp_y)); 
+			_mm_stream_si128(&ov[x4+2], _mm_unpacklo_epi8(chroma_h, tmp_y3)); 
+			_mm_stream_si128(&ov[x4+3], _mm_unpackhi_epi8(chroma_h, tmp_y3)); 
 			
-			_mm_stream_si128(&ov[x4],   r1); 
-			_mm_stream_si128(&ov[x4+1], r2); 
-			_mm_stream_si128(&ov[x4+2], r3); 
-			_mm_stream_si128(&ov[x4+3], r4); 
-
-			_mm_stream_si128(&ov2[x4],  r5); 
-			_mm_stream_si128(&ov2[x4+1],r6);
-			_mm_stream_si128(&ov2[x4+2],r7);
-			_mm_stream_si128(&ov2[x4+3],r8);
+			_mm_stream_si128(&ov2[x4],  _mm_unpacklo_epi8(chroma_l, tmp_y2)); 
+			_mm_stream_si128(&ov2[x4+1],_mm_unpackhi_epi8(chroma_l, tmp_y2));
+			_mm_stream_si128(&ov2[x4+2],_mm_unpacklo_epi8(chroma_h, tmp_y4));
+			_mm_stream_si128(&ov2[x4+3],_mm_unpackhi_epi8(chroma_h, tmp_y4));
 		}
 		
 		for (x = x * 16; x < halfwidth; x++) {
