@@ -181,7 +181,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame)
 {
 	Media media;
-	SoundDescriptionHandle sndHdl;
+	SoundDescriptionHandle sndHdl = NULL;
 	AudioStreamBasicDescription asbd;
 	AVCodecContext *codec;
 	UInt32 ioSize;
@@ -268,18 +268,19 @@ void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 		acl = GetDefaultChannelLayout(&asbd);
 		aclSize = sizeof(AudioChannelLayout);
 	}
-	err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, NULL, 0, kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndHdl);
-	if(err) fprintf(stderr, "AVI IMPORTER: Error creating the sound description\n");
+	if (asbd.mSampleRate > 0) {
+		err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, NULL, 0, kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndHdl);
+		if(err) fprintf(stderr, "AVI IMPORTER: Error creating the sound description\n");
 	
-	/* Create the magic cookie */
-	cookie = create_cookie(codec, &cookieSize, asbd.mFormatID);
-	if(cookie) {
-		err = QTSoundDescriptionSetProperty(sndHdl, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie,
-											cookieSize, cookie);
-		if(err) fprintf(stderr, "AVI IMPORTER: Error appending the magic cookie to the sound description\n");
-		av_free(cookie);
-	}
-	
+		/* Create the magic cookie */
+		cookie = create_cookie(codec, &cookieSize, asbd.mFormatID);
+		if(cookie) {
+			err = QTSoundDescriptionSetProperty(sndHdl, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie,
+												cookieSize, cookie);
+			if(err) fprintf(stderr, "AVI IMPORTER: Error appending the magic cookie to the sound description\n");
+			av_free(cookie);
+		}
+	}	
 	map->sampleHdl = (SampleDescriptionHandle)sndHdl;
 	map->asbd = asbd;
 } /* initialize_audio_map() */
@@ -530,13 +531,15 @@ int prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OSType 
 			track = NewMovieTrack(theMovie, st->codec->width << 16, st->codec->height << 16, kNoVolume);
 			initialize_video_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
 		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
-			track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
-			initialize_audio_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
-			
-			if (first_audio_track == NULL)
-				first_audio_track = track;
-			else
-				SetTrackAlternate(track, first_audio_track);
+			if (st->codec->sample_rate > 0) {
+				track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
+				initialize_audio_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
+				
+				if (first_audio_track == NULL)
+					first_audio_track = track;
+				else
+					SetTrackAlternate(track, first_audio_track);
+			}
 		}
 	}
 	
