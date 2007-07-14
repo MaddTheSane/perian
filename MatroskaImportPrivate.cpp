@@ -502,7 +502,14 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	if (err) return err;
 	
 	mkvTrack.desc = (SampleDescriptionHandle) sndDesc;
-	return MkvFinishSampleDescription(&kaxTrack, mkvTrack.desc, kToSampleDescription);
+	err = MkvFinishSampleDescription(&kaxTrack, mkvTrack.desc, kToSampleDescription);
+	if (err) return err;
+	
+	err = QTSampleTableCreateMutable(NULL, GetMovieTimeScale(theMovie), NULL, &mkvTrack.sampleTable);
+	if (err) return err;
+	
+	err = QTSampleTableAddSampleDescription(mkvTrack.sampleTable, mkvTrack.desc, 0, &mkvTrack.qtSampleDesc);
+	return err;
 }
 
 ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
