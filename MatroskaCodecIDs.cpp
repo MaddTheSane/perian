@@ -451,7 +451,6 @@ ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, SampleDescriptionHandle des
 	
 	if (dir == kToSampleDescription) {
 		Handle sndDescExt = CreateEsdsExt(tr_entry, true);
-		printf("hihi\n");
 		AddSoundDescriptionExtension(sndDesc, sndDescExt, 'esds');
 		
 		DisposeHandle((Handle) sndDescExt);
@@ -542,6 +541,15 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 		memcpy(*imgDescExt, codecPrivate.GetBuffer(), codecPrivate.GetSize());
 		
 		AddImageDescriptionExtension((ImageDescriptionHandle) desc, imgDescExt, 'strf');
+		
+	} else if (codecString == MKV_A_MS) {
+		// WAVFORMATEX is stored in the private data, and some codecs (WMA) need it to decode
+		KaxCodecPrivate & codecPrivate = GetChild<KaxCodecPrivate>(*tr_entry);
+		
+		QTSoundDescriptionSetProperty((SoundDescriptionHandle) desc, 
+		                              kQTPropertyClass_SoundDescription, 
+		                              kQTSoundDescriptionPropertyID_MagicCookie, 
+		                              codecPrivate.GetSize(), codecPrivate.GetBuffer());
 		
 	} else if (codecString == MKV_V_QT) {
 		// This seems to work fine, but there's something it's missing to get the 
@@ -692,6 +700,20 @@ ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescripti
 	return noErr;
 }
 
+typedef struct {
+	OSType cType;
+	int twocc;
+} WavCodec;
+
+static const WavCodec kWavCodecIDs[] = {
+	{ kAudioFormatMPEGLayer2, 0x50 },
+	{ kAudioFormatMPEGLayer3, 0x55 },
+	{ kAudioFormatAC3, 0x2000 },
+	{ kAudioFormatDTS, 0x2001 },
+	{ kAudioFormatMPEG4AAC, 0xff },
+	{ kAudioFormatXiphFLAC, 0xf1ac },
+	{ 0, 0 }
+};
 
 typedef struct {
 	OSType cType;
@@ -777,6 +799,21 @@ FourCharCode GetFourCC(KaxTrackEntry *tr_entry)
 		// offset to biCompression in BITMAPINFO
 		unsigned char *p = (unsigned char *) codecPrivate->GetBuffer() + 16;
 		return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+		
+	} else if (codecString == MKV_A_MS) {
+		// acm compatibility mode, twocc is in private info
+		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+		if (codecPrivate == NULL)
+			return 0;
+		
+		unsigned char *p = (unsigned char *) codecPrivate->GetBuffer();
+		int twocc = p[0] | (p[1] << 8);
+		
+		for (int i = 0; kWavCodecIDs[i].cType; i++) {
+			if (kWavCodecIDs[i].twocc == twocc)
+				return kWavCodecIDs[i].cType;
+		}
+		return 'ms\0\0' | twocc;
 		
 	} else if (codecString == MKV_V_QT) {
 		// QT compatibility mode, private info is the ImageDescription structure, big endian

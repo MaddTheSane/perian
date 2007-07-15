@@ -38,6 +38,7 @@ using namespace libmatroska;
 
 // these CodecIDs need special handling since they correspond to many fourccs
 #define MKV_V_MS "V_MS/VFW/FOURCC"
+#define MKV_A_MS "A_MS/ACM"
 #define MKV_V_QT "V_QUICKTIME"
 
 // these codecs have their profile as a part of the CodecID
