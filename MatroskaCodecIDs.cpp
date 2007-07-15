@@ -373,60 +373,88 @@ static uint8_t* putDescr(uint8_t *buffer, int tag, unsigned int size)
 //   + SL descriptor
 //    + dunno               (1 byte)
 
+Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
+{
+	KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+	KaxTrackNumber *trackNum = FindChild<KaxTrackNumber>(*tr_entry);
+	
+	int vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
+	int trackID = trackNum ? uint16(*trackNum) : 1;
+	int decoderSpecificInfoLen = vosLen ? descrLength(vosLen) : 0;
+	
+	Handle imgDescExt = NewHandle(4 + descrLength(3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1)));
+	UInt8 *pos = (UInt8 *) *imgDescExt;
+	
+	pos = write_int32(pos, 0);		// version
+	
+	// ES Descriptor
+	pos = putDescr(pos, 0x03, 3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
+	pos = write_int16(pos, EndianS16_NtoB(trackID));
+	*pos++ = 0;		// no flags
+	
+	// DecoderConfig descriptor
+	pos = putDescr(pos, 0x04, 13 + decoderSpecificInfoLen);
+	
+	// Object type indication, see http://gpac.sourceforge.net/tutorial/mediatypes.htm
+	if (audio)
+		*pos++ = 0x40;		// aac
+	else
+		*pos++ = 0x20;		// mpeg4 part 2
+	
+	// streamtype
+	if (audio)
+		*pos++ = 0x15;
+	else
+		*pos++ = 0x11;
+	
+	// 3 bytes: buffersize DB (not sure how to get easily)
+	*pos++ = 0;
+	pos = write_int16(pos, 0);
+	
+	// max bitrate, not sure how to get easily
+	pos = write_int32(pos, 0);
+	
+	// vbr
+	pos = write_int32(pos, 0);
+	
+	if (vosLen) {
+		pos = putDescr(pos, 0x05, vosLen);
+		pos = write_data(pos, codecPrivate->GetBuffer(), vosLen);
+	}
+	
+	// SL descriptor
+	pos = putDescr(pos, 0x06, 1);
+	*pos++ = 0x02;
+	
+	return imgDescExt;
+}
+
 ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
 {
 	if (!tr_entry || !desc) return paramErr;
 	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
 	
 	if (dir == kToSampleDescription) {
-		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		KaxTrackNumber *trackNum = FindChild<KaxTrackNumber>(*tr_entry);
-		
-		int vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
-		int trackID = trackNum ? uint16(*trackNum) : 1;
-		int decoderSpecificInfoLen = vosLen ? descrLength(vosLen) : 0;
-		
-		Handle imgDescExt = NewHandle(4 + descrLength(3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1)));
-		UInt8 *pos = (UInt8 *) *imgDescExt;
-		
-		pos = write_int32(pos, 0);		// version
-		
-		// ES Descriptor
-		pos = putDescr(pos, 0x03, 3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
-		pos = write_int16(pos, EndianS16_NtoB(trackID));
-		*pos++ = 0;		// no flags
-		
-		// DecoderConfig descriptor
-		pos = putDescr(pos, 0x04, 13 + decoderSpecificInfoLen);
-		
-		// Object type indication, see http://gpac.sourceforge.net/tutorial/mediatypes.htm
-		*pos++ = 0x20;
-		
-		// streamtype (video)
-		*pos++ = 0x11;
-		
-		// 3 bytes: buffersize DB (not sure how to get easily)
-		*pos++ = 0;
-		pos = write_int16(pos, 0);
-		
-		// max bitrate, not sure how to get easily
-		pos = write_int32(pos, 0);
-		
-		// vbr
-		pos = write_int32(pos, 0);
-		
-		if (vosLen) {
-			pos = putDescr(pos, 0x05, vosLen);
-			pos = write_data(pos, codecPrivate->GetBuffer(), vosLen);
-		}
-		
-		// SL descriptor
-		pos = putDescr(pos, 0x06, 1);
-		*pos++ = 0x02;
+		Handle imgDescExt = CreateEsdsExt(tr_entry, false);
 		
 		AddImageDescriptionExtension(imgDesc, imgDescExt, 'esds');
 		
 		DisposeHandle((Handle) imgDescExt);
+	}
+	return noErr;
+}
+
+ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
+{
+	if (!tr_entry || !desc) return paramErr;
+	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
+	
+	if (dir == kToSampleDescription) {
+		Handle sndDescExt = CreateEsdsExt(tr_entry, true);
+		printf("hihi\n");
+		AddSoundDescriptionExtension(sndDesc, sndDescExt, 'esds');
+		
+		DisposeHandle((Handle) sndDescExt);
 	}
 	return noErr;
 }
@@ -576,6 +604,10 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 			case kMPEG4VisualCodecType:
 				return DescExt_mp4v(tr_entry, desc, dir);
 				
+			case kAudioFormatMPEG4AAC:
+			case kMPEG4AudioFormat:
+				return DescExt_aac(tr_entry, desc, dir);
+				
 			case kSubFormatSSA:
 				return DescExt_SSA(tr_entry, desc, dir);
 		}
@@ -613,7 +645,9 @@ static const AudioChannelLayout flacChannelLayouts[6] = {
 	{ kAudioChannelLayoutTag_ITU_3_0 },
 	{ kAudioChannelLayoutTag_Quadraphonic },
 	{ kAudioChannelLayoutTag_ITU_3_2 },
-	{ kAudioChannelLayoutTag_ITU_3_2_1 }
+	{ kAudioChannelLayoutTag_ITU_3_2_1 },
+	{ kAudioChannelLayoutTag_MPEG_6_1_A },
+	{ kAudioChannelLayoutTag_MPEG_7_1_C }
 };
 
 AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
