@@ -46,6 +46,7 @@ static const CodecPair kAllInputFormats[] =
 	{ kAudioFormatMPEGLayer1, CODEC_ID_MP2 },
 	{ 0x6d730050, CODEC_ID_MP2 },
 	{ kAudioFormatTTA, CODEC_ID_TTA },
+	{ kAudioFormatDTS, CODEC_ID_DTS },
 	{ 0, CODEC_ID_NONE }
 };
 
@@ -357,7 +358,7 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 											 UInt32& ioNumberPackets, 
 											 AudioStreamPacketDescription* outPacketDescription)
 {
-	UInt32 ans = kAudioCodecProduceOutputPacketSuccess;
+	UInt32 ans;
 	
 	if (!avCodec)
 		OpenAVCodec();
@@ -366,7 +367,6 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 		CODEC_THROW(kAudioCodecStateError);
 	
 	UInt32 written = 0;
-	ioNumberPackets = 0;
 	Byte *outData = (Byte *) outOutputData;
 	
 	// we have leftovers from the last packet, use that first
@@ -394,6 +394,7 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 			inputBuffer.Zap(packetSize);
 			outBufUsed = 0;
 			ioOutputDataByteSize = written;
+			ioNumberPackets = ioOutputDataByteSize / (2 * mOutputFormat.NumberChannels());
 			return kAudioCodecProduceOutputPacketFailure;
 		}
 		inputBuffer.Zap(len);
@@ -403,7 +404,6 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 		memcpy(outData + written, outputBuffer, amountToCopy);
 		outBufUsed -= amountToCopy;
 		written += amountToCopy;
-		ioNumberPackets++;
 		
 		// and save what's left over
 		if (outBufUsed > 0)
@@ -412,11 +412,14 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 	
 	if (written < ioOutputDataByteSize)
 		ans = kAudioCodecProduceOutputPacketNeedsMoreInputData;
-	else if (outBufUsed > written || inputBuffer.GetNumPackets() > 0)
-		// we have more left than what we wrote, or an entire other packet
+	else if (inputBuffer.GetNumPackets() > 0)
+		// we have an entire packet left to decode
 		ans = kAudioCodecProduceOutputPacketSuccessHasMore;
+	else
+		ans = kAudioCodecProduceOutputPacketSuccess;
 	
 	ioOutputDataByteSize = written;
+	ioNumberPackets = ioOutputDataByteSize / (2 * mOutputFormat.NumberChannels());
 	
 	return ans;
 }

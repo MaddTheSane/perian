@@ -627,35 +627,43 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 // vorbis, flac and aac should be correct unless extradata specifices something else for aac
 static const AudioChannelLayout vorbisChannelLayouts[6] = {
 	{ kAudioChannelLayoutTag_UseChannelBitmap, kAudioChannelBit_Left | kAudioChannelBit_Right | kAudioChannelBit_CenterSurround },
-	{ kAudioChannelLayoutTag_Quadraphonic },
-	{ kAudioChannelLayoutTag_MPEG_5_0_C },
-	{ kAudioChannelLayoutTag_MPEG_5_1_C }
+	{ kAudioChannelLayoutTag_Quadraphonic },		// L R Ls Rs
+	{ kAudioChannelLayoutTag_MPEG_5_0_C },			// L C R Ls Rs
+	{ kAudioChannelLayoutTag_MPEG_5_1_C },			// L C R Ls Rs LFE
 };
 
 // these should be the default for the number of channels; esds can specify other mappings
 static const AudioChannelLayout aacChannelLayouts[6] = {
-	{ kAudioChannelLayoutTag_MPEG_3_0_B },		// C L R according to wiki.multimedia.cx
-	{ kAudioChannelLayoutTag_AAC_4_0 },
-	{ kAudioChannelLayoutTag_AAC_5_0 },
-	{ kAudioChannelLayoutTag_AAC_5_1 },
-	{ kAudioChannelLayoutTag_AAC_6_1 },
-	{ kAudioChannelLayoutTag_AAC_7_1 }
+	{ kAudioChannelLayoutTag_MPEG_3_0_B },			// C L R according to wiki.multimedia.cx
+	{ kAudioChannelLayoutTag_AAC_4_0 },				// C L R Cs
+	{ kAudioChannelLayoutTag_AAC_5_0 },				// C L R Ls Rs
+	{ kAudioChannelLayoutTag_AAC_5_1 },				// C L R Ls Rs Lfe
+	{ kAudioChannelLayoutTag_AAC_6_1 },				// C L R Ls Rs Cs Lfe
+	{ kAudioChannelLayoutTag_AAC_7_1 },				// C Lc Rc L R Ls Rs Lfe
 };
 
 static const AudioChannelLayout ac3ChannelLayouts[6] = {
-	{ kAudioChannelLayoutTag_ITU_3_0 },
-	{ kAudioChannelLayoutTag_ITU_3_1 },
-	{ kAudioChannelLayoutTag_ITU_3_2 },
-	{ kAudioChannelLayoutTag_ITU_3_2_1 }
+	{ kAudioChannelLayoutTag_ITU_3_0 },				// L R C
+	{ kAudioChannelLayoutTag_ITU_3_1 },				// L R C Cs
+	{ kAudioChannelLayoutTag_ITU_3_2 },				// L R C Ls Rs
+	{ kAudioChannelLayoutTag_ITU_3_2_1 },			// L R C LFE Ls Rs
 };
 
 static const AudioChannelLayout flacChannelLayouts[6] = {
-	{ kAudioChannelLayoutTag_ITU_3_0 },
-	{ kAudioChannelLayoutTag_Quadraphonic },
-	{ kAudioChannelLayoutTag_ITU_3_2 },
-	{ kAudioChannelLayoutTag_ITU_3_2_1 },
-	{ kAudioChannelLayoutTag_MPEG_6_1_A },
-	{ kAudioChannelLayoutTag_MPEG_7_1_C }
+	{ kAudioChannelLayoutTag_ITU_3_0 },				// L R C
+	{ kAudioChannelLayoutTag_Quadraphonic },		// L R Ls Rs
+	{ kAudioChannelLayoutTag_ITU_3_2 },				// L R C Ls Rs
+	{ kAudioChannelLayoutTag_ITU_3_2_1 },			// L R C LFE Ls Rs
+	{ kAudioChannelLayoutTag_MPEG_6_1_A },			// L R C LFE Ls Rs Cs
+	{ kAudioChannelLayoutTag_MPEG_7_1_C },			// L R C LFE Ls Rs Rls Rrs
+};
+
+// 5.1 is tested, the others are just guesses
+static const AudioChannelLayout dtsChannelLayouts[6] = {
+	{ kAudioChannelLayoutTag_MPEG_3_0_B },			// C L R
+	{ kAudioChannelLayoutTag_MPEG_4_0_B },			// C L R Cs
+	{ kAudioChannelLayoutTag_MPEG_5_0_D },			// C L R Ls Rs
+	{ kAudioChannelLayoutTag_MPEG_5_1_D },			// C L R Ls Rs Lfe
 };
 
 AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
@@ -680,6 +688,10 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 				
 			case kAudioFormatAC3:
 				acl = ac3ChannelLayouts[channelIndex];
+				break;
+				
+			case kAudioFormatDTS:
+				acl = dtsChannelLayouts[channelIndex];
 				break;
 		}
 	}

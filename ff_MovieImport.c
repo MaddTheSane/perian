@@ -90,6 +90,7 @@ void initLib()
 		register_avcodec(&vorbis_decoder);
 		register_avcodec(&mp2_decoder);
 		register_avcodec(&tta_decoder);
+		register_avcodec(&dca_decoder);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}

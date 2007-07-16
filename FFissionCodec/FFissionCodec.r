@@ -90,3 +90,10 @@
 #define kComponentName					"True Audio"
 #define kComponentInfo					"An AudioCodec that decodes True Audio into linear PCM"
 #include "XCAResources.r"
+
+#define kPrimaryResourceID				144
+#define kComponentType					'adec'
+#define kComponentSubtype				kAudioFormatDTS
+#define kComponentName					"DTS Coherent Acoustics"
+#define kComponentInfo					"An AudioCodec that decodes DCA Audio into linear PCM"
+#include "XCAResources.r"
