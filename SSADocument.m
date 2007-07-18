@@ -99,7 +99,7 @@ static ATSURGBAlphaColor SSAParseColor(NSString *c)
 	collisiontype = NormalCollisions;
 	if ((field = [hDict objectForKey:@"Collisions"]) && [field isEqualToString:@"ReverseCollisions"]) collisiontype = ReverseCollisions;
 	if (field = [hDict objectForKey:@"ScriptType"]) {
-		if ([field isEqualToString:@"v4.00+"]) version = S_ASS;
+		if ([[field lowercaseString] isEqualToString:@"v4.00+"]) version = S_ASS;
 		else version = S_SSA;
 	}
 }
