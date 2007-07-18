@@ -589,7 +589,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				break;
 				
 			case 'FPS1':
-				glob->avCodec = avcodec_find_decoder(CODEC_ID_FRAPS);
+				codecID = CODEC_ID_FRAPS;
 				break;
 				
             default:
