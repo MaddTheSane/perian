@@ -363,6 +363,9 @@ uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID)
 	uint8_t *waveAtom = NULL;
 	int size = 0;
 	
+	if (formatID == kAudioFormatMPEG4AAC)
+		return NULL;
+	
 	/* Do we need an endia atom, too? */
 	
 	/* initialize the user Atom
