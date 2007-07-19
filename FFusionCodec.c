@@ -836,12 +836,17 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 		if(glob->decode.lastFrame < p->frameNumber && p->frameNumber < glob->begin.lastFrame + 1)
 		{
 			/* We already began this sucker, but haven't decoded it yet, find the data */
-			myDrp->frameData = FFusionDataFind(&glob->data, p->frameNumber);
-			if(myDrp->frameData != NULL)
+			FrameData *frameData = NULL;
+			frameData = FFusionDataFind(&glob->data, p->frameNumber);
+			if(frameData != NULL)
 			{
+				myDrp->frameData = frameData;
 				drp->frameType = qtTypeForFrameInfo(drp->frameType, myDrp->frameData->type, myDrp->frameData->skippabble);
 				myDrp->frameNumber = p->frameNumber;
 				myDrp->GOPStartFrameNumber = glob->begin.lastIFrame;
+				frameData->hold = 0;
+				if(frameData->prereqFrame)
+					frameData->prereqFrame->hold = 1;
 				return noErr;
 			}
 		}
@@ -978,8 +983,9 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 
 static OSErr PrereqDecompress(FrameData *prereq, AVCodecContext *context, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture)
 {
-	if(prereq->prereqFrame)
-		PrereqDecompress(prereq->prereqFrame, context, dataProc, width, height, picture);
+	FrameData *preprereq = FrameDataCheckPrereq(prereq);
+	if(preprereq)
+		PrereqDecompress(preprereq, context, dataProc, width, height, picture);
 	
 	unsigned char *dataPtr = (unsigned char *)prereq->buffer;
 	int dataSize = prereq->dataSize;
@@ -1041,14 +1047,10 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	{
 		/* Pull from our buffer */
 		frameData = myDrp->frameData;
-		FFusionDataCheckPrereq(&(glob->data), frameData);
+		FrameData *prereq = FrameDataCheckPrereq(frameData);
 		
-		if(frameData->prereqFrame)
+		if(prereq)
 		{
-			FrameData *prereq = frameData->prereqFrame;
-			dataPtr = (unsigned char *)prereq->buffer;
-			dataSize = prereq->dataSize;
-			
 			err = PrereqDecompress(prereq, glob->avContext, NULL, myDrp->width, myDrp->height, &tempFrame);
 			if(tempFrame.data[0] != NULL)
 			{

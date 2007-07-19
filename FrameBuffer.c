@@ -107,16 +107,12 @@ void FFusionDataSetUnparsed(FFusionData *data, uint8_t *buffer, int bufferSize)
 	}
 }
 
-void FFusionDataCheckPrereq(FFusionData *data, FrameData * toData)
+FrameData *FrameDataCheckPrereq(FrameData * toData)
 {
 	FrameData *prereq = toData->prereqFrame;
-	while(prereq != NULL)
-	{
-		if(prereq->decoded)
-			toData->prereqFrame = NULL;
-		toData = prereq;
-		prereq = toData->prereqFrame;
-	}
+	if(prereq && prereq->decoded)
+		return NULL;
+	return prereq;
 }
 
 void FFusionDataMarkRead(FFusionData *data, FrameData *toData)
@@ -124,7 +120,7 @@ void FFusionDataMarkRead(FFusionData *data, FrameData *toData)
 	if(toData == NULL)
 		return;
 	
-	if(toData->prereqFrame != NULL)
+	if(toData->prereqFrame != NULL && toData->prereqFrame->hold)
 		return;
 	
 	int i;

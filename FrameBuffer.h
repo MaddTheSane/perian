@@ -15,7 +15,8 @@ struct FrameData_s
 	long			frameNumber;
 	short			type;
 	short			skippabble;
-	int				decoded;
+	short			decoded;
+	short			hold;
 	FrameData		*prereqFrame;  /* This is the frame's data which must be decoded to fully display this frame */
 	FrameData		*nextFrame; /* This is the next frame to decode if this one is already decoded.  This is for predictive decoding */
 	/* private */
@@ -40,7 +41,7 @@ void FFusionDataFree(FFusionData *data);
 int FFusionCreateDataBuffer(FFusionData *data, uint8_t *buffer, int bufferSize);
 FrameData *FFusionDataAppend(FFusionData *data, int dataSize, int type);
 void FFusionDataSetUnparsed(FFusionData *data, uint8_t *buffer, int bufferSize);
-void FFusionDataCheckPrereq(FFusionData *data, FrameData *toData);
 void FFusionDataMarkRead(FFusionData *data, FrameData *toData);
 FrameData *FFusionDataFind(FFusionData *data, int frameNumber);
 
+FrameData *FrameDataCheckPrereq(FrameData *toData);
