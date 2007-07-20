@@ -175,6 +175,9 @@ ComponentResult FFAvi_MovieImportGetMIMETypeList(ff_global_ptr storage, QTAtomCo
 		case 'FLV ':
 			err = GetComponentResource((Component)storage->ci, 'mime', kFLVthngResID, (Handle*)mimeInfo);
 			break;
+		case 'TTA ':
+			err = GetComponentResource((Component)storage->ci, 'mime', kTTAthngResID, (Handle*)mimeInfo);
+			break;
 		default:
 			err = GetComponentResource((Component)storage->ci, 'mime', kAVIthngResID, (Handle*)mimeInfo);
 			break;
