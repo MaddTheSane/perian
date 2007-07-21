@@ -235,7 +235,7 @@ pascal ComponentResult VobSubCodecPreflight(VobSubCodecGlobals glob, CodecDecomp
 	// get the color palette info from the image description
     SetupColorPalette(glob, p->imageDescription);
 
-	if (isImageDescriptionExtensionPresent(p->imageDescription, kSampleDescriptionExtensionMKVCompression))
+	if (isImageDescriptionExtensionPresent(p->imageDescription, kMKVCompressionExtension))
 		glob->compressed = 1;
 	
 	return noErr;
@@ -471,7 +471,7 @@ static ComponentResult SetupColorPalette(VobSubCodecGlobals glob, ImageDescripti
     
     Handle descExtension = NewHandle(0);
     
-    err = GetImageDescriptionExtension(imageDescription, &descExtension, kSampleDescriptionExtensionVobSubIdx, 1);
+    err = GetImageDescriptionExtension(imageDescription, &descExtension, kVobSubIdxExtension, 1);
     if (err) goto bail;
 	
     char *string = (char *) *descExtension;

@@ -365,9 +365,9 @@ ComponentResult MatroskaImport::ReadContentEncodings(KaxContentEncodings &encodi
 	**ext = algo;
 	
 	if (mkvTrack.type == track_audio)
-		AddSoundDescriptionExtension((SoundDescriptionHandle)mkvTrack.desc, ext, kSampleDescriptionExtensionMKVCompression);
+		AddSoundDescriptionExtension((SoundDescriptionHandle)mkvTrack.desc, ext, kMKVCompressionExtension);
 	else
-		AddImageDescriptionExtension((ImageDescriptionHandle)mkvTrack.desc, ext, kSampleDescriptionExtensionMKVCompression);
+		AddImageDescriptionExtension((ImageDescriptionHandle)mkvTrack.desc, ext, kMKVCompressionExtension);
 	
 	return noErr;
 }

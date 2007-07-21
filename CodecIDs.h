@@ -22,78 +22,81 @@
 #ifndef __CODECIDS_H__
 #define __CODECIDS_H__
 
-// Description Extensions
 enum {
-    kCookieTypeOggSerialNo = 'oCtN'
-};
+	// these are atoms/extension types defined by XiphQT for their codecs
+	kCookieTypeOggSerialNo = 'oCtN',
+	
+	kCookieTypeVorbisHeader = 'vCtH',
+	kCookieTypeVorbisComments = 'vCt#',
+	kCookieTypeVorbisCodebooks = 'vCtC',
+	kCookieTypeVorbisFirstPageNo = 'vCtN',
 
-// format specific cookie types
-enum {
-    kCookieTypeVorbisHeader = 'vCtH',
-    kCookieTypeVorbisComments = 'vCt#',
-    kCookieTypeVorbisCodebooks = 'vCtC',
-	kCookieTypeVorbisFirstPageNo = 'vCtN'
-};
+	kCookieTypeSpeexHeader = 'sCtH',
+	kCookieTypeSpeexComments = 'sCt#',
+	kCookieTypeSpeexExtraHeader	= 'sCtX',
 
-enum {
-    kCookieTypeSpeexHeader = 'sCtH',
-    kCookieTypeSpeexComments = 'sCt#',
-    kCookieTypeSpeexExtraHeader	= 'sCtX'
-};
+	kCookieTypeTheoraHeader = 'tCtH',
+	kCookieTypeTheoraComments = 'tCt#',
+	kCookieTypeTheoraCodebooks = 'tCtC',
 
-enum {
-    kCookieTypeTheoraHeader = 'tCtH',
-    kCookieTypeTheoraComments = 'tCt#',
-    kCookieTypeTheoraCodebooks = 'tCtC'
-};
+	kCookieTypeFLACStreaminfo = 'fCtS',
+	kCookieTypeFLACMetadata = 'fCtM',
 
-enum {
-    kCookieTypeFLACStreaminfo = 'fCtS',
-    kCookieTypeFLACMetadata = 'fCtM'
-};
-
-enum {
-	kSampleDescriptionExtensionTheora = 'XdxT',
-	kSampleDescriptionExtensionVobSubIdx = '.IDX',
-	kSampleDescriptionExtensionReal = 'RVex',
-	kSampleDescriptionExtensionMKVCompression = 'Comp',
+	kTheoraDescExtension = 'XdxT',
+	
+	
+	// contains same as MKV's codec private for real video
+	kRealVideoExtension = 'RVex',
+	
+	// contains the .idx file for vobsub (codec private in mkv)
+	kVobSubIdxExtension = '.IDX',
+	
+	// contains a single byte equal to the ContentCompAlgo element in matroska
+	kMKVCompressionExtension = 'MCmp',
 };
 
 
 enum {
-	// unofficial QuickTime FourCCs
-    kAudioFormatXiphVorbis                  = 'XiVs',
-    kAudioFormatXiphSpeex                   = 'XiSp',
-    kAudioFormatXiphFLAC                    = 'XiFL',
-    kVideoFormatXiphTheora                  = 'XiTh',
+	// XiphQT's codec IDs
+	kAudioFormatXiphVorbis                  = 'XiVs',
+	kAudioFormatXiphSpeex                   = 'XiSp',
+	kAudioFormatXiphFLAC                    = 'XiFL',
+	kVideoFormatXiphTheora                  = 'XiTh',
+	
+	// the samples for these codec IDs are OGG pages containing the actual codec data
+	kAudioFormatXiphOggFramedVorbis         = 'XoVs',
+	kAudioFormatXiphOggFramedSpeex          = 'XoSp',
+	kAudioFormatXiphOggFramedFLAC           = 'XoFL',
+	
+	// these are 'ms' + the wav/avi twocc
 	kAudioFormatAC3MS                       = 0x6D732000,
 	kAudioFormatWMA1MS                      = 0x6D730160,
 	kAudioFormatWMA2MS                      = 0x6D730161,
-	kAudioFormatFlashADPCM                  = 'FlAd',
+	
 	kVideoFormatMSMPEG4v3                   = 'MP43',
 	kMPEG1VisualCodecType                   = 'MPEG',
 	kMPEG2VisualCodecType                   = 'MPG2',
+	kVideoFormatReal5                       = 'RV10',
+	kVideoFormatRealG2                      = 'RV20',
+	kVideoFormatReal8                       = 'RV30',
+	kVideoFormatReal9                       = 'RV40',
+	
+	kAudioFormatFlashADPCM                  = 'FlAd',
+	kAudioFormatDTS                         = 'DTS ', 
+	kAudioFormatTTA                         = 'TTA1',
+	kAudioFormatWavepack                    = 'WVPK',
+	kAudioFormatReal1                       = '14_4',
+	kAudioFormatReal2                       = '28_8',
+	kAudioFormatRealCook                    = 'COOK',
+	kAudioFormatRealSipro                   = 'SIPR',
+	kAudioFormatRealLossless                = 'RALF',
+	kAudioFormatRealAtrac3                  = 'ATRC',
 	
 	kSubFormatUTF8                          = 'SRT ',
 	kSubFormatSSA                           = 'SSA ',
 	kSubFormatASS                           = 'ASS ',
 	kSubFormatUSF                           = 'USF ',
 	kSubFormatVobSub                        = 'SPU ',
-	
-	// the following 4CCs don't have decoder support yet
-	kAudioFormatDTS                         = 'DTS ', 
-	kAudioFormatTTA                         = 'TTA1',
-	kAudioFormatWavepack                    = 'WVPK',
-	kVideoFormatReal5                       = 'RV10',
-	kVideoFormatRealG2                      = 'RV20',
-	kVideoFormatReal8                       = 'RV30',
-	kVideoFormatReal9                       = 'RV40',
-	kAudioFormatReal1                       = '14_4',
-	kAudioFormatReal2                       = '28_8',
-	kAudioFormatRealCook                    = 'COOK',
-	kAudioFormatRealSipro                   = 'SIPR',
-	kAudioFormatRealLossless                = 'RALF',
-	kAudioFormatRealAtrac3                  = 'ATRC'
 };
 
 #endif

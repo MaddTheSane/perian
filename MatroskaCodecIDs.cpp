@@ -270,7 +270,7 @@ ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHan
 		unsigned long endAtom[2] = { EndianU32_NtoB(sizeof(endAtom)), EndianU32_NtoB(kAudioTerminatorAtomType) };
 		PtrAndHand(endAtom, imgDescExt, sizeof(endAtom));
 		
-		AddImageDescriptionExtension(imgDesc, imgDescExt, kSampleDescriptionExtensionTheora);
+		AddImageDescriptionExtension(imgDesc, imgDescExt, kTheoraDescExtension);
 		
 		DisposePtr((Ptr)packetSizes);
 		DisposeHandle(imgDescExt);
@@ -292,7 +292,7 @@ ComponentResult DescExt_VobSub(KaxTrackEntry *tr_entry, SampleDescriptionHandle 
 		Handle imgDescExt = NewHandle(codecPrivate->GetSize());
 		memcpy(*imgDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
 		
-		AddImageDescriptionExtension(imgDesc, imgDescExt, kSampleDescriptionExtensionVobSubIdx);
+		AddImageDescriptionExtension(imgDesc, imgDescExt, kVobSubIdxExtension);
 		
 		DisposeHandle((Handle) imgDescExt);
 	}
@@ -332,7 +332,7 @@ ComponentResult DescExt_Real(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 		Handle imgDescExt = NewHandle(codecPrivate->GetSize());
 		memcpy(*imgDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
 		
-		AddImageDescriptionExtension(imgDesc, imgDescExt, kSampleDescriptionExtensionReal);
+		AddImageDescriptionExtension(imgDesc, imgDescExt, kRealVideoExtension);
 		
 		DisposeHandle((Handle) imgDescExt);
 	}
