@@ -342,16 +342,18 @@ ComponentResult VobSubCodecDrawBand(VobSubCodecGlobals glob, ImageSubCodecDecomp
 		AVSubtitleRect *rect = &glob->subtitle.rects[i];
 		uint8_t *line = (uint8_t *)drp->baseAddr + drp->rowBytes * rect->y + rect->x*4;
 		uint8_t *sub = rect->bitmap;
+		unsigned int w = FFMIN(rect->w, myDrp->width  - rect->x);
+		unsigned int h = FFMIN(rect->h, myDrp->height - rect->y);
 		
 		if (usePalette) {
 			for (j = 0; j < 4; j++)
 				rect->rgba_palette[j] = controlData.pixelColor[j];
 		}
 		
-		for (y = 0; y < rect->h; y++) {
+		for (y = 0; y < h; y++) {
 			uint32_t *pixel = (uint32_t *) line;
 			
-			for (x = 0; x < rect->w; x++)
+			for (x = 0; x < w; x++)
 				pixel[x] = rect->rgba_palette[sub[x]];
 			
 			line += drp->rowBytes;
