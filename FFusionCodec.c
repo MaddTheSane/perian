@@ -632,6 +632,12 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				glob->avContext->extradata_size = GetHandleSize(imgDescExt);
 				
 				DisposeHandle(imgDescExt);
+			} else {
+				count = isImageDescriptionExtensionPresent(p->imageDescription, 'strf');
+				
+				// avc1 in AVI, need to reorder frames
+				if (count >= 1)
+					glob->packedType = PACKED_ALL_IN_FIRST_FRAME;
 			}
 		} else if (glob->componentType == 'mp4v') {
 			count = isImageDescriptionExtensionPresent(p->imageDescription, 'esds');
