@@ -1,13 +1,7 @@
 
-#if __MACH__
-    #include <Carbon/Carbon.h>
-    #include <QuickTime/QuickTime.h>
-#else
-    #include <ConditionalMacros.h>
-    #include <Endian.h>
-    #include <ImageCodec.h>
-#endif
 
+#include <Carbon/Carbon.h>
+#include <QuickTime/QuickTime.h>
 #include "VobSubCodec.h"
 #include "Codecprintf.h"
 #include <zlib.h>
@@ -24,8 +18,8 @@ typedef struct	{
 	ComponentInstance		target;
 	OSType**				wantedDestinationPixelTypeH;
 	ImageCodecMPDrawBandUPP drawBandUPP;
-    
-    UInt32                  palette[16];
+	
+	UInt32                  palette[16];
 	
 	uint8_t					*codecData;
 	unsigned int			bufferSize;
@@ -40,14 +34,14 @@ typedef struct {
 } VobSubDecompressRecord;
 
 typedef struct {
-    // color format is 32-bit ARGB
-    UInt32  pixelColor[4];
-    UInt16  startCol;
-    UInt16  endCol;
-    UInt16  startLine;
-    UInt16  endLine;
-    UInt16  firstScanPos;
-    UInt16  secondScanPos;
+	// color format is 32-bit ARGB
+	UInt32  pixelColor[4];
+	UInt16  startCol;
+	UInt16  endCol;
+	UInt16  startLine;
+	UInt16  endLine;
+	UInt16  firstScanPos;
+	UInt16  secondScanPos;
 } PacketControlData;
 
 // Setup required for ComponentDispatchHelper.c
@@ -63,20 +57,15 @@ typedef struct {
 
 #define	GET_DELEGATE_COMPONENT()	(storage->delegateComponent)
 
-#if __MACH__
-	#include <CoreServices/Components.k.h>
-	#include <QuickTime/ImageCodec.k.h>
-	#include <QuickTime/ComponentDispatchHelper.c>
-#else
-	#include <Components.k.h>
-	#include <ImageCodec.k.h>
-	#include <ComponentDispatchHelper.c>
-#endif
+#include <CoreServices/Components.k.h>
+#include <QuickTime/ImageCodec.k.h>
+#include <QuickTime/ComponentDispatchHelper.c>
+
 
 static ComponentResult SetupColorPalette(VobSubCodecGlobals glob, ImageDescriptionHandle imageDescription);
 static ComponentResult DecompressPacket(VobSubCodecGlobals glob, ImageSubCodecDecompressRecord *drp);
 static ComponentResult ProcessControlSequence(UInt8 *controlSeq, UInt32 palette[16], 
-                                       PacketControlData *controlDataOut);
+									   PacketControlData *controlDataOut);
 // sets data pointer to the next byte after the line decoded
 static void DecodeLine(UInt8 **data, UInt32 *framePtr, PacketControlData controlData);
 static void PrintPix(UInt16 word, UInt32 **frame, UInt32 palette[4]);
@@ -84,16 +73,7 @@ static void PrintPix(UInt16 word, UInt32 **frame, UInt32 palette[4]);
 // dest must be at least as large as src
 static void ExtractData(UInt8 *dest, UInt8 *src, int srcSize);
 
-/* -- This Image Decompressor User the Base Image Decompressor Component --
-	The base image decompressor is an Apple-supplied component
-	that makes it easier for developers to create new decompressors.
-	The base image decompressor does most of the housekeeping and
-	interface functions required for a QuickTime decompressor component,
-	including scheduling for asynchronous decompression.
-*/
-
-// Component Open Request - Required
-pascal ComponentResult VobSubCodecOpen(VobSubCodecGlobals glob, ComponentInstance self)
+ComponentResult VobSubCodecOpen(VobSubCodecGlobals glob, ComponentInstance self)
 {
 	ComponentResult err;
 	// Allocate memory for our globals, set them up and inform the component manager that we've done so
@@ -104,7 +84,7 @@ pascal ComponentResult VobSubCodecOpen(VobSubCodecGlobals glob, ComponentInstanc
 
 	glob->self = self;
 	glob->target = self;
-	glob->wantedDestinationPixelTypeH = (OSType **)NewHandle(sizeof(OSType) * (kNumPixelFormatsSupportedVobSub + 1));
+	glob->wantedDestinationPixelTypeH = NewHandle(sizeof(OSType) * 2);
 	if (err = MemError()) goto bail;
 	glob->drawBandUPP = NULL;
 	
@@ -119,8 +99,7 @@ bail:
 	return err;
 }
 
-// Component Close Request - Required
-pascal ComponentResult VobSubCodecClose(VobSubCodecGlobals glob, ComponentInstance self)
+ComponentResult VobSubCodecClose(VobSubCodecGlobals glob, ComponentInstance self)
 {
 	// Make sure to close the base component and dealocate our storage
 	if (glob) {
@@ -143,30 +122,18 @@ pascal ComponentResult VobSubCodecClose(VobSubCodecGlobals glob, ComponentInstan
 	return noErr;
 }
 
-// Component Version Request - Required
-pascal ComponentResult VobSubCodecVersion(VobSubCodecGlobals glob)
-{
-#pragma unused(glob)
-	
-    return kVobSubCodecVersion;
+ComponentResult VobSubCodecVersion(VobSubCodecGlobals glob)
+{	
+	return kVobSubCodecVersion;
 }
 
-// Component Target Request
-// 		Allows another component to "target" you i.e., you call another component whenever
-// you would call yourself (as a result of your component being used by another component)
-pascal ComponentResult VobSubCodecTarget(VobSubCodecGlobals glob, ComponentInstance target)
+ComponentResult VobSubCodecTarget(VobSubCodecGlobals glob, ComponentInstance target)
 {
 	glob->target = target;
 	return noErr;
 }
 
-// Component GetMPWorkFunction Request
-//		Allows your image decompressor component to perform asynchronous decompression
-// in a single MP task by taking advantage of the Base Decompressor. If you implement
-// this selector, your DrawBand function must be MP-safe. MP safety means not
-// calling routines that may move or purge memory and not calling any routines which
-// might cause 68K code to be executed.
-pascal ComponentResult VobSubCodecGetMPWorkFunction(VobSubCodecGlobals glob, ComponentMPWorkFunctionUPP *workFunction, void **refCon)
+ComponentResult VobSubCodecGetMPWorkFunction(VobSubCodecGlobals glob, ComponentMPWorkFunctionUPP *workFunction, void **refCon)
 {
 	if (glob->drawBandUPP == NULL)
 		glob->drawBandUPP = NewImageCodecMPDrawBandUPP((ImageCodecMPDrawBandProcPtr)VobSubCodecDrawBand);
@@ -174,21 +141,8 @@ pascal ComponentResult VobSubCodecGetMPWorkFunction(VobSubCodecGlobals glob, Com
 	return ImageCodecGetBaseMPWorkFunction(glob->delegateComponent, workFunction, refCon, glob->drawBandUPP, glob);
 }
 
-#pragma mark-
-
-// ImageCodecInitialize
-//		The first function call that your image decompressor component receives from the base image
-// decompressor is always a call to ImageCodecInitialize . In response to this call, your image decompressor
-// component returns an ImageSubCodecDecompressCapabilities structure that specifies its capabilities.
-pascal ComponentResult VobSubCodecInitialize(VobSubCodecGlobals glob, ImageSubCodecDecompressCapabilities *cap)
+ComponentResult VobSubCodecInitialize(VobSubCodecGlobals glob, ImageSubCodecDecompressCapabilities *cap)
 {
-#pragma unused(glob)
-	
-	// Secifies the size of the ImageSubCodecDecompressRecord structure
-	// and say we can support asyncronous decompression
-	// With the help of the base image decompressor, any image decompressor
-	// that uses only interrupt-safe calls for decompression operations can
-	// support asynchronous decompression.
 	cap->decompressRecordSize = sizeof(VobSubDecompressRecord);
 	cap->canAsync = true;
 	cap->baseCodecShouldCallDecodeBandForAllFrames = true;
@@ -199,32 +153,23 @@ pascal ComponentResult VobSubCodecInitialize(VobSubCodecGlobals glob, ImageSubCo
 	return noErr;
 }
 
-// ImageCodecPreflight
-// 		The base image decompressor gets additional information about the capabilities of your image
-// decompressor component by calling ImageCodecPreflight. The base image decompressor uses this
-// information when responding to a call to the ImageCodecPredecompress function,
-// which the ICM makes before decompressing an image. You are required only to provide values for
-// the wantedDestinationPixelSize and wantedDestinationPixelTypes fields and can also modify other
-// fields if necessary.
-pascal ComponentResult VobSubCodecPreflight(VobSubCodecGlobals glob, CodecDecompressParams *p)
+ComponentResult VobSubCodecPreflight(VobSubCodecGlobals glob, CodecDecompressParams *p)
 {
 	CodecCapabilities *capabilities = p->capabilities;
 	OSTypePtr         formats = *glob->wantedDestinationPixelTypeH;
 
 	// Specify the minimum image band height supported by the component
-	// bandInc specifies a common factor of supported image band heights - 
-	// if your component supports only image bands that are an even
-    // multiple of some number of pixels high report this common factor in bandInc
+	// bandInc specifies a common factor of supported image band heights
 	capabilities->bandMin = (**p->imageDescription).height;
 	capabilities->bandInc = capabilities->bandMin;
 
 	// Indicate the wanted destination using the wantedDestinationPixelTypeH previously set up
 	capabilities->wantedPixelSize  = 0; 	
-    
-    // we want 4:4:4:4 ARGB cause that's what the pixel colors are stored as
+	
+	// we want 4:4:4:4 ARGB
 	*formats++ = k32ARGBPixelFormat;
 	*formats++ = 0;
-    
+	
 	p->wantedDestinationPixelTypes = glob->wantedDestinationPixelTypeH;
 
 	// Specify the number of pixels the image must be extended in width and height if
@@ -233,7 +178,7 @@ pascal ComponentResult VobSubCodecPreflight(VobSubCodecGlobals glob, CodecDecomp
 	capabilities->extendHeight = 0;
 	
 	// get the color palette info from the image description
-    SetupColorPalette(glob, p->imageDescription);
+	SetupColorPalette(glob, p->imageDescription);
 
 	if (isImageDescriptionExtensionPresent(p->imageDescription, kMKVCompressionExtension))
 		glob->compressed = 1;
@@ -241,27 +186,12 @@ pascal ComponentResult VobSubCodecPreflight(VobSubCodecGlobals glob, CodecDecomp
 	return noErr;
 }
 
-// ImageCodecBeginBand
-// 		The ImageCodecBeginBand function allows your image decompressor component to save information about
-// a band before decompressing it. This function is never called at interrupt time. The base image decompressor
-// preserves any changes your component makes to any of the fields in the ImageSubCodecDecompressRecord
-// or CodecDecompressParams structures. If your component supports asynchronous scheduled decompression, it
-// may receive more than one ImageCodecBeginBand call before receiving an ImageCodecDrawBand call.
-pascal ComponentResult VobSubCodecBeginBand(VobSubCodecGlobals glob, CodecDecompressParams *p, ImageSubCodecDecompressRecord *drp, long flags)
+ComponentResult VobSubCodecBeginBand(VobSubCodecGlobals glob, CodecDecompressParams *p, ImageSubCodecDecompressRecord *drp, long flags)
 {
-	//long offsetH, offsetV;
 	VobSubDecompressRecord *myDrp = (VobSubDecompressRecord *)drp->userDecompressRecord;
 
-#if 0
-	offsetH = (long)(p->dstRect.left - p->dstPixMap.bounds.left) * (long)(p->dstPixMap.pixelSize >> 3);
-	offsetV = (long)(p->dstRect.top - p->dstPixMap.bounds.top) * (long)drp->rowBytes;
-
-	drp->baseAddr = p->dstPixMap.baseAddr + offsetH + offsetV;
-#endif
-	
-	// Let base codec know that all our frames are key frames (a.k.a., sync samples)
-	// This allows the base codec to perform frame dropping on our behalf if needed 
-    drp->frameType = kCodecFrameTypeKey;
+	// Let base codec know that all our frames are keyframes
+	drp->frameType = kCodecFrameTypeKey;
 
 	myDrp->width = (**p->imageDescription).width;
 	myDrp->height = (**p->imageDescription).height;
@@ -305,10 +235,10 @@ bail:
 	inflateEnd(&strm);
 }
 
-pascal ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCodecDecompressRecord *drp, unsigned long flags)
+ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCodecDecompressRecord *drp, unsigned long flags)
 {
 	VobSubDecompressRecord *myDrp = (VobSubDecompressRecord *)drp->userDecompressRecord;
-    UInt8 *data = (UInt8 *) drp->codecData;
+	UInt8 *data = (UInt8 *) drp->codecData;
 	
 	if (glob->codecData == NULL) {
 		glob->codecData = malloc(myDrp->bufferSize + 2);
@@ -319,14 +249,14 @@ pascal ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCo
 	
 	if (glob->compressed)
 		DecompressZlib(glob, data, myDrp->bufferSize);
-    // the header of a spu PS packet starts 0x000001bd
-    // if it's raw spu data, the 1st 2 bytes are the length of the data
+	// the header of a spu PS packet starts 0x000001bd
+	// if it's raw spu data, the 1st 2 bytes are the length of the data
 	else if (data[0] + data[1] == 0)
 		// remove the MPEG framing
 		ExtractData(glob->codecData, data, myDrp->bufferSize);
 	else
 		memcpy(glob->codecData, drp->codecData, myDrp->bufferSize);
-    
+	
 	myDrp->decoded = true;
 	
 	return noErr;
@@ -349,7 +279,7 @@ pascal ComponentResult VobSubCodecDrawBand(VobSubCodecGlobals glob, ImageSubCode
 	VobSubDecompressRecord *myDrp = (VobSubDecompressRecord *)drp->userDecompressRecord;
 	//unsigned char *dataPtr = (unsigned char *)drp->codecData;
 	//ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
-    
+	
 	if(!myDrp->decoded)
 		err = VobSubCodecDecodeBand(glob, drp, 0);
 	
@@ -360,8 +290,8 @@ pascal ComponentResult VobSubCodecDrawBand(VobSubCodecGlobals glob, ImageSubCode
 		// invalid packet, not enough data
 		return err;
 	
-    DecompressPacket(glob, drp);
-    
+	DecompressPacket(glob, drp);
+	
 	return err;
 }
 
@@ -420,7 +350,7 @@ pascal ComponentResult VobSubCodecGetCompressedImageSize(VobSubCodecGlobals glob
 		return paramErr;
 
 //    *size = EndianU32_BtoN(framePtr->frameSize);
-        
+		
 	return unimpErr;
 }
 
@@ -489,287 +419,287 @@ static ComponentResult SetupColorPalette(VobSubCodecGlobals glob, ImageDescripti
 bail:
 	DisposeHandle(descExtension);
 	
-    return err;
+	return err;
 }
 
 static void ExtractData(UInt8 *dest, UInt8 *framedSrc, int srcSize) {
-    int copiedBytes = 0;
-    UInt8 *currentPacket = framedSrc;
-    
-    while (currentPacket - framedSrc < srcSize) {
-        // 3-byte start code: 0x00 00 01
-        if (currentPacket[0] + currentPacket[1] != 0 || currentPacket[2] != 1) {
-            Codecprintf(NULL, "VobSub Codec: !! Unknown header: %02x %02x %02x\n", currentPacket[0], currentPacket[1], currentPacket[2]);
-            return;
-        }
-        
-        int packet_length;
-        
-        switch (currentPacket[3]) {
-            case 0xba:
-                // discard PS packets; nothing in them we're interested in
-                // here, packet_length is the additional stuffing
-                packet_length = currentPacket[13] & 0x7;
-                
-                currentPacket += 14 + packet_length;
-                break;
-                
-            case 0xbe:
-            case 0xbf:
-                // skip padding and navigation data 
-                // (navigation shouldn't be present anyway)
-                packet_length = currentPacket[4];
-                packet_length <<= 8;
-                packet_length += currentPacket[5];
-                
-                currentPacket += 6 + packet_length;
-                break;
-                
-            case 0xbd:
-                // a private stream packet, contains subtitle data
-                packet_length = currentPacket[4];
-                packet_length <<= 8;
-                packet_length += currentPacket[5];
-                
-                int header_data_length = currentPacket[8];
-                
-                memcpy(&dest[copiedBytes], 
-                       // header's 9 bytes + extension, we don't want 1st byte of packet
-                       &currentPacket[9 + header_data_length + 1], 
-                       // we don't want the 1-byte stream ID, or the header
-                       packet_length - 1 - (header_data_length + 3));
-                
-                copiedBytes += packet_length - 1 - (header_data_length + 3);
-                currentPacket += packet_length + 6;
-                break;
-                
-            default:
-                // unknown packet, probably video, return for now
-                Codecprintf(NULL, "VobSubCodec - Unknown packet type %x, aborting\n", (int)currentPacket[3]);
-                return;
-        } // switch (currentPacket[3])
-    } // while (currentPacket - framedSrc < srcSize)
+	int copiedBytes = 0;
+	UInt8 *currentPacket = framedSrc;
+	
+	while (currentPacket - framedSrc < srcSize) {
+		// 3-byte start code: 0x00 00 01
+		if (currentPacket[0] + currentPacket[1] != 0 || currentPacket[2] != 1) {
+			Codecprintf(NULL, "VobSub Codec: !! Unknown header: %02x %02x %02x\n", currentPacket[0], currentPacket[1], currentPacket[2]);
+			return;
+		}
+		
+		int packet_length;
+		
+		switch (currentPacket[3]) {
+			case 0xba:
+				// discard PS packets; nothing in them we're interested in
+				// here, packet_length is the additional stuffing
+				packet_length = currentPacket[13] & 0x7;
+				
+				currentPacket += 14 + packet_length;
+				break;
+				
+			case 0xbe:
+			case 0xbf:
+				// skip padding and navigation data 
+				// (navigation shouldn't be present anyway)
+				packet_length = currentPacket[4];
+				packet_length <<= 8;
+				packet_length += currentPacket[5];
+				
+				currentPacket += 6 + packet_length;
+				break;
+				
+			case 0xbd:
+				// a private stream packet, contains subtitle data
+				packet_length = currentPacket[4];
+				packet_length <<= 8;
+				packet_length += currentPacket[5];
+				
+				int header_data_length = currentPacket[8];
+				
+				memcpy(&dest[copiedBytes], 
+					   // header's 9 bytes + extension, we don't want 1st byte of packet
+					   &currentPacket[9 + header_data_length + 1], 
+					   // we don't want the 1-byte stream ID, or the header
+					   packet_length - 1 - (header_data_length + 3));
+				
+				copiedBytes += packet_length - 1 - (header_data_length + 3);
+				currentPacket += packet_length + 6;
+				break;
+				
+			default:
+				// unknown packet, probably video, return for now
+				Codecprintf(NULL, "VobSubCodec - Unknown packet type %x, aborting\n", (int)currentPacket[3]);
+				return;
+		} // switch (currentPacket[3])
+	} // while (currentPacket - framedSrc < srcSize)
 }
 
 static ComponentResult DecompressPacket(VobSubCodecGlobals glob, ImageSubCodecDecompressRecord *drp) {
-    OSErr err = err;
-    PacketControlData controlData;
-    
-    UInt8 *data = (UInt8 *) glob->codecData;
-    // 2nd 2 bytes gives size of data. 1st 2 bytes of control header repeats this, so we skip it
-    int controlSequenceOffset = (data[2] << 8) + data[3] + 4;
-    
-    err = ProcessControlSequence(&data[controlSequenceOffset], glob->palette, &controlData);
-    
-    if (err == noErr) {
-        int i;
-        UInt8 *firstScanData;
-        UInt8 *secondScanData;
-        firstScanData = &(data[controlData.firstScanPos]);
-        secondScanData = &(data[controlData.secondScanPos]);
-        
-        Ptr currentLine = drp->baseAddr + controlData.startLine * drp->rowBytes;
-        
-        for (i = 0; i < controlData.endLine - controlData.startLine + 1; i += 2) {
-            DecodeLine(&firstScanData, (UInt32 *)currentLine, controlData);
-            currentLine += drp->rowBytes;
+	OSErr err = err;
+	PacketControlData controlData;
+	
+	UInt8 *data = (UInt8 *) glob->codecData;
+	// 2nd 2 bytes gives size of data. 1st 2 bytes of control header repeats this, so we skip it
+	int controlSequenceOffset = (data[2] << 8) + data[3] + 4;
+	
+	err = ProcessControlSequence(&data[controlSequenceOffset], glob->palette, &controlData);
+	
+	if (err == noErr) {
+		int i;
+		UInt8 *firstScanData;
+		UInt8 *secondScanData;
+		firstScanData = &(data[controlData.firstScanPos]);
+		secondScanData = &(data[controlData.secondScanPos]);
+		
+		Ptr currentLine = drp->baseAddr + controlData.startLine * drp->rowBytes;
+		
+		for (i = 0; i < controlData.endLine - controlData.startLine + 1; i += 2) {
+			DecodeLine(&firstScanData, (UInt32 *)currentLine, controlData);
+			currentLine += drp->rowBytes;
 			
-            DecodeLine(&secondScanData, (UInt32 *)currentLine, controlData);
-            currentLine += drp->rowBytes;
-        }
-    }
-    return err;
+			DecodeLine(&secondScanData, (UInt32 *)currentLine, controlData);
+			currentLine += drp->rowBytes;
+		}
+	}
+	return err;
 }
 
 static ComponentResult ProcessControlSequence(UInt8 *controlSeq, UInt32 palette[16],
-                                       PacketControlData *controlDataOut) {
-    // to set whether the key sequences 0x03 - 0x06 have been seen
-    UInt16 controlSeqSeen = 0;
-    int i = 0;
-    Boolean loop = TRUE;
-    
-    memset(controlDataOut, 0, sizeof(PacketControlData));
-    
-    while (loop) {
-        switch (controlSeq[i]) {
-            case 0x00:
-                // subpicture identifier, we don't care
-                i++;
-                break;
-                
-            case 0x01:
-                // start displaying, we don't care
-                i++;
-                break;
-                
-            case 0x03:
-                // palette info
-                controlDataOut->pixelColor[3] += palette[(controlSeq[i + 1] & 0xf0) >> 4];
-                controlDataOut->pixelColor[2] += palette[(controlSeq[i + 1] & 0x0f)];
-                controlDataOut->pixelColor[1] += palette[(controlSeq[i + 2] & 0xf0) >> 4];
-                controlDataOut->pixelColor[0] += palette[(controlSeq[i + 2] & 0x0f)];
+									   PacketControlData *controlDataOut) {
+	// to set whether the key sequences 0x03 - 0x06 have been seen
+	UInt16 controlSeqSeen = 0;
+	int i = 0;
+	Boolean loop = TRUE;
+	
+	memset(controlDataOut, 0, sizeof(PacketControlData));
+	
+	while (loop) {
+		switch (controlSeq[i]) {
+			case 0x00:
+				// subpicture identifier, we don't care
+				i++;
+				break;
 				
-                i += 3;
-                controlSeqSeen |= 0x000f;
-                break;
-                
-            case 0x04:
-                // alpha info
-                controlDataOut->pixelColor[3] += (controlSeq[i + 1] & 0xf0) << 20;
-                controlDataOut->pixelColor[2] += (controlSeq[i + 1] & 0x0f) << 24;
-                controlDataOut->pixelColor[1] += (controlSeq[i + 2] & 0xf0) << 20;
-                controlDataOut->pixelColor[0] += (controlSeq[i + 2] & 0x0f) << 24;
-                
-                // double the nibble
-                controlDataOut->pixelColor[3] += (controlSeq[i + 1] & 0xf0) << 24;
-                controlDataOut->pixelColor[2] += (controlSeq[i + 1] & 0x0f) << 28;
-                controlDataOut->pixelColor[1] += (controlSeq[i + 2] & 0xf0) << 24;
-                controlDataOut->pixelColor[0] += (controlSeq[i + 2] & 0x0f) << 28;
-                
-                i += 3;
-                controlSeqSeen |= 0x00f0;
-                break;
-                
-            case 0x05:
-                // coordinates of image
-                controlDataOut->startCol   = controlSeq[i + 1] << 4;
-                controlDataOut->startCol  += (controlSeq[i + 2] & 0xf0) >> 4;
-                controlDataOut->endCol    = (controlSeq[i + 2] & 0x0f) << 8;
-                controlDataOut->endCol    += controlSeq[i + 3];
-                controlDataOut->startLine  = controlSeq[i + 4] << 4;
-                controlDataOut->startLine += (controlSeq[i + 5] & 0xf0) >> 4;
-                controlDataOut->endLine   = (controlSeq[i + 5] & 0x0f) << 8;
-                controlDataOut->endLine   += controlSeq[i + 6];
-                
-                i += 7;
-                controlSeqSeen |= 0x0f00;
-                break;
-                
-            case 0x06:
-                // offset of the first graphic line, and second
-                controlDataOut->firstScanPos   = controlSeq[i + 1] << 8;
-                controlDataOut->firstScanPos  += controlSeq[i + 2];
-                controlDataOut->secondScanPos  = controlSeq[i + 3] << 8;
-                controlDataOut->secondScanPos += controlSeq[i + 4];
-                
-                i += 5;
-                controlSeqSeen |= 0xf000;
-                break;
-                
-            case 0xff:
-                // end of control sequence
-                loop = FALSE;
-                break;
-                
-            default:
-                Codecprintf(NULL, " !! Unknown control sequence 0x%02x  aborting (offset %x)\n", controlSeq[i], i);
-                loop = FALSE;
-                break;
-        }
-    }
+			case 0x01:
+				// start displaying, we don't care
+				i++;
+				break;
+				
+			case 0x03:
+				// palette info
+				controlDataOut->pixelColor[3] += palette[(controlSeq[i + 1] & 0xf0) >> 4];
+				controlDataOut->pixelColor[2] += palette[(controlSeq[i + 1] & 0x0f)];
+				controlDataOut->pixelColor[1] += palette[(controlSeq[i + 2] & 0xf0) >> 4];
+				controlDataOut->pixelColor[0] += palette[(controlSeq[i + 2] & 0x0f)];
+				
+				i += 3;
+				controlSeqSeen |= 0x000f;
+				break;
+				
+			case 0x04:
+				// alpha info
+				controlDataOut->pixelColor[3] += (controlSeq[i + 1] & 0xf0) << 20;
+				controlDataOut->pixelColor[2] += (controlSeq[i + 1] & 0x0f) << 24;
+				controlDataOut->pixelColor[1] += (controlSeq[i + 2] & 0xf0) << 20;
+				controlDataOut->pixelColor[0] += (controlSeq[i + 2] & 0x0f) << 24;
+				
+				// double the nibble
+				controlDataOut->pixelColor[3] += (controlSeq[i + 1] & 0xf0) << 24;
+				controlDataOut->pixelColor[2] += (controlSeq[i + 1] & 0x0f) << 28;
+				controlDataOut->pixelColor[1] += (controlSeq[i + 2] & 0xf0) << 24;
+				controlDataOut->pixelColor[0] += (controlSeq[i + 2] & 0x0f) << 28;
+				
+				i += 3;
+				controlSeqSeen |= 0x00f0;
+				break;
+				
+			case 0x05:
+				// coordinates of image
+				controlDataOut->startCol   = controlSeq[i + 1] << 4;
+				controlDataOut->startCol  += (controlSeq[i + 2] & 0xf0) >> 4;
+				controlDataOut->endCol    = (controlSeq[i + 2] & 0x0f) << 8;
+				controlDataOut->endCol    += controlSeq[i + 3];
+				controlDataOut->startLine  = controlSeq[i + 4] << 4;
+				controlDataOut->startLine += (controlSeq[i + 5] & 0xf0) >> 4;
+				controlDataOut->endLine   = (controlSeq[i + 5] & 0x0f) << 8;
+				controlDataOut->endLine   += controlSeq[i + 6];
+				
+				i += 7;
+				controlSeqSeen |= 0x0f00;
+				break;
+				
+			case 0x06:
+				// offset of the first graphic line, and second
+				controlDataOut->firstScanPos   = controlSeq[i + 1] << 8;
+				controlDataOut->firstScanPos  += controlSeq[i + 2];
+				controlDataOut->secondScanPos  = controlSeq[i + 3] << 8;
+				controlDataOut->secondScanPos += controlSeq[i + 4];
+				
+				i += 5;
+				controlSeqSeen |= 0xf000;
+				break;
+				
+			case 0xff:
+				// end of control sequence
+				loop = FALSE;
+				break;
+				
+			default:
+				Codecprintf(NULL, " !! Unknown control sequence 0x%02x  aborting (offset %x)\n", controlSeq[i], i);
+				loop = FALSE;
+				break;
+		}
+	}
 	
 	// force fully transparent to transparent black; needed? for graphicsModePreBlackAlpha
 	for (i = 0; i < 4; i++) {
 		if ((controlDataOut->pixelColor[i] & 0xff000000) == 0)
 			controlDataOut->pixelColor[i] = 0;
 	}
-    
-    if (controlSeqSeen != 0xffff)
-        return -1;
-    else
-        return noErr;
+	
+	if (controlSeqSeen != 0xffff)
+		return -1;
+	else
+		return noErr;
 }
 
 static void DecodeLine(UInt8 **data, UInt32 *framePtr, PacketControlData controlData) {
-    Boolean endline = FALSE;
-    UInt8 nibbleMask = 0xf0;
-    
-    framePtr += controlData.startCol;
-    
-    while (!endline) {
-        switch (**data & nibbleMask) {
-            case 0x0:
-                if (nibbleMask == 0xf0) {
-                    // byte aligned
-                    if ((**data & 0x0f) > 0x03) {
-                        // 3-nibble word
-                        PrintPix((**data << 4) + (((*data)[1] & 0xf0) >> 4), &framePtr, 
-                                 controlData.pixelColor);
-                        *data += 1;
-                        nibbleMask = 0x0f;
-                        
-                    } else {
-                        // 4-nibble word
-                        PrintPix(GetU16(*data), &framePtr, controlData.pixelColor);
-                        
-                        // 0x00-- is a newline
-                        if ((**data & 0x0f) == 0) {
-                            endline = TRUE;
-                        }
-                        *data += 2;
-                    }
-                    
-                } else {
-                    // not byte aligned
-                    if (((*data)[1] & 0xf0) > 0x30) {
-                        // 3-nibble word with 1st nibble equal to zero
-                        PrintPix((*data)[1], &framePtr, controlData.pixelColor);
-                        *data += 2;
-                        nibbleMask = 0xf0;
-                        
-                    } else {
-                        // 4-nibble word, not byte-aligned, 1st nibble = 0
-                        PrintPix(((*data)[1] << 4) + (((*data)[2] & 0xf0) >> 4), &framePtr, 
-                                 controlData.pixelColor);
-                        
-                        // 0x00-- is a newline
-                        if (((*data)[1] & 0xf0) == 0) {
-                            endline = TRUE;
-                            // byte align for the start of the next line
-                            *data += 1;
-                        }
-                        *data += 2;
-                    }
-                }
-                break;
-                
-            case 0x1:
-            case 0x2:
-            case 0x3:
-                // 2-nibble word, not byte aligned
-                PrintPix(((**data & 0x0f) << 4) + (((*data)[1] & 0xf0) >> 4), &framePtr, controlData.pixelColor);
-                *data += 1;
-                break;
-                
-            case 0x10:
-            case 0x20:
-            case 0x30:
-                // 2-nibble word, byte aligned
-                PrintPix(**data, &framePtr, controlData.pixelColor);
-                *data += 1;
-                break;
-                
-            default:
-                // 1-nibble word
-                if (nibbleMask == 0xf0) {
-                    PrintPix((**data & 0xf0) >> 4, &framePtr, controlData.pixelColor);
-                    nibbleMask = 0x0f;
-                } else {
-                    PrintPix(**data & 0x0f, &framePtr, controlData.pixelColor);
-                    nibbleMask = 0xf0;
-                    *data += 1;
-                }
-                break;
-        }
-    }
+	Boolean endline = FALSE;
+	UInt8 nibbleMask = 0xf0;
+	
+	framePtr += controlData.startCol;
+	
+	while (!endline) {
+		switch (**data & nibbleMask) {
+			case 0x0:
+				if (nibbleMask == 0xf0) {
+					// byte aligned
+					if ((**data & 0x0f) > 0x03) {
+						// 3-nibble word
+						PrintPix((**data << 4) + (((*data)[1] & 0xf0) >> 4), &framePtr, 
+								 controlData.pixelColor);
+						*data += 1;
+						nibbleMask = 0x0f;
+						
+					} else {
+						// 4-nibble word
+						PrintPix(GetU16(*data), &framePtr, controlData.pixelColor);
+						
+						// 0x00-- is a newline
+						if ((**data & 0x0f) == 0) {
+							endline = TRUE;
+						}
+						*data += 2;
+					}
+					
+				} else {
+					// not byte aligned
+					if (((*data)[1] & 0xf0) > 0x30) {
+						// 3-nibble word with 1st nibble equal to zero
+						PrintPix((*data)[1], &framePtr, controlData.pixelColor);
+						*data += 2;
+						nibbleMask = 0xf0;
+						
+					} else {
+						// 4-nibble word, not byte-aligned, 1st nibble = 0
+						PrintPix(((*data)[1] << 4) + (((*data)[2] & 0xf0) >> 4), &framePtr, 
+								 controlData.pixelColor);
+						
+						// 0x00-- is a newline
+						if (((*data)[1] & 0xf0) == 0) {
+							endline = TRUE;
+							// byte align for the start of the next line
+							*data += 1;
+						}
+						*data += 2;
+					}
+				}
+				break;
+				
+			case 0x1:
+			case 0x2:
+			case 0x3:
+				// 2-nibble word, not byte aligned
+				PrintPix(((**data & 0x0f) << 4) + (((*data)[1] & 0xf0) >> 4), &framePtr, controlData.pixelColor);
+				*data += 1;
+				break;
+				
+			case 0x10:
+			case 0x20:
+			case 0x30:
+				// 2-nibble word, byte aligned
+				PrintPix(**data, &framePtr, controlData.pixelColor);
+				*data += 1;
+				break;
+				
+			default:
+				// 1-nibble word
+				if (nibbleMask == 0xf0) {
+					PrintPix((**data & 0xf0) >> 4, &framePtr, controlData.pixelColor);
+					nibbleMask = 0x0f;
+				} else {
+					PrintPix(**data & 0x0f, &framePtr, controlData.pixelColor);
+					nibbleMask = 0xf0;
+					*data += 1;
+				}
+				break;
+		}
+	}
 }
 
 static void PrintPix(UInt16 word, UInt32 **frame, UInt32 palette[4]) {
-    int i;
-    for (i = 0; i < word >> 2; i++) {
-        (**frame) = palette[word & 0x3];
-        *frame += 1;
-    }
-    if (word == 0) {
-    }
+	int i;
+	for (i = 0; i < word >> 2; i++) {
+		(**frame) = palette[word & 0x3];
+		*frame += 1;
+	}
+	if (word == 0) {
+	}
 }
