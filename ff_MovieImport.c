@@ -92,6 +92,8 @@ void initLib()
 		register_avcodec(&tta_decoder);
 		register_avcodec(&dca_decoder);
 		
+		register_avcodec(&dvdsub_decoder);
+		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
 }
