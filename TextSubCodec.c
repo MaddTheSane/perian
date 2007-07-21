@@ -388,13 +388,22 @@ pascal ComponentResult TextSubCodecGetCompressedImageSize(TextSubGlobals glob, I
 pascal ComponentResult TextSubCodecGetCodecInfo(TextSubGlobals glob, CodecInfo *info)
 {
 	OSErr err = noErr;
+	ComponentDescription desc;
+	short resid;
+	
+	GetComponentInfo((Component)glob->self, &desc, 0, 0, 0);
+	
+	if (desc.componentSubType == kSubFormatSSA)
+		resid = kSSASubCodecResource;
+	else
+		resid = kTextSubCodecResource;
 
 	if (info == NULL) {
 		err = paramErr;
 	} else {
 		CodecInfo **tempCodecInfo;
 
-		err = GetComponentResource((Component)glob->self, codecInfoResourceType, kTextSubCodecResource, (Handle *)&tempCodecInfo);
+		err = GetComponentResource((Component)glob->self, codecInfoResourceType, resid, (Handle *)&tempCodecInfo);
 		if (err == noErr) {
 			*info = **tempCodecInfo;
 			DisposeHandle((Handle)tempCodecInfo);
