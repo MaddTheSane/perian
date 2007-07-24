@@ -942,6 +942,7 @@ void MatroskaTrack::ParseFirstBlock(KaxInternalBlock &block)
 		if (err == noErr) {
 			DisposeHandle((Handle) desc);
 			desc = (SampleDescriptionHandle) sndDesc;
+			err = QTSampleTableAddSampleDescription(sampleTable, desc, 0, &qtSampleDesc);
 		}
 	}
 }
