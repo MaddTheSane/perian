@@ -1,0 +1,151 @@
+#!/bin/bash
+#
+# Usage: createpatchstick /dev/diskX
+
+echo
+echo "--- Generation of Apple TV Patchstick ---"
+echo
+echo " Created by Marook."
+echo " Thanks to: MacTijn, Alan_Quatermain & ericIII"
+echo
+echo "-----------------------------------------"
+echo
+
+if [ "$USER" != "root" ]
+then
+	echo "You need to run this script as ROOT. Exiting..."
+	echo
+	exit 1
+fi
+
+if [ $# -ne 1 ]
+then
+		echo
+		echo "Listing available disks:"
+		diskutil list
+		echo $'\a'
+        echo "Please specify the disk to re-partition as argument one:"
+        echo " ./createpatchstick /dev/diskX"
+        echo
+        echo " WARNING: The disk will be ERASED !!!"
+        echo
+        exit 1
+fi
+
+
+partition_disk() {
+	echo
+	echo " Partitioning $THEDISK:"
+	diskutil partitionDisk $THEDISK 2 GPTFormat HFS+ Patchstick-root 80M HFS+ Patchstick 40M
+	echo " Patitions done."
+	#sleep 2
+}
+
+basic_folders() {
+	echo "Creating System folders..."
+	mkdir /Volumes/Patchstick-root/sbin /Volumes/Patchstick-root/etc /Volumes/Patchstick-root/dev /Volumes/Patchstick-root/OSBoot /Volumes/Patchstick-root/stuff
+	mkdir -p /Volumes/Patchstick-root/usr/lib/system
+	mkdir -p /Volumes/Patchstick-root/System/Library/Extensions
+	mkdir -p /Volumes/Patchstick-root/System/Library/Frameworks
+	ln -s /Volumes/Patchstick-root/sbin /Volumes/Patchstick-root/bin
+	mkdir -p /Volumes/Patchstick-root/System/Library/Frameworks/OSXFrames/
+	mkdir -p /Volumes/Patchstick-root/usr/libexec
+
+}
+
+copy_system() {
+	echo "Copying System Extentions..."
+	cp -R /System/Library/Extensions/{AppleACPIPlatform,AppleAPIC,AppleEFIRuntime,AppleFileSystemDriver,AppleFlashNVRAM,AppleHDA,AppleHPET,AppleIRController,AppleRTC,AppleSMBIOS,AppleSMC,AudioIPCDriver,BootCache,GeForce,IO80211Family,IOACPIFamily,IOATAFamily,IOAudioFamily,IOGraphicsFamily,IOHIDFamily,IONDRVSupport,IONetworkingFamily,IOPCIFamily,IOPlatformPluginFamily,IOSCSIArchitectureModelFamily,IOStorageFamily,IOUSBFamily,IOUSBMassStorageClass,NVDANV40Hal,NVDAResman,OSvKernDSPLib,System,AppleIntelCPUPowerManagement}.kext /Volumes/Patchstick-root/System/Library/Extensions/
+	cp -R /System/Library/Frameworks/{CoreFoundation,IOKit}.framework /Volumes/Patchstick-root/System/Library/Frameworks
+	cp /bin/bash /bin/chmod /usr/sbin/chown /usr/sbin/bless /bin/cp /sbin/mount /sbin/mount_hfs /sbin/mount_devfs /bin/sleep /sbin/umount /bin/sync /bin/sh /bin/ls /sbin/reboot /Volumes/Patchstick-root/sbin/
+	cp /usr/lib/dyld /usr/lib/libSystem.B.dylib /usr/lib/libncurses.5.4.dylib /usr/lib/libgcc_s.1.dylib /Volumes/Patchstick-root/usr/lib/
+	cp /usr/lib/system/libmathCommon.A.dylib /Volumes/Patchstick-root/usr/lib/system/
+}
+
+copy_kernal() {
+	echo "Copying System files..."
+	cp root/mach_kernel /Volumes/Patchstick-root/
+	cp root/com.apple.Boot.plist /Volumes/Patchstick-root/
+	cp root/Info.plist /Volumes/Patchstick-root/System/Library/Extensions/AppleFileSystemDriver.kext/Contents/
+	cp root/launchd /Volumes/Patchstick-root/sbin/launchd
+	chmod 755 /Volumes/Patchstick-root/sbin/launchd
+	if [ -e /Volumes/OSBoot/System/Library/CoreServices/boot.efi ]
+	then
+		cp /Volumes/OSBoot/System/Library/CoreServices/boot.efi /Volumes/Patchstick-root/
+	else
+  		echo "boot.efi not found! Do you have a mounted OSBoot volume?"
+  		echo "Can't complete process. Exiting.."
+  		exit 1
+	fi
+	
+	echo "Adding Kerberos..."
+	cp -p -R /System/Library/Frameworks/Kerberos.framework /Volumes/Patchstick-root/System/Library/Frameworks/OSXFrames/
+	#cp /usr/libexec/sshd-keygen-wrapper /Volumes/Patchstick-root/usr/libexec
+	#sed -i"" -e 's;^exec;DYLD_FRAMEWORK_PATH="/System/Library/Frameworks/OSXFrames" exec;' /Volumes/Patchstick-root/usr/libexec/sshd-keygen-wrapper
+}
+
+copy_stuff() {
+	echo "Copying Patchstick files..."
+	
+	cp -R Patchstick/* /Volumes/Patchstick/
+	#cp /usr/sbin/sshd /Volumes/Patchstick/ssh/
+
+	if [ -e /Library/QuickTime/Perian.component ]
+	then
+		echo " - Found Perian component. Adding it to the Patchstick..."
+		#cp installer.d/perian /Volumes/Patchstick/installer.d/
+		ditto /Library/QuickTime/Perian.component /Volumes/Patchstick/perian/Perian.component
+	else
+  		echo " - Perian not found in /Library/QuickTime. Skipping..."
+  		#rm /Volumes/Patchstick/installer.d/perian
+	fi
+	
+	
+	
+
+}
+
+disk_atv_mode() {
+	echo "Changing Patchstick-root to Apple TV Mode..."
+	#diskutil unmountDisk $THEDISK
+	START=$(gpt -r show $THEDISK | grep '1  GPT part' | awk '{print $1}')
+	SIZE=$(gpt -r show $THEDISK | grep '1  GPT part' | awk '{print $2}')
+	diskutil unmountDisk $THEDISK
+	gpt remove -i 1 $THEDISK
+	diskutil unmountDisk $THEDISK
+	gpt add -b $START -s $SIZE -i 1 -t "5265636F-7665-11AA-AA11-00306543ECAC" $THEDISK
+	diskutil unmountDisk $THEDISK
+	echo
+	echo "Your disk $THEDISK is now unmounted and ready to patch your AppleTV."
+}
+
+
+if [ $# = 1 ]
+then
+
+	read -p "Are you sure you want to partition disk $1? [yes|no]" sure
+	echo
+	
+	THEDISK=$1
+	export THEDISK
+	
+	case "$sure" in
+     yes)
+     	echo
+     	partition_disk
+     	basic_folders
+     	copy_system
+     	copy_kernal
+     	copy_stuff
+     	disk_atv_mode
+		echo "Enjoy... :-)"
+		echo
+		;;
+
+     *)
+		echo "You selected No. Aborting..."
+		exit
+		;;
+	esac   
+
+fi
