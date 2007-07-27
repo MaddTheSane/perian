@@ -95,6 +95,9 @@ copy_stuff() {
 		echo " - Found Perian component. Adding it to the Patchstick..."
 		#cp installer.d/perian /Volumes/Patchstick/installer.d/
 		ditto /Library/QuickTime/Perian.component /Volumes/Patchstick/perian/Perian.component
+	elif
+		echo " - Found Perian in your home directory. Grabbing it..."
+		ditto $HOME/Library/QuickTime/Perian.component /Volumes/Patchstick/perian/Perian.component
 	else
   		echo " - Perian not found in /Library/QuickTime. Skipping..."
   		#rm /Volumes/Patchstick/installer.d/perian
