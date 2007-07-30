@@ -513,7 +513,11 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	
 	OSStatus err = QTSoundDescriptionCreate(&asbd, pacl, acl_size, magicCookie, cookieSize, 
 											kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndDesc);
-	if (err) return err;
+	if (err) {
+		Codecprintf(NULL, "Borked audio track entry, hoping we can parse the track for asbd\n");
+		DisposeHandle((Handle)sndDesc);
+		return noErr;
+	}
 	
 	mkvTrack.desc = (SampleDescriptionHandle) sndDesc;
 	err = MkvFinishSampleDescription(&kaxTrack, mkvTrack.desc, kToSampleDescription);
@@ -1058,6 +1062,8 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	TimeValue sampleTime;
 	TimeValue64 displayOffset = frame.pts - frame.dts;
 	
+	if (desc == NULL) return;
+	
 	if (type == track_subtitle && !is_vobsub) {
 		if (frame.size > 0) subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.pts, frame.pts + frame.duration);
 		const char *packet=NULL; size_t size=0; unsigned start=0, end=0;
@@ -1126,6 +1132,10 @@ void MatroskaTrack::AddSamplesToTrack()
 	if (type == track_subtitle)
 		return;			// handled in AddFrame()
 
+	if (durationToAdd == 0 && numSamples == 0)
+		// nothing to add
+		return;
+	
 	if (sampleTable) {
 		if (firstSample == -1)
 			return;		// nothing to add
