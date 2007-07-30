@@ -158,8 +158,7 @@ NSArray *ParseSubPacket(NSString *str, SSADocument *ssa, Boolean plaintext)
 			re->styles = NULL;
 			re->disposelayout = NO;
 		} else {
-			NSArray *ar = [[linea objectAtIndex:(ssa->collisiontype == NormalCollisions) ? i : (pcount - i - 1)]
-						   componentsSeparatedByString:@"," count:9];
+			NSArray *ar = STSplitStringWithCount([linea objectAtIndex:(ssa->collisiontype == NormalCollisions) ? i : (pcount - i - 1)],@",",9);
 
 			if ([ar count] < 9) continue;
 			

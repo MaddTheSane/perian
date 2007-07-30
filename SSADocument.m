@@ -317,7 +317,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 
 -(ComponentResult) loadFile:(NSString*)path
 {
-	NSString *ssa = [[NSString stringFromUnknownEncodingFile:path] stringByStandardizingNewlines];
+	NSString *ssa = STStringByStandardizingNewlines(STLoadFileWithUnknownEncoding(path));
 	if (!ssa) return -1;
 	NSArray *lines = [ssa componentsSeparatedByString:@"\n"];
 	NSEnumerator *lenum = [lines objectEnumerator];
@@ -325,7 +325,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	NSArray *format;
 	NSMutableDictionary *headers, *styleDict;
 	NSMutableArray *doclines;
-	NSCharacterSet *ws = [NSCharacterSet whitespaceAndBomCharacterSet];
+	NSCharacterSet *ws = STWhitespaceAndBomCharacterSet();
 	unichar cai;
 	int formatc;
 	int readorder = 0;
@@ -344,7 +344,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 			
 			if (cai == ';') continue;
 			else if (cai == '[') {nextLine = ns; break;}
-			NSArray *pair = [ns pairSeparatedByString:@": "];
+			NSArray *pair = STPairSeparatedByString(ns, @": ");
 			if ([pair count] == 2) [headers setObject:[(NSString*)[pair objectAtIndex:1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:[pair objectAtIndex:0]];
 		}
 		
@@ -356,7 +356,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	while ([nextLine length] == 0) nextLine = [lenum nextObject];
 	nextLine = [lenum nextObject];
 	
-	NSArray *pair = [nextLine pairSeparatedByString:@": "];
+	NSArray *pair = STPairSeparatedByString(nextLine,@": ");
 	NSString *formatstring = (version == S_ASS) ?
 		@"Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
 																 :
@@ -369,9 +369,9 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	while (1) {
 		if (!ns) break; 
 		else if ([ns length] != 0) {
-			pair = [ns pairSeparatedByString:@": "];
+			pair = STPairSeparatedByString(ns,@": ");
 			if ([pair count] == 2 && [(NSString*)[pair objectAtIndex:0] isEqualToString:@"Dialogue"]) {
-				NSArray *curl = [(NSString*)[pair objectAtIndex:1] componentsSeparatedByString:@"," count:formatc];
+				NSArray *curl = STSplitStringWithCount([pair objectAtIndex:1],@",",formatc);
 				int count = MIN([format count], [curl count]), i;
 				NSMutableDictionary *lDict = [NSMutableDictionary dictionary];
 				for (i=0; i < count; i++) [lDict setObject:[curl objectAtIndex:i] forKey:[format objectAtIndex:i]];
@@ -392,13 +392,13 @@ static NSString *oneMKVPacket(NSDictionary *s)
 -(void) loadHeader:(NSString*)ssa width:(float)width height:(float)height
 {
 	if (!ssa) return;
-	NSArray *lines = [[ssa stringByStandardizingNewlines] componentsSeparatedByString:@"\n"];
+	NSArray *lines = [STStringByStandardizingNewlines(ssa) componentsSeparatedByString:@"\n"];
 	NSEnumerator *lenum = [lines objectEnumerator];
 	NSString *nextLine, *styleType, *ns;
 	NSArray *format;
 	NSMutableDictionary *headers, *styleDict;
 	NSMutableArray *doclines;
-	NSCharacterSet *ws = [NSCharacterSet whitespaceAndBomCharacterSet];
+	NSCharacterSet *ws = STWhitespaceAndBomCharacterSet();
 	unichar cai;
 	int formatc;
 	
@@ -420,7 +420,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 			
 			if (cai == ';') continue;
 			else if (cai == '[') {nextLine = ns; break;}
-			NSArray *pair = [ns pairSeparatedByString:@": "];
+			NSArray *pair = STPairSeparatedByString(ns,@": ");
 			if ([pair count] == 2) [headers setObject:[(NSString*)[pair objectAtIndex:1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] forKey:[pair objectAtIndex:0]];
 		}
 		
@@ -433,7 +433,7 @@ static NSString *oneMKVPacket(NSDictionary *s)
 	while ([nextLine length] == 0) nextLine = [lenum nextObject];
 	nextLine = [lenum nextObject];
 	
-	NSArray *pair = [nextLine pairSeparatedByString:@": "];
+	NSArray *pair = STPairSeparatedByString(nextLine,@": ");
 	NSString *formatstring = ([styleType isEqualToString:@"[V4+ Styles]"]) ?
 		@"Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding"
 																		   :
@@ -451,9 +451,9 @@ static NSString *oneMKVPacket(NSDictionary *s)
 			
 			if (cai == '[') {nextLine = ns; break;}
 			if (cai != ';' && cai != '!') {
-				NSArray *pair = [ns pairSeparatedByString:@": "];
+				NSArray *pair = STPairSeparatedByString(ns,@": ");
 				if ([pair count] == 2) {
-					NSArray *style = [(NSString*)[pair objectAtIndex:1] componentsSeparatedByString:@"," count:formatc]; // bug in SSA: font names with , break it
+					NSArray *style = STSplitStringWithCount([pair objectAtIndex:1],@",",formatc); 
 					int count = MIN([format count], [style count]), i;
 					NSMutableDictionary *styled = [NSMutableDictionary dictionary];
 					for (i=0; i < count; i++) [styled setObject:[[style objectAtIndex:i] stringByTrimmingCharactersInSet:ws] forKey:[format objectAtIndex:i]];

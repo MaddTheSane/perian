@@ -102,6 +102,13 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 
 extern "C" ComponentResult LoadSubStationAlphaSubtitles(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack);
 
+static int scanInt(NSScanner *sc)
+{
+	int r;
+	[sc scanInt:&r];
+	return r;
+}
+
 static ComponentResult ReadSRTFile(NSString *srt, SampleDescriptionHandle desc, Track theTrack, TimeScale movieTimeScale)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -133,15 +140,15 @@ static ComponentResult ReadSRTFile(NSString *srt, SampleDescriptionHandle desc, 
 					[sc setScanLocation:[sc scanLocation]+1];
 				break;
 			case TIMESTAMP:
-				h = [sc scanInt]; [sc scanString:@":" intoString:nil];
-				m = [sc scanInt]; [sc scanString:@":" intoString:nil];				
-				s = [sc scanInt]; [sc scanString:@"," intoString:nil];				
-				ms = [sc scanInt]; [sc scanString:@" --> " intoString:nil];
+				h = scanInt(sc); [sc scanString:@":" intoString:nil];
+				m = scanInt(sc); [sc scanString:@":" intoString:nil];				
+				s = scanInt(sc); [sc scanString:@"," intoString:nil];				
+				ms = scanInt(sc); [sc scanString:@" --> " intoString:nil];
 				start = ms + s*1000 + m*1000*60 + h*1000*60*60;
-				h = [sc scanInt]; [sc scanString:@":" intoString:nil];
-				m = [sc scanInt]; [sc scanString:@":" intoString:nil];				
-				s = [sc scanInt]; [sc scanString:@"," intoString:nil];				
-				ms = [sc scanInt]; [sc scanString:@"\n" intoString:nil];	
+				h = scanInt(sc); [sc scanString:@":" intoString:nil];
+				m = scanInt(sc); [sc scanString:@":" intoString:nil];				
+				s = scanInt(sc); [sc scanString:@"," intoString:nil];				
+				ms = scanInt(sc); [sc scanString:@"\n" intoString:nil];	
 				end = ms + s*1000 + m*1000*60 + h*1000*60*60;
 				state = LINES;
 				break;
@@ -211,7 +218,7 @@ ComponentResult LoadSubRipSubtitles(const FSRef *theDirectory, CFStringRef filen
 	srtfile = [[NSString stringWithUTF8String:(char*)path] stringByAppendingPathComponent:(NSString*)filename];
 	free(path);
 	
-	srt = [[NSString stringFromUnknownEncodingFile:srtfile] stringByStandardizingNewlines];
+	srt = STStringByStandardizingNewlines(STLoadFileWithUnknownEncoding(srtfile));
 	if (!srt) {err = -1; goto bail;}
 
 	dataRef = NewHandleClear(sizeof(Handle) + 1);

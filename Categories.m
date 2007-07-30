@@ -10,14 +10,7 @@
 #import "UniversalDetector.h"
 #import "Codecprintf.h"
 
-@implementation NSCharacterSet(STUtilities)
-+ (NSCharacterSet *)newlineCharacterSet
-{
-	const unichar chars[] = {'\r','\n',0x0085,0x2028,0x2029};
-	return [NSCharacterSet characterSetWithCharactersInString:[NSString stringWithCharacters:chars length:5]];
-}
-
-+ (NSCharacterSet *)whitespaceAndBomCharacterSet
+NSCharacterSet *STWhitespaceAndBomCharacterSet()
 {
 	const unichar bom = 0xfeff;
 	NSMutableCharacterSet *cs = [[NSMutableCharacterSet alloc] init]; 
@@ -28,50 +21,39 @@
 	
 	return [cs autorelease];
 }
-@end
 
-@implementation NSScanner (STAdditions)
-- (int)scanInt
+NSString *STStringByStandardizingNewlines(NSString *st)
 {
-	int r;
-	[self scanInt:&r];
-	return r;
-}
-@end
-
-@implementation NSString (STAdditions)
-- (NSString *)stringByStandardizingNewlines
-{
-	NSMutableString *ms = [NSMutableString stringWithString:self];
-	[ms replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:0 range:NSMakeRange(0,[self length])];
+	NSMutableString *ms = [NSMutableString stringWithString:st];
+	[ms replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
 	[ms replaceOccurrencesOfString:@"\r" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
 	return ms;
 }
 
-- (NSArray *)pairSeparatedByString:(NSString *)str
+NSArray *STPairSeparatedByString(NSString *st, NSString *split)
 {
 	NSMutableArray *ar = [NSMutableArray arrayWithCapacity:2];
-	NSRange r = [self rangeOfString:str options:NSLiteralSearch];
-	if (r.length == 0) [ar addObject:self];
+	NSRange r = [st rangeOfString:split options:NSLiteralSearch];
+	if (r.length == 0) [ar addObject:st];
 	else {
-		[ar addObject:[self substringToIndex:r.location]];
-		[ar addObject:[self substringFromIndex:r.location + r.length]];
+		[ar addObject:[st substringToIndex:r.location]];
+		[ar addObject:[st substringFromIndex:r.location + r.length]];
 	}
 	return ar;
 }
 
-- (NSArray *)componentsSeparatedByString:(NSString *)str count:(int)count
+extern NSArray *STSplitStringWithCount(NSString *st, NSString *split, int count)
 {
 	NSMutableArray *ar = [NSMutableArray arrayWithCapacity:count];
-	NSScanner *sc = [NSScanner scannerWithString:self];
+	NSScanner *sc = [NSScanner scannerWithString:st];
 	NSString *scv=nil;
 	[sc setCharactersToBeSkipped:nil];
 	[sc setCaseSensitive:TRUE];
 	
 	while (count != 1) {
 		count--;
-		[sc scanUpToString:str intoString:&scv];
-		[sc scanString:str intoString:nil];
+		[sc scanUpToString:split intoString:&scv];
+		[sc scanString:split intoString:nil];
 		if (!scv) scv = [NSString string];
 		[ar addObject:scv];
 		if ([sc isAtEnd]) break;
@@ -116,9 +98,9 @@ static BOOL DifferentiateLatin12(const unsigned char *data, int length)
 	return frcount <= 0;
 }
 
-+ (NSString *)stringFromUnknownEncodingFile:(NSString *)file
+extern NSString *STLoadFileWithUnknownEncoding(NSString *path)
 {
-	NSData *data = [NSData dataWithContentsOfMappedFile:file];
+	NSData *data = [NSData dataWithContentsOfMappedFile:path];
 	UniversalDetector *ud = [[UniversalDetector alloc] init];
 	NSString *res = nil;
 	NSStringEncoding enc;
@@ -141,7 +123,7 @@ static BOOL DifferentiateLatin12(const unsigned char *data, int length)
 	}
 	
 	if (conf < .6 || latin2) {
-		Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[enc_str UTF8String],[file UTF8String],conf*100.);
+		Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[enc_str UTF8String],[path UTF8String],conf*100.);
 	}
 
 	res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
@@ -151,4 +133,3 @@ static BOOL DifferentiateLatin12(const unsigned char *data, int length)
 	
 	return res;
 }
-@end

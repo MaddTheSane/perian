@@ -8,18 +8,17 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface NSCharacterSet (STAdditions)
-+ (NSCharacterSet *)newlineCharacterSet;
-+ (NSCharacterSet *)whitespaceAndBomCharacterSet;
-@end
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
+extern NSCharacterSet *STWhitespaceAndBomCharacterSet();
 
-@interface NSScanner (STAdditions)
-- (int)scanInt;
-@end
+extern NSString *STStringByStandardizingNewlines(NSString *st);
+extern NSArray *STPairSeparatedByString(NSString *st, NSString *split);
+extern NSArray *STSplitStringWithCount(NSString *st, NSString *split, int count);
+extern NSString *STLoadFileWithUnknownEncoding(NSString *path);
 
-@interface NSString (STAdditions)
-- (NSString *)stringByStandardizingNewlines;
-- (NSArray *)pairSeparatedByString:(NSString *)str;
-- (NSArray *)componentsSeparatedByString:(NSString *)str count:(int)count;
-+ (NSString *)stringFromUnknownEncodingFile:(NSString *)file;
-@end
+#ifdef __cplusplus
+}
+#endif
