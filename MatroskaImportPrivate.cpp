@@ -91,6 +91,34 @@ bool MatroskaImport::OpenFile()
 	return valid;
 }
 
+ComponentResult MatroskaImport::ProcessLevel1Element()
+{
+	int upperLevel = 0;
+	EbmlElement *dummyElt = NULL;
+	
+	if (EbmlId(*el_l1) == KaxInfo::ClassInfos.GlobalId) {
+		el_l1->Read(*aStream, KaxInfo::ClassInfos.Context, upperLevel, dummyElt, true);
+		return ReadSegmentInfo(*static_cast<KaxInfo *>(el_l1));
+								
+	} else if (EbmlId(*el_l1) == KaxTracks::ClassInfos.GlobalId) {
+		el_l1->Read(*aStream, KaxTracks::ClassInfos.Context, upperLevel, dummyElt, true);
+		return ReadTracks(*static_cast<KaxTracks *>(el_l1));
+		
+	} else if (EbmlId(*el_l1) == KaxChapters::ClassInfos.GlobalId) {
+		el_l1->Read(*aStream, KaxChapters::ClassInfos.Context, upperLevel, dummyElt, true);
+		return ReadChapters(*static_cast<KaxChapters *>(el_l1));
+		
+	} else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
+		el_l1->Read(*aStream, KaxAttachments::ClassInfos.Context, upperLevel, dummyElt, true);
+		return ReadAttachments(*static_cast<KaxAttachments *>(el_l1));
+		
+	} else if (EbmlId(*el_l1) == KaxSeekHead::ClassInfos.GlobalId) {
+		el_l1->Read(*aStream, KaxSeekHead::ClassInfos.Context, upperLevel, dummyElt, true);
+		return ReadMetaSeek(*static_cast<KaxSeekHead *>(el_l1));
+	}
+	return noErr;
+}
+
 ComponentResult MatroskaImport::SetupMovie()
 {
 	ComponentResult err = noErr;
@@ -106,33 +134,11 @@ ComponentResult MatroskaImport::SetupMovie()
 	SetAutoTrackAlternatesEnabled(theMovie, false);
 	
 	while (!done && NextLevel1Element()) {
-		int upperLevel = 0;
-		EbmlElement *dummyElt = NULL;
-		
-		if (EbmlId(*el_l1) == KaxInfo::ClassInfos.GlobalId) {
-			el_l1->Read(*aStream, KaxInfo::ClassInfos.Context, upperLevel, dummyElt, true);
-			err = ReadSegmentInfo(*static_cast<KaxInfo *>(el_l1));
-			
-		} else if (EbmlId(*el_l1) == KaxTracks::ClassInfos.GlobalId) {
-			el_l1->Read(*aStream, KaxTracks::ClassInfos.Context, upperLevel, dummyElt, true);
-			err = ReadTracks(*static_cast<KaxTracks *>(el_l1));
-			
-		} else if (EbmlId(*el_l1) == KaxChapters::ClassInfos.GlobalId) {
-			el_l1->Read(*aStream, KaxChapters::ClassInfos.Context, upperLevel, dummyElt, true);
-			err = ReadChapters(*static_cast<KaxChapters *>(el_l1));
-			
-		} else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
-			el_l1->Read(*aStream, KaxAttachments::ClassInfos.Context, upperLevel, dummyElt, true);
-			err = ReadAttachments(*static_cast<KaxAttachments *>(el_l1));
-			
-		} else if (EbmlId(*el_l1) == KaxSeekHead::ClassInfos.GlobalId) {
-			el_l1->Read(*aStream, KaxSeekHead::ClassInfos.Context, upperLevel, dummyElt, true);
-			err = ReadMetaSeek(*static_cast<KaxSeekHead *>(el_l1));
-			
-		} else if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
+		if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
 			// all header elements are before clusters in sane files
 			done = true;
-		}
+		} else
+			err = ProcessLevel1Element();
 		
 		if (err) return err;
 	}
@@ -180,6 +186,9 @@ EbmlElement * MatroskaImport::NextLevel1Element()
 
 ComponentResult MatroskaImport::ReadSegmentInfo(KaxInfo &segmentInfo)
 {
+	if (seenInfo)
+		return noErr;
+	
 	KaxDuration & duration = GetChild<KaxDuration>(segmentInfo);
 	KaxTimecodeScale & timecodeScale = GetChild<KaxTimecodeScale>(segmentInfo);
 	KaxTitle & title = GetChild<KaxTitle>(segmentInfo);
@@ -213,6 +222,7 @@ ComponentResult MatroskaImport::ReadSegmentInfo(KaxInfo &segmentInfo)
 		}
 		QTMetaDataRelease(movieMetaData);
 	}
+	seenInfo = true;
 	return noErr;
 }
 
@@ -222,6 +232,9 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	Track firstAudioTrack = NULL;
 	Track firstSubtitleTrack = NULL;
 	ComponentResult err = noErr;
+	
+	if (seenTracks)
+		return noErr;
 	
 	// Since creating a subtitle track requires a video track to have already been created
     // (so that it can be sized to fit exactly over the video track), we go through the 
@@ -334,6 +347,7 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	for (int i = 0; i < tracks.size(); i++) {
 		SetTrackEnabled(tracks[i].theTrack, tracks[i].isEnabled);
 	}
+	seenTracks = true;
 	return noErr;
 }
 
@@ -603,6 +617,9 @@ ComponentResult MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 	KaxEditionEntry & edition = GetChild<KaxEditionEntry>(chapterEntries);
 	UInt32 emptyDataRefExtension[2];
 	
+	if (seenChapters)
+		return noErr;
+	
 	chapterTrack = NewMovieTrack(theMovie, 0, 0, kNoVolume);
 	if (chapterTrack == NULL) {
 		Codecprintf(NULL, "MKV: Error creating chapter track %d\n", GetMoviesError());
@@ -656,6 +673,7 @@ ComponentResult MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 	
 	EndMediaEdits(chapterMedia);
 	SetTrackEnabled(chapterTrack, false);
+	seenChapters = true;
 	return noErr;
 }
 
@@ -726,6 +744,7 @@ ComponentResult MatroskaImport::ReadAttachments(KaxAttachments &attachments)
 
 ComponentResult MatroskaImport::ReadMetaSeek(KaxSeekHead &seekHead)
 {
+	ComponentResult err = noErr;
 	KaxSeek *seekEntry = FindChild<KaxSeek>(seekHead);
 	
 	// don't re-read a seek head that's already been read
@@ -748,17 +767,20 @@ ComponentResult MatroskaImport::ReadMetaSeek(KaxSeekHead &seekHead)
 		newSeekEntry.segmentPos = position;
 		
 		// recursively read seek heads that are pointed to by the current one
-		if (elementID == KaxSeekHead::ClassInfos.GlobalId) {
+		// as well as the level one elements we care about
+		if (elementID == KaxInfo::ClassInfos.GlobalId || 
+			elementID == KaxTracks::ClassInfos.GlobalId || 
+			elementID == KaxChapters::ClassInfos.GlobalId || 
+			elementID == KaxAttachments::ClassInfos.GlobalId || 
+			elementID == KaxSeekHead::ClassInfos.GlobalId) {
+			
 			MatroskaSeekContext savedContext = SaveContext();
 			SetContext(newSeekEntry.GetSeekContext(segmentOffset));
+			if (NextLevel1Element())
+				err = ProcessLevel1Element();
 			
-			if (NextLevel1Element() && EbmlId(*el_l1) == KaxSeekHead::ClassInfos.GlobalId) {
-				int upperLevel = 0;
-				EbmlElement *dummyElt = NULL;
-				el_l1->Read(*aStream, KaxSeekHead::ClassInfos.Context, upperLevel, dummyElt, true);
-				ReadMetaSeek(*static_cast<KaxSeekHead *>(el_l1));
-			}
 			SetContext(savedContext);
+			if (err) return err;
 		}
 		
 		levelOneElements.push_back(newSeekEntry);

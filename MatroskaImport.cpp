@@ -212,6 +212,9 @@ MatroskaImport::MatroskaImport(ComponentInstance self)
 	el_l0 = NULL;
 	el_l1 = NULL;
 	segmentOffset = 0;
+	seenInfo = false;
+	seenTracks = false;
+	seenChapters = false;
 }
 
 MatroskaImport::~MatroskaImport()

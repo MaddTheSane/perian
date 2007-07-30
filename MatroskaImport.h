@@ -211,6 +211,9 @@ private:
 	// returns it. Does not read the data.
 	EbmlElement *NextLevel1Element();
 	
+	// reads the current level 1 element and calls Read<...> based on its ebml id
+	ComponentResult ProcessLevel1Element();
+	
 	// sets up timescale & file name metadata
 	ComponentResult ReadSegmentInfo(KaxInfo &segmentInfo);
 	
@@ -281,6 +284,10 @@ private:
 	
 	vector<MatroskaTrack>	tracks;
 	vector<MatroskaSeek>	levelOneElements;
+	
+	bool					seenInfo;
+	bool					seenTracks;
+	bool					seenChapters;
 };
 
 #endif
