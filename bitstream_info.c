@@ -435,7 +435,7 @@ static int inline decode_slice_header(H264ParserContext *context, const uint8_t 
 		if(context->pic_order_present_flag && !field_pic_flag)
 			delta_pic_order_cnt[1] = get_se_golomb(gb);
 		
-		int frame_num_offset;
+		int frame_num_offset = 0;  //I think this is wrong, but the pts code isn't used anywhere, so no harm yet and this removes a warning.
 		
 		int abs_frame_num = 0;
 		int num_ref_frames_in_pic_order_cnt_cycle = context->num_ref_frames_in_pic_order_cnt_cycle;
@@ -555,7 +555,7 @@ static int inline decode_nals(H264ParserContext *context, const uint8_t *buf, in
 		
 		if(decode_nal(buf + buf_index, MININT(nalsize, NAL_PEEK_SIZE), partOfNal, &decodedNalSize, &nalType, &nal_ref_idc))
 		{
-			int pts;
+			int pts = 0;
 			if(nalType == 1 || nalType == 2)
 			{
 				if(decode_slice_header(context, partOfNal, decodedNalSize, nal_ref_idc, nalType, pts_decoded, &slice_type, &pts))
