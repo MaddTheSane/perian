@@ -1,51 +1,31 @@
 //
-//  Categories.m
-//  SSAView
+//  SubUtilities.m
+//  SSARender2
 //
-//  Created by Alexander Strange on 1/18/07.
-//  Copyright 2007 Perian Project. All rights reserved.
+//  Created by Alexander Strange on 7/28/07.
+//  Copyright 2007 __MyCompanyName__. All rights reserved.
 //
 
 #import "SubUtilities.h"
 #import "UniversalDetector.h"
-#import "Codecprintf.h"
 
-NSCharacterSet *STWhitespaceAndBomCharacterSet()
+NSArray *STSplitStringIgnoringWhitespace(NSString *str, NSString *split)
 {
-	const unichar bom = 0xfeff;
-	NSMutableCharacterSet *cs = [[NSMutableCharacterSet alloc] init]; 
-
-	[cs addCharactersInString:[NSString stringWithCharacters:&bom length:1]];
+	NSArray *tmp = [str componentsSeparatedByString:split];
+	NSCharacterSet *wcs = [NSCharacterSet whitespaceCharacterSet];
+	size_t num = [tmp count], i;
+	NSString *values[num];
 	
-	[cs formUnionWithCharacterSet:[NSCharacterSet whitespaceCharacterSet]];
+	[tmp getObjects:values];
+	for (i = 0; i < num; i++) values[i] = [values[i] stringByTrimmingCharactersInSet:wcs];
 	
-	return [cs autorelease];
+	return [NSArray arrayWithObjects:values count:num];
 }
 
-NSString *STStringByStandardizingNewlines(NSString *st)
-{
-	NSMutableString *ms = [NSMutableString stringWithString:st];
-	[ms replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
-	[ms replaceOccurrencesOfString:@"\r" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
-	return ms;
-}
-
-NSArray *STPairSeparatedByString(NSString *st, NSString *split)
-{
-	NSMutableArray *ar = [NSMutableArray arrayWithCapacity:2];
-	NSRange r = [st rangeOfString:split options:NSLiteralSearch];
-	if (r.length == 0) [ar addObject:st];
-	else {
-		[ar addObject:[st substringToIndex:r.location]];
-		[ar addObject:[st substringFromIndex:r.location + r.length]];
-	}
-	return ar;
-}
-
-extern NSArray *STSplitStringWithCount(NSString *st, NSString *split, int count)
+NSArray *STSplitStringWithCount(NSString *str, NSString *split, size_t count)
 {
 	NSMutableArray *ar = [NSMutableArray arrayWithCapacity:count];
-	NSScanner *sc = [NSScanner scannerWithString:st];
+	NSScanner *sc = [NSScanner scannerWithString:str];
 	NSString *scv=nil;
 	[sc setCharactersToBeSkipped:nil];
 	[sc setCaseSensitive:TRUE];
@@ -63,8 +43,16 @@ extern NSArray *STSplitStringWithCount(NSString *st, NSString *split, int count)
 	[sc scanUpToString:@"" intoString:&scv];
 	if (!scv) scv = [NSString string];
 	[ar addObject:scv];
-
+	
 	return ar;
+}
+
+NSMutableString *STStandardizeStringNewlines(NSString *str)
+{
+	NSMutableString *ms = [NSMutableString stringWithString:str];
+	[ms replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
+	[ms replaceOccurrencesOfString:@"\r" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
+	return ms;
 }
 
 static BOOL DifferentiateLatin12(const unsigned char *data, int length)
@@ -125,7 +113,7 @@ extern NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	if (conf < .6 || latin2) {
 		Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[enc_str UTF8String],[path UTF8String],conf*100.);
 	}
-
+	
 	res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
 	
 	if (!res) Codecprintf(NULL,"Failed to load file as guessed encoding %s.\n",[enc_str UTF8String]);

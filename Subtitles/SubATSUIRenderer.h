@@ -1,31 +1,38 @@
-/*
- *  SSARenderCodec.m
- *  Copyright (c) 2007 Perian Project
- *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; 
- *  version 2.1 of the License.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- */
+//
+//  SubATSUIRenderer.h
+//  SSARender2
+//
+//  Created by Alexander Strange on 7/30/07.
+//  Copyright 2007 __MyCompanyName__. All rights reserved.
+//
 
-#import <Carbon/Carbon.h>
+#ifdef __OBJC__
+#import <Cocoa/Cocoa.h>
+#import "SubRenderer.h"
 
-struct SSARenderGlobals;
+@interface SubATSUIRenderer : SubRenderer {
+	SubContext *context;
+	unichar *ubuffer;
+	ATSUTextLayout layout;
+	float videoAspect;
+	@public;
+	CGColorSpaceRef srgbCSpace;
+}
+-(SubATSUIRenderer*)initWithVideoAspectRatio:(float)aspect;
+-(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoAspectRatio:(float)aspect;
+-(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(float)cWidth height:(float)cHeight;
+@end
 
-typedef struct SSARenderGlobals *SSARenderGlobalsPtr;
+typedef SubATSUIRenderer *SubtitleRendererPtr;
 
-extern SSARenderGlobalsPtr SSA_Init(const char *header, size_t size, float width, float height);
-extern SSARenderGlobalsPtr SSA_InitNonSSA(float width, float height);
-extern void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef str, float width, float height);
-extern void SSA_PrerollFonts(SSARenderGlobalsPtr glob);
-extern void SSA_Dispose(SSARenderGlobalsPtr glob);
+#else
+#include <QuickTime/QuickTime.h>
+
+typedef void *SubtitleRendererPtr;
+extern SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int height);
+extern SubtitleRendererPtr SubInitNonSSA(int width, int height);
+extern CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s);
+extern void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight);
+extern void SubDisposeRenderer(SubtitleRendererPtr s);
+
+#endif

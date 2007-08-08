@@ -1,35 +1,128 @@
-/*
- *  SSARenderCodec.m
- *  Copyright (c) 2007 Perian Project
- *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; 
- *  version 2.1 of the License.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- */
+//
+//  SubATSUIRenderer.m
+//  SSARender2
+//
+//  Created by Alexander Strange on 7/30/07.
+//  Copyright 2007 __MyCompanyName__. All rights reserved.
+//
 
 #import "SubATSUIRenderer.h"
-#import "SubContext.h"
+#import "SubImport.h"
 #import "SubParsing.h"
+#import "SubUtilities.h"
 
-typedef struct SSARenderGlobals
+@interface SubATSUISpanEx : NSObject {
+	@public;
+	ATSUStyle style;
+	CGColorRef primaryColor, outlineColor, shadowColor;
+	Float32 outlineRadius, shadowDist, scaleX, scaleY, primaryAlpha, outlineAlpha, angle;
+}
+-(SubATSUISpanEx*)initWithStyle:(ATSUStyle)style_ subStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs;
+-(SubATSUISpanEx*)clone;
+@end
+
+@implementation SubATSUISpanEx
+-(void)dealloc
 {
-	SSADocument *document;
-	Boolean plaintext;
-	CGColorSpaceRef sourceColor;
-} SSARenderGlobals;
+	ATSUDisposeStyle(style);
+	CGColorRelease(primaryColor);
+	CGColorRelease(outlineColor);
+	CGColorRelease(shadowColor);
+	[super dealloc];
+}
 
-// Windows color (i apologize for the hardcoded path)
+static CGColorRef MakeCGColorFromRGBA(SubRGBAColor c, CGColorSpaceRef cspace)
+{
+	const float components[] = {c.red, c.green, c.blue, c.alpha};
+	
+	return CGColorCreate(cspace, components);
+}
+
+static CGColorRef MakeCGColorFromRGBOpaque(SubRGBAColor c, CGColorSpaceRef cspace)
+{
+	SubRGBAColor c2 = c;
+	c2.alpha = 1;
+	return MakeCGColorFromRGBA(c2, cspace);
+}
+
+static CGColorRef CloneCGColorWithAlpha(CGColorRef c, float alpha)
+{
+	CGColorRef new = CGColorCreateCopyWithAlpha(c, alpha);
+	CGColorRelease(c);
+	return new;
+}
+
+-(SubATSUISpanEx*)initWithStyle:(ATSUStyle)style_ subStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs
+{
+	if (self = [super init]) {
+		ATSUCreateAndCopyStyle(style_, &style);
+		
+		primaryColor = MakeCGColorFromRGBOpaque(sstyle->primaryColor, cs);
+		primaryAlpha = sstyle->primaryColor.alpha;
+		outlineColor = MakeCGColorFromRGBOpaque(sstyle->outlineColor, cs);
+		outlineAlpha = sstyle->outlineColor.alpha;
+		shadowColor  = MakeCGColorFromRGBA(sstyle->shadowColor,  cs);
+		outlineRadius = sstyle->outlineRadius;
+		shadowDist = sstyle->shadowDist;
+		scaleX = sstyle->scaleX / 100.;
+		scaleY = sstyle->scaleY / 100.;
+		angle = sstyle->angle;
+	}
+	
+	return self;
+}
+
+-(SubATSUISpanEx*)clone
+{
+	SubATSUISpanEx *ret = [[SubATSUISpanEx alloc] init];
+	
+	ATSUCreateAndCopyStyle(style, &ret->style);
+	ret->primaryColor = CGColorRetain(primaryColor);
+	ret->primaryAlpha = primaryAlpha;
+	ret->outlineColor = CGColorRetain(outlineColor);
+	ret->outlineAlpha = outlineAlpha;
+	ret->shadowColor = CGColorRetain(shadowColor);
+	ret->outlineRadius = outlineRadius;
+	ret->shadowDist = shadowDist;
+	ret->scaleX = scaleX;
+	ret->scaleY = scaleY;
+	ret->angle = angle;
+	
+	return [ret autorelease];
+}
+@end
+
+#define span_ex(span) ((SubATSUISpanEx*)span->ex)
+
+static void SetATSUStyleFlag(ATSUStyle style, ATSUAttributeTag t, Boolean v)
+{
+	const ATSUAttributeTag tags[] = {t};
+	const ByteCount		 sizes[] = {sizeof(v)};
+	const ATSUAttributeValuePtr vals[] = {&v};
+	
+	ATSUSetAttributes(style,1,tags,sizes,vals);
+}
+
+static void SetATSUStyleOther(ATSUStyle style, ATSUAttributeTag t, ByteCount s, const ATSUAttributeValuePtr v)
+{
+	const ATSUAttributeTag tags[] = {t};
+	const ByteCount		 sizes[] = {s};
+	const ATSUAttributeValuePtr vals[] = {v};
+	
+	ATSUSetAttributes(style,1,tags,sizes,vals);
+}
+
+static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s, const ATSUAttributeValuePtr v)
+{
+	const ATSUAttributeTag tags[] = {t};
+	const ByteCount		 sizes[] = {s};
+	const ATSUAttributeValuePtr vals[] = {v};
+	
+	ATSUSetLayoutControls(l,1,tags,sizes,vals);
+}
+
+@implementation SubATSUIRenderer
+
 static CGColorSpaceRef GetSRGBColorSpace() {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSData *d = [NSData dataWithContentsOfMappedFile:@"/System/Library/ColorSync/Profiles/sRGB Profile.icc"];
@@ -50,54 +143,279 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	return ret;
 }
 
-SSARenderGlobalsPtr SSA_Init(const char *header, size_t size, float width, float height)
+-(SubATSUIRenderer*)initWithVideoAspectRatio:(float)aspect;
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	SSARenderGlobalsPtr g = (SSARenderGlobalsPtr)NewPtr(sizeof(SSARenderGlobals));
-	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:size encoding:NSUTF8StringEncoding freeWhenDone:NO];
-	g->document = [[SSADocument alloc] init];
-	g->plaintext = false;
-	[g->document loadHeader:hdr width:width height:height];
-	g->sourceColor = GetSRGBColorSpace();
+	if (self = [super init]) {
+		videoAspect = aspect;
+		ATSUCreateTextLayout(&layout);
+		ubuffer = malloc(sizeof(unichar) * 128);
+		srgbCSpace = GetSRGBColorSpace();
+		
+		context = [[SubContext alloc] initWithNonSSAType:kSubTypeSRT delegate:self];
+		[context fixupResForVideoAspectRatio:aspect];
+	}
 	
-	[hdr release];
-	[pool release];
-	return g;
+	return self;
 }
 
-SSARenderGlobalsPtr SSA_InitNonSSA(float width, float height)
+-(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoAspectRatio:(float)aspect;
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	SSARenderGlobalsPtr g = (SSARenderGlobalsPtr)NewPtr(sizeof(SSARenderGlobals));
-	g->document = [[SSADocument alloc] init];
-	g->plaintext = true;
-	[g->document loadDefaultsWithWidth:width height:height];
-	g->sourceColor = GetSRGBColorSpace();
-
-	[pool release];
-	return g;
+	if (self = [super init]) {
+		unsigned hlength = [header length];
+		unichar *uheader = malloc(sizeof(unichar) * hlength);
+		
+		header = STStandardizeStringNewlines(header);
+		[header getCharacters:uheader];
+		
+		NSDictionary *headers;
+		NSArray *styles;
+		SubParseSSAFile(uheader, hlength, &headers, &styles, NULL);
+		free(uheader);
+		
+		ubuffer = malloc(sizeof(unichar) * 128);
+		videoAspect = aspect;
+		context = [[SubContext alloc] initWithHeaders:headers styles:styles extraData:header delegate:self];
+		[context fixupResForVideoAspectRatio:aspect];
+		ATSUCreateTextLayout(&layout);
+		srgbCSpace = GetSRGBColorSpace();
+	}
+	
+	return self;
 }
 
-static void GetTypographicRectangleForLayout(SSARenderEntity *re, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed *height, Fixed *width, unsigned baseX, unsigned baseY, float iheight)
+-(void)dealloc
+{
+	[context release];
+	free(ubuffer);
+	[super dealloc];
+}
+
+-(void*)completedStyleParsing:(SubStyle*)s
+{
+	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag};
+	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID)};
+	
+	ATSUFontID font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)s->fontname,kATSOptionFlagsDefault));
+	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
+	Fixed size = FloatToFixed(s->size * (72./96.));
+	Boolean b = s->bold, i = s->italic, u = s->underline, st = s->strikeout;
+	ATSUStyle style;
+		
+	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font};
+	
+	if (font == kATSUInvalidFontID) font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault));
+	
+	ATSUCreateStyle(&style);
+	ATSUSetAttributes(style, sizeof(tags) / sizeof(ATSUAttributeTag), tags, sizes, vals);
+	
+	if (s->tracking) {
+		Fixed tracking = FloatToFixed(s->tracking);
+		
+		SetATSUStyleOther(style, kATSUTrackingTag, sizeof(Fixed), &tracking);
+	}
+	
+	if (s->scaleX != 100. || s->scaleY != 100.) {
+		CGAffineTransform mat = CGAffineTransformMakeScale(s->scaleX / 100., s->scaleY / 100.);
+		
+		SetATSUStyleOther(style, kATSUFontMatrixTag, sizeof(CGAffineTransform), &mat);
+	}
+	
+	const ATSUFontFeatureType ftypes[] = {kLigaturesType, kTypographicExtrasType, kTypographicExtrasType, kTypographicExtrasType};
+	const ATSUFontFeatureSelector fsels[] = {kCommonLigaturesOnSelector, kSmartQuotesOnSelector, kPeriodsToEllipsisOnSelector, kHyphenToEnDashOnSelector};
+	
+	ATSUSetFontFeatures(style, sizeof(ftypes) / sizeof(ATSUFontFeatureType), ftypes, fsels);
+	
+	return style;
+}
+
+-(void)releaseStyleEx:(void*)ex
+{
+	ATSUDisposeStyle(ex);
+}
+
+-(void)completedHeaderParsing:(SubContext*)sc
+{
+	[sc fixupResForVideoAspectRatio:videoAspect];
+	context = sc;
+}
+
+-(void*)spanExtraFromRenderDiv:(SubRenderDiv*)div
+{
+	return [[[SubATSUISpanEx alloc] initWithStyle:(ATSUStyle)div->styleLine->ex subStyle:div->styleLine colorSpace:srgbCSpace] autorelease];
+}
+
+-(void*)cloneSpanExtra:(SubRenderSpan*)span
+{
+	return [(SubATSUISpanEx*)span->ex clone];
+}
+
+-(void)disposeSpanExtra:(void*)ex
+{
+	SubATSUISpanEx *spanEx = ex;
+	[spanEx release];
+}
+
+enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for color/border changes in the middle of lines
+	  renderManualShadows = 2, // CG shadows can't change inside a line... probably
+	  renderComplexTransforms = 4}; // can't draw text at all, have to transform each vertex. needed for 3D perspective, or \frz in the middle of a line
+
+-(void)spanChangedTag:(SSATagType)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p
+{
+	SubATSUISpanEx *spanEx = span->ex;
+	BOOL isFirstSpan = [div->spans count] == 0;
+	Boolean bval;
+	int ival;
+	float fval;
+	NSString *sval;
+	Fixed fixval;
+	CGColorRef color;
+	CGAffineTransform mat;
+	
+#define bv() bval = *(int*)p;
+#define iv() ival = *(int*)p;
+#define fv() fval = *(float*)p;
+#define sv() sval = *(NSString**)p;
+#define fixv() fv(); fixval = FloatToFixed(fval);
+#define colorv() color = MakeCGColorFromRGBA(ParseSSAColor(*(int*)p), srgbCSpace);
+	
+	switch (tag) {
+		case tag_b:
+			bv();
+			SetATSUStyleFlag(spanEx->style, kATSUQDBoldfaceTag, bval != 0);
+			break; 
+		case tag_i:
+			bv();
+			SetATSUStyleFlag(spanEx->style, kATSUQDItalicTag, bval);
+			break; 
+		case tag_u:
+			bv();
+			SetATSUStyleFlag(spanEx->style, kATSUQDUnderlineTag, bval);
+			break; 
+		case tag_s:
+			bv();
+			SetATSUStyleFlag(spanEx->style, kATSUStyleStrikeThroughTag, bval);
+			break; 
+		case tag_bord:
+			fv();
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
+			spanEx->outlineRadius = fval;
+			break;
+		case tag_shad:
+			fv();
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts | renderManualShadows;
+			spanEx->shadowDist = fval;
+			break;
+		case tag_fn:
+			sv();
+			ATSUFontID font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)sval,kATSOptionFlagsDefault));
+			if (font) SetATSUStyleOther(spanEx->style, kATSUFontTag, sizeof(ATSUFontID), &font);
+			break;
+		case tag_fs:
+			fv();
+			fixval = FloatToFixed(fval * (72./96.));
+			SetATSUStyleOther(spanEx->style, kATSUSizeTag, sizeof(Fixed), &fixval);
+			break;
+		case tag_1c:
+			CGColorRelease(spanEx->primaryColor);
+			colorv();
+			spanEx->primaryColor = color;
+			break;
+		case tag_3c:
+			CGColorRelease(spanEx->outlineColor);
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
+			{
+				SubRGBAColor rgba = ParseSSAColor(*(int*)p);
+				spanEx->outlineColor = MakeCGColorFromRGBOpaque(rgba, srgbCSpace);
+				spanEx->outlineAlpha = rgba.alpha;
+			}
+			break;
+		case tag_4c:
+			CGColorRelease(spanEx->shadowColor);
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts | renderManualShadows;
+			colorv();
+			spanEx->shadowColor = color;
+			break;
+		case tag_fscx:
+			fv();
+			fval /= 100.;
+			mat = CGAffineTransformMakeScale(fval, spanEx->scaleY);
+			spanEx->scaleX = fval;
+			SetATSUStyleOther(spanEx->style, kATSUFontMatrixTag, sizeof(CGAffineTransform), &mat);
+			break;
+		case tag_fscy:
+			fv();
+			fval /= 100.;
+			mat = CGAffineTransformMakeScale(spanEx->scaleX, fval);
+			spanEx->scaleY = fval;
+			SetATSUStyleOther(spanEx->style, kATSUFontMatrixTag, sizeof(CGAffineTransform), &mat);
+			break;
+		case tag_fsp:
+			fixv();
+			SetATSUStyleOther(spanEx->style, kATSUTrackingTag, sizeof(Fixed), &fixval);
+			break;
+		case tag_frz:
+			if (!isFirstSpan) div->render_complexity |= renderComplexTransforms; // this one's hard
+			fv();
+			spanEx->angle = fval;
+			break;
+		case tag_1a:
+			iv();
+			spanEx->primaryAlpha = 1.-(ival/255.);
+			break;
+		case tag_3a:
+			iv();
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
+			spanEx->outlineAlpha = 1.-(ival/255.);
+			break;
+		case tag_4a:
+			iv();
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts | renderManualShadows;
+			spanEx->shadowColor = CloneCGColorWithAlpha(spanEx->shadowColor, 1.-(ival/255.));
+			break;
+		case tag_r:
+			sv();
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts | renderManualShadows;
+			{
+				SubStyle *style = [context->styles objectForKey:sval];
+				if (!style) style = context->defaultStyle;
+				
+				[spanEx release];
+				span->ex = [[SubATSUISpanEx alloc] initWithStyle:(ATSUStyle)style->ex subStyle:style colorSpace:srgbCSpace];
+			}
+			break;
+		default:
+			NSLog(@"unimplemented tag %d",tag);
+	}
+}
+
+#pragma mark Rendering Helper Functions
+
+static ATSUTextMeasurement GetLineHeight(ATSUTextLayout layout, UniCharArrayOffset lpos)
+{
+	ATSUTextMeasurement ascent, descent;
+	
+	ATSUGetLineControl(layout, lpos, kATSULineAscentTag,  sizeof(ATSUTextMeasurement), &ascent,  NULL);
+	ATSUGetLineControl(layout, lpos, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
+	
+	return ascent + descent;
+}
+
+static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed *height, Fixed *width)
 {
 	ATSTrapezoid trap = {0};
 	ItemCount trapCount;
 	FixedRect largeRect = {0};
-	ATSUTextMeasurement ascent, descent;
-	
+	Fixed baseY = 0;
 	int i;
+
 	for (i = breakCount; i >= 0; i--) {		
 		UniCharArrayOffset end = breaks[i+1];
 		FixedRect rect;
-		OSStatus err;
 		
-		err=ATSUGetGlyphBounds(re->layout,baseX,FloatToFixed(iheight) - baseY,breaks[i],end-breaks[i],kATSUseDeviceOrigins,1,&trap,&trapCount);
-		
-		ATSUGetLineControl(re->layout, breaks[i], kATSULineAscentTag, sizeof(ATSUTextMeasurement), &ascent, NULL);
-		ATSUGetLineControl(re->layout, breaks[i], kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
-		
-		baseY += ascent + descent;
+		ATSUGetGlyphBounds(layout, 0, baseY, breaks[i], end-breaks[i], kATSUseDeviceOrigins, 1, &trap, &trapCount);
 
+		baseY += GetLineHeight(layout, breaks[i]);
+		
 		rect.bottom = MAX(trap.lowerLeft.y, trap.lowerRight.y);
 		rect.left = MIN(trap.lowerLeft.x, trap.upperLeft.x);
 		rect.top = MIN(trap.upperLeft.y, trap.upperRight.y);
@@ -110,307 +428,367 @@ static void GetTypographicRectangleForLayout(SSARenderEntity *re, UniCharArrayOf
 		largeRect.top = MIN(largeRect.top, rect.top);
 		largeRect.right = MAX(largeRect.right, rect.right);
 	}
+	
 	*height = largeRect.bottom - largeRect.top;
 	*width = largeRect.right - largeRect.left;
 }
-/*
-typedef struct CurveCallbackData {
-	Float32Point origin, current;
-	float		 windowHeight;
-	CGContextRef c;
-} CurveCallbackData;
 
-static OSStatus SSA_CubicMoveTo(const Float32Point *p, void *callBackDataPtr)
+//our rendering coordinate space is the SSA PlayResY with X calculated from video aspect ratio
+static void SetupSubCTM(CGContextRef c, float originalWidth, float originalHeight, float width, float height)
 {
-	CurveCallbackData *cd = callBackDataPtr;
-	float x, y;
-	
-	x = cd->origin.x + p->x;
-	y = cd->windowHeight - (cd->origin.y + p->y);
-	
-	CGContextMoveToPoint(cd->c,x,y);
-	
-	cd->current.x = x;
-	cd->current.y = y;
-	return noErr;
+	CGContextScaleCTM(c, width / originalWidth, height / originalHeight);
 }
 
-static OSStatus SSA_CubicLineTo(const Float32Point *p, void *callBackDataPtr)
+enum {fillc, strokec};
+
+static void SetColor(CGContextRef c, int whichcolor, CGColorRef col)
 {
-	CurveCallbackData *cd = callBackDataPtr;
-	float x, y;
-	
-	x = cd->origin.x + p->x;
-	y = cd->windowHeight - (cd->origin.y + p->y);
-	
-	if (x == cd->current.x && y == cd->current.y) return noErr;
-	
-	CGContextAddLineToPoint(cd->c,x,y);
-	
-	cd->current.x = x;
-	cd->current.y = y;
-	return noErr;	
+	if (whichcolor == fillc) CGContextSetFillColorWithColor(c, col);
+	else CGContextSetStrokeColorWithColor(c, col);
 }
 
-static OSStatus SSA_CubicCurveTo(const Float32Point *p1, const Float32Point *p2, const Float32Point *p3, void *callBackDataPtr)
+static void SetStyleSpanRuns(ATSUTextLayout layout, SubRenderDiv *div)
 {
-	CurveCallbackData *cd = callBackDataPtr;
-	float x[3] = {p1->x,p2->x,p3->x};
-	float y[3] = {p1->y,p2->y,p3->y};
+	unsigned span_count = [div->spans count];
 	int i;
-	for (i = 0; i < 3; i++) x[i] += cd->origin.x;
-	for (i = 0; i < 3; i++) y[i] = cd->windowHeight - (cd->origin.y + y[i]);
 	
-	CGContextAddCurveToPoint(cd->c,x[0],y[0],x[1],y[1],x[2],y[2]);
-	
-	cd->current.x = x[2];
-	cd->current.y = y[2];
-	return noErr;
+	for (i = 0; i < span_count; i++) {
+		SubRenderSpan *span = [div->spans objectAtIndex:i];
+		UniCharArrayOffset next = (i == span_count-1) ? [div->text length] : ((SubRenderSpan*)[div->spans objectAtIndex:i+1])->offset;
+		ATSUSetRunStyle(layout, span_ex(span)->style, span->offset, next - span->offset);
+	}
 }
-*/
 
-typedef enum DrawingMode {shadowtext, foreground} DrawingMode;
+static Fixed RoundFixed(Fixed n) {return IntToFixed(FixedToInt(n));}
 
-static void DrawOneStyleSpan(SSARenderEntity *re, SSAStyleSpan *span, CGContextRef c, UniCharArrayOffset linepos, UniCharCount lineclength, ATSUTextMeasurement baseX, ATSUTextMeasurement baseY, DrawingMode mode)
+static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 align)
 {
-	Fixed lineRot = FloatToFixed(span->angle - re->style->angle);
-	if (span->shadow > 0 && span->outline == 0) span->outline = 1;
+	const ATSUAttributeTag tags[] = {kATSULineFlushFactorTag, kATSULineWidthTag};
+	const ByteCount		 sizes[] = {sizeof(Fract), sizeof(ATSUTextMeasurement)};
+	Fract alignment;
+	const ATSUAttributeValuePtr vals[] = {&alignment, &lineWidth};
 	
-	CGContextSetLineWidth(c,span->outline * 2.);
+	switch (align) {
+		case kSubAlignmentLeft:
+			alignment = FloatToFract(0);
+			break;
+		case kSubAlignmentCenter:
+			alignment = kATSUCenterAlignment;
+			break;
+		case kSubAlignmentRight:
+			alignment = fract1;
+			break;
+	}
+	
+	ATSUSetLayoutControls(layout,sizeof(vals) / sizeof(ATSUAttributeValuePtr),tags,sizes,vals);
+}
 
-	if (re->multipart_drawing) SetATSULayoutOther(re->layout,kATSULineRotationTag,sizeof(Fixed),&lineRot);
+static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, ItemCount *nbreaks, Fixed breakingWidth, unsigned textLen)
+{
+	UniCharArrayOffset *breaks;
+	ItemCount breakCount;
+	
+	switch (div->wrapStyle) {
+		case kSubLineWrapTopWider:
+		case kSubLineWrapSimple:
+		case kSubLineWrapBottomWider:
+			ATSUBatchBreakLines(layout, kATSUFromTextBeginning, kATSUToTextEnd, breakingWidth, &breakCount);
+			break;
+		case kSubLineWrapNone:
+			ATSUBatchBreakLines(layout, kATSUFromTextBeginning, kATSUToTextEnd, positiveInfinity, &breakCount);
+			break;
+	}
+	
+	breaks = malloc(sizeof(UniCharArrayOffset) * (breakCount+2));
+	ATSUGetSoftLineBreaks(layout, kATSUFromTextBeginning, kATSUToTextEnd, breakCount, &breaks[1], NULL);
+	
+	breaks[0] = 0;
+	breaks[breakCount+1] = textLen;
 		
-	if (mode == shadowtext) {
-		Fixed shadOffset = FloatToFixed(span->shadow);
-		if (span->shadow == 0) return;
+	*nbreaks = breakCount;
+	return breaks;
+}
+
+typedef struct {
+	UniCharArrayOffset *breaks;
+	ItemCount breakCount;
+	unsigned lStart, lEnd;
+	SInt8 direction;
+} BreakContext;
+
+enum {kTextLayerShadow, kTextLayerOutline, kTextLayerPrimary};
+
+static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanEx *lastSpanEx, int textType, BOOL endLayer)
+{	
+#define if_different(x) if (!lastSpanEx || lastSpanEx-> x != spanEx-> x)
+	
+	switch (textType) {
+		case kTextLayerShadow:
+			if_different(shadowColor) {
+				if (endLayer) CGContextEndTransparencyLayer(c);
+
+				SetColor(c, fillc, spanEx->shadowColor);
+				SetColor(c, strokec, spanEx->shadowColor);
+				if (CGColorGetAlpha(spanEx->shadowColor) != 1.) {
+					endLayer = YES;
+					CGContextBeginTransparencyLayer(c, NULL);
+				} else endLayer = NO;
+			}
+			break;
+			
+		case kTextLayerOutline:
+			if_different(outlineRadius) CGContextSetLineWidth(c, spanEx->outlineRadius*2. + .5);
+			if_different(outlineColor)  SetColor(c, strokec, spanEx->outlineColor);
+			
+			if_different(outlineAlpha) {
+				if (endLayer) CGContextEndTransparencyLayer(c);
+				
+				CGContextSetAlpha(c, spanEx->outlineAlpha);
+				if (spanEx->outlineAlpha != 1.) {
+					endLayer = YES;
+					CGContextBeginTransparencyLayer(c, NULL);
+				} else endLayer = NO;
+			}
+				
+			break;
+		case kTextLayerPrimary:
+			if_different(primaryColor) SetColor(c, fillc, spanEx->primaryColor);
+			
+			if_different(primaryAlpha) {
+				if (endLayer) CGContextEndTransparencyLayer(c);
+
+				CGContextSetAlpha(c, spanEx->primaryAlpha);
+				if (spanEx->primaryAlpha != 1.) {
+					endLayer = YES;
+					CGContextBeginTransparencyLayer(c, NULL);
+				} else endLayer = NO;
+			}
+			break;
+	}
+	
+	return endLayer;
+}
+
+static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY, SubATSUISpanEx *firstSpanEx, int textType)
+{
+	int i;
+	BOOL endLayer = NO;
+	SubATSUISpanEx *lastSpanEx = nil;
+	const CGTextDrawingMode textModes[] = {kCGTextFillStroke, kCGTextStroke, kCGTextFill};
 		
-		CGContextSetRGBFillColor(c,span->color.shadow.red,span->color.shadow.green,span->color.shadow.blue,span->color.shadow.alpha);
-		CGContextSetRGBStrokeColor(c,span->color.shadow.red,span->color.shadow.green,span->color.shadow.blue,span->color.shadow.alpha);
-		CGContextSetTextDrawingMode(c, kCGTextFillStroke);	
-
-		ATSUDrawText(re->layout,linepos,lineclength,baseX + shadOffset,baseY - shadOffset);
-	} else {
-		CGContextSetRGBFillColor(c,span->color.primary.red,span->color.primary.green,span->color.primary.blue,span->color.primary.alpha);
-		CGContextSetRGBStrokeColor(c,span->color.outline.red,span->color.outline.green,span->color.outline.blue,span->color.outline.alpha);
-
-		if (span->outline > 0) {
-			CGContextSetTextDrawingMode(c,kCGTextStroke);
-			ATSUDrawText(re->layout,linepos,lineclength,baseX,baseY);
-			CGContextSetTextDrawingMode(c,kCGTextFill);
+	CGContextSetTextDrawingMode(c, textModes[textType]);
+	
+	if (!(div->render_complexity & renderMultipleParts)) endLayer = SetupCGForSpan(c, firstSpanEx, lastSpanEx, textType, endLayer);
+	
+	for (i = breakc.lStart; i != breakc.lEnd; i -= breakc.direction) {
+		UniCharArrayOffset thisBreak = breakc.breaks[i], nextBreak = breakc.breaks[i+1], linelen = nextBreak - thisBreak;
+		float extraHeight = 0;
+		
+		if (!(div->render_complexity & renderMultipleParts)) {
+			ATSUDrawText(layout, thisBreak, linelen, RoundFixed(penX), RoundFixed(penY));
+			extraHeight = div->styleLine->outlineRadius*2. + .5;
+		} else {
+			int j, spans = [div->spans count];
+			for (j = 0; j < spans; j++) {
+				SubRenderSpan *span = [div->spans objectAtIndex:j];
+				SubATSUISpanEx *spanEx = span->ex;
+				UniCharArrayOffset spanLen, drawStart, drawLen;
+				
+				if (j < spans-1) {
+					SubRenderSpan *nextSpan = [div->spans objectAtIndex:j+1];
+					spanLen = nextSpan->offset - span->offset;
+				} else spanLen = [div->text length] - span->offset;
+				
+				if (spanLen == 0) continue;
+				if ((span->offset + spanLen) < thisBreak) continue;
+				if (span->offset >= nextBreak) break;
+				
+				if (span->offset < thisBreak) {
+					drawStart = thisBreak;
+					drawLen = spanLen - (thisBreak - span->offset);
+				} else {
+					drawStart = span->offset;
+					drawLen = spanLen;
+				}
+				
+				endLayer = SetupCGForSpan(c, spanEx, lastSpanEx, textType, endLayer);
+				ATSUDrawText(layout, drawStart, drawLen, RoundFixed((textType == kTextLayerShadow) ? (penX + FloatToFixed(spanEx->shadowDist)) : penX), 
+														 RoundFixed((textType == kTextLayerShadow) ? (penY - FloatToFixed(spanEx->shadowDist)) : penY));
+				extraHeight = MAX(extraHeight, spanEx->outlineRadius*2. + .5);
+			}
+		
 		}
-		
-		ATSUDrawText(re->layout,linepos,lineclength,baseX,baseY);
+
+		penY += breakc.direction * (GetLineHeight(layout, thisBreak) + FloatToFixed(extraHeight));
 	}
 	
+	if (endLayer) CGContextEndTransparencyLayer(c);
+
+	return penY;
 }
 
-static void SSA_DrawTextLine(SSARenderEntity *re, UniCharArrayOffset linepos, UniCharCount lineclength, ATSUTextMeasurement baseX, ATSUTextMeasurement baseY, DrawingMode mode, CGContextRef c)
+static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY)
 {
-	int i;
-	//ATSCubicMoveToUPP cmoveP;
-	//ATSCubicLineToUPP clineP;
-	//ATSCubicCurveToUPP ccurveP;
+	SubATSUISpanEx *firstSpanEx = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
+	BOOL endLayer = NO;
 	
-	if (!re->multipart_drawing) {
-		DrawOneStyleSpan(re,re->styles[0],c,linepos,lineclength,baseX,baseY,mode);
-	} else {
-		for (i = 0; i < re->style_count; i++) {
-			SSAStyleSpan *span = re->styles[i];
-			UniCharArrayOffset spanst, spanl;
-			
-			if ((span->range.location + span->range.length) < linepos) continue;
-			if (span->range.location >= (linepos + lineclength)) break;
-			
-			spanl = span->range.length;
-			
-			if (span->range.location < linepos) {
-				spanst = linepos;
-				spanl -= linepos - span->range.location;
-			} else spanst = span->range.location;
-			
-			DrawOneStyleSpan(re,re->styles[i],c,spanst,spanl,baseX,baseY,mode);
+	if (!(div->render_complexity & renderManualShadows)) {
+		if (firstSpanEx->shadowDist) {
+			endLayer = YES;
+			CGContextSetShadowWithColor(c, CGSizeMake(firstSpanEx->shadowDist + .5, -(firstSpanEx->shadowDist + .5)), 0, firstSpanEx->shadowColor);
+			CGContextBeginTransparencyLayer(c, NULL);
 		}
-	}
-}
-
-static Fixed GetLineHeight(ATSUTextLayout layout, UniCharArrayOffset lpos)
-{
-	ATSUTextMeasurement ascent, descent;
+	} else DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerShadow);
 	
-	ATSUGetLineControl(layout, lpos, kATSULineAscentTag,  sizeof(ATSUTextMeasurement), &ascent,  NULL);
-	ATSUGetLineControl(layout, lpos, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
+	DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerOutline);
+	penY = DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerPrimary);
 	
-	return ascent + descent;
-}
-
-static Fixed SSA_DrawLineArray(SSARenderEntity *re, int lstart, int lend, int lstep, char direction, UniCharArrayOffset *breaks, Fixed penX, Fixed penY, DrawingMode mode, CGContextRef c)
-{
-	int i;
-	
-	for (i = lstart; i != lend; i += lstep) {		
-		SSA_DrawTextLine(re, breaks[i], breaks[i+1] - breaks[i], penX, penY, mode, c);
-		
-		penY += direction * GetLineHeight(re->layout, breaks[i]);
-	}
+	if (endLayer) CGContextEndTransparencyLayer(c);
 	
 	return penY;
 }
-							   
-void SSA_RenderLine(SSARenderGlobalsPtr glob, CGContextRef c, CFStringRef cfSub, float cWidth, float cHeight)
+
+#pragma mark Main Renderer Function
+
+-(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(float)cWidth height:(float)cHeight
 {
-	ItemCount breakCount;
-	Fixed penY=0,penX;
-	Fixed lastTopPenY=-1, lastBottomPenY=-1, lastCenterPenY=-1, *storePenY, ignoredPenY;
-	int i, lstart, lend, lstep, subcount, j; char direction;
-	if (!(glob && glob->document)) return;
-	SSADocument *ssa = glob->document;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSString *curSub = (NSString*)cfSub;
-	NSArray *rentities = ParseSubPacket(curSub,ssa,glob->plaintext);
-	SSARenderEntity *last_re = nil;
-	OSStatus err;
+	ubuffer = realloc(ubuffer, sizeof(unichar) * [packet length]);
+	const float horizScale = (context->resY * videoAspect) / (float)context->resX;
+	NSArray *divs = SubParsePacket(packet, context, self, ubuffer);
+	unsigned div_count = [divs count];
+	int i;
+	Fixed bottomPen = 0, topPen = 0, centerPen = 0, *storePen=NULL;
 	
-	CGContextClearRect(c, CGRectMake(0,0,cWidth,cHeight));
-	CGContextScaleCTM(c, cWidth / ssa->resX, cHeight / ssa->resY);
+	CGContextSaveGState(c);
 	
-	CGContextSetFillColorSpace(c, glob->sourceColor);
-	CGContextSetStrokeColorSpace(c, glob->sourceColor);
-	subcount = [rentities count];
+	SetupSubCTM(c, context->resY * videoAspect, context->resY, cWidth, cHeight);
 	
-	for (j = 0; j < subcount; j++) {
-		SSARenderEntity *re = (SSARenderEntity*)[rentities objectAtIndex:j];
-		if (re->is_shape) continue;
-		ATSUTextLayout layout = re->layout;
-		BOOL dirty_layout = NO;
+	SetATSULayoutOther(layout, kATSUCGContextTag, sizeof(CGContextRef), &c);
+	
+	CGContextSetLineCap(c, kCGLineCapRound);
+	CGContextSetLineJoin(c, kCGLineJoinRound);
+	
+	for (i = 0; i < div_count; i++) {
+		SubRenderDiv *div = [divs objectAtIndex:i];
+		unsigned textLen = [div->text length];
+		if (!textLen) continue;
 		
-		if (last_re && re->marginv != last_re->marginv) {lastTopPenY = lastBottomPenY = lastCenterPenY = -1;}
-					
-		size_t sublen = [re->nstext length];
-						
-		err=ATSUSetTextPointerLocation(layout,re->text,kATSUFromTextBeginning,kATSUToTextEnd,sublen);
+		Fixed penY=0, penX, breakingWidth = FloatToFixed((context->resX - div->marginL - div->marginR) * horizScale); BreakContext breakc = {0};
+
+		[div->text getCharacters:ubuffer];
 		
+		ATSUSetTextPointerLocation(layout, ubuffer, kATSUFromTextBeginning, kATSUToTextEnd, textLen);		
 		ATSUSetTransientFontMatching(layout,TRUE);
+		
+		{
+			SubATSUISpanEx *firstspan = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
+			Fixed fangle = FloatToFixed(firstspan->angle);
+			
+			SetATSULayoutOther(layout, kATSULineRotationTag, sizeof(Fixed), &fangle);
+		}
+		
+		SetLayoutPositioning(layout, breakingWidth, div->alignH);	
 
-		for (i = 0; i < re->style_count; i++) ATSUSetRunStyle(layout,re->styles[i]->astyle,re->styles[i]->range.location,re->styles[i]->range.length);
+		SetStyleSpanRuns(layout, div);
 		
-		SetATSULayoutOther(layout,kATSUCGContextTag,sizeof(CGContextRef),&c);
-		if (!re->multipart_drawing) {
-			Fixed lineRot = FloatToFixed(re->styles[0]->angle);
-			SetATSULayoutOther(re->layout,kATSULineRotationTag,sizeof(Fixed),&lineRot);
-		}
+		ItemCount breakCount;
+		UniCharArrayOffset *breaks = FindLineBreaks(layout, div, &breakCount, breakingWidth, textLen);
 		
-		ATSUBatchBreakLines(layout,kATSUFromTextBeginning,kATSUToTextEnd,IntToFixed(re->usablewidth),&breakCount); 
-		ATSUGetSoftLineBreaks(layout,kATSUFromTextBeginning,kATSUToTextEnd,0,NULL,&breakCount);
-		UniCharArrayOffset breaks[breakCount+2];
-		ATSUGetSoftLineBreaks(layout,kATSUFromTextBeginning,kATSUToTextEnd,breakCount,&breaks[1],&breakCount);
-		
-		breaks[0] = 0;
-		breaks[breakCount+1] = sublen;
-		
-		penX = IntToFixed(re->marginl);
-		
-		if (re->posx == -1) {
-			ATSUTextMeasurement descent, total = 0;
-			
-			switch (re->valign)
-			{
-				case S_BottomAlign: default: //bottom
-					ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
-					penY = (lastBottomPenY!=-1)?lastBottomPenY:(MAX(IntToFixed(re->marginv), descent) + FloatToFixed(shadow)); direction = 1;
-					lstart = breakCount; lend = -1; lstep = -1;
-					storePenY = &lastBottomPenY;
+		if (div->posX == -1) {
+			penX = FloatToFixed(div->marginL * horizScale);
+
+			switch(div->alignV) {
+				case kSubAlignmentBottom:
+					if (!bottomPen) {
+						ATSUTextMeasurement bottomLineDescent;
+						ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &bottomLineDescent, NULL);
+						penY = IntToFixed(div->marginV) + bottomLineDescent;
+					} else penY = bottomPen;
+					
+					storePen = &bottomPen; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
 					break;
-				case S_MiddleAlign: // center
-					penY = (lastCenterPenY!=-1)?lastCenterPenY:(FloatToFixed((ssa->resY - FixedToFloat(total)) / 2.));  direction = -1;
-					lstart = 0; lend = breakCount+1; lstep = 1;
-					storePenY = &lastCenterPenY;
+				case kSubAlignmentMiddle:
+					if (!centerPen) {
+						ATSUTextMeasurement imageWidth, imageHeight;
+						
+						GetTypographicRectangleForLayout(layout, breaks, breakCount, &imageHeight, &imageWidth);
+						penY = (IntToFixed(context->resY) / 2) + (imageHeight / 2);
+					} else penY = centerPen;
+					
+					storePen = &centerPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
 					break;
-				case S_TopAlign: //top					
-					penY = (lastTopPenY!=-1)?lastTopPenY:(FloatToFixed(ssa->resY - re->marginv) - GetLineHeight(layout, kATSUFromTextBeginning)); direction = -1;
-					lstart = 0; lend = breakCount+1; lstep = 1;
-					storePenY = &lastTopPenY;
+				case kSubAlignmentTop:
+					if (!topPen) {
+						penY = FloatToFixed(context->resY - div->marginV) - GetLineHeight(layout, kATSUFromTextBeginning);
+					} else penY = topPen;
+					
+					storePen = &topPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
 					break;
 			}
-		}
-		else {
-			Fixed imageHeight, imageWidth;
+		} else {
+			ATSUTextMeasurement imageWidth, imageHeight;
+						
+			GetTypographicRectangleForLayout(layout, breaks, breakCount, &imageHeight, &imageWidth);
+
+			penX = FloatToFixed(div->posX * horizScale);
+			penY = FloatToFixed(context->resY - div->posY);
 			
-			GetTypographicRectangleForLayout(re,breaks,breakCount,&imageHeight,&imageWidth,penX,penY,ssa->resY);
-			
-			penX = IntToFixed(re->posx);
-			penY = FloatToFixed((ssa->resY - re->posy));
-//			NSLog(@"pos (%d,%d) w %d (image: %f, %f)",re->posx,re->posy,re->usablewidth,FixedToFloat(imageWidth),FixedToFloat(imageHeight));			
-			switch(re->halign) {
-				case S_CenterAlign:
-					penX -= imageWidth / 2;
-					break;
-				case S_RightAlign:
-					penX -= imageWidth;
+			switch (div->alignH) {
+				case kSubAlignmentCenter: penX -= imageWidth / 2; break;
+				case kSubAlignmentRight: penX -= imageWidth;
 			}
 			
-			switch(re->valign) {
-				case S_MiddleAlign:
-					penY -= imageHeight / 2;
-					break;
-				case S_RightAlign:
-					penY -= imageHeight;
+			switch (div->alignV) {
+				case kSubAlignmentMiddle: penY -= imageHeight / 2; break;
+				case kSubAlignmentTop: penY -= imageHeight;
 			}
-			
-			SetATSULayoutOther(layout,kATSULineWidthTag,sizeof(Fixed),&imageWidth);
-			dirty_layout = YES;
-			
-			direction = 1;
-			lstart = breakCount; lend = -1; lstep = -1;
-			storePenY = &ignoredPenY;
+						
+			SetLayoutPositioning(layout, imageWidth, div->alignH);
+			storePen = NULL; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
 		}
 		
-		CGContextSetLineJoin(c, kCGLineJoinRound);
-		CGContextSetLineCap(c, kCGLineCapRound);
-				
-		SSA_DrawLineArray(re, lstart, lend, lstep, direction, breaks, penX, penY, shadowtext, c);
+		breakc.breakCount = breakCount;
+		breakc.breaks = breaks;
 		
-		penY = SSA_DrawLineArray(re, lstart, lend, lstep, direction, breaks, penX, penY, foreground, c);
+		penY = DrawOneTextDiv(c, layout, div, breakc, penX, penY);
 		
-		if (dirty_layout) {
-			Fixed fwidth = IntToFixed(re->usablewidth);
-			SetATSULayoutOther(layout,kATSULineWidthTag,sizeof(Fixed),&fwidth);
-		}
+		if (storePen) *storePen = penY;
 		
-		*storePenY = penY;
-		
-		last_re = re;
+		free(breaks);
 	}
 	
+	CGContextRestoreGState(c);
 	[pool release];
 }
 
-void SSA_Dispose(SSARenderGlobalsPtr glob)
+extern SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int height)
 {
-	[glob->document release];
-	CGColorSpaceRelease(glob->sourceColor);
-	DisposePtr((Ptr)glob);
+	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO];
+
+	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoAspectRatio:(float)width/(float)height];
+	[hdr release];
+	return s;
 }
 
-void SSA_PrerollFonts(SSARenderGlobalsPtr glob)
+extern SubtitleRendererPtr SubInitNonSSA(int width, int height)
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	CGColorSpaceRef csp = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-	void *fakebuf = malloc(640 * 480 * 4); // set up an offscreen buffer
-	CGContextRef c = CGBitmapContextCreate(fakebuf,640,480,8,640 * 4,csp,kCGImageAlphaPremultipliedFirst);
-	
-	if (glob->plaintext) {
-		SSA_RenderLine(glob,c,(CFStringRef)@"Hello World!",640,480);
-	} else {
-		int i;
-		for (i = 0; i < glob->document->stylecount; i++) {
-			ssastyleline *s = &glob->document->styles[i];
-			NSString *line = [NSString stringWithFormat:@"0,0,%@,,0000,0000,0000,,Hello World!",s->name];
-			SSA_RenderLine(glob,c,(CFStringRef)line,640,480);
-		}
-	}
-	
-	CGContextRelease(c);
-	free(fakebuf);
-	CGColorSpaceRelease(csp);
-	[pool release];
+	return [[SubATSUIRenderer alloc] initWithVideoAspectRatio:(float)width/(float)height];
 }
+
+extern CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s)
+{
+	return s->srgbCSpace;
+}
+
+extern void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
+{
+	[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
+}
+
+extern void SubDisposeRenderer(SubtitleRendererPtr s)
+{
+	[s release];
+}
+@end
+

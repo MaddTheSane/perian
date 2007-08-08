@@ -884,7 +884,7 @@ MatroskaTrack::MatroskaTrack()
 	durationToAdd = 0;
 	displayOffsetSum = 0;
 	durationSinceZeroSum = 0;
-	subtitleSerializer = new CXXSubtitleSerializer;
+	subtitleSerializer = new CXXSubSerializer;
 	subDataRefHandler = NULL;
 	is_vobsub = false;
 	isEnabled = true;

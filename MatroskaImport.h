@@ -112,7 +112,7 @@ public:
 	QTSampleDescriptionID	qtSampleDesc;
 	SInt64					timecodeScale;
 	TimeValue64				maxLoadedTime;
-	CXXSubtitleSerializer	*subtitleSerializer;
+	CXXSubSerializer		*subtitleSerializer;
 	Handle					subDataRefHandler;
 	uint8					isEnabled;
 	uint32_t				defaultDuration;

@@ -15,7 +15,7 @@
 const UInt8 kNumPixelFormatsSupportedTextSub = 1;
 
 // Data structures
-typedef struct	{
+typedef struct TextSubGlobalsRecord {
 	ComponentInstance		self;
 	ComponentInstance		delegateComponent;
 	ComponentInstance		target;
@@ -24,7 +24,7 @@ typedef struct	{
 	
 	CGColorSpaceRef         colorSpace;
 
-	SSARenderGlobalsPtr		ssa;
+	SubtitleRendererPtr		ssa;
 	Boolean					translateSRT;
 } TextSubGlobalsRecord, *TextSubGlobals;
 
@@ -96,6 +96,7 @@ pascal ComponentResult TextSubCodecOpen(TextSubGlobals glob, ComponentInstance s
 	if (err = MemError()) goto bail;
 	glob->drawBandUPP = NULL;
 	glob->ssa = NULL;
+	glob->colorSpace = NULL;
 	
 	// Open and target an instance of the base decompressor as we delegate
 	// most of our calls to the base decompressor instance
@@ -125,7 +126,7 @@ pascal ComponentResult TextSubCodecClose(TextSubGlobals glob, ComponentInstance 
 		if (glob->colorSpace) {
 			CGColorSpaceRelease(glob->colorSpace);
 		}
-		if (glob->ssa) SSA_Dispose(glob->ssa);
+		if (glob->ssa) SubDisposeRenderer(glob->ssa);
 		DisposePtr((Ptr)glob);
 	}
 
@@ -182,6 +183,7 @@ pascal ComponentResult TextSubCodecInitialize(TextSubGlobals glob, ImageSubCodec
 	cap->canAsync = true;
 	
 	cap->subCodecIsMultiBufferAware = true;
+	cap->subCodecSupportsDecodeSmoothing = true;
 
 	return noErr;
 }
@@ -225,9 +227,7 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 	capabilities->extendWidth = 0;
 	capabilities->extendHeight = 0;
 	
-	if (glob->colorSpace == NULL)
-		glob->colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-	
+	glob->colorSpace = NULL;
 	glob->translateSRT = true;
 	glob->ssa = NULL;
 	
@@ -269,13 +269,15 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 				Handle ssaheader;
 				GetImageDescriptionExtension(p->imageDescription,&ssaheader,kSubFormatSSA,1);
 				
-				glob->ssa = SSA_Init(*ssaheader, GetHandleSize(ssaheader), myDrp->width, myDrp->height);
+				glob->ssa = SubInitForSSA(*ssaheader, GetHandleSize(ssaheader), myDrp->width, myDrp->height);
 			} 
 		} 
 		
-		if (!glob->ssa) glob->ssa = SSA_InitNonSSA(myDrp->width,myDrp->height);
+		if (!glob->ssa) glob->ssa = SubInitNonSSA(myDrp->width,myDrp->height);
 		
-		SSA_PrerollFonts(glob->ssa);
+		//SSA_PrerollFonts(glob->ssa);
+		
+		glob->colorSpace = SubGetColorSpace(glob->ssa);
 	}
 	
 	return noErr;
@@ -314,7 +316,9 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 		if (!buf) return noErr;
 	}
 	
-	SSA_RenderLine(glob->ssa,c,buf,myDrp->width,myDrp->height);
+	CGContextClearRect(c, CGRectMake(0,0, myDrp->width, myDrp->height));
+
+	SubRenderPacket(glob->ssa,c,buf,myDrp->width,myDrp->height);
 	
 	CFRelease(buf);
 	CGContextSynchronize(c);

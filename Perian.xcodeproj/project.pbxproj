@@ -486,6 +486,7 @@
 		3D211A220B6B1A660051299D /* SubUtilities.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = SubUtilities.m; path = Subtitles/SubUtilities.m; sourceTree = "<group>"; };
 		3D211A2E0B6B1AD80051299D /* SubParsing.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubParsing.h; path = Subtitles/SubParsing.h; sourceTree = "<group>"; };
 		3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; name = SubParsing.m.rl; path = Subtitles/SubParsing.m.rl; sourceTree = "<group>"; };
+		3D2623160C6A60B700FD1242 /* SubRenderer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubRenderer.h; path = Subtitles/SubRenderer.h; sourceTree = "<group>"; };
 		3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UniversalDetector.xcodeproj; path = UniversalDetector/UniversalDetector.xcodeproj; sourceTree = "<group>"; };
 		3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = UniversalDetector.h; path = UniversalDetector/UniversalDetector.h; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
@@ -819,8 +820,6 @@
 				61D517710AE0402E00A671E1 /* CommonUtils.h */,
 				61D517720AE0402E00A671E1 /* CommonUtils.c */,
 				6116E74E0B4738CE0020F1CE /* CodecIDs.h */,
-				3D211A210B6B1A660051299D /* SubUtilities.h */,
-				3D211A220B6B1A660051299D /* SubUtilities.m */,
 				3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */,
 			);
 			name = Source;
@@ -933,21 +932,24 @@
 		6123D61D0AD0A052003EDE52 /* Subtitles */ = {
 			isa = PBXGroup;
 			children = (
-				3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */,
-				3D211A2E0B6B1AD80051299D /* SubParsing.h */,
-				3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */,
+				3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */,
+				3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */,
 				3D211A1E0B6B1A540051299D /* SubContext.h */,
 				3D211A1F0B6B1A540051299D /* SubContext.m */,
-				613CD51A0AD1FB650098A825 /* TextSubCodec.c */,
-				613CD51B0AD1FB650098A825 /* TextSubCodec.h */,
-				613CD51D0AD1FB650098A825 /* TextSubCodecDispatch.h */,
+				3D211A2E0B6B1AD80051299D /* SubParsing.h */,
+				3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */,
+				61D514DC0ADF3DBA00A671E1 /* SubImport.h */,
+				61D514DD0ADF3DBA00A671E1 /* SubImport.mm */,
+				3D2623160C6A60B700FD1242 /* SubRenderer.h */,
+				3D211A210B6B1A660051299D /* SubUtilities.h */,
+				3D211A220B6B1A660051299D /* SubUtilities.m */,
+				3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */,
 				6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */,
 				6123D6230AD0A3FE003EDE52 /* VobSubCodec.h */,
 				6123D6250AD0A3FF003EDE52 /* VobSubCodecDispatch.h */,
-				61D514DC0ADF3DBA00A671E1 /* SubImport.h */,
-				61D514DD0ADF3DBA00A671E1 /* SubImport.mm */,
-				3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */,
-				3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */,
+				613CD51A0AD1FB650098A825 /* TextSubCodec.c */,
+				613CD51B0AD1FB650098A825 /* TextSubCodec.h */,
+				613CD51D0AD1FB650098A825 /* TextSubCodecDispatch.h */,
 			);
 			name = Subtitles;
 			sourceTree = "<group>";

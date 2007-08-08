@@ -1,69 +1,56 @@
-/*
- *  SSARenderCodec.m
- *  Copyright (c) 2007 Perian Project
- *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; 
- *  version 2.1 of the License.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- */
+//
+//  SubContext.h
+//  SSARender2
+//
+//  Created by Alexander Strange on 7/28/07.
+//  Copyright 2007 __MyCompanyName__. All rights reserved.
+//
 
 #import <Cocoa/Cocoa.h>
-#import "SubImport.h"
+#import "SubRenderer.h"
 
-enum {S_LeftAlign = 0, S_CenterAlign, S_RightAlign};
-enum {S_BottomAlign = 0, S_MiddleAlign, S_TopAlign};
+enum {kSubTypeSSA, kSubTypeASS, kSubTypeSRT};
+enum {kSubCollisionsNormal, kSubCollisionsReverse};
+enum {kSubLineWrapTopWider = 0, kSubLineWrapSimple, kSubLineWrapNone, kSubLineWrapBottomWider};
+enum {kSubAlignmentLeft, kSubAlignmentCenter, kSubAlignmentRight};
+enum {kSubAlignmentBottom, kSubAlignmentMiddle, kSubAlignmentTop};
 
-typedef struct ssacolors {
-	ATSURGBAlphaColor primary, secondary, outline, shadow;
-} ssacolors;
+typedef ATSURGBAlphaColor SubRGBAColor;
 
-typedef struct ssastyleline {
-	NSString *name, *font;
-	float fsize;
-	ssacolors color;
-	Boolean bold, italic, underline, strikeout;
-	float scalex, scaley, tracking, angle;
-	int borderstyle;
-	float outline, shadow;
-	int alignment, halign, valign;
-	int marginl, marginr, marginv;
-	ATSUTextLayout layout;
-	ATSUStyle atsustyle;
-	int usablewidth;
-} ssastyleline;
-
-@interface SSADocument : NSObject {
-	NSArray *_lines;
-	NSString *header;
-	
-	@public
-		
-	int stylecount;
-	ssastyleline *styles;
-	ssastyleline *defaultstyle;
-	
-	float resX, resY;
-	double timescale;
-	enum {NormalCollisions, ReverseCollisions} collisiontype;
-	enum {S_ASS, S_SSA} version;
-	Boolean disposedefaultstyle;
+@interface SubStyle : NSObject {	
+	@public;
+	NSString *name;
+	NSString *fontname;
+	Float32 size;
+	SubRGBAColor primaryColor, secondaryColor, outlineColor, shadowColor;
+	Float32 scaleX, scaleY, tracking, angle;
+	Float32 outlineRadius, shadowDist;
+	unsigned marginL, marginR, marginV;
+	BOOL bold, italic, underline, strikeout;
+	UInt8 alignH, alignV, borderStyle;
+	void* ex;
+	SubRenderer *delegate;
 }
--(NSString *)header;
--(SubLine *)movPacket:(int)i;
--(void) loadHeader:(NSString*)path width:(float)width height:(float)height;
--(unsigned)packetCount;
--(void)loadDefaultsWithWidth:(float)width height:(float)height;
++(SubStyle*)defaultStyleWithDelegate:(SubRenderer*)delegate;
+-(SubStyle*)initWithDictionary:(NSDictionary *)s scriptVersion:(UInt8)version delegate:(SubRenderer *)renderer;
 @end
 
-extern int SSA2ASSAlignment(int a);
+@interface SubContext : NSObject {
+	@public;
+	
+	float resX, resY;
+	UInt8 scriptType, collisions, wrapStyle;
+	NSDictionary *styles; SubStyle *defaultStyle;
+	NSDictionary *headers;
+	NSString *headertext;
+}
+
+-(SubContext*)initWithHeaders:(NSDictionary *)headers styles:(NSArray *)styles extraData:(NSString *)ed delegate:(SubRenderer*)delegate;
+-(SubContext*)initWithNonSSAType:(UInt8)type delegate:(SubRenderer*)delegate;
+-(SubStyle*)styleForName:(NSString *)name;
+-(void)fixupResForVideoAspectRatio:(float)aspect;
+@end
+
+extern UInt8 SSA2ASSAlignment(UInt8 a);
+void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV);
+extern SubRGBAColor ParseSSAColor(unsigned rgb);

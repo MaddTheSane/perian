@@ -1,22 +1,21 @@
 //
-//  Categories.h
-//  SSAView
+//  SubUtilities.h
+//  SSARender2
 //
-//  Created by Alexander Strange on 1/18/07.
-//  Copyright 2007 Perian Project. All rights reserved.
+//  Created by Alexander Strange on 7/28/07.
+//  Copyright 2007 __MyCompanyName__. All rights reserved.
 //
 
 #import <Cocoa/Cocoa.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 	
-extern NSCharacterSet *STWhitespaceAndBomCharacterSet();
-
-extern NSString *STStringByStandardizingNewlines(NSString *st);
-extern NSArray *STPairSeparatedByString(NSString *st, NSString *split);
-extern NSArray *STSplitStringWithCount(NSString *st, NSString *split, int count);
+extern NSArray *STSplitStringIgnoringWhitespace(NSString *str, NSString *split);
+extern NSArray *STSplitStringWithCount(NSString *str, NSString *split, size_t count);
+extern NSMutableString *STStandardizeStringNewlines(NSString *str);
 extern NSString *STLoadFileWithUnknownEncoding(NSString *path);
 
 #ifdef __cplusplus
