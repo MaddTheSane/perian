@@ -104,13 +104,13 @@
 		11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */; };
 		11F28DAD0B52EB75000AF78C /* SUUpdateAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */; };
 		3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
-		3D211A200B6B1A540051299D /* SSADocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SSADocument.m */; };
-		3D211A230B6B1A660051299D /* Categories.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* Categories.m */; };
-		3D211A300B6B1AD80051299D /* SSATagParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */; };
+		3D211A200B6B1A540051299D /* SubContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SubContext.m */; };
+		3D211A230B6B1A660051299D /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
+		3D211A300B6B1AD80051299D /* SubParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */; };
 		3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
 		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; settings = {COMPILER_FLAGS = "-O3 -fno-reorder-blocks -fweb"; }; };
 		3DAD32DA0B6DB26100DA0A72 /* StdIOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB114D0ACDF3C2007994BD /* StdIOCallback.cpp */; };
-		3DB2BB290B6C92F000416863 /* SSARenderCodec.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SSARenderCodec.m */; };
+		3DB2BB290B6C92F000416863 /* SubATSUIRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
 		6116E5530B43C27B0020F1CE /* ACSimpleCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E53E0B43C27B0020F1CE /* ACSimpleCodec.cpp */; };
@@ -262,7 +262,7 @@
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).dot",
 			);
-			script = "RAGEL=${PROJECT_DIR}/ragel\nRLCODEGEN=${PROJECT_DIR}/rlcodegen\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} || exit\n";
+			script = "RAGEL=${PROJECT_DIR}/Subtitles/ragel\nRLCODEGEN=${PROJECT_DIR}/Subtitles/rlgen-cd\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
 		};
 /* End PBXBuildRule section */
 
@@ -480,18 +480,18 @@
 		11D4EFA30A3CE8C10066D45F /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpostproc.a; path = build/Universal/libpostproc.a; sourceTree = "<group>"; };
 		11F28DAB0B52EB75000AF78C /* SUUpdateAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUUpdateAlert.h; sourceTree = "<group>"; };
 		11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUUpdateAlert.m; sourceTree = "<group>"; };
-		3D211A1E0B6B1A540051299D /* SSADocument.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SSADocument.h; sourceTree = "<group>"; };
-		3D211A1F0B6B1A540051299D /* SSADocument.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SSADocument.m; sourceTree = "<group>"; };
-		3D211A210B6B1A660051299D /* Categories.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = Categories.h; sourceTree = "<group>"; };
-		3D211A220B6B1A660051299D /* Categories.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = Categories.m; sourceTree = "<group>"; };
-		3D211A2E0B6B1AD80051299D /* SSATagParsing.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SSATagParsing.h; sourceTree = "<group>"; };
-		3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = SSATagParsing.m.rl; sourceTree = "<group>"; };
+		3D211A1E0B6B1A540051299D /* SubContext.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubContext.h; path = Subtitles/SubContext.h; sourceTree = "<group>"; };
+		3D211A1F0B6B1A540051299D /* SubContext.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = SubContext.m; path = Subtitles/SubContext.m; sourceTree = "<group>"; };
+		3D211A210B6B1A660051299D /* SubUtilities.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubUtilities.h; path = Subtitles/SubUtilities.h; sourceTree = "<group>"; };
+		3D211A220B6B1A660051299D /* SubUtilities.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = SubUtilities.m; path = Subtitles/SubUtilities.m; sourceTree = "<group>"; };
+		3D211A2E0B6B1AD80051299D /* SubParsing.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubParsing.h; path = Subtitles/SubParsing.h; sourceTree = "<group>"; };
+		3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; name = SubParsing.m.rl; path = Subtitles/SubParsing.m.rl; sourceTree = "<group>"; };
 		3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UniversalDetector.xcodeproj; path = UniversalDetector/UniversalDetector.xcodeproj; sourceTree = "<group>"; };
 		3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = UniversalDetector.h; path = UniversalDetector/UniversalDetector.h; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
-		3DB2BB270B6C92F000416863 /* SSARenderCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSARenderCodec.h; sourceTree = "<group>"; };
-		3DB2BB280B6C92F000416863 /* SSARenderCodec.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSARenderCodec.m; sourceTree = "<group>"; };
+		3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubATSUIRenderer.h; path = Subtitles/SubATSUIRenderer.h; sourceTree = "<group>"; };
+		3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SubATSUIRenderer.m; path = Subtitles/SubATSUIRenderer.m; sourceTree = "<group>"; };
 		6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACBaseCodec.cpp; sourceTree = "<group>"; };
 		6116E5380B43C27B0020F1CE /* ACBaseCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACBaseCodec.h; sourceTree = "<group>"; };
 		6116E5390B43C27B0020F1CE /* ACCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACCodec.cpp; sourceTree = "<group>"; };
@@ -627,8 +627,8 @@
 		61CB11C90ACDF50F007994BD /* KaxTracks.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTracks.cpp; path = libmatroska/src/KaxTracks.cpp; sourceTree = "<group>"; };
 		61CB11CA0ACDF50F007994BD /* KaxTrackVideo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTrackVideo.cpp; path = libmatroska/src/KaxTrackVideo.cpp; sourceTree = "<group>"; };
 		61CB11CB0ACDF50F007994BD /* KaxVersion.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxVersion.cpp; path = libmatroska/src/KaxVersion.cpp; sourceTree = "<group>"; };
-		61D514DC0ADF3DBA00A671E1 /* SubImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubImport.h; sourceTree = "<group>"; };
-		61D514DD0ADF3DBA00A671E1 /* SubImport.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = SubImport.mm; sourceTree = "<group>"; };
+		61D514DC0ADF3DBA00A671E1 /* SubImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubImport.h; path = Subtitles/SubImport.h; sourceTree = "<group>"; };
+		61D514DD0ADF3DBA00A671E1 /* SubImport.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = SubImport.mm; path = Subtitles/SubImport.mm; sourceTree = "<group>"; };
 		61D517710AE0402E00A671E1 /* CommonUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommonUtils.h; sourceTree = "<group>"; };
 		61D517720AE0402E00A671E1 /* CommonUtils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CommonUtils.c; sourceTree = "<group>"; };
 		61D6914E0AC8E382000EFC7D /* DataHandlerCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DataHandlerCallback.cpp; sourceTree = "<group>"; };
@@ -819,8 +819,8 @@
 				61D517710AE0402E00A671E1 /* CommonUtils.h */,
 				61D517720AE0402E00A671E1 /* CommonUtils.c */,
 				6116E74E0B4738CE0020F1CE /* CodecIDs.h */,
-				3D211A210B6B1A660051299D /* Categories.h */,
-				3D211A220B6B1A660051299D /* Categories.m */,
+				3D211A210B6B1A660051299D /* SubUtilities.h */,
+				3D211A220B6B1A660051299D /* SubUtilities.m */,
 				3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */,
 			);
 			name = Source;
@@ -934,10 +934,10 @@
 			isa = PBXGroup;
 			children = (
 				3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */,
-				3D211A2E0B6B1AD80051299D /* SSATagParsing.h */,
-				3D211A2F0B6B1AD80051299D /* SSATagParsing.m.rl */,
-				3D211A1E0B6B1A540051299D /* SSADocument.h */,
-				3D211A1F0B6B1A540051299D /* SSADocument.m */,
+				3D211A2E0B6B1AD80051299D /* SubParsing.h */,
+				3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */,
+				3D211A1E0B6B1A540051299D /* SubContext.h */,
+				3D211A1F0B6B1A540051299D /* SubContext.m */,
 				613CD51A0AD1FB650098A825 /* TextSubCodec.c */,
 				613CD51B0AD1FB650098A825 /* TextSubCodec.h */,
 				613CD51D0AD1FB650098A825 /* TextSubCodecDispatch.h */,
@@ -946,8 +946,8 @@
 				6123D6250AD0A3FF003EDE52 /* VobSubCodecDispatch.h */,
 				61D514DC0ADF3DBA00A671E1 /* SubImport.h */,
 				61D514DD0ADF3DBA00A671E1 /* SubImport.mm */,
-				3DB2BB270B6C92F000416863 /* SSARenderCodec.h */,
-				3DB2BB280B6C92F000416863 /* SSARenderCodec.m */,
+				3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */,
+				3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */,
 			);
 			name = Subtitles;
 			sourceTree = "<group>";
@@ -1589,7 +1589,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D211A300B6B1AD80051299D /* SSATagParsing.m.rl in Sources */,
+				3D211A300B6B1AD80051299D /* SubParsing.m.rl in Sources */,
 				11C85ED80A641E6400DF3D73 /* ff_dataref.c in Sources */,
 				11C85EDA0A641E6400DF3D73 /* ff_private.c in Sources */,
 				11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */,
@@ -1614,9 +1614,9 @@
 				61FD41330B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp in Sources */,
 				F52286260B50625E00F8CF7D /* bitstream_info.c in Sources */,
 				3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */,
-				3D211A200B6B1A540051299D /* SSADocument.m in Sources */,
-				3D211A230B6B1A660051299D /* Categories.m in Sources */,
-				3DB2BB290B6C92F000416863 /* SSARenderCodec.m in Sources */,
+				3D211A200B6B1A540051299D /* SubContext.m in Sources */,
+				3D211A230B6B1A660051299D /* SubUtilities.m in Sources */,
+				3DB2BB290B6C92F000416863 /* SubATSUIRenderer.m in Sources */,
 				3DAD32DA0B6DB26100DA0A72 /* StdIOCallback.cpp in Sources */,
 				6156986F0BCDA87700E17ADE /* ringbuffer.cpp in Sources */,
 				F57676060BE1A18300B2434B /* FrameBuffer.c in Sources */,

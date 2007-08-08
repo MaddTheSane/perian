@@ -18,8 +18,8 @@
  *
  */
 
-#import "SSATagParsing.h"
-#import "Categories.h"
+#import "SubParsing.h"
+#import "SubUtilities.h"
 
 @implementation SSAStyleSpan
 -(void)dealloc

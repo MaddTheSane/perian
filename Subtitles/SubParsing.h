@@ -19,7 +19,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "SSADocument.h"
+#import "SubContext.h"
 
 @interface SSAStyleSpan : NSObject
 {

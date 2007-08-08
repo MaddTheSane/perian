@@ -9,7 +9,7 @@
 #endif
 
 #include "TextSubCodec.h"
-#include "SSARenderCodec.h"
+#include "SubATSUIRenderer.h"
 
 // Constants
 const UInt8 kNumPixelFormatsSupportedTextSub = 1;

@@ -6,7 +6,7 @@
 //  Copyright 2007 Perian Project. All rights reserved.
 //
 
-#import "Categories.h"
+#import "SubUtilities.h"
 #import "UniversalDetector.h"
 #import "Codecprintf.h"
 

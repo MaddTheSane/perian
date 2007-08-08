@@ -18,8 +18,8 @@
  *
  */
 
-#import "SSADocument.h"
-#import "Categories.h"
+#import "SubContext.h"
+#import "SubUtilities.h"
 #include "SubImport.h"
 #include "Codecprintf.h"
 

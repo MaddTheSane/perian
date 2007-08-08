@@ -18,9 +18,9 @@
  *
  */
 
-#import "SSARenderCodec.h"
-#import "SSADocument.h"
-#import "SSATagParsing.h"
+#import "SubATSUIRenderer.h"
+#import "SubContext.h"
+#import "SubParsing.h"
 
 typedef struct SSARenderGlobals
 {
