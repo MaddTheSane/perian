@@ -503,6 +503,8 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	
 	// get more info about the codec
 	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
+	if(asbd.mChannelsPerFrame == 0)
+		asbd.mChannelsPerFrame = 1;		// avoid a div by zero
 	
 	acl = GetDefaultChannelLayout(&asbd);
 	
