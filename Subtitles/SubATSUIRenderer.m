@@ -197,7 +197,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	
 	ATSUFontID font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)s->fontname,kATSOptionFlagsDefault));
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
-	Fixed size = FloatToFixed(s->size * (72./96.));
+	Fixed size = FloatToFixed(s->size * kVSFilterFontScale);
 	Boolean b = s->bold, i = s->italic, u = s->underline, st = s->strikeout;
 	ATSUStyle style;
 		
@@ -312,7 +312,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_fs:
 			fv();
-			fixval = FloatToFixed(fval * (72./96.));
+			fixval = FloatToFixed(fval * kVSFilterFontScale);
 			SetATSUStyleOther(spanEx->style, kATSUSizeTag, sizeof(Fixed), &fixval);
 			break;
 		case tag_1c:
@@ -377,7 +377,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			if (!isFirstSpan) div->render_complexity |= renderMultipleParts | renderManualShadows;
 			{
 				SubStyle *style = [context->styles objectForKey:sval];
-				if (!style) style = context->defaultStyle;
+				if (!style) style = div->styleLine;
 				
 				[spanEx release];
 				span->ex = [[SubATSUISpanEx alloc] initWithStyle:(ATSUStyle)style->ex subStyle:style colorSpace:srgbCSpace];
@@ -586,7 +586,7 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 		
 		if (!(div->render_complexity & renderMultipleParts)) {
 			ATSUDrawText(layout, thisBreak, linelen, RoundFixed(penX), RoundFixed(penY));
-			extraHeight = div->styleLine->outlineRadius*2. + .5;
+			extraHeight = div->styleLine->outlineRadius;
 		} else {
 			int j, spans = [div->spans count];
 			for (j = 0; j < spans; j++) {
@@ -614,7 +614,7 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 				endLayer = SetupCGForSpan(c, spanEx, lastSpanEx, textType, endLayer);
 				ATSUDrawText(layout, drawStart, drawLen, RoundFixed((textType == kTextLayerShadow) ? (penX + FloatToFixed(spanEx->shadowDist)) : penX), 
 														 RoundFixed((textType == kTextLayerShadow) ? (penY - FloatToFixed(spanEx->shadowDist)) : penY));
-				extraHeight = MAX(extraHeight, spanEx->outlineRadius*2. + .5);
+				extraHeight = MAX(extraHeight, spanEx->outlineRadius);
 			}
 		
 		}

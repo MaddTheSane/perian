@@ -9,6 +9,9 @@
 #import <Cocoa/Cocoa.h>
 #import "SubRenderer.h"
 
+//you'd think VSFilter would use 72dpi (scale by 1) or 96dpi (scale by .75) but it doesn't
+#define kVSFilterFontScale .9
+
 enum {kSubTypeSSA, kSubTypeASS, kSubTypeSRT};
 enum {kSubCollisionsNormal, kSubCollisionsReverse};
 enum {kSubLineWrapTopWider = 0, kSubLineWrapSimple, kSubLineWrapNone, kSubLineWrapBottomWider};

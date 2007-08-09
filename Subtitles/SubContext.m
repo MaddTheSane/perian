@@ -69,7 +69,7 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 	
 	sty->name = @"*Default";
 	sty->fontname = @"Helvetica";
-	sty->size = 32 * (96./72.);
+	sty->size = 32 / kVSFilterFontScale;
 	sty->primaryColor = (SubRGBAColor){1,1,1,1};
 	sty->outlineColor = (SubRGBAColor){0,0,0,1};
 	sty->shadowColor = (SubRGBAColor){0,0,0,1};
