@@ -14,12 +14,12 @@
 	SubContext *context;
 	unichar *ubuffer;
 	ATSUTextLayout layout;
-	float videoAspect;
+	float screenScaleX, screenScaleY, origWidth, origHeight;
 	@public;
 	CGColorSpaceRef srgbCSpace;
 }
--(SubATSUIRenderer*)initWithVideoAspectRatio:(float)aspect;
--(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoAspectRatio:(float)aspect;
+-(SubATSUIRenderer*)initWithVideoWidth:(float)width videoHeight:(float)height;
+-(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoWidth:(float)width videoHeight:(float)height;
 -(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(float)cWidth height:(float)cHeight;
 @end
 

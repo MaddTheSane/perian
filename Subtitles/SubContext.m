@@ -69,7 +69,8 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 	
 	sty->name = @"*Default";
 	sty->fontname = @"Helvetica";
-	sty->size = 32 / kVSFilterFontScale;
+	sty->platformSizeScale = kVSFilterFontScale;
+	sty->size = 32 / sty->platformSizeScale * sqrt([delegate aspectRatio] / (4./3.));
 	sty->primaryColor = (SubRGBAColor){1,1,1,1};
 	sty->outlineColor = (SubRGBAColor){0,0,0,1};
 	sty->shadowColor = (SubRGBAColor){0,0,0,1};
@@ -132,6 +133,7 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 		
 		ParseASSAlignment(align, &alignH, &alignV);
 		
+		platformSizeScale = kVSFilterFontScale;
 		ex = [delegate completedStyleParsing:self];
 	}
 	
@@ -161,20 +163,17 @@ BOOL IsScriptASS(NSDictionary *headers)
 	wrapStyle = [[headers objectForKey:@"WrapStyle"] intValue];
 	
 	NSString *resXS = [headers objectForKey:@"PlayResX"], *resYS = [headers objectForKey:@"PlayResY"];
-	resX = resXS ? [resXS floatValue] : 0.;
-	resY = resYS ? [resYS floatValue] : 0.;
-}
-
--(void)fixupResForVideoAspectRatio:(float)aspect
-{
-	BOOL hasX = resX > 0, hasY = resY > 0;
 	
-	if (!hasX && !hasY) {
-		resX = 384; resY = 288; // SSA default res
-	} else if (!hasX) {
-		resX = resY * aspect;
-	} else if (!hasY) {
-		resY = resX / aspect;
+	if (resXS) resX = [resXS floatValue];
+	if (resYS) resY = [resYS floatValue];
+	
+	// obscure res rules copied from VSFilter
+	if (!resXS && !resYS) {
+		resX = 384; resX = 388;
+	} else if (!resYS) {
+		resY = (resX == 1280) ? 1024 : (resX / (4./3.));
+	} else if (!resXS) {
+		resX = (resY == 1024) ? 1280 : (resY * (4./3.));
 	}
 }
 
@@ -213,16 +212,16 @@ BOOL IsScriptASS(NSDictionary *headers)
 -(SubContext*)initWithNonSSAType:(UInt8)type delegate:(SubRenderer*)delegate
 {
 	if (self = [super init]) {
-		resX = 0;
+		resX = 640;
 		resY = 480;
 		scriptType = type;
 		collisions = kSubCollisionsNormal;
 		wrapStyle = kSubLineWrapBottomWider;
 		styles = headers = nil;
 		headertext = nil;
-		defaultStyle = [[SubStyle defaultStyleWithDelegate:delegate] retain];
-		
 		[delegate completedHeaderParsing:self];
+
+		defaultStyle = [[SubStyle defaultStyleWithDelegate:delegate] retain];		
 	}
 	
 	return self;
@@ -252,4 +251,5 @@ BOOL IsScriptASS(NSDictionary *headers)
 -(void)spanChangedTag:(SSATagType)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p {}
 -(void)releaseStyleExtra:(void*)ex {}
 -(void)releaseSpanExtra:(void*)ex {}
+-(float)aspectRatio {return 4./3.;}
 @end

@@ -22,4 +22,5 @@ typedef enum {tag_b=0, tag_i, tag_u, tag_s, tag_bord, tag_shad, tag_be, tag_fn, 
 -(void*)cloneSpanExtra:(SubRenderSpan*)span;
 -(void)releaseSpanExtra:(void*)ex;
 -(void)spanChangedTag:(SSATagType)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p;
+-(float)aspectRatio;
 @end

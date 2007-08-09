@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SubRenderer.h"
 
-//you'd think VSFilter would use 72dpi (scale by 1) or 96dpi (scale by .75) but it doesn't
+// approximation, real value must be determined from truetype fields
 #define kVSFilterFontScale .9
 
 enum {kSubTypeSSA, kSubTypeASS, kSubTypeSRT};
@@ -32,6 +32,7 @@ typedef ATSURGBAlphaColor SubRGBAColor;
 	BOOL bold, italic, underline, strikeout;
 	UInt8 alignH, alignV, borderStyle;
 	void* ex;
+	Float32 platformSizeScale;
 	SubRenderer *delegate;
 }
 +(SubStyle*)defaultStyleWithDelegate:(SubRenderer*)delegate;
@@ -51,7 +52,6 @@ typedef ATSURGBAlphaColor SubRGBAColor;
 -(SubContext*)initWithHeaders:(NSDictionary *)headers styles:(NSArray *)styles extraData:(NSString *)ed delegate:(SubRenderer*)delegate;
 -(SubContext*)initWithNonSSAType:(UInt8)type delegate:(SubRenderer*)delegate;
 -(SubStyle*)styleForName:(NSString *)name;
--(void)fixupResForVideoAspectRatio:(float)aspect;
 @end
 
 extern UInt8 SSA2ASSAlignment(UInt8 a);

@@ -126,7 +126,7 @@ void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSA
 	const unichar *p = ssa, *pe = ssa + len, *strbegin = p;
 	int cs=0;
 	
-	NSMutableDictionary *hd = [[NSMutableDictionary alloc] init];
+	NSMutableDictionary *hd = [NSMutableDictionary dictionary];
 	NSMutableArray *stylearr = [NSMutableArray array], *eventarr = [NSMutableArray array], *cur_array=NULL;
 	NSCharacterSet *wcs = [NSCharacterSet whitespaceCharacterSet];
 	NSString *str=NULL, *styleformat=NULL, *eventformat=NULL;
@@ -431,6 +431,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			%%write eof;
 
 			if (!reached_end) NSLog(@"parse error: %@",inputText);
+			if (linebuf[linelen-1] == '\\') [div->text appendString:@"\\"];
 			[divs addObject:div];
 		}
 		

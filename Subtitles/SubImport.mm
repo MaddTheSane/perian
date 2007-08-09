@@ -142,9 +142,9 @@ static NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
 	if (subdata[slen-1] != '\n') subdata[slen++] = '\n'; // append newline if missing
 	
 	NSDictionary *headers;
-	NSArray *styles, *subs;
+	NSArray *subs;
 	
-	SubParseSSAFile(subdata, slen, &headers, &styles, &subs);
+	SubParseSSAFile(subdata, slen, &headers, NULL, &subs);
 	free(subdata);
 	
 	int i, numlines = [subs count];

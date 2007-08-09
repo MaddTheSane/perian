@@ -298,32 +298,49 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 {
 	TextSubDecompressRecord *myDrp = (TextSubDecompressRecord *)drp->userDecompressRecord;
 	
+	
     CGContextRef c = CGBitmapContextCreate(drp->baseAddr, myDrp->width, myDrp->height,
 										   8, drp->rowBytes,  glob->colorSpace,
 										   kCGImageAlphaPremultipliedFirst);
 	
+	CGContextClearRect(c, CGRectMake(0,0, myDrp->width, myDrp->height));
+	
 	CFMutableStringRef buf;
+	
+	if (drp->codecData[0] == '\n' && myDrp->dataSize == 1) goto leave; // skip empty packets
 	
 	if (glob->translateSRT) {
 		buf = CFStringCreateMutableWithBytes(NULL, drp->codecData, myDrp->dataSize, kCFStringEncodingUTF8);
-		if (!buf) return noErr;
+		if (!buf) goto leave;
 		CFStringFindAndReplace(buf, CFSTR("<i>"),  CFSTR("{\\i1}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
 		CFStringFindAndReplace(buf, CFSTR("</i>"), CFSTR("{\\i0}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
 		CFStringFindAndReplace(buf, CFSTR("<"),    CFSTR("{"),      CFRangeMake(0,CFStringGetLength(buf)), 0);
 		CFStringFindAndReplace(buf, CFSTR(">"),    CFSTR("}"),      CFRangeMake(0,CFStringGetLength(buf)), 0);
 	} else {
 		buf = (CFMutableStringRef)CFStringCreateWithBytes(NULL, (UInt8*)drp->codecData, myDrp->dataSize, kCFStringEncodingUTF8, false);
-		if (!buf) return noErr;
+		if (!buf) goto leave;
 	}
 	
-	CGContextClearRect(c, CGRectMake(0,0, myDrp->width, myDrp->height));
-
 	SubRenderPacket(glob->ssa,c,buf,myDrp->width,myDrp->height);
 	
-	CFRelease(buf);
-	CGContextSynchronize(c);
-	CGContextRelease(c);
+#if 0
+	{
+		CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, "/subtitle.pdf", strlen("/subtitle.pdf"), 0);
+		CGRect rect = CGRectMake(0,0, myDrp->width, myDrp->height);
+		CGContextRef pc = CGPDFContextCreateWithURL(url, &rect, NULL);
+		
+		CGPDFContextBeginPage(pc, NULL);
+		SubRenderPacket(glob->ssa,pc,buf,myDrp->width,myDrp->height);
+		CGPDFContextEndPage(pc);
+		CGContextRelease(pc);
+		CFRelease(url);
+	}
+#endif
 	
+	CFRelease(buf);
+	
+leave:
+	CGContextRelease(c);
 	return noErr;
 }
 

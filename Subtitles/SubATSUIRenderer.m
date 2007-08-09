@@ -143,22 +143,23 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	return ret;
 }
 
--(SubATSUIRenderer*)initWithVideoAspectRatio:(float)aspect;
+-(SubATSUIRenderer*)initWithVideoWidth:(float)width videoHeight:(float)height;
 {
 	if (self = [super init]) {
-		videoAspect = aspect;
 		ATSUCreateTextLayout(&layout);
 		ubuffer = malloc(sizeof(unichar) * 128);
 		srgbCSpace = GetSRGBColorSpace();
 		
-		context = [[SubContext alloc] initWithNonSSAType:kSubTypeSRT delegate:self];
-		[context fixupResForVideoAspectRatio:aspect];
+		origWidth = width;
+		origHeight = height;
+		
+		[[SubContext alloc] initWithNonSSAType:kSubTypeSRT delegate:self];
 	}
 	
 	return self;
 }
 
--(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoAspectRatio:(float)aspect;
+-(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoWidth:(float)width videoHeight:(float)height;
 {
 	if (self = [super init]) {
 		unsigned hlength = [header length];
@@ -173,11 +174,14 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 		free(uheader);
 		
 		ubuffer = malloc(sizeof(unichar) * 128);
-		videoAspect = aspect;
-		context = [[SubContext alloc] initWithHeaders:headers styles:styles extraData:header delegate:self];
-		[context fixupResForVideoAspectRatio:aspect];
+		
+		origWidth = width;
+		origHeight = height;
+		
 		ATSUCreateTextLayout(&layout);
 		srgbCSpace = GetSRGBColorSpace();
+		
+		[[SubContext alloc] initWithHeaders:headers styles:styles extraData:header delegate:self];
 	}
 	
 	return self;
@@ -190,6 +194,18 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	[super dealloc];
 }
 
+-(void)completedHeaderParsing:(SubContext*)sc
+{
+	context = sc;
+	screenScaleX = origWidth / context->resX;
+	screenScaleY = origHeight / context->resY;
+}
+
+-(float)aspectRatio
+{
+	return origWidth / origHeight;
+}
+
 -(void*)completedStyleParsing:(SubStyle*)s
 {
 	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag};
@@ -197,7 +213,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	
 	ATSUFontID font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)s->fontname,kATSOptionFlagsDefault));
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
-	Fixed size = FloatToFixed(s->size * kVSFilterFontScale);
+	Fixed size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY);
 	Boolean b = s->bold, i = s->italic, u = s->underline, st = s->strikeout;
 	ATSUStyle style;
 		
@@ -231,12 +247,6 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 -(void)releaseStyleEx:(void*)ex
 {
 	ATSUDisposeStyle(ex);
-}
-
--(void)completedHeaderParsing:(SubContext*)sc
-{
-	[sc fixupResForVideoAspectRatio:videoAspect];
-	context = sc;
 }
 
 -(void*)spanExtraFromRenderDiv:(SubRenderDiv*)div
@@ -312,7 +322,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_fs:
 			fv();
-			fixval = FloatToFixed(fval * kVSFilterFontScale);
+			fixval = FloatToFixed(fval * div->styleLine->platformSizeScale);
 			SetATSUStyleOther(spanEx->style, kATSUSizeTag, sizeof(Fixed), &fixval);
 			break;
 		case tag_1c:
@@ -433,12 +443,6 @@ static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArray
 	*width = largeRect.right - largeRect.left;
 }
 
-//our rendering coordinate space is the SSA PlayResY with X calculated from video aspect ratio
-static void SetupSubCTM(CGContextRef c, float originalWidth, float originalHeight, float width, float height)
-{
-	CGContextScaleCTM(c, width / originalWidth, height / originalHeight);
-}
-
 enum {fillc, strokec};
 
 static void SetColor(CGContextRef c, int whichcolor, CGColorRef col)
@@ -463,10 +467,11 @@ static Fixed RoundFixed(Fixed n) {return IntToFixed(FixedToInt(n));}
 
 static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 align)
 {
-	const ATSUAttributeTag tags[] = {kATSULineFlushFactorTag, kATSULineWidthTag};
-	const ByteCount		 sizes[] = {sizeof(Fract), sizeof(ATSUTextMeasurement)};
+	const ATSUAttributeTag tags[] = {kATSULineFlushFactorTag, kATSULineWidthTag, kATSULineRotationTag};
+	const ByteCount		 sizes[] = {sizeof(Fract), sizeof(ATSUTextMeasurement), sizeof(Fixed)};
 	Fract alignment;
-	const ATSUAttributeValuePtr vals[] = {&alignment, &lineWidth};
+	Fixed fixzero = 0;
+	const ATSUAttributeValuePtr vals[] = {&alignment, &lineWidth, &fixzero};
 	
 	switch (align) {
 		case kSubAlignmentLeft:
@@ -486,7 +491,7 @@ static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 a
 static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, ItemCount *nbreaks, Fixed breakingWidth, unsigned textLen)
 {
 	UniCharArrayOffset *breaks;
-	ItemCount breakCount;
+	ItemCount breakCount=0;
 	
 	switch (div->wrapStyle) {
 		case kSubLineWrapTopWider:
@@ -654,7 +659,6 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	ubuffer = realloc(ubuffer, sizeof(unichar) * [packet length]);
-	const float horizScale = (context->resY * videoAspect) / (float)context->resX;
 	NSArray *divs = SubParsePacket(packet, context, self, ubuffer);
 	unsigned div_count = [divs count];
 	int i;
@@ -662,8 +666,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	
 	CGContextSaveGState(c);
 	
-	SetupSubCTM(c, context->resY * videoAspect, context->resY, cWidth, cHeight);
-	
+	if (cWidth != origWidth || cHeight != origHeight) CGContextScaleCTM(c, cWidth / origWidth, cHeight / origHeight);
 	SetATSULayoutOther(layout, kATSUCGContextTag, sizeof(CGContextRef), &c);
 	
 	CGContextSetLineCap(c, kCGLineCapRound);
@@ -674,19 +677,19 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		unsigned textLen = [div->text length];
 		if (!textLen) continue;
 		
-		Fixed penY=0, penX, breakingWidth = FloatToFixed((context->resX - div->marginL - div->marginR) * horizScale); BreakContext breakc = {0};
+		NSRect marginRect = NSMakeRect(div->marginL, div->marginV, context->resX - div->marginL - div->marginR, context->resY - div->marginV - div->marginV);
+		
+		marginRect.origin.x *= screenScaleX;
+		marginRect.origin.y *= screenScaleY;
+		marginRect.size.width *= screenScaleX;
+		marginRect.size.height *= screenScaleY;
+
+		Fixed penY, penX, breakingWidth = FloatToFixed(marginRect.size.width); BreakContext breakc = {0};
 
 		[div->text getCharacters:ubuffer];
 		
 		ATSUSetTextPointerLocation(layout, ubuffer, kATSUFromTextBeginning, kATSUToTextEnd, textLen);		
 		ATSUSetTransientFontMatching(layout,TRUE);
-		
-		{
-			SubATSUISpanEx *firstspan = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
-			Fixed fangle = FloatToFixed(firstspan->angle);
-			
-			SetATSULayoutOther(layout, kATSULineRotationTag, sizeof(Fixed), &fangle);
-		}
 		
 		SetLayoutPositioning(layout, breakingWidth, div->alignH);	
 
@@ -696,14 +699,14 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		UniCharArrayOffset *breaks = FindLineBreaks(layout, div, &breakCount, breakingWidth, textLen);
 		
 		if (div->posX == -1) {
-			penX = FloatToFixed(div->marginL * horizScale);
+			penX = FloatToFixed(NSMinX(marginRect));
 
 			switch(div->alignV) {
-				case kSubAlignmentBottom:
+				case kSubAlignmentBottom: default:
 					if (!bottomPen) {
 						ATSUTextMeasurement bottomLineDescent;
 						ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &bottomLineDescent, NULL);
-						penY = IntToFixed(div->marginV) + bottomLineDescent;
+						penY = FloatToFixed(NSMinY(marginRect)) + bottomLineDescent;
 					} else penY = bottomPen;
 					
 					storePen = &bottomPen; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
@@ -713,14 +716,14 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 						ATSUTextMeasurement imageWidth, imageHeight;
 						
 						GetTypographicRectangleForLayout(layout, breaks, breakCount, &imageHeight, &imageWidth);
-						penY = (IntToFixed(context->resY) / 2) + (imageHeight / 2);
+						penY = (FloatToFixed(NSMidY(marginRect)) / 2) + (imageHeight / 2);
 					} else penY = centerPen;
 					
 					storePen = &centerPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
 					break;
 				case kSubAlignmentTop:
 					if (!topPen) {
-						penY = FloatToFixed(context->resY - div->marginV) - GetLineHeight(layout, kATSUFromTextBeginning);
+						penY = FloatToFixed(NSMaxY(marginRect)) - GetLineHeight(layout, kATSUFromTextBeginning);
 					} else penY = topPen;
 					
 					storePen = &topPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
@@ -731,8 +734,8 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 						
 			GetTypographicRectangleForLayout(layout, breaks, breakCount, &imageHeight, &imageWidth);
 
-			penX = FloatToFixed(div->posX * horizScale);
-			penY = FloatToFixed(context->resY - div->posY);
+			penX = FloatToFixed(div->posX * screenScaleX);
+			penY = FloatToFixed((context->resY - div->posY) * screenScaleY);
 			
 			switch (div->alignH) {
 				case kSubAlignmentCenter: penX -= imageWidth / 2; break;
@@ -746,6 +749,13 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 						
 			SetLayoutPositioning(layout, imageWidth, div->alignH);
 			storePen = NULL; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
+		}
+		
+		{
+			SubATSUISpanEx *firstspan = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
+			Fixed fangle = FloatToFixed(firstspan->angle);
+			
+			SetATSULayoutOther(layout, kATSULineRotationTag, sizeof(Fixed), &fangle);
 		}
 		
 		breakc.breakCount = breakCount;
@@ -766,14 +776,14 @@ extern SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int wid
 {
 	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO];
 
-	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoAspectRatio:(float)width/(float)height];
+	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoWidth:width videoHeight:height];
 	[hdr release];
 	return s;
 }
 
 extern SubtitleRendererPtr SubInitNonSSA(int width, int height)
 {
-	return [[SubATSUIRenderer alloc] initWithVideoAspectRatio:(float)width/(float)height];
+	return [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
 }
 
 extern CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s)
