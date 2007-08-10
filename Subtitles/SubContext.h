@@ -9,9 +9,6 @@
 #import <Cocoa/Cocoa.h>
 #import "SubRenderer.h"
 
-// approximation, real value must be determined from truetype fields
-#define kVSFilterFontScale .9
-
 enum {kSubTypeSSA, kSubTypeASS, kSubTypeSRT};
 enum {kSubCollisionsNormal, kSubCollisionsReverse};
 enum {kSubLineWrapTopWider = 0, kSubLineWrapSimple, kSubLineWrapNone, kSubLineWrapBottomWider};

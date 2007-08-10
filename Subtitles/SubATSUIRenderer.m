@@ -11,6 +11,8 @@
 #import "SubParsing.h"
 #import "SubUtilities.h"
 
+static float GetWinFontSizeScale(ATSFontRef font);
+
 @interface SubATSUISpanEx : NSObject {
 	@public;
 	ATSUStyle style;
@@ -211,15 +213,27 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag};
 	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID)};
 	
-	ATSUFontID font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)s->fontname,kATSOptionFlagsDefault));
+	ATSFontRef fontRef = ATSFontFindFromName((CFStringRef)s->fontname,kATSOptionFlagsDefault);
+	ATSUFontID font = FMGetFontFromATSFontRef(fontRef);
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
-	Fixed size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY);
+	Fixed size;
 	Boolean b = s->bold, i = s->italic, u = s->underline, st = s->strikeout;
 	ATSUStyle style;
 		
 	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font};
 	
-	if (font == kATSUInvalidFontID) font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault));
+	if (font == kATSUInvalidFontID) {
+		fontRef = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
+		font = FMGetFontFromATSFontRef(fontRef);
+	}
+	
+//	NSString *realName = nil;
+//	ATSFontGetName(fontRef, kATSOptionFlagsDefault, &realName);
+
+//	NSLog(@"font \"%@\" aka \"%@\"",realName,s->fontname);
+	
+	if (!s->platformSizeScale) s->platformSizeScale = GetWinFontSizeScale(fontRef);
+	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY);
 	
 	ATSUCreateStyle(&style);
 	ATSUSetAttributes(style, sizeof(tags) / sizeof(ATSUAttributeTag), tags, sizes, vals);
@@ -802,3 +816,111 @@ extern void SubDisposeRenderer(SubtitleRendererPtr s)
 }
 @end
 
+#pragma options align=mac68k
+//Windows/OS/2 TrueType metrics table
+typedef struct TT_OS2
+{
+    UInt16   version;                /* 0x0001 - more or 0xFFFF */
+    SInt16   xAvgCharWidth;
+    UInt16   usWeightClass;
+    UInt16   usWidthClass;
+    SInt16   fsType;
+    SInt16   ySubscriptXSize;
+    SInt16   ySubscriptYSize;
+    SInt16   ySubscriptXOffset;
+    SInt16   ySubscriptYOffset;
+    SInt16   ySuperscriptXSize;
+    SInt16   ySuperscriptYSize;
+    SInt16   ySuperscriptXOffset;
+    SInt16   ySuperscriptYOffset;
+    SInt16   yStrikeoutSize;
+    SInt16   yStrikeoutPosition;
+    SInt16   sFamilyClass;
+	
+    UInt8    panose[10];
+	
+    UInt32   ulUnicodeRange1;        /* Bits 0-31   */
+    UInt32   ulUnicodeRange2;        /* Bits 32-63  */
+    UInt32   ulUnicodeRange3;        /* Bits 64-95  */
+    UInt32   ulUnicodeRange4;        /* Bits 96-127 */
+	
+    SInt8    achVendID[4];
+	
+    UInt16   fsSelection;
+    UInt16   usFirstCharIndex;
+    UInt16   usLastCharIndex;
+    SInt16   sTypoAscender;
+    SInt16   sTypoDescender;
+    SInt16   sTypoLineGap;
+    UInt16   usWinAscent;
+    UInt16   usWinDescent;
+	
+    /* only version 1 tables: */
+	
+    UInt32   ulCodePageRange1;       /* Bits 0-31   */
+    UInt32   ulCodePageRange2;       /* Bits 32-63  */
+	
+    /* only version 2 tables: */
+	
+    SInt16   sxHeight;
+    SInt16   sCapHeight;
+    UInt16   usDefaultChar;
+    UInt16   usBreakChar;
+    UInt16   usMaxContext;
+	
+} TT_OS2;
+
+//The other TrueType metrics table, used by ATSUI
+typedef struct TT_HHEA
+{
+    Fixed    Version;
+    SInt16   Ascender;
+    SInt16   Descender;
+    SInt16   Line_Gap;
+	
+    UInt16   advance_Width_Max;      /* advance width maximum */
+	
+    SInt16   min_Left_Side_Bearing;  /* minimum left-sb       */
+    SInt16   min_Right_Side_Bearing; /* minimum right-sb      */
+    SInt16   xMax_Extent;            /* xmax extents          */
+    SInt16   caret_Slope_Rise;
+    SInt16   caret_Slope_Run;
+    SInt16   caret_Offset;
+	
+    SInt16   Reserved[4];
+	
+    SInt16   metric_Data_Format;
+    UInt16   number_Of_HMetrics;
+} TT_HHEA;
+#pragma options align=reset
+
+// Windows and OS X use different TrueType fields to measure text.
+// Some Windows fonts have one field set incorrectly, so we have to compensate.
+// XXX This function doesn't read from the right fonts; if we're using italic variant, it should get the ATSFontRef for that
+static float GetWinFontSizeScale(ATSFontRef font)
+{
+	TT_OS2 os2Table = {0};
+	TT_HHEA hheaTable = {0};
+	ByteCount os2Size = 0, hheaSize = 0;
+	
+	ATSFontGetTable(font, 'OS/2', 0, sizeof(TT_OS2), &os2Table, &os2Size);
+	ATSFontGetTable(font, 'hhea', 0, sizeof(TT_HHEA), &hheaTable, &hheaSize);
+	Fixed os2Version = EndianU32_BtoN(os2Table.version);
+	//	Fixed hheaVersion = EndianU32_BtoN(hheaTable.Version);
+	
+	//	NSLog(@"hhea len %d ver %#x, os2 len %d ver %d", hheaSize, hheaVersion, os2Size, os2Version);
+	
+	if (os2Size && hheaSize && os2Version) {
+		int hA = EndianS16_BtoN(hheaTable.Ascender), hD = EndianS16_BtoN(hheaTable.Descender);
+		unsigned oA = EndianU16_BtoN(os2Table.usWinAscent), oD = EndianU16_BtoN(os2Table.usWinDescent);
+		int macSize = hA - hD;
+		unsigned winSize = oA + oD;
+		float scale = (float)macSize / (float)winSize;
+		
+		//		NSLog(@"os/2 a %d d %d, hhea a %d d %d -> scale %f\n----", oA, oD, hA, hD, scale);
+		
+		return scale;
+	}
+	
+	return 1;
+}

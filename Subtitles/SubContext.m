@@ -69,8 +69,8 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 	
 	sty->name = @"*Default";
 	sty->fontname = @"Helvetica";
-	sty->platformSizeScale = kVSFilterFontScale;
-	sty->size = 32 / sty->platformSizeScale * sqrt([delegate aspectRatio] / (4./3.));
+	sty->platformSizeScale = 1;
+	sty->size = 32 * sqrt([delegate aspectRatio] / (4./3.));
 	sty->primaryColor = (SubRGBAColor){1,1,1,1};
 	sty->outlineColor = (SubRGBAColor){0,0,0,1};
 	sty->shadowColor = (SubRGBAColor){0,0,0,1};
@@ -133,7 +133,7 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 		
 		ParseASSAlignment(align, &alignH, &alignV);
 		
-		platformSizeScale = kVSFilterFontScale;
+		platformSizeScale = 0;
 		ex = [delegate completedStyleParsing:self];
 	}
 	
