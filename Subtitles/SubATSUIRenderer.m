@@ -227,11 +227,6 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 		font = FMGetFontFromATSFontRef(fontRef);
 	}
 	
-//	NSString *realName = nil;
-//	ATSFontGetName(fontRef, kATSOptionFlagsDefault, &realName);
-
-//	NSLog(@"font \"%@\" aka \"%@\"",realName,s->fontname);
-	
 	if (!s->platformSizeScale) s->platformSizeScale = GetWinFontSizeScale(fontRef);
 	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY);
 	
@@ -408,7 +403,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			}
 			break;
 		default:
-			NSLog(@"unimplemented tag %d",tag);
+			NSLog(@"Perian: unimplemented tag %d",tag);
 	}
 }
 
@@ -817,6 +812,34 @@ extern void SubDisposeRenderer(SubtitleRendererPtr s)
 @end
 
 #pragma options align=mac68k
+typedef struct TT_Header
+{
+    Fixed   Table_Version;
+    Fixed   Font_Revision;
+	
+    SInt32  CheckSum_Adjust;
+    SInt32  Magic_Number;
+	
+    UInt16  Flags;
+    UInt16  Units_Per_EM;
+	
+    SInt32  Created [2];
+    SInt32  Modified[2];
+	
+    SInt16  xMin;
+    SInt16  yMin;
+    SInt16  xMax;
+    SInt16  yMax;
+	
+    UInt16  Mac_Style;
+    UInt16  Lowest_Rec_PPEM;
+	
+    SInt16  Font_Direction;
+    SInt16  Index_To_Loc_Format;
+    SInt16  Glyph_Data_Format;
+	
+} TT_Header;
+
 //Windows/OS/2 TrueType metrics table
 typedef struct TT_OS2
 {
@@ -869,29 +892,6 @@ typedef struct TT_OS2
     UInt16   usMaxContext;
 	
 } TT_OS2;
-
-//The other TrueType metrics table, used by ATSUI
-typedef struct TT_HHEA
-{
-    Fixed    Version;
-    SInt16   Ascender;
-    SInt16   Descender;
-    SInt16   Line_Gap;
-	
-    UInt16   advance_Width_Max;      /* advance width maximum */
-	
-    SInt16   min_Left_Side_Bearing;  /* minimum left-sb       */
-    SInt16   min_Right_Side_Bearing; /* minimum right-sb      */
-    SInt16   xMax_Extent;            /* xmax extents          */
-    SInt16   caret_Slope_Rise;
-    SInt16   caret_Slope_Run;
-    SInt16   caret_Offset;
-	
-    SInt16   Reserved[4];
-	
-    SInt16   metric_Data_Format;
-    UInt16   number_Of_HMetrics;
-} TT_HHEA;
 #pragma options align=reset
 
 // Windows and OS X use different TrueType fields to measure text.
@@ -899,28 +899,25 @@ typedef struct TT_HHEA
 // XXX This function doesn't read from the right fonts; if we're using italic variant, it should get the ATSFontRef for that
 static float GetWinFontSizeScale(ATSFontRef font)
 {
+	TT_Header headTable = {0};
 	TT_OS2 os2Table = {0};
-	TT_HHEA hheaTable = {0};
-	ByteCount os2Size = 0, hheaSize = 0;
+	ByteCount os2Size = 0, headSize = 0;
 	
-	ATSFontGetTable(font, 'OS/2', 0, sizeof(TT_OS2), &os2Table, &os2Size);
-	ATSFontGetTable(font, 'hhea', 0, sizeof(TT_HHEA), &hheaTable, &hheaSize);
-	Fixed os2Version = EndianU32_BtoN(os2Table.version);
-	//	Fixed hheaVersion = EndianU32_BtoN(hheaTable.Version);
+	OSErr err = ATSFontGetTable(font, 'OS/2', 0, 0, NULL, &os2Size);
+	if (!os2Size || err) return 1;
 	
-	//	NSLog(@"hhea len %d ver %#x, os2 len %d ver %d", hheaSize, hheaVersion, os2Size, os2Version);
-	
-	if (os2Size && hheaSize && os2Version) {
-		int hA = EndianS16_BtoN(hheaTable.Ascender), hD = EndianS16_BtoN(hheaTable.Descender);
-		unsigned oA = EndianU16_BtoN(os2Table.usWinAscent), oD = EndianU16_BtoN(os2Table.usWinDescent);
-		int macSize = hA - hD;
-		unsigned winSize = oA + oD;
-		float scale = (float)macSize / (float)winSize;
+	err = ATSFontGetTable(font, 'head', 0, 0, NULL, &headSize);
+	if (!headSize || err) return 1;
+
+	ATSFontGetTable(font, 'head', 0, headSize, &headTable, &headSize);
+	ATSFontGetTable(font, 'OS/2', 0, os2Size, &os2Table, &os2Size);
 		
-		//		NSLog(@"os/2 a %d d %d, hhea a %d d %d -> scale %f\n----", oA, oD, hA, hD, scale);
+	// ppem = units_per_em * lfheight / (winAscent + winDescent) c.f. WINE
+	// lfheight being SSA font size
+	unsigned oA = EndianU16_BtoN(os2Table.usWinAscent), oD = EndianU16_BtoN(os2Table.usWinDescent);
+	unsigned winSize = oA + oD;
 		
-		return scale;
-	}
+	unsigned unitsPerEM = EndianU16_BtoN(headTable.Units_Per_EM);
 	
-	return 1;
+	return (winSize && unitsPerEM) ? ((float)unitsPerEM / (float)winSize) : 1;
 }
