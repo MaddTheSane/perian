@@ -218,6 +218,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			div->marginR = div->styleLine->marginR;
 			div->marginV = div->styleLine->marginV;
 			div->layer = 0;
+			div->wrapStyle = kSubLineWrapTopWider;
 		} else {
 			NSArray *fields = STSplitStringWithCount(inputText, @",", 9);
 			if ([fields count] < 9) continue;
@@ -232,6 +233,8 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			if (div->marginL == 0) div->marginL = div->styleLine->marginL;
 			if (div->marginR == 0) div->marginR = div->styleLine->marginR;
 			if (div->marginV == 0) div->marginV = div->styleLine->marginV;
+			
+			div->wrapStyle = context->wrapStyle;
 		}
 		
 		div->alignH = div->styleLine->alignH;

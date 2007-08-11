@@ -497,22 +497,105 @@ static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 a
 	ATSUSetLayoutControls(layout,sizeof(vals) / sizeof(ATSUAttributeValuePtr),tags,sizes,vals);
 }
 
+static BOOL BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *div, ATSLayoutRecord *records, ItemCount numRecords, Fixed idealLineWidth, unsigned numBreaks, Fixed widthOffset)
+{		
+	int recOffset = 0;
+	BOOL foundABreak;
+	
+	do {
+		int j, lastIndex = 0;
+		ATSUTextMeasurement error = 0;
+		foundABreak = NO;
+		
+		for (j = recOffset; j < numRecords; j++) {
+			ATSLayoutRecord *rec = &records[j];
+			Fixed recPos = rec->realPos - widthOffset;
+			
+			if (rec->flags & kATSGlyphInfoIsWhiteSpace) {
+				if (recPos >= idealLineWidth) {
+					error = recPos - idealLineWidth;
+					if (lastIndex) {
+						Fixed lastError = abs((records[lastIndex].realPos - widthOffset) - idealLineWidth);
+						if (lastError < error || div->wrapStyle == kSubLineWrapBottomWider) {
+							rec = &records[lastIndex];
+							j = lastIndex;
+						}
+					}
+					
+					foundABreak = YES;
+					ATSUSetSoftLineBreak(layout, rec->originalOffset/2);
+					break;
+				}
+				
+				lastIndex = j;
+			}
+		}
+		
+		widthOffset = records[j].realPos;
+		recOffset = j;
+	} while (foundABreak && numBreaks--);
+		
+	return numBreaks == 0;
+}
+
+static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, Fixed breakingWidth, unsigned textLen, ItemCount numHardBreaks)
+{
+	UniCharArrayOffset hardBreaks[numHardBreaks+2];
+	float fWidth = FixedToFloat(breakingWidth);
+	
+	ATSUGetSoftLineBreaks(layout, kATSUFromTextBeginning, kATSUToTextEnd, numHardBreaks, &hardBreaks[1], NULL);	
+	int i;
+	
+	hardBreaks[0] = 0;
+	hardBreaks[numHardBreaks+1] = textLen;
+	
+	for (i = 0; i <= numHardBreaks; i++) {
+		UniCharArrayOffset thisBreak = hardBreaks[i], nextBreak = hardBreaks[i+1];
+		ATSUTextMeasurement leftEdge, rightEdge, ignore;
+		
+		ATSUGetUnjustifiedBounds(layout, thisBreak, nextBreak - thisBreak, &leftEdge, &rightEdge, &ignore, &ignore);
+		float lineWidth = FixedToFloat(rightEdge - leftEdge);
+				
+		if (lineWidth > fWidth) {
+			ATSLayoutRecord *records;
+			ItemCount numRecords;
+			unsigned idealSplitLines = ceil(lineWidth / fWidth);
+			Fixed idealBreakWidth = FloatToFixed(lineWidth / ceil(lineWidth / fWidth));
+			
+			ATSUDirectGetLayoutDataArrayPtrFromTextLayout(layout, thisBreak, kATSUDirectDataLayoutRecordATSLayoutRecordCurrent, (void*)&records, &numRecords);
+			
+			// XXX here, if we didn't find exactly as many line breaks as we wanted, we ditch even-width lines and rerun ATSUI's breaking
+			// this isn't quite right; if it finds at least one break it should keep that and only redo the rest of the line
+			if (!BreakOneLineSpan(layout, div, records, numRecords, idealBreakWidth, idealSplitLines-1, 0))
+				ATSUBatchBreakLines(layout, thisBreak, nextBreak - thisBreak, breakingWidth, NULL);
+			
+			ATSUDirectReleaseLayoutDataArrayPtr(NULL, kATSUDirectDataLayoutRecordATSLayoutRecordCurrent, (void*)&records);
+		}
+	}
+}
+
 static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, ItemCount *nbreaks, Fixed breakingWidth, unsigned textLen)
 {
 	UniCharArrayOffset *breaks;
 	ItemCount breakCount=0;
 	
 	switch (div->wrapStyle) {
-		case kSubLineWrapTopWider:
 		case kSubLineWrapSimple:
-		case kSubLineWrapBottomWider:
 			ATSUBatchBreakLines(layout, kATSUFromTextBeginning, kATSUToTextEnd, breakingWidth, &breakCount);
 			break;
+		case kSubLineWrapTopWider:
+		case kSubLineWrapBottomWider:
 		case kSubLineWrapNone:
+			SetLayoutPositioning(layout, positiveInfinity, kSubAlignmentLeft);	
 			ATSUBatchBreakLines(layout, kATSUFromTextBeginning, kATSUToTextEnd, positiveInfinity, &breakCount);
+			if (div->wrapStyle != kSubLineWrapNone) {
+				BreakLinesEvenly(layout, div, breakingWidth, textLen, breakCount);
+				ATSUGetSoftLineBreaks(layout, kATSUFromTextBeginning, kATSUToTextEnd, 0, NULL, &breakCount);
+			}
+			SetLayoutPositioning(layout, breakingWidth, div->alignH);	
 			break;
 	}
-	
+		
 	breaks = malloc(sizeof(UniCharArrayOffset) * (breakCount+2));
 	ATSUGetSoftLineBreaks(layout, kATSUFromTextBeginning, kATSUToTextEnd, breakCount, &breaks[1], NULL);
 	
@@ -700,8 +783,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		ATSUSetTextPointerLocation(layout, ubuffer, kATSUFromTextBeginning, kATSUToTextEnd, textLen);		
 		ATSUSetTransientFontMatching(layout,TRUE);
 		
-		SetLayoutPositioning(layout, breakingWidth, div->alignH);	
-
+		SetLayoutPositioning(layout, breakingWidth, div->alignH);
 		SetStyleSpanRuns(layout, div);
 		
 		ItemCount breakCount;
