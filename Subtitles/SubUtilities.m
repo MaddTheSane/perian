@@ -8,6 +8,7 @@
 
 #import "SubUtilities.h"
 #import "UniversalDetector.h"
+#import "Codecprintf.h"
 
 NSArray *STSplitStringIgnoringWhitespace(NSString *str, NSString *split)
 {
