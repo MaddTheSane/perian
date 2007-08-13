@@ -1909,6 +1909,8 @@
 					Carbon,
 					"-read_only_relocs",
 					suppress,
+					"-undefined",
+					define_a_way,
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
 				PREBINDING = NO;
