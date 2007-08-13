@@ -317,7 +317,6 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         
         if (glob->avCodec)
         {
-			avcodec_thread_free(glob->avContext);
             avcodec_close(glob->avContext);
         }
 				
