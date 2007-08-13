@@ -133,7 +133,7 @@ typedef struct
 static OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length);
 static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic);
 static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
-static void SetupMultithreadedDecoding(AVCodecContext *s);
+static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID);
 
 int GetPPUserPreference();
 void SetPPUserPreference(int value);
@@ -676,7 +676,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		glob->avContext->release_buffer = FFusionReleaseBuffer;
 		
 		// multi-slice decoding
-		SetupMultithreadedDecoding(glob->avContext);
+		SetupMultithreadedDecoding(glob->avContext, codecID);
 		
         // Finally we open the avcodec 
         
@@ -1541,11 +1541,14 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
     return err;
 }
 
-static void SetupMultithreadedDecoding(AVCodecContext *s)
+static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID)
 {
 	int nthreads;
 	size_t len = 4;
 	
+    // multithreading is only effective for mpeg1/2
+    if (codecID != CODEC_ID_MPEG1VIDEO && codecID != CODEC_ID_MPEG2VIDEO) return;
+    
 	// one thread per usable CPU
 	// (vmware or power saving may disable some CPUs)
 	if (sysctlbyname("hw.activecpu", &nthreads, &len, NULL, 0) == -1) nthreads = 1;
