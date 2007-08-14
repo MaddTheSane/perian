@@ -14,9 +14,10 @@
 	SubContext *context;
 	unichar *ubuffer;
 	ATSUTextLayout layout;
-	float screenScaleX, screenScaleY, origWidth, origHeight;
+	float screenScaleX, screenScaleY, videoWidth, videoHeight;
 	@public;
 	CGColorSpaceRef srgbCSpace;
+	TextBreakLocatorRef breakLocator;
 }
 -(SubATSUIRenderer*)initWithVideoWidth:(float)width videoHeight:(float)height;
 -(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoWidth:(float)width videoHeight:(float)height;
