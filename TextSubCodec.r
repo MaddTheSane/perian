@@ -58,7 +58,7 @@
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
-#define kTextSubDecoFlags ( codecInfoDoes32 | codecInfoDoes16 | codecInfoDoes8 | codecInfoDoes1 | codecInfoDoesSpool | cmpThreadSafe )
+#define kTextSubDecoFlags ( codecInfoDoes32 | codecInfoDoes16 | codecInfoDoes8 | codecInfoDoes1 | codecInfoDoesSpool | cmpThreadSafe | codecInfoDoesStretch | codecInfoDoesShrink)
 
 // These flags specify the possible format of compressed data produced by the component
 // and the format of compressed files that the component can handle during decompression

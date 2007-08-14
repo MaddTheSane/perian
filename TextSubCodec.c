@@ -34,8 +34,6 @@ typedef struct {
 	long		depth;
     long        dataSize;
     
-    //CGContextRef    quartzContext;
-    // pointer to the data the context currently is drawing into
     Ptr             baseAddr;
 } TextSubDecompressRecord;
 
@@ -227,6 +225,9 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 	capabilities->extendWidth = 0;
 	capabilities->extendHeight = 0;
 	
+	capabilities->flags |= codecCanAsync | codecCanAsyncWhen | codecCanScale;
+	capabilities->flags2 |= codecDrawsHigherQualityScaled;
+    
 	glob->colorSpace = NULL;
 	glob->translateSRT = true;
 	glob->ssa = NULL;
@@ -254,8 +255,8 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 	// This allows the base codec to perform frame dropping on our behalf if needed 
     drp->frameType = kCodecFrameTypeKey;
 
-	myDrp->width = (**p->imageDescription).width;
-	myDrp->height = (**p->imageDescription).height;
+	myDrp->width = p->dstRect.right - p->dstRect.left;
+	myDrp->height = p->dstRect.bottom - p->dstRect.top;
 	myDrp->depth = (**p->imageDescription).depth;
     myDrp->dataSize = p->bufferSize;
 	
@@ -297,7 +298,6 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDecompressRecord *drp)
 {
 	TextSubDecompressRecord *myDrp = (TextSubDecompressRecord *)drp->userDecompressRecord;
-	
 	
     CGContextRef c = CGBitmapContextCreate(drp->baseAddr, myDrp->width, myDrp->height,
 										   8, drp->rowBytes,  glob->colorSpace,
