@@ -222,6 +222,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID)};
 	
 	ATSFontRef fontRef = ATSFontFindFromName((CFStringRef)s->fontname,kATSOptionFlagsDefault);
+	NSString *resultName;
 	ATSUFontID font = FMGetFontFromATSFontRef(fontRef);
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
 	Fixed size;
@@ -231,9 +232,22 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font};
 	
 	if (font == kATSUInvalidFontID) {
+		const char *utf8 = [s->fontname UTF8String];
+		
+		ATSUFindFontFromName(utf8, strlen(utf8), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
+		
+		// 18 = "compatible full name"
+		if (font == kATSUInvalidFontID) ATSUFindFontFromName(utf8, strlen(utf8), 18, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
+		fontRef = FMGetATSFontRefFromFont(font);
+	}
+	
+	if (font == kATSUInvalidFontID) {
 		fontRef = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
 		font = FMGetFontFromATSFontRef(fontRef);
 	}
+	
+	ATSFontGetName(fontRef, kATSOptionFlagsDefault, (CFStringRef*)&resultName);
+	NSLog(@"found a font named \"%@\" id %d for the name \"%@\"", resultName, fontRef, s->fontname);
 	
 	if (!s->platformSizeScale) s->platformSizeScale = GetWinFontSizeScale(fontRef);
 	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY);
@@ -782,6 +796,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	
 	CGContextSetLineCap(c, kCGLineCapRound);
 	CGContextSetLineJoin(c, kCGLineJoinRound);
+	CGContextSetInterpolationQuality(c, kCGInterpolationHigh);
 	
 	for (i = 0; i < div_count; i++) {
 		SubRenderDiv *div = [divs objectAtIndex:i];
