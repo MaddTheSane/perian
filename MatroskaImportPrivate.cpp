@@ -51,9 +51,6 @@
 using namespace std;
 using namespace libmatroska;
 
-typedef struct PixelAspectRatio {UInt32 hSpacing, vSpacing;} PixelAspectRatio;
-
-
 bool MatroskaImport::OpenFile()
 {
 	bool valid = true;
@@ -390,7 +387,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 {
 	ComponentResult err = noErr;
 	ImageDescriptionHandle imgDesc;
-	PixelAspectRatio **pasp = (PixelAspectRatio**)NewHandle(sizeof(PixelAspectRatio));
+	CleanApertureImageDescriptionExtension **clap = (CleanApertureImageDescriptionExtension**)NewHandle(sizeof(CleanApertureImageDescriptionExtension));
 	Fixed width, height;
 	
 	KaxTrackVideo &videoTrack = GetChild<KaxTrackVideo>(kaxTrack);
@@ -415,20 +412,19 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 		} else {
 			width = IntToFixed(uint32(disp_width));
 			height = IntToFixed(uint32(disp_height));
-		}
-		
-		**pasp = (PixelAspectRatio){uint32(disp_width) * uint32(pxl_height),uint32(disp_height) * uint32(pxl_width)};
-		if ((*pasp)->hSpacing == (*pasp)->vSpacing) **pasp = (PixelAspectRatio){1,1};
+		}		
 	} else if (pxl_width.ValueIsSet() && pxl_height.ValueIsSet()) {
 		width = IntToFixed(uint32(pxl_width));
 		height = IntToFixed(uint32(pxl_height));
-		
-		**pasp = (PixelAspectRatio){1,1};
 	} else {
 		Codecprintf(NULL, "MKV: Video has unknown dimensions.\n");
 		return invalidTrack;
 	}
 	
+	**clap = (CleanApertureImageDescriptionExtension){EndianU32_NtoB(width), EndianU32_NtoB(fixed1),
+													  EndianU32_NtoB(height), EndianU32_NtoB(fixed1),
+													  EndianU32_NtoB(0), EndianU32_NtoB(1), EndianU32_NtoB(0), EndianU32_NtoB(1)};
+
 	mkvTrack.theTrack = NewMovieTrack(theMovie, width, height, kNoVolume);
 	if (mkvTrack.theTrack == NULL)
 		return GetMoviesError();
@@ -447,11 +443,10 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	(*imgDesc)->cType = GetFourCC(&kaxTrack);
     (*imgDesc)->depth = 24;
     (*imgDesc)->clutID = -1;
-	if ((*pasp)->hSpacing != (*pasp)->vSpacing) {
-		(*pasp)->hSpacing = EndianU32_NtoB((*pasp)->hSpacing);
-		(*pasp)->vSpacing = EndianU32_NtoB((*pasp)->vSpacing);
-		AddImageDescriptionExtension(imgDesc,(Handle)pasp,kICMImageDescriptionPropertyID_PixelAspectRatio);
-	}
+	
+	AddImageDescriptionExtension(imgDesc,(Handle)clap, kCleanApertureImageDescriptionExtension);
+	
+	DisposeHandle((Handle)clap);
 	
 	mkvTrack.desc = (SampleDescriptionHandle) imgDesc;
 	
@@ -464,6 +459,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	if (err) return err;
 	
 	err = QTSampleTableAddSampleDescription(mkvTrack.sampleTable, mkvTrack.desc, 0, &mkvTrack.qtSampleDesc);
+		
 	return err;
 }
 

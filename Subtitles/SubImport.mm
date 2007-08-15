@@ -594,40 +594,56 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 
 -(SubLine*)getSerializedPacket
 {
-	int packetcount;
-	
-	if ([outpackets count] == 0)  {
+	unsigned numOutPackets = [outpackets count];
+
+	if ((!finished && numOutPackets < 2) || numOutPackets == 0) {
+		unsigned newNumOutPackets;
+		
 		[self refill];
-		if ([outpackets count] == 0) 
+		
+		newNumOutPackets = [outpackets count];
+		
+		if (numOutPackets == newNumOutPackets) 
 			return nil;
+		
+		numOutPackets = newNumOutPackets;
 	}
 	
-	packetcount = [outpackets count];
-	if (!finished && packetcount < 2) return nil;
-	else if (finished && packetcount == 1) {
+	SubLine *ret;
+	BOOL lastPacket = finished && numOutPackets == 1;
+	
+	if (!write_gap || lastPacket) {
 		SubLine *sl = [outpackets objectAtIndex:0];
+		
+		if (lastPacket) [outpackets removeObjectAtIndex:0];
+		
+		write_gap = YES;
+		ret = sl;
+	} else {
+		SubLine *lastLine, *nextLine;
+		unsigned lastEnd, nextBegin;
+		
+		lastLine = [outpackets objectAtIndex:0];
+		nextLine = [outpackets objectAtIndex:1];
+		
+		lastEnd = lastLine->end_time;
+		nextBegin = nextLine->begin_time;
+		
 		[outpackets removeObjectAtIndex:0];
-		[sl autorelease];
-		return sl;
-	}
-	
-	SubLine *bl = [outpackets objectAtIndex:0];
-	
-	if (write_gap) {
-		SubLine *el = [outpackets objectAtIndex:1];
-		write_gap = false;
-		[bl autorelease];
-		[outpackets removeObjectAtIndex:0];
-		if (el->begin_time > bl->end_time) {
-			SubLine *ret = [[[SubLine alloc] initWithLine:@"\n" start:bl->end_time end:el->begin_time] autorelease];
-			return ret;
+		
+		write_gap = NO;
+
+		if (lastEnd == nextBegin) return [self getSerializedPacket];
+		else {
+			SubLine *blankLine = [[SubLine alloc] initWithLine:@"\n" start:lastEnd end:nextBegin];
+			
+			ret = blankLine;
 		}
-		return [self getSerializedPacket]; // this is not so clean
 	}
 	
 	
-	write_gap = true;
-	return bl;
+	[ret autorelease];
+	return ret;
 }
 
 -(void)setFinished:(BOOL)f
