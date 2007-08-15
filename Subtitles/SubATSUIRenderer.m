@@ -23,6 +23,7 @@ static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, unichar 
 	ATSUStyle style;
 	CGColorRef primaryColor, outlineColor, shadowColor;
 	Float32 outlineRadius, shadowDist, scaleX, scaleY, primaryAlpha, outlineAlpha, angle;
+	BOOL blurEdges;
 }
 -(SubATSUISpanEx*)initWithStyle:(ATSUStyle)style_ subStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs;
 -(SubATSUISpanEx*)clone;
@@ -358,6 +359,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_1c:
 			CGColorRelease(spanEx->primaryColor);
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
 			colorv();
 			spanEx->primaryColor = color;
 			break;
@@ -401,6 +403,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_1a:
 			iv();
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
 			spanEx->primaryAlpha = 1.-(ival/255.);
 			break;
 		case tag_3a:
@@ -423,6 +426,11 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 				[spanEx release];
 				span->ex = [[SubATSUISpanEx alloc] initWithStyle:(ATSUStyle)style->ex subStyle:style colorSpace:srgbCSpace];
 			}
+			break;
+		case tag_be:
+			bv();
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
+			spanEx->blurEdges = bval;
 			break;
 		default:
 			NSLog(@"Perian: unimplemented tag %d",tag);
