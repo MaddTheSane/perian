@@ -441,6 +441,8 @@ bail:
 		outpackets = [[NSMutableArray alloc] init];
 		finished = NO;
 		write_gap = NO;
+		toReturn = nil;
+		last_time = 0;
 	}
 	
 	return self;
@@ -592,58 +594,56 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 #endif
 }
 
+-(SubLine*)_getSerializedPacket
+{
+	if ([outpackets count] == 0)  {
+		[self refill];
+		if ([outpackets count] == 0) 
+			return nil;
+	}
+	
+	SubLine *sl = [outpackets objectAtIndex:0];
+	[outpackets removeObjectAtIndex:0];
+	
+	[sl autorelease];
+	return sl;
+}
+
 -(SubLine*)getSerializedPacket
 {
-	unsigned numOutPackets = [outpackets count];
-
-	if ((!finished && numOutPackets < 2) || numOutPackets == 0) {
-		unsigned newNumOutPackets;
-		
-		[self refill];
-		
-		newNumOutPackets = [outpackets count];
-		
-		if (numOutPackets == newNumOutPackets) 
-			return nil;
-		
-		numOutPackets = newNumOutPackets;
+	if (!last_time) {
+		SubLine *ret = [self _getSerializedPacket];
+		if (ret) {
+			last_time = ret->end_time;
+			write_gap = YES;
+		}
+		return ret;
 	}
 	
-	SubLine *ret;
-	BOOL lastPacket = finished && numOutPackets == 1;
+restart:
 	
-	if (!write_gap || lastPacket) {
-		SubLine *sl = [outpackets objectAtIndex:0];
-		
-		if (lastPacket) [outpackets removeObjectAtIndex:0];
-		
-		write_gap = YES;
-		ret = sl;
-	} else {
-		SubLine *lastLine, *nextLine;
-		unsigned lastEnd, nextBegin;
-		
-		lastLine = [outpackets objectAtIndex:0];
-		nextLine = [outpackets objectAtIndex:1];
-		
-		lastEnd = lastLine->end_time;
-		nextBegin = nextLine->begin_time;
-		
-		[outpackets removeObjectAtIndex:0];
+	if (write_gap) {
+		SubLine *next = [self _getSerializedPacket];
+		SubLine *sl;
+
+		if (!next) return nil;
+
+		toReturn = [next retain];
 		
 		write_gap = NO;
-
-		if (lastEnd == nextBegin) return [self getSerializedPacket];
-		else {
-			SubLine *blankLine = [[SubLine alloc] initWithLine:@"\n" start:lastEnd end:nextBegin];
-			
-			ret = blankLine;
-		}
+		
+		if (toReturn->begin_time > last_time) sl = [[SubLine alloc] initWithLine:@"\n" start:last_time end:toReturn->begin_time];
+		else goto restart;
+		
+		return [sl autorelease];
+	} else {
+		SubLine *ret = toReturn;
+		last_time = ret->end_time;
+		write_gap = YES;
+		
+		toReturn = nil;
+		return [ret autorelease];
 	}
-	
-	
-	[ret autorelease];
-	return ret;
 }
 
 -(void)setFinished:(BOOL)f
@@ -653,7 +653,7 @@ static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
 
 -(BOOL)isEmpty
 {
-	return [lines count] == 0 && [outpackets count] == 0;
+	return [lines count] == 0 && [outpackets count] == 0 && !toReturn;
 }
 
 -(NSString*)description

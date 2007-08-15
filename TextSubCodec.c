@@ -278,7 +278,7 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 		
 		//SSA_PrerollFonts(glob->ssa);
 		
-		glob->colorSpace = SubGetColorSpace(glob->ssa);
+		glob->colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	}
 	
 	return noErr;

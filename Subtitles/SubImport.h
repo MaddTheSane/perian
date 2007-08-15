@@ -37,6 +37,8 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, Ti
 {
 	NSMutableArray *lines, *outpackets;
 	BOOL finished, write_gap;
+	unsigned last_time;
+	SubLine *toReturn;
 }
 -(void)addLine:(SubLine *)sline;
 -(void)setFinished:(BOOL)finished;

@@ -217,38 +217,41 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	return videoWidth / videoHeight;
 }
 
+static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
+{
+	ATSFontRef fontRef = ATSFontFindFromName((CFStringRef)name,kATSOptionFlagsDefault);
+	ATSUFontID font = FMGetFontFromATSFontRef(fontRef);
+
+	if (font == kATSUInvalidFontID) {
+		const char *utf8 = [name UTF8String];
+		ATSUFindFontFromName(utf8, strlen(utf8), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
+
+		if (font == kATSUInvalidFontID) ATSUFindFontFromName(utf8, strlen(utf8), 18, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
+		
+		if (font == kATSUInvalidFontID) {
+			fontRef = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
+			font = FMGetFontFromATSFontRef(fontRef);
+		} else fontRef = FMGetATSFontRefFromFont(font);
+	}
+	
+	*_fontRef = fontRef;
+	
+	return font;
+}
+
 -(void*)completedStyleParsing:(SubStyle*)s
 {
 	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag};
 	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID)};
 	
-	ATSFontRef fontRef = ATSFontFindFromName((CFStringRef)s->fontname,kATSOptionFlagsDefault);
-	NSString *resultName;
-	ATSUFontID font = FMGetFontFromATSFontRef(fontRef);
+	ATSFontRef fontRef;
+	ATSUFontID font = GetFontIDForSSAName(s->fontname, &fontRef);
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
 	Fixed size;
 	Boolean b = s->bold, i = s->italic, u = s->underline, st = s->strikeout;
 	ATSUStyle style;
 		
 	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font};
-	
-	if (font == kATSUInvalidFontID) {
-		const char *utf8 = [s->fontname UTF8String];
-		
-		ATSUFindFontFromName(utf8, strlen(utf8), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
-		
-		// 18 = "compatible full name"
-		if (font == kATSUInvalidFontID) ATSUFindFontFromName(utf8, strlen(utf8), 18, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
-		fontRef = FMGetATSFontRefFromFont(font);
-	}
-	
-	if (font == kATSUInvalidFontID) {
-		fontRef = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
-		font = FMGetFontFromATSFontRef(fontRef);
-	}
-	
-	ATSFontGetName(fontRef, kATSOptionFlagsDefault, (CFStringRef*)&resultName);
-	NSLog(@"found a font named \"%@\" id %d for the name \"%@\"", resultName, fontRef, s->fontname);
 	
 	if (!s->platformSizeScale) s->platformSizeScale = GetWinFontSizeScale(fontRef);
 	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY);
@@ -349,8 +352,12 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_fn:
 			sv();
-			ATSUFontID font = FMGetFontFromATSFontRef(ATSFontFindFromName((CFStringRef)sval,kATSOptionFlagsDefault));
-			if (font) SetATSUStyleOther(spanEx->style, kATSUFontTag, sizeof(ATSUFontID), &font);
+			{
+				ATSFontRef fontRef;
+				ATSUFontID font = GetFontIDForSSAName(sval, &fontRef);
+				
+				if (font) SetATSUStyleOther(spanEx->style, kATSUFontTag, sizeof(ATSUFontID), &font);
+			}
 			break;
 		case tag_fs:
 			fv();
