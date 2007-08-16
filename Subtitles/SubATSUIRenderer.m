@@ -411,17 +411,24 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 		case tag_1a:
 			iv();
 			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
-			spanEx->primaryAlpha = 1.-(ival/255.);
+			spanEx->primaryAlpha = (255-ival)/255.;
 			break;
 		case tag_3a:
 			iv();
 			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
-			spanEx->outlineAlpha = 1.-(ival/255.);
+			spanEx->outlineAlpha = (255-ival)/255.;
 			break;
 		case tag_4a:
 			iv();
 			if (!isFirstSpan) div->render_complexity |= renderMultipleParts | renderManualShadows;
-			spanEx->shadowColor = CloneCGColorWithAlpha(spanEx->shadowColor, 1.-(ival/255.));
+			spanEx->shadowColor = CloneCGColorWithAlpha(spanEx->shadowColor, (255-ival)/255.);
+			break;
+		case tag_alpha:
+			iv();
+			fval = (255-ival)/255.;
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts | renderManualShadows;
+			spanEx->primaryAlpha = spanEx->outlineAlpha = fval;
+			spanEx->shadowColor = CloneCGColorWithAlpha(spanEx->shadowColor, fval);
 			break;
 		case tag_r:
 			sv();

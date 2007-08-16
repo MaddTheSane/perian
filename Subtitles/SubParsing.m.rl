@@ -279,6 +279,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				action secondaryc {tag(2c, intnum);}
 				action outlinec {tag(3c, intnum);}
 				action shadowc {tag(4c, intnum);}
+				action alpha {tag(alpha, intnum);}
 				action primarya {tag(1a, intnum);}
 				action secondarya {tag(2a, intnum);}
 				action outlinea {tag(3a, intnum);}
@@ -350,8 +351,8 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"2c" color %secondaryc
 							|"3c" color %outlinec
 							|"4c" color %shadowc
+							|"alpha" color %alpha
 							|"1a" color %primarya
-							|"alpha" color %primarya
 							|"2a" color %secondarya
 							|"3a" color %outlinea
 							|"4a" color %shadowa
