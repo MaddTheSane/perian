@@ -470,14 +470,12 @@
 				 "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
 				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
 				 "rm -rf \"$TMP_PATH\" && "
-				 "chown -R %d:%d \"$DST_COMPONENT\"",
-				 sb.st_uid, sb.st_gid);
+				 "chown -R root:admin \"$DST_COMPONENT\"");
 	else
 		asprintf(&buf,
 				 "mkdir -p \"$DST_PATH\" && "
 				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
-				 "chown -R %d:%d \"$DST_COMPONENT\"",
-				 sb.st_uid, sb.st_gid);
+				 "chown -R root:admin \"$DST_COMPONENT\"");
 	if(!buf)
 	{
 		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for extraction command\n", @"")];
