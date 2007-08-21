@@ -390,21 +390,21 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 			
 			// SubRip
 			actRange = CFStringFind(cfFoundFilename, CFSTR(".srt"), kCFCompareCaseInsensitive | kCFCompareBackwards);
-			if (actRange.location == extRange.location)
+			if (actRange.length && actRange.location == extRange.location)
 				subType = kSubTypeSRT;
 			else {
 				// SubStationAlpha
 				actRange = CFStringFind(cfFoundFilename, CFSTR(".ass"), kCFCompareCaseInsensitive | kCFCompareBackwards);
-				if (actRange.location == extRange.location)
+				if (actRange.length && actRange.location == extRange.location)
 					subType = kSubTypeASS;
 				else {
 					actRange = CFStringFind(cfFoundFilename, CFSTR(".ssa"), kCFCompareCaseInsensitive | kCFCompareBackwards);
-					if (actRange.location == extRange.location)
+					if (actRange.length && actRange.location == extRange.location)
 						subType = kSubTypeSSA;
 					else {
 						// VobSub
 						actRange = CFStringFind(cfFoundFilename, CFSTR(".idx"), kCFCompareCaseInsensitive | kCFCompareBackwards);
-						if (actRange.location == extRange.location)
+						if (actRange.length && actRange.location == extRange.location)
 							err = LoadVobSubSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
 					}
 				}
