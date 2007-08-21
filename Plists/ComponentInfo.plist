@@ -23,5 +23,15 @@
 			<string>fr.free.magicwb.wmacodec</string>
 		</array>
 	</dict>
+	<dict>
+		<key>CFBundleIdentifier</key>
+		<string>com.shepmater.A52Codec</string>
+		<key>HumanReadableName</key>
+		<string>A52Codec</string>
+		<key>obsoletes</key>
+		<array>
+			<string>org.perian.No.Bundle.ID.AC3 Codec</string>
+		</array>
+	</dict>
 </array>
 </plist>
