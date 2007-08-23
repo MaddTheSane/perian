@@ -591,6 +591,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				codecID = CODEC_ID_FRAPS;
 				break;
 				
+			case 'SNOW':
+				codecID = CODEC_ID_SNOW;
+				break;
+				
             default:
 				Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
         }
@@ -1441,6 +1445,10 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 				
 			case 'FPS1':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kFRAPSCodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
+				
+			case 'SNOW':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kSnowCodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
             default:	// should never happen but we have to handle the case

@@ -80,6 +80,7 @@ enum {
 	kVideoFormatRealG2                      = 'RV20',
 	kVideoFormatReal8                       = 'RV30',
 	kVideoFormatReal9                       = 'RV40',
+	kVideoFormatSnow                        = 'SNOW',
 	
 	kAudioFormatFlashADPCM                  = 'FlAd',
 	kAudioFormatDTS                         = 'DTS ', 

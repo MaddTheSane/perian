@@ -61,6 +61,7 @@
 #define kMPEG1Name		"MPEG-1 Video"
 #define kMPEG2Name		"MPEG-2 Video"
 #define kFRAPSName		"Fraps"
+#define kSnowName		"Snow"
 
 // Codec names Resource ID
 
@@ -82,6 +83,7 @@
 #define kMPEG1NameResID		271
 #define kMPEG2NameResID		272
 #define kFRAPSNameResID		273
+#define kSnowNameResID		274
 
 // Codec infos Resource ID
 
@@ -103,6 +105,7 @@
 #define kMPEG1InfoResID		300
 #define kMPEG2InfoResID		301
 #define kFRAPSInfoResID		302
+#define kSnowInfoResID		303
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -546,6 +549,31 @@ resource 'cdci' (kMPEG2CodecInfoResID) {
 
 resource 'cdci' (kFRAPSCodecInfoResID) {
 	kFRAPSName,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// Snow Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kSnowCodecInfoResID) {
+	kSnowName,				// Type
 	1,					// Version
 	1,					// Revision level
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -2941,6 +2969,39 @@ resource 'thng' (332) {
 };
 
 //---------------------------------------------------------------------------
+// Snow Components
+//---------------------------------------------------------------------------
+resource 'thng' (333) {
+	decompressorComponentType,              // Type
+	'SNOW',                                 // SubType
+	kFFusionCodecManufacturer,                      // Manufacturer
+	0,                                      // - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',                                 // Name Type
+	kSnowNameResID,                        // Name ID
+	'STR ',                                 // Info Type
+	kSnowInfoResID,                        // Info ID
+	0,                                      // Icon Type
+	0,                                      // Icon ID
+	kFFusionCodecVersion,                   // Version
+	componentHasMultiplePlatforms +         // Registration Flags 
+	componentDoAutoVersion,                 // Registration Flags
+	0,                                      // Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',                         // Entry point found by symbol name 'dlle' resource
+	256,                            // ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+//---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
 
@@ -3014,6 +3075,10 @@ resource 'STR ' (kMPEG2NameResID) {
 
 resource 'STR ' (kFRAPSNameResID) {
 	"Fraps (Perian)"
+};
+
+resource 'STR ' (kSnowNameResID) {
+	"Snow (Perian)"
 };
 
 //---------------------------------------------------------------------------
@@ -3090,6 +3155,10 @@ resource 'STR ' (kMPEG2InfoResID) {
 
 resource 'STR ' (kFRAPSInfoResID) {
 	"Decompresses video stored in Fraps format."
+};
+
+resource 'STR ' (kSnowInfoResID) {
+	"Decompresses video stored in Snow format."
 };
 
 //---------------------------------------------------------------------------
