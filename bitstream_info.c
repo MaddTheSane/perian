@@ -17,6 +17,7 @@
 #define Picture MPEGPICTURE
 
 #include "avcodec.h"
+#include "allcodecs.h"
 
 #ifdef __BIG_ENDIAN__
 #define WORDS_BIGENDIAN
