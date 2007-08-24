@@ -114,6 +114,7 @@ static NSArray *SplitByFormat(NSString *format, NSArray *lines)
 		NSString *s = [lines objectAtIndex:i];
 		NSArray *splitline = STSplitStringWithCount(s, @",", numfields);
 		
+		if ([splitline count] != numfields) continue;
 		[ar addObject:[NSDictionary dictionaryWithObjects:splitline
 												  forKeys:formarray]];
 	}
