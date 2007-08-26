@@ -50,7 +50,7 @@ else
     echo -n "Building "
     if [ $buildi386 -eq $buildppc ] ; then
         echo "Universal"
-    elif [ $buildi386 ] ; then
+    elif [ $buildi386 -gt 0 ] ; then
         echo "Intel-only"
     else
         echo "PPC-only"
