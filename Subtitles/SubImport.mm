@@ -338,6 +338,15 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 	return err;
 }
 
+static Boolean ShouldLoadExternalSubtitles()
+{
+	Boolean isSet, value;
+	
+	value = CFPreferencesGetAppBooleanValue(CFSTR("LoadExternalSubtitles"),CFSTR("org.perian.Perian"),&isSet);
+	
+	return isSet ? value : YES;
+}
+
 ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 {
 	ComponentResult err = noErr;
@@ -349,6 +358,8 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 	CFRange baseFilenameRange;
 	ItemCount filesFound;
 	Boolean containerChanged;
+	
+	if (!ShouldLoadExternalSubtitles()) return noErr;
 	
 	err = FSGetCatalogInfo(theFile, kFSCatInfoNone, NULL, &hfsFilename, NULL, &parentDir);
 	if (err) goto bail;

@@ -5,6 +5,7 @@
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
 #define LastInstalledVersionKey CFSTR("LastInstalledVersion")
 #define AC3TwoChannelModeKey CFSTR("twoChannelMode")
+#define ExternalSubtitlesKey CFSTR("LoadExternalSubtitles")
 
 //Old
 #define AC3StereoOverDolbyKey CFSTR("useStereoOverDolby")
@@ -890,6 +891,12 @@
 	[NSApp endSheet:window_dynRangeSheet];
 	[self saveAC3DynamicRange:nextDynValue];
 	[window_dynRangeSheet orderOut:self];
+}
+
+#pragma mark Subtitles
+- (IBAction)setLoadExternalSubtitles:(id)sender
+{	
+	[self setKey:ExternalSubtitlesKey forAppID:perianAppID fromBool:(BOOL)[sender state]];
 }
 
 #pragma mark About 

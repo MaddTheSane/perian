@@ -70,6 +70,8 @@ typedef enum
     IBOutlet NSTextField                *textField_ac3DynamicRangeValue;
     IBOutlet NSSlider                   *slider_ac3DynamicRangeSlider;
 	
+	IBOutlet NSButton					*button_loadExternalSubtitles;
+	
 	//About
 	IBOutlet NSTextView					*textView_about;
 	IBOutlet NSButton					*button_website;
@@ -96,6 +98,7 @@ typedef enum
 - (IBAction)installUninstall:(id)sender;
 - (IBAction)updateCheck:(id)sender;
 - (IBAction)setAutoUpdateCheck:(id)sender;
+- (IBAction)setLoadExternalSubtitles:(id)sender;
 
 //AC3 Settings
 - (IBAction)setAC3DynamicRangePopup:(id)sender;

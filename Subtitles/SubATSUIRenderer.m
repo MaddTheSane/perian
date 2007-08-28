@@ -219,20 +219,23 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 
 static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
 {
-	ATSFontRef fontRef = ATSFontFindFromName((CFStringRef)name,kATSOptionFlagsDefault);
-	ATSUFontID font = FMGetFontFromATSFontRef(fontRef);
-
+	ByteCount nlen = [name length];
+	unichar *uname = (unichar*)[name cStringUsingEncoding:NSUnicodeStringEncoding];
+	
+	ATSFontRef fontRef;
+	ATSUFontID font;
+	
+	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
+	
 	if (font == kATSUInvalidFontID) {
-		const char *utf8 = [name UTF8String];
-		ATSUFindFontFromName(utf8, strlen(utf8), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
-
-		if (font == kATSUInvalidFontID) ATSUFindFontFromName(utf8, strlen(utf8), 18, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
+		fontRef = ATSFontFindFromName((CFStringRef)name,kATSOptionFlagsDefault);
+		font = FMGetFontFromATSFontRef(fontRef);
 		
 		if (font == kATSUInvalidFontID) {
 			fontRef = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
 			font = FMGetFontFromATSFontRef(fontRef);
-		} else fontRef = FMGetATSFontRefFromFont(font);
-	}
+		}
+	} else fontRef = FMGetATSFontRefFromFont(font);
 	
 	*_fontRef = fontRef;
 	

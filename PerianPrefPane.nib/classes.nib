@@ -13,6 +13,7 @@
                 setAC3DynamicRangeSlider = id; 
                 setAC3DynamicRangeValue = id; 
                 setAutoUpdateCheck = id; 
+                setLoadExternalSubtitles = id; 
                 updateCheck = id; 
             }; 
             CLASS = CPFPerianPrefPaneController; 
@@ -22,6 +23,7 @@
                 "button_donate" = NSButton; 
                 "button_forum" = NSButton; 
                 "button_install" = NSButton; 
+                "button_loadExternalSubtitles" = NSButton; 
                 "button_updateCheck" = NSButton; 
                 "button_website" = NSButton; 
                 "popup_ac3DynamicRangeType" = NSPopUpButton; 
