@@ -96,9 +96,9 @@ OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType,
 
 /* Import routines */
 int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSType dataRefType);
-int prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OSType dataRefType);
+OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OSType dataRefType);
 void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame);
-void initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame);
+OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame);
 
 int determine_header_offset(ff_global_ptr storage);
 int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDuration);

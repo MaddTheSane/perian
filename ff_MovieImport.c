@@ -439,7 +439,9 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		prepare_track(storage, targetTrack, dataRef, dataRefType);
 	} else {
 		storage->map_count = ic->nb_streams;
-		prepare_movie(storage, theMovie, dataRef, dataRefType);
+		result = prepare_movie(storage, theMovie, dataRef, dataRefType);
+		if (result != 0)
+			goto bail;
 	}
 	
 	/* replace the SampleDescription if user called MovieImportSetSampleDescription() */
