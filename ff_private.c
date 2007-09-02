@@ -239,10 +239,13 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		SetMediaTimeScale(media, map->str->time_base.den);
 	}
 	
-	/* FIXME. in the MSADPCM codec, we get a wrong mFramesPerPacket entry because
-		* of the difference in the sample_rate and the time_base denumerator. So we
-		* recalculate here the mFramesPerPacket entry */
-	if(asbd.mBytesPerPacket) {
+	if (asbd.mFormatID == kAudioFormatLinearPCM)
+		asbd.mFramesPerPacket = 1;
+	else if (asbd.mBytesPerPacket) {
+		/* FIXME. in the MSADPCM codec, we get a wrong mFramesPerPacket entry because
+		 * of the difference in the sample_rate and the time_base denumerator. So we
+		 * recalculate here the mFramesPerPacket entry */
+
 		/* For calculation, lets assume a packet duration of 1, use ioSize as tmp storage */
 		ioSize = map->str->time_base.num * codec->sample_rate / map->str->time_base.den;
 		/* downscale to correct bytes_per_packet */
