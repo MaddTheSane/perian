@@ -131,24 +131,73 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 
 @implementation SubATSUIRenderer
 
+// from Apple Q&A 1396
+static CGColorSpaceRef CreateICCColorSpaceFromPathToProfile (const char * iccProfilePath) {
+	CMProfileRef    iccProfile = NULL;
+	CGColorSpaceRef iccColorSpace = NULL;
+	CMProfileLocation loc;
+	
+	// Specify that the location of the profile will be a POSIX path to the profile.
+	loc.locType = cmPathBasedProfile;
+	
+	// Make sure the path is not larger then the buffer
+	if(strlen(iccProfilePath) > sizeof(loc.u.pathLoc.path))
+		return NULL;
+	
+	// Copy the path the profile into the CMProfileLocation structure
+	strcpy (loc.u.pathLoc.path, iccProfilePath);
+	
+	// Open the profile
+	if (CMOpenProfile(&iccProfile, &loc) != noErr)
+	{
+		iccProfile = (CMProfileRef) 0;
+		return NULL;
+	}
+	
+	// Create the ColorSpace with the open profile.
+	iccColorSpace = CGColorSpaceCreateWithPlatformColorSpace( iccProfile );
+	
+	// Close the profile now that we have what we need from it.
+	CMCloseProfile(iccProfile);
+	
+	return iccColorSpace;
+}
+
+static CGColorSpaceRef CreateColorSpaceFromSystemICCProfileName(CFStringRef profileName) {
+	FSRef pathToProfilesFolder;
+    FSRef pathToProfile;
+	
+	// Find the Systems Color Sync Profiles folder
+	if(FSFindFolder(kOnSystemDisk, kColorSyncProfilesFolderType,
+					kDontCreateFolder, &pathToProfilesFolder) == noErr) {
+		
+		// Make a UniChar string of the profile name
+		UniChar uniBuffer[sizeof(CMPathLocation)];
+		CFStringGetCharacters (profileName,CFRangeMake(0,CFStringGetLength(profileName)),uniBuffer);
+		
+		// Create a FSRef to the profile in the Systems Color Sync Profile folder
+		if(FSMakeFSRefUnicode (&pathToProfilesFolder,CFStringGetLength(profileName),uniBuffer,
+							   kUnicodeUTF8Format,&pathToProfile) == noErr) {
+			unsigned char path[sizeof(CMPathLocation)];
+			
+			// Write the posix path to the profile into our path buffer from the FSRef
+			if(FSRefMakePath (&pathToProfile,path,sizeof(CMPathLocation)) == noErr)
+				return CreateICCColorSpaceFromPathToProfile((char*)path);
+		}
+	}
+	
+	return NULL;
+}
+
+static CGColorSpaceRef CreateICCsRGBColorSpace() {
+	return CreateColorSpaceFromSystemICCProfileName(CFSTR("sRGB Profile.icc"));
+}
+
 static CGColorSpaceRef GetSRGBColorSpace() {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSData *d = [NSData dataWithContentsOfMappedFile:@"/System/Library/ColorSync/Profiles/sRGB Profile.icc"];
-	CGColorSpaceRef ret;
-	
-	if (d) {
-		CMProfileLocation loc;
-		loc.locType = cmPtrBasedProfile;
-		loc.u.ptrLoc.p = (char*)[d bytes];
-		CMProfileRef prof;
-		
-		CMOpenProfile(&prof,&loc);
-		ret = CGColorSpaceCreateWithPlatformColorSpace(prof);
-		CMCloseProfile(prof);
-	} else ret = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
-	
+	CGColorSpaceRef cs = CreateICCsRGBColorSpace();
 	[pool release];
-	return ret;
+	return cs;
 }
 
 -(SubATSUIRenderer*)initWithVideoWidth:(float)width videoHeight:(float)height;

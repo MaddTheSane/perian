@@ -162,7 +162,7 @@ void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSA
 		action assformat {styleformat = @"Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding";}
 		action ssaformat {styleformat = @"Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding";}
 
-		stylename = "[V4 Styles]" %ssaformat | "[V4+ Styles]" %assformat;
+		stylename = ("[" [Vv] "4 Styles]") %ssaformat | ("[" [Vv] "4+ Styles]") %assformat;
 		
 		sline = (("Style:" ws* %sstart str %csvlineend) | str) :> nl;
 		
