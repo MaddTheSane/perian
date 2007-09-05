@@ -458,6 +458,7 @@ ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 
 ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
 {
+#if 0
 	if (!tr_entry || !desc) return paramErr;
 	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
 	
@@ -467,6 +468,7 @@ ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, SampleDescriptionHandle des
 		
 		DisposeHandle((Handle) sndDescExt);
 	}
+#endif
 	return noErr;
 }
 
