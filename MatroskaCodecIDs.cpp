@@ -42,7 +42,7 @@ ComponentResult DescExt_H264(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 	if (dir == kToSampleDescription) {
 		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
 		if (codecPrivate == NULL)
-			return invalidAtomErr;
+			return noErr;
 		
 		Handle imgDescExt = NewHandle(codecPrivate->GetSize());
 		memcpy(*imgDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
