@@ -381,6 +381,9 @@ Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
 	KaxTrackNumber *trackNum = FindChild<KaxTrackNumber>(*tr_entry);
 	
+	if (codecPrivate == NULL)
+		return NULL;
+	
 	int vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
 	int trackID = trackNum ? uint16(*trackNum) : 1;
 	int decoderSpecificInfoLen = vosLen ? descrLength(vosLen) : 0;
@@ -439,6 +442,12 @@ ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 	
 	if (dir == kToSampleDescription) {
 		Handle imgDescExt = CreateEsdsExt(tr_entry, false);
+		
+		if (imgDescExt == NULL) {
+			// missing extradata -> probably missing pts too, so force VfW mode
+			(*desc)->dataFormat = 'XVID';
+			return noErr;
+		}
 		
 		AddImageDescriptionExtension(imgDesc, imgDescExt, 'esds');
 		
