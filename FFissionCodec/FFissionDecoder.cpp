@@ -66,7 +66,7 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0
 	magicCookie = NULL;
 	magicCookieSize = 0;
 	
-	for (int i = 0; i < kAllInputFormats[i].codecID != CODEC_ID_NONE; i++) {
+	for (int i = 0; kAllInputFormats[i].codecID != CODEC_ID_NONE; i++) {
 		CAStreamBasicDescription theInputFormat(kAudioStreamAnyRate, kAllInputFormats[i].mFormatID, 0, 1, 0, 0, 0, 0);
 		AddInputFormat(theInputFormat);
 	}
