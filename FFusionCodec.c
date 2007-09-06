@@ -1553,12 +1553,12 @@ static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID)
 	int nthreads;
 	size_t len = 4;
 	
-    // multithreading is only effective for mpeg1/2
-    if (codecID != CODEC_ID_MPEG1VIDEO && codecID != CODEC_ID_MPEG2VIDEO) return;
+    // multithreading is only effective for mpeg1/2 and h.264 with slices
+    if (codecID != CODEC_ID_MPEG1VIDEO && codecID != CODEC_ID_MPEG2VIDEO && codecID != CODEC_ID_H264) return;
     
-	// one thread per usable CPU
-	// (vmware or power saving may disable some CPUs)
+	// two threads on multicore, otherwise 1
 	if (sysctlbyname("hw.activecpu", &nthreads, &len, NULL, 0) == -1) nthreads = 1;
+	else nthreads = 2;
 	
 	avcodec_thread_init(s, nthreads);
 }

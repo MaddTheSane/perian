@@ -14,6 +14,7 @@ enum {kSubCollisionsNormal, kSubCollisionsReverse};
 enum {kSubLineWrapTopWider = 0, kSubLineWrapSimple, kSubLineWrapNone, kSubLineWrapBottomWider};
 enum {kSubAlignmentLeft, kSubAlignmentCenter, kSubAlignmentRight};
 enum {kSubAlignmentBottom, kSubAlignmentMiddle, kSubAlignmentTop};
+enum {kSubBorderStyleNormal = 1, kSubBorderStyleBox = 3};
 
 typedef ATSURGBAlphaColor SubRGBAColor;
 

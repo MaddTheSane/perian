@@ -515,7 +515,15 @@ static ATSUTextMeasurement GetLineHeight(ATSUTextLayout layout, UniCharArrayOffs
 	return ascent + descent;
 }
 
-static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed *height, Fixed *width)
+static void ExpandCGRect(CGRect *rect, float radius)
+{
+	rect->origin.x -= radius;
+	rect->origin.y -= radius;
+	rect->size.height += radius;
+	rect->size.width += radius;
+}
+
+static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
 {
 	ATSTrapezoid trap = {0};
 	ItemCount trapCount;
@@ -544,6 +552,8 @@ static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArray
 		largeRect.right = MAX(largeRect.right, rect.right);
 	}
 	
+	if (lX) *lX = largeRect.left;
+	if (lY) *lY = largeRect.bottom;
 	*height = largeRect.bottom - largeRect.top;
 	*width = largeRect.right - largeRect.left;
 }
@@ -722,7 +732,7 @@ typedef struct {
 
 enum {kTextLayerShadow, kTextLayerOutline, kTextLayerPrimary};
 
-static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanEx *lastSpanEx, int textType, BOOL endLayer)
+static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanEx *lastSpanEx, SubRenderDiv *div, int textType, BOOL endLayer)
 {	
 #define if_different(x) if (!lastSpanEx || lastSpanEx-> x != spanEx-> x)
 	
@@ -742,7 +752,7 @@ static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanE
 			
 		case kTextLayerOutline:
 			if_different(outlineRadius) CGContextSetLineWidth(c, spanEx->outlineRadius*2. + .5);
-			if_different(outlineColor)  SetColor(c, strokec, spanEx->outlineColor);
+			if_different(outlineColor)  SetColor(c, (div->styleLine->borderStyle == kSubBorderStyleNormal) ? strokec : fillc, spanEx->outlineColor);
 			
 			if_different(outlineAlpha) {
 				if (endLayer) CGContextEndTransparencyLayer(c);
@@ -773,6 +783,21 @@ static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanE
 	return endLayer;
 }
 
+static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak, UniCharArrayOffset lineLen, Fixed penX, Fixed penY, CGContextRef c, SubRenderDiv *div, SubATSUISpanEx *spanEx, int textType)
+{	
+	if (textType == kTextLayerOutline && div->styleLine->borderStyle == kSubBorderStyleBox) {
+		ATSUTextMeasurement lineWidth, lineHeight, lineX, lineY;
+		UniCharArrayOffset breaks[2] = {thisBreak, thisBreak + lineLen};
+		GetTypographicRectangleForLayout(layout, breaks, 0, &lineX, &lineY, &lineHeight, &lineWidth);
+		
+		CGRect borderRect = CGRectMake(FixedToFloat(lineX + penX), FixedToFloat(penY - lineY), FixedToFloat(lineWidth) + 1., FixedToFloat(lineHeight) + 1.);
+		
+		ExpandCGRect(&borderRect, spanEx->outlineRadius);
+		
+		CGContextFillRect(c, borderRect);
+	} else ATSUDrawText(layout, thisBreak, lineLen, RoundFixed(penX), RoundFixed(penY));
+}
+
 static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY, SubATSUISpanEx *firstSpanEx, int textType)
 {
 	int i;
@@ -782,14 +807,14 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 		
 	CGContextSetTextDrawingMode(c, textModes[textType]);
 	
-	if (!(div->render_complexity & renderMultipleParts)) endLayer = SetupCGForSpan(c, firstSpanEx, lastSpanEx, textType, endLayer);
+	if (!(div->render_complexity & renderMultipleParts)) endLayer = SetupCGForSpan(c, firstSpanEx, lastSpanEx, div, textType, endLayer);
 	
 	for (i = breakc.lStart; i != breakc.lEnd; i -= breakc.direction) {
 		UniCharArrayOffset thisBreak = breakc.breaks[i], nextBreak = breakc.breaks[i+1], linelen = nextBreak - thisBreak;
 		float extraHeight = 0;
 		
 		if (!(div->render_complexity & renderMultipleParts)) {
-			ATSUDrawText(layout, thisBreak, linelen, RoundFixed(penX), RoundFixed(penY));
+			RenderActualLine(layout, thisBreak, linelen, penX, penY, c, div, firstSpanEx, textType);
 			extraHeight = div->styleLine->outlineRadius;
 		} else {
 			int j, spans = [div->spans count];
@@ -815,9 +840,9 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 					drawLen = spanLen;
 				}
 				
-				endLayer = SetupCGForSpan(c, spanEx, lastSpanEx, textType, endLayer);
-				ATSUDrawText(layout, drawStart, drawLen, RoundFixed((textType == kTextLayerShadow) ? (penX + FloatToFixed(spanEx->shadowDist)) : penX), 
-														 RoundFixed((textType == kTextLayerShadow) ? (penY - FloatToFixed(spanEx->shadowDist)) : penY));
+				endLayer = SetupCGForSpan(c, spanEx, lastSpanEx, div, textType, endLayer);
+				RenderActualLine(layout, drawStart, drawLen, (textType == kTextLayerShadow) ? (penX + FloatToFixed(spanEx->shadowDist)) : penX, 
+														 (textType == kTextLayerShadow) ? (penY - FloatToFixed(spanEx->shadowDist)) : penY, c, div, spanEx, textType);
 				extraHeight = MAX(extraHeight, spanEx->outlineRadius);
 			}
 		
@@ -836,13 +861,15 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	SubATSUISpanEx *firstSpanEx = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
 	BOOL endLayer = NO;
 	
-	if (!(div->render_complexity & renderManualShadows)) {
-		if (firstSpanEx->shadowDist) {
-			endLayer = YES;
-			CGContextSetShadowWithColor(c, CGSizeMake(firstSpanEx->shadowDist + .5, -(firstSpanEx->shadowDist + .5)), 0, firstSpanEx->shadowColor);
-			CGContextBeginTransparencyLayer(c, NULL);
-		}
-	} else DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerShadow);
+	if (div->styleLine->borderStyle == kSubBorderStyleNormal) {
+		if (!(div->render_complexity & renderManualShadows)) {
+			if (firstSpanEx->shadowDist) {
+				endLayer = YES;
+				CGContextSetShadowWithColor(c, CGSizeMake(firstSpanEx->shadowDist + .5, -(firstSpanEx->shadowDist + .5)), 0, firstSpanEx->shadowColor);
+				CGContextBeginTransparencyLayer(c, NULL);
+			}
+		} else DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerShadow);
+	}
 	
 	DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerOutline);
 	penY = DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerPrimary);
@@ -896,7 +923,10 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		
 		ItemCount breakCount;
 		UniCharArrayOffset *breaks = FindLineBreaks(layout, div, breakLocator, &breakCount, breakingWidth, ubuffer, textLen);
-		
+		ATSUTextMeasurement imageWidth, imageHeight;
+
+		if (div->posX != -1 || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, NULL, NULL, &imageHeight, &imageWidth);
+
 		if (div->posX == -1) {
 			penX = FloatToFixed(NSMinX(marginRect));
 
@@ -912,9 +942,6 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 					break;
 				case kSubAlignmentMiddle:
 					if (!centerPen) {
-						ATSUTextMeasurement imageWidth, imageHeight;
-						
-						GetTypographicRectangleForLayout(layout, breaks, breakCount, &imageHeight, &imageWidth);
 						penY = (FloatToFixed(NSMidY(marginRect)) / 2) + (imageHeight / 2);
 					} else penY = centerPen;
 					
@@ -928,11 +955,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 					storePen = &topPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
 					break;
 			}
-		} else {
-			ATSUTextMeasurement imageWidth, imageHeight;
-						
-			GetTypographicRectangleForLayout(layout, breaks, breakCount, &imageHeight, &imageWidth);
-
+		} else {						
 			penX = FloatToFixed(div->posX * screenScaleX);
 			penY = FloatToFixed((context->resY - div->posY) * screenScaleY);
 			
