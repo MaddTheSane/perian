@@ -56,6 +56,16 @@ NSMutableString *STStandardizeStringNewlines(NSString *str)
 	return ms;
 }
 
+void STSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *, const void *))
+{
+	int count = [array count];
+	id  objs[count];
+	
+	[array getObjects:objs];
+	mergesort(objs, count, sizeof(void*), compare);
+	[array setArray:[NSArray arrayWithObjects:objs count:count]];
+}
+
 static BOOL DifferentiateLatin12(const unsigned char *data, int length)
 {
 	// generated from french/german (latin1) and hungarian/slovak (latin2)

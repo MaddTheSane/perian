@@ -519,8 +519,8 @@ static void ExpandCGRect(CGRect *rect, float radius)
 {
 	rect->origin.x -= radius;
 	rect->origin.y -= radius;
-	rect->size.height += radius;
-	rect->size.width += radius;
+	rect->size.height += radius*2.;
+	rect->size.width += radius*2.;
 }
 
 static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
@@ -790,9 +790,14 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 		UniCharArrayOffset breaks[2] = {thisBreak, thisBreak + lineLen};
 		GetTypographicRectangleForLayout(layout, breaks, 0, &lineX, &lineY, &lineHeight, &lineWidth);
 		
-		CGRect borderRect = CGRectMake(FixedToFloat(lineX + penX), FixedToFloat(penY - lineY), FixedToFloat(lineWidth) + 1., FixedToFloat(lineHeight) + 1.);
+		CGRect borderRect = CGRectMake(FixedToFloat(lineX + penX), FixedToFloat(penY - lineY), FixedToFloat(lineWidth), FixedToFloat(lineHeight));
 		
 		ExpandCGRect(&borderRect, spanEx->outlineRadius);
+		
+		borderRect.origin.x = floor(borderRect.origin.x);
+		borderRect.origin.y = floor(borderRect.origin.y);
+		borderRect.size.width = ceil(borderRect.size.width);
+		borderRect.size.height = ceil(borderRect.size.height);
 		
 		CGContextFillRect(c, borderRect);
 	} else ATSUDrawText(layout, thisBreak, lineLen, RoundFixed(penX), RoundFixed(penY));
@@ -886,7 +891,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	ubuffer = realloc(ubuffer, sizeof(unichar) * [packet length]);
 	NSArray *divs = SubParsePacket(packet, context, self, ubuffer);
-	unsigned div_count = [divs count];
+	unsigned div_count = [divs count], lastLayer = 0;
 	int i;
 	Fixed bottomPen = 0, topPen = 0, centerPen = 0, *storePen=NULL;
 	
@@ -902,7 +907,13 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	for (i = 0; i < div_count; i++) {
 		SubRenderDiv *div = [divs objectAtIndex:i];
 		unsigned textLen = [div->text length];
+		BOOL resetPens = NO;
 		if (!textLen) continue;
+		
+		if (div->layer != lastLayer) {
+			resetPens = YES;
+			lastLayer = div->layer;
+		}
 		
 		NSRect marginRect = NSMakeRect(div->marginL, div->marginV, context->resX - div->marginL - div->marginR, context->resY - div->marginV - div->marginV);
 		
@@ -932,7 +943,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 
 			switch(div->alignV) {
 				case kSubAlignmentBottom: default:
-					if (!bottomPen) {
+					if (!bottomPen || resetPens) {
 						ATSUTextMeasurement bottomLineDescent;
 						ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &bottomLineDescent, NULL);
 						penY = FloatToFixed(NSMinY(marginRect)) + bottomLineDescent;
@@ -941,14 +952,14 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 					storePen = &bottomPen; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
 					break;
 				case kSubAlignmentMiddle:
-					if (!centerPen) {
+					if (!centerPen || resetPens) {
 						penY = (FloatToFixed(NSMidY(marginRect)) / 2) + (imageHeight / 2);
 					} else penY = centerPen;
 					
 					storePen = &centerPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
 					break;
 				case kSubAlignmentTop:
-					if (!topPen) {
+					if (!topPen || resetPens) {
 						penY = FloatToFixed(NSMaxY(marginRect)) - GetLineHeight(layout, kATSUFromTextBeginning);
 					} else penY = topPen;
 					

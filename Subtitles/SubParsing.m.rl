@@ -197,6 +197,15 @@ static NSMutableString *FilterSlashEscapes(NSMutableString *s)
 	return s;
 }
 
+static int compare_layer(const void *a, const void *b)
+{
+	const SubRenderDiv *divA = a, *divB = b;
+	
+	if (divA->layer < divB->layer) return -1;
+	else if (divA->layer > divB->layer) return 1;
+	return 0;
+}
+
 NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate, unichar *linebuf)
 {
 	packet = STStandardizeStringNewlines(packet);
@@ -211,7 +220,6 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 		
 		div->text = [[NSMutableString string] retain];
 		div->spans = [[NSMutableArray array] retain];
-		div->wrapStyle = context->wrapStyle;
 		
 		if (context->scriptType == kSubTypeSRT) {
 			div->styleLine = [context->defaultStyle retain];
@@ -442,5 +450,6 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 		
 	}
 	
+	STSortMutableArrayStably(divs, compare_layer);
 	return divs;
 }

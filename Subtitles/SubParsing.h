@@ -22,12 +22,13 @@ extern "C"
 	NSMutableString *text;
 	SubStyle *styleLine;
 	unsigned marginL, marginR, marginV;
-	unsigned layer;
 	NSMutableArray *spans;
 	
 	int posX, posY;
 	UInt8 alignH, alignV, wrapStyle, render_complexity;
 	BOOL is_shape;
+	
+	unsigned layer;
 }
 -(SubRenderDiv*)nextDivWithDelegate:(SubRenderer*)delegate;
 @end

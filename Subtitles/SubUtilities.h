@@ -17,7 +17,7 @@ extern NSArray *STSplitStringIgnoringWhitespace(NSString *str, NSString *split);
 extern NSArray *STSplitStringWithCount(NSString *str, NSString *split, size_t count);
 extern NSMutableString *STStandardizeStringNewlines(NSString *str);
 extern NSString *STLoadFileWithUnknownEncoding(NSString *path);
-
+extern void STSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *, const void *));
 #ifdef __cplusplus
 }
 #endif
