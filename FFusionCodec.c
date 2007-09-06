@@ -1550,7 +1550,7 @@ OSErr FFusionDecompress(AVCodecContext *context, UInt8 *dataPtr, ICMDataProcReco
 
 static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID)
 {
-	int nthreads;
+	int nthreads = 1;
 	size_t len = 4;
 	
     // multithreading is only effective for mpeg1/2 and h.264 with slices
@@ -1558,7 +1558,7 @@ static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID)
     
 	// two threads on multicore, otherwise 1
 	if (sysctlbyname("hw.activecpu", &nthreads, &len, NULL, 0) == -1) nthreads = 1;
-	else nthreads = 2;
+	else nthreads = FFMIN(nthreads, 2);
 	
 	avcodec_thread_init(s, nthreads);
 }
