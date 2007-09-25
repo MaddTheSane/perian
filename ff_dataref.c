@@ -105,6 +105,9 @@ static int dataref_read(URLContext *h, unsigned char *buf, int size)
 		offset.lo = (UInt32)p->pos;
 		
 		result = DataHScheduleData64(p->dh, (Ptr)buf, &offset, (long)read, 0, NULL, NULL);
+		if (result == badComponentSelector && offset.hi == 0) {
+			result = DataHScheduleData(p->dh, (Ptr)buf, offset.lo, (long)read, 0, NULL, NULL);
+		}
 	} else {
 		result = DataHScheduleData(p->dh, (Ptr)buf, (long)p->pos, (long)read, 0, NULL, NULL);
 	}
