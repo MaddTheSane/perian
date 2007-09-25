@@ -17,7 +17,6 @@
 #define Picture MPEGPICTURE
 
 #include "avcodec.h"
-#include "allcodecs.h"
 
 #ifdef __BIG_ENDIAN__
 #define WORDS_BIGENDIAN
@@ -219,6 +218,8 @@ static int parse_mpeg4_stream(FFusionParserContext *parser, const uint8_t *buf, 
 		*out_buf_size = endOfFrame;
 	return 1;
 }
+
+extern AVCodecParser mpeg4video_parser;
 
 FFusionParser ffusionMpeg4VideoParser = {
 	&mpeg4video_parser,
@@ -690,6 +691,8 @@ static int parse_extra_data_h264(FFusionParserContext *parser, const uint8_t *bu
 	
 	return 1;
 }
+
+extern AVCodecParser h264_parser;
 
 FFusionParser ffusionH264Parser = {
 	&h264_parser,

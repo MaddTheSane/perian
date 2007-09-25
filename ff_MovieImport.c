@@ -22,9 +22,6 @@
 
 #include "ff_MovieImportVersion.h"
 #include "ff_private.h"
-#include "allcodecs.h"
-#include "allformats.h"
-#include "allcodecs.h"
 #include "Codecprintf.h"
 #include "riff.h"
 #include "SubImport.h"
@@ -50,6 +47,32 @@
 
 #pragma mark -
 
+#define REGISTER_MUXER(x) { \
+	extern AVOutputFormat x##_muxer; \
+		av_register_output_format(&x##_muxer); }
+#define REGISTER_DEMUXER(x) { \
+	extern AVInputFormat x##_demuxer; \
+		av_register_input_format(&x##_demuxer); }
+#define REGISTER_MUXDEMUX(x)  REGISTER_MUXER(x); REGISTER_DEMUXER(x)
+#define REGISTER_PROTOCOL(x) { \
+	extern URLProtocol x##_protocol; \
+		register_protocol(&x##_protocol); }
+
+#define REGISTER_ENCODER(x) { \
+	extern AVCodec x##_encoder; \
+		register_avcodec(&x##_encoder); }
+#define REGISTER_DECODER(x) { \
+	extern AVCodec x##_decoder; \
+		register_avcodec(&x##_decoder); }
+#define REGISTER_ENCDEC(x)  REGISTER_ENCODER(x); REGISTER_DECODER(x)
+
+#define REGISTER_PARSER(x) { \
+	extern AVCodecParser x##_parser; \
+		av_register_codec_parser(&x##_parser); }
+#define REGISTER_BSF(x) { \
+	extern AVBitStreamFilter x##_bsf; \
+		av_register_bitstream_filter(&x##_bsf); }
+
 void initLib()
 {
 	/* This one is used because Global variables are initialized ONE time
@@ -61,39 +84,39 @@ void initLib()
 	/* Register the Parser of ffmpeg, needed because we do no proper setup of the libraries */
 	if(!inited) {
 		inited = TRUE;
-		av_register_input_format(&avi_demuxer);
-		av_register_input_format(&flv_demuxer);
-		av_register_input_format(&tta_demuxer);
+		REGISTER_DEMUXER(avi);
+		REGISTER_DEMUXER(flv);
+		REGISTER_DEMUXER(tta);
 		register_parsers();
 		
 		avcodec_init();
-		register_avcodec(&msmpeg4v1_decoder);
-		register_avcodec(&msmpeg4v2_decoder);
-		register_avcodec(&msmpeg4v3_decoder);
-		register_avcodec(&mpeg4_decoder);
-		register_avcodec(&h264_decoder);
-		register_avcodec(&flv_decoder);
-		register_avcodec(&flashsv_decoder);
-		register_avcodec(&vp3_decoder);
-		register_avcodec(&vp6_decoder);
-		register_avcodec(&vp6f_decoder);
-		register_avcodec(&h263i_decoder);
-		register_avcodec(&huffyuv_decoder);
-		register_avcodec(&ffvhuff_decoder);
-		register_avcodec(&mpeg1video_decoder);
-		register_avcodec(&mpeg2video_decoder);
-		register_avcodec(&fraps_decoder);
-		register_avcodec(&snow_decoder);
+		REGISTER_DECODER(msmpeg4v1);
+		REGISTER_DECODER(msmpeg4v2);
+		REGISTER_DECODER(msmpeg4v3);
+		REGISTER_DECODER(mpeg4);
+		REGISTER_DECODER(h264);
+		REGISTER_DECODER(flv);
+		REGISTER_DECODER(flashsv);
+		REGISTER_DECODER(vp3);
+		REGISTER_DECODER(vp6);
+		REGISTER_DECODER(vp6f);
+		REGISTER_DECODER(h263i);
+		REGISTER_DECODER(huffyuv);
+		REGISTER_DECODER(ffvhuff);
+		REGISTER_DECODER(mpeg1video);
+		REGISTER_DECODER(mpeg2video);
+		REGISTER_DECODER(fraps);
+		REGISTER_DECODER(snow);
 		
-		register_avcodec(&wmav1_decoder);
-		register_avcodec(&wmav2_decoder);
-		register_avcodec(&adpcm_swf_decoder);
-		register_avcodec(&vorbis_decoder);
-		register_avcodec(&mp2_decoder);
-		register_avcodec(&tta_decoder);
-		register_avcodec(&dca_decoder);
+		REGISTER_DECODER(wmav1);
+		REGISTER_DECODER(wmav2);
+		REGISTER_DECODER(adpcm_swf);
+		REGISTER_DECODER(vorbis);
+		REGISTER_DECODER(mp2);
+		REGISTER_DECODER(tta);
+		REGISTER_DECODER(dca);
 		
-		register_avcodec(&dvdsub_decoder);
+		REGISTER_DECODER(dvdsub);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}

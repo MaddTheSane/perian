@@ -23,7 +23,6 @@
 #include "ff_private.h"
 #include "avcodec.h"
 #include "mpegaudio.h"
-#include "allformats.h"
 #include "Codecprintf.h"
 #include "CommonUtils.h"
 #include "CodecIDs.h"
