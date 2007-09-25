@@ -48,6 +48,10 @@
 #include "Codecprintf.h"
 #include "bitstream_info.h"
 
+extern "C" {
+#include "avutil.h"
+}
+
 using namespace std;
 using namespace libmatroska;
 
@@ -383,6 +387,18 @@ ComponentResult MatroskaImport::ReadContentEncodings(KaxContentEncodings &encodi
 	return noErr;
 }
 
+static void SetCleanApertureDimensions(CleanApertureImageDescriptionExtension **clap, Fixed cleanW, Fixed cleanH)
+{
+	int wN, wD, hN, hD;
+	
+	av_reduce(&wN, &wD, cleanW, fixed1, UINT_MAX);
+	av_reduce(&hN, &hD, cleanH, fixed1, UINT_MAX);
+	
+	**clap = (CleanApertureImageDescriptionExtension){EndianU32_NtoB(wN), EndianU32_NtoB(wD),
+													  EndianU32_NtoB(hN), EndianU32_NtoB(hD),
+													  EndianU32_NtoB(0), EndianU32_NtoB(1), EndianU32_NtoB(0), EndianU32_NtoB(1)};
+}
+
 ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
 {
 	ComponentResult err = noErr;
@@ -421,10 +437,8 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 		return invalidTrack;
 	}
 	
-	**clap = (CleanApertureImageDescriptionExtension){EndianU32_NtoB(width), EndianU32_NtoB(fixed1),
-													  EndianU32_NtoB(height), EndianU32_NtoB(fixed1),
-													  EndianU32_NtoB(0), EndianU32_NtoB(1), EndianU32_NtoB(0), EndianU32_NtoB(1)};
-
+	SetCleanApertureDimensions(clap, width, height);
+	
 	mkvTrack.theTrack = NewMovieTrack(theMovie, width, height, kNoVolume);
 	if (mkvTrack.theTrack == NULL)
 		return GetMoviesError();
