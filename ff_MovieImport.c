@@ -360,9 +360,9 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 			require_noerr(result, bail);
 			
 			OSType fourcc = get_avi_strf_fourcc(&byteContext);
+			enum CodecID id = codec_get_id(codec_bmp_tags, BSWAP(fourcc));
 			
-			if (codec_get_id(codec_bmp_tags, BSWAP(fourcc)) == CODEC_ID_MJPEG || 
-				codec_get_id(codec_bmp_tags, BSWAP(fourcc)) == CODEC_ID_DVVIDEO)
+			if (id == CODEC_ID_MJPEG || id == CODEC_ID_DVVIDEO || id == CODEC_ID_RAWVIDEO || id == CODEC_ID_NONE)
 				*valid = 0;
 			
 			url_fclose(&byteContext);
@@ -441,7 +441,10 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	
 	/* Get the Stream Infos if not already read */
 	result = av_find_stream_info(ic);
-	if(result < 0)
+	
+	// -1 means it couldn't understand at least one stream
+	// which might just mean we don't have its video decoder enabled
+	if(result < 0 && result != -1)
 		goto bail;
 	
 	// we couldn't find any streams, bail with an error.
