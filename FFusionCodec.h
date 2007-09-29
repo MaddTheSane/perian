@@ -49,6 +49,7 @@
 #define kMPEG2CodecInfoResID		272
 #define kFRAPSCodecInfoResID		273
 #define kSnowCodecInfoResID			274
+#define kNuvCodecInfoResID			275
 
 #define kFFusionCodecManufacturer	'Peri'
 

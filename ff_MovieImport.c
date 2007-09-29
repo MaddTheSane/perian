@@ -87,6 +87,7 @@ void initLib()
 		REGISTER_DEMUXER(avi);
 		REGISTER_DEMUXER(flv);
 		REGISTER_DEMUXER(tta);
+		REGISTER_DEMUXER(nuv);
 		register_parsers();
 		
 		avcodec_init();
@@ -107,6 +108,7 @@ void initLib()
 		REGISTER_DECODER(mpeg2video);
 		REGISTER_DECODER(fraps);
 		REGISTER_DECODER(snow);
+		REGISTER_DECODER(nuv);
 		
 		REGISTER_DECODER(wmav1);
 		REGISTER_DECODER(wmav2);
@@ -203,6 +205,9 @@ ComponentResult FFAvi_MovieImportGetMIMETypeList(ff_global_ptr storage, QTAtomCo
 			break;
 		case 'TTA ':
 			err = GetComponentResource((Component)storage->ci, 'mime', kTTAthngResID, (Handle*)mimeInfo);
+			break;
+		case 'NUV ':
+			err = GetComponentResource((Component)storage->ci, 'mime', kNuvthngResID, (Handle*)mimeInfo);
 			break;
 		default:
 			err = GetComponentResource((Component)storage->ci, 'mime', kAVIthngResID, (Handle*)mimeInfo);

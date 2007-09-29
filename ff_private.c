@@ -541,6 +541,12 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 		
 		if(st->codec->codec_type == CODEC_TYPE_VIDEO) {
 			track = NewMovieTrack(theMovie, st->codec->width << 16, st->codec->height << 16, kNoVolume);
+
+            // XXX Support for 'old' NUV files, that didn't put the codec_tag in the file. 
+            if( st->codec->codec_id == CODEC_ID_NUV && st->codec->codec_tag == 0 ) {
+                st->codec->codec_tag = MKTAG( 'N', 'U', 'V', '1' );
+            }
+			
 			initialize_video_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
 		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
 			if (st->codec->sample_rate > 0) {
@@ -856,6 +862,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 	}
 	
 	while((readResult = av_read_frame(formatContext, &packet)) == 0) {		
+		bool trustPacketDuration = true;
 		ncstream = &storage->stream_map[packet.stream_index];
 		stream = ncstream->str;
 		codecContext = stream->codec;
@@ -863,6 +870,8 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		
 		if((packet.flags & PKT_FLAG_KEY) == 0)
 			flags |= mediaSampleNotSync;
+		
+		if(IS_NUV(storage->componentType) && codecContext->codec_id == CODEC_ID_MP3) trustPacketDuration = false;
 		
 		memset(&sampleRec, 0, sizeof(sampleRec));
 		sampleRec.dataOffset.hi = packet.pos >> 32;
@@ -889,7 +898,12 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			AddMediaSampleReferences64(ncstream->media, ncstream->sampleHdl, 1, &ncstream->lastSample, NULL);
 		}
 		
-		if(packet.duration == 0) {
+
+        // If this is a nuv file, then we want to set the duration to zero.
+        // This is because the nuv container doesn't have the framesize info 
+        // for audio. 
+
+		if(packet.duration == 0 || !trustPacketDuration) {
 			//no duration, we'll have to wait for the next packet to calculate it
 			// keep the duration of the last sample, so we can use it if it's the last frame
 			sampleRec.durationPerSample = ncstream->lastSample.durationPerSample;

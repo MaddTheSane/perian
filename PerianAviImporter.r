@@ -321,6 +321,64 @@ resource 'STR ' (kTTAthngResID) {
 	"True Audio Importer"
 };
 
+
+
+
+/* Component Manager Things - 
+	Nuv */
+resource 'thng' (kNuvthngResID) {
+	'eat ',					// Type
+	'NUV ',					// SubType
+	'Myth',					// Manufacturer
+	0,
+	0,
+	0,
+	0,
+	'STR ',						// Name Type
+	kNuvthngResID,						// Name ID
+	0,							// Info Type
+	0,							// Info ID
+	0,							// Icon Type
+	0,							// Icon ID
+	kFFAviComponentVersion,		// Version
+	componentHasMultiplePlatforms +
+	componentDoAutoVersion,		// Registratin Flags
+	0,							// Resource ID of Icon Family
+{
+	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
+	'dlle',					// Code Resource type
+	512,
+	platformIA32NativeEntryPoint,		// IA32
+	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
+	'dlle',
+	512,
+	platformPowerPCNativeEntryPoint,	// PowerPC
+},
+'thnr', kNuvthngResID
+};
+
+resource 'thnr' (kNuvthngResID) {
+{
+	'mime', 1, 0,
+	'mime', kNuvthngResID, 0,
+}
+};
+
+resource 'mime' (kNuvthngResID) {
+{
+	kMimeInfoMimeTypeTag,		1, "audio/x-nuv";
+	kMimeInfoFileExtensionTag,	1, "nuv";
+	kMimeInfoDescriptionTag,	1, "NuppelVideo";
+};
+};
+
+resource 'STR ' (kNuvthngResID) {
+	"NuppelVideo"
+};
+
+
+
+
 resource 'dlle' (512) {
 	"FFAvi_MovieImportComponentDispatch"
 };

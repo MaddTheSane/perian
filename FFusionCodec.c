@@ -450,7 +450,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     OSType *pos;
     int index;
     CodecCapabilities *capabilities = p->capabilities;
-    Byte* myptr;
 	long count = 0;
 	Handle imgDescExt;
 	
@@ -596,6 +595,12 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			case 'SNOW':
 				codecID = CODEC_ID_SNOW;
 				break;
+
+            case 'RJPG':
+            case 'NUV1':
+                codecID = CODEC_ID_NUV;
+                break;
+
 				
             default:
 				Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
@@ -620,9 +625,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		
         // We also pass the FourCC since it allows the H263 hybrid decoder
         // to make the difference between the various flavours of DivX
-        
-        myptr = (unsigned char *)&(glob->componentType);
-        glob->avContext->codec_tag = (myptr[3] << 24) + (myptr[2] << 16) + (myptr[1] << 8) + myptr[0];
+        glob->avContext->codec_tag = Endian32_Swap(glob->componentType);
         
 		// avc1 requires the avcC extension
 		if (glob->componentType == 'avc1') {
@@ -1452,6 +1455,11 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 			case 'SNOW':
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kSnowCodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
+
+            case 'RJPG':
+                err = GetComponentResource((Component)glob->self, codecInfoResourceType, kNuvCodecInfoResID, (Handle *)&tempCodecInfo);
+                break;
+
 				
             default:	// should never happen but we have to handle the case
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX4CodecInfoResID, (Handle *)&tempCodecInfo);

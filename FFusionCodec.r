@@ -62,6 +62,7 @@
 #define kMPEG2Name		"MPEG-2 Video"
 #define kFRAPSName		"Fraps"
 #define kSnowName		"Snow"
+#define kNuvName		"NuppelVideo"
 
 // Codec names Resource ID
 
@@ -84,6 +85,7 @@
 #define kMPEG2NameResID		272
 #define kFRAPSNameResID		273
 #define kSnowNameResID		274
+#define kNuvNameResID		275
 
 // Codec infos Resource ID
 
@@ -106,6 +108,7 @@
 #define kMPEG2InfoResID		301
 #define kFRAPSInfoResID		302
 #define kSnowInfoResID		303
+#define kNuvInfoResID		304
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -592,6 +595,32 @@ resource 'cdci' (kSnowCodecInfoResID) {
 	0,					// Compression Pipeline Latency
 	0					// Private Data
 };
+
+//---------------------------------------------------------------------------
+// Nuv Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kNuvCodecInfoResID) {
+	kNuvName,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
 
 //---------------------------------------------------------------------------
 // MS-MPEG4 v1 Component
@@ -3002,6 +3031,73 @@ resource 'thng' (333) {
 };
 
 //---------------------------------------------------------------------------
+// New Nuv Components
+//---------------------------------------------------------------------------
+resource 'thng' (334) {
+	decompressorComponentType,              // Type
+	'RJPG',                                 // SubType
+	kFFusionCodecManufacturer,                      // Manufacturer
+	0,                                      // - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',                                 // Name Type
+	kNuvNameResID,                        // Name ID
+	'STR ',                                 // Info Type
+	kNuvInfoResID,                        // Info ID
+	0,                                      // Icon Type
+	0,                                      // Icon ID
+	kFFusionCodecVersion,                   // Version
+	componentHasMultiplePlatforms +         // Registration Flags 
+	componentDoAutoVersion,                 // Registration Flags
+	0,                                      // Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',                         // Entry point found by symbol name 'dlle' resource
+	256,                            // ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+//---------------------------------------------------------------------------
+// Old Nuv Components
+//---------------------------------------------------------------------------
+resource 'thng' (335) {
+	decompressorComponentType,              // Type
+	'NUV1',                                 // SubType
+	kFFusionCodecManufacturer,                      // Manufacturer
+	0,                                      // - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',                                 // Name Type
+	kNuvNameResID,                        // Name ID
+	'STR ',                                 // Info Type
+	kNuvInfoResID,                        // Info ID
+	0,                                      // Icon Type
+	0,                                      // Icon ID
+	kFFusionCodecVersion,                   // Version
+	componentHasMultiplePlatforms +         // Registration Flags 
+	componentDoAutoVersion,                 // Registration Flags
+	0,                                      // Resource ID of Icon Family
+{
+	kFFusionDecompressionFlags, 
+	'dlle',                         // Entry point found by symbol name 'dlle' resource
+	256,                            // ID of 'dlle' resource
+	platformPowerPCNativeEntryPoint,
+	kFFusionDecompressionFlags,
+	'dlle',
+	256,
+	platformIA32NativeEntryPoint,
+};
+};
+
+
+//---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
 
@@ -3079,6 +3175,10 @@ resource 'STR ' (kFRAPSNameResID) {
 
 resource 'STR ' (kSnowNameResID) {
 	"Snow (Perian)"
+};
+
+resource 'STR ' (kNuvNameResID) {
+	"NuppelVideo (Perian)"
 };
 
 //---------------------------------------------------------------------------
@@ -3159,6 +3259,10 @@ resource 'STR ' (kFRAPSInfoResID) {
 
 resource 'STR ' (kSnowInfoResID) {
 	"Decompresses video stored in Snow format."
+};
+
+resource 'STR ' (kNuvInfoResID) {
+	"Decompresses video stored in NuppelVideo format."
 };
 
 //---------------------------------------------------------------------------
