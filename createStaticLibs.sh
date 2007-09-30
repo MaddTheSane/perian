@@ -69,9 +69,9 @@ else
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --cross-compile --arch=i386 --extra-ldflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+                "$SRCROOT/ffmpeg/configure" --cross-compile --arch=i386 --extra-ldflags='-arch i386 -isysroot $SDKROOT' --extra-cflags='-arch i386 -isysroot $SDKROOT $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
             else
-                "$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m --extra-cflags='$optCFlags'
+                "$SRCROOT/ffmpeg/configure"  --extra-ldflags='-isysroot $SDKROOT' --extra-cflags='-isysroot $SDKROOT $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
             fi
         
             make depend > /dev/null 2>&1 || true
@@ -97,9 +97,9 @@ else
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" $extraConfigureOptions $generalConfigureOptions --extra-cflags='$optCFlags'
+                "$SRCROOT/ffmpeg/configure" --extra-ldflags='-isysroot $SDKROOT' --extra-cflags='-isysroot $SDKROOT $optCFlags' $extraConfigureOptions $generalConfigureOptions
             else
-                "$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk' --extra-cflags='-arch ppc -isysroot /Developer/SDKs/MacOSX10.4u.sdk $optCFlags' $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc -isysroot $SDKROOT' --extra-cflags='-arch ppc -isysroot $SDKROOT $optCFlags' $extraConfigureOptions $generalConfigureOptions
             fi
         
             make depend > /dev/null 2>&1 || true

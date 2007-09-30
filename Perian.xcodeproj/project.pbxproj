@@ -1971,10 +1971,6 @@
 		11BA39B10A61E453008AF206 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Version Macros and Static Libraries";
 			};
 			name = Development;
@@ -1982,11 +1978,7 @@
 		11BA39B20A61E453008AF206 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Version Macros and Static Libraries";
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2018,11 +2010,7 @@
 		3D4BBE460B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Version Macros and Static Libraries";
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
