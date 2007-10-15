@@ -454,7 +454,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
     (*imgDesc)->width = uint16(pxl_width);
     (*imgDesc)->height = uint16(pxl_height);
     (*imgDesc)->frameCount = 1;
-	(*imgDesc)->cType = GetFourCC(&kaxTrack);
+	(*imgDesc)->cType = MkvGetFourCC(&kaxTrack);
     (*imgDesc)->depth = 24;
     (*imgDesc)->clutID = -1;
 	
@@ -481,7 +481,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 {
 	SoundDescriptionHandle sndDesc;
 	AudioStreamBasicDescription asbd = {0};
-	AudioChannelLayout acl;
+	AudioChannelLayout acl = {0};
     AudioChannelLayout *pacl = &acl;
     ByteCount acl_size = sizeof(acl);
 	ByteCount ioSize = sizeof(asbd);
@@ -503,21 +503,22 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	KaxAudioChannels & numChannels = GetChild<KaxAudioChannels>(audioTrack);
 	KaxAudioBitDepth & bitDepth = GetChild<KaxAudioBitDepth>(audioTrack);
 	
-	asbd.mBitsPerChannel = uint32(bitDepth);
-	asbd.mFormatID = GetFourCC(&kaxTrack);
+	if (bitDepth.ValueIsSet()) asbd.mBitsPerChannel = uint32(bitDepth);
+	asbd.mFormatID = MkvGetFourCC(&kaxTrack);
 	asbd.mSampleRate = Float64(sampleFreq);
 	asbd.mChannelsPerFrame = uint32(numChannels);
 	asbd.mFramesPerPacket = 1;		// needed for mp3 and v1 SoundDescription, maybe others
 	
-	MkvFinishASBD(&kaxTrack, &asbd);
+	MkvFinishAudioDescriptions(&kaxTrack, &asbd, &acl);
 	
 	// get more info about the codec
 	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
 	if(asbd.mChannelsPerFrame == 0)
 		asbd.mChannelsPerFrame = 1;		// avoid a div by zero
 	
-	acl = GetDefaultChannelLayout(&asbd);
-	
+	// FIXME mChannelLayoutTag == 0 is valid
+	// but we don't use channel position lists (yet) so it's safe for now
+	if (acl.mChannelLayoutTag == 0) acl = GetDefaultChannelLayout(&asbd);
 	if (acl.mChannelLayoutTag == 0) {
 		pacl = NULL;
 		acl_size = 0;
@@ -558,7 +559,7 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 	trackHeight = IntToFixed(movieBox.bottom - movieBox.top);
 	
 	(*imgDesc)->idSize = sizeof(ImageDescription);
-	(*imgDesc)->cType = GetFourCC(&kaxTrack);
+	(*imgDesc)->cType = MkvGetFourCC(&kaxTrack);
 	(*imgDesc)->frameCount = 1;
 	(*imgDesc)->depth = 32;
 	(*imgDesc)->clutID = -1;

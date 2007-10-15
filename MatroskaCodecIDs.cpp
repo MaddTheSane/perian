@@ -435,6 +435,30 @@ Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	return imgDescExt;
 }
 
+// FIXME this is like ff_private.c->create_cookie, but that doesn't work with AAC, and this only works with AAC
+static Handle CreateQTAACExtFromEsds(Handle esdsExt)
+{
+	AudioFormatAtom frma = {sizeof(AudioFormatAtom), kAudioFormatAtomType, 'mp4a'};
+	AudioTerminatorAtom term = {sizeof(AudioTerminatorAtom), 0};
+	ByteCount esdsSize = GetHandleSize(esdsExt), waveSize = 40 + esdsSize;
+	Handle waveAtom = NewHandle(waveSize);
+	uint8_t *pos = (uint8_t*)*waveAtom;
+	
+	pos = write_int32(pos, EndianU32_NtoB(frma.size));
+	pos = write_int32(pos, EndianU32_NtoB(frma.atomType));
+	pos = write_int32(pos, EndianU32_NtoB(frma.format));
+	pos = write_int32(pos, EndianU32_NtoB(12));
+	pos = write_int32(pos, EndianU32_NtoB('mp4a'));
+	pos = write_int32(pos, EndianU32_NtoB(0));
+	pos = write_int32(pos, EndianU32_NtoB(esdsSize + 8));
+	pos = write_int32(pos, EndianU32_NtoB('esds'));
+	pos = write_data(pos, (uint8_t*)*esdsExt, esdsSize);
+	pos = write_int32(pos, EndianU32_NtoB(term.size));
+	pos = write_int32(pos, EndianU32_NtoB(term.atomType));
+	
+	return waveAtom;
+}
+
 ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
 {
 	if (!tr_entry || !desc) return paramErr;
@@ -458,17 +482,20 @@ ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 
 ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
 {
-#if 0
 	if (!tr_entry || !desc) return paramErr;
 	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
 	
 	if (dir == kToSampleDescription) {
 		Handle sndDescExt = CreateEsdsExt(tr_entry, true);
-		AddSoundDescriptionExtension(sndDesc, sndDescExt, 'esds');
+		Handle aacFrmaExt = CreateQTAACExtFromEsds(sndDescExt);
 		
+		AddSoundDescriptionExtension(sndDesc, aacFrmaExt, 'wave');
+		
+		//QTSoundDescriptionSetProperty(sndDesc, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie, GetHandleSize(aacFrmaExt), *aacFrmaExt);
 		DisposeHandle((Handle) sndDescExt);
+		DisposeHandle((Handle) aacFrmaExt);
 	}
-#endif
+
 	return noErr;
 }
 
@@ -495,49 +522,58 @@ ComponentResult ASBDExt_LPCM(KaxTrackEntry *tr_entry, AudioStreamBasicDescriptio
 	return noErr;
 }
 
-ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)
+static void PrintCoreAudioError(const char *msg, OSStatus err)
+{
+	OSStatus swap_err = EndianU32_NtoB(err);
+	Codecprintf(NULL, "%s '%.4s'\n", msg, &swap_err);
+}
+
+ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
 {
 	if (!tr_entry || !asbd) return paramErr;
-#if 0
 	// newer Matroska files have the esds atom stored in the codec private
 	// use it for our AudioStreamBasicDescription and AudioChannelLayout if possible
-	KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+	Handle esdsExt = CreateEsdsExt(tr_entry, true);
+	OSStatus err = noErr;
 	
-	if (codecPrivate != NULL) {
+	if (esdsExt) {
 		// the magic cookie for AAC is the esds atom
 		// but only the AAC-specific part; Apple seems to want the entire thing for this stuff
 		// so this block doesn't really do anything at the moment
-		magicCookie = (Ptr) codecPrivate->GetBuffer();
-		cookieSize = codecPrivate->GetSize();
+		// actually, it wants to skip the 4 byte version at the front
+		Ptr magicCookie = *esdsExt + 4;
+		ByteCount cookieSize = GetHandleSize(esdsExt) - 4, asbdSize = sizeof(*asbd), aclSize = sizeof(*acl);
 		
 		err = AudioFormatGetProperty(kAudioFormatProperty_ASBDFromESDS,
 									 cookieSize,
 									 magicCookie,
-									 &ioSize,
-									 &asbd);
+									 &asbdSize,
+									 asbd);
 		if (err != noErr) 
-			dprintf("MatroskaQT: Error creating ASBD from esds atom %ld\n", err);
+			PrintCoreAudioError("MatroskaQT: Error creating ASBD from AAC esds", err);
+		//else Codecprintf(NULL, "AAC: profile %d, nch %d\n", asbd->mFormatFlags, asbd->mChannelsPerFrame);
 		
 		err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutFromESDS,
 									 cookieSize,
 									 magicCookie,
-									 &acl_size,
-									 &acl);
-		if (err != noErr) {
-			dprintf("MatroskaQT: Error creating ACL from esds atom %ld\n", err);
-		} else {
-			aclIsFromESDS = true;
-		}
+									 &aclSize,
+									 acl);
+		if (err != noErr) 
+			PrintCoreAudioError("MatroskaQT: Error creating ACL from AAC esds", err);
 		
+		DisposeHandle(esdsExt);
 	} else {
 		// if we don't have a esds atom, all we can do is get the profile of the AAC
 		// and hope there isn't a custom channel configuration 
 		// (how would we get the esds in that case?)
-		asbd.mFormatFlags = GetAACProfile(tr_entry);
-		dprintf("MatroskaQT: AAC track, but no esds atom\n");
+		// FIXME check for codec string
+		// and OutputSamplingFrequency (for SBR)
+		
+		asbd->mFormatFlags = kMPEG4Object_AAC_LC;
+		Codecprintf(NULL, "MatroskaQT: AAC track, but no esds atom\n");
 	}
-#endif
-	return noErr;
+
+	return err;
 }
 
 ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
@@ -714,11 +750,11 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 }
 
 
-ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)
+ComponentResult MkvFinishAudioDescriptions(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
 {
 	switch (asbd->mFormatID) {
 		case kAudioFormatMPEG4AAC:
-			return ASBDExt_AAC(tr_entry, asbd);
+			return ASBDExt_AAC(tr_entry, asbd, acl);
 			
 		case kAudioFormatLinearPCM:
 			return ASBDExt_LPCM(tr_entry, asbd);
@@ -811,7 +847,7 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 };
 
 
-FourCharCode GetFourCC(KaxTrackEntry *tr_entry)
+FourCharCode MkvGetFourCC(KaxTrackEntry *tr_entry)
 {
 	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
 	if (tr_codec == NULL)

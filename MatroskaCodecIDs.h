@@ -52,14 +52,14 @@ typedef enum {
 	kToSampleDescription
 } DescExtDirection;
 
-ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
-ComponentResult MkvFinishASBD(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd);
-FourCharCode GetFourCC(KaxTrackEntry *tr_entry);
+extern ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
+extern ComponentResult MkvFinishAudioDescriptions(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl);
+extern FourCharCode MkvGetFourCC(KaxTrackEntry *tr_entry);
 
 extern "C"{
 #endif
 
-AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd);
+extern AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd);
 
 #ifdef __cplusplus
 }
