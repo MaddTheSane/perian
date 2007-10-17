@@ -60,6 +60,7 @@ extern "C"{
 #endif
 
 extern AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd);
+extern uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *esdsLen, int trackID, bool audio);
 
 #ifdef __cplusplus
 }

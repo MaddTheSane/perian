@@ -187,7 +187,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	OSStatus err;
 	
 	uint8_t *cookie = NULL;
-	int cookieSize = 0;
+	size_t cookieSize = 0;
 	
 	codec = map->str->codec;
 	map->base = map->str->time_base;
@@ -220,7 +220,9 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	
 	// this probably isn't quite right; FLV doesn't set frame_size or block_align, 
 	// but we need > 0 frames per packet or Apple's mp3 decoder won't work
-	if (asbd.mBytesPerPacket == 0 && asbd.mFramesPerPacket == 0)
+	if (asbd.mFormatID == kAudioFormatMPEG4AAC)
+		asbd.mFramesPerPacket = 1024;
+	else if (asbd.mBytesPerPacket == 0 && asbd.mFramesPerPacket == 0)
 		asbd.mFramesPerPacket = 1;
 	
 	// if we don't have mBytesPerPacket, we can't import as CBR. Probably should be VBR, and the codec
@@ -274,7 +276,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	if (asbd.mSampleRate > 0) {
 		err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, NULL, 0, kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndHdl);
 		if(err) {
-			fprintf(stderr, "AVI IMPORTER: Error creating the sound description\n");
+			fprintf(stderr, "AVI IMPORTER: Error %ld creating the sound description\n", err);
 			return err;
 		}
 	
@@ -283,7 +285,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		if(cookie) {
 			err = QTSoundDescriptionSetProperty(sndHdl, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie,
 												cookieSize, cookie);
-			if(err) fprintf(stderr, "AVI IMPORTER: Error appending the magic cookie to the sound description\n");
+			if(err) fprintf(stderr, "AVI IMPORTER: Error %ld appending the magic cookie to the sound description\n", err);
 			av_free(cookie);
 		}
 	}	
@@ -361,7 +363,7 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 /* This function creates a magic cookie basec on the codec parameter and formatID
  * Return value: a pointer to a magic cookie which has to be av_free()'d
  * in cookieSize, the size of the magic cookie is returned to the caller */
-uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID)
+uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID)
 {
 	uint8_t *result = NULL;
 	uint8_t *ptr;
@@ -371,8 +373,9 @@ uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID)
 	uint8_t *waveAtom = NULL;
 	int size = 0;
 	
-	if (formatID == kAudioFormatMPEG4AAC)
-		return NULL;
+	if (formatID == kAudioFormatMPEG4AAC) {
+		return CreateEsdsFromSetupData(codec->extradata, codec->extradata_size, cookieSize, 1, true);
+	}
 	
 	/* Do we need an endia atom, too? */
 	

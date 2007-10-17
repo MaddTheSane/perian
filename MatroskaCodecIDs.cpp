@@ -376,23 +376,14 @@ static uint8_t* putDescr(uint8_t *buffer, int tag, unsigned int size)
 //   + SL descriptor
 //    + dunno               (1 byte)
 
-Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
+uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *esdsLen, int trackID, bool audio)
 {
-	KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-	KaxTrackNumber *trackNum = FindChild<KaxTrackNumber>(*tr_entry);
-	
-	if (codecPrivate == NULL)
-		return NULL;
-	
-	int vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
-	int trackID = trackNum ? uint16(*trackNum) : 1;
 	int decoderSpecificInfoLen = vosLen ? descrLength(vosLen) : 0;
 	
-	Handle imgDescExt = NewHandle(4 + descrLength(3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1)));
-	UInt8 *pos = (UInt8 *) *imgDescExt;
-	
-	pos = write_int32(pos, 0);		// version
-	
+	*esdsLen = descrLength(3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
+	uint8_t *esds = (uint8_t*)malloc(*esdsLen);
+	UInt8 *pos = (UInt8 *) esds;
+		
 	// ES Descriptor
 	pos = putDescr(pos, 0x03, 3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
 	pos = write_int16(pos, EndianS16_NtoB(trackID));
@@ -425,38 +416,35 @@ Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	
 	if (vosLen) {
 		pos = putDescr(pos, 0x05, vosLen);
-		pos = write_data(pos, codecPrivate->GetBuffer(), vosLen);
+		pos = write_data(pos, codecPrivate, vosLen);
 	}
 	
 	// SL descriptor
 	pos = putDescr(pos, 0x06, 1);
 	*pos++ = 0x02;
 	
-	return imgDescExt;
+	return esds;
 }
 
-// FIXME this is like ff_private.c->create_cookie, but that doesn't work with AAC, and this only works with AAC
-static Handle CreateQTAACExtFromEsds(Handle esdsExt)
+static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 {
-	AudioFormatAtom frma = {sizeof(AudioFormatAtom), kAudioFormatAtomType, 'mp4a'};
-	AudioTerminatorAtom term = {sizeof(AudioTerminatorAtom), 0};
-	ByteCount esdsSize = GetHandleSize(esdsExt), waveSize = 40 + esdsSize;
-	Handle waveAtom = NewHandle(waveSize);
-	uint8_t *pos = (uint8_t*)*waveAtom;
+	KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
+	KaxTrackNumber *trackNum = FindChild<KaxTrackNumber>(*tr_entry);
 	
-	pos = write_int32(pos, EndianU32_NtoB(frma.size));
-	pos = write_int32(pos, EndianU32_NtoB(frma.atomType));
-	pos = write_int32(pos, EndianU32_NtoB(frma.format));
-	pos = write_int32(pos, EndianU32_NtoB(12));
-	pos = write_int32(pos, EndianU32_NtoB('mp4a'));
-	pos = write_int32(pos, EndianU32_NtoB(0));
-	pos = write_int32(pos, EndianU32_NtoB(esdsSize + 8));
-	pos = write_int32(pos, EndianU32_NtoB('esds'));
-	pos = write_data(pos, (uint8_t*)*esdsExt, esdsSize);
-	pos = write_int32(pos, EndianU32_NtoB(term.size));
-	pos = write_int32(pos, EndianU32_NtoB(term.atomType));
+	int vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
+	int trackID = trackNum ? uint16(*trackNum) : 1;
+	size_t esdsLen;
 	
-	return waveAtom;
+	if (codecPrivate == NULL)
+		return NULL;
+	
+	Handle esdsExt = NewHandleClear(4);
+	uint8_t *esds = CreateEsdsFromSetupData(codecPrivate->GetBuffer(), vosLen, &esdsLen, trackID, audio);
+	
+	PtrAndHand(esds, esdsExt, esdsLen);
+	free((char*)esds);
+	
+	return esdsExt;
 }
 
 ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
@@ -486,14 +474,10 @@ ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, SampleDescriptionHandle des
 	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
 	
 	if (dir == kToSampleDescription) {
-		Handle sndDescExt = CreateEsdsExt(tr_entry, true);
-		Handle aacFrmaExt = CreateQTAACExtFromEsds(sndDescExt);
-		
-		AddSoundDescriptionExtension(sndDesc, aacFrmaExt, 'wave');
-		
-		//QTSoundDescriptionSetProperty(sndDesc, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie, GetHandleSize(aacFrmaExt), *aacFrmaExt);
-		DisposeHandle((Handle) sndDescExt);
-		DisposeHandle((Handle) aacFrmaExt);
+		Handle esdsExt = CreateEsdsExt(tr_entry, true);
+				
+		QTSoundDescriptionSetProperty(sndDesc, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie, GetHandleSize(esdsExt) - 4, (*esdsExt) + 4);
+		DisposeHandle((Handle) esdsExt);
 	}
 
 	return noErr;

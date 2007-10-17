@@ -108,7 +108,7 @@ void send_movie_changed_notification(Movie movie);
 
 OSType map_video_codec_to_mov_tag(enum CodecID codec_id);
 void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map);
-uint8_t *create_cookie(AVCodecContext *codec, int *cookieSize, UInt32 formatID);
+uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID);
 Handle create_strf_ext(AVCodecContext *codec);
 
 uint8_t *write_int32(uint8_t *target, int32_t data);
