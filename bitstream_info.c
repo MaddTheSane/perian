@@ -581,7 +581,6 @@ static int inline decode_nals(H264ParserContext *context, const uint8_t *buf, in
 			}
 			else if(nalType == 5)
 			{
-				lowestType == FF_I_TYPE;
 				ret = 1;
 #if 0 /*this was an attempt to figure out the PTS information and detect an out of order P frame before we hit its B frame */
 				context->prev_poc_lsb = 0;
