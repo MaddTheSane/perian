@@ -3,11 +3,18 @@ PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
 generalConfigureOptions="--disable-muxers --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook"
-export sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
+sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-opts"
 fi
+
+ver=$(uname -r)
+if (( ${ver:0:1} < 9 )); then
+    #no-pic only on pre-leopard
+    sdkflags="$sdkflags -mdynamic-no-pic"
+fi
+export sdkflags
 
 OUTPUT_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
 
