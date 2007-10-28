@@ -3,7 +3,7 @@ PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
 generalConfigureOptions="--disable-muxers --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook"
-sdkflags="-isysroot $SDKROOT  -mmacosx-version-min=10.4" #there has to be a way to get that 10.4 from a variable; any ideas?
+export sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-opts"
@@ -70,9 +70,9 @@ else
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --cross-compile --arch=i386 --extra-ldflags='-arch i386 $sdkflags' --extra-cflags='-arch i386 $sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+                "$SRCROOT/ffmpeg/configure" --cross-compile --arch=i386 --extra-ldflags='-arch i386' --extra-cflags='-arch i386 $sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
             else
-                "$SRCROOT/ffmpeg/configure"  --extra-ldflags='$sdkflags' --extra-cflags='$sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
+                "$SRCROOT/ffmpeg/configure" --extra-cflags='$sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
             fi
         
             make depend > /dev/null 2>&1 || true
@@ -98,9 +98,9 @@ else
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --extra-ldflags='$sdkflags' --extra-cflags='$sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --extra-cflags='$sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions
             else
-                "$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc $sdkflags' --extra-cflags='-arch ppc $sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc' --extra-cflags='-arch ppc $sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions
             fi
         
             make depend > /dev/null 2>&1 || true
