@@ -433,13 +433,11 @@ static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	
 	int vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
 	int trackID = trackNum ? uint16(*trackNum) : 1;
+    uint8_t *vosBuf = codecPrivate ? codecPrivate->GetBuffer() : NULL;
 	size_t esdsLen;
-	
-	if (codecPrivate == NULL)
-		return NULL;
-	
+
 	Handle esdsExt = NewHandleClear(4);
-	uint8_t *esds = CreateEsdsFromSetupData(codecPrivate->GetBuffer(), vosLen, &esdsLen, trackID, audio);
+	uint8_t *esds = CreateEsdsFromSetupData(vosBuf, vosLen, &esdsLen, trackID, audio);
 	
 	PtrAndHand(esds, esdsExt, esdsLen);
 	free((char*)esds);
