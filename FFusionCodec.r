@@ -113,7 +113,7 @@
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
 
-#define kFFusionDecompressionFlags ( codecInfoDoes32 | codecInfoDoes16 | codecInfoDoes8 | codecInfoDoes1 | cmpThreadSafe )
+#define kFFusionDecompressionFlags ( codecInfoDoes32 | codecInfoDoes16 | codecInfoDoes8 | codecInfoDoes1 | codecInfoDoesTemporal | cmpThreadSafe )
 
 // These flags specify the possible format of compressed data produced by the component
 // and the format of compressed files that the component can handle during decompression
@@ -336,7 +336,7 @@ resource 'cdci' (kH264CodecInfoResID) {
 	128,					// Compression Accuracy
 	128,					// Decomression Accuracy
 	200,					// Compression Speed
-	200,					// Decompression Speed
+	190,					// Decompression Speed
 	128,					// Compression Level
 	0,					// Reserved
 	1,					// Minimum Height
