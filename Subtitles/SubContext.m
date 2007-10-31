@@ -147,6 +147,12 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 	[delegate releaseStyleExtra:ex];
 	[super dealloc];
 }
+
+-(void)finalize
+{
+	[delegate releaseStyleExtra:ex];
+	[super finalize];
+}
 @end
 
 @implementation SubContext

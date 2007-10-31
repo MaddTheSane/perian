@@ -39,6 +39,15 @@ static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, unichar 
 	[super dealloc];
 }
 
+-(void)finalize
+{
+	ATSUDisposeStyle(style);
+	CGColorRelease(primaryColor);
+	CGColorRelease(outlineColor);
+	CGColorRelease(shadowColor);
+	[super finalize];
+}
+
 static CGColorRef MakeCGColorFromRGBA(SubRGBAColor c, CGColorSpaceRef cspace)
 {
 	const float components[] = {c.red, c.green, c.blue, c.alpha};
@@ -252,6 +261,13 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	free(ubuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
 	[super dealloc];
+}
+
+-(void)finalize
+{
+	free(ubuffer);
+	UCDisposeTextBreakLocator(&breakLocator);
+	[super finalize];
 }
 
 -(void)completedHeaderParsing:(SubContext*)sc

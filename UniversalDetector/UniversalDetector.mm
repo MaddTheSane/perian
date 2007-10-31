@@ -85,6 +85,12 @@ class wrappedUniversalDetector:public nsUniversalDetector
 	[super dealloc];
 }
 
+-(void)finalize
+{
+	delete (wrappedUniversalDetector *)detectorptr;
+	[super finalize];
+}
+
 -(void)analyzeData:(NSData *)data
 {
 	[self analyzeBytes:(const char *)[data bytes] length:[data length]];

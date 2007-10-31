@@ -17,6 +17,7 @@ ver=$(uname -r)
 if (( ${ver:0:1} < 9 )); then
     #no-pic only on pre-leopard
     sdkflags="$sdkflags -mdynamic-no-pic"
+    generalConfigureOptions="$generalConfigureOptions --disable-altivec"
 fi
 export sdkflags
 

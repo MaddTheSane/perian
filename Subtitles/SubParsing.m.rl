@@ -38,6 +38,8 @@
 	[delegate releaseSpanExtra:ex];
 	[super dealloc];
 }
+
+-(void)finalize {[delegate releaseSpanExtra:ex]; [super finalize];}
 @end
 
 @implementation SubRenderDiv
