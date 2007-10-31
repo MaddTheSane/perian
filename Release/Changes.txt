@@ -1,3 +1,15 @@
+1.1
+- Major performance improvements
+- TrueAudio, MP1, and DTS audio support
+- Slice-based multithreaded decoding for MPEG-1/2/H.264
+- Compatibility fixes for QuickTime 7.2 and Leopard
+- Objective-C GC compatibility
+- Fixed a crash in Toast
+- Better subtitle rendering
+- Subtitles play during MKV loading
+- Snow support
+- Miscellaneous bug fixes
+
 1.0
 - Added support for Matroska/mkv
 - Integrated a52codec
