@@ -10,6 +10,7 @@
 #import "SubImport.h"
 #import "SubParsing.h"
 #import "SubUtilities.h"
+#import "Codecprintf.h"
 
 static float GetWinFontSizeScale(ATSFontRef font);
 static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities);
@@ -515,7 +516,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			spanEx->blurEdges = bval;
 			break;
 		default:
-			NSLog(@"Perian: unimplemented tag %d",tag);
+			Codecprintf(NULL, "Unimplemented SSA tag #%d\n",tag);
 	}
 }
 

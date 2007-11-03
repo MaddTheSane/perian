@@ -10,6 +10,7 @@
 #import "SubParsing.h"
 #import "SubUtilities.h"
 #import "SubContext.h"
+#import "Codecprintf.h"
 
 %%machine SSAfile;
 %%write data;
@@ -445,7 +446,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			%%write exec;
 			%%write eof;
 
-			if (!reached_end) NSLog(@"parse error: %@",inputText);
+			if (!reached_end) Codecprintf(NULL, "parse error: %s\n", [inputText UTF8String]);
 			if (linebuf[linelen-1] == '\\') [div->text appendString:@"\\"];
 			[divs addObject:div];
 		}
