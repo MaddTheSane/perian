@@ -142,6 +142,7 @@ pascal OSStatus HandlePPDialogControlEvent(EventHandlerCallRef  nextHandler, Eve
 void ChangeHintText(int value, ControlRef staticTextField);
 
 extern void initLib();
+extern CFMutableStringRef GetHomeDirectory();
 
 //---------------------------------------------------------------------------
 // Component Dispatcher
