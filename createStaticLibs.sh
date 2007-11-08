@@ -7,10 +7,10 @@ if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 fi
 
 generalConfigureOptions="--disable-muxers --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook"
-sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"
+sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -gstabs+ -Dattribute_deprecated="
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
-    generalConfigureOptions="$generalConfigureOptions --disable-opts"
+    generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
 fi
 
 ver=$(uname -r)
@@ -76,7 +76,9 @@ else
         BUILDDIR="$BUILT_PRODUCTS_DIR/intel"
         mkdir "$BUILDDIR"
 
-        export optCFlags="-mtune=nocona -fstrict-aliasing -frerun-cse-after-loop -fweb -falign-loops=16 -gstabs+ -Dattribute_deprecated=" 
+		if [ "$BUILD_STYLE" != "Development" ] ; then
+        	export optCFlags="-mtune=nocona -fstrict-aliasing -frerun-cse-after-loop -fweb -falign-loops=16" 
+        fi
 
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
@@ -90,7 +92,7 @@ else
         fi
         if [ "$BUILD_STYLE" = "Development" ] ; then
             cd libavcodec
-            export CFLAGS="-O1 -fomit-frame-pointer -funit-at-a-time"; make h264.o cabac.o i386/dsputil_mmx.o h264_parser.o
+            export CFLAGS="-O1 -fomit-frame-pointer -funit-at-a-time"; make h264.o cabac.o h264_parser.o motion_est.o
             unset CFLAGS;
             cd ..
         fi
@@ -104,7 +106,9 @@ else
         BUILDDIR="$BUILT_PRODUCTS_DIR/ppc"
         mkdir "$BUILDDIR"
 
-        export optCFlags="-mcpu=G3 -mtune=G5 -fstrict-aliasing -funroll-loops -falign-loops=16 -mmultiple -gstabs+ -Dattribute_deprecated="
+		if [ "$BUILD_STYLE" != "Development" ] ; then
+       		export optCFlags="-mcpu=G3 -mtune=G5 -fstrict-aliasing -funroll-loops -falign-loops=16 -mmultiple"
+       	fi
     
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
