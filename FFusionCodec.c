@@ -176,8 +176,7 @@ void FFusionRunUpdateCheck()
     
     //Two places to check, home dir and /
     
-    CFStringRef home = (CFStringRef)GetHomeDirectory();
-    CFMutableStringRef location = CFStringCreateMutableCopy(NULL, 0, home);
+    CFMutableStringRef location = GetHomeDirectory();
     CFStringAppend(location, CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app"));
     
     char fileRep[1024];
