@@ -626,8 +626,8 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 			case kAudioFormatXiphVorbis:
 				return DescExt_XiphVorbis(tr_entry, desc, dir);
 				
-			case kAudioFormatXiphFLAC:
-				return DescExt_XiphFLAC(tr_entry, desc, dir);
+//			case kAudioFormatXiphFLAC:
+//				return DescExt_XiphFLAC(tr_entry, desc, dir);
 				
 			case kVideoFormatXiphTheora:
 				return DescExt_XiphTheora(tr_entry, desc, dir);
