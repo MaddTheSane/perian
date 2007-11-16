@@ -967,6 +967,7 @@ void MatroskaTrack::ParseFirstBlock(KaxInternalBlock &block)
 	
 	switch ((*desc)->dataFormat) {
 		case kAudioFormatAC3:
+		case kAudioFormatAC3MS:
 			replaceSoundDesc = parse_ac3_bitstream(&asbd, &acl, block.GetBuffer(0).Buffer(), block.GetFrameSize(0));
 			break;
 	}

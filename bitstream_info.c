@@ -11,6 +11,7 @@
 
 #include <AudioToolbox/AudioToolbox.h>
 #include <QuickTime/QuickTime.h>
+#include "CodecIDs.h"
 
 #import "ac3tab.h"
 //ffmpeg's struct Picture conflicts with QuickDraw's
@@ -127,7 +128,7 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	/* Setup the AudioStreamBasicDescription and AudioChannelLayout */
 	memset(asbd, 0, sizeof(AudioStreamBasicDescription));
 	asbd->mSampleRate = sample_rate >> shift;
-	asbd->mFormatID = kAudioFormatAC3;
+	asbd->mFormatID = kAudioFormatAC3MS;
 	asbd->mFramesPerPacket = 1;
 	asbd->mChannelsPerFrame = nfchans_tbl[acmod] + lfe;
 	

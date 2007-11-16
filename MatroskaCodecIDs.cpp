@@ -719,6 +719,7 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 				break;
 				
 			case kAudioFormatAC3:
+			case kAudioFormatAC3MS:
 				acl = ac3ChannelLayouts[channelIndex];
 				break;
 				
@@ -752,7 +753,7 @@ typedef struct {
 static const WavCodec kWavCodecIDs[] = {
 	{ kAudioFormatMPEGLayer2, 0x50 },
 	{ kAudioFormatMPEGLayer3, 0x55 },
-	{ kAudioFormatAC3, 0x2000 },
+	{ kAudioFormatAC3MS, 0x2000 },
 	{ kAudioFormatDTS, 0x2001 },
 	{ kAudioFormatMPEG4AAC, 0xff },
 	{ kAudioFormatXiphFLAC, 0xf1ac },
@@ -794,11 +795,11 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kAudioFormatMPEGLayer1, "A_MPEG/L1" },
 	{ kAudioFormatMPEGLayer2, "A_MPEG/L2" },
 	{ kAudioFormatMPEGLayer3, "A_MPEG/L3" },
-	{ kAudioFormatAC3, "A_AC3" },
+	{ kAudioFormatAC3MS, "A_AC3" },
 	{ kAudioFormatAC3MS, "A_AC3" },
 	// anything special for these two?
-	{ kAudioFormatAC3, "A_AC3/BSID9" },
-	{ kAudioFormatAC3, "A_AC3/BSID10" },
+	{ kAudioFormatAC3MS, "A_AC3/BSID9" },
+	{ kAudioFormatAC3MS, "A_AC3/BSID10" },
 	{ kAudioFormatXiphVorbis, "A_VORBIS" },
 	{ kAudioFormatXiphFLAC, "A_FLAC" },
 	{ kAudioFormatLinearPCM, "A_PCM/INT/LIT" },
