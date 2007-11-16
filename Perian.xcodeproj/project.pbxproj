@@ -1797,11 +1797,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -1829,11 +1824,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -1861,13 +1851,6 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_2)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_GC = YES;
@@ -1890,11 +1873,7 @@
 				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = (
-					$SYMROOT/Universal,
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
-				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Universal\"";
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -1908,7 +1887,6 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_NAME = Perian;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WRAPPER_EXTENSION = component;
 				ZERO_LINK = NO;
 			};
@@ -1940,10 +1918,7 @@
 				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = (
-					$SYMROOT/Universal,
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
-				);
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				OTHER_CFLAGS_i386 = "-march=pentium-m -mtune=nocona $(OTHER_CFLAGS)";
 				OTHER_CFLAGS_ppc = "$(OTHER_CFLAGS)";
@@ -2042,13 +2017,6 @@
 			buildSettings = {
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_2)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
-				FRAMEWORK_SEARCH_PATHS_QUOTED_2 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
@@ -2071,11 +2039,7 @@
 				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = (
-					$SYMROOT/Universal,
-					"$(LIBRARY_SEARCH_PATHS_QUOTED_1)",
-				);
-				LIBRARY_SEARCH_PATHS_QUOTED_1 = "\"$(SRCROOT)/build/Universal\"";
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				OTHER_CFLAGS_i386 = "-march=pentium-m -mtune=nocona $(OTHER_CFLAGS)";
 				OTHER_CFLAGS_ppc = "$(OTHER_CFLAGS)";
@@ -2089,7 +2053,6 @@
 				PREBINDING = NO;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_NAME = Perian;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WRAPPER_EXTENSION = component;
 				ZERO_LINK = NO;
 			};
@@ -2180,7 +2143,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WRAPPER_EXTENSION = prefPane;
 				ZERO_LINK = NO;
 			};
@@ -2190,11 +2152,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_1)",
-				);
-				FRAMEWORK_SEARCH_PATHS_QUOTED_1 = "\"$(SYSTEM_DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -2329,7 +2286,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WRAPPER_EXTENSION = prefPane;
 				ZERO_LINK = YES;
 			};
@@ -2354,7 +2310,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				WRAPPER_EXTENSION = prefPane;
 				ZERO_LINK = NO;
 			};
