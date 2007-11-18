@@ -11,6 +11,12 @@
 
 #include <QuickTime/QuickTime.h>
 
+#ifndef __OBJC_GC__
+#ifndef __strong
+#define __strong
+#endif
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -56,7 +62,7 @@ extern void SubLoadSRTFromPath(NSString *path, SubContext **meta, SubSerializer 
 
 class CXXSubSerializer
 {
-	void *priv;
+	__strong void *priv;
 	
 public:
 	CXXSubSerializer();
@@ -72,7 +78,7 @@ public:
 
 class CXXAutoreleasePool
 {
-	void *pool;
+	__strong void *pool;
 public:
 	CXXAutoreleasePool();
 	~CXXAutoreleasePool();
