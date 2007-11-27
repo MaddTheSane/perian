@@ -819,3 +819,13 @@ int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size,
 		return (parser->parserStructure->parser_parse)(parser, buf, buf_size, out_buf_size, type, skippable);
 	return 0;
 }
+
+int ffusionIsParsedVideoInterlaced(FFusionParserContext *parser)
+{
+	if (parser->parserStructure == &ffusionH264Parser) {
+		H264ParserContext *h264parser = parser->internalContext;
+		return !h264parser->frame_mbs_only_flag;
+	}
+	
+	return 0;
+}

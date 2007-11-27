@@ -314,17 +314,13 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         {
             DisposeImageCodecMPDrawBandUPP(glob->drawBandUPP);
         }
-        
-        if (glob->avCodec)
-        {
-            avcodec_close(glob->avContext);
-        }
 				
         if (glob->avContext)
         {
 			if (glob->avContext->extradata)
 				free(glob->avContext->extradata);
 						
+			if (glob->avContext->codec) avcodec_close(glob->avContext);
             av_free(glob->avContext);
         }
 		
@@ -676,6 +672,11 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		
 		if(glob->avContext->extradata_size != 0 && glob->begin.parser != NULL)
 			ffusionParseExtraData(glob->begin.parser, glob->avContext->extradata, glob->avContext->extradata_size);
+		
+		// XXX: at the moment ffmpeg can't handle interlaced H.264 right
+		// specifically PAFF + spatial prediction
+		if (codecID == CODEC_ID_H264 && ffusionIsParsedVideoInterlaced(glob->begin.parser))
+			return -2;
 		
 		// some hooks into ffmpeg's buffer allocation to get frames in 
 		// decode order without delay more easily
