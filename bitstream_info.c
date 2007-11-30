@@ -353,12 +353,12 @@ static void decode_sps(H264ParserContext *context, const uint8_t *buf, int buf_s
 		context->sum_of_offset_for_ref_frames = 0;
 		for(i=0; i<context->num_ref_frames_in_pic_order_cnt_cycle; i++)
 			context->sum_of_offset_for_ref_frames += get_se_golomb(gb); //offset_for_ref_frame[i]
-		get_ue_golomb(gb);	//num_ref_frames
-		get_bits1(gb);		//gaps_in_frame_num_value_allowed_flag
-		get_ue_golomb(gb);	//pic_width_in_mbs_minus1
-		get_ue_golomb(gb);	//pic_height_in_map_units_minus1
-		context->frame_mbs_only_flag = get_bits1(gb);
 	}
+	get_ue_golomb(gb);	//num_ref_frames
+	get_bits1(gb);		//gaps_in_frame_num_value_allowed_flag
+	get_ue_golomb(gb);	//pic_width_in_mbs_minus1
+	get_ue_golomb(gb);	//pic_height_in_map_units_minus1
+	context->frame_mbs_only_flag = get_bits1(gb);
 }
 
 static void decode_pps(H264ParserContext *context, const uint8_t *buf, int buf_size)

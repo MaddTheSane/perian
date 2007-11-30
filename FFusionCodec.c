@@ -676,7 +676,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		// XXX: at the moment ffmpeg can't handle interlaced H.264 right
 		// specifically PAFF + spatial prediction
 		if (codecID == CODEC_ID_H264 && ffusionIsParsedVideoInterlaced(glob->begin.parser))
-			return -2;
+			goto error;
 		
 		// some hooks into ffmpeg's buffer allocation to get frames in 
 		// decode order without delay more easily
@@ -693,7 +693,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         {
             Codecprintf(glob->fileLog, "Error opening avcodec!\n");
             
-            return -2;
+            goto error;
         }
 		
 		// we allocate some space for copying the frame data since we need some padding at the end
@@ -773,6 +773,15 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 	
     
     return noErr;
+	
+error:
+	HLock(glob->pixelTypes);
+    pos = *((OSType **)glob->pixelTypes);
+	*pos = 0;
+	p->wantedDestinationPixelTypes = (OSType **)glob->pixelTypes;
+	HUnlock(glob->pixelTypes);
+	
+	return -2;
 }
 
 static int qtTypeForFrameInfo(int original, int fftype, int skippable)
