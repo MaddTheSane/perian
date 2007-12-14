@@ -525,7 +525,7 @@ static int inline decode_nals(H264ParserContext *context, const uint8_t *buf, in
 			}
 			start_offset = buf_index + 1;
 			//do start code prefix search
-			for(; buf_index < buf_size; buf_index++)
+			for(buf_index++; buf_index < buf_size; buf_index++)
 			{
 				if(buf[buf_index] == 0)
 				{
