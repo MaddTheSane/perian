@@ -40,6 +40,7 @@
 #include "bitstream_info.h"
 #include "FrameBuffer.h"
 #include "CommonUtils.h"
+#include "pthread.h"
 
 void inline swapFrame(AVFrame * *a, AVFrame * *b)
 {
@@ -163,6 +164,14 @@ extern CFMutableStringRef GetHomeDirectory();
 #include <QuickTime/ImageCodec.k.h>
 #include <QuickTime/ComponentDispatchHelper.c>
 
+void *launchUpdateChecker(void *args)
+{
+	FSRef *ref = (FSRef *)args;
+    LSOpenFSRef(ref, NULL);
+	free(ref);
+	return NULL;
+}
+
 void FFusionRunUpdateCheck()
 {
     CFDateRef lastRunDate = CFPreferencesCopyAppValue(CFSTR("NextRunDate"), CFSTR("org.perian.Perian"));
@@ -180,11 +189,11 @@ void FFusionRunUpdateCheck()
     CFStringAppend(location, CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app"));
     
     char fileRep[1024];
-    FSRef updateCheckRef;
+    FSRef *updateCheckRef = malloc(sizeof(FSRef));
     Boolean doCheck = FALSE;
     
     if(CFStringGetFileSystemRepresentation(location, fileRep, 1024))
-        if(FSPathMakeRef((UInt8 *)fileRep, &updateCheckRef, NULL) == noErr)
+        if(FSPathMakeRef((UInt8 *)fileRep, updateCheckRef, NULL) == noErr)
             doCheck = TRUE;
     
     CFRelease(location);
@@ -192,11 +201,11 @@ void FFusionRunUpdateCheck()
     {
         CFStringRef absLocation = CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app");
         if(CFStringGetFileSystemRepresentation(absLocation, fileRep, 1024))
-            if(FSPathMakeRef((UInt8 *)fileRep, &updateCheckRef, NULL) != noErr)
+            if(FSPathMakeRef((UInt8 *)fileRep, updateCheckRef, NULL) != noErr)
                 return;  //We have failed
     }
-    
-    LSOpenFSRef(&updateCheckRef, NULL);    
+	pthread_t thread;
+	pthread_create(&thread, NULL, launchUpdateChecker, updateCheckRef);
 }
 
 //---------------------------------------------------------------------------
