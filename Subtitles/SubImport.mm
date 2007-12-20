@@ -314,6 +314,7 @@ inLoopError:
 	SetMediaLanguage(theMedia, GetFilenameLanguage(filename));
 	
 bail:
+	[ss release];
 	[pool release];
 	
 	if (err) {
