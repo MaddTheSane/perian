@@ -348,6 +348,7 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
 		if(glob->fileLog)
 			fclose(glob->fileLog);
 		
+        memset(glob, 0, sizeof(FFusionGlobalsRecord));
         DisposePtr((Ptr)glob);
     }
 	
