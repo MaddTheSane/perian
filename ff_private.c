@@ -605,7 +605,8 @@ int determine_header_offset(ff_global_ptr storage) {
 		result = av_seek_frame(formatContext, -1, 0, 0);
 		if(result < 0) goto bail;
 		
-		av_read_frame(formatContext, &packet);
+		result = av_read_frame(formatContext, &packet);
+		if(result < 0) goto bail;
 		st = formatContext->streams[packet.stream_index];
 		
 		/* read_packet will give the first decodable packet. However, that isn't necessarily
