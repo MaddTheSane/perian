@@ -973,7 +973,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 						penY = (FloatToFixed(NSMidY(marginRect)) / 2) + (imageHeight / 2);
 					} else penY = centerPen;
 					
-					storePen = &centerPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
+					storePen = &centerPen; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
 					break;
 				case kSubAlignmentTop:
 					if (!topPen || resetPens) {
