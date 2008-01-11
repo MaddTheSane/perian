@@ -983,7 +983,8 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 					storePen = &topPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
 					break;
 			}
-		} else {						
+		} else {
+			ATSUTextMeasurement descent;
 			penX = FloatToFixed(div->posX * screenScaleX);
 			penY = FloatToFixed((context->resY - div->posY) * screenScaleY);
 			
@@ -996,6 +997,10 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 				case kSubAlignmentMiddle: penY -= imageHeight / 2; break;
 				case kSubAlignmentTop: penY -= imageHeight;
 			}
+			
+			ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
+			
+			penY += descent;
 						
 			SetLayoutPositioning(layout, imageWidth, div->alignH);
 			storePen = NULL; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
