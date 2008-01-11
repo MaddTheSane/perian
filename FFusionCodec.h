@@ -28,7 +28,7 @@
 //Global Header
 //---------------------------------------------------------------------------
 
-#define kFFusionCodecVersion		(0x00030002)
+#define kFFusionCodecVersion		(0x00030003)
 
 #define kDivX1CodecInfoResID		256
 #define kDivX2CodecInfoResID		257

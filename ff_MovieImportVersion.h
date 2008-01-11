@@ -23,9 +23,9 @@
 #ifndef __FF_MOVIEIMPORTVERSION__
 #define __FF_MOVIEIMPORTVERSION__
 
-#define kFFAviComponentVersion 0x00010002
+#define kFFAviComponentVersion 0x00010003
 
-#define kChristophManufacturer 'Rafz'
+#define kChristophManufacturer 'Peri'
 
 #define kAVIthngResID 512
 #define kFLVthngResID 515
