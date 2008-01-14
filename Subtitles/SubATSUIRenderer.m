@@ -540,7 +540,7 @@ static void ExpandCGRect(CGRect *rect, float radius)
 	rect->size.width += radius*2.;
 }
 
-static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
+static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed extraHeight, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
 {
 	ATSTrapezoid trap = {0};
 	ItemCount trapCount;
@@ -554,7 +554,7 @@ static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArray
 		
 		ATSUGetGlyphBounds(layout, 0, baseY, breaks[i], end-breaks[i], kATSUseDeviceOrigins, 1, &trap, &trapCount);
 
-		baseY += GetLineHeight(layout, breaks[i]);
+		baseY += GetLineHeight(layout, breaks[i]) + extraHeight;
 		
 		rect.bottom = MAX(trap.lowerLeft.y, trap.lowerRight.y);
 		rect.left = MIN(trap.lowerLeft.x, trap.upperLeft.x);
@@ -574,6 +574,37 @@ static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArray
 	*height = largeRect.bottom - largeRect.top;
 	*width = largeRect.right - largeRect.left;
 }
+
+#if 0
+static void GetImageBoundingBoxForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed extraHeight, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
+{
+	Rect largeRect = {0};
+	ATSUTextMeasurement baseY = 0;
+	int i;
+	
+	for (i = breakCount; i >= 0; i--) {
+		UniCharArrayOffset end = breaks[i+1];
+		Rect rect;
+		
+		ATSUMeasureTextImage(layout, breaks[i], end-breaks[i], 0, baseY, &rect);
+		
+		baseY += GetLineHeight(layout, breaks[i]) + extraHeight;
+		
+		if (i == breakCount) largeRect = rect;
+		
+		largeRect.bottom = MAX(largeRect.bottom, rect.bottom);
+		largeRect.left = MIN(largeRect.left, rect.left);
+		largeRect.top = MIN(largeRect.top, rect.top);
+		largeRect.right = MAX(largeRect.right, rect.right);
+			}
+	
+	
+	if (lX) *lX = IntToFixed(largeRect.left);
+	if (lY) *lY = IntToFixed(largeRect.bottom);
+	*height = IntToFixed(largeRect.bottom - largeRect.top);
+	*width = IntToFixed(largeRect.right - largeRect.left);
+}
+#endif
 
 enum {fillc, strokec};
 
@@ -805,7 +836,7 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 	if (textType == kTextLayerOutline && div->styleLine->borderStyle == kSubBorderStyleBox) {
 		ATSUTextMeasurement lineWidth, lineHeight, lineX, lineY;
 		UniCharArrayOffset breaks[2] = {thisBreak, thisBreak + lineLen};
-		GetTypographicRectangleForLayout(layout, breaks, 0, &lineX, &lineY, &lineHeight, &lineWidth);
+		GetTypographicRectangleForLayout(layout, breaks, 0, FloatToFixed(spanEx->outlineRadius), &lineX, &lineY, &lineHeight, &lineWidth);
 		
 		CGRect borderRect = CGRectMake(FixedToFloat(lineX + penX), FixedToFloat(penY - lineY), FixedToFloat(lineWidth), FixedToFloat(lineHeight));
 		
@@ -953,7 +984,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		UniCharArrayOffset *breaks = FindLineBreaks(layout, div, breakLocator, &breakCount, breakingWidth, ubuffer, textLen);
 		ATSUTextMeasurement imageWidth, imageHeight;
 
-		if (div->posX != -1 || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, NULL, NULL, &imageHeight, &imageWidth);
+		if (div->posX != -1 || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
 
 		if (div->posX == -1) {
 			penX = FloatToFixed(NSMinX(marginRect));
@@ -993,15 +1024,15 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 				case kSubAlignmentRight: penX -= imageWidth;
 			}
 			
+			ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
+
 			switch (div->alignV) {
 				case kSubAlignmentMiddle: penY -= imageHeight / 2; break;
-				case kSubAlignmentTop: penY -= imageHeight;
+				case kSubAlignmentTop: penY -= imageHeight; break;
 			}
 			
-			ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
-			
 			penY += descent;
-						
+
 			SetLayoutPositioning(layout, imageWidth, div->alignH);
 			storePen = NULL; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
 		}
