@@ -656,9 +656,10 @@ ComponentResult MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 	Media chapterMedia = NewTrackMedia(chapterTrack, TextMediaType, GetMovieTimeScale(theMovie), 
 									   dataRef, HandleDataHandlerSubType);
 	if (chapterMedia == NULL) {
-		Codecprintf(NULL, "MKV: Error creating chapter media %d\n", GetMoviesError());
+		OSErr err = GetMoviesError();
+		Codecprintf(NULL, "MKV: Error creating chapter media %d\n", err);
 		DisposeMovieTrack(chapterTrack);
-		return GetMoviesError();
+		return err;
 	}
 	
 	// Name the chapter track "Chapters" for easy distinguishing
