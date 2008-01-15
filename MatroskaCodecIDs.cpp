@@ -426,6 +426,8 @@ uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *e
 	return esds;
 }
 
+static const unsigned char aac_lc_vos[] = {0x11, 0x90};
+
 static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 {
 	KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
@@ -435,6 +437,11 @@ static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	int trackID = trackNum ? uint16(*trackNum) : 1;
     uint8_t *vosBuf = codecPrivate ? codecPrivate->GetBuffer() : NULL;
 	size_t esdsLen;
+	
+	if (!vosBuf) { // minimal AAC-LC descriptor
+		vosBuf = (uint8_t*)aac_lc_vos;
+		vosLen = 2;
+	}
 
 	Handle esdsExt = NewHandleClear(4);
 	uint8_t *esds = CreateEsdsFromSetupData(vosBuf, vosLen, &esdsLen, trackID, audio);
