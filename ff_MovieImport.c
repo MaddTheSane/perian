@@ -404,9 +404,7 @@ ComponentResult FFAvi_MovieImportFile(ff_global_ptr storage, const FSSpec *theFi
 	
 	result = FSpMakeFSRef(theFile, &theFileFSRef);
 	require_noerr(result, bail);
-	
-	LoadExternalSubtitles(&theFileFSRef, theMovie);
-	
+		
 bail:
 		if(dataRef)
 			DisposeHandle(dataRef);
@@ -433,7 +431,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	FFAvi_MovieImportValidateDataRef(storage, dataRef, dataRefType, &valid);
 	if(valid != 255)
 		goto bail;
-		
+			
 	/* Prepare the iocontext structure */
 	result = url_open_dataref(&byteContext, dataRef, dataRefType, &storage->dataHandler, &storage->dataHandlerSupportsWideOffsets, &storage->dataSize);
 	storage->isStreamed = dataRefType == URLDataHandlerSubType;
@@ -547,6 +545,8 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		import_with_idle(storage, inFlags, outFlags, 0, 0, true);			
 	}
 	
+	LoadExternalSubtitlesFromFileDataRef(dataRef, dataRefType, theMovie);
+
 bail:
 	if(result == noErr)
 		storage->movieLoadState == kMovieLoadStateLoaded;
