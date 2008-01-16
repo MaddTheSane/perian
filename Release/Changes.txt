@@ -3,7 +3,7 @@
 - TrueAudio, MP1, and DTS audio support
 - Slice-based multithreaded decoding for MPEG-1/2/H.264
 - No longer tries to decode AVCHD/interlaced H.264
-- Compatibility fixes for QuickTime 7.3 and Leopard
+- Compatibility fixes for QuickTime 7.4 and Leopard
 - Objective-C GC compatibility
 - Fixed a crash in Toast
 - Better subtitle rendering

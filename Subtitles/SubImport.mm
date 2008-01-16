@@ -445,11 +445,7 @@ bail:
 
 ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType dataRefType, Movie theMovie)
 {
-	if (dataRefType != AliasDataHandlerSubType) {
-		FourCharCode type = EndianU32_NtoB(dataRefType);
-		Codecprintf(NULL, "importing dataRef of type \"%.4s\"", &type);
-		return noErr;
-	}
+	if (dataRefType != AliasDataHandlerSubType) return noErr;
 	
 	CFStringRef cfPath;
 	FSRef ref;
