@@ -83,7 +83,7 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 	sty->italic = sty->underline = sty->strikeout = NO;
 	sty->alignH = kSubAlignmentCenter;
 	sty->alignV = kSubAlignmentBottom;
-	sty->borderStyle = 0;
+	sty->borderStyle = kSubBorderStyleNormal;
 	sty->ex = [delegate completedStyleParsing:sty];
 	sty->delegate = delegate;
 	return sty;
