@@ -1067,12 +1067,15 @@ SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int
 
 	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoWidth:width videoHeight:height];
 	[hdr release];
+	CFRetain(s);
 	return s;
 }
 
 SubtitleRendererPtr SubInitNonSSA(int width, int height)
 {
-	return [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
+	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
+	CFRetain(s);
+	return s;
 }
 
 CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s)
@@ -1087,6 +1090,7 @@ void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int
 
 void SubDisposeRenderer(SubtitleRendererPtr s)
 {
+	CFRelease(s);
 	[s release];
 }
 @end
