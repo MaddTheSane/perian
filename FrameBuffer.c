@@ -38,7 +38,8 @@ void FFusionDataFree(FFusionData *data)
 		av_free(data->frames[i]->buffer);
 		free(data->frames[i]);
 	}
-	free(data->buffer);
+	free(data->frames);
+	av_free(data->buffer);
 }
 
 int FFusionCreateDataBuffer(FFusionData *data, uint8_t *buffer, int bufferSize)

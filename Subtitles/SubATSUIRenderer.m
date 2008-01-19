@@ -261,6 +261,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	[context release];
 	free(ubuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
+	ATSUDisposeTextLayout(layout);
 	[super dealloc];
 }
 
@@ -268,6 +269,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 {
 	free(ubuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
+	ATSUDisposeTextLayout(layout);
 	[super finalize];
 }
 
@@ -348,7 +350,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
 	return style;
 }
 
--(void)releaseStyleEx:(void*)ex
+-(void)releaseStyleExtra:(void*)ex
 {
 	ATSUDisposeStyle(ex);
 }
@@ -1059,7 +1061,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	[pool release];
 }
 
-extern SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int height)
+SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int height)
 {
 	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO];
 
@@ -1068,22 +1070,22 @@ extern SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int wid
 	return s;
 }
 
-extern SubtitleRendererPtr SubInitNonSSA(int width, int height)
+SubtitleRendererPtr SubInitNonSSA(int width, int height)
 {
 	return [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
 }
 
-extern CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s)
+CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s)
 {
 	return s->srgbCSpace;
 }
 
-extern void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
+void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
 {
 	[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
 }
 
-extern void SubDisposeRenderer(SubtitleRendererPtr s)
+void SubDisposeRenderer(SubtitleRendererPtr s)
 {
 	[s release];
 }

@@ -95,7 +95,7 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 		NSString *tmp;
 		delegate = delegate_;
 				
-#define sv(fn, n) fn = [s objectForKey: @""#n]
+#define sv(fn, n) fn = [[s objectForKey: @""#n] retain]
 #define fv(fn, n) fn = [[s objectForKey:@""#n] floatValue]
 #define iv(fn, n) fn = [[s objectForKey:@""#n] intValue]
 #define bv(fn, n) fn = [[s objectForKey:@""#n] intValue] != 0
@@ -199,7 +199,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 			
 			for (i=0; i < nstyles; i++) {
 				NSDictionary *style = [styles_ objectAtIndex:i];
-				[sdict setObject:[[SubStyle alloc] initWithDictionary:style scriptVersion:scriptType delegate:delegate]
+				[sdict setObject:[[[SubStyle alloc] initWithDictionary:style scriptVersion:scriptType delegate:delegate] autorelease]
 												forKey:[style objectForKey:@"Name"]];
 			}
 			
