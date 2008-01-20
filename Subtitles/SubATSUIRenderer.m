@@ -1063,18 +1063,22 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 
 SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int height)
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO];
 
 	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoWidth:width videoHeight:height];
 	[hdr release];
 	CFRetain(s);
+	[pool release];
 	return s;
 }
 
 SubtitleRendererPtr SubInitNonSSA(int width, int height)
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
 	CFRetain(s);
+	[pool release];
 	return s;
 }
 
@@ -1090,8 +1094,10 @@ void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int
 
 void SubDisposeRenderer(SubtitleRendererPtr s)
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	CFRelease(s);
 	[s release];
+	[pool release];
 }
 @end
 
