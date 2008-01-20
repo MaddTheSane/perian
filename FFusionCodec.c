@@ -428,7 +428,7 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 		cap->subCodecIsMultiBufferAware = true;
 		cap->subCodecSupportsOutOfOrderDisplayTimes = true;
 		cap->baseCodecShouldCallDecodeBandForAllFrames = true;
-		cap->subCodecSupportsScheduledBackwardsPlaybackWithDifferenceFrames = true;
+	//	cap->subCodecSupportsScheduledBackwardsPlaybackWithDifferenceFrames = true;
 		
 	//  XXX enabling this seems to cause rare visible artifacts in h.264?
 	//	cap->subCodecSupportsDrawInDecodeOrder = true; 
@@ -458,6 +458,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     CodecCapabilities *capabilities = p->capabilities;
 	long count = 0;
 	Handle imgDescExt;
+	OSErr err = noErr;
 	
     // We first open libavcodec library and the codec corresponding
     // to the fourCC if it has not been done before
@@ -686,7 +687,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		// XXX: at the moment ffmpeg can't handle interlaced H.264 right
 		// specifically PAFF + spatial prediction
 		if (codecID == CODEC_ID_H264 && ffusionIsParsedVideoInterlaced(glob->begin.parser))
-			goto error;
+			err = featureUnsupported;
 		
 		// some hooks into ffmpeg's buffer allocation to get frames in 
 		// decode order without delay more easily
@@ -703,7 +704,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         {
             Codecprintf(glob->fileLog, "Error opening avcodec!\n");
             
-            goto error;
+			err = paramErr;
         }
 		
 		// we allocate some space for copying the frame data since we need some padding at the end
@@ -746,6 +747,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
     index = 0;
 	
+	if (!err) {
 	switch (glob->avContext->pix_fmt)
 	{
 		case PIX_FMT_BGR24:
@@ -766,6 +768,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			}
 			break;
 	}
+	}
     
     pos[index++] = 0;
     HUnlock(glob->pixelTypes);
@@ -781,17 +784,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
 	capabilities->flags |= codecCanAsync | codecCanAsyncWhen;
 	
-    
-    return noErr;
-	
-error:
-	HLock(glob->pixelTypes);
-    pos = *((OSType **)glob->pixelTypes);
-	*pos = 0;
-	p->wantedDestinationPixelTypes = (OSType **)glob->pixelTypes;
-	HUnlock(glob->pixelTypes);
-	
-	return -2;
+    return err;
 }
 
 static int qtTypeForFrameInfo(int original, int fftype, int skippable)
