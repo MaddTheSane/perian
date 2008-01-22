@@ -428,7 +428,7 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 		cap->subCodecIsMultiBufferAware = true;
 		cap->subCodecSupportsOutOfOrderDisplayTimes = true;
 		cap->baseCodecShouldCallDecodeBandForAllFrames = true;
-	//	cap->subCodecSupportsScheduledBackwardsPlaybackWithDifferenceFrames = true;
+		cap->subCodecSupportsScheduledBackwardsPlaybackWithDifferenceFrames = true;
 		
 	//  XXX enabling this seems to cause rare visible artifacts in h.264?
 	//	cap->subCodecSupportsDrawInDecodeOrder = true; 
