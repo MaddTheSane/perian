@@ -174,7 +174,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 	if (resYS) resY = [resYS floatValue];
 	
 	// obscure res rules copied from VSFilter
-	if (!resXS && !resYS) {
+	if ((!resXS && !resYS) || (!resX && !resY)) {
 		resX = 384; resY = 288;
 	} else if (!resYS) {
 		resY = (resX == 1280) ? 1024 : (resX / (4./3.));
