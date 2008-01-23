@@ -1,56 +1,118 @@
-{
-    IBClasses = (
-        {
-            ACTIONS = {
-                cancelDynRangeSheet = id; 
-                installUninstall = id; 
-                launchDonate = id; 
-                launchForum = id; 
-                launchWebsite = id; 
-                saveDynRangeSheet = id; 
-                set2ChannelModePopup = id; 
-                setAC3DynamicRangePopup = id; 
-                setAC3DynamicRangeSlider = id; 
-                setAC3DynamicRangeValue = id; 
-                setAutoUpdateCheck = id; 
-                setLoadExternalSubtitles = id; 
-                updateCheck = id; 
-            }; 
-            CLASS = CPFPerianPrefPaneController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                "button_autoUpdateCheck" = NSButton; 
-                "button_donate" = NSButton; 
-                "button_forum" = NSButton; 
-                "button_install" = NSButton; 
-                "button_loadExternalSubtitles" = NSButton; 
-                "button_updateCheck" = NSButton; 
-                "button_website" = NSButton; 
-                "popup_ac3DynamicRangeType" = NSPopUpButton; 
-                "popup_outputMode" = NSPopUpButton; 
-                "progress_install" = NSProgressIndicator; 
-                "progress_updateCheck" = NSProgressIndicator; 
-                "slider_ac3DynamicRangeSlider" = NSSlider; 
-                "textField_ac3DynamicRangeValue" = NSTextField; 
-                "textField_currentVersion" = NSTextField; 
-                "textField_installStatus" = NSTextField; 
-                "textView_about" = NSTextView; 
-                "window_dynRangeSheet" = NSWindow; 
-            }; 
-            SUPERCLASS = NSPreferencePane; 
-        }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {
-            CLASS = NSPreferencePane; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                "_firstKeyView" = NSView; 
-                "_initialKeyView" = NSView; 
-                "_lastKeyView" = NSView; 
-                "_window" = NSWindow; 
-            }; 
-            SUPERCLASS = NSObject; 
-        }
-    ); 
-    IBVersion = 1; 
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>cancelDynRangeSheet</key>
+				<string>id</string>
+				<key>installUninstall</key>
+				<string>id</string>
+				<key>launchDonate</key>
+				<string>id</string>
+				<key>launchForum</key>
+				<string>id</string>
+				<key>launchWebsite</key>
+				<string>id</string>
+				<key>saveDynRangeSheet</key>
+				<string>id</string>
+				<key>set2ChannelModePopup</key>
+				<string>id</string>
+				<key>setAC3DynamicRangePopup</key>
+				<string>id</string>
+				<key>setAC3DynamicRangeSlider</key>
+				<string>id</string>
+				<key>setAC3DynamicRangeValue</key>
+				<string>id</string>
+				<key>setAutoUpdateCheck</key>
+				<string>id</string>
+				<key>setLoadExternalSubtitles</key>
+				<string>id</string>
+				<key>updateCheck</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>CPFPerianPrefPaneController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>button_autoUpdateCheck</key>
+				<string>NSButton</string>
+				<key>button_donate</key>
+				<string>NSButton</string>
+				<key>button_forum</key>
+				<string>NSButton</string>
+				<key>button_install</key>
+				<string>NSButton</string>
+				<key>button_loadExternalSubtitles</key>
+				<string>NSButton</string>
+				<key>button_updateCheck</key>
+				<string>NSButton</string>
+				<key>button_website</key>
+				<string>NSButton</string>
+				<key>popup_ac3DynamicRangeType</key>
+				<string>NSPopUpButton</string>
+				<key>popup_outputMode</key>
+				<string>NSPopUpButton</string>
+				<key>progress_install</key>
+				<string>NSProgressIndicator</string>
+				<key>progress_updateCheck</key>
+				<string>NSProgressIndicator</string>
+				<key>slider_ac3DynamicRangeSlider</key>
+				<string>NSSlider</string>
+				<key>textField_ac3DynamicRangeValue</key>
+				<string>NSTextField</string>
+				<key>textField_currentVersion</key>
+				<string>NSTextField</string>
+				<key>textField_installStatus</key>
+				<string>NSTextField</string>
+				<key>textView_about</key>
+				<string>NSTextView</string>
+				<key>window_dynRangeSheet</key>
+				<string>NSWindow</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSPreferencePane</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>NSPreferencePane</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>_firstKeyView</key>
+				<string>NSView</string>
+				<key>_initialKeyView</key>
+				<string>NSView</string>
+				<key>_lastKeyView</key>
+				<string>NSView</string>
+				<key>_window</key>
+				<string>NSWindow</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>
