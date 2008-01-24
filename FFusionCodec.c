@@ -298,6 +298,10 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         {
             Codecprintf(glob->fileLog, "Error opening the base image decompressor! Exiting.\n");
         }
+		
+		// we allocate some space for copying the frame data since we need some padding at the end
+		// for ffmpeg's optimized bitstream readers. Size doesn't really matter, it'll grow if need be
+		FFusionDataSetup(&(glob->data), 256, 64*1024);
         FFusionRunUpdateCheck();
     }
     
@@ -707,9 +711,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			err = paramErr;
         }
 		
-		// we allocate some space for copying the frame data since we need some padding at the end
-		// for ffmpeg's optimized bitstream readers. Size doesn't really matter, it'll grow if need be
-		FFusionDataSetup(&(glob->data), 256, 64*1024);
     }
     
     // Specify the minimum image band height supported by the component
@@ -845,6 +846,11 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	myDrp->decoded = p->frameTime ? (0 != (p->frameTime->flags & icmFrameAlreadyDecoded)) : false;
 	myDrp->frameData = NULL;
 	myDrp->buffer = NULL;
+	
+	if (!glob->avContext) {
+		fprintf(stderr, "Perian Codec: QT tried to call BeginBand without preflighting!\n");
+		return internalComponentErr;
+	}
 	
 	if(myDrp->decoded)
 	{
