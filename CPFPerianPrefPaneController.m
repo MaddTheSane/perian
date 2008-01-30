@@ -1,5 +1,6 @@
 #import "CPFPerianPrefPaneController.h"
 #import "UpdateCheckerAppDelegate.h"
+#import "ECQTComponent.h"
 #include <sys/stat.h>
 
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
@@ -227,9 +228,6 @@
 			userInstalled = NO;
 		else
 			userInstalled = YES;
-
-#warning TODO(durin42) Should filter out components that aren't installed from this list.
-		componentReplacementInfo = [[NSArray alloc] initWithContentsOfFile:[[[self bundle] resourcePath] stringByAppendingPathComponent:ComponentInfoPlist]];
 	}
 	
 	return self;
@@ -361,8 +359,8 @@
 	[updateDate release];
 	
 	/* A52 Prefs */
-	int twoChannelMode = [self getIntFromKey:AC3TwoChannelModeKey forAppID:a52AppID withDefault:0xffffffff];
-	if(twoChannelMode != 0xffffffff)
+	unsigned twoChannelMode = [self getIntFromKey:AC3TwoChannelModeKey forAppID:a52AppID withDefault:0xffffffff];
+	if (twoChannelMode != 0xffffffff)
 	{
 		/* sanity checks */
 		if(twoChannelMode & A52_CHANNEL_MASK & 0xf7 != 2)
@@ -408,7 +406,6 @@
 	if(auth != nil)
 		AuthorizationFree(auth, 0);
 	[errorString release];
-	[componentReplacementInfo release];
 	[super dealloc];
 }
 
@@ -697,83 +694,6 @@
 	[self checkForInstallation];
 }
 
-#pragma mark Component Version List
-- (NSArray *)installedComponentsForUser:(BOOL)user
-{
-	NSString *path = [self basePathForType:ComponentTypeQuickTime user:user];
-	NSArray *installedComponents = [[NSFileManager defaultManager] directoryContentsAtPath:path];
-	NSMutableArray *retArray = [[NSMutableArray alloc] initWithCapacity:[installedComponents count]]; 
-	NSEnumerator *componentEnum = [installedComponents objectEnumerator];
-	NSString *component;
-	while ((component = [componentEnum nextObject])) {
-		if ([[component pathExtension] isEqualToString:@"component"])
-			[retArray addObject:component];
-	}
-	return [retArray autorelease];
-}
-
-- (NSDictionary *)componentInfoForComponent:(NSString *)component userInstalled:(BOOL)user
-{
-	NSString *compName = component;
-	if ([[component pathExtension] isEqualToString:@"component"])
-		compName = [component stringByDeletingPathExtension];
-	NSMutableDictionary *componentInfo = [[NSMutableDictionary alloc] initWithObjectsAndKeys:compName, @"name", NULL];
-	NSBundle *componentBundle = [NSBundle bundleWithPath:[[self basePathForType:ComponentTypeQuickTime 
-																		   user:user] stringByAppendingPathComponent:component]];
-	NSDictionary *infoDictionary = nil;
-	if (componentBundle)
-		infoDictionary = [componentBundle infoDictionary];
-	if (infoDictionary && [infoDictionary objectForKey:BundleIdentifierKey]) {
-		NSString *componentVersion = [infoDictionary objectForKey:BundleVersionKey];
-		if (componentVersion)
-			[componentInfo setObject:componentVersion forKey:@"version"];
-		else
-			[componentInfo setObject:@"Unknown" forKey:@"version"];
-		[componentInfo setObject:(user ? @"User" : @"System") forKey:@"installType"];
-		[componentInfo setObject:[self checkComponentStatusByBundleIdentifier:[componentBundle bundleIdentifier]] forKey:@"status"];
-		[componentInfo setObject:[componentBundle bundleIdentifier] forKey:@"bundleID"];
-	} else {
-		[componentInfo setObject:@"Unknown" forKey:@"version"];
-		[componentInfo setObject:(user ? @"User" : @"System") forKey:@"installType"];
-		NSString *bundleIdent = [NSString stringWithFormat:PERIAN_NO_BUNDLE_ID_FORMAT,compName];
-		[componentInfo setObject:[self checkComponentStatusByBundleIdentifier:bundleIdent] forKey:@"status"];
-		[componentInfo setObject:bundleIdent forKey:@"bundleID"];
-	}
-	return [componentInfo autorelease];
-}
-
-- (NSArray *)installedComponents
-{
-	NSArray *userComponents = [self installedComponentsForUser:YES];
-	NSArray *systemComponents = [self installedComponentsForUser:NO];
-	unsigned numComponents = [userComponents count] + [systemComponents count];
-	NSMutableArray *components = [[NSMutableArray alloc] initWithCapacity:numComponents];
-	NSEnumerator *compEnum = [userComponents objectEnumerator];
-	NSString *compName;
-	while ((compName = [compEnum nextObject]))
-		[components addObject:[self componentInfoForComponent:compName userInstalled:YES]];
-	
-	compEnum = [systemComponents objectEnumerator];
-	while ((compName = [compEnum nextObject]))
-		[components addObject:[self componentInfoForComponent:compName userInstalled:NO]];
-	return [components autorelease];
-}
-
-- (NSString *)checkComponentStatusByBundleIdentifier:(NSString *)bundleID
-{
-	NSString *status = @"OK";
-	NSEnumerator *infoEnum = [componentReplacementInfo objectEnumerator];
-	NSDictionary *infoDict;
-	while ((infoDict = [infoEnum nextObject])) {
-		NSEnumerator *stringsEnum = [[infoDict objectForKey:ObsoletesKey] objectEnumerator];
-		NSString *obsoletedID;
-		while ((obsoletedID = [stringsEnum nextObject]))
-			if ([obsoletedID isEqualToString:bundleID])
-				status = [NSString stringWithFormat:@"Obsoleted by %@",[infoDict objectForKey:HumanReadableNameKey]];
-	}
-	return status;
-}
-
 #pragma mark Check Updates
 - (IBAction)updateCheck:(id)sender 
 {
@@ -918,4 +838,48 @@
 	
 }
 
+#pragma mark Component Manager
+- (NSArray *)installedComponents
+{
+	NSMutableArray *mComps = [[NSMutableArray alloc] init];
+	
+	NSMutableArray* allComps = [NSMutableArray array];
+	
+	[allComps addObjectsFromArray:	GetComponentsInFolder(@"/Library/Components")];
+	[allComps addObjectsFromArray:	GetComponentsInFolder(@"/Library/QuickTime")];
+	[allComps addObjectsFromArray:	GetComponentsInFolder(@"~/Library/QuickTime")];
+	[allComps addObjectsFromArray:	GetComponentsInFolder(@"~/Library/Components")];
+	
+	[allComps addObjectsFromArray:	GetComponentsInFolder(@"/Library/Components (Disabled)")];
+	[allComps addObjectsFromArray:	GetComponentsInFolder(@"/Library/QuickTime (Disabled)")];
+	[allComps addObjectsFromArray:	GetComponentsInFolder(@"~/Library/QuickTime (Disabled)")];
+	[allComps addObjectsFromArray:	GetComponentsInFolder(@"~/Library/Components (Disabled)")];
+
+	unsigned x= 0;
+	for (x = 0; x < [allComps count]; x++)
+	{	
+		NSString* comp = [allComps objectAtIndex:x];
+		ECQTComponent* compobj = [ECQTComponent componentWithPath:comp];
+		if (compobj && [compobj name])
+			[mComps addObject:compobj];
+	}
+	return [mComps autorelease];
+}
+
 @end
+
+NSArray* GetComponentsInFolder(NSString* folder)
+{
+	folder = [folder stringByExpandingTildeInPath];
+	NSFileManager* fm = [NSFileManager defaultManager];
+	NSArray* contents = [fm directoryContentsAtPath:folder];
+	NSMutableArray* newContents = [NSMutableArray array];
+	unsigned x;
+	for (x = 0; x < [contents count]; x++)
+	{
+		NSString* comp = [contents objectAtIndex:x];
+		
+		[newContents addObject:[folder stringByAppendingPathComponent:comp]];
+	}
+	return newContents;
+}

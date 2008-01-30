@@ -74,6 +74,7 @@
 /* Begin PBXBuildFile section */
 		11207C730C2F4A4E002A0FF0 /* ComponentInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */; };
 		112E0C820A6436BA00DB4C29 /* FFusionCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F560DF0003D61D0101ABA332 /* FFusionCodec.c */; };
+		113077FF0D50139500ECDECC /* ECQTComponent.m in Sources */ = {isa = PBXBuildFile; fileRef = 113077FD0D50139500ECDECC /* ECQTComponent.m */; };
 		113F589A0A6B091600509987 /* Codecprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 113F58990A6B091600509987 /* Codecprintf.c */; };
 		11629EE10B51E482006591C8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629EE00B51E482006591C8 /* main.m */; };
 		11629EEB0B51E4F1006591C8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
@@ -439,6 +440,8 @@
 		02CA1BD20513A38D00D00256 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; name = ComponentInfo.plist; path = Plists/ComponentInfo.plist; sourceTree = "<group>"; };
+		113077FD0D50139500ECDECC /* ECQTComponent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ECQTComponent.m; sourceTree = "<group>"; };
+		113077FE0D50139500ECDECC /* ECQTComponent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ECQTComponent.h; sourceTree = "<group>"; };
 		113F58980A6B091600509987 /* Codecprintf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Codecprintf.h; sourceTree = "<group>"; };
 		113F58990A6B091600509987 /* Codecprintf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Codecprintf.c; sourceTree = "<group>"; };
 		1156DBD80A3CE9F500963B0E /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
@@ -1114,6 +1117,8 @@
 		83D1D6DF0B4C81E000E09EC9 /* PrefPane */ = {
 			isa = PBXGroup;
 			children = (
+				113077FD0D50139500ECDECC /* ECQTComponent.m */,
+				113077FE0D50139500ECDECC /* ECQTComponent.h */,
 				83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */,
 				83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */,
 				F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */,
@@ -1691,6 +1696,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				83D1D6E20B4C81F200E09EC9 /* CPFPerianPrefPaneController.m in Sources */,
+				113077FF0D50139500ECDECC /* ECQTComponent.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
