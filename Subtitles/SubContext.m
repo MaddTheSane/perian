@@ -51,14 +51,14 @@ UInt8 SSA2ASSAlignment(UInt8 a)
 void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 {
 	switch (a) {
-		case 1 ... 3: *alignV = kSubAlignmentBottom; break;
+		default: case 1 ... 3: *alignV = kSubAlignmentBottom; break;
 		case 4 ... 6: *alignV = kSubAlignmentMiddle; break;
 		case 7 ... 9: *alignV = kSubAlignmentTop; break;
 	}
 	
 	switch (a) {
 		case 1: case 4: case 7: *alignH = kSubAlignmentLeft; break;
-		case 2: case 5: case 8: *alignH = kSubAlignmentCenter; break;
+		default: case 2: case 5: case 8: *alignH = kSubAlignmentCenter; break;
 		case 3: case 6: case 9: *alignH = kSubAlignmentRight; break;
 	}
 }
