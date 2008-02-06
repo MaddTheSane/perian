@@ -829,8 +829,8 @@ int ffusionIsParsedVideoDecodable(FFusionParserContext *parser)
 		H264ParserContext *h264parser = parser->internalContext;
 		
 		// don't try to decode interlaced or 4:2:2 H.264
-		return (!h264parser->frame_mbs_only_flag) && (h264parser->chroma_format_idc <= 1);
+		return (h264parser->frame_mbs_only_flag == 1) && (h264parser->chroma_format_idc <= 1);
 	}
 	
-	return 0;
+	return 1;
 }

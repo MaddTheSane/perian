@@ -690,7 +690,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		
 		// XXX: at the moment ffmpeg can't handle interlaced H.264 right
 		// specifically PAFF + spatial prediction
-		if (codecID == CODEC_ID_H264 && ffusionIsParsedVideoDecodable(glob->begin.parser))
+		if (codecID == CODEC_ID_H264 && !ffusionIsParsedVideoDecodable(glob->begin.parser))
 			err = featureUnsupported;
 		
 		// some hooks into ffmpeg's buffer allocation to get frames in 
