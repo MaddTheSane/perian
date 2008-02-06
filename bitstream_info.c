@@ -735,7 +735,7 @@ void freeFFusionParser(FFusionParserContext *parser)
 	if(parser->avctx)
 		av_free(parser->avctx);
 	if(parser->internalContext)
-		free(parser->internalContext);
+		av_free(parser->internalContext);
 	free(parser);
 }
 
@@ -786,7 +786,7 @@ found:
 	parserContext->pc = s;
 	parserContext->parserStructure = ffParser;
 	if(ffParser->internalContextSize)
-		parserContext->internalContext = malloc(ffParser->internalContextSize);
+		parserContext->internalContext = av_mallocz(ffParser->internalContextSize);
 	else
 		parserContext->internalContext = NULL;
 	if(ffParser->init)
