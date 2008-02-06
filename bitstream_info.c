@@ -249,6 +249,8 @@ typedef struct H264ParserContext_s
 	int offset_for_non_ref_pic;
 	int num_ref_frames_in_pic_order_cnt_cycle;
 	int sum_of_offset_for_ref_frames;
+	
+	int chroma_format_idc;
 }H264ParserContext;
 
 static int decode_nal(const uint8_t *buf, int buf_size, uint8_t *out_buf, int *out_buf_size, int *type, int *nal_ref_idc)
@@ -330,8 +332,9 @@ static void decode_sps(H264ParserContext *context, const uint8_t *buf, int buf_s
 	get_ue_golomb(gb);	//seq_parameter_set_id
 	if(profile_idc >= 100)
 	{
+		context->chroma_format_idc = get_ue_golomb(gb);
 		//high profile
-		if(get_ue_golomb(gb) == 3)	//chroma_format_idc
+		if(context->chroma_format_idc == 3)	//chroma_format_idc
 			get_bits1(gb);			//residual_color_transfrom_flag
 		get_ue_golomb(gb);			//bit_depth_luma_minus8
 		get_ue_golomb(gb);			//bit_depth_chroma_minus8
@@ -820,11 +823,13 @@ int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size,
 	return 0;
 }
 
-int ffusionIsParsedVideoInterlaced(FFusionParserContext *parser)
+int ffusionIsParsedVideoDecodable(FFusionParserContext *parser)
 {
 	if (parser->parserStructure == &ffusionH264Parser) {
 		H264ParserContext *h264parser = parser->internalContext;
-		return !h264parser->frame_mbs_only_flag;
+		
+		// don't try to decode interlaced or 4:2:2 H.264
+		return (!h264parser->frame_mbs_only_flag) && (h264parser->chroma_format_idc <= 1);
 	}
 	
 	return 0;
