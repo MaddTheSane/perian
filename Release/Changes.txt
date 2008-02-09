@@ -2,8 +2,8 @@
 - Major performance improvements
 - TrueAudio, MP1, and DTS audio support
 - Slice-based multithreaded decoding for MPEG-1/2/H.264
-- Better support for interlaced H.264
-- Compatibility fixes for QuickTime 7.2 and Leopard
+- Apple H.264 now handles AVCHD/interlaced video
+- Compatibility fixes for QuickTime 7.4 and Leopard
 - Objective-C GC compatibility
 - Fixed a crash in Toast
 - Better subtitle rendering

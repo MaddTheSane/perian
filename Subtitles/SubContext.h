@@ -29,7 +29,7 @@ typedef ATSURGBAlphaColor SubRGBAColor;
 	unsigned marginL, marginR, marginV;
 	BOOL bold, italic, underline, strikeout;
 	UInt8 alignH, alignV, borderStyle;
-	void* ex;
+	__strong void* ex;
 	Float32 platformSizeScale;
 	SubRenderer *delegate;
 }

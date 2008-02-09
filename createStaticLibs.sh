@@ -54,6 +54,12 @@ else
     exit 0
 fi
 
+if [ -e ffmpeg/patched ] ; then
+	(cd ffmpeg && svn revert -R . && rm patched)
+fi
+
+(cd ffmpeg; patch -p1 < ../Patches/ffmpeg.diff)
+
 if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
     echo "Static ffmpeg libs are up-to-date ; not rebuilding"
 else

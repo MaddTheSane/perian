@@ -20,7 +20,7 @@
 *
 ****************************************************************************/
 
-#define kChristophManufacturer 'Rafz'
+#define kChristophManufacturer 'Peri'
 
 #define thng_RezTemplateVersion 2
 

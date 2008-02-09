@@ -1,0 +1,5 @@
+diff -ruN ffmpeg/patched ffmpeg-/patched
+--- ffmpeg/patched	1969-12-31 19:00:00.000000000 -0500
++++ ffmpeg-/patched	2008-02-09 14:41:01.000000000 -0500
+@@ -0,0 +1 @@
++

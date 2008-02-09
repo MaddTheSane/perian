@@ -11,6 +11,12 @@
 
 #include <QuickTime/QuickTime.h>
 
+#ifndef __OBJC_GC__
+#ifndef __strong
+#define __strong
+#endif
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -18,6 +24,7 @@ extern "C"
 
 short GetFilenameLanguage(CFStringRef filename);
 ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie);
+ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType dataRefType, Movie theMovie);
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox);
 
 #ifdef __OBJC__
@@ -56,7 +63,7 @@ extern void SubLoadSRTFromPath(NSString *path, SubContext **meta, SubSerializer 
 
 class CXXSubSerializer
 {
-	void *priv;
+	__strong void *priv;
 	
 public:
 	CXXSubSerializer();
@@ -72,7 +79,7 @@ public:
 
 class CXXAutoreleasePool
 {
-	void *pool;
+	__strong void *pool;
 public:
 	CXXAutoreleasePool();
 	~CXXAutoreleasePool();

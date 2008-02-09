@@ -261,6 +261,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	[context release];
 	free(ubuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
+	ATSUDisposeTextLayout(layout);
 	[super dealloc];
 }
 
@@ -268,6 +269,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 {
 	free(ubuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
+	ATSUDisposeTextLayout(layout);
 	[super finalize];
 }
 
@@ -348,7 +350,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
 	return style;
 }
 
--(void)releaseStyleEx:(void*)ex
+-(void)releaseStyleExtra:(void*)ex
 {
 	ATSUDisposeStyle(ex);
 }
@@ -540,7 +542,7 @@ static void ExpandCGRect(CGRect *rect, float radius)
 	rect->size.width += radius*2.;
 }
 
-static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
+static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed extraHeight, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
 {
 	ATSTrapezoid trap = {0};
 	ItemCount trapCount;
@@ -554,7 +556,7 @@ static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArray
 		
 		ATSUGetGlyphBounds(layout, 0, baseY, breaks[i], end-breaks[i], kATSUseDeviceOrigins, 1, &trap, &trapCount);
 
-		baseY += GetLineHeight(layout, breaks[i]);
+		baseY += GetLineHeight(layout, breaks[i]) + extraHeight;
 		
 		rect.bottom = MAX(trap.lowerLeft.y, trap.lowerRight.y);
 		rect.left = MIN(trap.lowerLeft.x, trap.upperLeft.x);
@@ -574,6 +576,37 @@ static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArray
 	*height = largeRect.bottom - largeRect.top;
 	*width = largeRect.right - largeRect.left;
 }
+
+#if 0
+static void GetImageBoundingBoxForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed extraHeight, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
+{
+	Rect largeRect = {0};
+	ATSUTextMeasurement baseY = 0;
+	int i;
+	
+	for (i = breakCount; i >= 0; i--) {
+		UniCharArrayOffset end = breaks[i+1];
+		Rect rect;
+		
+		ATSUMeasureTextImage(layout, breaks[i], end-breaks[i], 0, baseY, &rect);
+		
+		baseY += GetLineHeight(layout, breaks[i]) + extraHeight;
+		
+		if (i == breakCount) largeRect = rect;
+		
+		largeRect.bottom = MAX(largeRect.bottom, rect.bottom);
+		largeRect.left = MIN(largeRect.left, rect.left);
+		largeRect.top = MIN(largeRect.top, rect.top);
+		largeRect.right = MAX(largeRect.right, rect.right);
+			}
+	
+	
+	if (lX) *lX = IntToFixed(largeRect.left);
+	if (lY) *lY = IntToFixed(largeRect.bottom);
+	*height = IntToFixed(largeRect.bottom - largeRect.top);
+	*width = IntToFixed(largeRect.right - largeRect.left);
+}
+#endif
 
 enum {fillc, strokec};
 
@@ -805,7 +838,7 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 	if (textType == kTextLayerOutline && div->styleLine->borderStyle == kSubBorderStyleBox) {
 		ATSUTextMeasurement lineWidth, lineHeight, lineX, lineY;
 		UniCharArrayOffset breaks[2] = {thisBreak, thisBreak + lineLen};
-		GetTypographicRectangleForLayout(layout, breaks, 0, &lineX, &lineY, &lineHeight, &lineWidth);
+		GetTypographicRectangleForLayout(layout, breaks, 0, FloatToFixed(spanEx->outlineRadius), &lineX, &lineY, &lineHeight, &lineWidth);
 		
 		CGRect borderRect = CGRectMake(FixedToFloat(lineX + penX), FixedToFloat(penY - lineY), FixedToFloat(lineWidth), FixedToFloat(lineHeight));
 		
@@ -866,6 +899,7 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 				RenderActualLine(layout, drawStart, drawLen, (textType == kTextLayerShadow) ? (penX + FloatToFixed(spanEx->shadowDist)) : penX, 
 														 (textType == kTextLayerShadow) ? (penY - FloatToFixed(spanEx->shadowDist)) : penY, c, div, spanEx, textType);
 				extraHeight = MAX(extraHeight, spanEx->outlineRadius);
+				lastSpanEx = spanEx;
 			}
 		
 		}
@@ -953,7 +987,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		UniCharArrayOffset *breaks = FindLineBreaks(layout, div, breakLocator, &breakCount, breakingWidth, ubuffer, textLen);
 		ATSUTextMeasurement imageWidth, imageHeight;
 
-		if (div->posX != -1 || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, NULL, NULL, &imageHeight, &imageWidth);
+		if (div->posX != -1 || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
 
 		if (div->posX == -1) {
 			penX = FloatToFixed(NSMinX(marginRect));
@@ -973,7 +1007,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 						penY = (FloatToFixed(NSMidY(marginRect)) / 2) + (imageHeight / 2);
 					} else penY = centerPen;
 					
-					storePen = &centerPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
+					storePen = &centerPen; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
 					break;
 				case kSubAlignmentTop:
 					if (!topPen || resetPens) {
@@ -983,7 +1017,8 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 					storePen = &topPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
 					break;
 			}
-		} else {						
+		} else {
+			ATSUTextMeasurement descent;
 			penX = FloatToFixed(div->posX * screenScaleX);
 			penY = FloatToFixed((context->resY - div->posY) * screenScaleY);
 			
@@ -992,11 +1027,15 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 				case kSubAlignmentRight: penX -= imageWidth;
 			}
 			
+			ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
+
 			switch (div->alignV) {
 				case kSubAlignmentMiddle: penY -= imageHeight / 2; break;
-				case kSubAlignmentTop: penY -= imageHeight;
+				case kSubAlignmentTop: penY -= imageHeight; break;
 			}
-						
+			
+			penY += descent;
+
 			SetLayoutPositioning(layout, imageWidth, div->alignH);
 			storePen = NULL; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
 		}
@@ -1022,33 +1061,43 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	[pool release];
 }
 
-extern SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int height)
+SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int height)
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO];
 
 	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoWidth:width videoHeight:height];
 	[hdr release];
+	CFRetain(s);
+	[pool release];
 	return s;
 }
 
-extern SubtitleRendererPtr SubInitNonSSA(int width, int height)
+SubtitleRendererPtr SubInitNonSSA(int width, int height)
 {
-	return [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
+	CFRetain(s);
+	[pool release];
+	return s;
 }
 
-extern CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s)
+CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s)
 {
 	return s->srgbCSpace;
 }
 
-extern void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
+void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
 {
 	[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
 }
 
-extern void SubDisposeRenderer(SubtitleRendererPtr s)
+void SubDisposeRenderer(SubtitleRendererPtr s)
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	CFRelease(s);
 	[s release];
+	[pool release];
 }
 @end
 

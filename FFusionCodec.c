@@ -40,6 +40,7 @@
 #include "bitstream_info.h"
 #include "FrameBuffer.h"
 #include "CommonUtils.h"
+#include "pthread.h"
 
 void inline swapFrame(AVFrame * *a, AVFrame * *b)
 {
@@ -163,6 +164,14 @@ extern CFMutableStringRef GetHomeDirectory();
 #include <QuickTime/ImageCodec.k.h>
 #include <QuickTime/ComponentDispatchHelper.c>
 
+void *launchUpdateChecker(void *args)
+{
+	FSRef *ref = (FSRef *)args;
+    LSOpenFSRef(ref, NULL);
+	free(ref);
+	return NULL;
+}
+
 void FFusionRunUpdateCheck()
 {
     CFDateRef lastRunDate = CFPreferencesCopyAppValue(CFSTR("NextRunDate"), CFSTR("org.perian.Perian"));
@@ -180,11 +189,11 @@ void FFusionRunUpdateCheck()
     CFStringAppend(location, CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app"));
     
     char fileRep[1024];
-    FSRef updateCheckRef;
+    FSRef *updateCheckRef = malloc(sizeof(FSRef));
     Boolean doCheck = FALSE;
     
     if(CFStringGetFileSystemRepresentation(location, fileRep, 1024))
-        if(FSPathMakeRef((UInt8 *)fileRep, &updateCheckRef, NULL) == noErr)
+        if(FSPathMakeRef((UInt8 *)fileRep, updateCheckRef, NULL) == noErr)
             doCheck = TRUE;
     
     CFRelease(location);
@@ -192,11 +201,11 @@ void FFusionRunUpdateCheck()
     {
         CFStringRef absLocation = CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app");
         if(CFStringGetFileSystemRepresentation(absLocation, fileRep, 1024))
-            if(FSPathMakeRef((UInt8 *)fileRep, &updateCheckRef, NULL) != noErr)
+            if(FSPathMakeRef((UInt8 *)fileRep, updateCheckRef, NULL) != noErr)
                 return;  //We have failed
     }
-    
-    LSOpenFSRef(&updateCheckRef, NULL);    
+	pthread_t thread;
+	pthread_create(&thread, NULL, launchUpdateChecker, updateCheckRef);
 }
 
 //---------------------------------------------------------------------------
@@ -289,6 +298,10 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         {
             Codecprintf(glob->fileLog, "Error opening the base image decompressor! Exiting.\n");
         }
+		
+		// we allocate some space for copying the frame data since we need some padding at the end
+		// for ffmpeg's optimized bitstream readers. Size doesn't really matter, it'll grow if need be
+		FFusionDataSetup(&(glob->data), 256, 64*1024);
         FFusionRunUpdateCheck();
     }
     
@@ -314,17 +327,13 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         {
             DisposeImageCodecMPDrawBandUPP(glob->drawBandUPP);
         }
-        
-        if (glob->avCodec)
-        {
-            avcodec_close(glob->avContext);
-        }
 				
         if (glob->avContext)
         {
 			if (glob->avContext->extradata)
 				free(glob->avContext->extradata);
 						
+			if (glob->avContext->codec) avcodec_close(glob->avContext);
             av_free(glob->avContext);
         }
 		
@@ -343,6 +352,7 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
 		if(glob->fileLog)
 			fclose(glob->fileLog);
 		
+        memset(glob, 0, sizeof(FFusionGlobalsRecord));
         DisposePtr((Ptr)glob);
     }
 	
@@ -452,6 +462,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     CodecCapabilities *capabilities = p->capabilities;
 	long count = 0;
 	Handle imgDescExt;
+	OSErr err = noErr;
 	
     // We first open libavcodec library and the codec corresponding
     // to the fourCC if it has not been done before
@@ -677,6 +688,11 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		if(glob->avContext->extradata_size != 0 && glob->begin.parser != NULL)
 			ffusionParseExtraData(glob->begin.parser, glob->avContext->extradata, glob->avContext->extradata_size);
 		
+		// XXX: at the moment ffmpeg can't handle interlaced H.264 right
+		// specifically PAFF + spatial prediction
+		if (glob->componentType == 'avc1' && !ffusionIsParsedVideoDecodable(glob->begin.parser))
+			err = featureUnsupported;
+		
 		// some hooks into ffmpeg's buffer allocation to get frames in 
 		// decode order without delay more easily
 		glob->avContext->opaque = glob;
@@ -692,12 +708,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         {
             Codecprintf(glob->fileLog, "Error opening avcodec!\n");
             
-            return -2;
+			err = paramErr;
         }
 		
-		// we allocate some space for copying the frame data since we need some padding at the end
-		// for ffmpeg's optimized bitstream readers. Size doesn't really matter, it'll grow if need be
-		FFusionDataSetup(&(glob->data), 256, 64*1024);
     }
     
     // Specify the minimum image band height supported by the component
@@ -735,6 +748,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
     index = 0;
 	
+	if (!err) {
 	switch (glob->avContext->pix_fmt)
 	{
 		case PIX_FMT_BGR24:
@@ -755,6 +769,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			}
 			break;
 	}
+	}
     
     pos[index++] = 0;
     HUnlock(glob->pixelTypes);
@@ -770,8 +785,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
 	capabilities->flags |= codecCanAsync | codecCanAsyncWhen;
 	
-    
-    return noErr;
+    return err;
 }
 
 static int qtTypeForFrameInfo(int original, int fftype, int skippable)
@@ -832,6 +846,11 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	myDrp->decoded = p->frameTime ? (0 != (p->frameTime->flags & icmFrameAlreadyDecoded)) : false;
 	myDrp->frameData = NULL;
 	myDrp->buffer = NULL;
+	
+	if (!glob->avContext) {
+		fprintf(stderr, "Perian Codec: QT tried to call BeginBand without preflighting!\n");
+		return internalComponentErr;
+	}
 	
 	if(myDrp->decoded)
 	{

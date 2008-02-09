@@ -69,7 +69,7 @@ static const LanguageTriplet ISO_QTLanguages[] = {
 	{ "gu", "guj", langGujarati },
 	{ "he", "heb", langHebrew },
 	{ "hi", "hin", langHindi },
-	{ "",   "hmn", langHungarian },
+	{ "hu", "hun", langHungarian },
 	{ "is", "ice", langIcelandic },
 	{ "is", "isl", langIcelandic },
 	{ "id", "ind", langIndonesian },

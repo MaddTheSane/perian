@@ -314,6 +314,7 @@ inLoopError:
 	SetMediaLanguage(theMedia, GetFilenameLanguage(filename));
 	
 bail:
+	[ss release];
 	[pool release];
 	
 	if (err) {
@@ -440,6 +441,22 @@ bail:
 		CFRelease(cfFilename);
 	
 	return err;
+}
+
+ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType dataRefType, Movie theMovie)
+{
+	if (dataRefType != AliasDataHandlerSubType) return noErr;
+	
+	CFStringRef cfPath;
+	FSRef ref;
+	uint8_t path[PATH_MAX];
+	
+	QTGetDataReferenceFullPathCFString(dataRef, dataRefType, kQTPOSIXPathStyle, &cfPath);
+	CFStringGetCString(cfPath, (char*)path, PATH_MAX, kCFStringEncodingUTF8);
+	FSPathMakeRef(path, &ref, NULL);
+	CFRelease(cfPath);
+	
+	return LoadExternalSubtitles(&ref, theMovie);
 }
 
 #pragma mark Obj-C Classes

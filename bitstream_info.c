@@ -11,6 +11,7 @@
 
 #include <AudioToolbox/AudioToolbox.h>
 #include <QuickTime/QuickTime.h>
+#include "CodecIDs.h"
 
 #import "ac3tab.h"
 //ffmpeg's struct Picture conflicts with QuickDraw's
@@ -127,7 +128,7 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	/* Setup the AudioStreamBasicDescription and AudioChannelLayout */
 	memset(asbd, 0, sizeof(AudioStreamBasicDescription));
 	asbd->mSampleRate = sample_rate >> shift;
-	asbd->mFormatID = kAudioFormatAC3;
+	asbd->mFormatID = kAudioFormatAC3MS;
 	asbd->mFramesPerPacket = 1;
 	asbd->mChannelsPerFrame = nfchans_tbl[acmod] + lfe;
 	
@@ -248,6 +249,8 @@ typedef struct H264ParserContext_s
 	int offset_for_non_ref_pic;
 	int num_ref_frames_in_pic_order_cnt_cycle;
 	int sum_of_offset_for_ref_frames;
+	
+	int chroma_format_idc;
 }H264ParserContext;
 
 static int decode_nal(const uint8_t *buf, int buf_size, uint8_t *out_buf, int *out_buf_size, int *type, int *nal_ref_idc)
@@ -329,8 +332,9 @@ static void decode_sps(H264ParserContext *context, const uint8_t *buf, int buf_s
 	get_ue_golomb(gb);	//seq_parameter_set_id
 	if(profile_idc >= 100)
 	{
+		context->chroma_format_idc = get_ue_golomb(gb);
 		//high profile
-		if(get_ue_golomb(gb) == 3)	//chroma_format_idc
+		if(context->chroma_format_idc == 3)	//chroma_format_idc
 			get_bits1(gb);			//residual_color_transfrom_flag
 		get_ue_golomb(gb);			//bit_depth_luma_minus8
 		get_ue_golomb(gb);			//bit_depth_chroma_minus8
@@ -352,12 +356,12 @@ static void decode_sps(H264ParserContext *context, const uint8_t *buf, int buf_s
 		context->sum_of_offset_for_ref_frames = 0;
 		for(i=0; i<context->num_ref_frames_in_pic_order_cnt_cycle; i++)
 			context->sum_of_offset_for_ref_frames += get_se_golomb(gb); //offset_for_ref_frame[i]
-		get_ue_golomb(gb);	//num_ref_frames
-		get_bits1(gb);		//gaps_in_frame_num_value_allowed_flag
-		get_ue_golomb(gb);	//pic_width_in_mbs_minus1
-		get_ue_golomb(gb);	//pic_height_in_map_units_minus1
-		context->frame_mbs_only_flag = get_bits1(gb);
 	}
+	get_ue_golomb(gb);	//num_ref_frames
+	get_bits1(gb);		//gaps_in_frame_num_value_allowed_flag
+	get_ue_golomb(gb);	//pic_width_in_mbs_minus1
+	get_ue_golomb(gb);	//pic_height_in_map_units_minus1
+	context->frame_mbs_only_flag = get_bits1(gb);
 }
 
 static void decode_pps(H264ParserContext *context, const uint8_t *buf, int buf_size)
@@ -524,7 +528,7 @@ static int inline decode_nals(H264ParserContext *context, const uint8_t *buf, in
 			}
 			start_offset = buf_index + 1;
 			//do start code prefix search
-			for(; buf_index < buf_size; buf_index++)
+			for(buf_index++; buf_index < buf_size; buf_index++)
 			{
 				if(buf[buf_index] == 0)
 				{
@@ -731,7 +735,7 @@ void freeFFusionParser(FFusionParserContext *parser)
 	if(parser->avctx)
 		av_free(parser->avctx);
 	if(parser->internalContext)
-		free(parser->internalContext);
+		av_free(parser->internalContext);
 	free(parser);
 }
 
@@ -782,7 +786,7 @@ found:
 	parserContext->pc = s;
 	parserContext->parserStructure = ffParser;
 	if(ffParser->internalContextSize)
-		parserContext->internalContext = malloc(ffParser->internalContextSize);
+		parserContext->internalContext = av_mallocz(ffParser->internalContextSize);
 	else
 		parserContext->internalContext = NULL;
 	if(ffParser->init)
@@ -817,4 +821,16 @@ int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size,
 	if(parser->parserStructure->parser_parse)
 		return (parser->parserStructure->parser_parse)(parser, buf, buf_size, out_buf_size, type, skippable);
 	return 0;
+}
+
+int ffusionIsParsedVideoDecodable(FFusionParserContext *parser)
+{
+	if (parser->parserStructure == &ffusionH264Parser) {
+		H264ParserContext *h264parser = parser->internalContext;
+		
+		// don't try to decode interlaced or 4:2:2 H.264
+		return (h264parser->frame_mbs_only_flag == 1) && (h264parser->chroma_format_idc <= 1);
+	}
+	
+	return 1;
 }

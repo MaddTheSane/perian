@@ -321,8 +321,11 @@ OSType get_avi_strf_fourcc(ByteIOContext *pb)
 			return get_be32(pb);
 		} else if (tag == 'strh'){
 			// 4-byte offset to the fourcc
-			url_fskip(pb, 4);
-			return get_be32(pb);
+			OSType tag1 = get_be32(pb);
+			if(tag1 == 'iavs' || tag1 == 'ivas')
+				return get_be32(pb);
+			else
+				url_fskip(pb, size + (size & 1) - 4);
 		} else
 			url_fskip(pb, size + (size & 1));
 	}
@@ -335,7 +338,7 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	DataHandler dataHandler = NULL;
 	uint8_t buf[PROBE_BUF_SIZE];
 	AVProbeData *pd = (AVProbeData *)malloc(sizeof(AVProbeData));
-	ByteIOContext byteContext;
+	ByteIOContext *byteContext;
 
 	/* default */
 	*valid = 0;
@@ -360,17 +363,16 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 		AVI importer handle AVIs with these two video types */
 		if (IS_AVI(storage->componentType)) {
 			/* Prepare the iocontext structure */
-			memset(&byteContext, 0, sizeof(byteContext));
 			result = url_open_dataref(&byteContext, dataRef, dataRefType, NULL, NULL, NULL);
 			require_noerr(result, bail);
 			
-			OSType fourcc = get_avi_strf_fourcc(&byteContext);
+			OSType fourcc = get_avi_strf_fourcc(byteContext);
 			enum CodecID id = codec_get_id(codec_bmp_tags, BSWAP(fourcc));
 			
-			if (id == CODEC_ID_MJPEG || id == CODEC_ID_DVVIDEO || id == CODEC_ID_RAWVIDEO || id == CODEC_ID_NONE)
+			if (id == CODEC_ID_MJPEG || id == CODEC_ID_DVVIDEO || id == CODEC_ID_RAWVIDEO || id == CODEC_ID_NONE || id == CODEC_ID_MSVIDEO1)
 				*valid = 0;
 			
-			url_fclose(&byteContext);
+			url_fclose(byteContext);
 		}
 	}
 		
@@ -402,9 +404,7 @@ ComponentResult FFAvi_MovieImportFile(ff_global_ptr storage, const FSSpec *theFi
 	
 	result = FSpMakeFSRef(theFile, &theFileFSRef);
 	require_noerr(result, bail);
-	
-	LoadExternalSubtitles(&theFileFSRef, theMovie);
-	
+		
 bail:
 		if(dataRef)
 			DisposeHandle(dataRef);
@@ -416,7 +416,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 										 Track *usedTrack, TimeValue atTime, TimeValue *addedDuration, long inFlags, long *outFlags)
 {
 	ComponentResult result = noErr;
-	ByteIOContext byteContext;
+	ByteIOContext *byteContext;
 	AVFormatContext *ic = NULL;
 	AVFormatParameters params;
 	OSType mediaType;
@@ -431,16 +431,15 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	FFAvi_MovieImportValidateDataRef(storage, dataRef, dataRefType, &valid);
 	if(valid != 255)
 		goto bail;
-		
+			
 	/* Prepare the iocontext structure */
-	memset(&byteContext, 0, sizeof(byteContext));
 	result = url_open_dataref(&byteContext, dataRef, dataRefType, &storage->dataHandler, &storage->dataHandlerSupportsWideOffsets, &storage->dataSize);
 	storage->isStreamed = dataRefType == URLDataHandlerSubType;
 	require_noerr(result, bail);
 	
 	/* Open the Format Context */
 	memset(&params, 0, sizeof(params));
-	result = av_open_input_stream(&ic, &byteContext, "", storage->format, &params);
+	result = av_open_input_stream(&ic, byteContext, "", storage->format, &params);
 	require_noerr(result,bail);
 	storage->format_context = ic;
 	
@@ -546,12 +545,14 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		import_with_idle(storage, inFlags, outFlags, 0, 0, true);			
 	}
 	
+	LoadExternalSubtitlesFromFileDataRef(dataRef, dataRefType, theMovie);
+
 bail:
 	if(result == noErr)
 		storage->movieLoadState == kMovieLoadStateLoaded;
 	else
 		storage->movieLoadState == kMovieLoadStateError;
-	
+		
 	return result;
 } /* FFAvi_MovieImportDataRef */
 

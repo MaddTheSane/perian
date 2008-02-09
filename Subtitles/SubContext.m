@@ -51,14 +51,14 @@ UInt8 SSA2ASSAlignment(UInt8 a)
 void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 {
 	switch (a) {
-		case 1 ... 3: *alignV = kSubAlignmentBottom; break;
+		default: case 1 ... 3: *alignV = kSubAlignmentBottom; break;
 		case 4 ... 6: *alignV = kSubAlignmentMiddle; break;
 		case 7 ... 9: *alignV = kSubAlignmentTop; break;
 	}
 	
 	switch (a) {
 		case 1: case 4: case 7: *alignH = kSubAlignmentLeft; break;
-		case 2: case 5: case 8: *alignH = kSubAlignmentCenter; break;
+		default: case 2: case 5: case 8: *alignH = kSubAlignmentCenter; break;
 		case 3: case 6: case 9: *alignH = kSubAlignmentRight; break;
 	}
 }
@@ -83,7 +83,7 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 	sty->italic = sty->underline = sty->strikeout = NO;
 	sty->alignH = kSubAlignmentCenter;
 	sty->alignV = kSubAlignmentBottom;
-	sty->borderStyle = 0;
+	sty->borderStyle = kSubBorderStyleNormal;
 	sty->ex = [delegate completedStyleParsing:sty];
 	sty->delegate = delegate;
 	return sty;
@@ -95,7 +95,7 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 		NSString *tmp;
 		delegate = delegate_;
 				
-#define sv(fn, n) fn = [s objectForKey: @""#n]
+#define sv(fn, n) fn = [[s objectForKey: @""#n] retain]
 #define fv(fn, n) fn = [[s objectForKey:@""#n] floatValue]
 #define iv(fn, n) fn = [[s objectForKey:@""#n] intValue]
 #define bv(fn, n) fn = [[s objectForKey:@""#n] intValue] != 0
@@ -174,7 +174,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 	if (resYS) resY = [resYS floatValue];
 	
 	// obscure res rules copied from VSFilter
-	if (!resXS && !resYS) {
+	if ((!resXS && !resYS) || (!resX && !resY)) {
 		resX = 384; resY = 288;
 	} else if (!resYS) {
 		resY = (resX == 1280) ? 1024 : (resX / (4./3.));
@@ -199,7 +199,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 			
 			for (i=0; i < nstyles; i++) {
 				NSDictionary *style = [styles_ objectAtIndex:i];
-				[sdict setObject:[[SubStyle alloc] initWithDictionary:style scriptVersion:scriptType delegate:delegate]
+				[sdict setObject:[[[SubStyle alloc] initWithDictionary:style scriptVersion:scriptType delegate:delegate] autorelease]
 												forKey:[style objectForKey:@"Name"]];
 			}
 			

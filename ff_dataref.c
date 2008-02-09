@@ -198,7 +198,7 @@ URLProtocol dataref_protocol = {
 };
 
 /* This is the public function to open bytecontext withs datarefs */
-OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType, DataHandler *dataHandler, Boolean *wideSupport, int64_t *dataSize)
+OSStatus url_open_dataref(ByteIOContext **pb, Handle dataRef, OSType dataRefType, DataHandler *dataHandler, Boolean *wideSupport, int64_t *dataSize)
 {
 	URLContext *uc;
 	URLProtocol *up;
@@ -216,7 +216,7 @@ OSStatus url_open_dataref(ByteIOContext *pb, Handle dataRef, OSType dataRefType,
 		err = -ENOMEM;
 		return err;
 	}
-	uc->filename[0] = '\0';
+	uc->filename = NULL;
 	uc->prot = up;
 	uc->flags = URL_RDONLY; // we're just using the read access...
 	uc->is_streamed = 0; // not streamed...

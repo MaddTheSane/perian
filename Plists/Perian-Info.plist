@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Perian</string>
 	<key>CFBundleGetInfoString</key>
-	<string>1.0.9999 (SVNREVISION ffmpeg: FFMPEGREVISION), Copyright 2007 The Perian Team</string>
+	<string>1.1 (SVNREVISION ffmpeg: FFMPEGREVISION), Copyright 2007 The Perian Team</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.perian.Perian</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -15,11 +15,11 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.9999</string>
+	<string>1.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.9999</string>
+	<string>1.1</string>
 	<key>CSResourcesFileMapped</key>
 	<string>yes</string>
 </dict>

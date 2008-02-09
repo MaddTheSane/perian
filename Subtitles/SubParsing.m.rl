@@ -47,7 +47,7 @@
 -(NSString*)description
 {
 	int i, sc = [spans count];
-	NSMutableString *tmp = [NSMutableString stringWithFormat:@"div %d spans:",sc];
+	NSMutableString *tmp = [NSMutableString stringWithFormat:@"div \"%@\" with %d spans:", text, sc];
 	for (i = 0; i < sc; i++) {[tmp appendFormat:@" %d",((SubRenderSpan*)[spans objectAtIndex:i])->offset];}
 	[tmp appendFormat:@" %d", [text length]];
 	return tmp;

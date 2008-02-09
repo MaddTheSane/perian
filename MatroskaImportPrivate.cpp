@@ -656,9 +656,10 @@ ComponentResult MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 	Media chapterMedia = NewTrackMedia(chapterTrack, TextMediaType, GetMovieTimeScale(theMovie), 
 									   dataRef, HandleDataHandlerSubType);
 	if (chapterMedia == NULL) {
-		Codecprintf(NULL, "MKV: Error creating chapter media %d\n", GetMoviesError());
+		OSErr err = GetMoviesError();
+		Codecprintf(NULL, "MKV: Error creating chapter media %d\n", err);
 		DisposeMovieTrack(chapterTrack);
-		return GetMoviesError();
+		return err;
 	}
 	
 	// Name the chapter track "Chapters" for easy distinguishing
@@ -965,10 +966,13 @@ void MatroskaTrack::ParseFirstBlock(KaxInternalBlock &block)
 	AudioChannelLayout acl = {0};
 	bool replaceSoundDesc = false;
 	
-	switch ((*desc)->dataFormat) {
-		case kAudioFormatAC3:
-			replaceSoundDesc = parse_ac3_bitstream(&asbd, &acl, block.GetBuffer(0).Buffer(), block.GetFrameSize(0));
-			break;
+	if (desc) {
+		switch ((*desc)->dataFormat) {
+			case kAudioFormatAC3:
+			case kAudioFormatAC3MS:
+				replaceSoundDesc = parse_ac3_bitstream(&asbd, &acl, block.GetBuffer(0).Buffer(), block.GetFrameSize(0));
+				break;
+		}
 	}
 	
 	if (replaceSoundDesc) {

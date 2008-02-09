@@ -115,10 +115,7 @@ ComponentResult MatroskaImportFile(MatroskaImport *store, const FSSpec *theFile,
 	
 	err = store->ImportDataRef((Handle)alias, rAliasType, theMovie, targetTrack,
 							   usedTrack, atTime, durationAdded, inFlags, outFlags);
-	if (err) goto bail;
-	
-	LoadExternalSubtitles(&theFileFSRef, theMovie);
-	
+		
 bail:
 	if (alias)
 		DisposeHandle((Handle)alias);
@@ -130,8 +127,11 @@ bail:
 ComponentResult MatroskaImportDataRef(MatroskaImport *store, Handle dataRef, OSType dataRefType, Movie theMovie, Track targetTrack,
 									  Track *usedTrack, TimeValue atTime, TimeValue *durationAdded, long inFlags, long *outFlags)
 {
-	return store->ImportDataRef(dataRef, dataRefType, theMovie, targetTrack,
+	ComponentResult res = store->ImportDataRef(dataRef, dataRefType, theMovie, targetTrack,
 								usedTrack, atTime, durationAdded, inFlags, outFlags);
+	
+	LoadExternalSubtitlesFromFileDataRef(dataRef, dataRefType, theMovie);
+	return res;
 }
 
 // MovieImportValidate
@@ -253,7 +253,7 @@ ComponentResult MatroskaImport::ImportDataRef(Handle dataRef, OSType dataRefType
 		if (!OpenFile())
 			// invalid file, validate should catch this
 			return invalidMovie;
-		
+				
 		err = SetupMovie();
 		if (err) return err;
 		
