@@ -1,6 +1,6 @@
-diff -ru ffmpeg/libavcodec/dsputil.c ffmpeg-/libavcodec/dsputil.c
---- ffmpeg/libavcodec/dsputil.c	2008-01-20 15:05:32.000000000 -0500
-+++ ffmpeg-/libavcodec/dsputil.c	2008-01-20 17:09:12.000000000 -0500
+diff -ruN ffmpeg/libavcodec/dsputil.c ffmpeg-/libavcodec/dsputil.c
+--- ffmpeg/libavcodec/dsputil.c	2008-02-15 15:13:00.000000000 -0500
++++ ffmpeg-/libavcodec/dsputil.c	2008-02-15 15:15:51.000000000 -0500
 @@ -1440,6 +1440,7 @@
      \
      assert(x<8 && y<8 && x>=0 && y>=0);\
@@ -91,9 +91,9 @@ diff -ru ffmpeg/libavcodec/dsputil.c ffmpeg-/libavcodec/dsputil.c
  }
  
  #define op_avg(a, b) a = (((a)+(((b) + 32)>>6)+1)>>1)
-diff -ru ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c ffmpeg-/libavcodec/i386/dsputil_h264_template_mmx.c
---- ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	2008-01-20 15:05:31.000000000 -0500
-+++ ffmpeg-/libavcodec/i386/dsputil_h264_template_mmx.c	2008-01-20 17:08:31.000000000 -0500
+diff -ruN ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c ffmpeg-/libavcodec/i386/dsputil_h264_template_mmx.c
+--- ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	2008-02-15 15:12:38.000000000 -0500
++++ ffmpeg-/libavcodec/i386/dsputil_h264_template_mmx.c	2008-02-15 15:15:51.000000000 -0500
 @@ -182,14 +182,26 @@
      }
  }
@@ -132,9 +132,9 @@ diff -ru ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c ffmpeg-/libavcodec/i
      );
  }
  
-diff -ru ffmpeg/libavcodec/i386/dsputil_mmx.c ffmpeg-/libavcodec/i386/dsputil_mmx.c
---- ffmpeg/libavcodec/i386/dsputil_mmx.c	2008-01-20 15:05:31.000000000 -0500
-+++ ffmpeg-/libavcodec/i386/dsputil_mmx.c	2008-01-20 17:03:15.000000000 -0500
+diff -ruN ffmpeg/libavcodec/i386/dsputil_mmx.c ffmpeg-/libavcodec/i386/dsputil_mmx.c
+--- ffmpeg/libavcodec/i386/dsputil_mmx.c	2008-02-15 15:12:38.000000000 -0500
++++ ffmpeg-/libavcodec/i386/dsputil_mmx.c	2008-02-15 15:15:51.000000000 -0500
 @@ -1918,7 +1918,7 @@
  
  #define QPEL_V_LOW(m3,m4,m5,m6, pw_20, pw_3, rnd, in0, in1, in2, in7, out, OP)\
@@ -385,9 +385,9 @@ diff -ru ffmpeg/libavcodec/i386/dsputil_mmx.c ffmpeg-/libavcodec/i386/dsputil_mm
          :"r"(w_data+n2), "r"(w_data+len-2-n2),\
           "r"(data+n2), "r"(data+len-2-n2)\
      );
-diff -ru ffmpeg/libavcodec/i386/h264dsp_mmx.c ffmpeg-/libavcodec/i386/h264dsp_mmx.c
---- ffmpeg/libavcodec/i386/h264dsp_mmx.c	2008-01-20 15:05:31.000000000 -0500
-+++ ffmpeg-/libavcodec/i386/h264dsp_mmx.c	2008-01-20 17:03:15.000000000 -0500
+diff -ruN ffmpeg/libavcodec/i386/h264dsp_mmx.c ffmpeg-/libavcodec/i386/h264dsp_mmx.c
+--- ffmpeg/libavcodec/i386/h264dsp_mmx.c	2008-02-15 15:12:38.000000000 -0500
++++ ffmpeg-/libavcodec/i386/h264dsp_mmx.c	2008-02-15 15:15:51.000000000 -0500
 @@ -341,21 +341,21 @@
  // in: mm0=p1 mm1=p0 mm2=q0 mm3=q1 mm7=(tc&mask)
  // out: mm1=p0' mm2=q0'
@@ -447,9 +447,9 @@ diff -ru ffmpeg/libavcodec/i386/h264dsp_mmx.c ffmpeg-/libavcodec/i386/h264dsp_mm
      );
  }
  
-diff -ru ffmpeg/libavcodec/i386/motion_est_mmx.c ffmpeg-/libavcodec/i386/motion_est_mmx.c
---- ffmpeg/libavcodec/i386/motion_est_mmx.c	2008-01-20 15:05:31.000000000 -0500
-+++ ffmpeg-/libavcodec/i386/motion_est_mmx.c	2008-01-20 17:03:15.000000000 -0500
+diff -ruN ffmpeg/libavcodec/i386/motion_est_mmx.c ffmpeg-/libavcodec/i386/motion_est_mmx.c
+--- ffmpeg/libavcodec/i386/motion_est_mmx.c	2008-02-15 15:12:38.000000000 -0500
++++ ffmpeg-/libavcodec/i386/motion_est_mmx.c	2008-02-15 15:15:51.000000000 -0500
 @@ -167,7 +167,7 @@
  static inline void sad8_4_mmx2(uint8_t *blk1, uint8_t *blk2, int stride, int h)
  {
@@ -486,9 +486,9 @@ diff -ru ffmpeg/libavcodec/i386/motion_est_mmx.c ffmpeg-/libavcodec/i386/motion_
      );
  }
  
-diff -ru ffmpeg/libavcodec/i386/simple_idct_mmx.c ffmpeg-/libavcodec/i386/simple_idct_mmx.c
---- ffmpeg/libavcodec/i386/simple_idct_mmx.c	2008-01-20 15:05:31.000000000 -0500
-+++ ffmpeg-/libavcodec/i386/simple_idct_mmx.c	2008-01-20 17:03:15.000000000 -0500
+diff -ruN ffmpeg/libavcodec/i386/simple_idct_mmx.c ffmpeg-/libavcodec/i386/simple_idct_mmx.c
+--- ffmpeg/libavcodec/i386/simple_idct_mmx.c	2008-02-15 15:12:38.000000000 -0500
++++ ffmpeg-/libavcodec/i386/simple_idct_mmx.c	2008-02-15 15:15:51.000000000 -0500
 @@ -363,7 +363,7 @@
          "movq " #src4 ", %%mm1          \n\t" /* R6     R2      r6      r2 */\
          "movq " #src1 ", %%mm2          \n\t" /* R3     R1      r3      r1 */\
@@ -534,3 +534,24 @@ diff -ru ffmpeg/libavcodec/i386/simple_idct_mmx.c ffmpeg-/libavcodec/i386/simple
                  : "%eax"
          );
  }
+diff -ruN ffmpeg/libavcodec/ppc/mpegvideo_altivec.c ffmpeg-/libavcodec/ppc/mpegvideo_altivec.c
+--- ffmpeg/libavcodec/ppc/mpegvideo_altivec.c	2008-02-15 15:12:50.000000000 -0500
++++ ffmpeg-/libavcodec/ppc/mpegvideo_altivec.c	2008-02-15 15:16:25.000000000 -0500
+@@ -610,7 +610,7 @@
+ {
+     if (s->avctx->lowres==0)
+     {
+-        if ((s->avctx->idct_algo == FF_IDCT_AUTO) ||
++        if ((mm_flags & MM_ALTIVEC && s->avctx->idct_algo == FF_IDCT_AUTO) ||
+                 (s->avctx->idct_algo == FF_IDCT_ALTIVEC))
+         {
+             s->dsp.idct_put = idct_put_altivec;
+@@ -636,7 +636,7 @@
+     }
+ 
+ 
+-    if ((s->avctx->dct_algo == FF_DCT_AUTO) ||
++    if ((mm_flags & MM_ALTIVEC && s->avctx->dct_algo == FF_DCT_AUTO) ||
+             (s->avctx->dct_algo == FF_DCT_ALTIVEC))
+     {
+ #if 0 /* seems to cause trouble under some circumstances */
