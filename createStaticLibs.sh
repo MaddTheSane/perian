@@ -6,7 +6,7 @@ if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 	MACOSX_DEPLOYMENT_TARGET="10.4"
 fi
 
-generalConfigureOptions="--disable-muxers --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook"
+generalConfigureOptions="--disable-muxers --disable-encoders --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3"
 sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -gstabs+ -Dattribute_deprecated="
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
@@ -58,7 +58,7 @@ if [ -e ffmpeg/patched ] ; then
 	(cd ffmpeg && svn revert -R . && rm patched)
 fi
 
-(cd ffmpeg; patch -p1 < ../Patches/ffmpeg.diff)
+(cd ffmpeg; patch -p1 < ../Patches/ffmpeg.diff; touch patched)
 
 if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
     echo "Static ffmpeg libs are up-to-date ; not rebuilding"
