@@ -26,6 +26,7 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <matroska/KaxTracks.h>
 #include <matroska/KaxTrackEntryData.h>
+#include <matroska/KaxTrackAudio.h>
 #include "MatroskaCodecIDs.h"
 #include "CommonUtils.h"
 #include "Codecprintf.h"
@@ -342,6 +343,67 @@ ComponentResult DescExt_Real(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 	return noErr;
 }
 
+// c.f. http://wiki.multimedia.cx/index.php?title=Understanding_AAC
+
+struct MatroskaQT_AACProfileName
+{
+	char *name;
+	char profile;
+};
+
+static const MatroskaQT_AACProfileName kMatroskaAACProfiles[] = {
+	{"A_AAC/MPEG2/MAIN", 1},
+	{"A_AAC/MPEG2/LC", 2},
+	{"A_AAC/MPEG2/LC/SBR", 5},
+	{"A_AAC/MPEG2/SSR", 3},
+	{"A_AAC/MPEG4/MAIN", 1},
+	{"A_AAC/MPEG4/LC", 2},
+	{"A_AAC/MPEG4/LC/SBR", 5},
+	{"A_AAC/MPEG4/SSR", 3},
+	{"A_AAC/MPEG4/LTP", 4}
+};
+
+static const unsigned kAACFrequencyIndexes[] = {
+	96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000,
+	11025, 8000, 7350
+};
+
+static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vosLen)
+{
+	unsigned char profile = 0, freq_index = 15;
+	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
+	KaxTrackAudio & audioTrack = GetChild<KaxTrackAudio>(*tr_entry);
+	KaxAudioSamplingFreq & sampleFreq = GetChild<KaxAudioSamplingFreq>(audioTrack);
+	KaxAudioChannels & numChannels = GetChild<KaxAudioChannels>(audioTrack);
+	unsigned freq = unsigned((double)sampleFreq), channels = unsigned(numChannels);
+
+	string codecString(*tr_codec);
+
+	for (int i = 0; i < sizeof(kMatroskaAACProfiles)/sizeof(MatroskaQT_AACProfileName); i++) {
+		const MatroskaQT_AACProfileName *prof = &kMatroskaAACProfiles[i];
+		if (strcmp(codecString.c_str(), prof->name) == 0) {profile = prof->profile; break;}
+	}
+	
+	for (int i = 0; i < sizeof(kAACFrequencyIndexes)/sizeof(unsigned); i++) {
+		if (kAACFrequencyIndexes[i] == freq) {freq_index = i; break;}
+	}
+	
+	if (freq_index != 15) {
+		*vosBuf++ = (profile << 3) | (freq_index >> 1);
+		*vosBuf++ = (freq_index << 7) | (channels << 3);
+		*vosLen = 2;
+	} else {
+		freq = EndianU32_NtoB(freq);
+		
+		*vosBuf++ = (profile << 3) | (freq_index >> 1);
+		*vosBuf++ = (freq_index << 7) | (freq >> (24 - 7));
+		*vosBuf++ = (freq >> (24 - 7 - 8)) & 0xff;
+		*vosBuf++ = (freq >> (24 - 7 - 16)) & 0xff;
+		*vosBuf++ = ((freq & 1) << 7) | (channels << 3);
+		*vosLen = 5;
+	}
+}
+
 // the esds atom creation is based off of the routines for it in ffmpeg's movenc.c
 static unsigned int descrLength(unsigned int len)
 {
@@ -426,21 +488,20 @@ uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *e
 	return esds;
 }
 
-static const unsigned char aac_lc_vos[] = {0x11, 0x90};
-
 static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 {
 	KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
 	KaxTrackNumber *trackNum = FindChild<KaxTrackNumber>(*tr_entry);
 	
-	int vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
+	size_t vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
 	int trackID = trackNum ? uint16(*trackNum) : 1;
-    uint8_t *vosBuf = codecPrivate ? codecPrivate->GetBuffer() : NULL;
+	uint8_t aacBuf[5] = {0};
+	uint8_t *vosBuf = codecPrivate ? codecPrivate->GetBuffer() : NULL;
 	size_t esdsLen;
 	
-	if (!vosBuf) { // minimal AAC-LC descriptor
-		vosBuf = (uint8_t*)aac_lc_vos;
-		vosLen = 2;
+	if (audio && !vosBuf) {
+		RecreateAACVOS(tr_entry, aacBuf, &vosLen);
+		vosBuf = aacBuf;
 	}
 
 	Handle esdsExt = NewHandleClear(4);

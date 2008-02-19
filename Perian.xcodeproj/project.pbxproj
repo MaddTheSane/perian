@@ -1855,7 +1855,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = NO;
+				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -1890,7 +1890,6 @@
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
 				PREBINDING = NO;
-				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_NAME = Perian;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
 				WRAPPER_EXTENSION = component;
