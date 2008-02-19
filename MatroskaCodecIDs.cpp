@@ -370,7 +370,7 @@ static const unsigned kAACFrequencyIndexes[] = {
 
 static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vosLen)
 {
-	unsigned char profile = 0, freq_index = 15;
+	unsigned char profile = 2, freq_index = 15;
 	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
 	KaxTrackAudio & audioTrack = GetChild<KaxTrackAudio>(*tr_entry);
 	KaxAudioSamplingFreq & sampleFreq = GetChild<KaxAudioSamplingFreq>(audioTrack);
@@ -392,13 +392,11 @@ static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vos
 		*vosBuf++ = (profile << 3) | (freq_index >> 1);
 		*vosBuf++ = (freq_index << 7) | (channels << 3);
 		*vosLen = 2;
-	} else {
-		freq = EndianU32_NtoB(freq);
-		
+	} else {		
 		*vosBuf++ = (profile << 3) | (freq_index >> 1);
 		*vosBuf++ = (freq_index << 7) | (freq >> (24 - 7));
-		*vosBuf++ = (freq >> (24 - 7 - 8)) & 0xff;
-		*vosBuf++ = (freq >> (24 - 7 - 16)) & 0xff;
+		*vosBuf++ = (freq >> (24 - 7 - 8));
+		*vosBuf++ = (freq >> (24 - 7 - 16));
 		*vosBuf++ = ((freq & 1) << 7) | (channels << 3);
 		*vosLen = 5;
 	}
