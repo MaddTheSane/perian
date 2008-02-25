@@ -1,6 +1,6 @@
 Index: ffmpeg/libavcodec/i386/motion_est_mmx.c
 ===================================================================
---- ffmpeg/libavcodec/i386/motion_est_mmx.c	(revision 12218)
+--- ffmpeg/libavcodec/i386/motion_est_mmx.c	(revision 12223)
 +++ ffmpeg/libavcodec/i386/motion_est_mmx.c	(working copy)
 @@ -167,7 +167,7 @@
  static inline void sad8_4_mmx2(uint8_t *blk1, uint8_t *blk2, int stride, int h)
@@ -40,7 +40,7 @@ Index: ffmpeg/libavcodec/i386/motion_est_mmx.c
  
 Index: ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c
 ===================================================================
---- ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	(revision 12218)
+--- ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	(revision 12223)
 +++ ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	(working copy)
 @@ -192,8 +192,8 @@
          "pxor   %%mm7, %%mm7        \n\t"
@@ -64,54 +64,10 @@ Index: ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c
  
 Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
 ===================================================================
---- ffmpeg/libavcodec/i386/dsputil_mmx.c	(revision 12218)
+--- ffmpeg/libavcodec/i386/dsputil_mmx.c	(revision 12223)
 +++ ffmpeg/libavcodec/i386/dsputil_mmx.c	(working copy)
-@@ -220,7 +220,6 @@
- /***********************************/
- /* standard MMX */
+@@ -772,7 +772,7 @@
  
--#ifdef CONFIG_ENCODERS
- static void get_pixels_mmx(DCTELEM *block, const uint8_t *pixels, int line_size)
- {
-     asm volatile(
-@@ -277,7 +276,6 @@
-         : "%"REG_a
-     );
- }
--#endif //CONFIG_ENCODERS
- 
- void put_pixels_clamped_mmx(const DCTELEM *block, uint8_t *pixels, int line_size)
- {
-@@ -544,7 +542,6 @@
-         );
- }
- 
--#ifdef CONFIG_ENCODERS
- static int pix_sum16_mmx(uint8_t * pix, int line_size){
-     const int h=16;
-     int sum;
-@@ -582,7 +579,6 @@
- 
-         return sum;
- }
--#endif //CONFIG_ENCODERS
- 
- static void add_bytes_mmx(uint8_t *dst, uint8_t *src, int w){
-     long i=0;
-@@ -800,7 +796,6 @@
-     }
- }
- 
--#ifdef CONFIG_ENCODERS
- static int pix_norm1_mmx(uint8_t *pix, int line_size) {
-     int tmp;
-   asm volatile (
-@@ -2018,11 +2013,9 @@
-     return sum;
- }
- 
--#endif //CONFIG_ENCODERS
--
  #define QPEL_V_LOW(m3,m4,m5,m6, pw_20, pw_3, rnd, in0, in1, in2, in7, out, OP)\
          "paddw " #m4 ", " #m3 "           \n\t" /* x1 */\
 -        "movq "MANGLE(ff_pw_20)", %%mm4   \n\t" /* 20 */\
@@ -119,7 +75,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          "pmullw " #m3 ", %%mm4            \n\t" /* 20x1 */\
          "movq "#in7", " #m3 "             \n\t" /* d */\
          "movq "#in0", %%mm5               \n\t" /* D */\
-@@ -2034,7 +2027,7 @@
+@@ -784,7 +784,7 @@
          "paddw " #m5 ", %%mm6             \n\t" /* x2 */\
          "paddw %%mm6, %%mm6               \n\t" /* 2x2 */\
          "psubw %%mm6, %%mm5               \n\t" /* -2x2 + x3 */\
@@ -128,7 +84,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          "paddw " #rnd ", %%mm4            \n\t" /* x2 */\
          "paddw %%mm4, %%mm5               \n\t" /* 20x1 - 6x2 + 3x3 - x4 */\
          "psraw $5, %%mm5                  \n\t"\
-@@ -2068,10 +2061,10 @@
+@@ -818,10 +818,10 @@
          "paddw %%mm5, %%mm5               \n\t" /* 2b */\
          "psubw %%mm5, %%mm6               \n\t" /* c - 2b */\
          "pshufw $0x06, %%mm0, %%mm5       \n\t" /* 0C0B0A0A */\
@@ -141,7 +97,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          "psubw %%mm5, %%mm0               \n\t" /* 20a - d */\
          "paddw %6, %%mm6                  \n\t"\
          "paddw %%mm6, %%mm0               \n\t" /* 20a - 6b + 3c - d */\
-@@ -2094,10 +2087,10 @@
+@@ -844,10 +844,10 @@
          "psrlq $24, %%mm6                 \n\t" /* IJKLM000 */\
          "punpcklbw %%mm7, %%mm2           \n\t" /* 0F0G0H0I */\
          "punpcklbw %%mm7, %%mm6           \n\t" /* 0I0J0K0L */\
@@ -154,7 +110,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          "psubw %%mm4, %%mm3               \n\t" /* - 6b +3c - d */\
          "paddw %6, %%mm1                  \n\t"\
          "paddw %%mm1, %%mm3               \n\t" /* 20a - 6b +3c - d */\
-@@ -2120,7 +2113,7 @@
+@@ -870,7 +870,7 @@
          "psubw %%mm5, %%mm0               \n\t" /* c - 2b */\
          "movq %%mm3, %%mm5                \n\t" /* JKLMNOPQ */\
          "psrlq $24, %%mm3                 \n\t" /* MNOPQ000 */\
@@ -163,7 +119,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          "punpcklbw %%mm7, %%mm3           \n\t" /* 0M0N0O0P */\
          "paddw %%mm3, %%mm2               \n\t" /* d */\
          "psubw %%mm2, %%mm0               \n\t" /* -6b + 3c - d */\
-@@ -2128,7 +2121,7 @@
+@@ -878,7 +878,7 @@
          "punpcklbw %%mm7, %%mm2           \n\t" /* 0J0K0L0M */\
          "punpckhbw %%mm7, %%mm5           \n\t" /* 0N0O0P0Q */\
          "paddw %%mm2, %%mm6               \n\t" /* a */\
@@ -172,7 +128,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          "paddw %6, %%mm0                  \n\t"\
          "paddw %%mm6, %%mm0               \n\t" /* 20a - 6b + 3c - d */\
          "psraw $5, %%mm0                  \n\t"\
-@@ -2143,8 +2136,8 @@
+@@ -893,8 +893,8 @@
          "paddw %%mm2, %%mm5               \n\t" /* d */\
          "paddw %%mm6, %%mm6               \n\t" /* 2b */\
          "psubw %%mm6, %%mm4               \n\t" /* c - 2b */\
@@ -183,7 +139,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          "psubw %%mm5, %%mm3               \n\t" /* -6b + 3c - d */\
          "paddw %6, %%mm4                  \n\t"\
          "paddw %%mm3, %%mm4               \n\t" /* 20a - 6b + 3c - d */\
-@@ -2157,7 +2150,9 @@
+@@ -907,7 +907,9 @@
          "decl %2                          \n\t"\
          " jnz 1b                          \n\t"\
          : "+a"(src), "+c"(dst), "+g"(h)\
@@ -194,7 +150,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          : "memory"\
      );\
  }\
-@@ -2235,10 +2230,10 @@
+@@ -985,10 +987,10 @@
          "paddw %%mm5, %%mm5               \n\t" /* 2b */\
          "psubw %%mm5, %%mm6               \n\t" /* c - 2b */\
          "pshufw $0x06, %%mm0, %%mm5       \n\t" /* 0C0B0A0A */\
@@ -207,7 +163,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          "psubw %%mm5, %%mm0               \n\t" /* 20a - d */\
          "paddw %6, %%mm6                  \n\t"\
          "paddw %%mm6, %%mm0               \n\t" /* 20a - 6b + 3c - d */\
-@@ -2256,8 +2251,8 @@
+@@ -1006,8 +1008,8 @@
          "paddw %%mm5, %%mm4               \n\t" /* d */\
          "paddw %%mm2, %%mm2               \n\t" /* 2b */\
          "psubw %%mm2, %%mm3               \n\t" /* c - 2b */\
@@ -218,7 +174,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          "psubw %%mm4, %%mm3               \n\t" /* -6b + 3c - d */\
          "paddw %6, %%mm1                  \n\t"\
          "paddw %%mm1, %%mm3               \n\t" /* 20a - 6b + 3c - d */\
-@@ -2270,7 +2265,9 @@
+@@ -1020,7 +1022,9 @@
          "decl %2                          \n\t"\
          " jnz 1b                          \n\t"\
          : "+a"(src), "+c"(dst), "+g"(h)\
@@ -229,7 +185,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          : "memory"\
      );\
  }\
-@@ -2349,31 +2346,31 @@
+@@ -1099,31 +1103,31 @@
          "movq 8(%0), %%mm1              \n\t"\
          "movq 16(%0), %%mm2             \n\t"\
          "movq 24(%0), %%mm3             \n\t"\
@@ -277,7 +233,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          \
          "add $136, %0                   \n\t"\
          "add %6, %1                     \n\t"\
-@@ -2381,7 +2378,9 @@
+@@ -1131,7 +1135,9 @@
          " jnz 1b                        \n\t"\
          \
          : "+r"(temp_ptr), "+r"(dst), "+g"(count)\
@@ -288,7 +244,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          :"memory"\
      );\
  }\
-@@ -2421,19 +2420,19 @@
+@@ -1171,19 +1177,19 @@
          "movq 8(%0), %%mm1              \n\t"\
          "movq 16(%0), %%mm2             \n\t"\
          "movq 24(%0), %%mm3             \n\t"\
@@ -316,7 +272,7 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
                  \
          "add $72, %0                    \n\t"\
          "add %6, %1                     \n\t"\
-@@ -2441,7 +2440,9 @@
+@@ -1191,7 +1197,9 @@
          " jnz 1b                        \n\t"\
           \
          : "+r"(temp_ptr), "+r"(dst), "+g"(count)\
@@ -327,27 +283,9 @@ Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
          : "memory"\
     );\
  }\
-@@ -2858,8 +2859,6 @@
-     }
- }
- 
--#ifdef CONFIG_ENCODERS
--
- #define PHADDD(a, t)\
-     "movq "#a", "#t"                  \n\t"\
-     "psrlq $32, "#a"                  \n\t"\
-@@ -2922,8 +2921,6 @@
- #undef PHADDD
- #endif //HAVE_SSSE3
- 
--#endif /* CONFIG_ENCODERS */
--
- #define PREFETCH(name, op) \
- static void name(void *mem, int stride, int h){\
-     const uint8_t *p= mem;\
 Index: ffmpeg/libavcodec/i386/h264dsp_mmx.c
 ===================================================================
---- ffmpeg/libavcodec/i386/h264dsp_mmx.c	(revision 12218)
+--- ffmpeg/libavcodec/i386/h264dsp_mmx.c	(revision 12223)
 +++ ffmpeg/libavcodec/i386/h264dsp_mmx.c	(working copy)
 @@ -417,21 +417,21 @@
  // in: mm0=p1 mm1=p0 mm2=q0 mm3=q1 mm7=(tc&mask)
@@ -410,7 +348,7 @@ Index: ffmpeg/libavcodec/i386/h264dsp_mmx.c
  
 Index: ffmpeg/libavcodec/i386/simple_idct_mmx.c
 ===================================================================
---- ffmpeg/libavcodec/i386/simple_idct_mmx.c	(revision 12218)
+--- ffmpeg/libavcodec/i386/simple_idct_mmx.c	(revision 12223)
 +++ ffmpeg/libavcodec/i386/simple_idct_mmx.c	(working copy)
 @@ -363,7 +363,7 @@
          "movq " #src4 ", %%mm1          \n\t" /* R6     R2      r6      r2 */\
@@ -459,7 +397,7 @@ Index: ffmpeg/libavcodec/i386/simple_idct_mmx.c
  }
 Index: ffmpeg/libavcodec/i386/vc1dsp_mmx.c
 ===================================================================
---- ffmpeg/libavcodec/i386/vc1dsp_mmx.c	(revision 12218)
+--- ffmpeg/libavcodec/i386/vc1dsp_mmx.c	(revision 12223)
 +++ ffmpeg/libavcodec/i386/vc1dsp_mmx.c	(working copy)
 @@ -77,7 +77,7 @@
      asm volatile(
