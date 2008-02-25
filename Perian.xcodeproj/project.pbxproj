@@ -1870,10 +1870,7 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					ffmpeg/libavcodec,
-					ffmpeg/libavutil,
-					ffmpeg/libpostproc,
-					ffmpeg/libavformat,
+					"ffmpeg/**",
 					libebml,
 					libmatroska,
 				);
@@ -1916,10 +1913,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					ffmpeg/libavcodec,
-					ffmpeg/libavutil,
-					ffmpeg/libpostproc,
-					ffmpeg/libavformat,
+					"ffmpeg/**",
 					libebml,
 					libmatroska,
 				);
@@ -2046,10 +2040,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					ffmpeg/libavcodec,
-					ffmpeg/libavutil,
-					ffmpeg/libpostproc,
-					ffmpeg/libavformat,
+					"ffmpeg/**",
 					libebml,
 					libmatroska,
 				);
