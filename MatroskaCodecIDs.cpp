@@ -570,12 +570,6 @@ ComponentResult ASBDExt_LPCM(KaxTrackEntry *tr_entry, AudioStreamBasicDescriptio
 	return noErr;
 }
 
-static void PrintCoreAudioError(const char *msg, OSStatus err)
-{
-	OSStatus swap_err = EndianU32_NtoB(err);
-	Codecprintf(NULL, "%s '%.4s'\n", msg, &swap_err);
-}
-
 ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
 {
 	if (!tr_entry || !asbd) return paramErr;
@@ -598,8 +592,7 @@ ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription
 									 &asbdSize,
 									 asbd);
 		if (err != noErr) 
-			PrintCoreAudioError("MatroskaQT: Error creating ASBD from AAC esds", err);
-		//else Codecprintf(NULL, "AAC: profile %d, nch %d\n", asbd->mFormatFlags, asbd->mChannelsPerFrame);
+			FourCCprintf("MatroskaQT: Error creating ASBD from AAC esds", err);
 		
 		err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutFromESDS,
 									 cookieSize,
@@ -607,7 +600,7 @@ ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription
 									 &aclSize,
 									 acl);
 		if (err != noErr) 
-			PrintCoreAudioError("MatroskaQT: Error creating ACL from AAC esds", err);
+			FourCCprintf("MatroskaQT: Error creating ACL from AAC esds", err);
 		
 		DisposeHandle(esdsExt);
 	} else {

@@ -14,6 +14,7 @@
 
 #ifdef DEBUG_BUILD
 #define CODEC_HEADER			"Perian Codec: "
+#define FILELOG
 
 static int Codecvprintf(FILE *fileLog, const char *format, va_list va, int print_header)
 {
@@ -23,9 +24,9 @@ static int Codecvprintf(FILE *fileLog, const char *format, va_list va, int print
 	if(fileLog)
 	{
 		if(print_header)
-			fprintf(glob->fileLog, CODEC_HEADER);
+			fprintf(fileLog, CODEC_HEADER);
 		ret = vfprintf(fileLog, format, va);
-		fflush(glob->fileLog);
+		fflush(fileLog);
 	}
 	else
 	{
@@ -46,26 +47,26 @@ int Codecprintf(FILE *fileLog, const char *format, ...)
 	int ret;
 	va_list va;
 	va_start(va, format);
-	ret = Codecvprintf(fileLog, format, va, 1);
+	ret = Codecvprintf(fileLog, format, va, !fileLog);
 	va_end(va);
 	return ret;
 }
 
-void FourCCprintf (char *string, unsigned long a)
+const char *FourCCString(FourCharCode c)
 {
-    if (a < 64)
-    {
-        Codecprintf(NULL, "%s%ld\n", string, a);
-    }
-    else
-    {
-        Codecprintf(NULL, "%s%c%c%c%c\n", string,
-			   (unsigned char)((a >> 24) & 0xff), 
-			   (unsigned char)((a >> 16) & 0xff), 
-			   (unsigned char)((a >> 8) & 0xff), 
-			   (unsigned char)(a & 0xff));
-    }
+    static unsigned char fourcc[5] = {0};
+    int i;
+    
+    for (i = 0; i < 4; i++) fourcc[i] = c >> 8*(3-i);
+    
+    return (char*)fourcc;
 }
+
+void FourCCprintf (char *string, FourCharCode a)
+{
+    Codecprintf(NULL, "%s%s\n", string, FourCCString(a));
+}
+
 #else
 #define Codecvprintf(file, fmt, va, print_header) /**/
 #endif
