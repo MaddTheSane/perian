@@ -582,6 +582,11 @@ static int inline decode_nals(H264ParserContext *context, const uint8_t *buf, in
 						}
 					}
 				}
+				
+				// Parser users assume I-frames are IDR-frames
+				// but in H.264 they don't have to be.
+				// Mark these as P-frames if they effectively are.
+				if (lowestType == FF_I_TYPE) lowestType = FF_P_TYPE;
 			}
 			else if(nalType == 5)
 			{
