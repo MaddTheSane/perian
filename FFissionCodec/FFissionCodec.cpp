@@ -24,11 +24,11 @@ extern "C" {
 }
 #include "FFissionCodec.h"
 
-extern "C" void initLib();
+extern "C" void init_FFmpeg();
 
 FFissionCodec::FFissionCodec(UInt32 inInputBufferByteSize) : ACSimpleCodec(inInputBufferByteSize)
 {
-	initLib();
+	init_FFmpeg();
 	
 	avContext = avcodec_alloc_context();
 	avCodec = NULL;

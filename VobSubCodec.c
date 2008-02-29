@@ -215,7 +215,7 @@ ComponentResult VobSubCodecPreflight(VobSubCodecGlobals glob, CodecDecompressPar
 		glob->compressed = 1;
 	
 	if (!glob->avCodec) {
-		initLib();
+		init_FFmpeg();
 		
 		glob->avCodec = avcodec_find_decoder(CODEC_ID_DVD_SUBTITLE);
 		glob->avContext = avcodec_alloc_context();

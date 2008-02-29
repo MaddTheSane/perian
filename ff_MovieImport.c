@@ -73,7 +73,7 @@
 	extern AVBitStreamFilter x##_bsf; \
 		av_register_bitstream_filter(&x##_bsf); }
 
-void initLib()
+void init_FFmpeg()
 {
 	/* This one is used because Global variables are initialized ONE time
 	* until the application quits. Thus, we have to make sure we're initialize
@@ -353,7 +353,7 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	result = DataHScheduleData(dataHandler, (Ptr)(pd->buf), 0, PROBE_BUF_SIZE, 0, NULL, NULL);
 	require_noerr(result,bail);
 	
-	initLib();
+	init_FFmpeg();
 	storage->format = av_probe_input_format(pd, 1);
 	if(storage->format != NULL) {
 		*valid = 255; /* This means we can read the data */
