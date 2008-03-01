@@ -90,6 +90,21 @@ struct decode_glob
 	FFusionBuffer	*futureBuffer;
 };
 
+struct per_frame_decode_stats
+{
+	unsigned		begin_calls;
+	unsigned		decode_calls;
+	unsigned		draw_calls;
+	unsigned		end_calls;
+};
+
+struct decode_stats
+{
+	struct per_frame_decode_stats type[4];
+	int		max_frames_begun;
+	int		max_frames_decoded;
+};
+
 typedef struct
 {
     ComponentInstance		self;
@@ -110,6 +125,7 @@ typedef struct
 	struct begin_glob	begin;
 	FFusionData		data;
 	struct decode_glob	decode;
+	struct decode_stats stats;
 } FFusionGlobalsRecord, *FFusionGlobals;
 
 typedef struct
@@ -167,7 +183,7 @@ extern CFMutableStringRef GetHomeDirectory();
 #include <QuickTime/ImageCodec.k.h>
 #include <QuickTime/ComponentDispatchHelper.c>
 
-void *launchUpdateChecker(void *args)
+static void *launchUpdateChecker(void *args)
 {
 	FSRef *ref = (FSRef *)args;
     LSOpenFSRef(ref, NULL);
@@ -209,6 +225,44 @@ void FFusionRunUpdateCheck()
     }
 	pthread_t thread;
 	pthread_create(&thread, NULL, launchUpdateChecker, updateCheckRef);
+}
+
+static void RecomputeMaxCounts(FFusionGlobals glob)
+{
+	int i;
+	unsigned begun = 0, decoded = 0, ended = 0, drawn = 0;
+	
+	for (i = 0; i < 4; i++) {
+		struct per_frame_decode_stats *f = &glob->stats.type[i];
+		
+		begun += f->begin_calls;
+		decoded += f->decode_calls;
+		drawn += f->draw_calls;
+		ended += f->end_calls;
+	}
+	
+	signed begin_diff = begun - ended, decode_diff = decoded - drawn;
+	
+	if (abs(begin_diff) > glob->stats.max_frames_begun) glob->stats.max_frames_begun = begin_diff;
+	if (abs(decode_diff) > glob->stats.max_frames_decoded) glob->stats.max_frames_decoded = decode_diff;
+}
+
+static void DumpFrameDropStats(FFusionGlobals glob)
+{
+	static const char types[4] = {'?', 'I', 'P', 'B'};
+	int i;
+	
+	if (!glob->fileLog || glob->decode.lastFrame == 0) return;
+	
+	Codecprintf(glob->fileLog, "Type\t| BeginBand\t| DecodeBand\t| DrawBand\t| dropped before decode\t| dropped before draw\n");
+	
+	for (i = 0; i < 4; i++) {
+		struct per_frame_decode_stats *f = &glob->stats.type[i];
+				
+		Codecprintf(glob->fileLog, "%c\t| %d\t\t| %d\t\t| %d\t\t| %d/%f%%\t\t| %d/%f%%\n", types[i], f->begin_calls, f->decode_calls, f->draw_calls,
+					f->begin_calls - f->decode_calls,(f->begin_calls > f->decode_calls) ? ((float)(f->begin_calls - f->decode_calls)/(float)f->begin_calls) * 100. : 0.,
+					f->decode_calls - f->draw_calls,(f->decode_calls > f->draw_calls) ? ((float)(f->decode_calls - f->draw_calls)/(float)f->decode_calls) * 100. : 0.);
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -315,6 +369,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance self)
 {
     FFusionDebugPrint("%p closed.\n", glob);
+	DumpFrameDropStats(glob);
 
     // Make sure to close the base component and deallocate our storage
     if (glob) 
@@ -435,8 +490,6 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 		cap->subCodecSupportsOutOfOrderDisplayTimes = true;
 		cap->baseCodecShouldCallDecodeBandForAllFrames = true;
 		cap->subCodecSupportsScheduledBackwardsPlaybackWithDifferenceFrames = !doExperimentalFlags;
-		
-	//  XXX enabling this seems to cause rare visible artifacts in h.264?
 		cap->subCodecSupportsDrawInDecodeOrder = doExperimentalFlags; 
 		cap->subCodecSupportsDecodeSmoothing = true; 
 	}
@@ -1022,7 +1075,10 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	myDrp->frameNumber = p->frameNumber;
 	myDrp->GOPStartFrameNumber = glob->begin.lastIFrame;
 	
+	glob->stats.type[drp->frameType].begin_calls++;
+	RecomputeMaxCounts(glob);
 	FFusionDebugPrint("%p BeginBand: frame #%d type %d. (%sskippable)\n", glob, myDrp->frameNumber, type, not(skippable));
+	
     return noErr;
 }
 
@@ -1049,6 +1105,8 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
 	
+	glob->stats.type[drp->frameType].decode_calls++;
+	RecomputeMaxCounts(glob);
 	FFusionDebugPrint("%p DecodeBand #%d qtType %d. (packed %d)\n", glob, myDrp->frameNumber, drp->frameType, glob->packedType);
 
 	avcodec_get_frame_defaults(&tempFrame);
@@ -1177,6 +1235,8 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
 	int i, j;
 	
+	glob->stats.type[drp->frameType].draw_calls++;
+	RecomputeMaxCounts(glob);
 	FFusionDebugPrint("%p DrawBand #%d. (%sdecoded)\n", glob, myDrp->frameNumber, not(myDrp->decoded));
 	
 	if(!myDrp->decoded)
@@ -1270,7 +1330,9 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 pascal ComponentResult FFusionCodecEndBand(FFusionGlobals glob, ImageSubCodecDecompressRecord *drp, OSErr result, long flags)
 {
 	FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
+	glob->stats.type[drp->frameType].end_calls++;
 	FFusionDebugPrint("%p EndBand #%d.\n", glob, myDrp->frameNumber);
+	
     return noErr;
 }
 
