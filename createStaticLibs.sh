@@ -6,17 +6,22 @@ if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 	MACOSX_DEPLOYMENT_TARGET="10.4"
 fi
 
-generalConfigureOptions="--disable-muxers --disable-encoders --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3"
+generalConfigureOptions="--disable-muxers --disable-encoders --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook"
 sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -gstabs+ -Dattribute_deprecated="
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
 fi
 
-ver=$(uname -r)
-if (( ${ver:0:1} < 9 )); then
+ver=`what /usr/bin/ld`
+needs_pic=false || (echo $ver | grep "ld64-77")
+
+if $needs_pic; then
     #no-pic only on pre-leopard
-    sdkflags="$sdkflags -mdynamic-no-pic"
+    sdkflags="$sdkflags -fPIC"
+    generalConfigureOptions="$generalConfigureOptions --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3"
+else 
+	sdkflags="$sdkflags -mdynamic-no-pic" # ld can't handle -fno-pic on ppc
 fi
 export sdkflags
 
@@ -58,7 +63,11 @@ if [ -e ffmpeg/patched ] ; then
 	(cd ffmpeg && svn revert -R . && rm patched)
 fi
 
-(cd ffmpeg; patch -p1 < ../Patches/ffmpeg.diff; touch patched)
+if $needs_pic; then
+ (cd ffmpeg; patch -p1 < ../Patches/ffmpeg-pic.diff)
+fi
+
+touch patched
 
 if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
     echo "Static ffmpeg libs are up-to-date ; not rebuilding"
