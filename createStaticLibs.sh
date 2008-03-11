@@ -13,10 +13,13 @@ if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
 fi
 
-what /usr/bin/ld | grep ld64-77
-no_pic=$?
+if what /usr/bin/ld | grep -q ld64-77; then
+  no_pic=0
+else
+  no_pic=1
+fi
 
-if [ $no_pic ]; then
+if [ $no_pic -gt 0 ]; then
     sdkflags="$sdkflags -mdynamic-no-pic" # ld can't handle -fno-pic on ppc
 else
     #no-pic only on pre-leopard
@@ -64,7 +67,7 @@ if [ -e ffmpeg/patched ] ; then
 	(cd ffmpeg && svn revert -R . && rm patched)
 fi
 
-if [ ! $no_pic ]; then
+if [ $no_pic -eq 0 ] ; then
  (cd ffmpeg; patch -p1 < ../Patches/ffmpeg-pic.diff)
 fi
 
