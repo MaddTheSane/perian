@@ -13,16 +13,17 @@ if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
 fi
 
-ver=`what /usr/bin/ld`
-needs_pic=false || (echo $ver | grep "ld64-77")
+what /usr/bin/ld | grep ld64-77
+no_pic=$?
 
-if $needs_pic; then
+if [ $no_pic ]; then
+    sdkflags="$sdkflags -mdynamic-no-pic" # ld can't handle -fno-pic on ppc
+else
     #no-pic only on pre-leopard
     sdkflags="$sdkflags -fPIC"
     generalConfigureOptions="$generalConfigureOptions --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3"
-else 
-	sdkflags="$sdkflags -mdynamic-no-pic" # ld can't handle -fno-pic on ppc
-fi
+fi 
+	
 export sdkflags
 
 OUTPUT_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
@@ -63,7 +64,7 @@ if [ -e ffmpeg/patched ] ; then
 	(cd ffmpeg && svn revert -R . && rm patched)
 fi
 
-if $needs_pic; then
+if [ ! $no_pic ]; then
  (cd ffmpeg; patch -p1 < ../Patches/ffmpeg-pic.diff)
 fi
 
