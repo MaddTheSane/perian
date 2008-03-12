@@ -188,6 +188,43 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 		for (x = 0; x < vWidth; x++) {
 			unsigned x2 = x*2, x4 = x*4;
 
+#if 0
+			asm volatile(
+				"movdqu		%4,		%%xmm4	\n\t"
+				"movdqu		%5,		%%xmm5	\n\t"
+				"movdqa		%2,		%%xmm0	\n\t"
+				"movdqa	16+1*%2,	%%xmm2	\n\t"
+				"movdqa		%3,		%%xmm1	\n\t"
+				"movdqa	16+1*%3,	%%xmm3	\n\t"
+				"movdqa		%%xmm4, %%xmm6	\n\t"
+				"punpcklbw	%%xmm5, %%xmm4	\n\t" /*chroma_l*/
+				"punpckhbw	%%xmm5, %%xmm6	\n\t" /*chroma_h*/
+				"movdqa		%%xmm4, %%xmm5	\n\t"
+				"punpcklbw	%%xmm0, %%xmm5	\n\t"
+				"movntdq	%%xmm5, %0		\n\t" /*ov[x4]*/
+				"movdqa		%%xmm4, %%xmm5	\n\t"
+				"punpckhbw	%%xmm0, %%xmm5	\n\t"
+				"movntdq	%%xmm5, 16+1*%0	\n\t" /*ov[x4+1]*/
+				"movdqa		%%xmm6, %%xmm5	\n\t"
+				"punpcklbw	%%xmm2, %%xmm5	\n\t"
+				"movntdq	%%xmm5, 32+1*%0	\n\t" /*ov[x4+2]*/
+				"movdqa		%%xmm6, %%xmm5	\n\t"
+				"punpckhbw	%%xmm2, %%xmm5	\n\t"
+				"movntdq	%%xmm5, 48+1*%0	\n\t" /*ov[x4+3]*/
+				"movdqa		%%xmm4, %%xmm5	\n\t"
+				"punpcklbw	%%xmm1, %%xmm5	\n\t"
+				"movntdq	%%xmm5, %1		\n\t" /*ov2[x4]*/
+				"punpckhbw	%%xmm1, %%xmm4	\n\t"
+				"movntdq	%%xmm4, 16+1*%1	\n\t" /*ov2[x4+1]*/
+				"movdqa		%%xmm6, %%xmm5	\n\t"
+				"punpcklbw	%%xmm3, %%xmm5	\n\t"
+				"movntdq	%%xmm5, 32+1*%1	\n\t" /*ov2[x4+2]*/
+				"punpckhbw	%%xmm3, %%xmm6	\n\t"
+				"movntdq	%%xmm6, 48+1*%1	\n\t" /*ov2[x4+3]*/
+				: "=m" (ov[x4]), "=m" (ov2[x4])
+				: "m" (yv[x2]), "m" (yv2[x2]), "m" (uv[x]), "m" (vv[x])
+				);
+#else
 			__m128i	tmp_y = yv[x2], tmp_y3 = yv[x2+1],
 					tmp_y2 = yv2[x2], tmp_y4 = yv2[x2+1],
 					tmp_u = _mm_loadu_si128(&uv[x]), tmp_v = _mm_loadu_si128(&vv[x]),
@@ -203,6 +240,7 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 			_mm_stream_si128(&ov2[x4+1],_mm_unpackhi_epi8(chroma_l, tmp_y2));
 			_mm_stream_si128(&ov2[x4+2],_mm_unpacklo_epi8(chroma_h, tmp_y4));
 			_mm_stream_si128(&ov2[x4+3],_mm_unpackhi_epi8(chroma_h, tmp_y4));
+#endif
 		}
 		
 		for (x = x * 16; x < halfwidth; x++) {
