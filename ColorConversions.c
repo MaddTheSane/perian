@@ -103,6 +103,18 @@ static void Y420toY422_ppc_scalar(UInt8* baseAddr, unsigned outRB, unsigned widt
 		 inV += rbV;
 		 baseAddr += outRB * 2;
 	 }
+	if(height & 1)
+	{
+		int x;
+		for(x=0; x < halfWidth; x++)
+		{
+			unsigned x4 = x*4, x2 = x*2;
+			baseAddr[x4] = inU[x];
+			baseAddr[x4+1] = inY[x2];
+			baseAddr[x4+2] = inV[x];
+			baseAddr[x4+3] = inY[x2+1];
+		}
+	}	
  }
 
 static void Y420toY422_ppc_altivec(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
@@ -153,6 +165,18 @@ static void Y420toY422_ppc_altivec(UInt8 * o, unsigned outRB, unsigned width, un
 		uc += rU;
 		vc += rV;
 	}
+	if(height & 1)
+	{
+		unsigned halfwidth = width / 2;
+		for(x=0; x < halfwidth; x++)
+		{
+			unsigned x4 = x*4, x2 = x*2;
+			o[x4] = uc[x];
+			o[x4+1] = yc[x2];
+			o[x4+2] = vc[x];
+			o[x4+3] = yc[x2+1];
+		}
+	}	
 }
 
 void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
@@ -188,7 +212,7 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 		for (x = 0; x < vWidth; x++) {
 			unsigned x2 = x*2, x4 = x*4;
 
-#if 0
+#if 1
 			asm volatile(
 				"movdqu		%4,		%%xmm4	\n\t"
 				"movdqu		%5,		%%xmm5	\n\t"
@@ -258,6 +282,17 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 		uc += rU;
 		vc += rV;
 	}
+	if(height & 1)
+	{
+		for(x=0; x < halfwidth; x++)
+		{
+			unsigned x4 = x*4, x2 = x*2;
+			o[x4] = uc[x];
+			o[x4+1] = yc[x2];
+			o[x4+2] = vc[x];
+			o[x4+3] = yc[x2+1];
+		}
+	}
 }
 
 
@@ -284,6 +319,17 @@ static void __attribute__((noinline)) Y420toY422_x86_scalar(UInt8 * o, unsigned 
 		yc += rY*2;
 		u += rU;
 		v += rV;
+	}
+	if(height & 1)
+	{
+		for(x=0; x < halfwidth; x++)
+		{
+			unsigned x4 = x*4, x2 = x*2;
+			o[x4] = u[x];
+			o[x4+1] = yc[x2];
+			o[x4+2] = v[x];
+			o[x4+3] = yc[x2+1];
+		}
 	}
 }
 
