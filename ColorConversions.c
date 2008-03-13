@@ -254,6 +254,7 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 			"addl		$64,	%1		\n\t"
 			"dec		%6				\n\t"
 			"jnz		0b				\n\t"
+			: /*No outputs*/
 			: "r" (ov), "r" (ov2),
 			"r" (yv), "r" (yv2), "r" (uv), "r" (vv),
 			"r" (vWidth)
