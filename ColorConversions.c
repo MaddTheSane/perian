@@ -23,6 +23,14 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 
+#ifndef GOOD_COMPILER
+#define noinline __attribute__((noinline))
+#else
+#define noinline
+#endif
+
+#define unlikely(x) __builtin_expect(x, 0)
+
 //-----------------------------------------------------------------
 // FastY420
 //-----------------------------------------------------------------
@@ -57,6 +65,21 @@ void FastY420(UInt8 *baseAddr, AVFrame *picture)
 // The function should never be called since many people now
 // have a decent OS/QT version.
 //-----------------------------------------------------------------
+
+static void noinline Y420toY422_lastrow(UInt8 *o, const UInt8 *yc, const UInt8 *uc, const UInt8 *vc, unsigned halfWidth)
+{
+	unsigned x;
+	for(x=0; x < halfWidth; x++)
+	{
+		unsigned x4 = x*4, x2 = x*2;
+		o[x4] = uc[x];
+		o[x4+1] = yc[x2];
+		o[x4+2] = vc[x];
+		o[x4+3] = yc[x2+1];
+	}
+}
+
+#define HandleLastRow(o, yc, uc, vc, halfWidth, height) if (unlikely(height & 1)) Y420toY422_lastrow(o, yc, uc, vc, halfWidth)
 
 #ifdef __BIG_ENDIAN__
 //hand-unrolled code is a bad idea on modern CPUs. luckily, this does not run on modern CPUs, only G3s.
@@ -103,18 +126,8 @@ static void Y420toY422_ppc_scalar(UInt8* baseAddr, unsigned outRB, unsigned widt
 		 inV += rbV;
 		 baseAddr += outRB * 2;
 	 }
-	if(height & 1)
-	{
-		int x;
-		for(x=0; x < halfWidth; x++)
-		{
-			unsigned x4 = x*4, x2 = x*2;
-			baseAddr[x4] = inU[x];
-			baseAddr[x4+1] = inY[x2];
-			baseAddr[x4+2] = inV[x];
-			baseAddr[x4+3] = inY[x2+1];
-		}
-	}	
+	
+	HandleLastRow(baseAddr, inY, inU, inV, halfWidth, height);
  }
 
 static void Y420toY422_ppc_altivec(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
@@ -165,18 +178,8 @@ static void Y420toY422_ppc_altivec(UInt8 * o, unsigned outRB, unsigned width, un
 		uc += rU;
 		vc += rV;
 	}
-	if(height & 1)
-	{
-		unsigned halfwidth = width / 2;
-		for(x=0; x < halfwidth; x++)
-		{
-			unsigned x4 = x*4, x2 = x*2;
-			o[x4] = uc[x];
-			o[x4+1] = yc[x2];
-			o[x4+2] = vc[x];
-			o[x4+3] = yc[x2+1];
-		}
-	}	
+	
+	HandleLastRow(o, yc, uc, vc, width / 2, height);
 }
 
 void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
@@ -212,16 +215,16 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 #if 0
 		asm volatile(
 			"\n0:			\n\t"
-			"movdqu		(%4),	%%xmm4	\n\t"
-			"movdqu		(%5),	%%xmm5	\n\t"
-			"addl		$16,	%4		\n\t"
-			"addl		$16,	%5		\n\t"
 			"movdqa		(%2),	%%xmm0	\n\t"
 			"movdqa		16(%2),	%%xmm2	\n\t"
-			"addl		$32,	%2		\n\t"
 			"movdqa		(%3),		%%xmm1	\n\t"
 			"movdqa		16(%3),	%%xmm3	\n\t"
+			"movdqu		(%4),	%%xmm4	\n\t"
+			"movdqu		(%5),	%%xmm5	\n\t"
+			"addl		$32,	%2		\n\t"
 			"addl		$32,	%3		\n\t"
+			"addl		$16,	%4		\n\t"
+			"addl		$16,	%5		\n\t"
 			"movdqa		%%xmm4, %%xmm6	\n\t"
 			"punpcklbw	%%xmm5, %%xmm4	\n\t" /*chroma_l*/
 			"punpckhbw	%%xmm5, %%xmm6	\n\t" /*chroma_h*/
@@ -251,10 +254,9 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 			"addl		$64,	%1		\n\t"
 			"dec		%6				\n\t"
 			"jnz		0b				\n\t"
-			:
 			: "r" (ov), "r" (ov2),
 			"r" (yv), "r" (yv2), "r" (uv), "r" (vv),
-			"c" (vWidth)
+			"r" (vWidth)
 			);
 #else
 		for (x = 0; x < vWidth; x++) {
@@ -293,21 +295,14 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 		uc += rU;
 		vc += rV;
 	}
-	if(height & 1)
-	{
-		for(x=0; x < halfwidth; x++)
-		{
-			unsigned x4 = x*4, x2 = x*2;
-			o[x4] = uc[x];
-			o[x4+1] = yc[x2];
-			o[x4+2] = vc[x];
-			o[x4+3] = yc[x2+1];
-		}
-	}
+	
+	_mm_sfence();
+	
+	HandleLastRow(o, yc, uc, vc, halfwidth, height);
 }
 
 
-static void __attribute__((noinline)) Y420toY422_x86_scalar(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+static void noinline Y420toY422_x86_scalar(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
 	UInt8		*yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
 	unsigned	rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], halfheight = height / 2, halfwidth = width / 2;
@@ -331,17 +326,8 @@ static void __attribute__((noinline)) Y420toY422_x86_scalar(UInt8 * o, unsigned 
 		u += rU;
 		v += rV;
 	}
-	if(height & 1)
-	{
-		for(x=0; x < halfwidth; x++)
-		{
-			unsigned x4 = x*4, x2 = x*2;
-			o[x4] = u[x];
-			o[x4+1] = yc[x2];
-			o[x4+2] = v[x];
-			o[x4+3] = yc[x2+1];
-		}
-	}
+
+	HandleLastRow(o, yc, u, v, halfwidth, height);
 }
 
 void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
@@ -349,10 +335,8 @@ void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFr
 	uintptr_t yc = (uintptr_t)picture->data[0];
 
 	//make sure the ffmpeg picture buffers are aligned enough, they're only guaranteed to be 8-byte for some reason...
-	if ((yc | picture->linesize[0]) % 16 == 0) {
-		Y420toY422_sse2(o, outRB, width, height, picture);
-		_mm_sfence();
-	} else Y420toY422_x86_scalar(o, outRB, width, height, picture);
+	if (!unlikely((yc | picture->linesize[0]) % 16)) Y420toY422_sse2(o, outRB, width, height, picture); 
+	else Y420toY422_x86_scalar(o, outRB, width, height, picture);
 }
 #endif
 
