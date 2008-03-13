@@ -23,8 +23,7 @@ if [ $no_pic -gt 0 ]; then
     sdkflags="$sdkflags -mdynamic-no-pic" # ld can't handle -fno-pic on ppc
 else
     #no-pic only on pre-leopard
-    sdkflags="$sdkflags -fPIC"
-    generalConfigureOptions="$generalConfigureOptions --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3"
+    generalConfigureOptions="$generalConfigureOptions --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3 --enable-shared"
 fi 
 	
 export sdkflags
