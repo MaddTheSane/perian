@@ -345,11 +345,10 @@ void BGR24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned h
 {
 	unsigned i, j;
 	UInt8 *srcPtr = picture->data[0];
-	unsigned width_third = width / 3;
 	
 	for (i = 0; i < height; ++i)
 	{
-		for (j = 0; j < width_third; j ++)
+		for (j = 0; j < width; j ++)
 		{
 			unsigned j3 = j * 3;
 			baseAddr[j3] = srcPtr[j3+2];
