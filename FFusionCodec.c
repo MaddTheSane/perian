@@ -668,6 +668,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
             case 'NUV1':
                 codecID = CODEC_ID_NUV;
                 break;
+			case 'tscc':
+				codecID = CODEC_ID_TSCC;
+				break;
 
 				
             default:
@@ -690,6 +693,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         
         glob->avContext->width = (**p->imageDescription).width;
         glob->avContext->height = (**p->imageDescription).height;
+		glob->avContext->bits_per_sample = (**p->imageDescription).depth;
 		
         // We also pass the FourCC since it allows the H263 hybrid decoder
         // to make the difference between the various flavours of DivX
@@ -1565,6 +1569,10 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kNuvCodecInfoResID, (Handle *)&tempCodecInfo);
                 break;
 
+            case 'tscc':
+                err = GetComponentResource((Component)glob->self, codecInfoResourceType, kTSCCCodecInfoResID, (Handle *)&tempCodecInfo);
+                break;
+				
 				
             default:	// should never happen but we have to handle the case
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX4CodecInfoResID, (Handle *)&tempCodecInfo);

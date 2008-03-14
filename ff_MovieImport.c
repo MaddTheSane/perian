@@ -119,6 +119,7 @@ void init_FFmpeg()
 		REGISTER_DECODER(dca);
 		
 		REGISTER_DECODER(dvdsub);
+		REGISTER_DECODER(tscc);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
