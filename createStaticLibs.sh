@@ -131,9 +131,9 @@ else
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --extra-cflags='$sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --extra-cflags='-faltivec $sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions
             else
-                "$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc' --extra-cflags='-arch ppc $sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --cross-compile --arch=ppc  --extra-ldflags='-arch ppc' --extra-cflags='-faltivec -arch ppc $sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions
             fi
         
             make depend > /dev/null 2>&1 || true
