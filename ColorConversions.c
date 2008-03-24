@@ -254,10 +254,9 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 			"addl		$64,	%1		\n\t"
 			"dec		%6				\n\t"
 			"jnz		0b				\n\t"
-			: /*No outputs*/
-			: "r" (ov), "r" (ov2),
-			"r" (yv), "r" (yv2), "r" (uv), "r" (vv),
-			"r" (vWidth)
+			: "+r" (ov), "+r" (ov2),
+			"+r" (yv), "+r" (yv2), "+r" (uv), "+r" (vv)
+			: "r" (vWidth)
 			);
 #else
 		for (x = 0; x < vWidth; x++) {
@@ -280,8 +279,8 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 			_mm_stream_si128(&ov2[x4+3],_mm_unpackhi_epi8(chroma_h, tmp_y4));
 		}
 #endif
-		
-		for (x = vWidth * 16; x < halfwidth; x++) {
+
+		for (x=vWidth * 16; x < halfwidth; x++) {
 			unsigned x4 = x*4, x2 = x*2;
 			o2[x4] = o[x4] = uc[x];
 			o[x4 + 1] = yc[x2];
