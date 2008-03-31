@@ -61,10 +61,10 @@
 		marginL = marginR = marginV = layer = 0;
 		spans = nil;
 		
-		posX = posY = kSubPositionNone;
+		posX = posY = 0;
 		alignH = kSubAlignmentMiddle; alignV = kSubAlignmentBottom;
 		
-		is_shape = NO;
+		is_shape = positioned = NO;
 		render_complexity = 0;
 	}
 	
@@ -91,6 +91,7 @@
   div->wrapStyle = wrapStyle;
   
     div->is_shape = NO;
+	div->positioned = positioned;
 	div->render_complexity = render_complexity;
 	
 	return div;
@@ -332,6 +333,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					
 					div->posX = curX;
 					div->posY = curY;
+					div->positioned = YES;
 				}
 
 				intnum = ("-"? [0-9]+) >paramset %setintnum;

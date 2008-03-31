@@ -990,9 +990,9 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		UniCharArrayOffset *breaks = FindLineBreaks(layout, div, breakLocator, &breakCount, breakingWidth, ubuffer, textLen);
 		ATSUTextMeasurement imageWidth, imageHeight;
 
-		if (div->posX != kSubPositionNone || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
+		if (div->positioned || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
 
-		if (div->posX == kSubPositionNone) {
+		if (!div->positioned) {
 			penX = FloatToFixed(NSMinX(marginRect));
 
 			switch(div->alignV) {
