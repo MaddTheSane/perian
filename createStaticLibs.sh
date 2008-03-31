@@ -6,7 +6,7 @@ if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 	MACOSX_DEPLOYMENT_TARGET="10.4"
 fi
 
-generalConfigureOptions="--disable-muxers --disable-encoders --disable-strip --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook"
+generalConfigureOptions="--disable-muxers --disable-encoders --disable-stripping --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook"
 sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -gstabs+ -Dattribute_deprecated="
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
