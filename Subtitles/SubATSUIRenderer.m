@@ -930,7 +930,10 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerOutline);
 	penY = DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerPrimary);
 	
-	if (endLayer) CGContextEndTransparencyLayer(c);
+	if (endLayer) {
+		CGContextEndTransparencyLayer(c);
+		CGContextSetShadowWithColor(c, CGSizeMake(0,0), 0, NULL);
+	}
 	
 	return penY;
 }
