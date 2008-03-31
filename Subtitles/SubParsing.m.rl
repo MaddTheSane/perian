@@ -61,7 +61,7 @@
 		marginL = marginR = marginV = layer = 0;
 		spans = nil;
 		
-		posX = posY = -1;
+		posX = posY = kSubPositionNone;
 		alignH = kSubAlignmentMiddle; alignV = kSubAlignmentBottom;
 		
 		is_shape = NO;
@@ -340,7 +340,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				string = ([^\\}]*) >paramset %setstringval;
 				color = ("H"|"&"){,2} (xdigit+) >paramset %sethexnum "&"?;
 				parens = "(" [^)]* ")";
-				xypos = ("(" [0-9]+ "," [0-9]+ ")") >paramset %setxypos;
+				xypos = ("(" "-"? [0-9]+ "," "-"? [0-9]+ ")") >paramset %setxypos;
 				
 				cmd = "\\" (
 							"b" intnum %bold

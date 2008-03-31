@@ -15,6 +15,7 @@ enum {kSubLineWrapTopWider = 0, kSubLineWrapSimple, kSubLineWrapNone, kSubLineWr
 enum {kSubAlignmentLeft, kSubAlignmentCenter, kSubAlignmentRight};
 enum {kSubAlignmentBottom, kSubAlignmentMiddle, kSubAlignmentTop};
 enum {kSubBorderStyleNormal = 1, kSubBorderStyleBox = 3};
+enum {kSubPositionNone = INT_MAX};
 
 typedef ATSURGBAlphaColor SubRGBAColor;
 

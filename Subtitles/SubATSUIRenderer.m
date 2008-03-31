@@ -333,7 +333,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
 	if (s->tracking) {
 		Fixed tracking = FloatToFixed(s->tracking);
 		
-		SetATSUStyleOther(style, kATSUTrackingTag, sizeof(Fixed), &tracking);
+		SetATSUStyleOther(style, kATSUAfterWithStreamShiftTag, sizeof(Fixed), &tracking);
 	}
 	
 	if (s->scaleX != 100. || s->scaleY != 100.) {
@@ -472,7 +472,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_fsp:
 			fixv();
-			SetATSUStyleOther(spanEx->style, kATSUTrackingTag, sizeof(Fixed), &fixval);
+			SetATSUStyleOther(spanEx->style, kATSUAfterWithStreamShiftTag, sizeof(Fixed), &fixval);
 			break;
 		case tag_frz:
 			if (!isFirstSpan) div->render_complexity |= renderComplexTransforms; // this one's hard
@@ -987,9 +987,9 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		UniCharArrayOffset *breaks = FindLineBreaks(layout, div, breakLocator, &breakCount, breakingWidth, ubuffer, textLen);
 		ATSUTextMeasurement imageWidth, imageHeight;
 
-		if (div->posX != -1 || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
+		if (div->posX != kSubPositionNone || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
 
-		if (div->posX == -1) {
+		if (div->posX == kSubPositionNone) {
 			penX = FloatToFixed(NSMinX(marginRect));
 
 			switch(div->alignV) {
