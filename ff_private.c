@@ -319,7 +319,7 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 			asbd->mFormatID = kAudioFormatMPEGLayer3;
 			break;
 		case CODEC_ID_AC3:
-			asbd->mFormatID = kAudioFormatAC3MS;
+			asbd->mFormatID = kAudioFormatAC3;
 			map->vbr = 1;
 			break;
 		case CODEC_ID_PCM_S16LE:
