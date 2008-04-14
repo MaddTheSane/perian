@@ -6,8 +6,8 @@ if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 	MACOSX_DEPLOYMENT_TARGET="10.4"
 fi
 
-generalConfigureOptions="--disable-muxers --disable-encoders --disable-stripping --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook"
-sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -gstabs+ -Dattribute_deprecated="
+generalConfigureOptions="--disable-muxers --disable-encoders --disable-stripping --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook --disable-ffserver"
+sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -ggdb -Dattribute_deprecated="
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
@@ -114,7 +114,7 @@ else
             unset CFLAGS;
             cd ..
         fi
-        make -j3            lib
+        make -j3
     fi
     
     #######################
@@ -138,7 +138,7 @@ else
         
             make depend > /dev/null 2>&1 || true
         fi
-        make -j3            lib
+        make -j3
     fi
 fi
 
