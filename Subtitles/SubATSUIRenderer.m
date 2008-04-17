@@ -653,47 +653,14 @@ static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 a
 	ATSUSetLayoutControls(layout,sizeof(vals) / sizeof(ATSUAttributeValuePtr),tags,sizes,vals);
 }
 
-static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator,
-										   ATSLayoutRecord *records, ItemCount lineLen, Fixed idealLineWidth, Fixed originalLineWidth, Fixed maximumLineWidth, unsigned numBreaks, unichar *uline)
+static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *div, unsigned char *breakOpportunities,
+										   ATSLayoutRecord *records, ItemCount lineLen, Fixed idealLineWidth, Fixed originalLineWidth, Fixed maximumLineWidth, unsigned numBreaks)
 {		
 	int recOffset = 0;
 	Fixed widthOffset = 0;
 	BOOL foundABreak;
 	UniCharArrayOffset lastBreakOffset = 0;
-	declare_bitfield(breakOpportunities, lineLen);
 	
-	FindAllPossibleLineBreaks(breakLocator, uline, lineLen, breakOpportunities);
-	
-#if 0
-	{
-		NSMutableString *nss = [NSMutableString string];
-		int i;
-		
-		for (i = 0; i < [div->text length]; i++) {
-			if (bitfield_test(breakOpportunities, i))
-				[nss appendFormat:@"%c", '|'];
-			
-			[nss appendFormat:@"%C", [div->text characterAtIndex:i]];
-		}
-		
-		NSLog(@"breaks (div): \"%@\"", nss);
-	}
-	
-	{
-		NSMutableString *nss = [NSMutableString string];
-		int i;
-		
-		for (i = 0; i < lineLen; i++) {
-			if (bitfield_test(breakOpportunities, i))
-				[nss appendFormat:@"%c", '|'];
-			
-			[nss appendFormat:@"%C", uline[i]];
-		}
-		
-		NSLog(@"breaks (uline): \"%@\"", nss);
-	}
-#endif
-    
 	do {
 		int j, lastIndex = 0;
 		ATSUTextMeasurement error = 0;
@@ -738,11 +705,13 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, Fixed breakingWidth, unichar *utext, unsigned textLen, ItemCount numHardBreaks)
 {
 	UniCharArrayOffset hardBreaks[numHardBreaks+2];
+	declare_bitfield(breakOpportunities, textLen);
+	
 	float fWidth = FixedToFloat(breakingWidth);
 	
 	ATSUGetSoftLineBreaks(layout, kATSUFromTextBeginning, kATSUToTextEnd, numHardBreaks, &hardBreaks[1], NULL);	
-	int i;
-	
+	FindAllPossibleLineBreaks(breakLocator, utext, textLen, breakOpportunities);
+		
 	hardBreaks[0] = 0;
 	hardBreaks[numHardBreaks+1] = textLen;
 	
@@ -762,7 +731,7 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 			
 			ATSUDirectGetLayoutDataArrayPtrFromTextLayout(layout, thisBreak, kATSUDirectDataLayoutRecordATSLayoutRecordCurrent, (void*)&records, &numRecords);
 						
-			UniCharArrayOffset res = BreakOneLineSpan(layout, div, breakLocator, records, numRecords, idealBreakWidth, fixLineWidth, breakingWidth, idealSplitLines-1, &utext[thisBreak]);
+			UniCharArrayOffset res = BreakOneLineSpan(layout, div, breakOpportunities, records, numRecords, idealBreakWidth, fixLineWidth, breakingWidth, idealSplitLines-1);
 			
 			if (res) ATSUBatchBreakLines(layout, res, nextBreak - res, breakingWidth, NULL);
 			
