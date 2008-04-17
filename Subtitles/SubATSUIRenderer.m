@@ -664,6 +664,36 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 	
 	FindAllPossibleLineBreaks(breakLocator, uline, lineLen, breakOpportunities);
 	
+#if 0
+	{
+		NSMutableString *nss = [NSMutableString string];
+		int i;
+		
+		for (i = 0; i < [div->text length]; i++) {
+			if (bitfield_test(breakOpportunities, i))
+				[nss appendFormat:@"%c", '|'];
+			
+			[nss appendFormat:@"%C", [div->text characterAtIndex:i]];
+		}
+		
+		NSLog(@"breaks (div): \"%@\"", nss);
+	}
+	
+	{
+		NSMutableString *nss = [NSMutableString string];
+		int i;
+		
+		for (i = 0; i < lineLen; i++) {
+			if (bitfield_test(breakOpportunities, i))
+				[nss appendFormat:@"%c", '|'];
+			
+			[nss appendFormat:@"%C", uline[i]];
+		}
+		
+		NSLog(@"breaks (uline): \"%@\"", nss);
+	}
+#endif
+    
 	do {
 		int j, lastIndex = 0;
 		ATSUTextMeasurement error = 0;
@@ -801,7 +831,7 @@ static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanE
 			break;
 			
 		case kTextLayerOutline:
-			if_different(outlineRadius) CGContextSetLineWidth(c, spanEx->outlineRadius*2. + .5);
+			if_different(outlineRadius) CGContextSetLineWidth(c, spanEx->outlineRadius ? (spanEx->outlineRadius*2. + .5) : 0.);
 			if_different(outlineColor)  SetColor(c, (div->styleLine->borderStyle == kSubBorderStyleNormal) ? strokec : fillc, spanEx->outlineColor);
 			
 			if_different(outlineAlpha) {
@@ -1220,12 +1250,12 @@ static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, unichar 
 	UniCharArrayOffset lastBreak = 0;
 	
 	while (1) {
-		UniCharArrayOffset breakOffset;
+		UniCharArrayOffset breakOffset = 0;
 		OSStatus status;
 		
-		status = UCFindTextBreak(breakLocator, kUCTextBreakLineMask, kUCTextBreakLeadingEdgeMask | (lastBreak ? kUCTextBreakLeadingEdgeMask : 0), uline, lineLen, lastBreak, &breakOffset);
+		status = UCFindTextBreak(breakLocator, kUCTextBreakLineMask, kUCTextBreakLeadingEdgeMask | (lastBreak ? kUCTextBreakIterateMask : 0), uline, lineLen, lastBreak, &breakOffset);
 		
-		if (status != noErr || breakOffset == lineLen) break;
+		if (status != noErr || breakOffset >= lineLen) break;
 		
 		bitfield_set(breakOpportunities, breakOffset-1);
 		lastBreak = breakOffset;
