@@ -711,6 +711,7 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 	
 	ATSUGetSoftLineBreaks(layout, kATSUFromTextBeginning, kATSUToTextEnd, numHardBreaks, &hardBreaks[1], NULL);	
 	FindAllPossibleLineBreaks(breakLocator, utext, textLen, breakOpportunities);
+	int i;
 		
 	hardBreaks[0] = 0;
 	hardBreaks[numHardBreaks+1] = textLen;
