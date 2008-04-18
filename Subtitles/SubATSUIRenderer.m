@@ -654,7 +654,7 @@ static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 a
 }
 
 static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *div, unsigned char *breakOpportunities,
-										   ATSLayoutRecord *records, ItemCount lineLen, Fixed idealLineWidth, Fixed originalLineWidth, Fixed maximumLineWidth, unsigned numBreaks)
+										   ATSLayoutRecord *records, ItemCount lineLen, Fixed idealLineWidth, Fixed originalLineWidth, Fixed maximumLineWidth, unsigned numBreaks, unsigned lastHardBreak)
 {		
 	int recOffset = 0;
 	Fixed widthOffset = 0;
@@ -669,8 +669,9 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 		for (j = recOffset; j < lineLen; j++) {
 			ATSLayoutRecord *rec = &records[j];
 			Fixed recPos = rec->realPos - widthOffset;
+			UniCharArrayOffset charOffset = rec->originalOffset/2 + lastHardBreak;
 
-			if (bitfield_test(breakOpportunities, rec->originalOffset/2)) {
+			if (bitfield_test(breakOpportunities, charOffset)) {
 				if (recPos >= idealLineWidth) {
 					error = recPos - idealLineWidth;
 
@@ -679,6 +680,8 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 						if (lastError < error || div->wrapStyle == kSubLineWrapBottomWider) {
 							rec = &records[lastIndex];
 							j = lastIndex;
+							recPos = rec->realPos - widthOffset;
+							charOffset = rec->originalOffset/2 + lastHardBreak;
 						}
 					}
 					
@@ -686,8 +689,8 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 					if ((recPos + (originalLineWidth - rec->realPos)) < maximumLineWidth) return 0;
 						
 					foundABreak = YES;
-					lastBreakOffset = rec->originalOffset/2;
-					ATSUSetSoftLineBreak(layout, rec->originalOffset/2);
+					lastBreakOffset = charOffset;
+					ATSUSetSoftLineBreak(layout, charOffset);
 					break;
 				}
 				
@@ -697,7 +700,8 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 		
 		widthOffset = records[j].realPos;
 		recOffset = j;
-	} while (foundABreak && numBreaks--);
+		numBreaks--;
+	} while (foundABreak && numBreaks);
 		
 	return (numBreaks == 0) ? 0 : lastBreakOffset;
 }
@@ -706,12 +710,11 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 {
 	UniCharArrayOffset hardBreaks[numHardBreaks+2];
 	declare_bitfield(breakOpportunities, textLen);
-	
-	float fWidth = FixedToFloat(breakingWidth);
+	float fBreakingWidth = FixedToFloat(breakingWidth);
+	int i;
 	
 	ATSUGetSoftLineBreaks(layout, kATSUFromTextBeginning, kATSUToTextEnd, numHardBreaks, &hardBreaks[1], NULL);	
 	FindAllPossibleLineBreaks(breakLocator, utext, textLen, breakOpportunities);
-	int i;
 		
 	hardBreaks[0] = 0;
 	hardBreaks[numHardBreaks+1] = textLen;
@@ -721,22 +724,22 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 		ATSUTextMeasurement leftEdge, rightEdge, ignore;
 		
 		ATSUGetUnjustifiedBounds(layout, thisBreak, nextBreak - thisBreak, &leftEdge, &rightEdge, &ignore, &ignore);
-		Fixed fixLineWidth = rightEdge - leftEdge;
-		float lineWidth = FixedToFloat(fixLineWidth);
+		Fixed lineWidth = rightEdge - leftEdge;
+		float fLineWidth = FixedToFloat(lineWidth);
 				
-		if (fixLineWidth > breakingWidth) {
+		if (lineWidth > breakingWidth) {
 			ATSLayoutRecord *records;
 			ItemCount numRecords;
-			unsigned idealSplitLines = ceil(lineWidth / fWidth);
-			Fixed idealBreakWidth = FloatToFixed(lineWidth / ceil(lineWidth / fWidth));
+			unsigned idealSplitLines = ceil(fLineWidth / fBreakingWidth);
+			Fixed idealBreakWidth = FloatToFixed(fLineWidth / idealSplitLines);
 			
 			ATSUDirectGetLayoutDataArrayPtrFromTextLayout(layout, thisBreak, kATSUDirectDataLayoutRecordATSLayoutRecordCurrent, (void*)&records, &numRecords);
 						
-			UniCharArrayOffset res = BreakOneLineSpan(layout, div, breakOpportunities, records, numRecords, idealBreakWidth, fixLineWidth, breakingWidth, idealSplitLines-1);
-			
-			if (res) ATSUBatchBreakLines(layout, res, nextBreak - res, breakingWidth, NULL);
+			UniCharArrayOffset res = BreakOneLineSpan(layout, div, breakOpportunities, records, numRecords, idealBreakWidth, lineWidth, breakingWidth, idealSplitLines-1, thisBreak);
 			
 			ATSUDirectReleaseLayoutDataArrayPtr(NULL, kATSUDirectDataLayoutRecordATSLayoutRecordCurrent, (void*)&records);
+			
+			if (res) ATSUBatchBreakLines(layout, res, nextBreak - res, breakingWidth, NULL);
 		}
 	}
 }
