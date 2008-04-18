@@ -614,12 +614,9 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 			return GetMoviesError();
 		
 		mkvTrack.theMedia = GetTrackMedia(mkvTrack.theTrack);
-		mh = GetMediaHandler(mkvTrack.theMedia);
-		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
-		
-		BeginMediaEdits(mkvTrack.theMedia);
-		
 		mkvTrack.is_vobsub = false;
+
+		BeginMediaEdits(mkvTrack.theMedia);
 	} else {
 		Codecprintf(NULL, "MKV: Unsupported subtitle type\n");
 		return noErr;
@@ -1081,8 +1078,11 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	if (desc == NULL) return;
 	
 	if (type == track_subtitle && !is_vobsub) {
-		if (frame.size > 0) subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.pts, frame.pts + frame.duration);
 		const char *packet=NULL; size_t size=0; unsigned start=0, end=0;
+		
+		if (frame.size > 0)
+			subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.pts, frame.pts + frame.duration);
+
 		packet = subtitleSerializer->popPacket(&size, &start, &end);
 		if (packet) {
 			Handle sampleH;
@@ -1187,7 +1187,7 @@ void MatroskaTrack::FinishTrack()
 			 AddFrame(fr); // add empty frames to flush the subtitle packet queue
 		 } while (!subtitleSerializer->empty());
 		 EndMediaEdits(theMedia);
+	} else {
+		AddSamplesToTrack();
 	}
-	
-	AddSamplesToTrack();
 }

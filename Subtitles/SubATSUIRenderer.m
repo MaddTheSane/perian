@@ -920,13 +920,11 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	SubATSUISpanEx *firstSpanEx = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
 	BOOL endLayer = NO;
 	
-	if (div->styleLine->borderStyle == kSubBorderStyleNormal) {
+	if (div->styleLine->borderStyle == kSubBorderStyleNormal && firstSpanEx->shadowDist) {
 		if (!(div->render_complexity & renderManualShadows)) {
-			if (firstSpanEx->shadowDist) {
-				endLayer = YES;
-				CGContextSetShadowWithColor(c, CGSizeMake(firstSpanEx->shadowDist + .5, -(firstSpanEx->shadowDist + .5)), 0, firstSpanEx->shadowColor);
-				CGContextBeginTransparencyLayer(c, NULL);
-			}
+			endLayer = YES;
+			CGContextSetShadowWithColor(c, CGSizeMake(firstSpanEx->shadowDist + .5, -(firstSpanEx->shadowDist + .5)), 0, firstSpanEx->shadowColor);
+			CGContextBeginTransparencyLayer(c, NULL);
 		} else DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerShadow);
 	}
 	
