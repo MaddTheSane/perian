@@ -260,6 +260,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 {
 	[context release];
 	free(ubuffer);
+	CGColorSpaceRelease(srgbCSpace);
 	UCDisposeTextBreakLocator(&breakLocator);
 	ATSUDisposeTextLayout(layout);
 	[super dealloc];
@@ -285,36 +286,37 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	return videoWidth / videoHeight;
 }
 
-static ATSFontRef gHelveticaATSRef = -1;
-static ATSUFontID gHelveticaATSUID;
-
-static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
+static ATSUFontID GetFontIDForSSAName(NSString *name)
 {
 	ByteCount nlen = [name length];
 	unichar *uname = (unichar*)[name cStringUsingEncoding:NSUnicodeStringEncoding];
+	static NSMutableDictionary *fontIDCache = nil;
 	
-	ATSFontRef fontRef;
+	if (!fontIDCache) fontIDCache = [[NSMutableDictionary alloc] init];
+	
+	NSNumber *idN = [fontIDCache objectForKey:name];
+		
+	if (idN) return [idN intValue];
+	
 	ATSUFontID font;
 	
 	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
 	
 	if (font == kATSUInvalidFontID) {
-		fontRef = ATSFontFindFromName((CFStringRef)name,kATSOptionFlagsDefault);
-		font = FMGetFontFromATSFontRef(fontRef);
+		font = ATSFontFindFromName((CFStringRef)name,kATSOptionFlagsDefault);
 		
 		if (font == kATSUInvalidFontID) {
-			if (gHelveticaATSRef == -1) {
-				gHelveticaATSRef = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
-				gHelveticaATSUID = FMGetFontFromATSFontRef(fontRef);
-			}
+			static ATSUFontID helveticaID = kATSUInvalidFontID;
 			
-			fontRef = gHelveticaATSRef;
-			font    = gHelveticaATSUID;
+			if (helveticaID == kATSUInvalidFontID)
+				ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
+			
+			font = helveticaID;
 		}
-	} else fontRef = FMGetATSFontRefFromFont(font);
+	}
 	
-	*_fontRef = fontRef;
-	
+	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:name];
+	 
 	return font;
 }
 
@@ -323,8 +325,8 @@ static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
 	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag};
 	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID)};
 	
-	ATSFontRef fontRef;
-	ATSUFontID font = GetFontIDForSSAName(s->fontname, &fontRef);
+	ATSUFontID font = GetFontIDForSSAName(s->fontname);
+	ATSFontRef fontRef = font;
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
 	Fixed size;
 	Boolean b = s->bold, i = s->italic, u = s->underline, st = s->strikeout;
@@ -432,8 +434,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 		case tag_fn:
 			sv();
 			{
-				ATSFontRef fontRef;
-				ATSUFontID font = GetFontIDForSSAName(sval, &fontRef);
+				ATSUFontID font = GetFontIDForSSAName(sval);
 				
 				if (font) SetATSUStyleOther(spanEx->style, kATSUFontTag, sizeof(ATSUFontID), &font);
 			}
@@ -1110,6 +1111,7 @@ void SubPrerollFromHeader(char *header, int headerLen)
 	SubtitleRendererPtr s = headerLen ? SubInitForSSA(header, headerLen, 640, 480)
 								      : SubInitNonSSA(640, 480);
 	
+	/*
 	CGColorSpaceRef csp = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	void *buf = malloc(640 * 480 * 4);
 	CGContextRef c = CGBitmapContextCreate(buf,640,480,8,640 * 4,csp,kCGImageAlphaPremultipliedFirst);
@@ -1122,7 +1124,7 @@ void SubPrerollFromHeader(char *header, int headerLen)
 		
 		for (i = 0; i < nstyles; i++) {
 			SubStyle *sty = [styles objectAtIndex:i];
-			NSString *line = [NSString stringWithFormat:@"0,0,%@,,0,0,0,,to Be continued", sty->name];
+			NSString *line = [NSString stringWithFormat:@"0,0,%@,,0,0,0,,{\fs1}If you are seeing this message, your player doesn't fully support the formatted subtitle track. It is recommended you switch to the unformatted track.", sty->name];
 			SubRenderPacket(s, c, (CFStringRef)line, 640, 480);
 		}
 	}
@@ -1130,6 +1132,9 @@ void SubPrerollFromHeader(char *header, int headerLen)
 	CGContextRelease(c);
 	free(buf);
 	CGColorSpaceRelease(csp);
+	*/
+	
+	SubDisposeRenderer(s);
 	[pool release];
 }
 

@@ -882,9 +882,11 @@ void MatroskaImport::PrerollSubtitleTracks()
 	if (!seenTracks) return;
 		
 	for (int i = 0; i < tracks.size(); i++) {
-		if (tracks[i].type == track_subtitle) {
+		MatroskaTrack *track = &tracks[i];
+		
+		if (track->type == track_subtitle) {
 			Handle subtitleDescriptionExt;
-			OSErr err = GetImageDescriptionExtension((ImageDescriptionHandle)tracks[i].desc, &subtitleDescriptionExt, kSubFormatSSA, 0);
+			OSErr err = GetImageDescriptionExtension((ImageDescriptionHandle)track->desc, &subtitleDescriptionExt, kSubFormatSSA, 1);
 			
 			if (err || !subtitleDescriptionExt) continue;
 			
