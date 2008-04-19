@@ -286,6 +286,8 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	return videoWidth / videoHeight;
 }
 
+// XXX: Assumes ATSUFontID = ATSFontRef. This is true.
+// May appear as a memory leak, but it isn't, not really.
 static ATSUFontID GetFontIDForSSAName(NSString *name)
 {
 	ByteCount nlen = [name length];

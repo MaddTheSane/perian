@@ -142,6 +142,16 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandl
 	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
 	
 	if (dir == kToSampleDescription) {
+		// WAVFORMATEX is stored in the private data, and some codecs (WMA) need it to decode
+		KaxCodecPrivate & codecPrivate = GetChild<KaxCodecPrivate>(*tr_entry);
+		
+		QTSoundDescriptionSetProperty(sndDesc, 
+		                              kQTPropertyClass_SoundDescription, 
+		                              kQTSoundDescriptionPropertyID_MagicCookie, 
+		                              codecPrivate.GetSize(), codecPrivate.GetBuffer());
+		
+		//XXX: What exactly was the point of all this?
+#if 0
 		Handle sndDescExt = NewHandle(0);
 		unsigned char *privateBuf;
 		int i;
@@ -206,6 +216,7 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandl
 		
 		DisposePtr((Ptr)packetSizes);
 		DisposeHandle(sndDescExt);
+#endif
 	}
 	return noErr;
 }
