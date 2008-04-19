@@ -247,9 +247,7 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 		} 
 		
 		if (!glob->ssa) glob->ssa = SubInitNonSSA((**p->imageDescription).width,(**p->imageDescription).height);
-		
-		//SSA_PrerollFonts(glob->ssa);
-		
+				
 		glob->colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	}
 	

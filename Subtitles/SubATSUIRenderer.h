@@ -6,6 +6,11 @@
 //  Copyright 2007 __MyCompanyName__. All rights reserved.
 //
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
 #import "SubRenderer.h"
@@ -30,10 +35,16 @@ typedef SubATSUIRenderer *SubtitleRendererPtr;
 #include <QuickTime/QuickTime.h>
 
 typedef void *SubtitleRendererPtr;
+
+#endif
+
 extern SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int height);
 extern SubtitleRendererPtr SubInitNonSSA(int width, int height);
 extern CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s);
 extern void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight);
+extern void SubPrerollFromHeader(char *header, int headerLen);
 extern void SubDisposeRenderer(SubtitleRendererPtr s);
 
+#ifdef __cplusplus
+}
 #endif

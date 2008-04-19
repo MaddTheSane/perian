@@ -10,6 +10,9 @@
 #define __SUBIMPORT_H__
 
 #include <QuickTime/QuickTime.h>
+#ifndef __OBJC__
+#include "SubATSUIRenderer.h"
+#endif
 
 #ifndef __OBJC_GC__
 #ifndef __strong
@@ -30,6 +33,7 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, Ti
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
 #import "SubContext.h"
+#import "SubATSUIRenderer.h"
 
 @interface SubLine : NSObject
 {

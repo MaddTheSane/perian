@@ -285,6 +285,9 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	return videoWidth / videoHeight;
 }
 
+static ATSFontRef gHelveticaATSRef = -1;
+static ATSUFontID gHelveticaATSUID;
+
 static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
 {
 	ByteCount nlen = [name length];
@@ -300,8 +303,13 @@ static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
 		font = FMGetFontFromATSFontRef(fontRef);
 		
 		if (font == kATSUInvalidFontID) {
-			fontRef = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
-			font = FMGetFontFromATSFontRef(fontRef);
+			if (gHelveticaATSRef == -1) {
+				gHelveticaATSRef = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
+				gHelveticaATSUID = FMGetFontFromATSFontRef(fontRef);
+			}
+			
+			fontRef = gHelveticaATSRef;
+			font    = gHelveticaATSUID;
 		}
 	} else fontRef = FMGetATSFontRefFromFont(font);
 	
@@ -1094,6 +1102,35 @@ CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s)
 void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
 {
 	[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
+}
+
+void SubPrerollFromHeader(char *header, int headerLen)
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	SubtitleRendererPtr s = headerLen ? SubInitForSSA(header, headerLen, 640, 480)
+								      : SubInitNonSSA(640, 480);
+	
+	CGColorSpaceRef csp = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+	void *buf = malloc(640 * 480 * 4);
+	CGContextRef c = CGBitmapContextCreate(buf,640,480,8,640 * 4,csp,kCGImageAlphaPremultipliedFirst);
+	
+	if (!headerLen) {
+		SubRenderPacket(s, c, (CFStringRef)@"to Be continued", 640, 480);
+	} else {
+		NSArray *styles = [s->context->styles allValues];
+		int i, nstyles = [styles count];
+		
+		for (i = 0; i < nstyles; i++) {
+			SubStyle *sty = [styles objectAtIndex:i];
+			NSString *line = [NSString stringWithFormat:@"0,0,%@,,0,0,0,,to Be continued", sty->name];
+			SubRenderPacket(s, c, (CFStringRef)line, 640, 480);
+		}
+	}
+	
+	CGContextRelease(c);
+	free(buf);
+	CGColorSpaceRelease(csp);
+	[pool release];
 }
 
 void SubDisposeRenderer(SubtitleRendererPtr s)

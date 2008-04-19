@@ -110,9 +110,11 @@ ComponentResult MatroskaImport::ProcessLevel1Element()
 		return ReadChapters(*static_cast<KaxChapters *>(el_l1));
 		
 	} else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
+		ComponentResult res;
 		el_l1->Read(*aStream, KaxAttachments::ClassInfos.Context, upperLevel, dummyElt, true);
-		return ReadAttachments(*static_cast<KaxAttachments *>(el_l1));
-		
+		res = ReadAttachments(*static_cast<KaxAttachments *>(el_l1));
+		PrerollSubtitleTracks();
+		return res;
 	} else if (EbmlId(*el_l1) == KaxSeekHead::ClassInfos.GlobalId) {
 		el_l1->Read(*aStream, KaxSeekHead::ClassInfos.Context, upperLevel, dummyElt, true);
 		return ReadMetaSeek(*static_cast<KaxSeekHead *>(el_l1));
@@ -875,6 +877,21 @@ void MatroskaImport::SetContext(MatroskaSeekContext context)
 	ioHandler->setFilePointer(context.position);
 }
 
+void MatroskaImport::PrerollSubtitleTracks()
+{
+	if (!seenTracks) return;
+		
+	for (int i = 0; i < tracks.size(); i++) {
+		if (tracks[i].type == track_subtitle) {
+			Handle subtitleDescriptionExt;
+			OSErr err = GetImageDescriptionExtension((ImageDescriptionHandle)tracks[i].desc, &subtitleDescriptionExt, kSubFormatSSA, 0);
+			
+			if (err || !subtitleDescriptionExt) continue;
+			
+			SubPrerollFromHeader(*subtitleDescriptionExt, GetHandleSize(subtitleDescriptionExt));
+		}
+	}
+}
 
 MatroskaTrack::MatroskaTrack()
 {
