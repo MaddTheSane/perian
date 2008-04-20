@@ -27,6 +27,8 @@
 #include "parser.h"
 #include "golomb.h"
 
+#include "CodecIDs.h"
+
 int inline MININT(int a, int b)
 {
 	return a < b ? a : b;
@@ -54,6 +56,8 @@ static const int ac3_layout_lfe[8] = {
 	kAudioChannelLayoutTag_ITU_3_2_1};
 
 static const uint16_t ac3_freqs[3] = { 48000, 44100, 32000 };
+static const uint16_t ac3_bitratetab[] = {32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640};
+static const uint8_t ac3_halfrate[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3};
 
 /* From: http://svn.mplayerhq.hu/ac3/ (LGPL)
  * Synchronize to ac3 bitstream.
@@ -115,8 +119,23 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	uint8_t lfe = (buffer[offset + 6] >> shift) & 0x01;
 	
 	/* This is a valid frame!!! */
-//	uint8_t bitrate = ac3_bitratetab[frmsizecod >> 1];
-	int sample_rate = ac3_freqs[fscod];
+	uint16_t bitrate = ac3_bitratetab[frmsizecod >> 1];
+	uint8_t half = ac3_halfrate[bsid];
+	int sample_rate = ac3_freqs[fscod] >> half;
+	int framesize;
+	switch (fscod) {
+		case 0:
+			framesize = 4 * bitrate;
+			break;
+		case 1:
+			framesize = (320 * bitrate / 147 + (frmsizecod & 1 ? 1 : 0)) * 2;
+			break;
+		case 2:
+			framesize = 6 * bitrate;
+			break;
+		default:
+			break;
+	}
 	
 	shift = 0;
 	if(bsid > 8)
@@ -125,7 +144,10 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	/* Setup the AudioStreamBasicDescription and AudioChannelLayout */
 	memset(asbd, 0, sizeof(AudioStreamBasicDescription));
 	asbd->mSampleRate = sample_rate >> shift;
-	asbd->mFormatID = kAudioFormatAC3;
+	if(offset == 0 && buff_size == framesize)
+		asbd->mFormatID = kAudioFormatAC3;
+	else
+		asbd->mFormatID = kAudioFormatAC3MS;
 	asbd->mFramesPerPacket = 1;
 	asbd->mChannelsPerFrame = nfchans_tbl[acmod] + lfe;
 	
