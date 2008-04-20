@@ -307,14 +307,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	if (font == kATSUInvalidFontID) {
 		font = ATSFontFindFromName((CFStringRef)name,kATSOptionFlagsDefault);
 		
-		if (font == kATSUInvalidFontID) {
-			static ATSUFontID helveticaID = kATSUInvalidFontID;
-			
-			if (helveticaID == kATSUInvalidFontID)
-				ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
-			
-			font = helveticaID;
-		}
+		if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
 	}
 	
 	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:name];
