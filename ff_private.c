@@ -116,6 +116,21 @@ err:
 	return -1;
 } /* prepare_track() */
 
+/* A very large percent of movies have NTSC timebases (30/1.001) with misrounded fractions, so let's recover them. */
+static void rescue_ntsc_timebase(AVRational *base)
+{
+	av_reduce(&base->num, &base->den, base->num, base->den, INT_MAX);
+	
+	double fTimebase = av_q2d(*base), nearest_ntsc = floor(fTimebase * 1001. + .5) / 1001.;
+	const double small_interval = 1./120.;
+	
+	if (fabs(fTimebase - nearest_ntsc) < small_interval)
+	{
+		base->num = 1001;
+		base->den = (1001. / fTimebase) + .5;
+	}
+}
+
 /* Initializes the map & targetTrack to receive video data */
 void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame)
 {
@@ -128,7 +143,9 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	codec = map->str->codec;
 	
 	map->base = map->str->time_base;
-	if(map->base.den > 100000) {
+	
+	rescue_ntsc_timebase(&map->base);
+	if(map->base.num != 1001 && map->base.den > 100000) {
 		/* if that's the case, then we probably ran out of timevalues!
 		* a timescale of 100000 allows a movie duration of 5-6 hours
 		* so I think this will be enough */
@@ -529,23 +546,36 @@ static void get_track_dimensions_for_codec(AVCodecContext *codec, Fixed *fixedWi
 	else *fixedWidth = FloatToFixed(codec->width * av_q2d(codec->sample_aspect_ratio));
 }
 
-void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed cleanW, Fixed cleanH)
+void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW, Fixed displayH, Fixed pixelW, Fixed pixelH)
 {
-	CleanApertureImageDescriptionExtension **clap = (CleanApertureImageDescriptionExtension**)NewHandle(sizeof(CleanApertureImageDescriptionExtension));
+	CleanApertureImageDescriptionExtension    **clap = (CleanApertureImageDescriptionExtension**)NewHandle(sizeof(CleanApertureImageDescriptionExtension));
+	PixelAspectRatioImageDescriptionExtension **pasp = (PixelAspectRatioImageDescriptionExtension**)NewHandle(sizeof(PixelAspectRatioImageDescriptionExtension));
 	
-	int wN, wD, hN, hD;
-	
-	av_reduce(&wN, &wD, cleanW, fixed1, UINT_MAX);
-	av_reduce(&hN, &hD, cleanH, fixed1, UINT_MAX);
+	int wN = pixelW, wD = fixed1, hN = pixelH, hD = fixed1;
+
+	av_reduce(&wN, &wD, wN, wD, INT_MAX);
+	av_reduce(&hN, &hD, hN, hD, INT_MAX);
 	
 	**clap = (CleanApertureImageDescriptionExtension){EndianU32_NtoB(wN), EndianU32_NtoB(wD),
 												      EndianU32_NtoB(hN), EndianU32_NtoB(hD), 
-													  EndianU32_NtoB(0), EndianU32_NtoB(1),
-													  EndianU32_NtoB(0), EndianU32_NtoB(1)};
+													  EndianS32_NtoB(0), EndianU32_NtoB(1),
+													  EndianS32_NtoB(0), EndianU32_NtoB(1)};
+	
+	AVRational dar, invPixelSize, sar;
+	
+	dar			   = (AVRational){displayW, displayH};
+	invPixelSize   = (AVRational){pixelH, pixelW};
+	sar = av_mul_q(dar, invPixelSize);
+	
+	av_reduce(&sar.num, &sar.den, sar.num, sar.den, fixed1);
+	
+	**pasp = (PixelAspectRatioImageDescriptionExtension){EndianU32_NtoB(sar.num), EndianU32_NtoB(sar.den)};
 	
 	AddImageDescriptionExtension(imgDesc, (Handle)clap, kCleanApertureImageDescriptionExtension);
+	AddImageDescriptionExtension(imgDesc, (Handle)pasp, kPixelAspectRatioImageDescriptionExtension);
 	
 	DisposeHandle((Handle)clap);
+	DisposeHandle((Handle)pasp);
 }
 
 /* This function prepares the movie to receivve the movie data,
@@ -585,7 +615,7 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
             }
 			
 			initialize_video_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
-			set_track_clean_aperture_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height);
+			set_track_clean_aperture_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height, IntToFixed(st->codec->width), IntToFixed(st->codec->height));
 		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
 			if (st->codec->sample_rate > 0) {
 				track = NewMovieTrack(theMovie, 0, 0, kFullVolume);

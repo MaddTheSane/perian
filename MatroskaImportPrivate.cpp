@@ -420,7 +420,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 		} else {
 			width = IntToFixed(uint32(disp_width));
 			height = IntToFixed(uint32(disp_height));
-		}		
+		}				
 	} else if (pxl_width.ValueIsSet() && pxl_height.ValueIsSet()) {
 		width = IntToFixed(uint32(pxl_width));
 		height = IntToFixed(uint32(pxl_height));
@@ -448,7 +448,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
     (*imgDesc)->depth = 24;
     (*imgDesc)->clutID = -1;
 	
-	set_track_clean_aperture_ext(imgDesc, width, height);
+	set_track_clean_aperture_ext(imgDesc, width, height, IntToFixed(uint32(pxl_width)), IntToFixed(uint32(pxl_height)));
 	mkvTrack.desc = (SampleDescriptionHandle) imgDesc;
 	
 	// this sets up anything else needed in the description for the specific codec.
