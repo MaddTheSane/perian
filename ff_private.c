@@ -517,6 +517,33 @@ static void add_metadata(AVFormatContext *ic, Movie theMovie)
     QTMetaDataRelease(movie_metadata);
 }
 
+static void get_track_dimensions_for_codec(AVCodecContext *codec, Fixed *fixedWidth, Fixed *fixedHeight)
+{	
+	*fixedHeight = IntToFixed(codec->height);
+
+	if (!codec->sample_aspect_ratio.num) *fixedWidth = IntToFixed(codec->width);
+	else *fixedWidth = FloatToFixed(codec->width * av_q2d(codec->sample_aspect_ratio));
+}
+
+void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed cleanW, Fixed cleanH)
+{
+	CleanApertureImageDescriptionExtension **clap = (CleanApertureImageDescriptionExtension**)NewHandle(sizeof(CleanApertureImageDescriptionExtension));
+	
+	int wN, wD, hN, hD;
+	
+	av_reduce(&wN, &wD, cleanW, fixed1, UINT_MAX);
+	av_reduce(&hN, &hD, cleanH, fixed1, UINT_MAX);
+	
+	**clap = (CleanApertureImageDescriptionExtension){EndianU32_NtoB(wN), EndianU32_NtoB(wD),
+												      EndianU32_NtoB(hN), EndianU32_NtoB(hD), 
+													  EndianU32_NtoB(0), EndianU32_NtoB(1),
+													  EndianU32_NtoB(0), EndianU32_NtoB(1)};
+	
+	AddImageDescriptionExtension(imgDesc, (Handle)clap, kCleanApertureImageDescriptionExtension);
+	
+	DisposeHandle((Handle)clap);
+}
+
 /* This function prepares the movie to receivve the movie data,
  * After success, *out_map points to a valid stream maping
  * Return values:
@@ -543,7 +570,10 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 		map[j].duration = -1;
 		
 		if(st->codec->codec_type == CODEC_TYPE_VIDEO) {
-			track = NewMovieTrack(theMovie, st->codec->width << 16, st->codec->height << 16, kNoVolume);
+			Fixed width, height;
+			
+			get_track_dimensions_for_codec(st->codec, &width, &height);
+			track = NewMovieTrack(theMovie, width, height, kNoVolume);
 
             // XXX Support for 'old' NUV files, that didn't put the codec_tag in the file. 
             if( st->codec->codec_id == CODEC_ID_NUV && st->codec->codec_tag == 0 ) {
@@ -551,6 +581,7 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
             }
 			
 			initialize_video_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
+			set_track_clean_aperture_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height);
 		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
 			if (st->codec->sample_rate > 0) {
 				track = NewMovieTrack(theMovie, 0, 0, kFullVolume);

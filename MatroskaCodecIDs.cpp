@@ -142,7 +142,6 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandl
 	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
 	
 	if (dir == kToSampleDescription) {
-		// WAVFORMATEX is stored in the private data, and some codecs (WMA) need it to decode
 		KaxCodecPrivate & codecPrivate = GetChild<KaxCodecPrivate>(*tr_entry);
 		
 		QTSoundDescriptionSetProperty(sndDesc, 

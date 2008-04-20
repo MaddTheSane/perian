@@ -50,6 +50,9 @@
 
 extern "C" {
 #include "avutil.h"
+#define CodecType AVCodecType
+#include "ff_private.h"
+#undef CodecType	
 }
 
 using namespace std;
@@ -405,7 +408,6 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 {
 	ComponentResult err = noErr;
 	ImageDescriptionHandle imgDesc;
-	CleanApertureImageDescriptionExtension **clap = (CleanApertureImageDescriptionExtension**)NewHandle(sizeof(CleanApertureImageDescriptionExtension));
 	Fixed width, height;
 	
 	KaxTrackVideo &videoTrack = GetChild<KaxTrackVideo>(kaxTrack);
@@ -438,9 +440,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 		Codecprintf(NULL, "MKV: Video has unknown dimensions.\n");
 		return invalidTrack;
 	}
-	
-	SetCleanApertureDimensions(clap, width, height);
-	
+		
 	mkvTrack.theTrack = NewMovieTrack(theMovie, width, height, kNoVolume);
 	if (mkvTrack.theTrack == NULL)
 		return GetMoviesError();
@@ -460,10 +460,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
     (*imgDesc)->depth = 24;
     (*imgDesc)->clutID = -1;
 	
-	AddImageDescriptionExtension(imgDesc,(Handle)clap, kCleanApertureImageDescriptionExtension);
-	
-	DisposeHandle((Handle)clap);
-	
+	set_track_clean_aperture_ext(imgDesc, width, height);
 	mkvTrack.desc = (SampleDescriptionHandle) imgDesc;
 	
 	// this sets up anything else needed in the description for the specific codec.
