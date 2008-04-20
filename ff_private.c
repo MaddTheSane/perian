@@ -165,6 +165,10 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	(*imgHdl)->depth = codec->bits_per_sample;
 	(*imgHdl)->clutID = -1; // no color lookup table...
 	
+	// 12 is invalid in mov
+	// XXX it might be better to set this based entirely on pix_fmt
+	if ((*imgHdl)->depth == 12) (*imgHdl)->depth = 24;
+	
 	/* Create the strf image description extension (see AVI's BITMAPINFOHEADER) */
 	imgDescExt = create_strf_ext(codec);
 	if (imgDescExt) {
