@@ -392,18 +392,6 @@ ComponentResult MatroskaImport::ReadContentEncodings(KaxContentEncodings &encodi
 	return noErr;
 }
 
-static void SetCleanApertureDimensions(CleanApertureImageDescriptionExtension **clap, Fixed cleanW, Fixed cleanH)
-{
-	int wN, wD, hN, hD;
-	
-	av_reduce(&wN, &wD, cleanW, fixed1, UINT_MAX);
-	av_reduce(&hN, &hD, cleanH, fixed1, UINT_MAX);
-	
-	**clap = (CleanApertureImageDescriptionExtension){EndianU32_NtoB(wN), EndianU32_NtoB(wD),
-													  EndianU32_NtoB(hN), EndianU32_NtoB(hD),
-													  EndianU32_NtoB(0), EndianU32_NtoB(1), EndianU32_NtoB(0), EndianU32_NtoB(1)};
-}
-
 ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
 {
 	ComponentResult err = noErr;
