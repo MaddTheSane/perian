@@ -23,7 +23,8 @@ if [ $no_pic -gt 0 ]; then
     sdkflags="$sdkflags -mdynamic-no-pic" # ld can't handle -fno-pic on ppc
 else
     #no-pic only on pre-leopard
-    generalConfigureOptions="$generalConfigureOptions --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3 --enable-shared"
+    echo "warning: Due to issues with Xcode 3.0, Perian will run very slowly! Please get the iPhone SDK or fix Patches/ffmpeg.diff!";
+    generalConfigureOptions="$generalConfigureOptions --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3 --disable-mmx --enable-shared"
 fi 
 	
 export sdkflags
