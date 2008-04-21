@@ -866,6 +866,8 @@ int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size,
 
 int ffusionIsParsedVideoDecodable(FFusionParserContext *parser)
 {
+	if (!parser) return 1;
+	
 	if (parser->parserStructure == &ffusionH264Parser) {
 		H264ParserContext *h264parser = parser->internalContext;
 		

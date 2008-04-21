@@ -681,6 +681,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 //		if(glob->packedType != PACKED_QUICKTIME_KNOWS_ORDER)
 			glob->begin.parser = ffusionParserInit(codecID);
                 
+		if ((codecID == CODEC_ID_MPEG4 || codecID == CODEC_ID_H264) && !glob->begin.parser)
+			Codecprintf(glob->fileLog, "This is a parseable format, but we couldn't open a parser!\n");
+		
         // we do the same for the AVCodecContext since all context values are
         // correctly initialized when calling the alloc function
         
