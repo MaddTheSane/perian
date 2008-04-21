@@ -42,6 +42,12 @@ Modification from frank tang's original work:
   text stream.
 */
 
+/*
+Modification from frank tang's original work: (Modified by Cheolgi Kim
+. Korean CharSet of EUC-KR is extended to CP949, which allows more characters.
+  Thus, Error condition of EUC-KR is relaxed.
+*/
+
 // BIG5 
 
 static PRUint32 BIG5_cls [ 256 / 8 ] = {
@@ -170,12 +176,12 @@ PCK4BITS(1,1,1,1,1,1,1,1),  // 60 - 67
 PCK4BITS(1,1,1,1,1,1,1,1),  // 68 - 6f 
 PCK4BITS(1,1,1,1,1,1,1,1),  // 70 - 77 
 PCK4BITS(1,1,1,1,1,1,1,1),  // 78 - 7f 
-PCK4BITS(0,0,0,0,0,0,0,0),  // 80 - 87 
-PCK4BITS(0,0,0,0,0,0,0,0),  // 88 - 8f 
-PCK4BITS(0,0,0,0,0,0,0,0),  // 90 - 97 
-PCK4BITS(0,0,0,0,0,0,0,0),  // 98 - 9f 
+PCK4BITS(0,2,2,2,2,2,2,2),  // 80 - 87 
+PCK4BITS(2,2,2,2,2,2,2,2),  // 88 - 8f 
+PCK4BITS(2,2,2,2,2,2,2,2),  // 90 - 97 
+PCK4BITS(2,2,2,2,2,2,2,2),  // 98 - 9f 
 PCK4BITS(0,2,2,2,2,2,2,2),  // a0 - a7 
-PCK4BITS(2,2,2,2,2,3,3,3),  // a8 - af 
+PCK4BITS(2,2,2,2,2,2,2,2),  // a8 - af 
 PCK4BITS(2,2,2,2,2,2,2,2),  // b0 - b7 
 PCK4BITS(2,2,2,2,2,2,2,2),  // b8 - bf 
 PCK4BITS(2,2,2,2,2,2,2,2),  // c0 - c7 
@@ -185,13 +191,13 @@ PCK4BITS(2,2,2,2,2,2,2,2),  // d8 - df
 PCK4BITS(2,2,2,2,2,2,2,2),  // e0 - e7 
 PCK4BITS(2,2,2,2,2,2,2,2),  // e8 - ef 
 PCK4BITS(2,2,2,2,2,2,2,2),  // f0 - f7 
-PCK4BITS(2,2,2,2,2,2,2,0)   // f8 - ff 
+PCK4BITS(2,2,2,2,2,2,3,0)   // f8 - ff 
 };
 
 
 static PRUint32 EUCKR_st [ 2] = {
 PCK4BITS(eError,eStart,     3,eError,eError,eError,eError,eError),//00-07 
-PCK4BITS(eItsMe,eItsMe,eItsMe,eItsMe,eError,eError,eStart,eStart) //08-0f 
+PCK4BITS(eItsMe,eItsMe,eItsMe,eItsMe,eStart,eStart,eStart,eStart) //08-0f 
 };
 
 static const PRUint32 EUCKRCharLenTable[] = {0, 1, 2, 0};
