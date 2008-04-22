@@ -296,7 +296,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	
 	if (!fontIDCache) fontIDCache = [[NSMutableDictionary alloc] init];
 	
-	NSNumber *idN = [fontIDCache objectForKey:name];
+	NSNumber *idN = [fontIDCache objectForKey:[name lowercaseString]];
 		
 	if (idN) return [idN intValue];
 	
@@ -304,13 +304,38 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	
 	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
 	
-	if (font == kATSUInvalidFontID) {
-		font = ATSFontFindFromName((CFStringRef)name,kATSOptionFlagsDefault);
+	if (font == kATSUInvalidFontID) { // try a case-insensitive search
+		ItemCount fontCount;
+		ATSUFontCount(&fontCount);
 		
-		if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
+		ATSUFontID fontIDs[fontCount];
+		ItemCount arraySize = fontCount;
+		ATSUGetFontIDs(fontIDs, arraySize, &fontCount);
+		
+		// I do not want to call ATSUFindFontName twice 
+		// so I make the buffer large enough.
+		ByteCount len;
+		ItemCount x, index;
+		const ByteCount kBufLength = 1024;
+		char buf[kBufLength];
+	  
+		for (x = 0; x < fontCount; x++) {
+			ATSUFindFontName(fontIDs[x], kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, kBufLength, buf, &len, &index);
+			
+			CFStringRef fname = CFStringCreateWithBytes(NULL,(UInt8 *) buf, len, kCFStringEncodingUnicode, false);
+			if ([name caseInsensitiveCompare:(NSString *) fname] == NSOrderedSame) {
+				font = fontIDs[x];
+				break;
+			}
+			
+			CFRelease(fname);
+		}
+		
+		if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)name,        kATSOptionFlagsDefault); // for bugs in ATS under 10.4
+		if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault); // final fallback
 	}
 	
-	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:name];
+	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:[name lowercaseString]];
 	 
 	return font;
 }
