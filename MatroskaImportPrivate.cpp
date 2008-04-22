@@ -703,6 +703,11 @@ void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
 		KaxChapterString & chapString = GetChild<KaxChapterString>(chapDisplay);
 		MediaHandler mh = GetMediaHandler(GetTrackMedia(chapterTrack));
 		
+		if (UInt64(startTime) > movieDuration) {
+			Codecprintf(NULL, "MKV: Chapter time is beyond the end of the file\n");
+			return;
+		}
+		
 		Rect bounds = {0, 0, 0, 0};
 		TimeValue inserted;
 		OSErr err = TextMediaAddTextSample(mh, 
