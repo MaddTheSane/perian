@@ -170,14 +170,14 @@ void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSA
 		
 		sline = (("Style:" ws* %sstart str %csvlineend) | str) :> nl;
 		
-		styles = stylename % {cur_array=stylearr;} nl (format %{styleformat=str;})? <: (sline*);
+		styles = stylename % {cur_array=stylearr;} nl :> (format %{styleformat=str;})? <: (sline*);
 		
 		event_txt = (("Dialogue:" ws* %sstart str %csvlineend) | str);
 		event = event_txt :> nl;
 			
-		lines = "[Events]" %setupevents nl (format %{eventformat=str;})? <: (event*);
+		lines = "[Events]" %setupevents nl :> (format %{eventformat=str;})? <: (event*);
 		
-		main := bom? header :> styles :> lines?;
+		main := bom? header styles lines?;
 	}%%
 		
 	%%write init;
