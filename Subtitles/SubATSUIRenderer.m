@@ -286,13 +286,20 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	return videoWidth / videoHeight;
 }
 
+static NSMutableDictionary *fontIDCache = nil;
+
+static void CleanupFontIDCache() __attribute__((destructor));
+static void CleanupFontIDCache()
+{
+	if (fontIDCache) [fontIDCache release];
+	fontIDCache = nil;
+}
+
 // XXX: Assumes ATSUFontID = ATSFontRef. This is true.
-// May appear as a memory leak, but it isn't, not really.
 static ATSUFontID GetFontIDForSSAName(NSString *name)
 {
 	ByteCount nlen = [name length];
 	unichar *uname = (unichar*)[name cStringUsingEncoding:NSUnicodeStringEncoding];
-	static NSMutableDictionary *fontIDCache = nil;
 	
 	if (!fontIDCache) fontIDCache = [[NSMutableDictionary alloc] init];
 	
@@ -304,6 +311,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	
 	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
 	
+	if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)name, kATSOptionFlagsDefault); // for bugs in ATS under 10.4
 	if (font == kATSUInvalidFontID) { // try a case-insensitive search
 		ItemCount fontCount;
 		ATSUFontCount(&fontCount);
@@ -316,22 +324,19 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 		// so I make the buffer large enough.
 		ByteCount len;
 		ItemCount x, index;
-		const ByteCount kBufLength = 1024;
-		char buf[kBufLength];
+		const ByteCount kBufLength = 1024/sizeof(unichar);
+		unichar buf[kBufLength];
 	  
 		for (x = 0; x < fontCount; x++) {
-			ATSUFindFontName(fontIDs[x], kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, kBufLength, buf, &len, &index);
+			ATSUFindFontName(fontIDs[x], kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, kBufLength, (Ptr)buf, &len, &index);
+			NSString *fname = [NSString stringWithCharacters:buf length:len/sizeof(unichar)];
 			
-			CFStringRef fname = CFStringCreateWithBytes(NULL,(UInt8 *) buf, len, kCFStringEncodingUnicode, false);
-			if ([name caseInsensitiveCompare:(NSString *) fname] == NSOrderedSame) {
+			if ([name caseInsensitiveCompare:fname] == NSOrderedSame) {
 				font = fontIDs[x];
 				break;
 			}
-			
-			CFRelease(fname);
 		}
 		
-		if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)name,        kATSOptionFlagsDefault); // for bugs in ATS under 10.4
 		if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault); // final fallback
 	}
 	
