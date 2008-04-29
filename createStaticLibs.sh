@@ -68,7 +68,7 @@ if [ -e ffmpeg/patched ] ; then
 fi
 
 if [ $no_pic -eq 0 ] ; then
- (cd ffmpeg; patch -p1 < ../Patches/ffmpeg-pic.diff)
+# (cd ffmpeg; patch -p1 < ../Patches/ffmpeg-pic.diff)
 fi
 
 touch patched
