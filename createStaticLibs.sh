@@ -67,9 +67,9 @@ if [ -e ffmpeg/patched ] ; then
 	(cd ffmpeg && svn revert -R . && rm patched)
 fi
 
-if [ $no_pic -eq 0 ] ; then
+# if [ $no_pic -eq 0 ] ; then
 # (cd ffmpeg; patch -p1 < ../Patches/ffmpeg-pic.diff)
-fi
+# fi
 
 touch patched
 
