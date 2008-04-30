@@ -378,6 +378,19 @@ void RGB32toRGB32(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned h
 	}
 }
 
+void RGB24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture)
+{
+	unsigned y;
+	UInt8 *srcPtr = picture->data[0];
+	
+	for (y = 0; y < height; y++) {
+		memcpy(baseAddr, srcPtr, width * 3);
+		
+		baseAddr += rowBytes;
+		srcPtr += picture->linesize[0];
+	}
+}
+
 void Y422toY422(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
 	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
