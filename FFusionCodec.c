@@ -671,6 +671,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			case 'tscc':
 				codecID = CODEC_ID_TSCC;
 				break;
+				
+			case 'ZMBV':
+				codecID = CODEC_ID_ZMBV;
+				break;
 
 				
             default:
@@ -822,6 +826,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			break;
 		case PIX_FMT_RGB32:
 			pos[index++] = k32ARGBPixelFormat;
+			break;
+		case PIX_FMT_RGB24:
+			pos[index++] = k24RGBPixelFormat;
 			break;
 		case PIX_FMT_YUV420P:
 		default:
@@ -1300,6 +1307,10 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	{
 		RGB32toRGB32((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
 	}
+	else if (myDrp->pixelFormat == k24RGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_RGB24)
+	{
+		RGB24toRGB24((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
+	}
 	else if (myDrp->pixelFormat == k2vuyPixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUV422P)
 	{
 		Y422toY422((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
@@ -1575,6 +1586,10 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
             case 'tscc':
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kTSCCCodecInfoResID, (Handle *)&tempCodecInfo);
                 break;
+				
+			case 'ZMBV':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kZMBVCodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
 				
 				
             default:	// should never happen but we have to handle the case

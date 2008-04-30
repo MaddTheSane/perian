@@ -51,6 +51,7 @@
 #define kSnowCodecInfoResID			274
 #define kNuvCodecInfoResID			275
 #define kTSCCCodecInfoResID			305
+#define kZMBVCodecInfoResID			307
 
 #define kFFusionCodecManufacturer	'Peri'
 
