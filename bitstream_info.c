@@ -791,6 +791,8 @@ FFusionParserContext *ffusionParserInit(int codec_id)
     if(codec_id == CODEC_ID_NONE)
         return NULL;
 	
+	if (!ffusionFirstParser) initFFusionParsers();
+	
     for(ffParser = ffusionFirstParser; ffParser != NULL; ffParser = ffParser->next) {
 		parser = ffParser->avparse;
         if (parser->codec_ids[0] == codec_id ||
