@@ -63,6 +63,23 @@ short GetFilenameLanguage(CFStringRef filename)
 	return lang;
 }
 
+static bool ShouldEngageFrontRowHack(void)
+{
+	bool ret;
+	Boolean isSet;
+	
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSString *applicationName = [[NSProcessInfo processInfo] processName];
+	long minorVersion;
+	Gestalt(gestaltSystemVersionMinor, &minorVersion);
+	CFPreferencesGetAppBooleanValue(CFSTR("PerianFrontRowSubtitleHack"),CFSTR("org.perian.Perian"),&isSet);
+	
+	ret = (minorVersion == 5) && [applicationName isEqualToString:@"Front Row"] && isSet;
+	[pool release];
+	
+	return ret;
+}
+
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, 
                               TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox)
 {
@@ -91,7 +108,12 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 		if (theMedia != NULL) {
 			// finally, say that we're transparent
 			MediaHandler mh = GetMediaHandler(theMedia);
-			MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
+			
+			if (ShouldEngageFrontRowHack()) {
+				RGBColor blendColor = {0x0000, 0x0000, 0x0000};
+				MediaSetGraphicsMode(mh, transparent, &blendColor);
+			}
+			else MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
 			
 			// subtitle tracks should be above the video track, which should be layer 0
 			SetTrackLayer(theTrack, -1);
