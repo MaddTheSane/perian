@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SubRenderer.h"
 
-enum {kSubTypeSSA, kSubTypeASS, kSubTypeSRT};
+enum {kSubTypeSSA, kSubTypeASS, kSubTypeSRT, kSubTypeSMI};
 enum {kSubCollisionsNormal, kSubCollisionsReverse};
 enum {kSubLineWrapTopWider = 0, kSubLineWrapSimple, kSubLineWrapNone, kSubLineWrapBottomWider};
 enum {kSubAlignmentLeft, kSubAlignmentCenter, kSubAlignmentRight};

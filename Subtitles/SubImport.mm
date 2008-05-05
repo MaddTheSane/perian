@@ -9,6 +9,7 @@
 #include <QuickTime/QuickTime.h>
 #include "CommonUtils.h"
 #include "Codecprintf.h"
+#include "CodecIDs.h"
 #import "SubImport.h"
 #import "SubParsing.h"
 #import "SubUtilities.h"
@@ -161,6 +162,8 @@ static NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
 	return [nssSub substringToIndex:[nssSub rangeOfString:@"[Events]" options:NSLiteralSearch].location];
 }
 
+#pragma mark SAMI Parsing
+
 static void LoadSRTFromPath(NSString *path, SubSerializer *ss)
 {
 	NSMutableString *srt = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(path));
@@ -215,7 +218,291 @@ static void LoadSRTFromPath(NSString *path, SubSerializer *ss)
 	} while (![sc isAtEnd]);
 }
 
-ComponentResult LoadSingleTextSubtitle(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack, int subtitleType)
+static int parse_SYNC(NSString *str)
+{
+	NSScanner *sc = [NSScanner scannerWithString:str];
+
+	int res;
+
+	if ([sc scanString:@"START=" intoString:nil])
+		[sc scanInt:&res];
+
+	return res;
+}
+
+static NSArray *parse_STYLE(NSString *str)
+{
+	NSScanner *sc = [NSScanner scannerWithString:str];
+
+	NSString *firstRes;
+	NSString *secondRes;
+	NSArray *subArray;
+	int secondLoc;
+
+	[sc scanUpToString:@"<P CLASS=" intoString:nil];
+	if ([sc scanString:@"<P CLASS=" intoString:nil])
+		[sc scanUpToString:@">" intoString:&firstRes];
+	else
+		firstRes = @"noClass";
+
+	secondLoc = [str length] * .9;
+	[sc setScanLocation:secondLoc];
+
+	[sc scanUpToString:@"<P CLASS=" intoString:nil];
+	if ([sc scanString:@"<P CLASS=" intoString:nil])
+		[sc scanUpToString:@">" intoString:&secondRes];
+	else
+		secondRes = @"noClass";
+
+	if ([firstRes isEqualToString:secondRes])
+		secondRes = @"noClass";
+
+	subArray = [NSArray arrayWithObjects:firstRes, secondRes, nil];
+
+	return subArray;
+}
+
+static int parse_P(NSString *str, NSArray *subArray)
+{
+	NSScanner *sc = [NSScanner scannerWithString:str];
+
+	NSString *res;
+	int subLang;
+
+	if ([sc scanString:@"CLASS=" intoString:nil])
+		[sc scanUpToString:@">" intoString:&res];
+	else
+		res = @"noClass";
+
+	if ([res isEqualToString:[subArray objectAtIndex:0]])
+		subLang = 1;
+	else if ([res isEqualToString:[subArray objectAtIndex:1]])
+		subLang = 2;
+	else
+		subLang = 3;
+
+	return subLang;
+}
+
+static NSString *parse_COLOR(NSString *str)
+{
+	NSString *cvalue;
+	NSMutableString *cname = [NSMutableString stringWithFormat:@"%@", str];
+
+	if ([cname characterAtIndex:0] == '#' && [cname lengthOfBytesUsingEncoding:NSASCIIStringEncoding] == 7)
+		cvalue = [NSString stringWithFormat:@"{\\1c&H%@%@%@&}", [cname substringWithRange:NSMakeRange(5,2)], [cname substringWithRange:NSMakeRange(3,2)], [cname substringWithRange:NSMakeRange(1,2)]];
+	else {
+		[cname replaceOccurrencesOfString:@"Aqua" withString:@"00FFFF" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Black" withString:@"000000" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Blue" withString:@"0000FF" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Fuchsia" withString:@"FF00FF" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Gray" withString:@"808080" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Green" withString:@"008000" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Lime" withString:@"00FF00" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Maroon" withString:@"800000" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Navy" withString:@"000080" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Olive" withString:@"808000" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Purple" withString:@"800080" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Red" withString:@"FF0000" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Silver" withString:@"C0C0C0" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Teal" withString:@"008080" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"White" withString:@"FFFFFF" options:1 range:NSMakeRange(0,[cname length])];
+		[cname replaceOccurrencesOfString:@"Yellow" withString:@"FFFF00" options:1 range:NSMakeRange(0,[cname length])];
+
+		if ([cname lengthOfBytesUsingEncoding:NSASCIIStringEncoding] == 6)
+			cvalue = [NSString stringWithFormat:@"{\\1c&H%@%@%@&}", [cname substringWithRange:NSMakeRange(4,2)], [cname substringWithRange:NSMakeRange(2,2)], [cname substringWithRange:NSMakeRange(0,2)]];
+		else
+			cvalue = @"{\\1c&HFFFFFF&}";
+	}
+
+	return cvalue;
+}
+
+static NSString *parse_FONT(NSString *str)
+{
+	NSScanner *sc = [NSScanner scannerWithString:str];
+
+	NSString *res;
+	NSString *color;
+
+	if ([sc scanString:@"COLOR=" intoString:nil]) {
+		[sc scanUpToString:@">" intoString:&res];
+		color = parse_COLOR(res);
+	}
+	else
+		color = @"{\\1c&HFFFFFF&}";
+
+	return color;
+}
+
+static NSMutableString *StandardizeSMIWhitespace(NSString *str)
+{
+	if (!str) return nil;
+	NSMutableString *ms = [NSMutableString stringWithString:str];
+	[ms replaceOccurrencesOfString:@"\r" withString:@"" options:0 range:NSMakeRange(0,[ms length])];
+	[ms replaceOccurrencesOfString:@"\n" withString:@"" options:0 range:NSMakeRange(0,[ms length])];
+	[ms replaceOccurrencesOfString:@"&nbsp;" withString:@" " options:0 range:NSMakeRange(0,[ms length])];
+	return ms;
+}
+
+static void LoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount)
+{
+	NSMutableString *smi = StandardizeSMIWhitespace(STLoadFileWithUnknownEncoding(path));
+	if (!smi) return;
+		
+	NSScanner *sc = [NSScanner scannerWithString:smi];
+	NSString *res = nil;
+	[sc setCharactersToBeSkipped:nil];
+	[sc setCaseSensitive:NO];
+	
+	NSMutableString *cmt = [NSMutableString stringWithFormat:@""];
+	NSArray *subLanguage = parse_STYLE(smi);
+
+	int startTime=-1, endTime=-1, syncTime=-1;
+	int cc=1;
+	
+	enum {
+		TAG_INIT,
+		TAG_SYNC,
+		TAG_P,
+		TAG_BR_OPEN,
+		TAG_BR_CLOSE,
+		TAG_B_OPEN,
+		TAG_B_CLOSE,
+		TAG_I_OPEN,
+		TAG_I_CLOSE,
+		TAG_FONT_OPEN,
+		TAG_FONT_CLOSE,
+		TAG_COMMENT
+	} state = TAG_INIT;
+	
+	do {
+		switch (state) {
+			case TAG_INIT:
+				[sc scanUpToString:@"<SYNC" intoString:nil];
+				if ([sc scanString:@"<SYNC" intoString:nil])
+					state = TAG_SYNC;
+				break;
+			case TAG_SYNC:
+				[sc scanUpToString:@">" intoString:&res];
+				syncTime = parse_SYNC(res);
+				if (startTime > -1) {
+					endTime = syncTime;
+					if (subCount == 2 && cc == 2)
+						[cmt insertString:@"{\\an8}" atIndex:0];
+					if (subCount == 1 && cc == 1 || subCount == 2 && cc == 2) {
+						SubLine *sl = [[SubLine alloc] initWithLine:cmt start:startTime end:endTime];
+						[ss addLine:[sl autorelease]];
+					}
+				}
+				startTime = syncTime;
+				[cmt setString:@""];
+				state = TAG_COMMENT;
+				break;
+			case TAG_P:
+				[sc scanUpToString:@">" intoString:&res];
+				cc = parse_P(res, subLanguage);
+				[cmt setString:@""];
+				state = TAG_COMMENT;
+				break;
+			case TAG_BR_OPEN:
+				[sc scanUpToString:@">" intoString:nil];
+				[cmt appendString:@"\\n"];
+				state = TAG_COMMENT;
+				break;
+			case TAG_BR_CLOSE:
+				[sc scanUpToString:@">" intoString:nil];
+				[cmt appendString:@"\\n"];
+				state = TAG_COMMENT;
+				break;
+			case TAG_B_OPEN:
+				[sc scanUpToString:@">" intoString:&res];
+				[cmt appendString:@"{\\b1}"];
+				state = TAG_COMMENT;
+				break;
+			case TAG_B_CLOSE:
+				[sc scanUpToString:@">" intoString:nil];
+				[cmt appendString:@"{\\b0}"];
+				state = TAG_COMMENT;
+				break;
+			case TAG_I_OPEN:
+				[sc scanUpToString:@">" intoString:&res];
+				[cmt appendString:@"{\\i1}"];
+				state = TAG_COMMENT;
+				break;
+			case TAG_I_CLOSE:
+				[sc scanUpToString:@">" intoString:nil];
+				[cmt appendString:@"{\\i0}"];
+				state = TAG_COMMENT;
+				break;
+			case TAG_FONT_OPEN:
+				[sc scanUpToString:@">" intoString:&res];
+				[cmt appendString:parse_FONT(res)];
+				state = TAG_COMMENT;
+				break;
+			case TAG_FONT_CLOSE:
+				[sc scanUpToString:@">" intoString:nil];
+				[cmt appendString:@"{\\1c&HFFFFFF&}"];
+				state = TAG_COMMENT;
+				break;
+			case TAG_COMMENT:
+				[sc scanString:@">" intoString:nil];
+				if ([sc scanUpToString:@"<" intoString:&res])
+					[cmt appendString:res];
+				else
+					[cmt appendString:@"<>"];
+				if ([sc scanString:@"<" intoString:nil]) {
+					if ([sc scanString:@"SYNC" intoString:nil]) {
+						state = TAG_SYNC;
+						break;
+					}
+					else if ([sc scanString:@"P" intoString:nil]) {
+						state = TAG_P;
+						break;
+					}
+					else if ([sc scanString:@"BR" intoString:nil]) {
+						state = TAG_BR_OPEN;
+						break;
+					}
+					else if ([sc scanString:@"/BR" intoString:nil]) {
+						state = TAG_BR_CLOSE;
+						break;
+					}
+					else if ([sc scanString:@"B" intoString:nil]) {
+						state = TAG_B_OPEN;
+						break;
+					}
+					else if ([sc scanString:@"/B" intoString:nil]) {
+						state = TAG_B_CLOSE;
+						break;
+					}
+					else if ([sc scanString:@"I" intoString:nil]) {
+						state = TAG_I_OPEN;
+						break;
+					}
+					else if ([sc scanString:@"/I" intoString:nil]) {
+						state = TAG_I_CLOSE;
+						break;
+					}
+					else if ([sc scanString:@"FONT" intoString:nil]) {
+						state = TAG_FONT_OPEN;
+						break;
+					}
+					else if ([sc scanString:@"/FONT" intoString:nil]) {
+						state = TAG_FONT_CLOSE;
+						break;
+					}
+					else {
+						[cmt appendString:@"<"];
+						state = TAG_COMMENT;
+						break;
+					}
+				}
+		}
+	} while (![sc isAtEnd]);
+}
+
+static ComponentResult LoadSingleTextSubtitle(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack, int subtitleType, int whichTrack)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	UInt8 path[PATH_MAX];
@@ -236,7 +523,7 @@ ComponentResult LoadSingleTextSubtitle(const FSRef *theDirectory, CFStringRef fi
 		default:
 		{
 			timeBase = 100;
-			subCodec = 'SSA ';
+			subCodec = kSubFormatSSA;
 			const char *cheader = [LoadSSAFromPath(nsPath, ss) UTF8String];
 			int headerLen = strlen(cheader);
 			PtrToHand(cheader, &header, headerLen);
@@ -244,8 +531,13 @@ ComponentResult LoadSingleTextSubtitle(const FSRef *theDirectory, CFStringRef fi
 			break;
 		case kSubTypeSRT:
 			timeBase = 1000;
-			subCodec = 'SRT ';
+			subCodec = kSubFormatUTF8;
 			LoadSRTFromPath(nsPath, ss);
+			break;
+		case kSubTypeSMI:
+			timeBase = 1000;
+			subCodec = kSubFormatUTF8;
+			LoadSMIFromPath(nsPath, ss, whichTrack);
 			break;
 	}
 	
@@ -417,12 +709,22 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 						actRange = CFStringFind(cfFoundFilename, CFSTR(".idx"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 						if (actRange.length && actRange.location == extRange.location)
 							err = LoadVobSubSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
+						else {
+							actRange = CFStringFind(cfFoundFilename, CFSTR(".smi"), kCFCompareCaseInsensitive | kCFCompareBackwards);
+							if (actRange.length && actRange.location == extRange.location)
+								subType = kSubTypeSMI;
+						}
 					}
 				}
 			}
 			
-			if (subType != -1) err = LoadSingleTextSubtitle(&parentDir, cfFoundFilename, theMovie, &firstSubTrack, subType);
-			
+			if (subType == kSubTypeSMI) {
+				err = LoadSingleTextSubtitle(&parentDir, cfFoundFilename, theMovie, &firstSubTrack, kSubTypeSMI, 1);
+				if (!err) err = LoadSingleTextSubtitle(&parentDir, cfFoundFilename, theMovie, &firstSubTrack, kSubTypeSMI, 2);
+			}
+			else if (subType != -1)
+				err = LoadSingleTextSubtitle(&parentDir, cfFoundFilename, theMovie, &firstSubTrack, subType, 0);
+
 			if (err) goto bail;
 		}
 		
