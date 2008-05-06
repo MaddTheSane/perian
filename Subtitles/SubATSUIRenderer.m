@@ -291,8 +291,10 @@ static NSMutableDictionary *fontIDCache = nil;
 static void CleanupFontIDCache() __attribute__((destructor));
 static void CleanupFontIDCache()
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	if (fontIDCache) [fontIDCache release];
 	fontIDCache = nil;
+	[pool release];
 }
 
 // XXX: Assumes ATSUFontID = ATSFontRef. This is true.
