@@ -340,6 +340,29 @@ void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFr
 }
 #endif
 
+void YA420toV408(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+{
+	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2], *a = picture->data[3];
+	unsigned       rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], rA = picture->linesize[3], y, x;
+	
+	for (y = 0; y < height; y++) {
+		for (x = 0; x < width; x++) {
+			o[x*4] = u[x/2];
+			o[x*4+1] = yc[x];
+			o[x*4+2] = v[x/2];
+			o[x*4+3] = a[x];
+		}
+		
+		o += outRB;
+		yc += rY;
+		a += rA;
+		if (y & 1) {
+			u += rU;
+			v += rV;
+		}
+	}
+}
+
 void BGR24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture)
 {
 	unsigned i, j;

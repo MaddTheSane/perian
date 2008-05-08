@@ -675,7 +675,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			case 'ZMBV':
 				codecID = CODEC_ID_ZMBV;
 				break;
-
+				
+			case 'VP6A':
+				codecID = CODEC_ID_VP6A;
+				break;
 				
             default:
 				Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
@@ -829,6 +832,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			break;
 		case PIX_FMT_RGB24:
 			pos[index++] = k24RGBPixelFormat;
+			break;
+		case PIX_FMT_YUVA420P:
+			pos[index++] = k4444YpCbCrA8PixelFormat;
 			break;
 		case PIX_FMT_YUV420P:
 		default:
@@ -1315,6 +1321,10 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	{
 		Y422toY422((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
 	}
+	else if (myDrp->pixelFormat == k4444YpCbCrA8PixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUVA420P)
+	{
+		YA420toV408((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
+	}
 	else
 	{
 		Codecprintf(glob->fileLog, "Unsupported conversion from PIX_FMT %d to %c%c%c%c (%08x) buffer\n",
@@ -1591,6 +1601,9 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kZMBVCodecInfoResID, (Handle *)&tempCodecInfo);
 				break;
 				
+			case 'VP6A':
+				err = GetComponentResource((Component)glob->self, codecInfoResourceType, kVP6ACodecInfoResID, (Handle *)&tempCodecInfo);
+				break;
 				
             default:	// should never happen but we have to handle the case
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX4CodecInfoResID, (Handle *)&tempCodecInfo);
@@ -1678,7 +1691,7 @@ OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dat
         {            
             got_picture = 0;
             len = 1;
-			Codecprintf(NULL, "Error while decoding frame\n");
+			Codecprintf(glob->fileLog, "Error while decoding frame\n");
             
             return noErr;
         }

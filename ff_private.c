@@ -121,6 +121,8 @@ static void rescue_ntsc_timebase(AVRational *base)
 {
 	av_reduce(&base->num, &base->den, base->num, base->den, INT_MAX);
 	
+	if (base->num == 1) return; // XXX is this good enough?
+	
 	double fTimebase = av_q2d(*base), nearest_ntsc = floor(fTimebase * 1001. + .5) / 1001.;
 	const double small_interval = 1./120.;
 	
@@ -184,7 +186,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	
 	// 12 is invalid in mov
 	// XXX it might be better to set this based entirely on pix_fmt
-	if ((*imgHdl)->depth == 12) (*imgHdl)->depth = 24;
+	if ((*imgHdl)->depth == 12 || (*imgHdl)->depth == 0) (*imgHdl)->depth = codec->pix_fmt == PIX_FMT_YUVA420P ? 32 : 24;
 	
 	/* Create the strf image description extension (see AVI's BITMAPINFOHEADER) */
 	imgDescExt = create_strf_ext(codec);
@@ -325,6 +327,8 @@ OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
 			return 'VP6F';
 		case CODEC_ID_FLASHSV:
 			return 'FSV1';
+		case CODEC_ID_VP6A:
+			return 'VP6A';
 	}
 	return 0;
 }

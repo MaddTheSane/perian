@@ -52,6 +52,7 @@
 #define kNuvCodecInfoResID			275
 #define kTSCCCodecInfoResID			305
 #define kZMBVCodecInfoResID			307
+#define kVP6ACodecInfoResID			309
 
 #define kFFusionCodecManufacturer	'Peri'
 
