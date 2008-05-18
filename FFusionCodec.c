@@ -877,7 +877,7 @@ static int qtTypeForFrameInfo(int original, int fftype, int skippable)
 		if(!skippable)
 			return kCodecFrameTypeKey;
 	}
-	else if(skippable)
+	else if(skippable && IsFrameDroppingEnabled())
 		return kCodecFrameTypeDroppableDifference;
 	else if(fftype != 0)
 		return kCodecFrameTypeDifference;	

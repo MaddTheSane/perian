@@ -835,7 +835,7 @@ void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
 			block = &simpleBlock;
 			if (!simpleBlock.IsKeyframe())
 				flags |= mediaSampleNotSync;
-			if (simpleBlock.IsDiscardable())
+			if (simpleBlock.IsDiscardable() && IsFrameDroppingEnabled())
 				flags |= mediaSampleDroppable;
 		}
 		

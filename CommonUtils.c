@@ -285,3 +285,12 @@ int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type)
 	}
 	return 0;
 }
+
+int IsFrameDroppingEnabled()
+{
+	static int enabled = -1;
+	
+	if (enabled == -1) enabled = getenv("PerianNoFrameDropping") == NULL;
+	
+	return enabled;
+}
