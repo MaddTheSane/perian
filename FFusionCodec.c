@@ -123,6 +123,7 @@ typedef struct
 	FFusionBuffer	buffers[FFUSION_MAX_BUFFERS];	// the buffers which the codec has retained
 	int				lastAllocatedBuffer;		// the index of the buffer which was last allocated 
 												// by the codec (and is the latest in decode order)	
+	int				shouldUseReturnedFrame;
 	struct begin_glob	begin;
 	FFusionData		data;
 	struct decode_glob	decode;
@@ -322,6 +323,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 		glob->begin.parser = NULL;
 		if (getenv("PerianDebugLogging")) glob->fileLog = fopen("/tmp/perian.log", "a");
 		else glob->fileLog = NULL;
+		glob->shouldUseReturnedFrame = 0;
 		
 //        c = FindNextComponent(c, &cd);
 		
@@ -634,6 +636,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 
 			case 'VP30':
 			case 'VP31':
+				glob->shouldUseReturnedFrame = TRUE;
 				codecID = CODEC_ID_VP3;
 				break;
 				
@@ -1274,7 +1277,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	
 	if(!picture || picture->data[0] == 0)
 	{
-		if(myDrp->buffer->returnedFrame.data[0])
+		if(glob->shouldUseReturnedFrame && myDrp->buffer->returnedFrame.data[0])
 			//Some decoders (vp3) keep their internal buffers in an unusable state
 			picture = &myDrp->buffer->returnedFrame;
 		else if(glob->lastDisplayedFrame.data[0] != NULL)
