@@ -408,6 +408,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	if (disp_width.ValueIsSet() && disp_height.ValueIsSet()) {
 		// some files ignore the spec and treat display width/height as a ratio, not as pixels
 		// so scale the display size to be at least as large as the pixel size here
+		// but don't let it be bigger in both dimensions
 		float horizRatio = float(uint32(pxl_width)) / uint32(disp_width);
 		float vertRatio = float(uint32(pxl_height)) / uint32(disp_height);
 		
@@ -418,8 +419,16 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 			width = FloatToFixed(uint32(disp_width) * horizRatio);
 			height = FloatToFixed(uint32(disp_height) * horizRatio);
 		} else {
-			width = IntToFixed(uint32(disp_width));
-			height = IntToFixed(uint32(disp_height));
+			float dar = uint32(disp_width) / (float)uint32(disp_height);
+			float p_ratio = uint32(pxl_width) / (float)uint32(pxl_height);
+			
+			if (dar > p_ratio) {
+				width  = FloatToFixed(uint32(pxl_height) * dar);
+				height = IntToFixed(uint32(pxl_height));
+			} else {
+				width  = IntToFixed(uint32(pxl_width));
+				height = FloatToFixed(uint32(pxl_width) / dar);
+			}
 		}				
 	} else if (pxl_width.ValueIsSet() && pxl_height.ValueIsSet()) {
 		width = IntToFixed(uint32(pxl_width));
