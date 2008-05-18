@@ -23,4 +23,4 @@
  */
 
 // The high word is the codecInterfaceVersion
-#define kMatroskaImportVersion		(0x00020002)
+#define kMatroskaImportVersion		(0x00020003)
