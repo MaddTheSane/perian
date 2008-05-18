@@ -67,6 +67,9 @@ if [ -e ffmpeg/patched ] ; then
 	(cd ffmpeg && svn revert -R . && rm patched)
 fi
 
+patch -p0 < Patches/ffmpeg-h264dsp-chroma-mc4.diff
+touch ffmpeg/patched
+
 # if [ $no_pic -eq 0 ] ; then
 # (cd ffmpeg; patch -p1 < ../Patches/ffmpeg-pic.diff)
 # fi
