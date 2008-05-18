@@ -61,6 +61,7 @@ typedef struct
 	AVFrame		*frame;
 	bool		used;
 	long		frameNumber;
+	AVFrame		returnedFrame;
 } FFusionBuffer;
 
 typedef enum
@@ -1202,10 +1203,11 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 		
 	avcodec_get_frame_defaults(&tempFrame);
 	err = FFusionDecompress(glob, glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, &tempFrame, dataSize);
-	
+		
 	if (glob->packedType == PACKED_QUICKTIME_KNOWS_ORDER) {
 		myDrp->buffer = &glob->buffers[glob->lastAllocatedBuffer];
 		myDrp->buffer->frameNumber = myDrp->frameNumber;
+		myDrp->buffer->returnedFrame = tempFrame;
 		myDrp->decoded = true;
 		return err;
 	}
@@ -1219,6 +1221,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 		glob->decode.futureBuffer = NULL;
 	glob->decode.lastFrame = myDrp->frameNumber;
 	myDrp->decoded = true;
+	if (myDrp->buffer) myDrp->buffer->returnedFrame = tempFrame;
 	
 	FFusionDataMarkRead(&(glob->data), frameData);
 	
@@ -1271,7 +1274,10 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	
 	if(!picture || picture->data[0] == 0)
 	{
-		if(glob->lastDisplayedFrame.data[0] != NULL)
+		if(myDrp->buffer->returnedFrame.data[0])
+			//Some decoders (vp3) keep their internal buffers in an unusable state
+			picture = &myDrp->buffer->returnedFrame;
+		else if(glob->lastDisplayedFrame.data[0] != NULL)
 			//Display last frame
 			picture = &(glob->lastDisplayedFrame);
 		else
@@ -1651,6 +1657,7 @@ static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic)
 	FFusionBuffer *buf = pic->opaque;
 	
 	buf->used = false;
+	buf->returnedFrame.data[0] = NULL;
 	
 	avcodec_default_release_buffer(s, pic);
 }
