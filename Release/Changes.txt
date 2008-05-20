@@ -1,4 +1,6 @@
 1.1.1
+- H.264 in avi fixed
+- Some anamorphic AVI files supported
 - Performance problems due to PIC fixed with new Xcode
 - Fix a decoding bug with H.264 i-frames
 - Better character set detection
