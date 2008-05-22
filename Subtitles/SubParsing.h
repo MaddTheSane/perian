@@ -26,7 +26,7 @@ extern "C"
 	
 	int posX, posY;
 	UInt8 alignH, alignV, wrapStyle, render_complexity;
-	BOOL is_shape;
+	BOOL is_shape, positioned;
 	
 	unsigned layer;
 }

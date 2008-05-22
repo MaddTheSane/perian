@@ -9,12 +9,13 @@
 #import <Cocoa/Cocoa.h>
 #import "SubRenderer.h"
 
-enum {kSubTypeSSA, kSubTypeASS, kSubTypeSRT};
+enum {kSubTypeSSA, kSubTypeASS, kSubTypeSRT, kSubTypeSMI};
 enum {kSubCollisionsNormal, kSubCollisionsReverse};
 enum {kSubLineWrapTopWider = 0, kSubLineWrapSimple, kSubLineWrapNone, kSubLineWrapBottomWider};
 enum {kSubAlignmentLeft, kSubAlignmentCenter, kSubAlignmentRight};
 enum {kSubAlignmentBottom, kSubAlignmentMiddle, kSubAlignmentTop};
 enum {kSubBorderStyleNormal = 1, kSubBorderStyleBox = 3};
+enum {kSubPositionNone = INT_MAX};
 
 typedef ATSURGBAlphaColor SubRGBAColor;
 

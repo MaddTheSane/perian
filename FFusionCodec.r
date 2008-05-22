@@ -54,7 +54,8 @@
 #define kH264Name		"H.264"
 #define kFLV1Name		"Sorenson H.263"
 #define kFlashSVName	"Flash Screen Video"
-#define kVP6Name		"TrueMotion VP6"
+#define kVP6Name		"On2 VP6"
+#define kVP6AName		"On2 VP6+Alpha"
 #define kI263Name		"Intel H.263"
 #define kVP3Name		"On2 VP3"
 #define kHuffYUVName		"HuffYUV"
@@ -63,6 +64,8 @@
 #define kFRAPSName		"Fraps"
 #define kSnowName		"Snow"
 #define kNuvName		"NuppelVideo"
+#define kTSCCName		"Techsmith Screen Capture"
+#define kZMBVName		"DosBox Capture"
 
 // Codec names Resource ID
 
@@ -86,6 +89,9 @@
 #define kFRAPSNameResID		273
 #define kSnowNameResID		274
 #define kNuvNameResID		275
+#define kTSCCNameResID		305
+#define kZMBVNameResID		307
+#define kVP6ANameResID		309
 
 // Codec infos Resource ID
 
@@ -109,6 +115,9 @@
 #define kFRAPSInfoResID		302
 #define kSnowInfoResID		303
 #define kNuvInfoResID		304
+#define kTSCCInfoResID		306
+#define kZMBVInfoResID		308
+#define kVP6AInfoResID		310
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -621,6 +630,81 @@ resource 'cdci' (kNuvCodecInfoResID) {
 	0					// Private Data
 };
 
+
+//---------------------------------------------------------------------------
+// TSCC Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kTSCCCodecInfoResID) {
+	kTSCCName,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// ZMBV Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kZMBVCodecInfoResID) {
+	kZMBVName,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// ZMBV Description Resources
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kVP6ACodecInfoResID) {
+	kVP6AName,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
 
 //---------------------------------------------------------------------------
 // MS-MPEG4 v1 Component
@@ -3096,6 +3180,105 @@ resource 'thng' (335) {
 };
 };
 
+//---------------------------------------------------------------------------
+// TSCC Components
+//---------------------------------------------------------------------------
+resource 'thng' (336) {
+	decompressorComponentType,              // Type
+	'tscc',                                 // SubType
+	kFFusionCodecManufacturer,                      // Manufacturer
+	0,                                      // - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',                                 // Name Type
+	kTSCCNameResID,                        // Name ID
+	'STR ',                                 // Info Type
+	kTSCCInfoResID,                        // Info ID
+	0,                                      // Icon Type
+	0,                                      // Icon ID
+	kFFusionCodecVersion,                   // Version
+	componentHasMultiplePlatforms +         // Registration Flags 
+	componentDoAutoVersion,                 // Registration Flags
+	0,                                      // Resource ID of Icon Family
+	{
+		kFFusionDecompressionFlags, 
+		'dlle',                         // Entry point found by symbol name 'dlle' resource
+		256,                            // ID of 'dlle' resource
+		platformPowerPCNativeEntryPoint,
+		kFFusionDecompressionFlags,
+		'dlle',
+		256,
+		platformIA32NativeEntryPoint,
+	};
+};
+
+
+//---------------------------------------------------------------------------
+// ZMBV Components
+//---------------------------------------------------------------------------
+resource 'thng' (338) {
+	decompressorComponentType,              // Type
+	'VP6A',                                 // SubType
+	kFFusionCodecManufacturer,                      // Manufacturer
+	0,                                      // - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',                                 // Name Type
+	kVP6ANameResID,                        // Name ID
+	'STR ',                                 // Info Type
+	kVP6AInfoResID,                        // Info ID
+	0,                                      // Icon Type
+	0,                                      // Icon ID
+	kFFusionCodecVersion,                   // Version
+	componentHasMultiplePlatforms +         // Registration Flags 
+	componentDoAutoVersion,                 // Registration Flags
+	0,                                      // Resource ID of Icon Family
+	{
+		kFFusionDecompressionFlags, 
+		'dlle',                         // Entry point found by symbol name 'dlle' resource
+		256,                            // ID of 'dlle' resource
+		platformPowerPCNativeEntryPoint,
+		kFFusionDecompressionFlags,
+		'dlle',
+		256,
+		platformIA32NativeEntryPoint,
+	};
+};
+
+//---------------------------------------------------------------------------
+// ZMBV Components
+//---------------------------------------------------------------------------
+resource 'thng' (337) {
+	decompressorComponentType,              // Type
+	'ZMBV',                                 // SubType
+	kFFusionCodecManufacturer,                      // Manufacturer
+	0,                                      // - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',                                 // Name Type
+	kZMBVNameResID,                        // Name ID
+	'STR ',                                 // Info Type
+	kZMBVInfoResID,                        // Info ID
+	0,                                      // Icon Type
+	0,                                      // Icon ID
+	kFFusionCodecVersion,                   // Version
+	componentHasMultiplePlatforms +         // Registration Flags 
+	componentDoAutoVersion,                 // Registration Flags
+	0,                                      // Resource ID of Icon Family
+	{
+		kFFusionDecompressionFlags, 
+		'dlle',                         // Entry point found by symbol name 'dlle' resource
+		256,                            // ID of 'dlle' resource
+		platformPowerPCNativeEntryPoint,
+		kFFusionDecompressionFlags,
+		'dlle',
+		256,
+		platformIA32NativeEntryPoint,
+	};
+};
 
 //---------------------------------------------------------------------------
 // Component Name Resources
@@ -3181,6 +3364,18 @@ resource 'STR ' (kNuvNameResID) {
 	"NuppelVideo (Perian)"
 };
 
+resource 'STR ' (kTSCCNameResID) {
+	"Techsmith Screen Capture (Perian)"
+};
+
+resource 'STR ' (kZMBVNameResID) {
+	"DosBox Capture (Perian)"
+};
+
+resource 'STR ' (kVP6ANameResID) {
+	"On2 VP6A (Perian)"
+};
+
 //---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
@@ -3230,7 +3425,7 @@ resource 'STR ' (kFlashSVInfoResID) {
 };
 
 resource 'STR ' (kVP6InfoResID) {
-	"Decompresses video stored in TrueMotion VP6 format."
+	"Decompresses video stored in On2 VP6 format."
 };
 
 resource 'STR ' (kI263InfoResID) {
@@ -3263,6 +3458,18 @@ resource 'STR ' (kSnowInfoResID) {
 
 resource 'STR ' (kNuvInfoResID) {
 	"Decompresses video stored in NuppelVideo format."
+};
+
+resource 'STR ' (kTSCCInfoResID) {
+	"Decompresses video stored in Techsmith Screen Capture format."
+};
+
+resource 'STR ' (kZMBVInfoResID) {
+	"Decompresses video stored in DosBox Capture format."
+};
+
+resource 'STR ' (kVP6AInfoResID) {
+	"Decompresses video stored in On2 VP6A format."
 };
 
 //---------------------------------------------------------------------------

@@ -38,6 +38,8 @@ ComponentResult ReadESDSDescExt(Handle descExt, UInt8 **buffer, int *size);
 
 int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type);
 
+int IsFrameDroppingEnabled();
+
 #ifdef __cplusplus
 }
 #endif

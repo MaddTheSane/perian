@@ -116,6 +116,23 @@ err:
 	return -1;
 } /* prepare_track() */
 
+/* A very large percent of movies have NTSC timebases (30/1.001) with misrounded fractions, so let's recover them. */
+static void rescue_ntsc_timebase(AVRational *base)
+{
+	av_reduce(&base->num, &base->den, base->num, base->den, INT_MAX);
+	
+	if (base->num == 1) return; // XXX is this good enough?
+	
+	double fTimebase = av_q2d(*base), nearest_ntsc = floor(fTimebase * 1001. + .5) / 1001.;
+	const double small_interval = 1./120.;
+	
+	if (fabs(fTimebase - nearest_ntsc) < small_interval)
+	{
+		base->num = 1001;
+		base->den = (1001. / fTimebase) + .5;
+	}
+}
+
 /* Initializes the map & targetTrack to receive video data */
 void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSType dataRefType, AVPacket *firstFrame)
 {
@@ -128,7 +145,9 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	codec = map->str->codec;
 	
 	map->base = map->str->time_base;
-	if(map->base.den > 100000) {
+	
+	rescue_ntsc_timebase(&map->base);
+	if(map->base.num != 1001 && map->base.den > 100000) {
 		/* if that's the case, then we probably ran out of timevalues!
 		* a timescale of 100000 allows a movie duration of 5-6 hours
 		* so I think this will be enough */
@@ -164,6 +183,10 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	(*imgHdl)->vRes = 72 << 16;
 	(*imgHdl)->depth = codec->bits_per_sample;
 	(*imgHdl)->clutID = -1; // no color lookup table...
+	
+	// 12 is invalid in mov
+	// XXX it might be better to set this based entirely on pix_fmt
+	if ((*imgHdl)->depth == 12 || (*imgHdl)->depth == 0) (*imgHdl)->depth = codec->pix_fmt == PIX_FMT_YUVA420P ? 32 : 24;
 	
 	/* Create the strf image description extension (see AVI's BITMAPINFOHEADER) */
 	imgDescExt = create_strf_ext(codec);
@@ -304,6 +327,8 @@ OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
 			return 'VP6F';
 		case CODEC_ID_FLASHSV:
 			return 'FSV1';
+		case CODEC_ID_VP6A:
+			return 'VP6A';
 	}
 	return 0;
 }
@@ -319,7 +344,7 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 			asbd->mFormatID = kAudioFormatMPEGLayer3;
 			break;
 		case CODEC_ID_AC3:
-			asbd->mFormatID = kAudioFormatAC3MS;
+			asbd->mFormatID = kAudioFormatAC3;
 			map->vbr = 1;
 			break;
 		case CODEC_ID_PCM_S16LE:
@@ -517,6 +542,46 @@ static void add_metadata(AVFormatContext *ic, Movie theMovie)
     QTMetaDataRelease(movie_metadata);
 }
 
+static void get_track_dimensions_for_codec(AVCodecContext *codec, Fixed *fixedWidth, Fixed *fixedHeight)
+{	
+	*fixedHeight = IntToFixed(codec->height);
+
+	if (!codec->sample_aspect_ratio.num) *fixedWidth = IntToFixed(codec->width);
+	else *fixedWidth = FloatToFixed(codec->width * av_q2d(codec->sample_aspect_ratio));
+}
+
+void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW, Fixed displayH, Fixed pixelW, Fixed pixelH)
+{
+	CleanApertureImageDescriptionExtension    **clap = (CleanApertureImageDescriptionExtension**)NewHandle(sizeof(CleanApertureImageDescriptionExtension));
+	PixelAspectRatioImageDescriptionExtension **pasp = (PixelAspectRatioImageDescriptionExtension**)NewHandle(sizeof(PixelAspectRatioImageDescriptionExtension));
+	
+	int wN = pixelW, wD = fixed1, hN = pixelH, hD = fixed1;
+
+	av_reduce(&wN, &wD, wN, wD, INT_MAX);
+	av_reduce(&hN, &hD, hN, hD, INT_MAX);
+	
+	**clap = (CleanApertureImageDescriptionExtension){EndianU32_NtoB(wN), EndianU32_NtoB(wD),
+												      EndianU32_NtoB(hN), EndianU32_NtoB(hD), 
+													  EndianS32_NtoB(0), EndianU32_NtoB(1),
+													  EndianS32_NtoB(0), EndianU32_NtoB(1)};
+	
+	AVRational dar, invPixelSize, sar;
+	
+	dar			   = (AVRational){displayW, displayH};
+	invPixelSize   = (AVRational){pixelH, pixelW};
+	sar = av_mul_q(dar, invPixelSize);
+	
+	av_reduce(&sar.num, &sar.den, sar.num, sar.den, fixed1);
+	
+	**pasp = (PixelAspectRatioImageDescriptionExtension){EndianU32_NtoB(sar.num), EndianU32_NtoB(sar.den)};
+	
+	AddImageDescriptionExtension(imgDesc, (Handle)clap, kCleanApertureImageDescriptionExtension);
+	AddImageDescriptionExtension(imgDesc, (Handle)pasp, kPixelAspectRatioImageDescriptionExtension);
+	
+	DisposeHandle((Handle)clap);
+	DisposeHandle((Handle)pasp);
+}
+
 /* This function prepares the movie to receivve the movie data,
  * After success, *out_map points to a valid stream maping
  * Return values:
@@ -543,7 +608,10 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 		map[j].duration = -1;
 		
 		if(st->codec->codec_type == CODEC_TYPE_VIDEO) {
-			track = NewMovieTrack(theMovie, st->codec->width << 16, st->codec->height << 16, kNoVolume);
+			Fixed width, height;
+			
+			get_track_dimensions_for_codec(st->codec, &width, &height);
+			track = NewMovieTrack(theMovie, width, height, kNoVolume);
 
             // XXX Support for 'old' NUV files, that didn't put the codec_tag in the file. 
             if( st->codec->codec_id == CODEC_ID_NUV && st->codec->codec_tag == 0 ) {
@@ -551,6 +619,7 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
             }
 			
 			initialize_video_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
+			set_track_clean_aperture_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height, IntToFixed(st->codec->width), IntToFixed(st->codec->height));
 		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
 			if (st->codec->sample_rate > 0) {
 				track = NewMovieTrack(theMovie, 0, 0, kFullVolume);

@@ -22,6 +22,8 @@
 
 extern void FastY420(UInt8 *baseAddr, AVFrame *picture);
 extern void Y420toY422(UInt8* baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame * picture);
+extern void YA420toV408(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture);
 extern void RGB32toRGB32(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture);
+extern void RGB24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture);
 extern void BGR24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture);
 extern void Y422toY422(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture);

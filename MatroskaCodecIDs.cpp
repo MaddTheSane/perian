@@ -26,6 +26,7 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <matroska/KaxTracks.h>
 #include <matroska/KaxTrackEntryData.h>
+#include <matroska/KaxTrackAudio.h>
 #include "MatroskaCodecIDs.h"
 #include "CommonUtils.h"
 #include "Codecprintf.h"
@@ -141,6 +142,15 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandl
 	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
 	
 	if (dir == kToSampleDescription) {
+		KaxCodecPrivate & codecPrivate = GetChild<KaxCodecPrivate>(*tr_entry);
+		
+		QTSoundDescriptionSetProperty(sndDesc, 
+		                              kQTPropertyClass_SoundDescription, 
+		                              kQTSoundDescriptionPropertyID_MagicCookie, 
+		                              codecPrivate.GetSize(), codecPrivate.GetBuffer());
+		
+		//XXX: What exactly was the point of all this?
+#if 0
 		Handle sndDescExt = NewHandle(0);
 		unsigned char *privateBuf;
 		int i;
@@ -205,6 +215,7 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandl
 		
 		DisposePtr((Ptr)packetSizes);
 		DisposeHandle(sndDescExt);
+#endif
 	}
 	return noErr;
 }
@@ -342,6 +353,65 @@ ComponentResult DescExt_Real(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 	return noErr;
 }
 
+// c.f. http://wiki.multimedia.cx/index.php?title=Understanding_AAC
+
+struct MatroskaQT_AACProfileName
+{
+	char *name;
+	char profile;
+};
+
+static const MatroskaQT_AACProfileName kMatroskaAACProfiles[] = {
+	{"A_AAC/MPEG2/MAIN", 1},
+	{"A_AAC/MPEG2/LC", 2},
+	{"A_AAC/MPEG2/LC/SBR", 5},
+	{"A_AAC/MPEG2/SSR", 3},
+	{"A_AAC/MPEG4/MAIN", 1},
+	{"A_AAC/MPEG4/LC", 2},
+	{"A_AAC/MPEG4/LC/SBR", 5},
+	{"A_AAC/MPEG4/SSR", 3},
+	{"A_AAC/MPEG4/LTP", 4}
+};
+
+static const unsigned kAACFrequencyIndexes[] = {
+	96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000,
+	11025, 8000, 7350
+};
+
+static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vosLen)
+{
+	unsigned char profile = 2, freq_index = 15;
+	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
+	KaxTrackAudio & audioTrack = GetChild<KaxTrackAudio>(*tr_entry);
+	KaxAudioSamplingFreq & sampleFreq = GetChild<KaxAudioSamplingFreq>(audioTrack);
+	KaxAudioChannels & numChannels = GetChild<KaxAudioChannels>(audioTrack);
+	unsigned freq = unsigned((double)sampleFreq), channels = unsigned(numChannels);
+
+	string codecString(*tr_codec);
+
+	for (int i = 0; i < sizeof(kMatroskaAACProfiles)/sizeof(MatroskaQT_AACProfileName); i++) {
+		const MatroskaQT_AACProfileName *prof = &kMatroskaAACProfiles[i];
+		if (strcmp(codecString.c_str(), prof->name) == 0) {profile = prof->profile; break;}
+	}
+	
+	for (int i = 0; i < sizeof(kAACFrequencyIndexes)/sizeof(unsigned); i++) {
+		if (kAACFrequencyIndexes[i] == freq) {freq_index = i; break;}
+	}
+	
+	if (freq_index != 15) {
+		*vosBuf++ = (profile << 3) | (freq_index >> 1);
+		*vosBuf++ = (freq_index << 7) | (channels << 3);
+		*vosLen = 2;
+	} else {		
+		*vosBuf++ = (profile << 3) | (freq_index >> 1);
+		*vosBuf++ = (freq_index << 7) | (freq >> (24 - 7));
+		*vosBuf++ = (freq >> (24 - 7 - 8));
+		*vosBuf++ = (freq >> (24 - 7 - 16));
+		*vosBuf++ = ((freq & 1) << 7) | (channels << 3);
+		*vosLen = 5;
+	}
+}
+
 // the esds atom creation is based off of the routines for it in ffmpeg's movenc.c
 static unsigned int descrLength(unsigned int len)
 {
@@ -426,21 +496,20 @@ uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *e
 	return esds;
 }
 
-static const unsigned char aac_lc_vos[] = {0x11, 0x90};
-
 static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 {
 	KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
 	KaxTrackNumber *trackNum = FindChild<KaxTrackNumber>(*tr_entry);
 	
-	int vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
+	size_t vosLen = codecPrivate ? codecPrivate->GetSize() : 0;
 	int trackID = trackNum ? uint16(*trackNum) : 1;
-    uint8_t *vosBuf = codecPrivate ? codecPrivate->GetBuffer() : NULL;
+	uint8_t aacBuf[5] = {0};
+	uint8_t *vosBuf = codecPrivate ? codecPrivate->GetBuffer() : NULL;
 	size_t esdsLen;
 	
-	if (!vosBuf) { // minimal AAC-LC descriptor
-		vosBuf = (uint8_t*)aac_lc_vos;
-		vosLen = 2;
+	if (audio && !vosBuf) {
+		RecreateAACVOS(tr_entry, aacBuf, &vosLen);
+		vosBuf = aacBuf;
 	}
 
 	Handle esdsExt = NewHandleClear(4);
@@ -511,12 +580,6 @@ ComponentResult ASBDExt_LPCM(KaxTrackEntry *tr_entry, AudioStreamBasicDescriptio
 	return noErr;
 }
 
-static void PrintCoreAudioError(const char *msg, OSStatus err)
-{
-	OSStatus swap_err = EndianU32_NtoB(err);
-	Codecprintf(NULL, "%s '%.4s'\n", msg, &swap_err);
-}
-
 ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
 {
 	if (!tr_entry || !asbd) return paramErr;
@@ -539,8 +602,7 @@ ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription
 									 &asbdSize,
 									 asbd);
 		if (err != noErr) 
-			PrintCoreAudioError("MatroskaQT: Error creating ASBD from AAC esds", err);
-		//else Codecprintf(NULL, "AAC: profile %d, nch %d\n", asbd->mFormatFlags, asbd->mChannelsPerFrame);
+			FourCCprintf("MatroskaQT: Error creating ASBD from AAC esds", err);
 		
 		err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutFromESDS,
 									 cookieSize,
@@ -548,7 +610,7 @@ ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription
 									 &aclSize,
 									 acl);
 		if (err != noErr) 
-			PrintCoreAudioError("MatroskaQT: Error creating ACL from AAC esds", err);
+			FourCCprintf("MatroskaQT: Error creating ACL from AAC esds", err);
 		
 		DisposeHandle(esdsExt);
 	} else {
@@ -726,7 +788,6 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 				break;
 				
 			case kAudioFormatAC3:
-			case kAudioFormatAC3MS:
 				acl = ac3ChannelLayouts[channelIndex];
 				break;
 				
@@ -760,7 +821,7 @@ typedef struct {
 static const WavCodec kWavCodecIDs[] = {
 	{ kAudioFormatMPEGLayer2, 0x50 },
 	{ kAudioFormatMPEGLayer3, 0x55 },
-	{ kAudioFormatAC3MS, 0x2000 },
+	{ kAudioFormatAC3, 0x2000 },
 	{ kAudioFormatDTS, 0x2001 },
 	{ kAudioFormatMPEG4AAC, 0xff },
 	{ kAudioFormatXiphFLAC, 0xf1ac },
@@ -802,11 +863,11 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kAudioFormatMPEGLayer1, "A_MPEG/L1" },
 	{ kAudioFormatMPEGLayer2, "A_MPEG/L2" },
 	{ kAudioFormatMPEGLayer3, "A_MPEG/L3" },
-	{ kAudioFormatAC3MS, "A_AC3" },
+	{ kAudioFormatAC3, "A_AC3" },
 	{ kAudioFormatAC3MS, "A_AC3" },
 	// anything special for these two?
-	{ kAudioFormatAC3MS, "A_AC3/BSID9" },
-	{ kAudioFormatAC3MS, "A_AC3/BSID10" },
+	{ kAudioFormatAC3, "A_AC3/BSID9" },
+	{ kAudioFormatAC3, "A_AC3/BSID10" },
 	{ kAudioFormatXiphVorbis, "A_VORBIS" },
 	{ kAudioFormatXiphFLAC, "A_FLAC" },
 	{ kAudioFormatLinearPCM, "A_PCM/INT/LIT" },

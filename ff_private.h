@@ -110,6 +110,7 @@ OSType map_video_codec_to_mov_tag(enum CodecID codec_id);
 void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map);
 uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID);
 Handle create_strf_ext(AVCodecContext *codec);
+void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW, Fixed displayH, Fixed pixelW, Fixed pixelH);
 
 uint8_t *write_int32(uint8_t *target, int32_t data);
 uint8_t *write_int16(uint8_t *target, int16_t data);

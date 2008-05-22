@@ -9,7 +9,7 @@
 #include "CodecIDs.h"
 
 // The high word is the codecInterfaceVersion
-#define kVobSubCodecVersion		(0x00020001)
+#define kVobSubCodecVersion		(0x00020002)
 
 #define	kVobSubCodecFormatName	"VobSub"
 

@@ -23,6 +23,14 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 
+#ifndef GOOD_COMPILER
+#define noinline __attribute__((noinline))
+#else
+#define noinline
+#endif
+
+#define unlikely(x) __builtin_expect(x, 0)
+
 //-----------------------------------------------------------------
 // FastY420
 //-----------------------------------------------------------------
@@ -57,6 +65,21 @@ void FastY420(UInt8 *baseAddr, AVFrame *picture)
 // The function should never be called since many people now
 // have a decent OS/QT version.
 //-----------------------------------------------------------------
+
+static void noinline Y420toY422_lastrow(UInt8 *o, const UInt8 *yc, const UInt8 *uc, const UInt8 *vc, unsigned halfWidth)
+{
+	unsigned x;
+	for(x=0; x < halfWidth; x++)
+	{
+		unsigned x4 = x*4, x2 = x*2;
+		o[x4] = uc[x];
+		o[x4+1] = yc[x2];
+		o[x4+2] = vc[x];
+		o[x4+3] = yc[x2+1];
+	}
+}
+
+#define HandleLastRow(o, yc, uc, vc, halfWidth, height) if (unlikely(height & 1)) Y420toY422_lastrow(o, yc, uc, vc, halfWidth)
 
 #ifdef __BIG_ENDIAN__
 //hand-unrolled code is a bad idea on modern CPUs. luckily, this does not run on modern CPUs, only G3s.
@@ -103,6 +126,8 @@ static void Y420toY422_ppc_scalar(UInt8* baseAddr, unsigned outRB, unsigned widt
 		 inV += rbV;
 		 baseAddr += outRB * 2;
 	 }
+	
+	HandleLastRow(baseAddr, inY, inU, inV, halfWidth, height);
  }
 
 static void Y420toY422_ppc_altivec(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
@@ -153,6 +178,8 @@ static void Y420toY422_ppc_altivec(UInt8 * o, unsigned outRB, unsigned width, un
 		uc += rU;
 		vc += rV;
 	}
+	
+	HandleLastRow(o, yc, uc, vc, width / 2, height);
 }
 
 void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
@@ -185,6 +212,53 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 		__m128i * ov = (__m128i*)o, * ov2 = (__m128i*)o2, * yv = (__m128i*)yc, * yv2 = (__m128i*)yc2;
 		__m128i * uv = (__m128i*)uc,* vv  = (__m128i*)vc;
 		
+#if 0
+		asm volatile(
+			"\n0:			\n\t"
+			"movdqa		(%2),	%%xmm0	\n\t"
+			"movdqa		16(%2),	%%xmm2	\n\t"
+			"movdqa		(%3),		%%xmm1	\n\t"
+			"movdqa		16(%3),	%%xmm3	\n\t"
+			"movdqu		(%4),	%%xmm4	\n\t"
+			"movdqu		(%5),	%%xmm5	\n\t"
+			"addl		$32,	%2		\n\t"
+			"addl		$32,	%3		\n\t"
+			"addl		$16,	%4		\n\t"
+			"addl		$16,	%5		\n\t"
+			"movdqa		%%xmm4, %%xmm6	\n\t"
+			"punpcklbw	%%xmm5, %%xmm4	\n\t" /*chroma_l*/
+			"punpckhbw	%%xmm5, %%xmm6	\n\t" /*chroma_h*/
+			"movdqa		%%xmm4, %%xmm5	\n\t"
+			"punpcklbw	%%xmm0, %%xmm5	\n\t"
+			"movntdq	%%xmm5, (%0)	\n\t" /*ov[x4]*/
+			"movdqa		%%xmm4, %%xmm5	\n\t"
+			"punpckhbw	%%xmm0, %%xmm5	\n\t"
+			"movntdq	%%xmm5, 16(%0)	\n\t" /*ov[x4+1]*/
+			"movdqa		%%xmm6, %%xmm5	\n\t"
+			"punpcklbw	%%xmm2, %%xmm5	\n\t"
+			"movntdq	%%xmm5, 32(%0)	\n\t" /*ov[x4+2]*/
+			"movdqa		%%xmm6, %%xmm5	\n\t"
+			"punpckhbw	%%xmm2, %%xmm5	\n\t"
+			"movntdq	%%xmm5, 48(%0)	\n\t" /*ov[x4+3]*/
+			"addl		$64,	%0		\n\t"
+			"movdqa		%%xmm4, %%xmm5	\n\t"
+			"punpcklbw	%%xmm1, %%xmm5	\n\t"
+			"movntdq	%%xmm5, (%1)	\n\t" /*ov2[x4]*/
+			"punpckhbw	%%xmm1, %%xmm4	\n\t"
+			"movntdq	%%xmm4, 16(%1)	\n\t" /*ov2[x4+1]*/
+			"movdqa		%%xmm6, %%xmm5	\n\t"
+			"punpcklbw	%%xmm3, %%xmm5	\n\t"
+			"movntdq	%%xmm5, 32(%1)	\n\t" /*ov2[x4+2]*/
+			"punpckhbw	%%xmm3, %%xmm6	\n\t"
+			"movntdq	%%xmm6, 48(%1)	\n\t" /*ov2[x4+3]*/
+			"addl		$64,	%1		\n\t"
+			"dec		%6				\n\t"
+			"jnz		0b				\n\t"
+			: "+r" (ov), "+r" (ov2),
+			"+r" (yv), "+r" (yv2), "+r" (uv), "+r" (vv)
+			: "r" (vWidth)
+			);
+#else
 		for (x = 0; x < vWidth; x++) {
 			unsigned x2 = x*2, x4 = x*4;
 
@@ -204,8 +278,9 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 			_mm_stream_si128(&ov2[x4+2],_mm_unpacklo_epi8(chroma_h, tmp_y4));
 			_mm_stream_si128(&ov2[x4+3],_mm_unpackhi_epi8(chroma_h, tmp_y4));
 		}
-		
-		for (x = x * 16; x < halfwidth; x++) {
+#endif
+
+		for (x=vWidth * 16; x < halfwidth; x++) {
 			unsigned x4 = x*4, x2 = x*2;
 			o2[x4] = o[x4] = uc[x];
 			o[x4 + 1] = yc[x2];
@@ -220,10 +295,14 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 		uc += rU;
 		vc += rV;
 	}
+	
+	_mm_sfence();
+	
+	HandleLastRow(o, yc, uc, vc, halfwidth, height);
 }
 
 
-static void __attribute__((noinline)) Y420toY422_x86_scalar(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+static void noinline Y420toY422_x86_scalar(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
 {
 	UInt8		*yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
 	unsigned	rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], halfheight = height / 2, halfwidth = width / 2;
@@ -247,6 +326,8 @@ static void __attribute__((noinline)) Y420toY422_x86_scalar(UInt8 * o, unsigned 
 		u += rU;
 		v += rV;
 	}
+
+	HandleLastRow(o, yc, u, v, halfwidth, height);
 }
 
 void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
@@ -254,22 +335,42 @@ void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFr
 	uintptr_t yc = (uintptr_t)picture->data[0];
 
 	//make sure the ffmpeg picture buffers are aligned enough, they're only guaranteed to be 8-byte for some reason...
-	if ((yc | picture->linesize[0]) % 16 == 0) {
-		Y420toY422_sse2(o, outRB, width, height, picture);
-		_mm_sfence();
-	} else Y420toY422_x86_scalar(o, outRB, width, height, picture);
+	if (!unlikely((yc | picture->linesize[0]) % 16)) Y420toY422_sse2(o, outRB, width, height, picture); 
+	else Y420toY422_x86_scalar(o, outRB, width, height, picture);
 }
 #endif
+
+void YA420toV408(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+{
+	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2], *a = picture->data[3];
+	unsigned       rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], rA = picture->linesize[3], y, x;
+	
+	for (y = 0; y < height; y++) {
+		for (x = 0; x < width; x++) {
+			o[x*4] = u[x/2];
+			o[x*4+1] = yc[x];
+			o[x*4+2] = v[x/2];
+			o[x*4+3] = a[x];
+		}
+		
+		o += outRB;
+		yc += rY;
+		a += rA;
+		if (y & 1) {
+			u += rU;
+			v += rV;
+		}
+	}
+}
 
 void BGR24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture)
 {
 	unsigned i, j;
 	UInt8 *srcPtr = picture->data[0];
-	unsigned width_third = width / 3;
 	
 	for (i = 0; i < height; ++i)
 	{
-		for (j = 0; j < width_third; j ++)
+		for (j = 0; j < width; j ++)
 		{
 			unsigned j3 = j * 3;
 			baseAddr[j3] = srcPtr[j3+2];
@@ -294,6 +395,19 @@ void RGB32toRGB32(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned h
 		UInt32 *oRow = (UInt32 *)baseAddr, *iRow = (UInt32 *)srcPtr;
 		for (x = 0; x < width; x++) {oRow[x] = EndianU32_BtoN(iRow[x]);}
 #endif
+		
+		baseAddr += rowBytes;
+		srcPtr += picture->linesize[0];
+	}
+}
+
+void RGB24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture)
+{
+	unsigned y;
+	UInt8 *srcPtr = picture->data[0];
+	
+	for (y = 0; y < height; y++) {
+		memcpy(baseAddr, srcPtr, width * 3);
 		
 		baseAddr += rowBytes;
 		srcPtr += picture->linesize[0];

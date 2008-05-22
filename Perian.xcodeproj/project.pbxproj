@@ -74,6 +74,7 @@
 /* Begin PBXBuildFile section */
 		11207C730C2F4A4E002A0FF0 /* ComponentInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */; };
 		112E0C820A6436BA00DB4C29 /* FFusionCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F560DF0003D61D0101ABA332 /* FFusionCodec.c */; };
+		113077FF0D50139500ECDECC /* ECQTComponent.m in Sources */ = {isa = PBXBuildFile; fileRef = 113077FD0D50139500ECDECC /* ECQTComponent.m */; };
 		113F589A0A6B091600509987 /* Codecprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 113F58990A6B091600509987 /* Codecprintf.c */; };
 		11629EE10B51E482006591C8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629EE00B51E482006591C8 /* main.m */; };
 		11629EEB0B51E4F1006591C8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
@@ -108,7 +109,7 @@
 		3D211A230B6B1A660051299D /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
 		3D211A300B6B1AD80051299D /* SubParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */; };
 		3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
-		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; settings = {COMPILER_FLAGS = "-O3 -fno-reorder-blocks -fweb"; }; };
+		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; settings = {COMPILER_FLAGS = "-O3 -fweb -fno-reorder-blocks -fomit-frame-pointer"; }; };
 		3DAD32DA0B6DB26100DA0A72 /* StdIOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB114D0ACDF3C2007994BD /* StdIOCallback.cpp */; };
 		3DB2BB290B6C92F000416863 /* SubATSUIRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
@@ -439,6 +440,8 @@
 		02CA1BD20513A38D00D00256 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; name = ComponentInfo.plist; path = Plists/ComponentInfo.plist; sourceTree = "<group>"; };
+		113077FD0D50139500ECDECC /* ECQTComponent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ECQTComponent.m; sourceTree = "<group>"; };
+		113077FE0D50139500ECDECC /* ECQTComponent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ECQTComponent.h; sourceTree = "<group>"; };
 		113F58980A6B091600509987 /* Codecprintf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Codecprintf.h; sourceTree = "<group>"; };
 		113F58990A6B091600509987 /* Codecprintf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Codecprintf.c; sourceTree = "<group>"; };
 		1156DBD80A3CE9F500963B0E /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
@@ -489,6 +492,7 @@
 		3D2623160C6A60B700FD1242 /* SubRenderer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubRenderer.h; path = Subtitles/SubRenderer.h; sourceTree = "<group>"; };
 		3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UniversalDetector.xcodeproj; path = UniversalDetector/UniversalDetector.xcodeproj; sourceTree = "<group>"; };
 		3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = UniversalDetector.h; path = UniversalDetector/UniversalDetector.h; sourceTree = "<group>"; };
+		3D4A34870D8B03F700A07563 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
 		3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubATSUIRenderer.h; path = Subtitles/SubATSUIRenderer.h; sourceTree = "<group>"; };
@@ -1114,6 +1118,8 @@
 		83D1D6DF0B4C81E000E09EC9 /* PrefPane */ = {
 			isa = PBXGroup;
 			children = (
+				113077FD0D50139500ECDECC /* ECQTComponent.m */,
+				113077FE0D50139500ECDECC /* ECQTComponent.h */,
 				83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */,
 				83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */,
 				F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */,
@@ -1143,6 +1149,7 @@
 		F53AD5E30B2A4EE100D93AC9 /* File Import */ = {
 			isa = PBXGroup;
 			children = (
+				3D4A34870D8B03F700A07563 /* config.h */,
 				11C85ED30A641E6400DF3D73 /* ff_dataref.c */,
 				8F483BBC0A642B3D002CCA73 /* ff_MovieImportDispatch.h */,
 				11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */,
@@ -1691,6 +1698,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				83D1D6E20B4C81F200E09EC9 /* CPFPerianPrefPaneController.m in Sources */,
+				113077FF0D50139500ECDECC /* ECQTComponent.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1849,9 +1857,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = NO;
+				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_GC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
@@ -1864,10 +1871,8 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					ffmpeg/libavcodec,
-					ffmpeg/libavutil,
-					ffmpeg/libpostproc,
-					ffmpeg/libavformat,
+					"$(BUILT_PRODUCTS_DIR)",
+					"ffmpeg/**",
 					libebml,
 					libmatroska,
 				);
@@ -1884,7 +1889,6 @@
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
 				PREBINDING = NO;
-				PRESERVE_DEAD_CODE_INITS_AND_TERMS = NO;
 				PRODUCT_NAME = Perian;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
 				WRAPPER_EXTENSION = component;
@@ -1898,11 +1902,11 @@
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_GC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1910,10 +1914,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					ffmpeg/libavcodec,
-					ffmpeg/libavutil,
-					ffmpeg/libpostproc,
-					ffmpeg/libavformat,
+					"$(BUILT_PRODUCTS_DIR)",
+					"ffmpeg/**",
 					libebml,
 					libmatroska,
 				);
@@ -1968,7 +1970,6 @@
 					i386,
 				);
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				GCC_ENABLE_OBJC_GC = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_STRICT_ALIASING = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
@@ -2027,11 +2028,11 @@
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_GC = YES;
 				GCC_FAST_MATH = YES;
 				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				GCC_STRICT_ALIASING = YES;
@@ -2040,10 +2041,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					ffmpeg/libavcodec,
-					ffmpeg/libavutil,
-					ffmpeg/libpostproc,
-					ffmpeg/libavformat,
+					"$(BUILT_PRODUCTS_DIR)",
+					"ffmpeg/**",
 					libebml,
 					libmatroska,
 				);

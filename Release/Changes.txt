@@ -1,3 +1,17 @@
+1.1.1
+- H.264 in avi fixed
+- Some anamorphic AVI files supported
+- Performance problems due to PIC fixed with new Xcode
+- Fix a decoding bug with H.264 i-frames
+- Better character set detection
+- Problem with multiple update checkers fixed
+- Several parsing and rendering bugs with subtitles fixed
+- Subtitles don't cause the player to pause when the first line is shown
+- Audio fixed for some older MKV files with AAC/FLAC
+- Strange values in MKV chapters or video sizes are handled better
+- Support for SAMI subtitles and VP6+alpha and DosBox video codecs
+- FFmpeg fixed crashing on G3s and Fraps decoding problems
+
 1.1
 - Major performance improvements
 - TrueAudio, MP1, and DTS audio support

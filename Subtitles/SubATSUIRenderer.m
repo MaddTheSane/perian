@@ -260,6 +260,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 {
 	[context release];
 	free(ubuffer);
+	CGColorSpaceRelease(srgbCSpace);
 	UCDisposeTextBreakLocator(&breakLocator);
 	ATSUDisposeTextLayout(layout);
 	[super dealloc];
@@ -285,28 +286,64 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	return videoWidth / videoHeight;
 }
 
-static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
+static NSMutableDictionary *fontIDCache = nil;
+
+static void CleanupFontIDCache() __attribute__((destructor));
+static void CleanupFontIDCache()
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	if (fontIDCache) [fontIDCache release];
+	fontIDCache = nil;
+	[pool release];
+}
+
+// XXX: Assumes ATSUFontID = ATSFontRef. This is true.
+static ATSUFontID GetFontIDForSSAName(NSString *name)
 {
 	ByteCount nlen = [name length];
 	unichar *uname = (unichar*)[name cStringUsingEncoding:NSUnicodeStringEncoding];
 	
-	ATSFontRef fontRef;
+	if (!fontIDCache) fontIDCache = [[NSMutableDictionary alloc] init];
+	
+	NSNumber *idN = [fontIDCache objectForKey:[name lowercaseString]];
+		
+	if (idN) return [idN intValue];
+	
 	ATSUFontID font;
 	
 	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
 	
-	if (font == kATSUInvalidFontID) {
-		fontRef = ATSFontFindFromName((CFStringRef)name,kATSOptionFlagsDefault);
-		font = FMGetFontFromATSFontRef(fontRef);
+	if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)name, kATSOptionFlagsDefault); // for bugs in ATS under 10.4
+	if (font == kATSUInvalidFontID) { // try a case-insensitive search
+		ItemCount fontCount;
+		ATSUFontCount(&fontCount);
 		
-		if (font == kATSUInvalidFontID) {
-			fontRef = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault);
-			font = FMGetFontFromATSFontRef(fontRef);
+		ATSUFontID fontIDs[fontCount];
+		ItemCount arraySize = fontCount;
+		ATSUGetFontIDs(fontIDs, arraySize, &fontCount);
+		
+		// I do not want to call ATSUFindFontName twice 
+		// so I make the buffer large enough.
+		ByteCount len;
+		ItemCount x, index;
+		const ByteCount kBufLength = 1024/sizeof(unichar);
+		unichar buf[kBufLength];
+	  
+		for (x = 0; x < fontCount; x++) {
+			ATSUFindFontName(fontIDs[x], kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, kBufLength, (Ptr)buf, &len, &index);
+			NSString *fname = [NSString stringWithCharacters:buf length:len/sizeof(unichar)];
+			
+			if ([name caseInsensitiveCompare:fname] == NSOrderedSame) {
+				font = fontIDs[x];
+				break;
+			}
 		}
-	} else fontRef = FMGetATSFontRefFromFont(font);
+		
+		if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault); // final fallback
+	}
 	
-	*_fontRef = fontRef;
-	
+	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:[name lowercaseString]];
+	 
 	return font;
 }
 
@@ -315,8 +352,8 @@ static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
 	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag};
 	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID)};
 	
-	ATSFontRef fontRef;
-	ATSUFontID font = GetFontIDForSSAName(s->fontname, &fontRef);
+	ATSUFontID font = GetFontIDForSSAName(s->fontname);
+	ATSFontRef fontRef = font;
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
 	Fixed size;
 	Boolean b = s->bold, i = s->italic, u = s->underline, st = s->strikeout;
@@ -333,7 +370,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name, ATSFontRef *_fontRef)
 	if (s->tracking) {
 		Fixed tracking = FloatToFixed(s->tracking);
 		
-		SetATSUStyleOther(style, kATSUTrackingTag, sizeof(Fixed), &tracking);
+		SetATSUStyleOther(style, kATSUAfterWithStreamShiftTag, sizeof(Fixed), &tracking);
 	}
 	
 	if (s->scaleX != 100. || s->scaleY != 100.) {
@@ -424,8 +461,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 		case tag_fn:
 			sv();
 			{
-				ATSFontRef fontRef;
-				ATSUFontID font = GetFontIDForSSAName(sval, &fontRef);
+				ATSUFontID font = GetFontIDForSSAName(sval);
 				
 				if (font) SetATSUStyleOther(spanEx->style, kATSUFontTag, sizeof(ATSUFontID), &font);
 			}
@@ -472,7 +508,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_fsp:
 			fixv();
-			SetATSUStyleOther(spanEx->style, kATSUTrackingTag, sizeof(Fixed), &fixval);
+			SetATSUStyleOther(spanEx->style, kATSUAfterWithStreamShiftTag, sizeof(Fixed), &fixval);
 			break;
 		case tag_frz:
 			if (!isFirstSpan) div->render_complexity |= renderComplexTransforms; // this one's hard
@@ -653,16 +689,13 @@ static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 a
 	ATSUSetLayoutControls(layout,sizeof(vals) / sizeof(ATSUAttributeValuePtr),tags,sizes,vals);
 }
 
-static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator,
-										   ATSLayoutRecord *records, ItemCount lineLen, Fixed idealLineWidth, Fixed originalLineWidth, Fixed maximumLineWidth, unsigned numBreaks, unichar *uline)
+static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *div, unsigned char *breakOpportunities,
+										   ATSLayoutRecord *records, ItemCount lineLen, Fixed idealLineWidth, Fixed originalLineWidth, Fixed maximumLineWidth, unsigned numBreaks, unsigned lastHardBreak)
 {		
 	int recOffset = 0;
 	Fixed widthOffset = 0;
 	BOOL foundABreak;
 	UniCharArrayOffset lastBreakOffset = 0;
-	declare_bitfield(breakOpportunities, lineLen);
-	
-	FindAllPossibleLineBreaks(breakLocator, uline, lineLen, breakOpportunities);
 	
 	do {
 		int j, lastIndex = 0;
@@ -672,8 +705,9 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 		for (j = recOffset; j < lineLen; j++) {
 			ATSLayoutRecord *rec = &records[j];
 			Fixed recPos = rec->realPos - widthOffset;
+			UniCharArrayOffset charOffset = rec->originalOffset/2 + lastHardBreak;
 
-			if (bitfield_test(breakOpportunities, rec->originalOffset/2)) {
+			if (bitfield_test(breakOpportunities, charOffset)) {
 				if (recPos >= idealLineWidth) {
 					error = recPos - idealLineWidth;
 
@@ -682,6 +716,8 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 						if (lastError < error || div->wrapStyle == kSubLineWrapBottomWider) {
 							rec = &records[lastIndex];
 							j = lastIndex;
+							recPos = rec->realPos - widthOffset;
+							charOffset = rec->originalOffset/2 + lastHardBreak;
 						}
 					}
 					
@@ -689,8 +725,8 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 					if ((recPos + (originalLineWidth - rec->realPos)) < maximumLineWidth) return 0;
 						
 					foundABreak = YES;
-					lastBreakOffset = rec->originalOffset/2;
-					ATSUSetSoftLineBreak(layout, rec->originalOffset/2);
+					lastBreakOffset = charOffset;
+					ATSUSetSoftLineBreak(layout, charOffset);
 					break;
 				}
 				
@@ -700,7 +736,8 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 		
 		widthOffset = records[j].realPos;
 		recOffset = j;
-	} while (foundABreak && numBreaks--);
+		numBreaks--;
+	} while (foundABreak && numBreaks);
 		
 	return (numBreaks == 0) ? 0 : lastBreakOffset;
 }
@@ -708,11 +745,13 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, Fixed breakingWidth, unichar *utext, unsigned textLen, ItemCount numHardBreaks)
 {
 	UniCharArrayOffset hardBreaks[numHardBreaks+2];
-	float fWidth = FixedToFloat(breakingWidth);
-	
-	ATSUGetSoftLineBreaks(layout, kATSUFromTextBeginning, kATSUToTextEnd, numHardBreaks, &hardBreaks[1], NULL);	
+	declare_bitfield(breakOpportunities, textLen);
+	float fBreakingWidth = FixedToFloat(breakingWidth);
 	int i;
 	
+	ATSUGetSoftLineBreaks(layout, kATSUFromTextBeginning, kATSUToTextEnd, numHardBreaks, &hardBreaks[1], NULL);	
+	FindAllPossibleLineBreaks(breakLocator, utext, textLen, breakOpportunities);
+		
 	hardBreaks[0] = 0;
 	hardBreaks[numHardBreaks+1] = textLen;
 	
@@ -721,22 +760,22 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 		ATSUTextMeasurement leftEdge, rightEdge, ignore;
 		
 		ATSUGetUnjustifiedBounds(layout, thisBreak, nextBreak - thisBreak, &leftEdge, &rightEdge, &ignore, &ignore);
-		Fixed fixLineWidth = rightEdge - leftEdge;
-		float lineWidth = FixedToFloat(fixLineWidth);
+		Fixed lineWidth = rightEdge - leftEdge;
+		float fLineWidth = FixedToFloat(lineWidth);
 				
-		if (fixLineWidth > breakingWidth) {
+		if (lineWidth > breakingWidth) {
 			ATSLayoutRecord *records;
 			ItemCount numRecords;
-			unsigned idealSplitLines = ceil(lineWidth / fWidth);
-			Fixed idealBreakWidth = FloatToFixed(lineWidth / ceil(lineWidth / fWidth));
+			unsigned idealSplitLines = ceil(fLineWidth / fBreakingWidth);
+			Fixed idealBreakWidth = FloatToFixed(fLineWidth / idealSplitLines);
 			
 			ATSUDirectGetLayoutDataArrayPtrFromTextLayout(layout, thisBreak, kATSUDirectDataLayoutRecordATSLayoutRecordCurrent, (void*)&records, &numRecords);
 						
-			UniCharArrayOffset res = BreakOneLineSpan(layout, div, breakLocator, records, numRecords, idealBreakWidth, fixLineWidth, breakingWidth, idealSplitLines-1, &utext[thisBreak]);
-			
-			if (res) ATSUBatchBreakLines(layout, res, nextBreak - res, breakingWidth, NULL);
+			UniCharArrayOffset res = BreakOneLineSpan(layout, div, breakOpportunities, records, numRecords, idealBreakWidth, lineWidth, breakingWidth, idealSplitLines-1, thisBreak);
 			
 			ATSUDirectReleaseLayoutDataArrayPtr(NULL, kATSUDirectDataLayoutRecordATSLayoutRecordCurrent, (void*)&records);
+			
+			if (res) ATSUBatchBreakLines(layout, res, nextBreak - res, breakingWidth, NULL);
 		}
 	}
 }
@@ -801,7 +840,7 @@ static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanE
 			break;
 			
 		case kTextLayerOutline:
-			if_different(outlineRadius) CGContextSetLineWidth(c, spanEx->outlineRadius*2. + .5);
+			if_different(outlineRadius) CGContextSetLineWidth(c, spanEx->outlineRadius ? (spanEx->outlineRadius*2. + .5) : 0.);
 			if_different(outlineColor)  SetColor(c, (div->styleLine->borderStyle == kSubBorderStyleNormal) ? strokec : fillc, spanEx->outlineColor);
 			
 			if_different(outlineAlpha) {
@@ -917,20 +956,21 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	SubATSUISpanEx *firstSpanEx = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
 	BOOL endLayer = NO;
 	
-	if (div->styleLine->borderStyle == kSubBorderStyleNormal) {
+	if (div->styleLine->borderStyle == kSubBorderStyleNormal && firstSpanEx->shadowDist) {
 		if (!(div->render_complexity & renderManualShadows)) {
-			if (firstSpanEx->shadowDist) {
-				endLayer = YES;
-				CGContextSetShadowWithColor(c, CGSizeMake(firstSpanEx->shadowDist + .5, -(firstSpanEx->shadowDist + .5)), 0, firstSpanEx->shadowColor);
-				CGContextBeginTransparencyLayer(c, NULL);
-			}
+			endLayer = YES;
+			CGContextSetShadowWithColor(c, CGSizeMake(firstSpanEx->shadowDist + .5, -(firstSpanEx->shadowDist + .5)), 0, firstSpanEx->shadowColor);
+			CGContextBeginTransparencyLayer(c, NULL);
 		} else DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerShadow);
 	}
 	
 	DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerOutline);
 	penY = DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerPrimary);
 	
-	if (endLayer) CGContextEndTransparencyLayer(c);
+	if (endLayer) {
+		CGContextEndTransparencyLayer(c);
+		CGContextSetShadowWithColor(c, CGSizeMake(0,0), 0, NULL);
+	}
 	
 	return penY;
 }
@@ -987,9 +1027,9 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		UniCharArrayOffset *breaks = FindLineBreaks(layout, div, breakLocator, &breakCount, breakingWidth, ubuffer, textLen);
 		ATSUTextMeasurement imageWidth, imageHeight;
 
-		if (div->posX != -1 || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
+		if (div->positioned || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
 
-		if (div->posX == -1) {
+		if (!div->positioned) {
 			penX = FloatToFixed(NSMinX(marginRect));
 
 			switch(div->alignV) {
@@ -1090,6 +1130,39 @@ CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s)
 void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
 {
 	[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
+}
+
+void SubPrerollFromHeader(char *header, int headerLen)
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	SubtitleRendererPtr s = headerLen ? SubInitForSSA(header, headerLen, 640, 480)
+								      : SubInitNonSSA(640, 480);
+	
+	/*
+	CGColorSpaceRef csp = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
+	void *buf = malloc(640 * 480 * 4);
+	CGContextRef c = CGBitmapContextCreate(buf,640,480,8,640 * 4,csp,kCGImageAlphaPremultipliedFirst);
+	
+	if (!headerLen) {
+		SubRenderPacket(s, c, (CFStringRef)@"to Be continued", 640, 480);
+	} else {
+		NSArray *styles = [s->context->styles allValues];
+		int i, nstyles = [styles count];
+		
+		for (i = 0; i < nstyles; i++) {
+			SubStyle *sty = [styles objectAtIndex:i];
+			NSString *line = [NSString stringWithFormat:@"0,0,%@,,0,0,0,,{\fs1}If you are seeing this message, your player doesn't fully support the formatted subtitle track. It is recommended you switch to the unformatted track.", sty->name];
+			SubRenderPacket(s, c, (CFStringRef)line, 640, 480);
+		}
+	}
+	
+	CGContextRelease(c);
+	free(buf);
+	CGColorSpaceRelease(csp);
+	*/
+	
+	SubDisposeRenderer(s);
+	[pool release];
 }
 
 void SubDisposeRenderer(SubtitleRendererPtr s)
@@ -1217,12 +1290,12 @@ static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, unichar 
 	UniCharArrayOffset lastBreak = 0;
 	
 	while (1) {
-		UniCharArrayOffset breakOffset;
+		UniCharArrayOffset breakOffset = 0;
 		OSStatus status;
 		
-		status = UCFindTextBreak(breakLocator, kUCTextBreakLineMask, kUCTextBreakLeadingEdgeMask | (lastBreak ? kUCTextBreakLeadingEdgeMask : 0), uline, lineLen, lastBreak, &breakOffset);
+		status = UCFindTextBreak(breakLocator, kUCTextBreakLineMask, kUCTextBreakLeadingEdgeMask | (lastBreak ? kUCTextBreakIterateMask : 0), uline, lineLen, lastBreak, &breakOffset);
 		
-		if (status != noErr || breakOffset == lineLen) break;
+		if (status != noErr || breakOffset >= lineLen) break;
 		
 		bitfield_set(breakOpportunities, breakOffset-1);
 		lastBreak = breakOffset;

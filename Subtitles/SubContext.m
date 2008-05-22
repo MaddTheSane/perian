@@ -140,6 +140,39 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 	return self;
 }
 
+static NSString *yes(int i) {return i ? @"yes" : @"no";}
+
+static NSString *ColorString(SubRGBAColor *c)
+{
+	return [NSString stringWithFormat:@"{R: %d G: %d B: %d A: %d}", (int)(c->red * 255),
+					 (int)(c->green * 255), (int)(c->blue * 255), (int)(c->alpha * 255)];
+}
+
+-(NSString *)description
+{
+	static const NSString *alignHStr[] = {@"left", @"center", @"right"};
+	static const NSString *alignVStr[] = {@"bottom", @"middle", @"top"};
+	static const NSString *bstyle[] = {@"normal", @"box"};
+	
+	return [NSString stringWithFormat:@""
+					 "SubStyle named \"%@\"\n"
+					 "-Font: %f pt %@\n"
+					 "-Primary color: %@\n"
+					 "-Secondary color: %@\n"
+					 "-Outline: %f px %@\n"
+					 "-Shadow: %f px %@\n"
+					 "-Margin: %d px left, %d px right, %d px vertical\n"
+					 "-Bold: %@ Italic: %@ Underline: %@ Strikeout: %@\n"
+					 "-Alignment: %@ %@\n"
+					 "-Border style: %@\n"
+					 "-Per-font scale: %f\n",
+					 name, size, fontname, ColorString(&primaryColor),
+					 ColorString(&secondaryColor), outlineRadius, ColorString(&outlineColor),
+					 shadowDist, ColorString(&shadowColor), marginL, marginR, marginV,
+					 yes(bold), yes(italic), yes(underline), yes(strikeout), alignHStr[alignH],
+					 alignVStr[alignV], bstyle[borderStyle], platformSizeScale];
+}
+
 -(void)dealloc
 {
 	[name release];

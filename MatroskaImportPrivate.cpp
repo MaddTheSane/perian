@@ -50,6 +50,9 @@
 
 extern "C" {
 #include "avutil.h"
+#define CodecType AVCodecType
+#include "ff_private.h"
+#undef CodecType	
 }
 
 using namespace std;
@@ -110,9 +113,11 @@ ComponentResult MatroskaImport::ProcessLevel1Element()
 		return ReadChapters(*static_cast<KaxChapters *>(el_l1));
 		
 	} else if (EbmlId(*el_l1) == KaxAttachments::ClassInfos.GlobalId) {
+		ComponentResult res;
 		el_l1->Read(*aStream, KaxAttachments::ClassInfos.Context, upperLevel, dummyElt, true);
-		return ReadAttachments(*static_cast<KaxAttachments *>(el_l1));
-		
+		res = ReadAttachments(*static_cast<KaxAttachments *>(el_l1));
+		PrerollSubtitleTracks();
+		return res;
 	} else if (EbmlId(*el_l1) == KaxSeekHead::ClassInfos.GlobalId) {
 		el_l1->Read(*aStream, KaxSeekHead::ClassInfos.Context, upperLevel, dummyElt, true);
 		return ReadMetaSeek(*static_cast<KaxSeekHead *>(el_l1));
@@ -387,23 +392,10 @@ ComponentResult MatroskaImport::ReadContentEncodings(KaxContentEncodings &encodi
 	return noErr;
 }
 
-static void SetCleanApertureDimensions(CleanApertureImageDescriptionExtension **clap, Fixed cleanW, Fixed cleanH)
-{
-	int wN, wD, hN, hD;
-	
-	av_reduce(&wN, &wD, cleanW, fixed1, UINT_MAX);
-	av_reduce(&hN, &hD, cleanH, fixed1, UINT_MAX);
-	
-	**clap = (CleanApertureImageDescriptionExtension){EndianU32_NtoB(wN), EndianU32_NtoB(wD),
-													  EndianU32_NtoB(hN), EndianU32_NtoB(hD),
-													  EndianU32_NtoB(0), EndianU32_NtoB(1), EndianU32_NtoB(0), EndianU32_NtoB(1)};
-}
-
 ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
 {
 	ComponentResult err = noErr;
 	ImageDescriptionHandle imgDesc;
-	CleanApertureImageDescriptionExtension **clap = (CleanApertureImageDescriptionExtension**)NewHandle(sizeof(CleanApertureImageDescriptionExtension));
 	Fixed width, height;
 	
 	KaxTrackVideo &videoTrack = GetChild<KaxTrackVideo>(kaxTrack);
@@ -416,6 +408,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	if (disp_width.ValueIsSet() && disp_height.ValueIsSet()) {
 		// some files ignore the spec and treat display width/height as a ratio, not as pixels
 		// so scale the display size to be at least as large as the pixel size here
+		// but don't let it be bigger in both dimensions
 		float horizRatio = float(uint32(pxl_width)) / uint32(disp_width);
 		float vertRatio = float(uint32(pxl_height)) / uint32(disp_height);
 		
@@ -426,9 +419,17 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 			width = FloatToFixed(uint32(disp_width) * horizRatio);
 			height = FloatToFixed(uint32(disp_height) * horizRatio);
 		} else {
-			width = IntToFixed(uint32(disp_width));
-			height = IntToFixed(uint32(disp_height));
-		}		
+			float dar = uint32(disp_width) / (float)uint32(disp_height);
+			float p_ratio = uint32(pxl_width) / (float)uint32(pxl_height);
+			
+			if (dar > p_ratio) {
+				width  = FloatToFixed(uint32(pxl_height) * dar);
+				height = IntToFixed(uint32(pxl_height));
+			} else {
+				width  = IntToFixed(uint32(pxl_width));
+				height = FloatToFixed(uint32(pxl_width) / dar);
+			}
+		}				
 	} else if (pxl_width.ValueIsSet() && pxl_height.ValueIsSet()) {
 		width = IntToFixed(uint32(pxl_width));
 		height = IntToFixed(uint32(pxl_height));
@@ -436,9 +437,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 		Codecprintf(NULL, "MKV: Video has unknown dimensions.\n");
 		return invalidTrack;
 	}
-	
-	SetCleanApertureDimensions(clap, width, height);
-	
+		
 	mkvTrack.theTrack = NewMovieTrack(theMovie, width, height, kNoVolume);
 	if (mkvTrack.theTrack == NULL)
 		return GetMoviesError();
@@ -458,10 +457,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
     (*imgDesc)->depth = 24;
     (*imgDesc)->clutID = -1;
 	
-	AddImageDescriptionExtension(imgDesc,(Handle)clap, kCleanApertureImageDescriptionExtension);
-	
-	DisposeHandle((Handle)clap);
-	
+	set_track_clean_aperture_ext(imgDesc, width, height, IntToFixed(uint32(pxl_width)), IntToFixed(uint32(pxl_height)));
 	mkvTrack.desc = (SampleDescriptionHandle) imgDesc;
 	
 	// this sets up anything else needed in the description for the specific codec.
@@ -614,12 +610,9 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 			return GetMoviesError();
 		
 		mkvTrack.theMedia = GetTrackMedia(mkvTrack.theTrack);
-		mh = GetMediaHandler(mkvTrack.theMedia);
-		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
-		
-		BeginMediaEdits(mkvTrack.theMedia);
-		
 		mkvTrack.is_vobsub = false;
+
+		BeginMediaEdits(mkvTrack.theMedia);
 	} else {
 		Codecprintf(NULL, "MKV: Unsupported subtitle type\n");
 		return noErr;
@@ -718,6 +711,12 @@ void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
 		KaxChapterDisplay & chapDisplay = GetChild<KaxChapterDisplay>(*atom);
 		KaxChapterString & chapString = GetChild<KaxChapterString>(chapDisplay);
 		MediaHandler mh = GetMediaHandler(GetTrackMedia(chapterTrack));
+		TimeValue start = UInt64(startTime) / timecodeScale;
+
+		if (start > movieDuration) {
+			Codecprintf(NULL, "MKV: Chapter time is beyond the end of the file\n");
+			return;
+		}
 		
 		Rect bounds = {0, 0, 0, 0};
 		TimeValue inserted;
@@ -730,8 +729,6 @@ void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
 		if (err)
 			Codecprintf(NULL, "MKV: Error adding text sample %d\n", err);
 		else {
-			TimeValue start = UInt64(startTime) / timecodeScale;
-			
 			InsertMediaIntoTrack(chapterTrack, start, inserted, 1, fixed1);
 		}
 	}
@@ -838,7 +835,7 @@ void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
 			block = &simpleBlock;
 			if (!simpleBlock.IsKeyframe())
 				flags |= mediaSampleNotSync;
-			if (simpleBlock.IsDiscardable())
+			if (simpleBlock.IsDiscardable() && IsFrameDroppingEnabled())
 				flags |= mediaSampleDroppable;
 		}
 		
@@ -878,6 +875,23 @@ void MatroskaImport::SetContext(MatroskaSeekContext context)
 	ioHandler->setFilePointer(context.position);
 }
 
+void MatroskaImport::PrerollSubtitleTracks()
+{
+	if (!seenTracks) return;
+		
+	for (int i = 0; i < tracks.size(); i++) {
+		MatroskaTrack *track = &tracks[i];
+		
+		if (track->type == track_subtitle) {
+			Handle subtitleDescriptionExt;
+			OSErr err = GetImageDescriptionExtension((ImageDescriptionHandle)track->desc, &subtitleDescriptionExt, kSubFormatSSA, 1);
+			
+			if (err || !subtitleDescriptionExt) continue;
+			
+			SubPrerollFromHeader(*subtitleDescriptionExt, GetHandleSize(subtitleDescriptionExt));
+		}
+	}
+}
 
 MatroskaTrack::MatroskaTrack()
 {
@@ -969,7 +983,6 @@ void MatroskaTrack::ParseFirstBlock(KaxInternalBlock &block)
 	if (desc) {
 		switch ((*desc)->dataFormat) {
 			case kAudioFormatAC3:
-			case kAudioFormatAC3MS:
 				replaceSoundDesc = parse_ac3_bitstream(&asbd, &acl, block.GetBuffer(0).Buffer(), block.GetFrameSize(0));
 				break;
 		}
@@ -1082,8 +1095,11 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	if (desc == NULL) return;
 	
 	if (type == track_subtitle && !is_vobsub) {
-		if (frame.size > 0) subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.pts, frame.pts + frame.duration);
 		const char *packet=NULL; size_t size=0; unsigned start=0, end=0;
+		
+		if (frame.size > 0)
+			subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.pts, frame.pts + frame.duration);
+
 		packet = subtitleSerializer->popPacket(&size, &start, &end);
 		if (packet) {
 			Handle sampleH;
@@ -1188,7 +1204,7 @@ void MatroskaTrack::FinishTrack()
 			 AddFrame(fr); // add empty frames to flush the subtitle packet queue
 		 } while (!subtitleSerializer->empty());
 		 EndMediaEdits(theMedia);
+	} else {
+		AddSamplesToTrack();
 	}
-	
-	AddSamplesToTrack();
 }

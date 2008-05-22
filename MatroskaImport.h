@@ -257,6 +257,10 @@ private:
 	// This function restores el_l1 to what is saved in the context, deleting the current
 	// value if not null, and seeks to the specified point in the file.
 	void SetContext(MatroskaSeekContext context);
+	
+	// After the fonts are loaded, preplay the subtitle tracks to avoid an annoying pause
+	// from unavoidably lazy rendering APIs looking them up for the first time.
+	void PrerollSubtitleTracks();
 		
 	ComponentInstance		self;
 	Handle					dataRef;

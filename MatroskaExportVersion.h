@@ -23,6 +23,6 @@
  */
 
 // The high word is the codecInterfaceVersion
-#define kMatroskaExportVersion		(0x00020001)
+#define kMatroskaExportVersion		(0x00020002)
 
 #define kMatroskaExportShortFileTypeNamesResID 1025

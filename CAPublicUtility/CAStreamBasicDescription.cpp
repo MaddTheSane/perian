@@ -50,8 +50,6 @@
 	#include <Endian.h>
 #endif
 
-#import "CodecIDs.h"
-
 const AudioStreamBasicDescription	CAStreamBasicDescription::sEmpty = { 0.0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 CAStreamBasicDescription::CAStreamBasicDescription(double inSampleRate,		UInt32 inFormatID,
@@ -273,7 +271,6 @@ void	CAStreamBasicDescription::GetSimpleName(const AudioStreamBasicDescription& 
 			break;
 		
 		case kAudioFormatAC3:
-		case kAudioFormatAC3MS:
 			strcpy(outName, "AC-3");
 			break;
 		

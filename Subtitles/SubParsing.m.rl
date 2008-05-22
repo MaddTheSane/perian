@@ -61,10 +61,10 @@
 		marginL = marginR = marginV = layer = 0;
 		spans = nil;
 		
-		posX = posY = -1;
+		posX = posY = 0;
 		alignH = kSubAlignmentMiddle; alignV = kSubAlignmentBottom;
 		
-		is_shape = NO;
+		is_shape = positioned = NO;
 		render_complexity = 0;
 	}
 	
@@ -91,6 +91,7 @@
   div->wrapStyle = wrapStyle;
   
     div->is_shape = NO;
+	div->positioned = positioned;
 	div->render_complexity = render_complexity;
 	
 	return div;
@@ -169,14 +170,14 @@ void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSA
 		
 		sline = (("Style:" ws* %sstart str %csvlineend) | str) :> nl;
 		
-		styles = stylename % {cur_array=stylearr;} nl (format %{styleformat=str;})? <: (sline*);
+		styles = stylename % {cur_array=stylearr;} nl :> (format %{styleformat=str;})? <: (sline*);
 		
 		event_txt = (("Dialogue:" ws* %sstart str %csvlineend) | str);
 		event = event_txt :> nl;
 			
-		lines = "[Events]" %setupevents nl (format %{eventformat=str;})? <: (event*);
+		lines = "[Events]" %setupevents nl :> (format %{eventformat=str;})? <: (event*);
 		
-		main := bom? header :> styles :> lines?;
+		main := bom? header styles lines?;
 	}%%
 		
 	%%write init;
@@ -332,6 +333,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					
 					div->posX = curX;
 					div->posY = curY;
+					div->positioned = YES;
 				}
 
 				intnum = ("-"? [0-9]+) >paramset %setintnum;
@@ -340,7 +342,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				string = ([^\\}]*) >paramset %setstringval;
 				color = ("H"|"&"){,2} (xdigit+) >paramset %sethexnum "&"?;
 				parens = "(" [^)]* ")";
-				xypos = ("(" [0-9]+ "," [0-9]+ ")") >paramset %setxypos;
+				xypos = ("(" "-"? [0-9]+ "," "-"? [0-9]+ ")") >paramset %setxypos;
 				
 				cmd = "\\" (
 							"b" intnum %bold
