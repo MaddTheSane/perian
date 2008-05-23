@@ -105,9 +105,9 @@ else
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=i386 --extra-ldflags='-arch i386' --extra-cflags='-arch i386 $sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+                "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=i386 --extra-ldflags='-arch i386' --extra-cflags="-arch i386 $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
             else
-                "$SRCROOT/ffmpeg/configure" --extra-cflags='$sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
+                "$SRCROOT/ffmpeg/configure" --extra-cflags="$sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
             fi
         
             make depend > /dev/null 2>&1 || true
@@ -135,9 +135,9 @@ else
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --extra-cflags='-faltivec $sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --extra-cflags="-faltivec $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions
             else
-                "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=ppc  --extra-ldflags='-arch ppc' --extra-cflags='-faltivec -arch ppc $sdkflags $optCFlags' $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=ppc  --extra-ldflags='-arch ppc' --extra-cflags="-faltivec -arch ppc $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions
             fi
         
             make depend > /dev/null 2>&1 || true
