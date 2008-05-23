@@ -94,9 +94,10 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 	if (self = [super init]) {
 		NSString *tmp;
 		delegate = delegate_;
+		NSString *sv;
 				
 #define sv(fn, n) fn = [[s objectForKey: @""#n] retain]
-#define fv(fn, n) fn = [[s objectForKey:@""#n] floatValue]
+#define fv(fn, n) sv = [s objectForKey:@""#n]; fn = sv ? [sv floatValue] : 0.;
 #define iv(fn, n) fn = [[s objectForKey:@""#n] intValue]
 #define bv(fn, n) fn = [[s objectForKey:@""#n] intValue] != 0
 #define cv(fn, n) tmp = [s objectForKey:@""#n]; if (tmp) fn = ParseSSAColorString(tmp);
