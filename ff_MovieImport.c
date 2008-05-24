@@ -123,8 +123,6 @@ void init_FFmpeg()
 		REGISTER_DECODER(vp6a);
 		REGISTER_DECODER(zmbv);
 		
-		REGISTER_DECODER(zmbv);
-		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
 }
