@@ -4,9 +4,10 @@
 # Check the Perian.component target and PerianPane target.
 
 VERSION=1.1.1b1
-BETA=TRUE
+BETA=FALSE
 SRC_DIR=..
 BUILD_DIR=build
+ATV_BUILD_DIR=ATVComponents
 RELEASE_NAME=Perian
 PERIAN_DIR=$(BUILD_DIR)/Perian
 ART_DIR=Artwork
@@ -29,6 +30,14 @@ endif
 BUILDFLAGS="BUILDCONFIGURATION=$(BUILDSTYLE)"
 
 release: compile createfolder diskimage
+
+atv: compile
+	@# clean build dir
+	rm -rf $(ATV_BUILD_DIR)
+	mkdir $(ATV_BUILD_DIR)
+	cp $(PERIAN_BUILD_DIR)/Perian.prefPane/Contents/Resources/Components/*.zip $(PERIAN_BUILD_DIR)/Perian.prefPane/Contents/Resources/Components/*/*.zip $(ATV_BUILD_DIR)
+	cp ATV-Perian-Install.sh $(ATV_BUILD_DIR)
+	makeself --nocrc --nocomp --nox11 ATVComponents Perian-ATV-$(VERSION).sh Perian ./ATV-Perian-Install.sh
 
 compile:
 	$(MAKE) $(BUILDFLAGS) -C $(SRC_DIR)
