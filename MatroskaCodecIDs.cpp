@@ -788,6 +788,7 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 				break;
 				
 			case kAudioFormatAC3:
+			case kAudioFormatAC3MS:
 				acl = ac3ChannelLayouts[channelIndex];
 				break;
 				

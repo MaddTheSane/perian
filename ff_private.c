@@ -288,6 +288,15 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		{
 			useDefault = 0;
 			aclSize = sizeof(AudioChannelLayout);
+			QTMetaDataRef trackMetaData;
+			OSErr error = QTCopyTrackMetaData(targetTrack, &trackMetaData);
+			if(error == noErr)
+			{
+				const char *prop = "Surround";
+				OSType key = 'name';
+				error = QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL);
+				QTMetaDataRelease(trackMetaData);
+			}
 		}
 	}
 	if(useDefault && asbd.mChannelsPerFrame > 2)
@@ -344,7 +353,7 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 			asbd->mFormatID = kAudioFormatMPEGLayer3;
 			break;
 		case CODEC_ID_AC3:
-			asbd->mFormatID = kAudioFormatAC3;
+			asbd->mFormatID = kAudioFormatAC3MS;
 			map->vbr = 1;
 			break;
 		case CODEC_ID_PCM_S16LE:
