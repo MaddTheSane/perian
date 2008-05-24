@@ -99,6 +99,8 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 	(*imgDesc)->depth = 32;
 	(*imgDesc)->clutID = -1;
 	
+	if (!trackWidth || !trackHeight) {trackWidth = IntToFixed(640); trackHeight = IntToFixed(480);}
+	
 	if (imageExtension) AddImageDescriptionExtension(imgDesc, imageExtension, subType);
 	
 	theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
