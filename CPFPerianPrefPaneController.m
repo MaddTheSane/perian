@@ -643,6 +643,8 @@
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *infoDict = [self myInfoDict];
 	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
+	NSFileManager *fileManager = [NSFileManager defaultManager];
+	NSString *componentPath;
 
 	[errorString release];
 	errorString = [[NSMutableString alloc] init];
@@ -652,11 +654,11 @@
 		auth = nil;
 	
 	int tag = 0;
-	BOOL result = NO;
+	componentPath = [[self quickTimeComponentDir:userInstalled] stringByAppendingPathComponent:@"Perian.component"];
 	if(auth != nil && !userInstalled)
-		[self _authenticatedRemove:[[self quickTimeComponentDir:userInstalled] stringByAppendingPathComponent:@"Perian.component"]];
+		[self _authenticatedRemove:componentPath];
 	else
-		result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:[self quickTimeComponentDir:userInstalled] destination:@"" files:[NSArray arrayWithObject:@"Perian.component"] tag:&tag];
+		[fileManager removeFileAtPath:componentPath handler:nil];
 	
 	NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
 	NSDictionary *myComponent = nil;
@@ -664,10 +666,11 @@
 	{
 		ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
 		NSString *directory = [self basePathForType:type user:userInstalled];
+		componentPath = [directory stringByAppendingPathComponent:[myComponent objectForKey:ComponentNameKey]];
 		if(auth != nil && !userInstalled)
-			[self _authenticatedRemove:[directory stringByAppendingPathComponent:[myComponent objectForKey:ComponentNameKey]]];
+			[self _authenticatedRemove:componentPath];
 		else
-			result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:directory destination:@"" files:[NSArray arrayWithObject:[myComponent objectForKey:ComponentNameKey]] tag:&tag];
+			[fileManager removeFileAtPath:componentPath handler:nil];
 	}
 	if(auth != nil)
 	{
