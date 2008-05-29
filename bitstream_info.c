@@ -18,10 +18,6 @@
 
 #include "avcodec.h"
 
-#ifdef __BIG_ENDIAN__
-#define WORDS_BIGENDIAN
-#endif
-
 #include "bswap.h"
 #include "mpegvideo.h"
 #include "parser.h"
@@ -122,7 +118,7 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	uint16_t bitrate = ac3_bitratetab[frmsizecod >> 1];
 	uint8_t half = ac3_halfrate[bsid];
 	int sample_rate = ac3_freqs[fscod] >> half;
-	int framesize;
+	int framesize = 0;
 	switch (fscod) {
 		case 0:
 			framesize = 4 * bitrate;
@@ -148,7 +144,6 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 		asbd->mFormatID = kAudioFormatAC3;
 	else
 		asbd->mFormatID = kAudioFormatAC3MS;
-	asbd->mFramesPerPacket = 1;
 	asbd->mChannelsPerFrame = nfchans_tbl[acmod] + lfe;
 	
 	memset(acl, 0, sizeof(AudioChannelLayout));
