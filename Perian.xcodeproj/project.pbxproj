@@ -47,6 +47,7 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = F5CFD2EA0B5012E800616865 /* Build configuration list for PBXAggregateTarget "A52Codec" */;
 			buildPhases = (
+				3D79C0540DFBA1FF00EEFE22 /* ShellScript */,
 				F5CFD2E00B5012BC00616865 /* CopyFiles */,
 				F5CFD2E30B5012DB00616865 /* CopyFiles */,
 			);
@@ -452,7 +453,7 @@
 		11629FD00B51E65F006591C8 /* NSString+extras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+extras.m"; sourceTree = "<group>"; };
 		1162A0530B51ECE1006591C8 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = "<absolute>"; };
 		116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PerianUpdateChecker.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "PerianUpdateChecker-Info.plist"; path = "Plists/PerianUpdateChecker-Info.plist"; sourceTree = "<group>"; };
+		116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PerianUpdateChecker-Info.plist"; path = "Plists/PerianUpdateChecker-Info.plist"; sourceTree = "<group>"; };
 		116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateCheckerAppDelegate.h; sourceTree = "<group>"; };
 		116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateCheckerAppDelegate.m; sourceTree = "<group>"; };
 		116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = UpdateCheckerMainMenu.nib; path = "Update Checker Sources/UpdateCheckerMainMenu.nib"; sourceTree = "<group>"; };
@@ -468,7 +469,7 @@
 		1184A3830B505A8800C8452A /* SUStatus.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = SUStatus.nib; sourceTree = "<group>"; };
 		1184A38B0B505A9800C8452A /* SUStatusController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUStatusController.h; sourceTree = "<group>"; };
 		1184A38C0B505A9800C8452A /* SUStatusController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUStatusController.m; sourceTree = "<group>"; };
-		11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "Perian-Info.plist"; path = "Plists/Perian-Info.plist"; sourceTree = "<group>"; };
+		11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Perian-Info.plist"; path = "Plists/Perian-Info.plist"; sourceTree = "<group>"; };
 		11A70AC10A3D0105002058D4 /* Perian.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.component; sourceTree = BUILT_PRODUCTS_DIR; };
 		11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = "Read Me.rtf"; path = "Release/Read Me.rtf"; sourceTree = "<group>"; };
 		11C85ED30A641E6400DF3D73 /* ff_dataref.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_dataref.c; sourceTree = "<group>"; };
@@ -654,7 +655,7 @@
 		61D6915D0AC8E382000EFC7D /* MkvExportPrivate.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MkvExportPrivate.h; sourceTree = "<group>"; };
 		61FD41320B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatroskaImportPrivate.cpp; sourceTree = "<group>"; };
 		83D1D6C80B4C794700E09EC9 /* Perian.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
-		83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = "PerianPane-Info.plist"; path = "Plists/PerianPane-Info.plist"; sourceTree = "<group>"; };
+		83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PerianPane-Info.plist"; path = "Plists/PerianPane-Info.plist"; sourceTree = "<group>"; };
 		83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PreferencePanes.framework; path = /System/Library/Frameworks/PreferencePanes.framework; sourceTree = "<absolute>"; };
 		83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = PerianPrefPane.nib; sourceTree = "<group>"; };
 		83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CPFPerianPrefPaneController.h; sourceTree = "<group>"; };
@@ -1537,6 +1538,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Xcode auto-versioning script for Subversion\n# by Axel Andersson, modified by Daniel Jalkut to add\n# \"--revision HEAD\" to the svn info line, which allows\n# the latest revision to always be used.\n\n# further modified by Augie Fackler to be gross and sh-based in places\n# so that you can have svn installed anywhere\nPATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin\nffmpeg_rev=`cat \"$SYMROOT/Universal/buildid\"`\nREV=`svnversion -n ./`\necho $REV\n\necho | perl <<EOF\nuse strict;\ndie \"\\$0: Must be run from Xcode\" unless \\$ENV{\"BUILT_PRODUCTS_DIR\"};\n\nmy \\$INFO = \"\\$ENV{BUILT_PRODUCTS_DIR}/\\$ENV{WRAPPER_NAME}/Contents/Info.plist\";\n\nmy \\$version = \"$REV\";\n\n# (Match the last group of digits and optional letter M/S):\n\n# ugly yet functional (barely) regex by Daniel Jalkut:\n#$version =~ s/([\\d]*:)(\\d+[M|S]*).*/$2/;\n\n# better yet still functional regex via Kevin \"Regex Nerd\" Ballard\n(\\$version =~ m/\\d+[MS]*\\$/) && (\\$version = \\$&);\n\nopen(FH, \"\\$INFO\") or die \"\\$0: \\$INFO: $!\";\nmy \\$info = join(\"\", <FH>);\nclose(FH);\n\n#\\$info =~ s/([\\t ]+<key>CFBundleVersion<\\/key>\\n[\\t ]+<string>).*?(<\\/string>)/\\$1\\$version\\$2/;\n\\$info =~ s/SVNREVISION/\\$version/;\n\\$info =~ s/FFMPEGREVISION/$ffmpeg_rev/;\n\nopen(FH, \">\\$INFO\") or die \"\\$0: \\$INFO: \\$!\";\nprint FH \\$info;\nclose(FH);\nEOF\n";
+		};
+		3D79C0540DFBA1FF00EEFE22 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "pushd a52codec/build\nln -s Deployment+Debug Development || true\nln -s Development Deployment || true\nln -s Deployment Deployment+Debug || true\npopd";
 		};
 		F535FCD50B4D605900F00D14 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;

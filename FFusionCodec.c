@@ -193,16 +193,22 @@ static void *launchUpdateChecker(void *args)
 	return NULL;
 }
 
+Boolean FFusionAlreadyRanUpdateCheck = 0;
+
 void FFusionRunUpdateCheck()
 {
+	if (FFusionAlreadyRanUpdateCheck) return;
+
     CFDateRef lastRunDate = CFPreferencesCopyAppValue(CFSTR("NextRunDate"), CFSTR("org.perian.Perian"));
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
     
-	if (lastRunDate != nil && CFDateGetAbsoluteTime(lastRunDate) > now)
-        return;
-
-    if(lastRunDate != nil)
-        CFRelease(lastRunDate);
+	FFusionAlreadyRanUpdateCheck = 1;
+	
+	if (lastRunDate) {
+		Boolean exit = CFDateGetAbsoluteTime(lastRunDate) > now;
+		CFRelease(lastRunDate);
+		if (exit) return;
+	}
     
     //Two places to check, home dir and /
     
