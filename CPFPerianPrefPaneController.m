@@ -719,6 +719,8 @@
 		CFPreferencesSetAppValue(key, [NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN], perianAppID);
 	else
 		CFPreferencesSetAppValue(key, [NSDate distantFuture], perianAppID);
+    
+    CFPreferencesAppSynchronize(perianAppID);
 } 
 
 
@@ -820,6 +822,7 @@
 - (IBAction)setLoadExternalSubtitles:(id)sender
 {	
 	[self setKey:ExternalSubtitlesKey forAppID:perianAppID fromBool:(BOOL)[sender state]];
+    CFPreferencesAppSynchronize(perianAppID);
 }
 
 #pragma mark About 
