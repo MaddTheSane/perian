@@ -1045,11 +1045,12 @@ restart:
 CXXSubSerializer::CXXSubSerializer()
 {
 	priv = [[SubSerializer alloc] init];
+    CFRetain(priv);
 }
 
 CXXSubSerializer::~CXXSubSerializer()
 {
-	if (priv) {[(SubSerializer*)priv release]; priv = NULL;}
+	if (priv) {CFRelease(priv); [(SubSerializer*)priv release]; priv = NULL;}
 }
 
 void CXXSubSerializer::pushLine(const char *line, size_t size, unsigned start, unsigned end)
