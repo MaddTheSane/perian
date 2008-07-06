@@ -15,7 +15,7 @@
 int main(int argc, char *argv[])
 {
 	int fp = open(lockPath, O_CREAT | O_EXCL);
-	if(fp = -1)
+	if(fp == -1)
 	{
 		struct stat lockfile;
 		time_t current = time(NULL);
@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 
 	int ret = NSApplicationMain(argc,  (const char **) argv);
 	
+    close(fp);
 	unlink(lockPath);
 	
 	return ret;

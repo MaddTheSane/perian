@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
 	}
 	[plist setObject:components forKey:ComponentInfoDictionaryKey];
 	[plist writeToFile:[NSString stringWithUTF8String:argv[3]] atomically:YES];
+    [plist release];
 	[pool release];
 	
 	return 0;

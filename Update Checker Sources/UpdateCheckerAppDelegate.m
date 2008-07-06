@@ -90,6 +90,8 @@
 			NSRunAlertPanel(SULocalizedString(@"No Update Found!", nil), SULocalizedString(@"Your copy of Perian is up to date", nil), nil, nil, nil);
 		[[NSApplication sharedApplication] terminate:self];
 	}
+    
+    [appcast release];
 }
 
 - (void)appcastDidFailToLoad:(SUAppcast *)appcast
@@ -97,6 +99,7 @@
 	[self updateFailed];
 	if(manualRun)
 		[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to load Perian's version info. Please try again later.", nil)];
+    [appcast release];
 	[[NSApplication sharedApplication] terminate:self];	
 }
 

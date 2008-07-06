@@ -1709,7 +1709,6 @@ OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dat
         if (len < 0)
         {            
             got_picture = 0;
-            len = 1;
 			Codecprintf(glob->fileLog, "Error while decoding frame\n");
             
             return noErr;

@@ -27,7 +27,7 @@ else
     generalConfigureOptions="$generalConfigureOptions --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3 --disable-mmx --enable-shared"
 fi 
 
-if [ $CC = "" ]; then
+if [ "$CC" = "" ]; then
 	CC="gcc"
 	export CC
 fi

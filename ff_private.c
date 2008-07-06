@@ -1136,7 +1136,7 @@ void send_movie_changed_notification(Movie movie) {
 			err = QTInsertChild(container, anAction, kWhichAction, 1, 0, sizeof(whichAction), &whichAction, NULL);
 		
 		if(err == noErr)
-			err = MovieExecuteWiredActions(movie, 0, container);
+			MovieExecuteWiredActions(movie, 0, container);
 		
 		err = QTDisposeAtomContainer(container);
 	}	
