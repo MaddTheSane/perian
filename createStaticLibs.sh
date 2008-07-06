@@ -26,7 +26,12 @@ else
     echo "warning: Due to issues with Xcode 3.0, Perian will run very slowly! Please get the iPhone SDK or fix Patches/ffmpeg.diff!";
     generalConfigureOptions="$generalConfigureOptions --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3 --disable-mmx --enable-shared"
 fi 
-	
+
+if [ $CC = "" ]; then
+	CC="gcc"
+	export CC
+fi
+
 export sdkflags
 
 OUTPUT_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
@@ -105,9 +110,9 @@ else
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=i386 --extra-ldflags="$sdkflags -arch i386" --extra-cflags="-arch i386 $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+                "$SRCROOT/ffmpeg/configure" --cc=$CC --enable-cross-compile --arch=i386 --extra-ldflags="$sdkflags -arch i386" --extra-cflags="-arch i386 $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
             else
-                "$SRCROOT/ffmpeg/configure" --extra-cflags="$sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
+                "$SRCROOT/ffmpeg/configure" --cc=$CC --extra-cflags="$sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
             fi
         
             make depend > /dev/null 2>&1 || true
@@ -135,9 +140,9 @@ else
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --extra-cflags="-faltivec $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --cc=$CC --extra-cflags="-faltivec $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions
             else
-                "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=ppc  --extra-ldflags="$sdkflags -arch ppc" --extra-cflags="-faltivec -arch ppc $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --cc=$CC --enable-cross-compile --arch=ppc  --extra-ldflags="$sdkflags -arch ppc" --extra-cflags="-faltivec -arch ppc $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions
             fi
         
             make depend > /dev/null 2>&1 || true
