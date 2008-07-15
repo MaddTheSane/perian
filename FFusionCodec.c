@@ -161,7 +161,7 @@ pascal OSStatus HandlePPDialogControlEvent(EventHandlerCallRef  nextHandler, Eve
 void ChangeHintText(int value, ControlRef staticTextField);
 
 extern void init_FFmpeg();
-extern CFMutableStringRef GetHomeDirectory();
+extern CFMutableStringRef CopyHomeDirectory();
 
 #define FFusionDebugPrint(x...) if (glob->fileLog) Codecprintf(glob->fileLog, x);
 #define not(x) ((x) ? "" : "not ")
@@ -212,7 +212,7 @@ void FFusionRunUpdateCheck()
     
     //Two places to check, home dir and /
     
-    CFMutableStringRef location = GetHomeDirectory();
+    CFMutableStringRef location = CopyHomeDirectory();
     CFStringAppend(location, CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app"));
     
     char fileRep[1024];
