@@ -168,11 +168,8 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	imgHdl = (ImageDescriptionHandle)NewHandleClear(sizeof(ImageDescription));
 	(*imgHdl)->idSize = sizeof(ImageDescription);
 	
-	if (codec->codec_tag)
+	if (!((*imgHdl)->cType = map_video_codec_to_mov_tag(codec->codec_id)))
 		(*imgHdl)->cType = BSWAP(codec->codec_tag);
-	else
-		// need to lookup the fourcc from the codec_id
-		(*imgHdl)->cType = map_video_codec_to_mov_tag(codec->codec_id);
 //	FourCCprintf("fourcc: ", (*imgHdl)->cType);
 	
 	(*imgHdl)->temporalQuality = codecMaxQuality;
