@@ -34,16 +34,12 @@
 {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	lastRunDate = [[defaults objectForKey:NEXT_RUN_KEY] retain];
-	if (lastRunDate == nil || [lastRunDate laterDate:[NSDate date]] != lastRunDate) {
-		//this means we should in fact run
-		[defaults setObject:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN] forKey:NEXT_RUN_KEY];
-		manualRun = [defaults boolForKey:MANUAL_RUN_KEY];
-		[defaults removeObjectForKey:MANUAL_RUN_KEY];
-		[self doUpdateCheck];
-	} else {
-		//another instance was already started and therefore we don't need to do this again
-		[[NSApplication sharedApplication] terminate:self];
-	}
+	
+	[defaults setObject:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN] forKey:NEXT_RUN_KEY];
+	manualRun = [defaults boolForKey:MANUAL_RUN_KEY];
+	[defaults removeObjectForKey:MANUAL_RUN_KEY];
+	[defaults synchronize];
+	[self doUpdateCheck];
 }
 
 - (void)doUpdateCheck
@@ -55,6 +51,8 @@
 #ifdef betaAppcastUrl
 	updateUrlString = [[updateUrlString substringToIndex:[updateUrlString length]-4] stringByAppendingFormat:@"-%@.xml", betaAppcastUrl];
 #endif
+	if(manualRun)
+		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:UPDATE_STATUS_NOTIFICATION object:@"Starting"];
 	
 	SUAppcast *appcast = [[SUAppcast alloc] init];
 	[appcast setDelegate:self];
@@ -80,14 +78,22 @@
 	BOOL updateAvailable = SUStandardVersionComparison([latest minimumSystemVersion], currentSystemVersion);
     NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
+	
+	if (![panePath isEqualToString:@"Perian.prefPane"]) {
+		NSLog(@"The update checker needs to be run from inside the preference pane, quitting...");
+		updateAvailable = 0;
+	}
+	
 	NSString *skippedVersion = [[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY];
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	if (updateAvailable && (!skippedVersion || 
 		(skippedVersion && ![skippedVersion isEqualToString:[latest versionString]]))) {
+		if(manualRun)
+			[[NSDistributedNotificationCenter defaultCenter] postNotificationName:UPDATE_STATUS_NOTIFICATION object:@"YesUpdates"];
 		[self showUpdatePanelForItem:latest];
 	} else {
 		if(manualRun)
-			NSRunAlertPanel(SULocalizedString(@"No Update Found!", nil), SULocalizedString(@"Your copy of Perian is up to date", nil), nil, nil, nil);
+			[[NSDistributedNotificationCenter defaultCenter] postNotificationName:UPDATE_STATUS_NOTIFICATION object:@"NoUpdates"];
 		[[NSApplication sharedApplication] terminate:self];
 	}
     
@@ -98,7 +104,7 @@
 {
 	[self updateFailed];
 	if(manualRun)
-		[self showUpdateErrorAlertWithInfo:SULocalizedString(@"An error occurred while trying to load Perian's version info. Please try again later.", nil)];
+		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:UPDATE_STATUS_NOTIFICATION object:@"Error"];
     [appcast release];
 	[[NSApplication sharedApplication] terminate:self];	
 }

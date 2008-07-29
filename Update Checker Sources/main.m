@@ -12,9 +12,17 @@
 
 #define lockPath "/tmp/PerianUpdateLock"
 
+static int fp = -1;
+
+static void deleteLock()
+{
+	close(fp);
+	unlink(lockPath);
+}
+
 int main(int argc, char *argv[])
 {
-	int fp = open(lockPath, O_CREAT | O_EXCL);
+	fp = open(lockPath, O_CREAT | O_EXCL);
 	if(fp == -1)
 	{
 		struct stat lockfile;
@@ -30,11 +38,10 @@ int main(int argc, char *argv[])
 	}
 	if(fp == -1)
 		return 0;
+	
+	atexit(deleteLock);
 
 	int ret = NSApplicationMain(argc,  (const char **) argv);
-	
-    close(fp);
-	unlink(lockPath);
 	
 	return ret;
 }
