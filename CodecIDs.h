@@ -92,6 +92,7 @@ enum {
 	kAudioFormatRealSipro                   = 'SIPR',
 	kAudioFormatRealLossless                = 'RALF',
 	kAudioFormatRealAtrac3                  = 'ATRC',
+	kAudioFormatNellymoser					= 'NELL',
 	
 	kSubFormatUTF8                          = 'SRT ',
 	kSubFormatSSA                           = 'SSA ',

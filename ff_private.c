@@ -386,6 +386,9 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 		case CODEC_ID_TTA:
 			asbd->mFormatID = kAudioFormatTTA;
 			break;
+		case CODEC_ID_NELLYMOSER:
+			asbd->mFormatID = kAudioFormatNellymoser;
+			break;
 		default:
 			break;
 	}
