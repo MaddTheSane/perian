@@ -54,5 +54,6 @@ typedef ATSURGBAlphaColor SubRGBAColor;
 @end
 
 extern UInt8 SSA2ASSAlignment(UInt8 a);
-void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV);
+extern void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV);
 extern SubRGBAColor ParseSSAColor(unsigned rgb);
+extern BOOL ParseFontVerticality(NSString **fontname);
