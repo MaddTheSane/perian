@@ -349,17 +349,19 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 
 -(void*)completedStyleParsing:(SubStyle*)s
 {
-	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag};
-	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID)};
+	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag, kATSUVerticalCharacterTag};
+	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID), sizeof(ATSUVerticalCharacterType)};
 	
-	ATSUFontID font = GetFontIDForSSAName(s->fontname);
+	NSString *fn = s->fontname;
+	ATSUVerticalCharacterType vertical = ParseFontVerticality(&fn) ? kATSUStronglyVertical : kATSUStronglyHorizontal;
+	ATSUFontID font = GetFontIDForSSAName(fn);
 	ATSFontRef fontRef = font;
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
 	Fixed size;
 	Boolean b = s->bold, i = s->italic, u = s->underline, st = s->strikeout;
 	ATSUStyle style;
 		
-	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font};
+	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font, &vertical};
 	
 	if (!s->platformSizeScale) s->platformSizeScale = GetWinFontSizeScale(fontRef);
 	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY);
@@ -461,9 +463,13 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 		case tag_fn:
 			sv();
 			{
+				ATSUVerticalCharacterType vertical = ParseFontVerticality(&sval) ? kATSUStronglyVertical : kATSUStronglyHorizontal;
 				ATSUFontID font = GetFontIDForSSAName(sval);
 				
-				if (font) SetATSUStyleOther(spanEx->style, kATSUFontTag, sizeof(ATSUFontID), &font);
+				if (font) {
+					SetATSUStyleFlag(spanEx->style, kATSUVerticalCharacterTag, vertical);
+					SetATSUStyleOther(spanEx->style, kATSUFontTag, sizeof(ATSUFontID), &font);
+				}
 			}
 			break;
 		case tag_fs:

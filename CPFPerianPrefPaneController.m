@@ -402,6 +402,7 @@
 }
 
 - (void) dealloc {
+	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
 	[perianForumURL release];
 	[perianDonateURL release];
 	[perianWebSiteURL release];
@@ -656,7 +657,6 @@
 		/* Oh well, hope we don't need it */
 		auth = nil;
 	
-	int tag = 0;
 	componentPath = [[self quickTimeComponentDir:userInstalled] stringByAppendingPathComponent:@"Perian.component"];
 	if(auth != nil && !userInstalled)
 		[self _authenticatedRemove:componentPath];
@@ -687,7 +687,6 @@
 
 - (IBAction)installUninstall:(id)sender
 {
-	[progress_install startAnimation:sender];
 	if(installStatus == InstallStatusInstalled)
 		[NSThread detachNewThreadSelector:@selector(uninstall:) toTarget:self withObject:nil];
 	else
@@ -696,7 +695,6 @@
 
 - (void)installComplete:(id)sender
 {
-	[progress_install stopAnimation:sender];
 	[self checkForInstallation];
 }
 
@@ -778,10 +776,28 @@
 }
 
 #pragma mark Check Updates
+- (void)updateCheckStatusChanged:(NSNotification*)notification
+{
+	NSString *status = [notification object];
+	
+	//FIXME localize these
+	if ([status isEqualToString:@"Starting"]) {
+		[textField_updateStatus setStringValue:@"Checking..."];
+	} else if ([status isEqualToString:@"Error"]) {
+		[textField_updateStatus setStringValue:@"Couldn't reach the update server."];
+	} else if ([status isEqualToString:@"NoUpdates"]) {
+		[textField_updateStatus setStringValue:@"There are no updates."];
+	} else if ([status isEqualToString:@"NoUpdates"]) {
+		[textField_updateStatus setStringValue:@"Updates found!"];
+	}
+}
+
 - (IBAction)updateCheck:(id)sender 
 {
 	FSRef updateCheckRef;
 	
+	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
+	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(updateCheckStatusChanged:) name:UPDATE_STATUS_NOTIFICATION object:nil];
 	CFPreferencesSetAppValue((CFStringRef)NEXT_RUN_KEY, NULL, perianAppID);
 	CFPreferencesSetAppValue((CFStringRef)MANUAL_RUN_KEY, [NSNumber numberWithBool:YES], perianAppID);
 	CFPreferencesAppSynchronize(perianAppID);
@@ -799,6 +815,8 @@
 		CFPreferencesSetAppValue(key, [NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN], perianAppID);
 	else
 		CFPreferencesSetAppValue(key, [NSDate distantFuture], perianAppID);
+    
+    CFPreferencesAppSynchronize(perianAppID);
 } 
 
 
@@ -900,6 +918,7 @@
 - (IBAction)setLoadExternalSubtitles:(id)sender
 {	
 	[self setKey:ExternalSubtitlesKey forAppID:perianAppID fromBool:(BOOL)[sender state]];
+    CFPreferencesAppSynchronize(perianAppID);
 }
 
 #pragma mark About 

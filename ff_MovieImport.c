@@ -117,6 +117,7 @@ void init_FFmpeg()
 		REGISTER_DECODER(mp2);
 		REGISTER_DECODER(tta);
 		REGISTER_DECODER(dca);
+		REGISTER_DECODER(nellymoser);
 		
 		REGISTER_DECODER(dvdsub);
 		REGISTER_DECODER(tscc);

@@ -161,7 +161,7 @@ pascal OSStatus HandlePPDialogControlEvent(EventHandlerCallRef  nextHandler, Eve
 void ChangeHintText(int value, ControlRef staticTextField);
 
 extern void init_FFmpeg();
-extern CFMutableStringRef GetHomeDirectory();
+extern CFMutableStringRef CopyHomeDirectory();
 
 #define FFusionDebugPrint(x...) if (glob->fileLog) Codecprintf(glob->fileLog, x);
 #define not(x) ((x) ? "" : "not ")
@@ -193,20 +193,26 @@ static void *launchUpdateChecker(void *args)
 	return NULL;
 }
 
+Boolean FFusionAlreadyRanUpdateCheck = 0;
+
 void FFusionRunUpdateCheck()
 {
+	if (FFusionAlreadyRanUpdateCheck) return;
+
     CFDateRef lastRunDate = CFPreferencesCopyAppValue(CFSTR("NextRunDate"), CFSTR("org.perian.Perian"));
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
     
-	if (lastRunDate != nil && CFDateGetAbsoluteTime(lastRunDate) > now)
-        return;
-
-    if(lastRunDate != nil)
-        CFRelease(lastRunDate);
+	FFusionAlreadyRanUpdateCheck = 1;
+	
+	if (lastRunDate) {
+		Boolean exit = CFDateGetAbsoluteTime(lastRunDate) > now;
+		CFRelease(lastRunDate);
+		if (exit) return;
+	}
     
     //Two places to check, home dir and /
     
-    CFMutableStringRef location = GetHomeDirectory();
+    CFMutableStringRef location = CopyHomeDirectory();
     CFStringAppend(location, CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app"));
     
     char fileRep[1024];
@@ -521,6 +527,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 	long count = 0;
 	Handle imgDescExt;
 	OSErr err = noErr;
+	enum PixelFormat pixelFormat = PIX_FMT_NONE;
 	
     // We first open libavcodec library and the codec corresponding
     // to the fourCC if it has not been done before
@@ -770,6 +777,19 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		if (glob->componentType == 'avc1' && !ffusionIsParsedVideoDecodable(glob->begin.parser))
 			err = featureUnsupported;
 		
+		// this format doesn't have enough information in its headers
+		// we have to decode the first frame
+		if (glob->avContext->pix_fmt == PIX_FMT_NONE && p->bufferSize) {
+			AVFrame temp;
+			int got_picture;
+			avcodec_open(glob->avContext, glob->avCodec);
+			avcodec_decode_video(glob->avContext, &temp, 
+								 &got_picture, (UInt8*)p->data, p->bufferSize);
+			
+			avcodec_close(glob->avContext);
+			pixelFormat = glob->avContext->pix_fmt;
+		}
+		
 		// some hooks into ffmpeg's buffer allocation to get frames in 
 		// decode order without delay more easily
 		glob->avContext->opaque = glob;
@@ -788,6 +808,8 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			err = paramErr;
         }
 		
+		if (pixelFormat == PIX_FMT_NONE)
+			pixelFormat = glob->avContext->pix_fmt;
     }
     
     // Specify the minimum image band height supported by the component
@@ -826,7 +848,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     index = 0;
 	
 	if (!err) {
-	switch (glob->avContext->pix_fmt)
+	switch (pixelFormat)
 	{
 		case PIX_FMT_BGR24:
 			pos[index++] = k24RGBPixelFormat;
@@ -1700,7 +1722,6 @@ OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dat
         if (len < 0)
         {            
             got_picture = 0;
-            len = 1;
 			Codecprintf(glob->fileLog, "Error while decoding frame\n");
             
             return noErr;

@@ -97,3 +97,10 @@
 #define kComponentName					"DTS Coherent Acoustics"
 #define kComponentInfo					"An AudioCodec that decodes DCA Audio into linear PCM"
 #include "XCAResources.r"
+
+#define kPrimaryResourceID				146
+#define kComponentType					'adec'
+#define kComponentSubtype				kAudioFormatNellymoser
+#define kComponentName					"Nellymoser ASAO"
+#define kComponentInfo					"An AudioCodec that decodes Nellymoser ASAO into linear PCM"
+#include "XCAResources.r"

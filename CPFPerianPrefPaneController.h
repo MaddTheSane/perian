@@ -55,11 +55,10 @@ typedef enum
 	//General Pane
 	IBOutlet NSButton					*button_install;
 	IBOutlet NSTextField				*textField_installStatus;
-	IBOutlet NSProgressIndicator		*progress_install;
 	
 	IBOutlet NSTextField				*textField_currentVersion;
+	IBOutlet NSTextField				*textField_updateStatus;
 	IBOutlet NSButton					*button_updateCheck;
-	IBOutlet NSProgressIndicator		*progress_updateCheck;
 	IBOutlet NSButton					*button_autoUpdateCheck;
 	
 	//AC3 Settings in General Pane

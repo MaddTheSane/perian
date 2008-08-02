@@ -47,6 +47,7 @@ static const CodecPair kAllInputFormats[] =
 	{ 0x6d730050, CODEC_ID_MP2 },
 	{ kAudioFormatTTA, CODEC_ID_TTA },
 	{ kAudioFormatDTS, CODEC_ID_DTS },
+	{ kAudioFormatNellymoser, CODEC_ID_NELLYMOSER },
 	{ 0, CODEC_ID_NONE }
 };
 

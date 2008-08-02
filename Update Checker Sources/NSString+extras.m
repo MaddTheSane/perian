@@ -80,6 +80,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		ix = len;
 	
 	[componentsCopy removeObjectsInRange: NSMakeRange (ix, len - ix)];
+    [componentsCopy autorelease];
 
 	return [componentsCopy componentsJoinedByString: @" "];
 	} /*ellipsizeAfterNWords*/

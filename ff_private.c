@@ -168,11 +168,8 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	imgHdl = (ImageDescriptionHandle)NewHandleClear(sizeof(ImageDescription));
 	(*imgHdl)->idSize = sizeof(ImageDescription);
 	
-	if (codec->codec_tag)
+	if (!((*imgHdl)->cType = map_video_codec_to_mov_tag(codec->codec_id)))
 		(*imgHdl)->cType = BSWAP(codec->codec_tag);
-	else
-		// need to lookup the fourcc from the codec_id
-		(*imgHdl)->cType = map_video_codec_to_mov_tag(codec->codec_id);
 //	FourCCprintf("fourcc: ", (*imgHdl)->cType);
 	
 	(*imgHdl)->temporalQuality = codecMaxQuality;
@@ -388,6 +385,9 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 			break;
 		case CODEC_ID_TTA:
 			asbd->mFormatID = kAudioFormatTTA;
+			break;
+		case CODEC_ID_NELLYMOSER:
+			asbd->mFormatID = kAudioFormatNellymoser;
 			break;
 		default:
 			break;
@@ -1136,7 +1136,7 @@ void send_movie_changed_notification(Movie movie) {
 			err = QTInsertChild(container, anAction, kWhichAction, 1, 0, sizeof(whichAction), &whichAction, NULL);
 		
 		if(err == noErr)
-			err = MovieExecuteWiredActions(movie, 0, container);
+			MovieExecuteWiredActions(movie, 0, container);
 		
 		err = QTDisposeAtomContainer(container);
 	}	

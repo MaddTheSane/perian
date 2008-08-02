@@ -140,7 +140,7 @@ extern NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	return res;
 }
 
-CFMutableStringRef GetHomeDirectory()
+CFMutableStringRef CopyHomeDirectory()
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *home = NSHomeDirectory();
