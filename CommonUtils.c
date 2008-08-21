@@ -326,7 +326,7 @@ int IsFrameDroppingEnabled()
 			int count = sizeof(defaultFrameDroppingWhiteList)/sizeof(defaultFrameDroppingWhiteList[0]);
 			enabled = findNameInList(myProcessName, defaultFrameDroppingWhiteList, count);
 		}
-		Codecprintf(NULL, "Frame Dropping enabled is %d for %s\n", enabled, CFStringGetCStringPtr(myProcessName, kCFStringEncodingMacRoman));
+		//Codecprintf(NULL, "Frame Dropping enabled is %d for %s\n", enabled, CFStringGetCStringPtr(myProcessName, kCFStringEncodingMacRoman));
 		CFRelease(myProcessName);
 	}
 	
