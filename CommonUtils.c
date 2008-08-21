@@ -9,7 +9,7 @@
 
 #include "avcodec.h"
 #include "CommonUtils.h"
-
+#import <Carbon/Carbon.h>
 
 typedef struct LanguageTriplet {
 	char twoChar[3];
@@ -286,11 +286,49 @@ int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type)
 	return 0;
 }
 
+static const CFStringRef defaultFrameDroppingWhiteList[] = {
+	CFSTR("QuickTime Player"),
+	CFSTR("NicePlayer"),
+	CFSTR("Movie Time")
+};
+
+static int findNameInList(CFStringRef loadingApp, const CFStringRef *names, int count)
+{
+	int i;
+
+	for (i = 0; i < count; i++) {
+		if (CFStringCompare(loadingApp, names[i], 0) == kCFCompareEqualTo) return 1;
+	}
+
+	return 0;
+}
+
 int IsFrameDroppingEnabled()
 {
 	static int enabled = -1;
 	
-	if (enabled == -1) enabled = getenv("PerianNoFrameDropping") == NULL;
+	if (enabled == -1) {
+		ProcessSerialNumber myProcess;
+		GetCurrentProcess(&myProcess);
+		CFStringRef myProcessName;
+		CopyProcessName(&myProcess, &myProcessName);
+		
+		CFArrayRef list = CFPreferencesCopyAppValue(CFSTR("FrameDroppingWhiteList"), CFSTR("org.perian.Perian"));
+		
+		if (list) {
+			int count = CFArrayGetCount(list);
+			CFStringRef names[count];
+			
+			CFArrayGetValues(list, CFRangeMake(0, count), (void *)names);
+			enabled = findNameInList(myProcessName, names, count);
+			CFRelease(list);
+		} else {
+			int count = sizeof(defaultFrameDroppingWhiteList)/sizeof(defaultFrameDroppingWhiteList[0]);
+			enabled = findNameInList(myProcessName, defaultFrameDroppingWhiteList, count);
+		}
+		Codecprintf(NULL, "Frame Dropping enabled is %d for %s\n", enabled, CFStringGetCStringPtr(myProcessName, kCFStringEncodingMacRoman));
+		CFRelease(myProcessName);
+	}
 	
 	return enabled;
 }
