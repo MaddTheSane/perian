@@ -74,6 +74,7 @@ fi
 
 patch -p0 < Patches/ffmpeg-h264dsp-crash.diff
 patch -p0 < Patches/ffmpeg-forceinline.diff
+patch -p0 < Patches/ffmpeg-no-interlaced.diff
 touch ffmpeg/patched
 
 # if [ $no_pic -eq 0 ] ; then
