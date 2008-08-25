@@ -340,7 +340,7 @@ int IsFrameDroppingEnabled()
             }
             //Codecprintf(NULL, "Frame Dropping enabled is %d for %s\n", enabled, CFStringGetCStringPtr(myProcessName, kCFStringEncodingMacRoman));
             CFRelease(myProcessName);
-            CFRelease(path);
+            CFRelease(processInformation);
         }
 	}
 	

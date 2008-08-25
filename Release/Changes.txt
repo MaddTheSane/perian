@@ -10,6 +10,7 @@
 - Audio fixed for some older MKV files with AAC/FLAC
 - Strange values in MKV chapters or video sizes are handled better
 - Initial support for SAMI subtitles added
+- Worked around a QuickTime bug (#5770288) causing frames to be lost during export
 - New codecs: DosBox ZMBV, VP6+Alpha, Nellymoser ASAO
 FFmpeg:
 - Crashing on PPC G3 fixed
