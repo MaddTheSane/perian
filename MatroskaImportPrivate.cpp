@@ -247,6 +247,8 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
     // track entries in two passes, first to add audio/video, second to add subtitle tracks.
     for (int pass = 1; pass <= 2; pass++) {
 		for (int i = 0; i < trackEntries.ListSize(); i++) {
+			if (EbmlId(*trackEntries[i]) != KaxTrackEntry::ClassInfos.GlobalId)
+				continue;
 			KaxTrackEntry & track = *static_cast<KaxTrackEntry *>(trackEntries[i]);
 			KaxTrackNumber & number = GetChild<KaxTrackNumber>(track);
 			KaxTrackType & type = GetChild<KaxTrackType>(track);
