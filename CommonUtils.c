@@ -310,24 +310,38 @@ int IsFrameDroppingEnabled()
 	if (enabled == -1) {
 		ProcessSerialNumber myProcess;
 		GetCurrentProcess(&myProcess);
-		CFStringRef myProcessName;
-		CopyProcessName(&myProcess, &myProcessName);
+		CFDictionaryRef processInformation;
 		
-		CFArrayRef list = CFPreferencesCopyAppValue(CFSTR("FrameDroppingWhiteList"), CFSTR("org.perian.Perian"));
-		
-		if (list) {
-			int count = CFArrayGetCount(list);
-			CFStringRef names[count];
-			
-			CFArrayGetValues(list, CFRangeMake(0, count), (void *)names);
-			enabled = findNameInList(myProcessName, names, count);
-			CFRelease(list);
-		} else {
-			int count = sizeof(defaultFrameDroppingWhiteList)/sizeof(defaultFrameDroppingWhiteList[0]);
-			enabled = findNameInList(myProcessName, defaultFrameDroppingWhiteList, count);
-		}
-		//Codecprintf(NULL, "Frame Dropping enabled is %d for %s\n", enabled, CFStringGetCStringPtr(myProcessName, kCFStringEncodingMacRoman));
-		CFRelease(myProcessName);
+        processInformation = ProcessInformationCopyDictionary(&myProcess, kProcessDictionaryIncludeAllInformationMask);
+        
+        if (!processInformation) enabled = FALSE;
+		else {
+            CFArrayRef list = CFPreferencesCopyAppValue(CFSTR("FrameDroppingWhiteList"), CFSTR("org.perian.Perian"));
+            CFStringRef path = CFDictionaryGetValue(processInformation, kCFBundleExecutableKey);
+            CFRange entireRange = CFRangeMake(0, CFStringGetLength(path)), basename;
+            
+            CFStringFindWithOptions(path, CFSTR("/"), entireRange, kCFCompareBackwards, &basename);
+            
+            basename.location += 1; //advance past "/"
+            basename.length = entireRange.length - basename.location;
+            
+            CFStringRef myProcessName = CFStringCreateWithSubstring(NULL, path, basename);
+            
+            if (list) {
+                int count = CFArrayGetCount(list);
+                CFStringRef names[count];
+                
+                CFArrayGetValues(list, CFRangeMake(0, count), (void *)names);
+                enabled = findNameInList(myProcessName, names, count);
+                CFRelease(list);
+            } else {
+                int count = sizeof(defaultFrameDroppingWhiteList)/sizeof(defaultFrameDroppingWhiteList[0]);
+                enabled = findNameInList(myProcessName, defaultFrameDroppingWhiteList, count);
+            }
+            //Codecprintf(NULL, "Frame Dropping enabled is %d for %s\n", enabled, CFStringGetCStringPtr(myProcessName, kCFStringEncodingMacRoman));
+            CFRelease(myProcessName);
+            CFRelease(path);
+        }
 	}
 	
 	return enabled;
