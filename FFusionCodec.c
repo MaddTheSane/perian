@@ -718,7 +718,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         
         glob->avContext->width = (**p->imageDescription).width;
         glob->avContext->height = (**p->imageDescription).height;
-		glob->avContext->bits_per_sample = (**p->imageDescription).depth;
+		glob->avContext->bits_per_coded_sample = (**p->imageDescription).depth;
 		
         // We also pass the FourCC since it allows the H263 hybrid decoder
         // to make the difference between the various flavours of DivX

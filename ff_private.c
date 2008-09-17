@@ -178,7 +178,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	(*imgHdl)->height = codec->height;
 	(*imgHdl)->hRes = 72 << 16;
 	(*imgHdl)->vRes = 72 << 16;
-	(*imgHdl)->depth = codec->bits_per_sample;
+	(*imgHdl)->depth = codec->bits_per_coded_sample;
 	(*imgHdl)->clutID = -1; // no color lookup table...
 	
 	// 12 is invalid in mov
@@ -236,7 +236,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	if(!map->vbr) /* This works for all the tested codecs. but is there any better way? */
 		asbd.mBytesPerPacket = codec->block_align; /* this is tested for alaw/mulaw/msadpcm */
 	asbd.mFramesPerPacket = codec->frame_size; /* works for mp3, all other codecs this is 0 anyway */
-	asbd.mBitsPerChannel = codec->bits_per_sample;
+	asbd.mBitsPerChannel = codec->bits_per_coded_sample;
 	
 	// this probably isn't quite right; FLV doesn't set frame_size or block_align, 
 	// but we need > 0 frames per packet or Apple's mp3 decoder won't work
@@ -429,7 +429,7 @@ uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatI
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->sample_rate));
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->bit_rate / 8));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->block_align));
-	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_sample));
+	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_coded_sample));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->extradata_size));
 	/* now the remaining stuff */
 	ptr = write_data(ptr, codec->extradata, codec->extradata_size);
@@ -488,7 +488,7 @@ Handle create_strf_ext(AVCodecContext *codec)
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->height));
 	ptr = write_int16(ptr, EndianS16_NtoL(1)); /* planes */
 	
-	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_sample ? codec->bits_per_sample : 24)); /* depth */
+	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_coded_sample ? codec->bits_per_coded_sample : 24)); /* depth */
 	/* compression type */
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->codec_tag));
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->width * codec->height * 3));
