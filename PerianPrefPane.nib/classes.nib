@@ -84,6 +84,8 @@
 				<string>NSTextField</string>
 				<key>textField_installStatus</key>
 				<string>NSTextField</string>
+				<key>textField_updateStatus</key>
+				<string>NSTextField</string>
 				<key>textView_about</key>
 				<string>NSTextView</string>
 				<key>window_dynRangeSheet</key>
