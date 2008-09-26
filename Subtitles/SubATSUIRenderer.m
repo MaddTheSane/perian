@@ -998,6 +998,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	CGContextSetLineCap(c, kCGLineCapRound);
 	CGContextSetLineJoin(c, kCGLineJoinRound);
 	CGContextSetInterpolationQuality(c, kCGInterpolationHigh);
+	CGContextSetShouldSmoothFonts(c, NO); //disables subpixel AA for some reason
 	
 	for (i = 0; i < div_count; i++) {
 		SubRenderDiv *div = [divs objectAtIndex:i];
