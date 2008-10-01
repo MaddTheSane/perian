@@ -73,6 +73,7 @@ if [ -e ffmpeg/patched ] ; then
 fi
 
 patch -p0 < Patches/ffmpeg-h264dsp-chroma-mc4.diff
+patch -p0 < Patches/ffmpeg-faltivec.diff
 touch ffmpeg/patched
 
 # if [ $no_pic -eq 0 ] ; then
