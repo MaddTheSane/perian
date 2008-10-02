@@ -79,7 +79,7 @@
     NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	
-	if (![panePath isEqualToString:@"Perian.prefPane"]) {
+	if (![[panePath lastPathComponent] isEqualToString:@"Perian.prefPane"]) {
 		NSLog(@"The update checker needs to be run from inside the preference pane, quitting...");
 		updateAvailable = 0;
 	}
