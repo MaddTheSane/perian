@@ -1039,6 +1039,9 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 			if(type == FF_B_TYPE && glob->packedType == PACKED_ALL_IN_FIRST_FRAME && glob->begin.futureType == 0)
 				/* Badly framed.  We hit a B frame after it was supposed to be displayed, switch to delaying by a frame */
 				glob->packedType = PACKED_DELAY_BY_ONE_FRAME;
+			else if(glob->packedType == PACKED_DELAY_BY_ONE_FRAME && parsedBufSize < bufferSize - 16)
+				/* Seems to be switching back to packed in one frame; switch back*/
+				glob->packedType = PACKED_ALL_IN_FIRST_FRAME;
 			
 			if(FFusionCreateDataBuffer(&(glob->data), (uint8_t *)drp->codecData, parsedBufSize))
 				myDrp->frameData = FFusionDataAppend(&(glob->data), parsedBufSize, type);
