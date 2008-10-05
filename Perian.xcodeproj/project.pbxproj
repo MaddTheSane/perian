@@ -103,7 +103,6 @@
 		11C85EDA0A641E6400DF3D73 /* ff_private.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED60A641E6400DF3D73 /* ff_private.c */; };
 		11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */; };
 		11C85FE60A64314500DF3D73 /* FFusionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = F560DF0203D622D001ABA332 /* FFusionCodec.r */; };
-		11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */; };
 		11F28DAD0B52EB75000AF78C /* SUUpdateAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */; };
 		3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
 		3D211A200B6B1A540051299D /* SubContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SubContext.m */; };
@@ -1481,7 +1480,6 @@
 			files = (
 				11A70AD80A3D0149002058D4 /* InfoPlist.strings in Resources */,
 				11A70AD90A3D0149002058D4 /* FFusion.icns in Resources */,
-				11C85FE70A64315500DF3D73 /* Perian-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
