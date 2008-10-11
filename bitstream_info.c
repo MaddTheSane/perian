@@ -250,6 +250,9 @@ typedef struct H264ParserContext_s
 	int nal_length_size;
 	int prevPts;
 	
+	int profile_idc;
+	int level_idc;
+	
 	int poc_type;
 	int log2_max_frame_num;
 	int frame_mbs_only_flag;
@@ -265,6 +268,8 @@ typedef struct H264ParserContext_s
 	int sum_of_offset_for_ref_frames;
 	
 	int chroma_format_idc;
+	
+	int gaps_in_frame_num_value_allowed_flag;
 }H264ParserContext;
 
 static int decode_nal(const uint8_t *buf, int buf_size, uint8_t *out_buf, int *out_buf_size, int *type, int *nal_ref_idc)
@@ -333,18 +338,17 @@ static void skip_scaling_matrices(GetBitContext *gb){
 static void decode_sps(H264ParserContext *context, const uint8_t *buf, int buf_size)
 {
 	GetBitContext getbit, *gb = &getbit;
-	int profile_idc;
 	
 	init_get_bits(gb, buf, 8 * buf_size);
-    profile_idc= get_bits(gb, 8);
+    context->profile_idc= get_bits(gb, 8);
     get_bits1(gb);		//constraint_set0_flag
     get_bits1(gb);		//constraint_set1_flag
     get_bits1(gb);		//constraint_set2_flag
     get_bits1(gb);		//constraint_set3_flag
     get_bits(gb, 4);	//reserved
-	get_bits(gb, 8);	//level_idc
+	context->level_idc = get_bits(gb, 8);	//level_idc
 	get_ue_golomb(gb);	//seq_parameter_set_id
-	if(profile_idc >= 100)
+	if(context->profile_idc >= 100)
 	{
 		context->chroma_format_idc = get_ue_golomb(gb);
 		//high profile
@@ -372,7 +376,7 @@ static void decode_sps(H264ParserContext *context, const uint8_t *buf, int buf_s
 			context->sum_of_offset_for_ref_frames += get_se_golomb(gb); //offset_for_ref_frame[i]
 	}
 	get_ue_golomb(gb);	//num_ref_frames
-	get_bits1(gb);		//gaps_in_frame_num_value_allowed_flag
+	context->gaps_in_frame_num_value_allowed_flag = get_bits1(gb);		//gaps_in_frame_num_value_allowed_flag
 	get_ue_golomb(gb);	//pic_width_in_mbs_minus1
 	get_ue_golomb(gb);	//pic_height_in_map_units_minus1
 	context->frame_mbs_only_flag = get_bits1(gb);
@@ -859,6 +863,18 @@ int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size,
 	if(parser->parserStructure->parser_parse)
 		return (parser->parserStructure->parser_parse)(parser, buf, buf_size, out_buf_size, type, skippable);
 	return 0;
+}
+
+void ffusionLogDebugInfo(FFusionParserContext *parser, FILE *log)
+{
+	if (parser) {
+		if (parser->parserStructure == &ffusionH264Parser) {
+			H264ParserContext *h264parser = parser->internalContext;
+			
+			Codecprintf(log, "H.264 format: profile %d level %d\n\tis_avc %d\n\tframe_mbs_only %d\n\tchroma_format_idc %d\n\tframe_num_gaps %d\n",
+						h264parser->profile_idc, h264parser->level_idc, h264parser->is_avc, h264parser->frame_mbs_only_flag, h264parser->chroma_format_idc, h264parser->gaps_in_frame_num_value_allowed_flag);
+		}
+	}
 }
 
 int ffusionIsParsedVideoDecodable(FFusionParserContext *parser)

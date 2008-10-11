@@ -12,15 +12,12 @@
 #include <stdarg.h>
 #include "log.h"
 
-#ifdef DEBUG_BUILD
 #define CODEC_HEADER			"Perian Codec: "
-#define FILELOG
 
 static int Codecvprintf(FILE *fileLog, const char *format, va_list va, int print_header)
 {
-	int ret;
+	int ret = 0;
 	
-#ifdef FILELOG
 	if(fileLog)
 	{
 		if(print_header)
@@ -30,14 +27,13 @@ static int Codecvprintf(FILE *fileLog, const char *format, va_list va, int print
 	}
 	else
 	{
-#endif
+#ifdef DEBUG_BUILD
 		if(print_header)
 			printf(CODEC_HEADER);
 		
 		ret = vprintf(format, va);
-#ifdef FILELOG
-	}
 #endif
+	}
 	
 	return ret;
 }
@@ -66,10 +62,6 @@ void FourCCprintf (char *string, FourCharCode a)
 {
     Codecprintf(NULL, "%s%s\n", string, FourCCString(a));
 }
-
-#else
-#define Codecvprintf(file, fmt, va, print_header) /**/
-#endif
 
 void FFMpegCodecprintf(void* ptr, int level, const char* fmt, va_list vl)
 {
