@@ -1,3 +1,9 @@
+1.1.2
+- Fixed update checker never running - this requires a manual instal
+- Enabled frame-dropping on AppleTV
+- Fixed some frames being lost in AVCHD/.mp4
+- Fixed another ffmpeg crash on G3s
+
 1.1.1
 - H.264 in AVI fixed
 - Some anamorphic AVI files are now supported
