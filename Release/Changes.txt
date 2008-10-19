@@ -1,7 +1,7 @@
 1.1.2
-- Fixed update checker never running - this requires a manual instal
+- Fixed update checker never running - this version requires a manual install
 - Enabled frame-dropping on AppleTV
-- Fixed some frames being lost in AVCHD/.mp4
+- Fixed some frames being lost in AVCHD/.mp4 with newer versions of QuickTime
 - Fixed another ffmpeg crash on G3s
 
 1.1.1
