@@ -1,0 +1,16 @@
+diff --git a/configure b/configure
+index e6a6b4f..53eae9d 100755
+--- ffmpeg/configure
++++ ffmpeg/configure
+@@ -1589,9 +1589,9 @@ fi
+ 
+ # AltiVec flags: The FSF version of GCC differs from the Apple version
+ if enabled altivec; then
++    check_cflags -faltivec ||
+     check_cflags -maltivec -mabi=altivec &&
+-        { check_header altivec.h && inc_altivec_h="#include <altivec.h>" ; } ||
+-        check_cflags -faltivec
++        { check_header altivec.h && inc_altivec_h="#include <altivec.h>" ; }
+ 
+     # check if our compiler supports Motorola AltiVec C API
+     check_cc <<EOF || disable altivec
