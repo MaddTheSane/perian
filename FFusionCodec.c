@@ -276,6 +276,26 @@ static void DumpFrameDropStats(FFusionGlobals glob)
 	}
 }
 
+static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avctx, Ptr data, int bufferSize)
+{
+    AVCodecContext tmpContext;
+    AVFrame tmpFrame;
+    int got_picture;
+    enum PixelFormat pix_fmt;
+    
+    avcodec_get_context_defaults2(&tmpContext, CODEC_TYPE_VIDEO);
+    tmpContext.width = avctx->width;
+    tmpContext.height = avctx->height;
+    tmpContext.codec_tag = avctx->codec_tag;
+    
+    avcodec_open(&tmpContext, codec);
+    avcodec_decode_video(&tmpContext, &tmpFrame, &got_picture, (UInt8*)data, bufferSize);
+    pix_fmt = tmpContext.pix_fmt;
+    avcodec_close(&tmpContext);
+    
+    return pix_fmt;
+}
+
 //---------------------------------------------------------------------------
 // Component Routines
 //---------------------------------------------------------------------------
@@ -535,7 +555,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 	long count = 0;
 	Handle imgDescExt;
 	OSErr err = noErr;
-	enum PixelFormat pixelFormat = PIX_FMT_NONE;
 	
     // We first open libavcodec library and the codec corresponding
     // to the fourCC if it has not been done before
@@ -789,19 +808,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		if (glob->componentType == 'avc1' && !ffusionIsParsedVideoDecodable(glob->begin.parser))
 			err = featureUnsupported;
 		
-		// this format doesn't have enough information in its headers
-		// we have to decode the first frame
-		if (glob->avContext->pix_fmt == PIX_FMT_NONE && p->bufferSize) {
-			AVFrame temp;
-			int got_picture;
-			avcodec_open(glob->avContext, glob->avCodec);
-			avcodec_decode_video(glob->avContext, &temp, 
-								 &got_picture, (UInt8*)p->data, p->bufferSize);
-			
-			avcodec_close(glob->avContext);
-			pixelFormat = glob->avContext->pix_fmt;
-		}
-		
 		// some hooks into ffmpeg's buffer allocation to get frames in 
 		// decode order without delay more easily
 		glob->avContext->opaque = glob;
@@ -820,8 +826,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			err = paramErr;
         }
 		
-		if (pixelFormat == PIX_FMT_NONE)
-			pixelFormat = glob->avContext->pix_fmt;
+        // this format doesn't have enough information in its headers
+		// we have to decode the first frame
+		if (glob->avContext->pix_fmt == PIX_FMT_NONE && p->bufferSize && p->data)
+            glob->avContext->pix_fmt = FindPixFmtFromVideo(glob->avCodec, glob->avContext, p->data, p->bufferSize);
     }
     
     // Specify the minimum image band height supported by the component
@@ -860,7 +868,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     index = 0;
 	
 	if (!err) {
-	switch (pixelFormat)
+	switch (glob->avContext->pix_fmt)
 	{
 		case PIX_FMT_BGR24:
 			pos[index++] = k24RGBPixelFormat;
