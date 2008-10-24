@@ -82,6 +82,8 @@ typedef enum
 	AuthorizationRef					auth;
 	NSMutableString						*errorString;
 	
+	NSArray								*componentReplacementInfo;
+	
 	NSURL								*perianForumURL;
 	NSURL								*perianDonateURL;
 	NSURL								*perianWebSiteURL;
@@ -107,7 +109,7 @@ typedef enum
 - (IBAction)saveDynRangeSheet:(id)sender;
 
 //Component List
-//- (NSString *)checkComponentStatusByBundleIdentifier:(NSString *)bundleID;
+- (NSString *)checkComponentStatusByBundleIdentifier:(NSString *)bundleID;
 
 //About
 - (IBAction)launchWebsite:(id)sender;
@@ -115,5 +117,3 @@ typedef enum
 - (IBAction)launchForum:(id)sender;
 
 @end
-
-NSArray* GetComponentsInFolder(NSString* folder);

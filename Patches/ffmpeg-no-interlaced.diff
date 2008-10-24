@@ -1,0 +1,13 @@
+Index: ffmpeg/libavcodec/h264.h
+===================================================================
+--- ffmpeg/libavcodec/h264.h	(revision 14508)
++++ ffmpeg/libavcodec/h264.h	(working copy)
+@@ -55,7 +55,7 @@
+ 
+ /* Compiling in interlaced support reduces the speed
+  * of progressive decoding by about 2%. */
+-#define ALLOW_INTERLACE
++//#define ALLOW_INTERLACE
+ 
+ #define ALLOW_NOCHROMA
+ 

@@ -7,7 +7,7 @@ if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 fi
 
 generalConfigureOptions="--disable-muxers --disable-encoders --disable-stripping --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook --disable-ffserver"
-sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -ggdb -Dattribute_deprecated="
+sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -ggdb -gstabs -Dattribute_deprecated="
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
@@ -72,8 +72,12 @@ if [ -e ffmpeg/patched ] ; then
 	(cd ffmpeg && svn revert -R . && rm patched)
 fi
 
-patch -p0 < Patches/ffmpeg-h264dsp-chroma-mc4.diff
+patch -p0 < Patches/ffmpeg-h264dsp-crash.diff
+patch -p0 < Patches/ffmpeg-forceinline.diff
+patch -p0 < Patches/ffmpeg-no-interlaced.diff
 patch -p0 < Patches/ffmpeg-faltivec.diff
+patch -p0 < Patches/ffmpeg-h264-nounrollcabac.diff
+patch -p0 < Patches/ffmpeg-h264nal-valgrind-warning.diff
 touch ffmpeg/patched
 
 # if [ $no_pic -eq 0 ] ; then

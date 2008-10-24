@@ -1,3 +1,9 @@
+1.1.2
+- Fixed update checker never running - this version requires a manual install
+- Enabled frame-dropping on AppleTV
+- Fixed some frames being lost in AVCHD/.mp4 with newer versions of QuickTime
+- Fixed another ffmpeg crash on G3s
+
 1.1.1
 - H.264 in AVI fixed
 - Some anamorphic AVI files are now supported
@@ -10,6 +16,7 @@
 - Audio fixed for some older MKV files with AAC/FLAC
 - Strange values in MKV chapters or video sizes are handled better
 - Initial support for SAMI subtitles added
+- Worked around a QuickTime bug (#5770288) causing frames to be lost during export
 - New codecs: DosBox ZMBV, VP6+Alpha, Nellymoser ASAO
 FFmpeg:
 - Crashing on PPC G3 fixed

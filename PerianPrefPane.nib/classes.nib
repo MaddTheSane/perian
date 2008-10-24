@@ -72,6 +72,10 @@
 				<string>NSPopUpButton</string>
 				<key>popup_outputMode</key>
 				<string>NSPopUpButton</string>
+				<key>progress_install</key>
+				<string>NSProgressIndicator</string>
+				<key>progress_updateCheck</key>
+				<string>NSProgressIndicator</string>
 				<key>slider_ac3DynamicRangeSlider</key>
 				<string>NSSlider</string>
 				<key>textField_ac3DynamicRangeValue</key>

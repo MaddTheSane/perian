@@ -1,6 +1,6 @@
 Index: ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c
 ===================================================================
---- ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	(revision 13183)
+--- ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	(revision 14508)
 +++ ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	(working copy)
 @@ -185,8 +185,12 @@
      }
@@ -15,11 +15,24 @@ Index: ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c
      asm volatile(
          "pxor   %%mm7, %%mm7        \n\t"
          "movd %5, %%mm2             \n\t"
+Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
+===================================================================
+--- ffmpeg/libavcodec/i386/dsputil_mmx.c	(revision 14508)
++++ ffmpeg/libavcodec/i386/dsputil_mmx.c	(working copy)
+@@ -2626,6 +2626,8 @@
+             H264_QPEL_FUNCS(3, 2, sse2);
+             H264_QPEL_FUNCS(3, 3, sse2);
+         }
++#undef  H264_QPEL_FUNCS
++#define H264_QPEL_FUNCS(x, y, CPU) 
+ #ifdef HAVE_SSSE3
+         if(mm_flags & MM_SSSE3){
+             H264_QPEL_FUNCS(1, 0, ssse3);
 Index: ffmpeg/libavcodec/i386/h264dsp_mmx.c
 ===================================================================
---- ffmpeg/libavcodec/i386/h264dsp_mmx.c	(revision 13183)
+--- ffmpeg/libavcodec/i386/h264dsp_mmx.c	(revision 14508)
 +++ ffmpeg/libavcodec/i386/h264dsp_mmx.c	(working copy)
-@@ -1912,6 +1912,7 @@
+@@ -1922,6 +1922,7 @@
  #define H264_CHROMA_OP4(S,D,T)
  #define H264_CHROMA_MC8_TMPL put_h264_chroma_mc8_mmx
  #define H264_CHROMA_MC4_TMPL put_h264_chroma_mc4_mmx
@@ -27,7 +40,7 @@ Index: ffmpeg/libavcodec/i386/h264dsp_mmx.c
  #define H264_CHROMA_MC2_TMPL put_h264_chroma_mc2_mmx2
  #define H264_CHROMA_MC8_MV0 put_pixels8_mmx
  #include "dsputil_h264_template_mmx.c"
-@@ -1929,6 +1930,7 @@
+@@ -1939,6 +1940,7 @@
  #undef H264_CHROMA_OP4
  #undef H264_CHROMA_MC8_TMPL
  #undef H264_CHROMA_MC4_TMPL
@@ -35,7 +48,7 @@ Index: ffmpeg/libavcodec/i386/h264dsp_mmx.c
  #undef H264_CHROMA_MC2_TMPL
  #undef H264_CHROMA_MC8_MV0
  
-@@ -1937,6 +1939,7 @@
+@@ -1947,6 +1949,7 @@
                                 "pavgb " #T ", " #D " \n\t"
  #define H264_CHROMA_MC8_TMPL avg_h264_chroma_mc8_mmx2
  #define H264_CHROMA_MC4_TMPL avg_h264_chroma_mc4_mmx2
@@ -45,7 +58,7 @@ Index: ffmpeg/libavcodec/i386/h264dsp_mmx.c
  #include "dsputil_h264_template_mmx.c"
 Index: ffmpeg/libavcodec/dsputil.c
 ===================================================================
---- ffmpeg/libavcodec/dsputil.c	(revision 13183)
+--- ffmpeg/libavcodec/dsputil.c	(revision 14508)
 +++ ffmpeg/libavcodec/dsputil.c	(working copy)
 @@ -1592,7 +1592,7 @@
      }\
