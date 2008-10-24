@@ -34,8 +34,11 @@
 {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	lastRunDate = [[defaults objectForKey:NEXT_RUN_KEY] retain];
-	
-	[defaults setObject:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN] forKey:NEXT_RUN_KEY];
+    
+    if (![lastRunDate isEqualToDate:[NSDate distantFuture]]) {
+        [defaults setObject:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN] forKey:NEXT_RUN_KEY];
+    }
+    
 	manualRun = [defaults boolForKey:MANUAL_RUN_KEY];
 	[defaults removeObjectForKey:MANUAL_RUN_KEY];
 	[defaults synchronize];
