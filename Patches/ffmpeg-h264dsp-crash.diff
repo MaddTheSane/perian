@@ -1,6 +1,6 @@
 Index: ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c
 ===================================================================
---- ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	(revision 14508)
+--- ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	(revision 15692)
 +++ ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c	(working copy)
 @@ -185,8 +185,12 @@
      }
@@ -11,8 +11,8 @@ Index: ffmpeg/libavcodec/i386/dsputil_h264_template_mmx.c
  static void H264_CHROMA_MC4_TMPL(uint8_t *dst/*align 4*/, uint8_t *src/*align 1*/, int stride, int h, int x, int y)
  {
 +	if (!(x*y)) {H264_CHROMA_MC4_C(dst, src, stride, h, x, y); return;}
-+
-     asm volatile(
++	
+     __asm__ volatile(
          "pxor   %%mm7, %%mm7        \n\t"
          "movd %5, %%mm2             \n\t"
 Index: ffmpeg/libavcodec/i386/dsputil_mmx.c
