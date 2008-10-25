@@ -18,6 +18,17 @@
 			name = "ffmpeg Static Libraries";
 			productName = "Version Macros and Static Libraries";
 		};
+		F5121EB70EB3A54A0048EF67 /* Make SVN Rev */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F5121EBB0EB3A5680048EF67 /* Build configuration list for PBXAggregateTarget "Make SVN Rev" */;
+			buildPhases = (
+				F5121EB60EB3A54A0048EF67 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Make SVN Rev";
+			productName = "Make SVN Rev";
+		};
 		F59E09EA0A670E3D0019A3F0 /* Debug In QuickTime Player */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = F59E0A0B0A670E950019A3F0 /* Build configuration list for PBXAggregateTarget "Debug In QuickTime Player" */;
@@ -317,6 +328,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 61CB11760ACDF4D8007994BD;
 			remoteInfo = matroska;
+		};
+		F5121EBC0EB3A5AE0048EF67 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			remoteInfo = "Make SVN Rev";
 		};
 		F59E09EB0A670E420019A3F0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1289,7 +1307,6 @@
 				11A70ABE0A3D0105002058D4 /* Sources */,
 				11A70ABF0A3D0105002058D4 /* Frameworks */,
 				11A70ADC0A3D0156002058D4 /* Rez */,
-				11BA3E510A61F2CE008AF206 /* ShellScript */,
 			);
 			buildRules = (
 				3D74F53C0B6DB50C0018BAC0 /* PBXBuildRule */,
@@ -1299,6 +1316,7 @@
 				61CB12100ACE0FB1007994BD /* PBXTargetDependency */,
 				61CB12120ACE0FB1007994BD /* PBXTargetDependency */,
 				3DB3517F0BCF004B009357B8 /* PBXTargetDependency */,
+				F5121EBD0EB3A5AE0048EF67 /* PBXTargetDependency */,
 			);
 			name = Perian;
 			productName = Perian;
@@ -1418,6 +1436,7 @@
 				F5CFD3BA0B50142100616865 /* Setup Build Directories */,
 				F5CFD2DB0B5012AA00616865 /* A52Codec */,
 				116C42510B5041BD00FB0738 /* PerianUpdateChecker */,
+				F5121EB70EB3A54A0048EF67 /* Make SVN Rev */,
 			);
 		};
 /* End PBXProject section */
@@ -1531,19 +1550,6 @@
 			shellPath = /bin/sh;
 			shellScript = "source $SRCROOT/createStaticLibs.sh";
 		};
-		11BA3E510A61F2CE008AF206 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Xcode auto-versioning script for Subversion\n# by Axel Andersson, modified by Daniel Jalkut to add\n# \"--revision HEAD\" to the svn info line, which allows\n# the latest revision to always be used.\n\n# further modified by Augie Fackler to be gross and sh-based in places\n# so that you can have svn installed anywhere\nPATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin\nffmpeg_rev=`cat \"$SYMROOT/Universal/buildid\"`\nREV=`svnversion -n ./`\necho $REV\n\necho | perl <<EOF\nuse strict;\ndie \"\\$0: Must be run from Xcode\" unless \\$ENV{\"BUILT_PRODUCTS_DIR\"};\n\nmy \\$INFO = \"\\$ENV{BUILT_PRODUCTS_DIR}/\\$ENV{WRAPPER_NAME}/Contents/Info.plist\";\n\nmy \\$version = \"$REV\";\n\n# (Match the last group of digits and optional letter M/S):\n\n# ugly yet functional (barely) regex by Daniel Jalkut:\n#$version =~ s/([\\d]*:)(\\d+[M|S]*).*/$2/;\n\n# better yet still functional regex via Kevin \"Regex Nerd\" Ballard\n(\\$version =~ m/\\d+[MS]*\\$/) && (\\$version = \\$&);\n\nopen(FH, \"\\$INFO\") or die \"\\$0: \\$INFO: $!\";\nmy \\$info = join(\"\", <FH>);\nclose(FH);\n\n#\\$info =~ s/([\\t ]+<key>CFBundleVersion<\\/key>\\n[\\t ]+<string>).*?(<\\/string>)/\\$1\\$version\\$2/;\n\\$info =~ s/SVNREVISION/\\$version/;\n\\$info =~ s/FFMPEGREVISION/$ffmpeg_rev/;\n\nopen(FH, \">\\$INFO\") or die \"\\$0: \\$INFO: \\$!\";\nprint FH \\$info;\nclose(FH);\nEOF\n";
-		};
 		3D0B9E090EB37E8300C4F556 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1569,6 +1575,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "pushd a52codec/build\nln -s Deployment+Debug Development || true\nln -s Development Deployment || true\nln -s Deployment Deployment+Debug || true\npopd";
+		};
+		F5121EB60EB3A54A0048EF67 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.svn/dir-wcprops",
+				"$(SRCROOT)/ffmpeg/.svn/dir-wcprops",
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/include/SVNRevision.h",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "source scripts/getSVNRevision.sh";
 		};
 		F535FCD50B4D605900F00D14 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1764,6 +1786,11 @@
 			target = 61CB11760ACDF4D8007994BD /* matroska */;
 			targetProxy = 61CB12110ACE0FB1007994BD /* PBXContainerItemProxy */;
 		};
+		F5121EBD0EB3A5AE0048EF67 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			targetProxy = F5121EBC0EB3A5AE0048EF67 /* PBXContainerItemProxy */;
+		};
 		F59E09EC0A670E420019A3F0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 11A70AC00A3D0105002058D4 /* Perian */;
@@ -1907,6 +1934,9 @@
 					libmatroska,
 				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
@@ -1930,6 +1960,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_GC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -1948,6 +1979,9 @@
 					libmatroska,
 				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
@@ -2076,6 +2110,9 @@
 					libmatroska,
 				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
@@ -2359,6 +2396,34 @@
 			};
 			name = Deployment;
 		};
+		F5121EB80EB3A54A0048EF67 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Make SVN Rev";
+			};
+			name = Development;
+		};
+		F5121EB90EB3A54A0048EF67 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Make SVN Rev";
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		F5121EBA0EB3A54A0048EF67 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Make SVN Rev";
+			};
+			name = "Deployment+Debug";
+		};
 		F59E0A0C0A670E950019A3F0 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2562,6 +2627,16 @@
 				83D1D6CB0B4C794900E09EC9 /* Development */,
 				83D1D6CC0B4C794900E09EC9 /* Deployment */,
 				3D4BBE4F0B59EE0A000EDE04 /* Deployment+Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		F5121EBB0EB3A5680048EF67 /* Build configuration list for PBXAggregateTarget "Make SVN Rev" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5121EB80EB3A54A0048EF67 /* Development */,
+				F5121EB90EB3A54A0048EF67 /* Deployment */,
+				F5121EBA0EB3A54A0048EF67 /* Deployment+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Development;
