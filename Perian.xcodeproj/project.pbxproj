@@ -829,8 +829,11 @@
 				6116E74E0B4738CE0020F1CE /* CodecIDs.h */,
 				3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */,
 			);
+			indentWidth = 4;
 			name = Source;
 			sourceTree = "<group>";
+			tabWidth = 4;
+			usesTabs = 1;
 		};
 		116C425C0B50420D00FB0738 /* Update Checker Sources */ = {
 			isa = PBXGroup;
