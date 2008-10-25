@@ -299,6 +299,8 @@ static int findNameInList(CFStringRef loadingApp, const CFStringRef *names, int 
 	int i;
 
 	for (i = 0; i < count; i++) {
+		if (CFGetTypeID(names[i]) != CFStringGetTypeID())
+			continue;
 		if (CFStringCompare(loadingApp, names[i], 0) == kCFCompareEqualTo) return 1;
 	}
 
@@ -319,6 +321,8 @@ int IsFrameDroppingEnabled()
         if (!processInformation) enabled = FALSE;
 		else {
             CFArrayRef list = CFPreferencesCopyAppValue(CFSTR("FrameDroppingWhiteList"), CFSTR("org.perian.Perian"));
+			if(list && CFGetTypeID(list) != CFArrayGetTypeID())
+				list = NULL;
             CFStringRef path = CFDictionaryGetValue(processInformation, kCFBundleExecutableKey);
             CFRange entireRange = CFRangeMake(0, CFStringGetLength(path)), basename;
             

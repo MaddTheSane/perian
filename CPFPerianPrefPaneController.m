@@ -128,6 +128,26 @@
 	CFPreferencesSetAppValue(key, value, appID);
 }
 
+- (NSDate *)getDateFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
+{
+	CFPropertyListRef value;
+	NSDate *ret = nil;
+	
+	value = CFPreferencesCopyAppValue(key, appID);
+	if(value && CFGetTypeID(value) == CFDateGetTypeID())
+		ret = [[(NSDate *)value retain] autorelease];
+	
+	if(value)
+		CFRelease(value);
+	
+	return ret;
+}
+
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromDate:(NSDate *)value
+{
+	CFPreferencesSetAppValue(key, value, appID);
+}
+
 #pragma mark Private Functions
 
 - (NSString *)installationBasePath:(BOOL)userInstallation
@@ -353,12 +373,11 @@
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
 	}
 	
-	NSDate *updateDate = (NSDate *)CFPreferencesCopyAppValue((CFStringRef)NEXT_RUN_KEY, perianAppID);
+	NSDate *updateDate = [self getDateFromKey:(CFStringRef)NEXT_RUN_KEY forAppID:perianAppID];
 	if([updateDate timeIntervalSinceNow] > 1000000000) //futureDate
 		[button_autoUpdateCheck setIntValue:0];
 	else
 		[button_autoUpdateCheck setIntValue:1];
-	[updateDate release];
 	
 	/* A52 Prefs */
 	int twoChannelMode = [self getIntFromKey:AC3TwoChannelModeKey forAppID:a52AppID withDefault:0xffffffff];
@@ -798,7 +817,7 @@
 	
 	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(updateCheckStatusChanged:) name:UPDATE_STATUS_NOTIFICATION object:nil];
-	CFPreferencesSetAppValue((CFStringRef)MANUAL_RUN_KEY, [NSNumber numberWithBool:YES], perianAppID);
+	[self setKey:(CFStringRef)MANUAL_RUN_KEY forAppID:perianAppID fromBool:YES];
 	CFPreferencesAppSynchronize(perianAppID);
 	OSStatus status = FSPathMakeRef((UInt8 *)[[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Resources/PerianUpdateChecker.app"] fileSystemRepresentation], &updateCheckRef, NULL);
 	if(status != noErr)
@@ -811,9 +830,9 @@
 {
 	CFStringRef key = (CFStringRef)NEXT_RUN_KEY;
 	if([button_autoUpdateCheck intValue])
-		CFPreferencesSetAppValue(key, [NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN], perianAppID);
+		[self setKey:key forAppID:perianAppID fromDate:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN]];
 	else
-		CFPreferencesSetAppValue(key, [NSDate distantFuture], perianAppID);
+		[self setKey:key forAppID:perianAppID fromDate:[NSDate distantFuture]];
     
     CFPreferencesAppSynchronize(perianAppID);
 } 

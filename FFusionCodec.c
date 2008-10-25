@@ -203,6 +203,11 @@ void FFusionRunUpdateCheck()
 	if (FFusionAlreadyRanUpdateCheck) return;
 
     CFDateRef lastRunDate = CFPreferencesCopyAppValue(CFSTR("NextRunDate"), CFSTR("org.perian.Perian"));
+	if(lastRunDate && CFGetTypeID(lastRunDate) != CFDateGetTypeID())
+	{
+		CFRelease(lastRunDate);
+		lastRunDate = NULL;
+	}
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
     
 	FFusionAlreadyRanUpdateCheck = 1;
@@ -339,6 +344,8 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
     else
     {
 		CFStringRef pathToLogFile = CFPreferencesCopyAppValue(CFSTR("DebugLogFile"), CFSTR("org.perian.Perian"));
+		if(pathToLogFile && CFGetTypeID(pathToLogFile) != CFStringGetTypeID())
+			pathToLogFile = NULL;
 		char path[PATH_MAX];
         SetComponentInstanceStorage(self, (Handle)glob);
 
