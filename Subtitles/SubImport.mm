@@ -63,7 +63,8 @@ short GetFilenameLanguage(CFStringRef filename)
 	return lang;
 }
 
-static bool ShouldEngageFrontRowHack(void)
+//Use ugly transparency ("transparent" blend mode) for files imported in Front Row 
+//At the moment it doesn't support graphicsModePreBlackAlpha static bool ShouldEngageFrontRowHack(void)
 {
 	bool ret;
 	Boolean isSet;
@@ -72,8 +73,9 @@ static bool ShouldEngageFrontRowHack(void)
 	NSString *applicationName = [[NSProcessInfo processInfo] processName];
 	long minorVersion;
 	Gestalt(gestaltSystemVersionMinor, &minorVersion);
-	CFPreferencesGetAppBooleanValue(CFSTR("PerianFrontRowSubtitleHack"),CFSTR("org.perian.Perian"),&isSet);
-	
+	if (!CFPreferencesGetAppBooleanValue(CFSTR("PerianFrontRowSubtitleHack"),CFSTR("org.perian.Perian"),&isSet)) 
+		isSet = 1; 
+		
 	ret = (minorVersion == 5) && [applicationName isEqualToString:@"Front Row"] && isSet;
 	[pool release];
 	
