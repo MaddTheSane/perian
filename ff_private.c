@@ -282,23 +282,24 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	int useDefault = 1;
 	if(asbd.mFormatID == kAudioFormatAC3 || asbd.mFormatID == 'ms \0')
 	{
+		QTMetaDataRef trackMetaData; 
+		OSErr error = QTCopyTrackMetaData(targetTrack, &trackMetaData); 
+		if(error == noErr) 
+		{ 
+			const char *prop = "Surround"; 
+			OSType key = 'name'; 
+			error = QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL); 
+			QTMetaDataRelease(trackMetaData); 
+		} 
 		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size))
 		{
 			useDefault = 0;
 			aclSize = sizeof(AudioChannelLayout);
-			QTMetaDataRef trackMetaData;
-			OSErr error = QTCopyTrackMetaData(targetTrack, &trackMetaData);
-			if(error == noErr)
-			{
-				const char *prop = "Surround";
-				OSType key = 'name';
-				error = QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL);
-				QTMetaDataRelease(trackMetaData);
-			}
 		}
 	}
 	if(useDefault && asbd.mChannelsPerFrame > 2)
 	{
+		asbd.mFramesPerPacket = 0;
 		acl = GetDefaultChannelLayout(&asbd);
 		aclSize = sizeof(AudioChannelLayout);
 	}
