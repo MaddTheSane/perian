@@ -338,7 +338,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 
 				intnum = ("-"? [0-9]+) >paramset %setintnum;
 				flag = [01] >paramset %setintnum;
-				floatnum = ([0-9]+ ("." [0-9]*)?) >paramset %setfloatnum;
+				floatnum = ("-"? [0-9]+ ("." [0-9]*)?) >paramset %setfloatnum;
 				string = ([^\\}]*) >paramset %setstringval;
 				color = ("H"|"&"){,2} (xdigit+) >paramset %sethexnum "&"?;
 				parens = "(" [^)]* ")";

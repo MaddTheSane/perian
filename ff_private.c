@@ -169,9 +169,9 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	(*imgHdl)->idSize = sizeof(ImageDescription);
 	
 	if (!((*imgHdl)->cType = map_video_codec_to_mov_tag(codec->codec_id)))
-		if(!((*imgHdl)->cType = BSWAP(codec->codec_tag))) 
+		if(!((*imgHdl)->cType = BSWAP(codec->codec_tag)))
 			(*imgHdl)->cType = forced_map_video_codec_to_mov_tag(codec->codec_id);
-	//	FourCCprintf("fourcc: ", (*imgHdl)->cType);
+//	FourCCprintf("fourcc: ", (*imgHdl)->cType);
 	
 	(*imgHdl)->temporalQuality = codecMaxQuality;
 	(*imgHdl)->spatialQuality = codecMaxQuality;
@@ -282,15 +282,15 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	int useDefault = 1;
 	if(asbd.mFormatID == kAudioFormatAC3 || asbd.mFormatID == 'ms \0')
 	{
-		QTMetaDataRef trackMetaData; 
-		OSErr error = QTCopyTrackMetaData(targetTrack, &trackMetaData); 
-		if(error == noErr) 
-		{ 
-			const char *prop = "Surround"; 
-			OSType key = 'name'; 
-			error = QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL); 
-			QTMetaDataRelease(trackMetaData); 
-		} 
+		QTMetaDataRef trackMetaData;
+		OSErr error = QTCopyTrackMetaData(targetTrack, &trackMetaData);
+		if(error == noErr)
+		{
+			const char *prop = "Surround";
+			OSType key = 'name';
+			error = QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL);
+			QTMetaDataRelease(trackMetaData);
+		}
 		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size))
 		{
 			useDefault = 0;
@@ -337,17 +337,17 @@ OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
 			return 'FSV1';
 		case CODEC_ID_VP6A:
 			return 'VP6A';
-	} 
-	return 0; 
-} 
+	}
+	return 0;
+}
 
-OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id) 
-{ 
-	switch (codec_id) { 
-		case CODEC_ID_H264: 
-			return 'H264'; 
-		case CODEC_ID_MPEG4: 
-			return 'MP4S'; 
+OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
+{
+	switch (codec_id) {
+		case CODEC_ID_H264:
+			return 'H264';
+		case CODEC_ID_MPEG4:
+			return 'MP4S';
 	}
 	return 0;
 }

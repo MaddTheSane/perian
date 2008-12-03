@@ -286,6 +286,12 @@ ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCodecDeco
 	UInt8 *data = (UInt8 *) drp->codecData;
 	int ret, got_sub;
 	
+	if(myDrp->bufferSize < 4)
+	{
+		myDrp->decoded = true;
+		return noErr;
+	}
+	
 	if (glob->codecData == NULL) {
 		glob->codecData = malloc(myDrp->bufferSize + 2);
 		glob->bufferSize = myDrp->bufferSize + 2;
@@ -333,6 +339,8 @@ ComponentResult VobSubCodecDrawBand(VobSubCodecGlobals glob, ImageSubCodecDecomp
 	
 	// clear the buffer to pure transparent
 	memset(drp->baseAddr, 0, myDrp->height * drp->rowBytes);
+	if(myDrp->bufferSize < 4)
+		return noErr;
 	
 	err = ReadPacketControls(data, glob->palette, &controlData);
 	if (err == noErr)

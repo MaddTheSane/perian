@@ -42,6 +42,8 @@
 #include "CommonUtils.h"
 #include "pthread.h"
 
+#define PERIAN_PREF_DOMAIN CFSTR("org.perian.Perian")
+
 void inline swapFrame(AVFrame * *a, AVFrame * *b)
 {
 	AVFrame *t = *a;
@@ -202,7 +204,7 @@ void FFusionRunUpdateCheck()
 {
 	if (FFusionAlreadyRanUpdateCheck) return;
 
-    CFDateRef lastRunDate = CFPreferencesCopyAppValue(CFSTR("NextRunDate"), CFSTR("org.perian.Perian"));
+    CFDateRef lastRunDate = CFPreferencesCopyAppValue(CFSTR("NextRunDate"), PERIAN_PREF_DOMAIN);
 	if(lastRunDate && CFGetTypeID(lastRunDate) != CFDateGetTypeID())
 	{
 		CFRelease(lastRunDate);
@@ -343,7 +345,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
     }
     else
     {
-		CFStringRef pathToLogFile = CFPreferencesCopyAppValue(CFSTR("DebugLogFile"), CFSTR("org.perian.Perian"));
+		CFStringRef pathToLogFile = CFPreferencesCopyAppValue(CFSTR("DebugLogFile"), PERIAN_PREF_DOMAIN);
 		if(pathToLogFile && CFGetTypeID(pathToLogFile) != CFStringGetTypeID())
 			pathToLogFile = NULL;
 		char path[PATH_MAX];
@@ -516,7 +518,7 @@ pascal ComponentResult FFusionCodecGetMPWorkFunction(FFusionGlobals glob, Compon
 
 pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodecDecompressCapabilities *cap)
 {
-	Boolean doExperimentalFlags = CFPreferencesGetAppBooleanValue(CFSTR("ExperimentalQTFlags"), CFSTR("org.perian.Perian"), NULL);
+	Boolean doExperimentalFlags = CFPreferencesGetAppBooleanValue(CFSTR("ExperimentalQTFlags"), PERIAN_PREF_DOMAIN, NULL);
 	
     // Secifies the size of the ImageSubCodecDecompressRecord structure
     // and say we can support asyncronous decompression
@@ -918,6 +920,31 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 	capabilities->flags |= codecCanAsync | codecCanAsyncWhen;
 	
 	FFusionDebugPrint("%p Preflight requesting colorspace '%s'. (error %d)\n", glob, FourCCString(pos[0]), err);
+	
+	Boolean keyExists = FALSE;
+	int loopFilterSkip = CFPreferencesGetAppIntegerValue(CFSTR("SkipLoopFilter"), PERIAN_PREF_DOMAIN, &keyExists);
+	if(keyExists)
+	{
+		enum AVDiscard loopFilterValue = AVDISCARD_DEFAULT;
+		switch (loopFilterSkip) {
+			case 1:
+				loopFilterValue = AVDISCARD_NONREF;
+				break;
+			case 2:
+				loopFilterValue = AVDISCARD_BIDIR;
+				break;
+			case 3:
+				loopFilterValue = AVDISCARD_NONKEY;
+				break;
+			case 4:
+				loopFilterValue = AVDISCARD_ALL;
+				break;
+			default:
+				break;
+		}
+		glob->avContext->skip_loop_filter = loopFilterValue;
+		FFusionDebugPrint("%p Preflight set skip loop filter to %d", glob, loopFilterValue);
+	}
 	
     return err;
 }

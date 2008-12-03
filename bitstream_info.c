@@ -884,6 +884,10 @@ int ffusionIsParsedVideoDecodable(FFusionParserContext *parser)
 	if (parser->parserStructure == &ffusionH264Parser) {
 		H264ParserContext *h264parser = parser->internalContext;
 		
+		// don't decode main/base profile
+		if(h264parser->profile_idc < 100 && !CFPreferencesGetAppBooleanValue(CFSTR("DecodeAllProfiles"), CFSTR("org.perian.Perian"), NULL))
+			return 0;
+		
 		// don't try to decode interlaced or 4:2:2 H.264
 		return (h264parser->frame_mbs_only_flag == 1) && (h264parser->chroma_format_idc <= 1);
 	}

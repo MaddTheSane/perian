@@ -333,7 +333,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			remoteGlobalIDString = F5121EB70EB3A54A0048EF67;
 			remoteInfo = "Make SVN Rev";
 		};
 		F59E09EB0A670E420019A3F0 /* PBXContainerItemProxy */ = {

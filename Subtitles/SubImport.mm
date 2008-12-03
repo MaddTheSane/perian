@@ -16,6 +16,10 @@
 
 //#define SS_DEBUG
 
+extern "C" {
+	void ExtractVobSubPacket(UInt8 *dest, const UInt8 *framedSrc, int srcSize);
+}
+
 #pragma mark C
 
 // if the subtitle filename is something like title.en.srt or movie.fre.srt
@@ -63,7 +67,7 @@ short GetFilenameLanguage(CFStringRef filename)
 	return lang;
 }
 
-//Use ugly transparency ("transparent" blend mode) for files imported in Front Row 
+//Use ugly transparency ("transparent" blend mode) for files imported in Front Row
 //At the moment it doesn't support graphicsModePreBlackAlpha
 static bool ShouldEngageFrontRowHack(void)
 {
@@ -74,9 +78,9 @@ static bool ShouldEngageFrontRowHack(void)
 	NSString *applicationName = [[NSProcessInfo processInfo] processName];
 	long minorVersion;
 	Gestalt(gestaltSystemVersionMinor, &minorVersion);
-	if (!CFPreferencesGetAppBooleanValue(CFSTR("PerianFrontRowSubtitleHack"),CFSTR("org.perian.Perian"),&isSet)) 
-		isSet = 1; 
-		
+	if (!CFPreferencesGetAppBooleanValue(CFSTR("PerianFrontRowSubtitleHack"),CFSTR("org.perian.Perian"),&isSet))
+		isSet = 1;
+	
 	ret = (minorVersion == 5) && [applicationName isEqualToString:@"Front Row"] && isSet;
 	[pool release];
 	
@@ -650,9 +654,378 @@ bail:
 	return err;
 }
 
+#pragma mark IDX Parsing
+
+static NSString *getNextVobSubLine(NSEnumerator *lineEnum)
+{
+	NSString *line;
+	while ((line = [lineEnum nextObject]) != nil) {
+		//Reject empty lines which may contain whitespace
+		if([line length] < 3)
+			continue;
+		
+		if([line characterAtIndex:0] == '#')
+			continue;
+		
+		break;
+	}
+	return line;
+}
+
+//static long scanTime(NSScanner *scanner)
+//{
+//	NSCharacterSet *decimalDigits = [NSCharacterSet decimalDigitCharacterSet];
+//	int hours, minutes, seconds, subSeconds, sign = 1;
+//	NSString *signString = nil;
+//	[scanner scanUpToCharactersFromSet:decimalDigits intoString:&signString];
+//	if([signString length])
+//	{
+//		if([signString characterAtIndex:[signString length] - 1] == '-')
+//			sign = -1;
+//	}
+//	[scanner scanInt:&hours];
+//	[scanner scanUpToCharactersFromSet:decimalDigits intoString:nil];
+//	[scanner scanInt:&minutes];
+//	[scanner scanUpToCharactersFromSet:decimalDigits intoString:nil];
+//	[scanner scanInt:&seconds];
+//	[scanner scanUpToCharactersFromSet:decimalDigits intoString:nil];
+//	[scanner scanInt:&subSeconds];
+//	
+//	return sign * ((long)hours * 3600000 + (long)minutes * 60000 + (long)seconds * 1000 + (long)subSeconds);
+//}
+
+static long scanTime(const char *timeStr)
+{
+	int hours = 0, minutes = 0, seconds = 0, milliseconds = 0, sign = 1;
+	if(*timeStr == '-')
+	{
+		sign = -1;
+		timeStr++;
+	}
+	
+	sscanf(timeStr, "%d:%d:%d:%d", &hours, &minutes, &seconds, &milliseconds);
+	return sign * ((long)hours * 60 * 60 * 1000 + (long)minutes * 60 * 1000 + (long)seconds * 1000 + (long)milliseconds);
+}
+
+static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHandle *imgDescHand, Handle dataRef, OSType dataRefType, VobSubTrack *track)
+{
+	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
+	*imgDescHand = imgDesc;
+	(*imgDesc)->idSize = sizeof(ImageDescription);
+	(*imgDesc)->cType = kSubFormatVobSub;
+	(*imgDesc)->frameCount = 1;
+	(*imgDesc)->depth = 32;
+	(*imgDesc)->clutID = -1;
+	Fixed trackWidth = IntToFixed(movieBox.right - movieBox.left);
+	Fixed trackHeight = IntToFixed(movieBox.bottom - movieBox.top);
+	(*imgDesc)->width = FixedToInt(trackWidth);
+	(*imgDesc)->height = FixedToInt(trackHeight);
+	Track theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
+	if(theTrack == NULL)
+		return NULL;
+	
+	Media theMedia = NewTrackMedia(theTrack, VideoMediaType, 1000, dataRef, dataRefType);
+	if(theMedia == NULL)
+	{
+		DisposeMovieTrack(theTrack);
+		return NULL;
+	}
+	MediaHandler mh = GetMediaHandler(theMedia);
+	MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
+	SetTrackLayer(theTrack, -1);
+	
+	Handle imgDescExt = NewHandle([track->privateData length]);
+	memcpy(*imgDescExt, [track->privateData bytes], [track->privateData length]);
+	
+	AddImageDescriptionExtension(imgDesc, imgDescExt, kVobSubIdxExtension);
+	DisposeHandle(imgDescExt);
+	
+	return theMedia;
+}
+
+static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTime, uint16_t *endTime) {
+	// to set whether the key sequences 0x01 - 0x02 have been seen
+	Boolean loop = TRUE;
+	*startTime = *endTime = 0;
+
+	int controlOffset = (packet[2] << 8) + packet[3];
+	while(loop)
+	{	
+		uint8_t *controlSeq = packet + controlOffset;
+		uint32_t i = 4, end = length - controlOffset;
+		uint16_t timestamp = (controlSeq[0] << 8) | controlSeq[1];
+		uint16_t nextOffset = (controlSeq[2] << 8) + controlSeq[3];
+		while (i < end) {
+			switch (controlSeq[i]) {
+				case 0x00:
+					// subpicture identifier, we don't care
+					i++;
+					break;
+					
+				case 0x01:
+					*startTime = (timestamp << 10) / 90;
+					i++;
+					break;
+				
+				case 0x02:
+					*endTime = (timestamp << 10) / 90;
+					i++;
+					loop = false;
+					break;
+					
+				case 0x03:
+					// palette info, we don't care
+					i += 3;
+					break;
+					
+				case 0x04:
+					// alpha info, we don't care
+					i += 3;
+					break;
+					
+				case 0x05:
+					// coordinates of image, ffmpeg takes care of this
+					i += 7;
+					break;
+					
+				case 0x06:
+					// offset of the first graphic line, and second, ffmpeg takes care of this
+					i += 5;
+					break;
+					
+				case 0xff:
+					// end of control sequence
+					if(controlOffset == nextOffset)
+						loop = false;
+					controlOffset = nextOffset;
+					i = end;
+					break;
+					
+				default:
+					Codecprintf(NULL, " !! Unknown control sequence 0x%02x  aborting (offset %x)\n", controlSeq[i], i);
+					loop = FALSE;
+					break;
+			}
+		}
+	}
+}	
+
+typedef enum {
+	VOB_SUB_STATE_READING_PRIVATE,
+	VOB_SUB_STATE_READING_TRACK_HEADER,
+	VOB_SUB_STATE_READING_DELAY,
+	VOB_SUB_STATE_READING_TRACK_DATA
+} VobSubState;
+
 static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	UInt8 path[PATH_MAX];
+	
+	FSRefMakePath(theDirectory, path, PATH_MAX);
+	NSString *nsPath = [[NSString stringWithUTF8String:(char *)path] stringByAppendingPathComponent:(NSString *)filename];
+	NSString *idxContent = [NSString stringWithContentsOfFile:nsPath];
+	NSData *privateData = nil;
 	ComponentResult err = noErr;
+	
+	VobSubState state = VOB_SUB_STATE_READING_PRIVATE;
+	VobSubTrack *currentTrack = nil, *lastTrack = nil;
+	long movieDuration = (GetMovieDuration(theMovie) * 1000 / GetMovieTimeScale(theMovie));
+	int imageWidth = 0, imageHeight = 0;
+	long delay=0;
+
+	NSString *subFileName = [[nsPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sub"];
+	if(![[NSFileManager defaultManager] fileExistsAtPath:subFileName])
+		goto bail;
+
+	if(![idxContent length])
+		goto bail;
+	
+	NSArray *lines = [idxContent componentsSeparatedByString:@"\n"];
+	NSMutableArray *privateLines = [NSMutableArray array];
+	NSEnumerator *lineEnum = [lines objectEnumerator];
+	NSString *line;
+	Rect movieBox;
+	GetMovieBox(theMovie, &movieBox);
+	
+	NSMutableArray *tracks = [NSMutableArray array];
+	
+	while((line = getNextVobSubLine(lineEnum)) != NULL)
+	{
+		if([line hasPrefix:@"timestamp: "])
+			state = VOB_SUB_STATE_READING_TRACK_DATA;
+		else if([line hasPrefix:@"id: "])
+		{
+			if(privateData == nil)
+			{
+				NSString *allLines = [privateLines componentsJoinedByString:@"\n"];
+				privateData = [allLines dataUsingEncoding:NSUTF8StringEncoding];
+			}
+			state = VOB_SUB_STATE_READING_TRACK_HEADER;
+		}
+		else if([line hasPrefix:@"delay: "])
+			state = VOB_SUB_STATE_READING_DELAY;
+		else if(state != VOB_SUB_STATE_READING_PRIVATE)
+			state = VOB_SUB_STATE_READING_TRACK_HEADER;
+		
+		switch(state)
+		{
+			case VOB_SUB_STATE_READING_PRIVATE:
+				[privateLines addObject:line];
+				if([line hasPrefix:@"size: "])
+				{
+					sscanf([line UTF8String], "size: %dx%d", &imageWidth, &imageHeight);
+				}
+				break;
+			case VOB_SUB_STATE_READING_TRACK_HEADER:
+				if([line hasPrefix:@"id: "])
+				{
+					char *langStr = (char *)malloc([line length]);
+					int index;
+					sscanf([line UTF8String], "id: %s index: %d", langStr, &index);
+					int langLength = strlen(langStr);
+					if(langLength > 0 && langStr[langLength-1] == ',')
+						langStr[langLength-1] = 0;
+					NSString *language = [NSString stringWithUTF8String:langStr];
+					
+					lastTrack = currentTrack;
+					currentTrack = [[VobSubTrack alloc] initWithPrivateData:privateData language:language andIndex:index];
+					[tracks addObject:currentTrack];
+					[currentTrack release];
+				}
+				break;
+			case VOB_SUB_STATE_READING_DELAY:
+				delay = scanTime([[line substringFromIndex:7] UTF8String]);
+				break;
+			case VOB_SUB_STATE_READING_TRACK_DATA:
+			{
+				char *timeStr = (char *)malloc([line length]);
+				unsigned int position;
+				sscanf([line UTF8String], "timestamp: %s filepos: %x", timeStr, &position);
+				long time = scanTime(timeStr);
+				free(timeStr);
+				if(lastTrack)
+				{
+					[lastTrack addSampleTime:movieDuration offset:position];
+					lastTrack = nil;
+				}
+				[currentTrack addSampleTime:time + delay offset:position];
+			}
+				break;
+		}
+	}
+	if(lastTrack)
+	{
+		int position = [[[[NSFileManager defaultManager] fileAttributesAtPath:subFileName traverseLink:NO] objectForKey:NSFileSize] intValue];
+		[lastTrack addSampleTime:movieDuration offset:position];
+	}
+	
+	if([tracks count])
+	{
+		OSType dataRefType;
+		Handle dataRef = NULL;
+		
+		NSData *subFileData = [NSData dataWithContentsOfMappedFile:subFileName];
+		FSRef subFile;
+		FSPathMakeRef((const UInt8 *)[subFileName fileSystemRepresentation], &subFile, NULL);
+		FSSpec theFile;
+		FSGetCatalogInfo(&subFile, kFSCatInfoNone, NULL, NULL, &theFile, NULL);
+		
+		if((err = QTNewDataReferenceFromFSSpec(&theFile, 0, &dataRef, &dataRefType)) != noErr)
+			goto bail;
+		
+		NSEnumerator *trackEnum = [tracks objectEnumerator];
+		VobSubTrack *track = nil;
+		while((track = [trackEnum nextObject]) != nil)
+		{
+			ImageDescriptionHandle imgDesc;
+			Media trackMedia = createVobSubMedia(theMovie, movieBox, &imgDesc, dataRef, dataRefType, track);
+			if(imageWidth != 0)
+			{
+				(*imgDesc)->width = imageWidth;
+				(*imgDesc)->height = imageHeight;
+			}
+			
+			int sampleCount = [track->samples count] - 1;
+			int totalSamples = sampleCount;
+			SampleReference64Ptr samples = (SampleReference64Ptr)calloc(sampleCount*2, sizeof(SampleReference64Record));
+			SampleReference64Ptr sample = samples;
+			VobSubSample *lastSample = [track->samples objectAtIndex:0];
+			int i;
+			uint32_t lastTime = 0;
+			for(i=0; i<sampleCount; i++)
+			{
+				VobSubSample *nextSample = [track->samples objectAtIndex:i+1];
+				int offset = lastSample->fileOffset;
+				int size = nextSample->fileOffset - offset;
+				
+				NSData *subData = [subFileData subdataWithRange:NSMakeRange(offset, size)];
+				uint8_t *extracted = (uint8_t *)malloc(size);
+				ExtractVobSubPacket(extracted, (const UInt8 *)[subData bytes], size);
+				
+				uint16_t startTimestamp, endTimestamp;
+				ReadPacketTimes(extracted, size, &startTimestamp, &endTimestamp);
+				free(extracted);
+				uint32_t startTime = lastSample->timeStamp + startTimestamp;
+				uint32_t endTime = lastSample->timeStamp + endTimestamp;
+				if(i == 0)
+					lastSample->timeStamp = startTime;
+				else if(lastTime != startTime)
+				{
+					//insert a sample with no real data, to clear the subs
+					memset(sample, 0, sizeof(SampleReference64Record));
+					sample->durationPerSample = startTime - lastTime;
+					sample->numberOfSamples = 1;
+					sample->dataSize = 1;
+					totalSamples++;
+					sample++;
+				}
+				
+				sample->dataOffset.hi = 0;
+				sample->dataOffset.lo = offset;
+				sample->dataSize = nextSample->fileOffset - lastSample->fileOffset;
+				sample->sampleFlags = 0;
+				sample->durationPerSample = endTimestamp - startTimestamp;
+				sample->numberOfSamples = 1;
+				lastTime = endTime;
+				
+				lastSample = nextSample;
+				sample++;
+			}
+			AddMediaSampleReferences64(trackMedia, (SampleDescriptionHandle)imgDesc, totalSamples, samples, NULL);
+			free(samples);
+			NSString *langStr = track->language;
+			int lang = langUnspecified;
+			if([langStr length] == 3)
+			{
+				char langCStr[4] = "";
+				
+				CFStringGetCString((CFStringRef)langStr, langCStr, 4, kCFStringEncodingASCII);
+				lang = ISO639_2ToQTLangCode(langCStr);
+			}
+			else if([langStr length] == 2)
+			{
+				char langCStr[3] = "";
+				
+				CFStringGetCString((CFStringRef)langStr, langCStr, 3, kCFStringEncodingASCII);
+				lang = ISO639_1ToQTLangCode(langCStr);				
+			}
+			SetMediaLanguage(trackMedia, lang);
+			
+			TimeValue mediaDuration = GetMediaDuration(trackMedia);
+			TimeValue movieTimeScale = GetMovieTimeScale(theMovie);
+			Track theTrack = GetMediaTrack(trackMedia);
+			VobSubSample *firstSample = [track->samples objectAtIndex:0];
+			err = InsertMediaIntoTrack(theTrack, (firstSample->timeStamp * movieTimeScale)/1000, 0, mediaDuration, fixed1);
+			if (*firstSubTrack == NULL)
+				*firstSubTrack = theTrack;
+			else
+				SetTrackAlternate(*firstSubTrack, theTrack);
+		}
+	}
+	
+bail:
+	[pool release];
 	
 	return err;
 }
@@ -1041,6 +1414,60 @@ restart:
 {
 	return [NSString stringWithFormat:@"\"%@\", from %d s to %d s",line,begin_time,end_time];
 }
+@end
+
+@implementation VobSubSample
+
+- (id)initWithTime:(long)time offset:(long)offset
+{
+	self = [super init];
+	if(!self)
+		return self;
+	
+	timeStamp = time;
+	fileOffset = offset;
+	
+	return self;
+}
+
+@end
+
+@implementation VobSubTrack
+
+- (id)initWithPrivateData:(NSData *)idxPrivateData language:(NSString *)lang andIndex:(int)trackIndex
+{
+	self = [super init];
+	if(!self)
+		return self;
+	
+	privateData = [idxPrivateData retain];
+	language = [lang retain];
+	index = trackIndex;
+	samples = [[NSMutableArray alloc] init];
+	
+	return self;
+}
+
+- (void)dealloc
+{
+	[privateData release];
+	[language release];
+	[samples release];
+	[super dealloc];
+}
+
+- (void)addSample:(VobSubSample *)sample
+{
+	[samples addObject:sample];
+}
+
+- (void)addSampleTime:(long)time offset:(long)offset
+{
+	VobSubSample *sample = [[VobSubSample alloc] initWithTime:time offset:offset];
+	[self addSample:sample];
+	[sample release];
+}
+
 @end
 
 #pragma mark C++ Wrappers

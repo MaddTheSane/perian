@@ -57,6 +57,34 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, Ti
 -(BOOL)isEmpty;
 @end
 
+@interface VobSubSample : NSObject
+{
+	@public
+	long		timeStamp;
+	long		fileOffset;
+}
+
+- (id)initWithTime:(long)time offset:(long)offset;
+
+@end
+
+
+@interface VobSubTrack : NSObject
+{
+	@public
+	NSData			*privateData;
+	NSString		*language;
+	int				index;
+	NSMutableArray	*samples;
+}
+
+- (id)initWithPrivateData:(NSData *)idxPrivateData language:(NSString *)lang andIndex:(int)trackIndex;
+- (void)addSample:(VobSubSample *)sample;
+- (void)addSampleTime:(long)time offset:(long)offset;
+
+@end
+
+
 extern void SubLoadSSAFromPath(NSString *path, SubContext **meta, SubSerializer **lines, SubRenderer *renderer);
 extern void SubLoadSRTFromPath(NSString *path, SubContext **meta, SubSerializer **lines, SubRenderer *renderer);
 

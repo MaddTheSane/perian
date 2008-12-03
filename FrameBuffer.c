@@ -114,18 +114,18 @@ FrameData *FFusionDataAppend(FFusionData *data, uint8_t *buffer, int dataSize, i
 	
 	FrameData *dest = data->frames + data->frameWrite;
 	
-	if(data->unparsedFrames.buffer == buffer) 
-	{                
-		//This was an unparsed frame, don't memcpy; it's already in the correct place. 
-		dest->buffer = buffer; 
-		data->unparsedFrames.buffer += dataSize; 
-		data->unparsedFrames.dataSize -= dataSize; 
-	} 
-	else 
-	{ 
-		uint8_t *saveBuffer = insertIntoBuffer(data, buffer, dataSize); 
-		dest->buffer = saveBuffer; 
-	} 
+	if(data->unparsedFrames.buffer == buffer)
+	{		
+		//This was an unparsed frame, don't memcpy; it's already in the correct place.
+		dest->buffer = buffer;
+		data->unparsedFrames.buffer += dataSize;
+		data->unparsedFrames.dataSize -= dataSize;
+	}
+	else
+	{
+		uint8_t *saveBuffer = insertIntoBuffer(data, buffer, dataSize);
+		dest->buffer = saveBuffer;
+	}
 	dest->dataSize = dataSize;
 	dest->type = type;
 	dest->prereqFrame = NULL;
@@ -140,21 +140,20 @@ void FFusionDataSetUnparsed(FFusionData *data, uint8_t *buffer, int bufferSize)
 {
 	FrameData *unparsed = &(data->unparsedFrames);
 	
-	if(unparsed->buffer == buffer) 
-	{ 
-		//This part was already unparsed; don't memcpy again 
-		unparsed->dataSize = bufferSize; 
-	}
-	else
+	if(unparsed->buffer == buffer)
 	{
-		unparsed->buffer = insertIntoBuffer(data, buffer, bufferSize); 
-		if (unparsed->buffer) { 
-			memcpy(unparsed->buffer, buffer, bufferSize); 
-			unparsed->dataSize = bufferSize; 
-		}
+		//This part was already unparsed; don't memcpy again
+		unparsed->dataSize = bufferSize;
+	}
+	{
+		unparsed->buffer = insertIntoBuffer(data, buffer, bufferSize);
+		if (unparsed->buffer) {
+			memcpy(unparsed->buffer, buffer, bufferSize);
+			unparsed->dataSize = bufferSize;
+		}		
 	}
 }
-		
+
 void FFusionDataReadUnparsed(FFusionData *data)
 {
 	data->ringWrite -= data->unparsedFrames.dataSize;
