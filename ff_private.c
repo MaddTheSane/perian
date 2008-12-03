@@ -169,8 +169,9 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	(*imgHdl)->idSize = sizeof(ImageDescription);
 	
 	if (!((*imgHdl)->cType = map_video_codec_to_mov_tag(codec->codec_id)))
-		(*imgHdl)->cType = BSWAP(codec->codec_tag);
-//	FourCCprintf("fourcc: ", (*imgHdl)->cType);
+		if(!((*imgHdl)->cType = BSWAP(codec->codec_tag))) 
+			(*imgHdl)->cType = forced_map_video_codec_to_mov_tag(codec->codec_id);
+	//	FourCCprintf("fourcc: ", (*imgHdl)->cType);
 	
 	(*imgHdl)->temporalQuality = codecMaxQuality;
 	(*imgHdl)->spatialQuality = codecMaxQuality;
@@ -335,6 +336,17 @@ OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
 			return 'FSV1';
 		case CODEC_ID_VP6A:
 			return 'VP6A';
+	} 
+	return 0; 
+} 
+
+OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id) 
+{ 
+	switch (codec_id) { 
+		case CODEC_ID_H264: 
+			return 'H264'; 
+		case CODEC_ID_MPEG4: 
+			return 'MP4S'; 
 	}
 	return 0;
 }
@@ -975,7 +987,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		//add any samples waiting to be added
 		if(ncstream->lastSample.numberOfSamples > 0) {
 			//calculate the duration of the sample before adding it
-			ncstream->lastSample.durationPerSample = (packet.pts - ncstream->lastpts) * ncstream->base.num;
+			ncstream->lastSample.durationPerSample = (packet.dts - ncstream->lastdts) * ncstream->base.num;
 			
 			AddMediaSampleReferences64(ncstream->media, ncstream->sampleHdl, 1, &ncstream->lastSample, NULL);
 		}
@@ -990,7 +1002,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			// keep the duration of the last sample, so we can use it if it's the last frame
 			sampleRec.durationPerSample = ncstream->lastSample.durationPerSample;
 			ncstream->lastSample = sampleRec;
-			ncstream->lastpts = packet.pts;
+			ncstream->lastdts = packet.dts;
 		} else {
 			ncstream->lastSample.numberOfSamples = 0;
 			
