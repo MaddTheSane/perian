@@ -64,7 +64,8 @@ short GetFilenameLanguage(CFStringRef filename)
 }
 
 //Use ugly transparency ("transparent" blend mode) for files imported in Front Row 
-//At the moment it doesn't support graphicsModePreBlackAlpha static bool ShouldEngageFrontRowHack(void)
+//At the moment it doesn't support graphicsModePreBlackAlpha
+static bool ShouldEngageFrontRowHack(void)
 {
 	bool ret;
 	Boolean isSet;

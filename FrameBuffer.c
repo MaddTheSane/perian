@@ -39,6 +39,7 @@ void FFusionDataFree(FFusionData *data)
 		FFusionDataFree(data->previousData);
 		free(data->previousData);
 	}
+	av_free(data->ringBuffer);
 }
 
 static void expansion(FFusionData *data, int dataSize)
@@ -91,6 +92,7 @@ static uint8_t *createBuffer(FFusionData *data, int dataSize)
 	else
 	{
 		expansion(data, dataSize);
+		data->ringWrite = dataSize;
 		return data->ringBuffer;
 	}
 }
@@ -112,8 +114,18 @@ FrameData *FFusionDataAppend(FFusionData *data, uint8_t *buffer, int dataSize, i
 	
 	FrameData *dest = data->frames + data->frameWrite;
 	
-	uint8_t *saveBuffer = insertIntoBuffer(data, buffer, dataSize);
-	dest->buffer = saveBuffer;
+	if(data->unparsedFrames.buffer == buffer) 
+	{                
+		//This was an unparsed frame, don't memcpy; it's already in the correct place. 
+		dest->buffer = buffer; 
+		data->unparsedFrames.buffer += dataSize; 
+		data->unparsedFrames.dataSize -= dataSize; 
+	} 
+	else 
+	{ 
+		uint8_t *saveBuffer = insertIntoBuffer(data, buffer, dataSize); 
+		dest->buffer = saveBuffer; 
+	} 
 	dest->dataSize = dataSize;
 	dest->type = type;
 	dest->prereqFrame = NULL;
@@ -128,13 +140,21 @@ void FFusionDataSetUnparsed(FFusionData *data, uint8_t *buffer, int bufferSize)
 {
 	FrameData *unparsed = &(data->unparsedFrames);
 	
-	unparsed->buffer = insertIntoBuffer(data, buffer, bufferSize);
-	if (unparsed->buffer) {
-		memcpy(unparsed->buffer, buffer, bufferSize);
-		unparsed->dataSize = bufferSize;
+	if(unparsed->buffer == buffer) 
+	{ 
+		//This part was already unparsed; don't memcpy again 
+		unparsed->dataSize = bufferSize; 
+	}
+	else
+	{
+		unparsed->buffer = insertIntoBuffer(data, buffer, bufferSize); 
+		if (unparsed->buffer) { 
+			memcpy(unparsed->buffer, buffer, bufferSize); 
+			unparsed->dataSize = bufferSize; 
+		}
 	}
 }
-
+		
 void FFusionDataReadUnparsed(FFusionData *data)
 {
 	data->ringWrite -= data->unparsedFrames.dataSize;
@@ -154,7 +174,7 @@ void FFusionDataMarkRead(FrameData *toData)
 	if(toData == NULL)
 		return;
 	
-	if(toData->prereqFrame != NULL && toData->prereqFrame->hold)
+	if(toData->prereqFrame != NULL)
 		return;
 	
 	FFusionData *data = toData->data;

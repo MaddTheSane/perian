@@ -18,7 +18,6 @@ struct FrameData_s
 	short			type;
 	short			skippabble;
 	short			decoded;
-	short			hold;
 	FrameData		*prereqFrame;  /* This is the frame's data which must be decoded to fully display this frame */
 	FrameData		*nextFrame; /* This is the next frame to decode if this one is already decoded.  This is for predictive decoding */
 	FFusionData		*data;

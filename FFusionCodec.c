@@ -1016,9 +1016,6 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 				drp->frameType = qtTypeForFrameInfo(drp->frameType, myDrp->frameData->type, myDrp->frameData->skippabble);
 				myDrp->frameNumber = p->frameNumber;
 				myDrp->GOPStartFrameNumber = glob->begin.lastIFrame;
-				frameData->hold = 0;
-				if(frameData->prereqFrame)
-					frameData->prereqFrame->hold = 1;
 				return noErr;
 			}
 		}
