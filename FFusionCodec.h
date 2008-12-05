@@ -50,6 +50,8 @@
 #define kFRAPSCodecInfoResID		273
 #define kSnowCodecInfoResID			274
 #define kNuvCodecInfoResID			275
+#define kIndeo2CodecInfoResID			276
+#define kIndeo3CodecInfoResID			277
 #define kTSCCCodecInfoResID			305
 #define kZMBVCodecInfoResID			307
 #define kVP6ACodecInfoResID			309

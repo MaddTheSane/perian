@@ -1586,6 +1586,17 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
             case 'UMP4':
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX4CodecInfoResID, (Handle *)&tempCodecInfo);
                 break;
+				
+			case 'IV31':	// Indeo 3
+            case 'IV32':
+			case 'iv31':
+            case 'iv32':
+                err = GetComponentResource((Component)glob->self, codecInfoResourceType, kIndeo3CodecInfoResID, (Handle *)&tempCodecInfo);
+                break;
+				
+			case 'RT21':	// Indeo 2
+                err = GetComponentResource((Component)glob->self, codecInfoResourceType, kIndeo2CodecInfoResID, (Handle *)&tempCodecInfo);
+                break;
                 
             case 'DX50':
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX5CodecInfoResID, (Handle *)&tempCodecInfo);

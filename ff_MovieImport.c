@@ -123,6 +123,8 @@ void init_FFmpeg()
 		REGISTER_DECODER(tscc);
 		REGISTER_DECODER(vp6a);
 		REGISTER_DECODER(zmbv);
+		REGISTER_DECODER(indeo2);
+		REGISTER_DECODER(indeo3);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
