@@ -312,7 +312,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		}
 	
 		/* Create the magic cookie */
-		cookie = create_cookie(codec, &cookieSize, asbd.mFormatID);
+		cookie = create_cookie(codec, &cookieSize, asbd.mFormatID, map->vbr);
 		if(cookie) {
 			err = QTSoundDescriptionSetProperty(sndHdl, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie,
 												cookieSize, cookie);
@@ -410,7 +410,7 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 /* This function creates a magic cookie basec on the codec parameter and formatID
  * Return value: a pointer to a magic cookie which has to be av_free()'d
  * in cookieSize, the size of the magic cookie is returned to the caller */
-uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID)
+uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID, int vbr)
 {
 	uint8_t *result = NULL;
 	uint8_t *ptr;
@@ -440,7 +440,10 @@ uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatI
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->codec_tag));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->channels));
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->sample_rate));
-	ptr = write_int32(ptr, EndianS32_NtoL(codec->bit_rate / 8));
+	if(vbr)
+		ptr = write_int32(ptr, 0);
+	else
+		ptr = write_int32(ptr, EndianS32_NtoL(codec->bit_rate / 8));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->block_align));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_coded_sample));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->extradata_size));
@@ -564,12 +567,13 @@ static void add_metadata(AVFormatContext *ic, Movie theMovie)
     QTMetaDataRelease(movie_metadata);
 }
 
-static void get_track_dimensions_for_codec(AVCodecContext *codec, Fixed *fixedWidth, Fixed *fixedHeight)
+static void get_track_dimensions_for_codec(AVStream *st, Fixed *fixedWidth, Fixed *fixedHeight)
 {	
+	AVCodecContext *codec = st->codec;
 	*fixedHeight = IntToFixed(codec->height);
 
-	if (!codec->sample_aspect_ratio.num) *fixedWidth = IntToFixed(codec->width);
-	else *fixedWidth = FloatToFixed(codec->width * av_q2d(codec->sample_aspect_ratio));
+	if (!st->sample_aspect_ratio.num) *fixedWidth = IntToFixed(codec->width);
+	else *fixedWidth = FloatToFixed(codec->width * av_q2d(st->sample_aspect_ratio));
 }
 
 void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW, Fixed displayH, Fixed pixelW, Fixed pixelH)
@@ -632,7 +636,7 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 		if(st->codec->codec_type == CODEC_TYPE_VIDEO) {
 			Fixed width, height;
 			
-			get_track_dimensions_for_codec(st->codec, &width, &height);
+			get_track_dimensions_for_codec(st, &width, &height);
 			track = NewMovieTrack(theMovie, width, height, kNoVolume);
 
             // XXX Support for 'old' NUV files, that didn't put the codec_tag in the file. 
