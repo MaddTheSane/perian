@@ -5,7 +5,7 @@
 
 # further modified by Augie Fackler to be gross and sh-based in places
 # so that you can have svn installed anywhere
-PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
+PATH=/sw/bin:/opt/local/bin:/usr/local/bin:/usr/bin:$PATH
 ffmpeg_rev=`svnversion -n ./ffmpeg/`
 REV=`svnversion -n ./`
 echo $REV

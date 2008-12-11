@@ -1,3 +1,16 @@
+1.1.3
+- Enabled Indeo 2/3 decodecs
+- Added pref to skip loop filter for increased decode speed at the cost of quality
+- External idx/sub (VobSub) support
+- Reject baseline/main profile unless specified by prefs
+- Allow negative values for floats to fix \frz
+- Consistently mark audio formats for multi-channel streams with blank first frame
+- Frontrow hack enabled by default
+- Added support for H.264 and H.263 in FLV containers
+- Reduced memory usage for packed streams
+- Added display of SVN rev in Pref Pane
+- Added sanity checks on all preferences
+
 1.1.2
 - Fixed update checker never running - this version requires a manual install
 - Enabled frame-dropping on AppleTV
