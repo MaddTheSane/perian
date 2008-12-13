@@ -263,13 +263,14 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 #define tag(tagt, p) [delegate spanChangedTag:tag_##tagt span:current_span div:div param:&(p)]
 				
 		{
-			unichar *p = linebuf, *pe = linebuf + linelen, *outputbegin = p, *parambegin=p, *last_cmd_start=p;
+			unichar *p = linebuf, *pe = linebuf + linelen, *outputbegin = p, *parambegin=p, *last_tag_start=p;
 			const unichar *pb = p;
 			int cs = 0;
 			SubRenderSpan *current_span = [SubRenderSpan startingSpanForDiv:div delegate:delegate];
-			unsigned chars_deleted = 0; int intnum = 0; float floatnum = 0;
+			unsigned chars_deleted = 0; float floatnum = 0;
 			NSString *strval=NULL;
 			unsigned curX, curY;
+			int intnum = 0;
 			BOOL reached_end = NO, startNewLayout = NO, setAlignForDiv = NO;
 			
 			%%{
@@ -392,7 +393,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"pbo" floatnum
 					   );
 				
-				cmd_list = "{" (cmd* | any*) :> "}";
+				tag = "{" (cmd* | any*) :> "}";
 
 				action backslash_handler {
 					[div->text appendString:send()];					
@@ -420,19 +421,20 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				
 				action enter_tag {					
 					if (p > outputbegin) [div->text appendString:send()];
+					if (p == pe) reached_end = YES;
 					
 					if (p != pb) {
 						[div->spans addObject:current_span];
-						current_span = [current_span cloneWithDelegate:delegate];
+						
+						if (!reached_end) current_span = [current_span cloneWithDelegate:delegate];
 					}
 					
-					last_cmd_start = p;
-					if (p == pe) reached_end = YES;
+					last_tag_start = p;
 				}
 				
 				action exit_tag {			
 					p++;
-					chars_deleted += (p - last_cmd_start);
+					chars_deleted += (p - last_tag_start);
 					
 					current_span->offset = (p - pb) - chars_deleted;
 					outputbegin = p;
@@ -446,7 +448,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					p--;
 				}
 								
-				special = ("\\" any) >backslash_handler | cmd_list >enter_tag @exit_tag;
+				special = ("\\" any) >backslash_handler | tag >enter_tag @exit_tag;
 				sub_text_char = [^\\{];
 				sub_text = sub_text_char*;
 				
