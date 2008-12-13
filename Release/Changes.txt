@@ -3,12 +3,14 @@
 - Added external idx/sub (VobSub) support
 - Added support for H.264 and H.263 in FLV containers
 - Apple's decoder now handles Baseline/Main Profile H.264
-- Fix inconsistent importing for multi-channel audio
-- Fixed SSA subtitles with negative values in \frz tags
-- Enabled hack to show subtitles in Front Row
+- Fix inconsistent importing for multi-channel audio 
 - Reduced memory usage for packed streams
 - Added SVN revision to preference pane
 - Added sanity checks on all preferences
+Subtitles:
+- Enabled hack to show subtitles in Front Row
+- Fixed negative values in SSA \frz tag
+- Fixed VSFilter bug-compatibility for \an
 
 1.1.2
 - Fixed update checker never running - this version requires a manual install

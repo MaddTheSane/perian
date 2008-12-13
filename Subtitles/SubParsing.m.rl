@@ -270,7 +270,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			unsigned chars_deleted = 0; int intnum = 0; float floatnum = 0;
 			NSString *strval=NULL;
 			unsigned curX, curY;
-			BOOL reached_end = NO, startNewLayout = NO;
+			BOOL reached_end = NO, startNewLayout = NO, setAlignForDiv = NO;
 			
 			%%{
 				action bold {tag(b, intnum);}
@@ -307,11 +307,19 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				action setxypos {curX=curY=-1; sscanf([psend() UTF8String], "(%d,%d)", &curX, &curY);}
 				
 				action ssaalign {
-					if (outputbegin == pb) ParseASSAlignment(SSA2ASSAlignment(intnum), &div->alignH, &div->alignV);
+					if (!setAlignForDiv) {
+						setAlignForDiv = YES;
+						
+						ParseASSAlignment(SSA2ASSAlignment(intnum), &div->alignH, &div->alignV);
+					}
 				}
 				
 				action align {
-					if (outputbegin == pb) ParseASSAlignment(intnum, &div->alignH, &div->alignV);
+					if (!setAlignForDiv) {
+						setAlignForDiv = YES;
+						
+						ParseASSAlignment(intnum, &div->alignH, &div->alignV);
+					}
 				}
 				
 				action wrapstyle {
@@ -431,6 +439,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					
 					if (startNewLayout) {
 						startNewLayout = NO;
+						setAlignForDiv = NO;
 						chars_deleted = outputbegin - pb;
 					}
 					
