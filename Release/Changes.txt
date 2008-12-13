@@ -1,14 +1,13 @@
 1.1.3
 - Enabled Indeo 2/3 decodecs
-- Added pref to skip loop filter for increased decode speed at the cost of quality
-- External idx/sub (VobSub) support
-- Reject baseline/main profile unless specified by prefs
-- Allow negative values for floats to fix \frz
-- Consistently mark audio formats for multi-channel streams with blank first frame
-- Frontrow hack enabled by default
+- Added external idx/sub (VobSub) support
 - Added support for H.264 and H.263 in FLV containers
+- Apple's decoder now handles Baseline/Main Profile H.264
+- Fix inconsistent importing for multi-channel audio
+- Fixed SSA subtitles with negative values in \frz tags
+- Enabled hack to show subtitles in Front Row
 - Reduced memory usage for packed streams
-- Added display of SVN rev in Pref Pane
+- Added SVN revision to preference pane
 - Added sanity checks on all preferences
 
 1.1.2
