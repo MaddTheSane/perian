@@ -291,7 +291,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 			error = QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL);
 			QTMetaDataRelease(trackMetaData);
 		}
-		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size))
+		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size, false))
 		{
 			useDefault = 0;
 			aclSize = sizeof(AudioChannelLayout);
@@ -850,11 +850,11 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 		{
 			/* Add all of the samples to the media */
 			AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, sampleNum, ncstr->sampleTable, NULL);
-			free(ncstr->sampleTable);			
 
 			/* The index is both present and not empty */
 			*hadIndex = 1;
 		}
+		free(ncstr->sampleTable);			
 	}
 	
 	if(*hadIndex == 0)
