@@ -32,7 +32,7 @@ export sdkflags
 
 x86tune="generic"
 if [ "$CC" = "" ]; then
-	if [ -e /usr/bin/gcc-4.2 ]; then
+	if [[ -e /usr/bin/gcc-4.2 && -e /Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.2.1 ]]; then
 		CC="gcc-4.2"
 		x86tune="core2"
 	else

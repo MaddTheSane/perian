@@ -7,6 +7,7 @@
 - Reduced memory usage for packed streams
 - Added SVN revision to preference pane
 - Added sanity checks on all preferences
+- Fixed crash caused by (among other things) resizing a streaming window
 Subtitles:
 - Enabled hack to show subtitles in Front Row
 - Fixed negative values in SSA \frz tag
