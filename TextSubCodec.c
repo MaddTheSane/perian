@@ -12,7 +12,7 @@
 #include "SubATSUIRenderer.h"
 
 // Constants
-const UInt8 kNumPixelFormatsSupportedTextSub = 1;
+const UInt8 kNumPixelFormatsSupportedTextSub = 2;
 
 // Data structures
 typedef struct TextSubGlobalsRecord {
@@ -35,6 +35,7 @@ typedef struct {
     long        dataSize;
     
     Ptr             baseAddr;
+	OSType			pixelFormat;
 } TextSubDecompressRecord;
 
 // Setup required for ComponentDispatchHelper.c
@@ -204,7 +205,8 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
     
     // we want ARGB because Quartz can use it easily
     // Todo: add other possible pixel formats Quartz can handle
-    *formats++	= k32ARGBPixelFormat;
+    *formats++	= k32RGBAPixelFormat;
+	*formats++	= k32ARGBPixelFormat;
 	*formats++	= 0;
 	
 	// Specify the minimum image band height supported by the component
@@ -216,7 +218,6 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 
 	// Indicate the wanted destination using the wantedDestinationPixelTypeH previously set up
 	capabilities->wantedPixelSize  = 0; 	
-    **glob->wantedDestinationPixelTypeH = k32ARGBPixelFormat;
     
 	p->wantedDestinationPixelTypes = glob->wantedDestinationPixelTypeH;
 
@@ -274,6 +275,7 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 	// This allows the base codec to perform frame dropping on our behalf if needed 
     drp->frameType = kCodecFrameTypeKey;
 
+	myDrp->pixelFormat = p->dstPixMap.pixelFormat;
 	myDrp->width = p->dstRect.right - p->dstRect.left;
 	myDrp->height = p->dstRect.bottom - p->dstRect.top;
 	myDrp->depth = (**p->imageDescription).depth;
@@ -296,10 +298,11 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDecompressRecord *drp)
 {
 	TextSubDecompressRecord *myDrp = (TextSubDecompressRecord *)drp->userDecompressRecord;
-	
+	CGImageAlphaInfo alphaFormat = (myDrp->pixelFormat == k32ARGBPixelFormat) ? kCGImageAlphaPremultipliedFirst : kCGImageAlphaPremultipliedLast;
+
     CGContextRef c = CGBitmapContextCreate(drp->baseAddr, myDrp->width, myDrp->height,
 										   8, drp->rowBytes,  glob->colorSpace,
-										   kCGImageAlphaPremultipliedFirst);
+										   alphaFormat);
 	
 	CGContextClearRect(c, CGRectMake(0,0, myDrp->width, myDrp->height));
 	
