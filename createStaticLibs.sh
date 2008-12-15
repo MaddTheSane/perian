@@ -11,6 +11,7 @@ sdkflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -ggd
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
+    optcflags="-falign-loops=16 -fweb -fstrict-aliasing -finline-limit=1000"
 fi
 
 if what /usr/bin/ld | grep -q ld64-77; then
@@ -23,16 +24,22 @@ if [ $no_pic -gt 0 ]; then
     sdkflags="$sdkflags -mdynamic-no-pic" # ld can't handle -fno-pic on ppc
 else
     #no-pic only on pre-leopard
-    echo "warning: Due to issues with Xcode 3.0, Perian will run very slowly! Please get the iPhone SDK or fix Patches/ffmpeg.diff!";
+    echo "warning: Due to issues with Xcode 3.0, Perian will run very slowly! Please upgrade Xcode or fix Patches/ffmpeg.diff!";
     generalConfigureOptions="$generalConfigureOptions --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3 --disable-mmx --enable-shared"
 fi 
 
+export sdkflags
+
+x86tune="generic"
 if [ "$CC" = "" ]; then
-	CC="gcc"
+	if [ -e /usr/bin/gcc-4.2 ]; then
+		CC="gcc-4.2"
+		x86tune="core2"
+	else
+		CC="gcc"
+	fi
 	export CC
 fi
-
-export sdkflags
 
 OUTPUT_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
 
@@ -109,15 +116,15 @@ else
         mkdir "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
-        	export optCFlags="-mtune=nocona -fstrict-aliasing -frerun-cse-after-loop -fweb -falign-loops=16" 
+        	optcflags="$optcflags -mtune=$x86tune -frerun-cse-after-loop" 
         fi
 
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --cc=$CC --enable-cross-compile --arch=i386 --extra-ldflags="$sdkflags -arch i386" --extra-cflags="-arch i386 $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+                "$SRCROOT/ffmpeg/configure" --cc=$CC --enable-cross-compile --arch=i386 --extra-ldflags="$sdkflags -arch i386" --extra-cflags="-arch i386 $sdkflags $optcflags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
             else
-                "$SRCROOT/ffmpeg/configure" --cc=$CC --extra-cflags="$sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
+                "$SRCROOT/ffmpeg/configure" --cc=$CC --extra-cflags="$sdkflags $optcflags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
             fi
         
             make depend > /dev/null 2>&1 || true
@@ -139,15 +146,15 @@ else
         mkdir "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
-       		export optCFlags="-mcpu=G3 -mtune=G5 -fstrict-aliasing -funroll-loops -falign-loops=16 -mmultiple"
+       		optcflags="$optcflags -mcpu=G3 -mtune=G5 -funroll-loops -mmultiple"
        	fi
     
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --cc=$CC --extra-cflags="-faltivec $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --cc=$CC --extra-cflags="-faltivec $sdkflags $optcflags" $extraConfigureOptions $generalConfigureOptions
             else
-                "$SRCROOT/ffmpeg/configure" --cc=$CC --enable-cross-compile --arch=ppc  --extra-ldflags="$sdkflags -arch ppc" --extra-cflags="-faltivec -arch ppc $sdkflags $optCFlags" $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --cc=$CC --enable-cross-compile --arch=ppc  --extra-ldflags="$sdkflags -arch ppc" --extra-cflags="-faltivec -arch ppc $sdkflags $optcflags" $extraConfigureOptions $generalConfigureOptions
             fi
         
             make depend > /dev/null 2>&1 || true
