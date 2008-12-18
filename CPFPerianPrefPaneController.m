@@ -86,10 +86,10 @@
 	CFRelease(numRef);
 }
 
-- (int)getIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(int)defaultValue
+- (unsigned int)getUnsignedIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(int)defaultValue
 {
 	CFPropertyListRef value;
-	int ret = defaultValue;
+	unsigned int ret = defaultValue;
 	
 	value = CFPreferencesCopyAppValue(key, appID);
 	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
@@ -380,7 +380,7 @@
 		[button_autoUpdateCheck setIntValue:1];
 	
 	/* A52 Prefs */
-	int twoChannelMode = [self getIntFromKey:AC3TwoChannelModeKey forAppID:a52AppID withDefault:0xffffffff];
+	unsigned int twoChannelMode = [self getUnsignedIntFromKey:AC3TwoChannelModeKey forAppID:a52AppID withDefault:0xffffffff];
 	if(twoChannelMode != 0xffffffff)
 	{
 		/* sanity checks */
@@ -412,6 +412,11 @@
 	}
 	
 	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
+
+	if([self getBoolFromKey:ExternalSubtitlesKey forAppID:perianAppID withDefault:YES])
+		[button_loadExternalSubtitles setState:1];
+	else
+		[button_loadExternalSubtitles setState:0];
 }
 
 - (void)didUnselect
