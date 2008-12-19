@@ -84,7 +84,6 @@ patch -p0 < Patches/ffmpeg-forceinline.diff
 patch -p0 < Patches/ffmpeg-no-interlaced.diff
 patch -p0 < Patches/ffmpeg-faltivec.diff
 patch -p0 < Patches/ffmpeg-h264-nounrollcabac.diff
-patch -p0 < Patches/ffmpeg-h264nal-valgrind-warning.diff
 touch ffmpeg/patched
 
 # if [ $no_pic -eq 0 ] ; then
