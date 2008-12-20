@@ -61,7 +61,7 @@ typedef struct {
 
 
 // dest must be at least as large as src
-void ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize);
+int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes);
 static ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketControlData *controlDataOut);
 extern void initLib();
 
@@ -307,7 +307,7 @@ ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCodecDeco
 	// if it's raw spu data, the 1st 2 bytes are the length of the data
 	} else if (data[0] + data[1] == 0) {
 		// remove the MPEG framing
-		ExtractVobSubPacket(glob->codecData, data, myDrp->bufferSize);
+		myDrp->bufferSize = ExtractVobSubPacket(glob->codecData, data, myDrp->bufferSize, NULL);
 	} else {
 		memcpy(glob->codecData, drp->codecData, myDrp->bufferSize);
 	}
@@ -413,15 +413,16 @@ ComponentResult VobSubCodecGetCodecInfo(VobSubCodecGlobals glob, CodecInfo *info
 	return err;
 }
 
-void ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize) {
+int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes) {
 	int copiedBytes = 0;
 	UInt8 *currentPacket = framedSrc;
+	int packetSize = 0x7fffffff;
 	
-	while (currentPacket - framedSrc < srcSize) {
+	while (currentPacket - framedSrc < srcSize && copiedBytes < packetSize) {
 		// 3-byte start code: 0x00 00 01
 		if (currentPacket[0] + currentPacket[1] != 0 || currentPacket[2] != 1) {
 			Codecprintf(NULL, "VobSub Codec: !! Unknown header: %02x %02x %02x\n", currentPacket[0], currentPacket[1], currentPacket[2]);
-			return;
+			return copiedBytes;
 		}
 		
 		int packet_length;
@@ -460,6 +461,10 @@ void ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize) {
 					   // we don't want the 1-byte stream ID, or the header
 					   packet_length - 1 - (header_data_length + 3));
 				
+				if(packetSize == 0x7fffffff)
+				{
+					packetSize = dest[0] << 8 | dest[1];
+				}
 				copiedBytes += packet_length - 1 - (header_data_length + 3);
 				currentPacket += packet_length + 6;
 				break;
@@ -467,9 +472,13 @@ void ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize) {
 			default:
 				// unknown packet, probably video, return for now
 				Codecprintf(NULL, "VobSubCodec - Unknown packet type %x, aborting\n", (int)currentPacket[3]);
-				return;
+				return copiedBytes;
 		} // switch (currentPacket[3])
 	} // while (currentPacket - framedSrc < srcSize)
+	if(usedSrcBytes != NULL)
+		*usedSrcBytes = currentPacket - framedSrc;
+	
+	return copiedBytes;
 }
 
 ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketControlData *controlDataOut) {

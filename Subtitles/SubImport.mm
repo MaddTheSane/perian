@@ -17,7 +17,7 @@
 //#define SS_DEBUG
 
 extern "C" {
-	void ExtractVobSubPacket(UInt8 *dest, const UInt8 *framedSrc, int srcSize);
+	int ExtractVobSubPacket(UInt8 *dest, const UInt8 *framedSrc, int srcSize, int *usedSrcBytes);
 }
 
 #pragma mark C
@@ -752,7 +752,8 @@ static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTim
 	while(loop)
 	{	
 		uint8_t *controlSeq = packet + controlOffset;
-		uint32_t i = 4, end = length - controlOffset;
+		int32_t i = 4;
+		int32_t end = length - controlOffset;
 		uint16_t timestamp = (controlSeq[0] << 8) | controlSeq[1];
 		uint16_t nextOffset = (controlSeq[2] << 8) + controlSeq[3];
 		while (i < end) {
@@ -798,7 +799,7 @@ static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTim
 					if(controlOffset == nextOffset)
 						loop = false;
 					controlOffset = nextOffset;
-					i = end;
+					i = 0x7fffffff;
 					break;
 					
 				default:
@@ -806,6 +807,11 @@ static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTim
 					loop = FALSE;
 					break;
 			}
+		}
+		if(i != 0x7fffffff)
+		{
+			//End of packet
+			loop = false;
 		}
 	}
 }	
@@ -829,8 +835,7 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 	ComponentResult err = noErr;
 	
 	VobSubState state = VOB_SUB_STATE_READING_PRIVATE;
-	VobSubTrack *currentTrack = nil, *lastTrack = nil;
-	long movieDuration = (GetMovieDuration(theMovie) * 1000 / GetMovieTimeScale(theMovie));
+	VobSubTrack *currentTrack = nil;
 	int imageWidth = 0, imageHeight = 0;
 	long delay=0;
 
@@ -840,6 +845,8 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 
 	if(![idxContent length])
 		goto bail;
+	
+	int subFileSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:subFileName traverseLink:NO] objectForKey:NSFileSize] intValue];
 	
 	NSArray *lines = [idxContent componentsSeparatedByString:@"\n"];
 	NSMutableArray *privateLines = [NSMutableArray array];
@@ -888,7 +895,6 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 						langStr[langLength-1] = 0;
 					NSString *language = [NSString stringWithUTF8String:langStr];
 					
-					lastTrack = currentTrack;
 					currentTrack = [[VobSubTrack alloc] initWithPrivateData:privateData language:language andIndex:index];
 					[tracks addObject:currentTrack];
 					[currentTrack release];
@@ -904,22 +910,12 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 				sscanf([line UTF8String], "timestamp: %s filepos: %x", timeStr, &position);
 				long time = scanTime(timeStr);
 				free(timeStr);
-				if(lastTrack)
-				{
-					[lastTrack addSampleTime:movieDuration offset:position];
-					lastTrack = nil;
-				}
 				[currentTrack addSampleTime:time + delay offset:position];
 			}
 				break;
 		}
 	}
-	if(lastTrack)
-	{
-		int position = [[[[NSFileManager defaultManager] fileAttributesAtPath:subFileName traverseLink:NO] objectForKey:NSFileSize] intValue];
-		[lastTrack addSampleTime:movieDuration offset:position];
-	}
-	
+		
 	if([tracks count])
 	{
 		OSType dataRefType;
@@ -946,30 +942,41 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 				(*imgDesc)->height = imageHeight;
 			}
 			
-			int sampleCount = [track->samples count] - 1;
+			int sampleCount = [track->samples count];
 			int totalSamples = sampleCount;
 			SampleReference64Ptr samples = (SampleReference64Ptr)calloc(sampleCount*2, sizeof(SampleReference64Record));
 			SampleReference64Ptr sample = samples;
-			VobSubSample *lastSample = [track->samples objectAtIndex:0];
 			int i;
 			uint32_t lastTime = 0;
 			for(i=0; i<sampleCount; i++)
 			{
-				VobSubSample *nextSample = [track->samples objectAtIndex:i+1];
-				int offset = lastSample->fileOffset;
-				int size = nextSample->fileOffset - offset;
+				VobSubSample *currentSample = [track->samples objectAtIndex:i];
+				int offset = currentSample->fileOffset;
+				int nextOffset;
+				if(i == sampleCount - 1)
+					nextOffset = subFileSize;
+				else
+					nextOffset = ((VobSubSample *)[track->samples objectAtIndex:i+1])->fileOffset;
+				int size = nextOffset - offset;
+				if(size < 0)
+					//Skip samples for which we cannot determine size
+					continue;
 				
 				NSData *subData = [subFileData subdataWithRange:NSMakeRange(offset, size)];
 				uint8_t *extracted = (uint8_t *)malloc(size);
-				ExtractVobSubPacket(extracted, (const UInt8 *)[subData bytes], size);
+				int extractedSize = ExtractVobSubPacket(extracted, (const UInt8 *)[subData bytes], size, &size);
 				
 				uint16_t startTimestamp, endTimestamp;
-				ReadPacketTimes(extracted, size, &startTimestamp, &endTimestamp);
+				ReadPacketTimes(extracted, extractedSize, &startTimestamp, &endTimestamp);
 				free(extracted);
-				uint32_t startTime = lastSample->timeStamp + startTimestamp;
-				uint32_t endTime = lastSample->timeStamp + endTimestamp;
+				uint32_t startTime = currentSample->timeStamp + startTimestamp;
+				uint32_t endTime = currentSample->timeStamp + endTimestamp;
+				int duration = endTimestamp - startTimestamp;
+				if(duration <= 0)
+					//Skip samples which are broken
+					continue;
 				if(i == 0)
-					lastSample->timeStamp = startTime;
+					currentSample->timeStamp = startTime;
 				else if(lastTime != startTime)
 				{
 					//insert a sample with no real data, to clear the subs
@@ -983,13 +990,12 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 				
 				sample->dataOffset.hi = 0;
 				sample->dataOffset.lo = offset;
-				sample->dataSize = nextSample->fileOffset - lastSample->fileOffset;
+				sample->dataSize = size;
 				sample->sampleFlags = 0;
-				sample->durationPerSample = endTimestamp - startTimestamp;
+				sample->durationPerSample = duration;
 				sample->numberOfSamples = 1;
 				lastTime = endTime;
 				
-				lastSample = nextSample;
 				sample++;
 			}
 			AddMediaSampleReferences64(trackMedia, (SampleDescriptionHandle)imgDesc, totalSamples, samples, NULL);
