@@ -799,7 +799,7 @@ static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTim
 					if(controlOffset == nextOffset)
 						loop = false;
 					controlOffset = nextOffset;
-					i = 0x7fffffff;
+					i = INT_MAX;
 					break;
 					
 				default:
@@ -808,7 +808,7 @@ static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTim
 					break;
 			}
 		}
-		if(i != 0x7fffffff)
+		if(i != INT_MAX)
 		{
 			//End of packet
 			loop = false;

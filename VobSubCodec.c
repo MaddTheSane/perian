@@ -416,7 +416,7 @@ ComponentResult VobSubCodecGetCodecInfo(VobSubCodecGlobals glob, CodecInfo *info
 int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes) {
 	int copiedBytes = 0;
 	UInt8 *currentPacket = framedSrc;
-	int packetSize = 0x7fffffff;
+	int packetSize = INT_MAX;
 	
 	while (currentPacket - framedSrc < srcSize && copiedBytes < packetSize) {
 		// 3-byte start code: 0x00 00 01
@@ -461,7 +461,7 @@ int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrc
 					   // we don't want the 1-byte stream ID, or the header
 					   packet_length - 1 - (header_data_length + 3));
 				
-				if(packetSize == 0x7fffffff)
+				if(packetSize == INT_MAX)
 				{
 					packetSize = dest[0] << 8 | dest[1];
 				}
