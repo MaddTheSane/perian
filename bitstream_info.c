@@ -884,18 +884,26 @@ int ffusionIsParsedVideoDecodable(FFusionParserContext *parser)
 	
 	if (parser->parserStructure == &ffusionH264Parser) {
 		H264ParserContext *h264parser = parser->internalContext;
+		int no_decode = 0;
 		
-		// don't decode main/base profile
-		if(h264parser->profile_idc < 100 && !CFPreferencesGetAppBooleanValue(CFSTR("DecodeAllProfiles"), CFSTR("org.perian.Perian"), NULL))
-			return 0;
+		//QT is bad at high profile
+		//FIXME QT is also bad at B-pyramid (sps.vui.num_reorder_frames > 1)
+		//but to parse that we should just use ffh264 directly
+		no_decode |= h264parser->profile_idc < 100 && !CFPreferencesGetAppBooleanValue(CFSTR("DecodeAllProfiles"), CFSTR("org.perian.Perian"), NULL);
 		
-		// don't try to decode interlaced or 4:2:2 H.264
-		return (h264parser->frame_mbs_only_flag == 1) && (h264parser->chroma_format_idc <= 1);
+		//PAFF/MBAFF
+		//ffmpeg is ok at this now but we can't test it (not enough AVCHD samples)
+		//and the quicktime api for it may or may not actually exist
+		no_decode |= !h264parser->frame_mbs_only_flag;
+		
+		//4:2:2 chroma
+		no_decode |= h264parser->chroma_format_idc > 1;
+		
+		return !no_decode;
 	}
 	
 	return 1;
 }
-
 #ifdef DEBUG_BUILD
 //FFMPEG doesn't configure properly (their fault), so define their idoticly undefined symbols.
 int ff_epzs_motion_search(MpegEncContext * s, int *mx_ptr, int *my_ptr, int P[10][2], int src_index, int ref_index, int16_t (*last_mv)[2], int ref_mv_scale, int size, int h){return 0;}
