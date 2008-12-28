@@ -58,7 +58,7 @@ const char *FourCCString(FourCharCode c)
     return (char*)fourcc;
 }
 
-void FourCCprintf (char *string, FourCharCode a)
+void FourCCprintf(const char *string, FourCharCode a)
 {
     Codecprintf(NULL, "%s%s\n", string, FourCCString(a));
 }

@@ -840,12 +840,8 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 	long delay=0;
 
 	NSString *subFileName = [[nsPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sub"];
-	if(![[NSFileManager defaultManager] fileExistsAtPath:subFileName])
-		goto bail;
 
-	if(![idxContent length])
-		goto bail;
-	
+	if([[NSFileManager defaultManager] fileExistsAtPath:subFileName] && [idxContent length]) {
 	int subFileSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:subFileName traverseLink:NO] objectForKey:NSFileSize] intValue];
 	
 	NSArray *lines = [idxContent componentsSeparatedByString:@"\n"];
@@ -1029,7 +1025,7 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 				SetTrackAlternate(*firstSubTrack, theTrack);
 		}
 	}
-	
+	}
 bail:
 	[pool release];
 	

@@ -114,8 +114,7 @@ void FFissionCodec::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPro
 	
 	switch (inPropertyID) {
 		case kAudioCodecPropertyManufacturerCFString:
-			CFStringRef name = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian Project"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
-			*(CFStringRef*)outPropertyData = name;
+			*(CFStringRef*)outPropertyData = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian Project"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
 			break;
 			
 		case kAudioCodecPropertyMaximumPacketByteSize:

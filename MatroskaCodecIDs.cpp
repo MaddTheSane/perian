@@ -357,7 +357,7 @@ ComponentResult DescExt_Real(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 
 struct MatroskaQT_AACProfileName
 {
-	char *name;
+	const char *name;
 	char profile;
 };
 
@@ -831,7 +831,7 @@ static const WavCodec kWavCodecIDs[] = {
 
 typedef struct {
 	OSType cType;
-	char *mkvID;
+	const char *mkvID;
 } MatroskaQT_Codec;
 
 // the first matching pair is used for conversion

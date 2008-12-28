@@ -231,8 +231,7 @@ void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioP
 	
 	switch (inPropertyID) {
 		case kAudioCodecPropertyNameCFString:
-			CFStringRef name = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian FFmpeg audio decoder"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
-			*(CFStringRef*)outPropertyData = name;
+			*(CFStringRef*)outPropertyData = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian FFmpeg audio decoder"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
 			break; 
 			
 		case kAudioCodecPropertyInputBufferSize:

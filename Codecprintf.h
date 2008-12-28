@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 int Codecprintf(FILE *, const char *format, ...);
-void FourCCprintf(char *string, FourCharCode a);
+void FourCCprintf(const char *string, FourCharCode a);
 const char *FourCCString(FourCharCode c);
 
 void FFMpegCodecprintf(void* ptr, int level, const char* fmt, va_list vl);
