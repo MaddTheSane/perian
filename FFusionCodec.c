@@ -825,6 +825,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		// multi-slice decoding
 		SetupMultithreadedDecoding(glob->avContext, codecID);
 		
+		//fast flag
+		if (CFPreferencesGetAppBooleanValue(CFSTR("UseFastDecode"), PERIAN_PREF_DOMAIN, NULL))
+			glob->avContext->flags2 |= CODEC_FLAG2_FAST;
+		
         // Finally we open the avcodec 
         
         if (avcodec_open(glob->avContext, glob->avCodec))
