@@ -906,6 +906,8 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 				sscanf([line UTF8String], "timestamp: %s filepos: %x", timeStr, &position);
 				long time = scanTime(timeStr);
 				free(timeStr);
+				if(position > subFileSize)
+					position = subFileSize;
 				[currentTrack addSampleTime:time + delay offset:position];
 			}
 				break;
