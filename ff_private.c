@@ -218,7 +218,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	map->media = media;
 	
 	memset(&asbd,0,sizeof(asbd));
-	map_avi_to_mov_tag(codec->codec_id, &asbd, map);
+	map_avi_to_mov_tag(codec->codec_id, &asbd, map, codec->channels);
 	if(asbd.mFormatID == 0) /* no know codec, use the ms tag */
 		asbd.mFormatID = 'ms\0\0' + codec->codec_tag; /* the number is stored in the last byte => big endian */
 	
@@ -234,7 +234,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		* to fill as much as possible before creating the SoundDescriptionHandle */
 	asbd.mSampleRate = codec->sample_rate;
 	asbd.mChannelsPerFrame = codec->channels;
-	if(!map->vbr) /* This works for all the tested codecs. but is there any better way? */
+	if(!map->vbr && asbd.mBytesPerPacket == 0) /* This works for all the tested codecs. but is there any better way? */
 		asbd.mBytesPerPacket = codec->block_align; /* this is tested for alaw/mulaw/msadpcm */
 	asbd.mFramesPerPacket = codec->frame_size; /* works for mp3, all other codecs this is 0 anyway */
 	asbd.mBitsPerChannel = codec->bits_per_coded_sample;
@@ -353,7 +353,7 @@ OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
 }
 
 /* maps the codec_id tag of libavformat to a constant the AudioToolbox can work with */
-void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map)
+void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map, int channels)
 {
 	switch(codec_id) {
 		case CODEC_ID_MP2:
@@ -369,10 +369,12 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 		case CODEC_ID_PCM_S16LE:
 			asbd->mFormatID = kAudioFormatLinearPCM;
 			asbd->mFormatFlags = kLinearPCMFormatFlagIsSignedInteger;
+			asbd->mBytesPerPacket = 2 * channels;
 			break;
 		case CODEC_ID_PCM_U8:
 			asbd->mFormatID = kAudioFormatLinearPCM;
 			asbd->mFormatFlags = kLinearPCMFormatFlagIsBigEndian;
+			asbd->mBytesPerPacket = channels;
 			break;
 		case CODEC_ID_PCM_ALAW:
 			asbd->mFormatID = kAudioFormatALaw;
