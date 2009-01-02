@@ -294,6 +294,10 @@ static const CFStringRef defaultFrameDroppingWhiteList[] = {
 	CFSTR("Finder")
 };
 
+static const CFStringRef defaultForcedAppList[] = {
+	CFSTR("iChat"),
+};
+
 static int findNameInList(CFStringRef loadingApp, const CFStringRef *names, int count)
 {
 	int i;
@@ -307,47 +311,78 @@ static int findNameInList(CFStringRef loadingApp, const CFStringRef *names, int 
 	return 0;
 }
 
+static CFDictionaryRef getMyProcessInformation()
+{
+	ProcessSerialNumber myProcess;
+	GetCurrentProcess(&myProcess);
+	CFDictionaryRef processInformation;
+	
+	processInformation = ProcessInformationCopyDictionary(&myProcess, kProcessDictionaryIncludeAllInformationMask);
+	return processInformation;
+}
+
+static CFStringRef getProcessName(CFDictionaryRef processInformation)
+{
+	CFStringRef path = CFDictionaryGetValue(processInformation, kCFBundleExecutableKey);
+	CFRange entireRange = CFRangeMake(0, CFStringGetLength(path)), basename;
+	
+	CFStringFindWithOptions(path, CFSTR("/"), entireRange, kCFCompareBackwards, &basename);
+	
+	basename.location += 1; //advance past "/"
+	basename.length = entireRange.length - basename.location;
+	
+	CFStringRef myProcessName = CFStringCreateWithSubstring(NULL, path, basename);
+	return myProcessName;
+}
+
+static int isApplicationNameInList(CFStringRef prefOverride, const CFStringRef *defaultList, unsigned int defaultListCount)
+{
+	CFDictionaryRef processInformation = getMyProcessInformation();
+	
+	if (!processInformation)
+		return FALSE;
+	
+	CFArrayRef list = CFPreferencesCopyAppValue(prefOverride, CFSTR("org.perian.Perian"));
+	if(list && CFGetTypeID(list) != CFArrayGetTypeID())
+		list = NULL;
+	
+	CFStringRef myProcessName = getProcessName(processInformation);
+	int ret;
+	
+	if (list) {
+		int count = CFArrayGetCount(list);
+		CFStringRef names[count];
+		
+		CFArrayGetValues(list, CFRangeMake(0, count), (void *)names);
+		ret = findNameInList(myProcessName, names, count);
+		CFRelease(list);
+	} else {
+		ret = findNameInList(myProcessName, defaultList, defaultListCount);
+	}
+	CFRelease(myProcessName);
+	CFRelease(processInformation);
+	
+	return ret;
+}
+
 int IsFrameDroppingEnabled()
 {
 	static int enabled = -1;
 	
-	if (enabled == -1) {
-		ProcessSerialNumber myProcess;
-		GetCurrentProcess(&myProcess);
-		CFDictionaryRef processInformation;
-		
-        processInformation = ProcessInformationCopyDictionary(&myProcess, kProcessDictionaryIncludeAllInformationMask);
-        
-        if (!processInformation) enabled = FALSE;
-		else {
-            CFArrayRef list = CFPreferencesCopyAppValue(CFSTR("FrameDroppingWhiteList"), CFSTR("org.perian.Perian"));
-			if(list && CFGetTypeID(list) != CFArrayGetTypeID())
-				list = NULL;
-            CFStringRef path = CFDictionaryGetValue(processInformation, kCFBundleExecutableKey);
-            CFRange entireRange = CFRangeMake(0, CFStringGetLength(path)), basename;
-            
-            CFStringFindWithOptions(path, CFSTR("/"), entireRange, kCFCompareBackwards, &basename);
-            
-            basename.location += 1; //advance past "/"
-            basename.length = entireRange.length - basename.location;
-            
-            CFStringRef myProcessName = CFStringCreateWithSubstring(NULL, path, basename);
-            
-            if (list) {
-                int count = CFArrayGetCount(list);
-                CFStringRef names[count];
-                
-                CFArrayGetValues(list, CFRangeMake(0, count), (void *)names);
-                enabled = findNameInList(myProcessName, names, count);
-                CFRelease(list);
-            } else {
-                int count = sizeof(defaultFrameDroppingWhiteList)/sizeof(defaultFrameDroppingWhiteList[0]);
-                enabled = findNameInList(myProcessName, defaultFrameDroppingWhiteList, count);
-            }
-            CFRelease(myProcessName);
-            CFRelease(processInformation);
-        }
-	}
-	
+	if (enabled == -1)
+		enabled = isApplicationNameInList(CFSTR("FrameDroppingWhiteList"),
+										  defaultFrameDroppingWhiteList,
+										  sizeof(defaultFrameDroppingWhiteList)/sizeof(defaultFrameDroppingWhiteList[0]));
 	return enabled;
+}
+
+int forcePerianToDecode()
+{
+	static int forced = -1;
+	
+	if(forced == -1)
+		forced = isApplicationNameInList(CFSTR("ForcePerianAppList"),
+										 defaultForcedAppList,
+										 sizeof(defaultForcedAppList)/sizeof(defaultForcedAppList[0]));
+	return forced;
 }

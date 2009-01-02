@@ -543,6 +543,20 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
     return noErr;
 }
 
+static inline int shouldDecode(FFusionGlobals glob, enum CodecID codecID)
+{
+	FFusionDecodeAbilities decode = FFUSION_PREFER_DECODE;
+	if (glob->componentType == 'avc1')
+		decode = ffusionIsParsedVideoDecodable(glob->begin.parser);
+	if(decode > FFUSION_CANNOT_DECODE && 
+	   (codecID == CODEC_ID_H264 || codecID == CODEC_ID_MPEG4) && CFPreferencesGetAppBooleanValue(CFSTR("PreferAppleCodecs"), PERIAN_PREF_DOMAIN, NULL))
+		decode = FFUSION_PREFER_NOT_DECODE;
+	if(decode > FFUSION_CANNOT_DECODE)
+		if(forcePerianToDecode())
+			decode = FFUSION_PREFER_DECODE;
+	return decode > FFUSION_PREFER_NOT_DECODE;
+}
+
 //-----------------------------------------------------------------
 // ImageCodecPreflight
 //-----------------------------------------------------------------
@@ -812,8 +826,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		if (glob->fileLog)
 			ffusionLogDebugInfo(glob->begin.parser, glob->fileLog);
 		
-		if ((glob->componentType == 'avc1' && !ffusionIsParsedVideoDecodable(glob->begin.parser)) ||
-			(codecID == CODEC_ID_H264 || codecID == CODEC_ID_MPEG4) && CFPreferencesGetAppBooleanValue(CFSTR("PreferAppleCodecs"), PERIAN_PREF_DOMAIN, NULL))
+		if (!shouldDecode(glob, codecID))
 			err = featureUnsupported;
 		
 		// some hooks into ffmpeg's buffer allocation to get frames in 

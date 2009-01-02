@@ -38,12 +38,18 @@ typedef struct FFusionParser
 	struct FFusionParser *next;
 } FFusionParser;
 
+typedef enum {
+	FFUSION_CANNOT_DECODE,
+	FFUSION_PREFER_NOT_DECODE,
+	FFUSION_PREFER_DECODE,
+} FFusionDecodeAbilities;
+
 void initFFusionParsers();
 FFusionParserContext *ffusionParserInit(int codec_id);
 int ffusionParseExtraData(FFusionParserContext *parser, const uint8_t *buf, int buf_size);
 int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable);
 void ffusionLogDebugInfo(FFusionParserContext *parser, FILE *log);
-int ffusionIsParsedVideoDecodable(FFusionParserContext *parser);
+FFusionDecodeAbilities ffusionIsParsedVideoDecodable(FFusionParserContext *parser);
 
 #ifdef __cplusplus
 }
