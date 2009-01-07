@@ -119,7 +119,7 @@ uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size);
 
 #define BSWAP(a) ( (((a)&0xff) << 24) | (((a)&0xff00) << 8) | (((a)&0xff0000) >> 8) | (((a) >> 24) & 0xff) )
 
-#define IS_AVI(x) (x == 'AVI ' || x == 'VfW ' || x == 'VFW ')
+#define IS_AVI(x) (x == 'AVI ' || x == 'VfW ' || x == 'VFW ' || x == 'DIVX' || x == 'GVI ' || x == 'VP6 ')
 #define IS_NUV(x) (x == 'NUV ')
 
 #endif
