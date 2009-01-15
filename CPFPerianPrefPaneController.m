@@ -590,7 +590,7 @@
 		{
 			//Remove the old one here
 			int tag = 0;
-			BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:containingDir destination:@"" files:[NSArray arrayWithObject:component] tag:&tag];
+			BOOL result = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
 			if(result == NO)
 				ret = NO;
 		}
@@ -608,11 +608,11 @@
 		containingDir = [self basePathForType:type user:!userInstalled];
 
 		if(userInstalled)
-			[self _authenticatedRemove:[containingDir stringByAppendingPathComponent:component]];
+			ret = [self _authenticatedRemove:[containingDir stringByAppendingPathComponent:component]];
 		else
 		{
 			int tag = 0;
-			[[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:containingDir destination:@"" files:[NSArray arrayWithObject:component] tag:&tag];
+			ret = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
 		}
 	}
 	return ret;
