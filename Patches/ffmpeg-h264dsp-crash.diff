@@ -8,6 +8,6 @@ Index: ffmpeg/libavcodec/x86/dsputil_mmx.c
          }
 +#undef  H264_QPEL_FUNCS
 +#define H264_QPEL_FUNCS(x, y, CPU) 
- #ifdef HAVE_SSSE3
+ #if HAVE_SSSE3
          if(mm_flags & MM_SSSE3){
              H264_QPEL_FUNCS(1, 0, ssse3);
