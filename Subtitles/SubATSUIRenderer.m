@@ -215,6 +215,8 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 	if (self = [super init]) {
 		ATSUCreateTextLayout(&layout);
 		ubuffer = malloc(sizeof(unichar) * 128);
+		breakbuffer = malloc(sizeof(UniCharArrayOffset) * 2);
+		
 		srgbCSpace = GetSRGBColorSpace();
 		
 		videoWidth = width;
@@ -242,6 +244,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 		free(uheader);
 		
 		ubuffer = malloc(sizeof(unichar) * 128);
+		breakbuffer = malloc(sizeof(UniCharArrayOffset) * 2);
 		
 		videoWidth = width;
 		videoHeight = height;
@@ -259,6 +262,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 -(void)dealloc
 {
 	[context release];
+	free(breakbuffer);
 	free(ubuffer);
 	CGColorSpaceRelease(srgbCSpace);
 	UCDisposeTextBreakLocator(&breakLocator);
@@ -268,6 +272,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 
 -(void)finalize
 {
+	free(breakbuffer);
 	free(ubuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
 	ATSUDisposeTextLayout(layout);
@@ -314,6 +319,8 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	
 	ATSUFontID font;
 	
+	// should be kFontMicrosoftPlatform for the platform code
+	// but isn't for bug workarounds
 	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
 	
 	if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)name, kATSOptionFlagsDefault); // for bugs in ATS under 10.4
@@ -380,12 +387,12 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 		
 		SetATSUStyleOther(style, kATSUFontMatrixTag, sizeof(CGAffineTransform), &mat);
 	}
-	
+
 	const ATSUFontFeatureType ftypes[] = {kLigaturesType, kTypographicExtrasType, kTypographicExtrasType, kTypographicExtrasType};
 	const ATSUFontFeatureSelector fsels[] = {kCommonLigaturesOnSelector, kSmartQuotesOnSelector, kPeriodsToEllipsisOnSelector, kHyphenToEnDashOnSelector};
 	
 	ATSUSetFontFeatures(style, sizeof(ftypes) / sizeof(ATSUFontFeatureType), ftypes, fsels);
-	
+
 	return style;
 }
 
@@ -784,9 +791,8 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 	}
 }
 
-static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, ItemCount *nbreaks, Fixed breakingWidth, unichar *utext, unsigned textLen)
+static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, UniCharArrayOffset *breaks, ItemCount *nbreaks, Fixed breakingWidth, unichar *utext, unsigned textLen)
 {
-	UniCharArrayOffset *breaks;
 	ItemCount breakCount=0;
 	
 	switch (div->wrapStyle) {
@@ -806,12 +812,12 @@ static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *d
 			break;
 	}
 		
-	breaks = malloc(sizeof(UniCharArrayOffset) * (breakCount+2));
+	breaks = realloc(breaks, sizeof(UniCharArrayOffset) * (breakCount+2));
 	ATSUGetSoftLineBreaks(layout, kATSUFromTextBeginning, kATSUToTextEnd, breakCount, &breaks[1], NULL);
 	
 	breaks[0] = 0;
 	breaks[breakCount+1] = textLen;
-		
+	
 	*nbreaks = breakCount;
 	return breaks;
 }
@@ -877,7 +883,15 @@ static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanE
 }
 
 static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak, UniCharArrayOffset lineLen, Fixed penX, Fixed penY, CGContextRef c, SubRenderDiv *div, SubATSUISpanEx *spanEx, int textType)
-{	
+{
+	//ATS bug(?) with some fonts:
+	//drawing \n draws some random other character, so skip them
+	//XXX maybe don't store newlines in div->text at all
+	if ([div->text characterAtIndex:thisBreak+lineLen-1] == '\n') {
+		lineLen--;
+		if (!lineLen) return;
+	}
+	
 	if (textType == kTextLayerOutline && div->styleLine->borderStyle == kSubBorderStyleBox) {
 		ATSUTextMeasurement lineWidth, lineHeight, lineX, lineY;
 		UniCharArrayOffset breaks[2] = {thisBreak, thisBreak + lineLen};
@@ -916,6 +930,8 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 			extraHeight = div->styleLine->outlineRadius;
 		} else {
 			int j, spans = [div->spans count];
+			
+			//linear search for the next span to draw
 			for (j = 0; j < spans; j++) {
 				SubRenderSpan *span = [div->spans objectAtIndex:j];
 				SubATSUISpanEx *spanEx = span->ex;
@@ -927,17 +943,17 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 				} else spanLen = [div->text length] - span->offset;
 				
 				if (spanLen == 0) continue;
-				if ((span->offset + spanLen) < thisBreak) continue;
-				if (span->offset >= nextBreak) break;
+				if ((span->offset + spanLen) < thisBreak) continue; // too early
+				if (span->offset >= nextBreak) break; // too far ahead
 				
-				if (span->offset < thisBreak) {
+				if (span->offset < thisBreak) { // text spans a newline
 					drawStart = thisBreak;
 					drawLen = spanLen - (thisBreak - span->offset);
 				} else {
 					drawStart = span->offset;
 					drawLen = spanLen;
 				}
-				
+
 				endLayer = SetupCGForSpan(c, spanEx, lastSpanEx, div, textType, endLayer);
 				RenderActualLine(layout, drawStart, drawLen, (textType == kTextLayerShadow) ? (penX + FloatToFixed(spanEx->shadowDist)) : penX, 
 														 (textType == kTextLayerShadow) ? (penY - FloatToFixed(spanEx->shadowDist)) : penY, c, div, spanEx, textType);
@@ -1004,8 +1020,8 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		SubRenderDiv *div = [divs objectAtIndex:i];
 		unsigned textLen = [div->text length];
 		BOOL resetPens = NO;
-		if (!textLen) continue;
-		
+		if (!textLen || ![div->spans count]) continue;
+						
 		if (div->layer != lastLayer) {
 			resetPens = YES;
 			lastLayer = div->layer;
@@ -1018,7 +1034,8 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		marginRect.size.width *= screenScaleX;
 		marginRect.size.height *= screenScaleY;
 
-		Fixed penY, penX, breakingWidth = FloatToFixed(marginRect.size.width); BreakContext breakc = {0};
+		Fixed penY, penX, breakingWidth = FloatToFixed(marginRect.size.width);
+		BreakContext breakc = {0}; ItemCount breakCount;
 
 		[div->text getCharacters:ubuffer];
 		
@@ -1028,11 +1045,13 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		SetLayoutPositioning(layout, breakingWidth, div->alignH);
 		SetStyleSpanRuns(layout, div);
 		
-		ItemCount breakCount;
-		UniCharArrayOffset *breaks = FindLineBreaks(layout, div, breakLocator, &breakCount, breakingWidth, ubuffer, textLen);
-		ATSUTextMeasurement imageWidth, imageHeight;
+		breakbuffer = FindLineBreaks(layout, div, breakLocator, breakbuffer, &breakCount, breakingWidth, ubuffer, textLen);
 
-		if (div->positioned || div->alignV == kSubAlignmentMiddle) GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
+		ATSUTextMeasurement imageWidth, imageHeight;
+		UniCharArrayOffset *breaks = breakbuffer;
+
+		if (div->positioned || div->alignV == kSubAlignmentMiddle)
+			GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
 
 		if (!div->positioned) {
 			penX = FloatToFixed(NSMinX(marginRect));
@@ -1098,8 +1117,6 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		penY = DrawOneTextDiv(c, layout, div, breakc, penX, penY);
 		
 		if (storePen) *storePen = penY;
-		
-		free(breaks);
 	}
 	
 	CGContextRestoreGState(c);

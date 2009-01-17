@@ -396,7 +396,8 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				tag = "{" (cmd* | any*) :> "}";
 
 				action backslash_handler {
-					[div->text appendString:send()];					
+					p--;
+					[div->text appendString:send()];
 					unichar c = *(p+1), o=c;
 					
 					if (c) {
@@ -407,16 +408,15 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							case 'h':
 								o = 0xA0; //non-breaking space
 								break;
-							default:
-								o = c;
 						}
+						
+						[div->text appendFormat:@"%C",o];
 					}
-					
-					[div->text appendFormat:@"%C",o];
 					
 					chars_deleted++;
 					
-					outputbegin = p+2;
+					p++;
+					outputbegin = p+1;
 				}
 				
 				action enter_tag {					
@@ -448,7 +448,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					p--;
 				}
 								
-				special = ("\\" any) >backslash_handler | tag >enter_tag @exit_tag;
+				special = ("\\" :> any) @backslash_handler | tag >enter_tag @exit_tag;
 				sub_text_char = [^\\{];
 				sub_text = sub_text_char*;
 				
