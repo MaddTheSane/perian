@@ -291,7 +291,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 			error = QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL);
 			QTMetaDataRelease(trackMetaData);
 		}
-		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size, false))
+		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size))
 		{
 			useDefault = 0;
 			aclSize = sizeof(AudioChannelLayout);

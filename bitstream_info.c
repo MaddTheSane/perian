@@ -81,11 +81,10 @@ static int ac3_synchronize(uint8_t *buf, int buf_size)
  * @param acl Pointer to the AudioChannelLayout to fill
  * @param buffer Pointer to the buffer data to scan
  * @param buff_size Size of the buffer
- * @param wellFramed YES if the container is well frame, NO otherwise.  AVI is NO!
  * @return 1 if successfull, 0 otherwise
  */
 
-int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *acl, uint8_t *buffer, int buff_size, bool wellFramed)
+int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *acl, uint8_t *buffer, int buff_size)
 {
 	int offset = ac3_synchronize(buffer, buff_size);
 	if(offset == -1)
@@ -141,10 +140,7 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	/* Setup the AudioStreamBasicDescription and AudioChannelLayout */
 	memset(asbd, 0, sizeof(AudioStreamBasicDescription));
 	asbd->mSampleRate = sample_rate >> shift;
-	if(wellFramed && offset == 0 && buff_size == framesize)
-		asbd->mFormatID = kAudioFormatAC3;
-	else
-		asbd->mFormatID = kAudioFormatAC3MS;
+	asbd->mFormatID = kAudioFormatAC3MS;
 	asbd->mChannelsPerFrame = nfchans_tbl[acmod] + lfe;
 	
 	memset(acl, 0, sizeof(AudioChannelLayout));
