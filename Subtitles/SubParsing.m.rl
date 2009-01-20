@@ -203,8 +203,8 @@ static NSMutableString *FilterSlashEscapes(NSMutableString *s)
 
 static int compare_layer(const void *a, const void *b)
 {
-	const SubRenderDiv *divA = a, *divB = b;
-	
+	const SubRenderDiv *divA = *(id*)a, *divB = *(id*)b;
+
 	if (divA->layer < divB->layer) return -1;
 	else if (divA->layer > divB->layer) return 1;
 	return 0;

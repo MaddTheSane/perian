@@ -62,7 +62,7 @@ void STSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *
 	id  objs[count];
 	
 	[array getObjects:objs];
-	mergesort(objs, count, sizeof(void*), compare);
+	mergesort(objs, count, sizeof(id), compare);
 	[array setArray:[NSArray arrayWithObjects:objs count:count]];
 }
 
