@@ -743,10 +743,11 @@ static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHa
 	return theMedia;
 }
 
-static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTime, uint16_t *endTime) {
+static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTime, uint16_t *endTime, uint8_t *forced) {
 	// to set whether the key sequences 0x01 - 0x02 have been seen
 	Boolean loop = TRUE;
 	*startTime = *endTime = 0;
+	*forced = 0;
 
 	int controlOffset = (packet[2] << 8) + packet[3];
 	while(loop)
@@ -759,7 +760,7 @@ static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTim
 		while (i < end) {
 			switch (controlSeq[i]) {
 				case 0x00:
-					// subpicture identifier, we don't care
+					*forced = 1;
 					i++;
 					break;
 					
@@ -814,7 +815,120 @@ static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTim
 			loop = false;
 		}
 	}
-}	
+}
+
+typedef struct {
+	Movie theMovie;
+	OSType dataRefType;
+	Handle dataRef;
+	int imageWidth;
+	int imageHeight;
+	Rect movieBox;
+	NSData *subFileData;
+} VobSubInfo;
+
+static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onlyForced, Track *theTrack, uint8_t *hasForcedSubtitles)
+{
+	ImageDescriptionHandle imgDesc;
+	Media trackMedia = createVobSubMedia(info.theMovie, info.movieBox, &imgDesc, info.dataRef, info.dataRefType, track);
+	if(info.imageWidth != 0)
+	{
+		(*imgDesc)->width = info.imageWidth;
+		(*imgDesc)->height = info.imageHeight;
+	}
+	
+	int sampleCount = [track->samples count];
+	int totalSamples = 0;
+	SampleReference64Ptr samples = (SampleReference64Ptr)calloc(sampleCount*2, sizeof(SampleReference64Record));
+	SampleReference64Ptr sample = samples;
+	int i;
+	uint32_t lastTime = 0;
+	VobSubSample *firstSample = nil;
+	for(i=0; i<sampleCount; i++)
+	{
+		VobSubSample *currentSample = [track->samples objectAtIndex:i];
+		int offset = currentSample->fileOffset;
+		int nextOffset;
+		if(i == sampleCount - 1)
+			nextOffset = [info.subFileData length];
+		else
+			nextOffset = ((VobSubSample *)[track->samples objectAtIndex:i+1])->fileOffset;
+		int size = nextOffset - offset;
+		if(size < 0)
+			//Skip samples for which we cannot determine size
+			continue;
+		
+		NSData *subData = [info.subFileData subdataWithRange:NSMakeRange(offset, size)];
+		uint8_t *extracted = (uint8_t *)malloc(size);
+		int extractedSize = ExtractVobSubPacket(extracted, (const UInt8 *)[subData bytes], size, &size);
+		
+		uint16_t startTimestamp, endTimestamp;
+		uint8_t forced;
+		ReadPacketTimes(extracted, extractedSize, &startTimestamp, &endTimestamp, &forced);
+		if(onlyForced && !forced)
+			continue;
+		if(forced)
+			*hasForcedSubtitles = forced;
+		free(extracted);
+		uint32_t startTime = currentSample->timeStamp + startTimestamp;
+		uint32_t endTime = currentSample->timeStamp + endTimestamp;
+		int duration = endTimestamp - startTimestamp;
+		if(duration <= 0)
+			//Skip samples which are broken
+			continue;
+		if(firstSample == nil)
+		{
+			currentSample->timeStamp = startTime;
+			firstSample = currentSample;
+		}
+		else if(lastTime != startTime)
+		{
+			//insert a sample with no real data, to clear the subs
+			memset(sample, 0, sizeof(SampleReference64Record));
+			sample->durationPerSample = startTime - lastTime;
+			sample->numberOfSamples = 1;
+			sample->dataSize = 1;
+			totalSamples++;
+			sample++;
+		}
+		
+		sample->dataOffset.hi = 0;
+		sample->dataOffset.lo = offset;
+		sample->dataSize = size;
+		sample->sampleFlags = 0;
+		sample->durationPerSample = duration;
+		sample->numberOfSamples = 1;
+		lastTime = endTime;
+		totalSamples++;
+		sample++;
+	}
+	AddMediaSampleReferences64(trackMedia, (SampleDescriptionHandle)imgDesc, totalSamples, samples, NULL);
+	free(samples);
+	NSString *langStr = track->language;
+	int lang = langUnspecified;
+	if([langStr length] == 3)
+	{
+		char langCStr[4] = "";
+		
+		CFStringGetCString((CFStringRef)langStr, langCStr, 4, kCFStringEncodingASCII);
+		lang = ISO639_2ToQTLangCode(langCStr);
+	}
+	else if([langStr length] == 2)
+	{
+		char langCStr[3] = "";
+		
+		CFStringGetCString((CFStringRef)langStr, langCStr, 3, kCFStringEncodingASCII);
+		lang = ISO639_1ToQTLangCode(langCStr);				
+	}
+	SetMediaLanguage(trackMedia, lang);
+	
+	TimeValue mediaDuration = GetMediaDuration(trackMedia);
+	TimeValue movieTimeScale = GetMovieTimeScale(info.theMovie);
+	*theTrack = GetMediaTrack(trackMedia);
+	if(firstSample == nil)
+		firstSample = [track->samples objectAtIndex:0];
+	return InsertMediaIntoTrack(*theTrack, (firstSample->timeStamp * movieTimeScale)/1000, 0, mediaDuration, fixed1);
+}
 
 typedef enum {
 	VOB_SUB_STATE_READING_PRIVATE,
@@ -932,95 +1046,20 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 		VobSubTrack *track = nil;
 		while((track = [trackEnum nextObject]) != nil)
 		{
-			ImageDescriptionHandle imgDesc;
-			Media trackMedia = createVobSubMedia(theMovie, movieBox, &imgDesc, dataRef, dataRefType, track);
-			if(imageWidth != 0)
+			Track theTrack;
+			VobSubInfo info = {theMovie, dataRefType, dataRef, imageWidth, imageHeight, movieBox, subFileData};
+			uint8_t hasForced = 0;
+			err = loadTrackIntoMovie(track, info, 0, &theTrack, &hasForced);
+			if(hasForced)
 			{
-				(*imgDesc)->width = imageWidth;
-				(*imgDesc)->height = imageHeight;
-			}
-			
-			int sampleCount = [track->samples count];
-			int totalSamples = sampleCount;
-			SampleReference64Ptr samples = (SampleReference64Ptr)calloc(sampleCount*2, sizeof(SampleReference64Record));
-			SampleReference64Ptr sample = samples;
-			int i;
-			uint32_t lastTime = 0;
-			for(i=0; i<sampleCount; i++)
-			{
-				VobSubSample *currentSample = [track->samples objectAtIndex:i];
-				int offset = currentSample->fileOffset;
-				int nextOffset;
-				if(i == sampleCount - 1)
-					nextOffset = subFileSize;
+				Track forcedTrack;
+				err = loadTrackIntoMovie(track, info, 1, &forcedTrack, &hasForced);
+				if(*firstSubTrack == NULL)
+					*firstSubTrack = forcedTrack;
 				else
-					nextOffset = ((VobSubSample *)[track->samples objectAtIndex:i+1])->fileOffset;
-				int size = nextOffset - offset;
-				if(size < 0)
-					//Skip samples for which we cannot determine size
-					continue;
-				
-				NSData *subData = [subFileData subdataWithRange:NSMakeRange(offset, size)];
-				uint8_t *extracted = (uint8_t *)malloc(size);
-				int extractedSize = ExtractVobSubPacket(extracted, (const UInt8 *)[subData bytes], size, &size);
-				
-				uint16_t startTimestamp, endTimestamp;
-				ReadPacketTimes(extracted, extractedSize, &startTimestamp, &endTimestamp);
-				free(extracted);
-				uint32_t startTime = currentSample->timeStamp + startTimestamp;
-				uint32_t endTime = currentSample->timeStamp + endTimestamp;
-				int duration = endTimestamp - startTimestamp;
-				if(duration <= 0)
-					//Skip samples which are broken
-					continue;
-				if(i == 0)
-					currentSample->timeStamp = startTime;
-				else if(lastTime != startTime)
-				{
-					//insert a sample with no real data, to clear the subs
-					memset(sample, 0, sizeof(SampleReference64Record));
-					sample->durationPerSample = startTime - lastTime;
-					sample->numberOfSamples = 1;
-					sample->dataSize = 1;
-					totalSamples++;
-					sample++;
-				}
-				
-				sample->dataOffset.hi = 0;
-				sample->dataOffset.lo = offset;
-				sample->dataSize = size;
-				sample->sampleFlags = 0;
-				sample->durationPerSample = duration;
-				sample->numberOfSamples = 1;
-				lastTime = endTime;
-				
-				sample++;
+					SetTrackAlternate(*firstSubTrack, forcedTrack);
 			}
-			AddMediaSampleReferences64(trackMedia, (SampleDescriptionHandle)imgDesc, totalSamples, samples, NULL);
-			free(samples);
-			NSString *langStr = track->language;
-			int lang = langUnspecified;
-			if([langStr length] == 3)
-			{
-				char langCStr[4] = "";
-				
-				CFStringGetCString((CFStringRef)langStr, langCStr, 4, kCFStringEncodingASCII);
-				lang = ISO639_2ToQTLangCode(langCStr);
-			}
-			else if([langStr length] == 2)
-			{
-				char langCStr[3] = "";
-				
-				CFStringGetCString((CFStringRef)langStr, langCStr, 3, kCFStringEncodingASCII);
-				lang = ISO639_1ToQTLangCode(langCStr);				
-			}
-			SetMediaLanguage(trackMedia, lang);
 			
-			TimeValue mediaDuration = GetMediaDuration(trackMedia);
-			TimeValue movieTimeScale = GetMovieTimeScale(theMovie);
-			Track theTrack = GetMediaTrack(trackMedia);
-			VobSubSample *firstSample = [track->samples objectAtIndex:0];
-			err = InsertMediaIntoTrack(theTrack, (firstSample->timeStamp * movieTimeScale)/1000, 0, mediaDuration, fixed1);
 			if (*firstSubTrack == NULL)
 				*firstSubTrack = theTrack;
 			else
