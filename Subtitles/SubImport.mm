@@ -991,7 +991,7 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 				char *timeStr = (char *)malloc([line length]);
 				unsigned int position;
 				sscanf([line UTF8String], "timestamp: %s filepos: %x", timeStr, &position);
-				long time = ParseSubTime(timeStr, 100, YES);
+				long time = ParseSubTime(timeStr, 1000, YES);
 				free(timeStr);
 				if(position > subFileSize)
 					position = subFileSize;
