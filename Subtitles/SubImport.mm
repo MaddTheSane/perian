@@ -152,13 +152,24 @@ static NSString *MatroskaPacketizeLine(NSDictionary *sub, int n)
 		[sub objectForKey:@"Text"]];
 }
 
-static unsigned ParseSSATime(NSString *time)
+static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign)
 {
-	unsigned hour, minute, second, millisecond;
+	unsigned hour, minute, second, subsecond, timeval;
+	char separator;
+	int sign = 1;
 	
-	sscanf([time UTF8String],"%u:%u:%u.%u",&hour,&minute,&second,&millisecond);
+	if (hasSign && *time == '-') {
+		sign = -1;
+		time++;
+	}
 	
-	return hour * 100 * 60 * 60 + minute * 100 * 60 + second * 100 + millisecond;
+	if (sscanf(time,"%u:%u:%u%[,.:]%u",&hour,&minute,&second,&separator,&subsecond) < 5)
+		return 0;
+	
+	timeval = hour * 60 * 60 + minute * 60 + second;
+	timeval = secondScale * timeval + subsecond;
+	
+	return timeval * sign;
 }
 
 static NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
@@ -184,7 +195,8 @@ static NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
 	for (i = 0; i < numlines; i++) {
 		NSDictionary *sub = [subs objectAtIndex:i];
 		SubLine *sl = [[SubLine alloc] initWithLine:MatroskaPacketizeLine(sub, i) 
-											  start:ParseSSATime([sub objectForKey:@"Start"]) end:ParseSSATime([sub objectForKey:@"End"])];
+											  start:ParseSubTime([[sub objectForKey:@"Start"] UTF8String],100,NO)
+												end:ParseSubTime([[sub objectForKey:@"End"] UTF8String],100,NO)];
 		
 		[ss addLine:sl];
 		[sl autorelease];
@@ -207,7 +219,6 @@ static void LoadSRTFromPath(NSString *path, SubSerializer *ss)
 	NSString *res=nil;
 	[sc setCharactersToBeSkipped:nil];
 	
-	int h, m, s, ms;
 	unsigned startTime=0, endTime=0;
 	
 	enum {
@@ -226,16 +237,13 @@ static void LoadSRTFromPath(NSString *path, SubSerializer *ss)
 					[sc setScanLocation:[sc scanLocation]+1];
 				break;
 			case TIMESTAMP:
-				[sc scanInt:&h];  [sc scanString:@":" intoString:nil];
-				[sc scanInt:&m];  [sc scanString:@":" intoString:nil];				
-				[sc scanInt:&s];  [sc scanString:@"," intoString:nil];				
-				[sc scanInt:&ms]; [sc scanString:@" --> " intoString:nil];
-				startTime = ms + s*1000 + m*1000*60 + h*1000*60*60;
-				[sc scanInt:&h];  [sc scanString:@":" intoString:nil];
-				[sc scanInt:&m];  [sc scanString:@":" intoString:nil];				
-				[sc scanInt:&s];  [sc scanString:@"," intoString:nil];				
-				[sc scanInt:&ms]; [sc scanString:@"\n" intoString:nil];	
-				endTime = ms + s*1000 + m*1000*60 + h*1000*60*60;
+				[sc scanUpToString:@" --> " intoString:&res];
+				[sc scanString:@" --> " intoString:nil];
+				startTime = ParseSubTime([res UTF8String], 1000, NO);
+				
+				[sc scanUpToString:@"\n" intoString:&res];
+				[sc scanString:@"\n" intoString:nil];
+				endTime = ParseSubTime([res UTF8String], 1000, NO);
 				state = LINES;
 				break;
 			case LINES:
@@ -672,41 +680,6 @@ static NSString *getNextVobSubLine(NSEnumerator *lineEnum)
 	return line;
 }
 
-//static long scanTime(NSScanner *scanner)
-//{
-//	NSCharacterSet *decimalDigits = [NSCharacterSet decimalDigitCharacterSet];
-//	int hours, minutes, seconds, subSeconds, sign = 1;
-//	NSString *signString = nil;
-//	[scanner scanUpToCharactersFromSet:decimalDigits intoString:&signString];
-//	if([signString length])
-//	{
-//		if([signString characterAtIndex:[signString length] - 1] == '-')
-//			sign = -1;
-//	}
-//	[scanner scanInt:&hours];
-//	[scanner scanUpToCharactersFromSet:decimalDigits intoString:nil];
-//	[scanner scanInt:&minutes];
-//	[scanner scanUpToCharactersFromSet:decimalDigits intoString:nil];
-//	[scanner scanInt:&seconds];
-//	[scanner scanUpToCharactersFromSet:decimalDigits intoString:nil];
-//	[scanner scanInt:&subSeconds];
-//	
-//	return sign * ((long)hours * 3600000 + (long)minutes * 60000 + (long)seconds * 1000 + (long)subSeconds);
-//}
-
-static long scanTime(const char *timeStr)
-{
-	int hours = 0, minutes = 0, seconds = 0, milliseconds = 0, sign = 1;
-	if(*timeStr == '-')
-	{
-		sign = -1;
-		timeStr++;
-	}
-	
-	sscanf(timeStr, "%d:%d:%d:%d", &hours, &minutes, &seconds, &milliseconds);
-	return sign * ((long)hours * 60 * 60 * 1000 + (long)minutes * 60 * 1000 + (long)seconds * 1000 + (long)milliseconds);
-}
-
 static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHandle *imgDescHand, Handle dataRef, OSType dataRefType, VobSubTrack *track)
 {
 	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
@@ -1011,14 +984,14 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 				}
 				break;
 			case VOB_SUB_STATE_READING_DELAY:
-				delay = scanTime([[line substringFromIndex:7] UTF8String]);
+				delay = ParseSubTime([[line substringFromIndex:7] UTF8String], 1000, YES);
 				break;
 			case VOB_SUB_STATE_READING_TRACK_DATA:
 			{
 				char *timeStr = (char *)malloc([line length]);
 				unsigned int position;
 				sscanf([line UTF8String], "timestamp: %s filepos: %x", timeStr, &position);
-				long time = scanTime(timeStr);
+				long time = ParseSubTime(timeStr, 100, YES);
 				free(timeStr);
 				if(position > subFileSize)
 					position = subFileSize;
