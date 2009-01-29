@@ -19,11 +19,15 @@
 #include "avcodec.h"
 
 #include "bswap.h"
+#include "libavutil/internal.h"
 #include "mpegvideo.h"
 #include "parser.h"
 #include "golomb.h"
 
 #include "CodecIDs.h"
+
+#undef malloc
+#undef free
 
 int inline MININT(int a, int b)
 {

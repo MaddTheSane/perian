@@ -50,10 +50,16 @@ int Codecprintf(FILE *fileLog, const char *format, ...)
 
 const char *FourCCString(FourCharCode c)
 {
-    static unsigned char fourcc[5] = {0};
+    static char fourcc[sizeof("0xFFFF")] = {0};
     int i;
     
-    for (i = 0; i < 4; i++) fourcc[i] = c >> 8*(3-i);
+	//not a fourcc or twocc
+	if (c < '\0\0AA') {
+		snprintf(fourcc, sizeof(fourcc), "%#x", (unsigned)c);
+	} else {
+		for (i = 0; i < 4; i++) fourcc[i] = c >> 8*(3-i);
+		fourcc[4] = '\0';
+	}
     
     return (char*)fourcc;
 }

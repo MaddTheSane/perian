@@ -22,10 +22,14 @@
 
 #include "ff_private.h"
 #include "avcodec.h"
+#include "libavutil/internal.h"
 #include "mpegaudio.h"
 #include "Codecprintf.h"
 #include "CommonUtils.h"
 #include "CodecIDs.h"
+
+#undef malloc
+#undef free
 
 #include <CoreServices/CoreServices.h>
 #include <AudioToolbox/AudioToolbox.h>
