@@ -50,6 +50,8 @@ NSArray *STSplitStringWithCount(NSString *str, NSString *split, size_t count)
 
 NSMutableString *STStandardizeStringNewlines(NSString *str)
 {
+	if(str == nil)
+		return nil;
 	NSMutableString *ms = [NSMutableString stringWithString:str];
 	[ms replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
 	[ms replaceOccurrencesOfString:@"\r" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
