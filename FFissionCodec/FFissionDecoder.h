@@ -59,6 +59,7 @@ private:
 	Byte *outputBuffer;
 	int outBufSize;
 	int outBufUsed;
+	bool dtsPassthrough;
 };
 
 // kAudioCodecPropertyHasVariablePacketByteSizes is queried before our input format is set,
