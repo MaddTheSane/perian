@@ -63,7 +63,7 @@
 		register_avcodec(&x##_encoder); }
 #define REGISTER_DECODER(x) { \
 	extern AVCodec x##_decoder; \
-		register_avcodec(&x##_decoder); }
+		avcodec_register(&x##_decoder); }
 #define REGISTER_ENCDEC(x)  REGISTER_ENCODER(x); REGISTER_DECODER(x)
 
 #define REGISTER_PARSER(x) { \
