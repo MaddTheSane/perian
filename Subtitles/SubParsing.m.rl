@@ -64,7 +64,7 @@
 		posX = posY = 0;
 		alignH = kSubAlignmentMiddle; alignV = kSubAlignmentBottom;
 		
-		is_shape = positioned = NO;
+		positioned = NO;
 		render_complexity = 0;
 	}
 	
@@ -90,7 +90,6 @@
 	div->alignV  = alignV;
   div->wrapStyle = wrapStyle;
   
-    div->is_shape = NO;
 	div->positioned = positioned;
 	div->render_complexity = render_complexity;
 	
@@ -271,7 +270,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			NSString *strval=NULL;
 			unsigned curX, curY;
 			int intnum = 0;
-			BOOL reached_end = NO, startNewLayout = NO, setAlignForDiv = NO;
+			BOOL reached_end = NO, startNewLayout = NO, setAlignForDiv = NO, dropThisSpan = NO;
 			
 			%%{
 				action bold {tag(b, intnum);}
@@ -299,6 +298,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				action outlinea {tag(3a, intnum);}
 				action shadowa {tag(4a, intnum);}
 				action stylerevert {tag(r, strval);}
+				action drawingmode {tag(p, floatnum); dropThisSpan = floatnum > 0;}
 
 				action paramset {parambegin=p;}
 				action setintnum {intnum = [psend() intValue];}
@@ -389,7 +389,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"org" parens
 							|("fad" "e"? parens)
 							|"clip" parens
-							|"p" floatnum
+							|"p" floatnum %drawingmode
 							|"pbo" floatnum
 					   );
 				
@@ -419,8 +419,9 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					outputbegin = p+1;
 				}
 				
-				action enter_tag {					
-					if (p > outputbegin) [div->text appendString:send()];
+				action enter_tag {
+					if (dropThisSpan) chars_deleted += p - outputbegin;
+					else if (p > outputbegin) [div->text appendString:send()];
 					if (p == pe) reached_end = YES;
 					
 					if (p != pb) {
@@ -430,6 +431,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					}
 					
 					last_tag_start = p;
+					dropThisSpan = NO;
 				}
 				
 				action exit_tag {			

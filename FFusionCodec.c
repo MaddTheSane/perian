@@ -131,6 +131,7 @@ typedef struct
 	FFusionData		data;
 	struct decode_glob	decode;
 	struct decode_stats stats;
+	ColorConversionFuncs colorConv;
 } FFusionGlobalsRecord, *FFusionGlobals;
 
 typedef struct
@@ -1348,16 +1349,17 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 {
     OSErr err = noErr;
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
-	int i, j;
+	AVFrame *picture;
 	
 	glob->stats.type[drp->frameType].draw_calls++;
 	RecomputeMaxCounts(glob);
 	FFusionDebugPrint("%p DrawBand #%d. (%sdecoded)\n", glob, myDrp->frameNumber, not(myDrp->decoded));
 	
-	if(!myDrp->decoded)
+	if(!myDrp->decoded) {
 		err = FFusionCodecDecodeBand(glob, drp, 0);
-	
-	AVFrame *picture;
+
+		if (err) goto err;
+	}
 	
 	if (myDrp->buffer)
 	{
@@ -1373,65 +1375,39 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 			picture = &myDrp->buffer->returnedFrame;
 		else if(glob->lastDisplayedFrame.data[0] != NULL)
 			//Display last frame
-			picture = &(glob->lastDisplayedFrame);
-		else
-		{ 
-			//Can't display anything so put up a black frame
-			Ptr addr = drp->baseAddr; 
-			for(i=0; i<myDrp->height; i++) 
-			{ 
-				for(j=0; j<myDrp->width*2; j+=2) 
-				{ 
-					addr[j] = 0x80; 
-					addr[j+1] = 0x10; 
-					addr[j+2] = 0x80; 
-					addr[j+3] = 0x10; 
-				} 
-				addr += drp->rowBytes; 
-			} 
-			return noErr; 
+			picture = &glob->lastDisplayedFrame;
+		else {
+			//Display black (no frame decoded yet)
+
+			if (!glob->colorConv.clear) {
+				err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, NULL, myDrp->pixelFormat);
+				
+				if (err) goto err;
+			}
+			
+			glob->colorConv.clear((UInt8*)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height);
+			return noErr;
 		}
 	}
 	else
 	{
-		memcpy(&(glob->lastDisplayedFrame), picture, sizeof(AVFrame));
+		if (myDrp->buffer)
+			glob->lastDisplayedFrame = *picture;
 	}
 	
-	if (myDrp->pixelFormat == 'y420' && glob->avContext->pix_fmt == PIX_FMT_YUV420P)
-	{
-		FastY420((UInt8 *)drp->baseAddr, picture);
-	}
-	else if (myDrp->pixelFormat == k2vuyPixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUV420P)
-	{
-		Y420toY422((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else if (myDrp->pixelFormat == k24RGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_BGR24)
-	{
-		BGR24toRGB24((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else if (myDrp->pixelFormat == k32ARGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_RGB32)
-	{
-		RGB32toRGB32((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else if (myDrp->pixelFormat == k24RGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_RGB24)
-	{
-		RGB24toRGB24((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else if (myDrp->pixelFormat == k2vuyPixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUV422P)
-	{
-		Y422toY422((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else if (myDrp->pixelFormat == k4444YpCbCrA8PixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUVA420P)
-	{
-		YA420toV408((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else
-	{
-		Codecprintf(glob->fileLog, "Unsupported conversion from PIX_FMT %d to %c%c%c%c (%08x) buffer\n",
-					glob->avContext->pix_fmt, myDrp->pixelFormat >> 24 & 0xff, myDrp->pixelFormat >> 16 & 0xff, 
-					myDrp->pixelFormat >> 8 & 0xff, myDrp->pixelFormat & 0xff, myDrp->pixelFormat);
+	if (!glob->colorConv.convert) {
+		err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, picture, myDrp->pixelFormat);
+		
+		if (err) {
+			Codecprintf(glob->fileLog, "Unsupported conversion from pixel format %d to %s (%08x) buffer\n",
+						glob->avContext->pix_fmt, FourCCString(myDrp->pixelFormat), myDrp->pixelFormat);
+			goto err;
+		}
 	}
 	
+	glob->colorConv.convert(picture, (UInt8*)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height);
+	
+err:
     return err;
 }
 

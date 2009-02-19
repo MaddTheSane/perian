@@ -40,6 +40,8 @@ int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type);
 
 int IsFrameDroppingEnabled();
 int forcePerianToDecode();
+	
+int IsAltivecSupported();
 
 #ifdef __cplusplus
 }

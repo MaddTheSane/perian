@@ -58,7 +58,6 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = F5CFD2EA0B5012E800616865 /* Build configuration list for PBXAggregateTarget "A52Codec" */;
 			buildPhases = (
-				3D79C0540DFBA1FF00EEFE22 /* ShellScript */,
 				F5CFD2E00B5012BC00616865 /* CopyFiles */,
 				F5CFD2E30B5012DB00616865 /* CopyFiles */,
 			);
@@ -1561,20 +1560,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Xcode auto-versioning script for Subversion\n# by Axel Andersson, modified by Daniel Jalkut to add\n# \"--revision HEAD\" to the svn info line, which allows\n# the latest revision to always be used.\n\n# further modified by Augie Fackler to be gross and sh-based in places\n# so that you can have svn installed anywhere\nPATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin\nffmpeg_rev=`cat \"$SYMROOT/Universal/buildid\"`\nREV=`svnversion -n ./`\necho $REV\n\necho | perl <<EOF\nuse strict;\ndie \"\\$0: Must be run from Xcode\" unless \\$ENV{\"BUILT_PRODUCTS_DIR\"};\n\nmy \\$INFO = \"\\$ENV{BUILT_PRODUCTS_DIR}/\\$ENV{WRAPPER_NAME}/Contents/Info.plist\";\n\nmy \\$version = \"$REV\";\n\n# (Match the last group of digits and optional letter M/S):\n\n# ugly yet functional (barely) regex by Daniel Jalkut:\n#$version =~ s/([\\d]*:)(\\d+[M|S]*).*/$2/;\n\n# better yet still functional regex via Kevin \"Regex Nerd\" Ballard\n(\\$version =~ m/\\d+[MS]*\\$/) && (\\$version = \\$&);\n\nopen(FH, \"\\$INFO\") or die \"\\$0: \\$INFO: $!\";\nmy \\$info = join(\"\", <FH>);\nclose(FH);\n\n#\\$info =~ s/([\\t ]+<key>CFBundleVersion<\\/key>\\n[\\t ]+<string>).*?(<\\/string>)/\\$1\\$version\\$2/;\n\\$info =~ s/SVNREVISION/\\$version/;\n\\$info =~ s/FFMPEGREVISION/$ffmpeg_rev/;\n\nopen(FH, \">\\$INFO\") or die \"\\$0: \\$INFO: \\$!\";\nprint FH \\$info;\nclose(FH);\nEOF\n";
-		};
-		3D79C0540DFBA1FF00EEFE22 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "pushd a52codec/build\nln -s Deployment+Debug Development || true\nln -s Development Deployment || true\nln -s Deployment Deployment+Debug || true\npopd";
+			shellScript = "# Xcode auto-versioning script for Subversion\n# by Axel Andersson, modified by Daniel Jalkut to add\n# \"--revision HEAD\" to the svn info line, which allows\n# the latest revision to always be used.\n\n# further modified by Augie Fackler to be gross and sh-based in places\n# so that you can have svn installed anywhere\nPATH=/sw/bin:/opt/local/bin:/usr/local/bin:/usr/bin:$PATH\nffmpeg_rev=`cat \"$SYMROOT/Universal/buildid\"`\nREV=`svnversion -n ./`\necho $REV\n\necho | perl <<EOF\nuse strict;\ndie \"\\$0: Must be run from Xcode\" unless \\$ENV{\"BUILT_PRODUCTS_DIR\"};\n\nmy \\$INFO = \"\\$ENV{BUILT_PRODUCTS_DIR}/\\$ENV{WRAPPER_NAME}/Contents/Info.plist\";\n\nmy \\$version = \"$REV\";\n\n# (Match the last group of digits and optional letter M/S):\n\n# ugly yet functional (barely) regex by Daniel Jalkut:\n#$version =~ s/([\\d]*:)(\\d+[M|S]*).*/$2/;\n\n# better yet still functional regex via Kevin \"Regex Nerd\" Ballard\n(\\$version =~ m/\\d+[MS]*\\$/) && (\\$version = \\$&);\n\nopen(FH, \"\\$INFO\") or die \"\\$0: \\$INFO: $!\";\nmy \\$info = join(\"\", <FH>);\nclose(FH);\n\n#\\$info =~ s/([\\t ]+<key>CFBundleVersion<\\/key>\\n[\\t ]+<string>).*?(<\\/string>)/\\$1\\$version\\$2/;\n\\$info =~ s/SVNREVISION/\\$version/;\n\\$info =~ s/FFMPEGREVISION/$ffmpeg_rev/;\n\nopen(FH, \">\\$INFO\") or die \"\\$0: \\$INFO: \\$!\";\nprint FH \\$info;\nclose(FH);\nEOF\n";
 		};
 		F5121EB60EB3A54A0048EF67 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2120,8 +2106,8 @@
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
-				OTHER_CFLAGS_i386 = "-march=pentium-m -mtune=nocona $(OTHER_CFLAGS)";
-				OTHER_CFLAGS_ppc = "$(OTHER_CFLAGS)";
+				OTHER_CFLAGS_i386 = "-march=pentium-m -frerun-cse-after-loop $(OTHER_CFLAGS)";
+				OTHER_CFLAGS_ppc = "-mcpu=G3 -mtune=G5 -funroll-loops -mmultiple $(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,

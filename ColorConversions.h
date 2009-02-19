@@ -18,12 +18,22 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
 
 #include <Carbon/Carbon.h>
-#include "avcodec.h"
+#include "libavcodec/avcodec.h"
 
-extern void FastY420(UInt8 *baseAddr, AVFrame *picture);
-extern void Y420toY422(UInt8* baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame * picture);
-extern void YA420toV408(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture);
-extern void RGB32toRGB32(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture);
-extern void RGB24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture);
-extern void BGR24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture);
-extern void Y422toY422(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture);
+#ifndef __i386__
+#define FASTCALL
+#else
+#define FASTCALL __attribute__((fastcall))
+#endif
+
+typedef void ColorConversionFunc(AVFrame *inPicture, UInt8 *outBaseAddr, int outRowBytes, unsigned outWidth, unsigned outHeight) FASTCALL;
+typedef ColorConversionFunc *ColorConversionFuncPtr;
+typedef void ColorClearFunc(UInt8 *outBaseAddr, int outRowBytes, unsigned outWidth, unsigned outHeight) FASTCALL;
+typedef ColorClearFunc *ColorClearFuncPtr;
+
+typedef struct ColorConversionFuncs {
+	ColorConversionFuncPtr convert;
+	ColorClearFuncPtr      clear;
+} ColorConversionFuncs;
+
+extern int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFmt, AVFrame *ffPicture, OSType qtPixFmt);

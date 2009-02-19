@@ -386,3 +386,17 @@ int forcePerianToDecode()
 										 sizeof(defaultForcedAppList)/sizeof(defaultForcedAppList[0]));
 	return forced;
 }
+
+int IsAltivecSupported()
+{
+	static int altivec = -1;
+	
+	if (altivec == -1) {
+		long response = 0;
+		int err = Gestalt(gestaltPowerPCProcessorFeatures, &response);
+		
+		altivec = !err && ((response & gestaltPowerPCHasVectorInstructions) != 0);
+	}
+	
+	return altivec;
+}

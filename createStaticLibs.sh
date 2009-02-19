@@ -1,5 +1,5 @@
 #!/bin/sh -v
-PATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin
+PATH=/usr/local/bin:/sw/bin:/opt/local/bin:/usr/bin:$PATH
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
 if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
@@ -76,28 +76,21 @@ else
     exit 0
 fi
 
-if [ -e ffmpeg/patched ] ; then
-	(cd ffmpeg && svn revert -R . && rm patched)
-fi
-
-patch -p0 < Patches/ffmpeg-h264dsp-crash.diff
-patch -p0 < Patches/ffmpeg-forceinline.diff
-patch -p0 < Patches/ffmpeg-no-interlaced.diff
-patch -p0 < Patches/ffmpeg-faltivec.diff
-patch -p0 < Patches/ffmpeg-h264-nounrollcabac.diff
-touch ffmpeg/patched
-
-# if [ $no_pic -eq 0 ] ; then
-# (cd ffmpeg; patch -p1 < ../Patches/ffmpeg-pic.diff)
-# fi
-
-touch patched
-
 if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
     echo "Static ffmpeg libs are up-to-date ; not rebuilding"
 else
     echo "Static ffmpeg libs are out-of-date ; rebuilding"
     
+    if [ -e ffmpeg/patched ] ; then
+		cd ffmpeg && svn revert -R . && rm patched && cd ..
+	fi
+
+	patch -p0 < Patches/ffmpeg-forceinline.diff
+	patch -p0 < Patches/ffmpeg-no-interlaced.diff
+	patch -p0 < Patches/ffmpeg-faltivec.diff
+	patch -p0 < Patches/ffmpeg-h264-nounrollcabac.diff
+	touch ffmpeg/patched
+
     echo -n "Building "
     if [ $buildi386 -eq $buildppc ] ; then
         echo "Universal"

@@ -28,7 +28,8 @@ typedef ATSURGBAlphaColor SubRGBAColor;
 	Float32 scaleX, scaleY, tracking, angle;
 	Float32 outlineRadius, shadowDist;
 	unsigned marginL, marginR, marginV;
-	BOOL bold, italic, underline, strikeout;
+	Float32 weight; // 0/1 = not bold/bold, > 1 is a font weight
+	BOOL italic, underline, strikeout;
 	UInt8 alignH, alignV, borderStyle;
 	__strong void* ex;
 	Float32 platformSizeScale;

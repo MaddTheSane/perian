@@ -15,63 +15,53 @@
  *
  *  You should have received a copy of the GNU Lesser General Public
  *  License along with this library; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA */
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
-#include "ColorConversions.h"
 #include <QuickTime/QuickTime.h>
 #include <Accelerate/Accelerate.h>
-#include <sys/types.h>
-#include <sys/sysctl.h>
+#include "ColorConversions.h"
+#include "Codecprintf.h"
+#include "CommonUtils.h"
 
-#ifndef GOOD_COMPILER
-#define noinline __attribute__((noinline))
-#else
-#define noinline
-#endif
+/*
+ Converts (without resampling) from ffmpeg pixel formats to the ones QT accepts
+ 
+ Todo:
+ - rewrite everything in asm (or C with all loop optimization opportunities removed)
+ - add a version with bilinear resampling
+ - rewrite the PPC-only code to just use int instead of all the crazy types
+ - handle YUV 4:2:0 with odd width
+ */
 
 #define unlikely(x) __builtin_expect(x, 0)
+#define likely(x) __builtin_expect(x, 1)
 
-//-----------------------------------------------------------------
-// FastY420
-//-----------------------------------------------------------------
-// Returns y420 data directly to QuickTime which then converts
-// in RGB for display
-//-----------------------------------------------------------------
-
-void FastY420(UInt8 *baseAddr, AVFrame *picture)
+static FASTCALL void FastY420(AVFrame *picture, UInt8 *baseAddr, int outRowBytes, unsigned outWidth, unsigned outHeight)
 {
-    PlanarPixmapInfoYUV420 *planar;
-	
+    PlanarPixmapInfoYUV420 *planar = (PlanarPixmapInfoYUV420 *)baseAddr;	
 	/*From Docs: PixMap baseAddr points to a big-endian PlanarPixmapInfoYUV420 struct; see ImageCodec.i. */
-    planar = (PlanarPixmapInfoYUV420 *) baseAddr;
     
     // if ya can't set da poiners, set da offsets
-    planar->componentInfoY.offset = EndianU32_NtoB(picture->data[0] - baseAddr);
-    planar->componentInfoCb.offset =  EndianU32_NtoB(picture->data[1] - baseAddr);
-    planar->componentInfoCr.offset =  EndianU32_NtoB(picture->data[2] - baseAddr);
+    planar->componentInfoY.offset  =   EndianU32_NtoB(picture->data[0] - baseAddr);
+    planar->componentInfoCb.offset =   EndianU32_NtoB(picture->data[1] - baseAddr);
+    planar->componentInfoCr.offset =   EndianU32_NtoB(picture->data[2] - baseAddr);
     
     // for the 16/32 add look at EDGE in mpegvideo.c
-    planar->componentInfoY.rowBytes = EndianU32_NtoB(picture->linesize[0]);
+    planar->componentInfoY.rowBytes  = EndianU32_NtoB(picture->linesize[0]);
     planar->componentInfoCb.rowBytes = EndianU32_NtoB(picture->linesize[1]);
     planar->componentInfoCr.rowBytes = EndianU32_NtoB(picture->linesize[2]);
 }
 
-//-----------------------------------------------------------------
-// FFusionSlowDecompress
-//-----------------------------------------------------------------
-// We have to return 2yuv values because
-// QT version has no built-in y420 component.
-// Since we do the conversion ourselves it is not really optimized....
-// The function should never be called since many people now
-// have a decent OS/QT version.
-//-----------------------------------------------------------------
-
-static void noinline Y420toY422_lastrow(UInt8 *o, const UInt8 *yc, const UInt8 *uc, const UInt8 *vc, unsigned halfWidth)
+//Handles the last row for Y420 videos with an odd number of luma rows
+//FIXME odd number of luma columns is not handled and they will be lost
+static void Y420toY422_lastrow(UInt8 *o, UInt8 *yc, UInt8 *uc, UInt8 *vc, unsigned halfWidth)
 {
-	unsigned x;
+	int x;
 	for(x=0; x < halfWidth; x++)
 	{
-		unsigned x4 = x*4, x2 = x*2;
+		int x4 = x*4, x2 = x*2;
+
 		o[x4] = uc[x];
 		o[x4+1] = yc[x2];
 		o[x4+2] = vc[x];
@@ -81,14 +71,16 @@ static void noinline Y420toY422_lastrow(UInt8 *o, const UInt8 *yc, const UInt8 *
 
 #define HandleLastRow(o, yc, uc, vc, halfWidth, height) if (unlikely(height & 1)) Y420toY422_lastrow(o, yc, uc, vc, halfWidth)
 
-#ifdef __BIG_ENDIAN__
-//hand-unrolled code is a bad idea on modern CPUs. luckily, this does not run on modern CPUs, only G3s.
-//also, big-endian only
+//Y420 Planar to Y422 Packed
+//The only one anyone cares about, so implemented with SIMD
 
-static void Y420toY422_ppc_scalar(UInt8* baseAddr, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+#ifdef __ppc__
+//hand-unrolled code is a bad idea on modern CPUs. luckily, this does not run on modern CPUs, only G3s.
+
+static FASTCALL void Y420toY422_ppc_scalar(AVFrame *picture, UInt8 *baseAddr, int outRB, unsigned width, unsigned height)
 {
-	 unsigned             y = height / 2;
-	 unsigned             halfWidth = width / 2, halfHalfWidth = width / 4;
+	 unsigned        y = height / 2;
+	 unsigned        halfWidth = width / 2, halfHalfWidth = width / 4;
 	 UInt8          *inY = picture->data[0], *inU = picture->data[1], *inV = picture->data[2];
 	 int             rB = picture->linesize[0], rbU = picture->linesize[1], rbV = picture->linesize[2];
 	 
@@ -128,9 +120,9 @@ static void Y420toY422_ppc_scalar(UInt8* baseAddr, unsigned outRB, unsigned widt
 	 }
 	
 	HandleLastRow(baseAddr, inY, inU, inV, halfWidth, height);
- }
+}
 
-static void Y420toY422_ppc_altivec(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+static FASTCALL void Y420toY422_ppc_altivec(AVFrame * picture, UInt8 * o, int outRB, unsigned width, unsigned height)
 {
 	UInt8			*yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
 	unsigned		rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
@@ -181,38 +173,24 @@ static void Y420toY422_ppc_altivec(UInt8 * o, unsigned outRB, unsigned width, un
 	
 	HandleLastRow(o, yc, uc, vc, width / 2, height);
 }
-
-void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
-{
-	static void (*y420_function)(UInt8* baseAddr, unsigned outRB, unsigned width, unsigned height, AVFrame * picture) = NULL;
-	if (!y420_function) {
-		int sels[2] = { CTL_HW, HW_VECTORUNIT }; // from http://developer.apple.com/hardwaredrivers/ve/g3_compatibility.html
-		int vType = 0; //0 == scalar only
-		size_t length = sizeof(vType);
-		int error = sysctl(sels, 2, &vType, &length, NULL, 0);
-		if( 0 == error && vType ) y420_function = Y420toY422_ppc_altivec;
-		else 
-		y420_function = Y420toY422_ppc_scalar;
-	}
-	
-	y420_function(o, outRB, width, height, picture);
-}
 #else
 #include <emmintrin.h>
 
-static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+static FASTCALL void Y420toY422_sse2(AVFrame * picture, UInt8 *o, int outRB, unsigned width, unsigned height)
 {
 	UInt8	*yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
-	unsigned	rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
-	unsigned	y,x, vWidth = width / 32, halfheight = height / 2;
-	unsigned	halfwidth = width / 2; 
+	int		rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
+	int		y, x, halfwidth = width / 2 , halfheight = height / 2;
+	int		vWidth = width / 32; 
 	
 	for (y = 0; y < halfheight; y++) {
 		UInt8   * o2 = o + outRB,   * yc2 = yc + rY;
 		__m128i * ov = (__m128i*)o, * ov2 = (__m128i*)o2, * yv = (__m128i*)yc, * yv2 = (__m128i*)yc2;
 		__m128i * uv = (__m128i*)uc,* vv  = (__m128i*)vc;
 		
-#if 0
+#ifdef __i386__
+		int vWidth_ = vWidth;
+
 		asm volatile(
 			"\n0:			\n\t"
 			"movdqa		(%2),	%%xmm0	\n\t"
@@ -252,15 +230,16 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 			"punpckhbw	%%xmm3, %%xmm6	\n\t"
 			"movntdq	%%xmm6, 48(%1)	\n\t" /*ov2[x4+3]*/
 			"addl		$64,	%1		\n\t"
-			"dec		%6				\n\t"
+			"decl		%6				\n\t"
 			"jnz		0b				\n\t"
 			: "+r" (ov), "+r" (ov2),
-			"+r" (yv), "+r" (yv2), "+r" (uv), "+r" (vv)
-			: "r" (vWidth)
+			"+r" (yv), "+r" (yv2), "+r" (uv), "+r" (vv), "+m"(vWidth_)
+			:
+			: "memory", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6"
 			);
 #else
 		for (x = 0; x < vWidth; x++) {
-			unsigned x2 = x*2, x4 = x*4;
+			int x2 = x*2, x4 = x*4;
 
 			__m128i	tmp_y = yv[x2], tmp_y3 = yv[x2+1],
 					tmp_y2 = yv2[x2], tmp_y4 = yv2[x2+1],
@@ -281,7 +260,7 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 #endif
 
 		for (x=vWidth * 16; x < halfwidth; x++) {
-			unsigned x4 = x*4, x2 = x*2;
+			int x4 = x*4, x2 = x*2;
 			o2[x4] = o[x4] = uc[x];
 			o[x4 + 1] = yc[x2];
 			o2[x4 + 1] = yc2[x2];
@@ -295,24 +274,22 @@ static void Y420toY422_sse2(UInt8 *  o, unsigned outRB, unsigned width, unsigned
 		uc += rU;
 		vc += rV;
 	}
-	
-	_mm_sfence();
-	
+
 	HandleLastRow(o, yc, uc, vc, halfwidth, height);
 }
 
-
-static void noinline Y420toY422_x86_scalar(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+static FASTCALL void Y420toY422_x86_scalar(AVFrame * picture, UInt8 * o, int outRB, unsigned width, unsigned height)
 {
-	UInt8		*yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
-	unsigned	rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], halfheight = height / 2, halfwidth = width / 2;
-	unsigned	y, x;
+	UInt8	*yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
+	int		rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
+	int		halfheight = height / 2, halfwidth = width / 2;
+	int		y, x;
 	
 	for (y = 0; y < halfheight; y ++) {
 		UInt8 *o2 = o + outRB, *yc2 = yc + rY;
 		
 		for (x = 0; x < halfwidth; x++) {
-			unsigned x4 = x*4, x2 = x*2;
+			int x4 = x*4, x2 = x*2;
 			o2[x4] = o[x4] = u[x];
 			o[x4 + 1] = yc[x2];
 			o2[x4 + 1] = yc2[x2];
@@ -329,21 +306,15 @@ static void noinline Y420toY422_x86_scalar(UInt8 * o, unsigned outRB, unsigned w
 
 	HandleLastRow(o, yc, u, v, halfwidth, height);
 }
-
-void Y420toY422(UInt8 * o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
-{
-	uintptr_t yc = (uintptr_t)picture->data[0];
-
-	//make sure the ffmpeg picture buffers are aligned enough, they're only guaranteed to be 8-byte for some reason...
-	if (!unlikely((yc | picture->linesize[0]) % 16)) Y420toY422_sse2(o, outRB, width, height, picture); 
-	else Y420toY422_x86_scalar(o, outRB, width, height, picture);
-}
 #endif
 
-void YA420toV408(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+//Y420+Alpha Planar to V408 (YUV 4:4:4+Alpha 32-bit packed)
+//Could be fully unrolled to avoid x/2
+static FASTCALL void YA420toV408(AVFrame *picture, UInt8 *o, int outRB, unsigned width, unsigned height)
 {
-	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2], *a = picture->data[3];
-	unsigned       rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], rA = picture->linesize[3], y, x;
+	UInt8	*yc = picture->data[0], *u = picture->data[1], *v = picture->data[2], *a = picture->data[3];
+	int		rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], rA = picture->linesize[3];
+	unsigned y, x;
 	
 	for (y = 0; y < height; y++) {
 		for (x = 0; x < width; x++) {
@@ -363,65 +334,70 @@ void YA420toV408(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFr
 	}
 }
 
-void BGR24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture)
+static FASTCALL void BGR24toRGB24(AVFrame *picture, UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
 {
-	unsigned i, j;
 	UInt8 *srcPtr = picture->data[0];
+	int srcRB = picture->linesize[0];
+	int x, y;
 	
-	for (i = 0; i < height; ++i)
+	for (y = 0; y < height; y++)
 	{
-		for (j = 0; j < width; j ++)
+		for (x = 0; x < width; x++)
 		{
-			unsigned j3 = j * 3;
-			baseAddr[j3] = srcPtr[j3+2];
-			baseAddr[j3+1] = srcPtr[j3+1];
-			baseAddr[j3+2] = srcPtr[j3];
+			unsigned x3 = x * 3;
+			baseAddr[x3] = srcPtr[x3+2];
+			baseAddr[x3+1] = srcPtr[x3+1];
+			baseAddr[x3+2] = srcPtr[x3];
 		}
 		baseAddr += rowBytes;
-		srcPtr += picture->linesize[0];
+		srcPtr += srcRB;
 	}
 }
 
-void RGB32toRGB32(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture)
+//Native-endian XRGB32 to big-endian XRGB32
+static FASTCALL void RGB32toRGB32(AVFrame *picture, UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
 {
-	unsigned y;
 	UInt8 *srcPtr = picture->data[0];
-	
+	int srcRB = picture->linesize[0];
+	int y;
+
 	for (y = 0; y < height; y++) {
 #ifdef __BIG_ENDIAN__
 		memcpy(baseAddr, srcPtr, width * 4);
 #else
-		unsigned x;
 		UInt32 *oRow = (UInt32 *)baseAddr, *iRow = (UInt32 *)srcPtr;
-		for (x = 0; x < width; x++) {oRow[x] = EndianU32_BtoN(iRow[x]);}
+		int x;
+		for (x = 0; x < width; x++) {oRow[x] = EndianU32_NtoB(iRow[x]);}
 #endif
 		
 		baseAddr += rowBytes;
-		srcPtr += picture->linesize[0];
+		srcPtr += srcRB;
 	}
 }
 
-void RGB24toRGB24(UInt8 *baseAddr, unsigned rowBytes, unsigned width, unsigned height, AVFrame *picture)
+static FASTCALL void RGB24toRGB24(AVFrame *picture, UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
 {
-	unsigned y;
 	UInt8 *srcPtr = picture->data[0];
+	int srcRB = picture->linesize[0];
+	int y;
 	
 	for (y = 0; y < height; y++) {
 		memcpy(baseAddr, srcPtr, width * 3);
 		
 		baseAddr += rowBytes;
-		srcPtr += picture->linesize[0];
+		srcPtr += srcRB;
 	}
 }
 
-void Y422toY422(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFrame * picture)
+static FASTCALL void Y422toY422(AVFrame *picture, UInt8 *o, int outRB, unsigned width, unsigned height)
 {
-	UInt8          *yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
-	unsigned       rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2], y, x, halfwidth = width / 2;
+	UInt8	*yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
+	int		rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
+	int		x, y, halfwidth = width / 2;
 	
 	for (y = 0; y < height; y++) {
 		for (x = 0; x < halfwidth; x++) {
-			unsigned x2 = x * 2, x4 = x * 4;
+			int x2 = x * 2, x4 = x * 4;
 			o[x4] = u[x];
 			o[x4 + 1] = yc[x2];
 			o[x4 + 2] = v[x];
@@ -433,4 +409,122 @@ void Y422toY422(UInt8* o, unsigned outRB, unsigned width, unsigned height, AVFra
 		u += rU;
 		v += rV;
 	}
+}
+
+static void ClearRGB(UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height, int bytesPerPixel)
+{
+	int y;
+	
+	for (y = 0; y < height; y++) {
+		memset(baseAddr, 0, width * bytesPerPixel);
+		
+		baseAddr += rowBytes;
+	}
+}
+
+static FASTCALL void ClearRGB32(UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
+{
+	ClearRGB(baseAddr, rowBytes, width, height, 4);
+}
+
+static FASTCALL void ClearRGB24(UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
+{
+	ClearRGB(baseAddr, rowBytes, width, height, 3);
+}
+
+static FASTCALL void ClearV408(UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
+{
+	int x, y;
+	
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			unsigned x4 = x * 4;
+			baseAddr[x4]   = 0x80; //zero chroma
+			baseAddr[x4+1] = 0x10; //black
+			baseAddr[x4+2] = 0x80; 
+			baseAddr[x4+3] = 0xEB; //opaque
+		}
+		baseAddr += rowBytes;
+	}
+}
+
+static FASTCALL void ClearY422(UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
+{
+	int x, y;
+	
+	for (y = 0; y < height; y++)
+	{
+		for (x = 0; x < width; x++)
+		{
+			unsigned x2 = x * 2;
+			baseAddr[x2]   = 0x80; //zero chroma
+			baseAddr[x2+1] = 0x10; //black
+		}
+		baseAddr += rowBytes;
+	}
+}
+
+static FASTCALL void ClearNone(UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
+{
+}
+
+int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFmt, AVFrame *ffPicture, OSType qtPixFmt)
+{	
+	if (qtPixFmt == kYUV420CodecType && ffPixFmt == PIX_FMT_YUV420P)
+	{
+		funcs->clear = ClearNone;
+		funcs->convert = FastY420;
+	}
+	else if (qtPixFmt == k2vuyPixelFormat && ffPixFmt == PIX_FMT_YUV420P)
+	{
+		funcs->clear = ClearY422;
+
+#ifdef __ppc__
+		if (IsAltivecSupported())
+			funcs->convert = Y420toY422_ppc_altivec;
+		else
+			funcs->convert = Y420toY422_ppc_scalar;
+#else
+		//can't set this without the first real frame
+		if (ffPicture) {
+			if (ffPicture->linesize[0] % 16)
+				funcs->convert = Y420toY422_x86_scalar;
+			else
+				funcs->convert = Y420toY422_sse2;
+		}
+#endif		
+	}
+	else if (qtPixFmt == k24RGBPixelFormat && ffPixFmt == PIX_FMT_BGR24)
+	{
+		funcs->clear = ClearRGB24;
+		funcs->convert = BGR24toRGB24;
+	}
+	else if (qtPixFmt == k32ARGBPixelFormat && ffPixFmt == PIX_FMT_RGB32)
+	{
+		funcs->clear = ClearRGB32;
+		funcs->convert = RGB32toRGB32;
+	}
+	else if (qtPixFmt == k24RGBPixelFormat && ffPixFmt == PIX_FMT_RGB24)
+	{
+		funcs->clear = ClearRGB24;
+		funcs->convert = RGB24toRGB24;
+	}
+	else if (qtPixFmt == k2vuyPixelFormat && ffPixFmt == PIX_FMT_YUV422P)
+	{
+		funcs->clear = ClearY422;
+		funcs->convert = Y422toY422;
+	}
+	else if (qtPixFmt == k4444YpCbCrA8PixelFormat && ffPixFmt == PIX_FMT_YUVA420P)
+	{
+		funcs->clear = ClearV408;
+		funcs->convert = YA420toV408;
+	}
+	else
+	{
+		return paramErr;
+	}
+	
+	return noErr;
 }

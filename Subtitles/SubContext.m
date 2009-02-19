@@ -67,7 +67,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 {
 	if ([*fontname characterAtIndex:0] == '@') {
 		*fontname = [*fontname substringFromIndex:1];
-		return YES;
+		//return YES; // XXX vertical
 	}
 	return NO;
 }
@@ -88,7 +88,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 	sty->outlineRadius = 1.5;
 	sty->shadowDist = 2;
 	sty->marginL = sty->marginR = sty->marginV = 20;
-	sty->bold = YES;
+	sty->weight = 1;
 	sty->italic = sty->underline = sty->strikeout = NO;
 	sty->alignH = kSubAlignmentCenter;
 	sty->alignV = kSubAlignmentBottom;
@@ -120,7 +120,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 		if (tmp) outlineColor = shadowColor = ParseSSAColorString(tmp);
 		cv(outlineColor, OutlineColour);
 		cv(shadowColor, ShadowColour);
-		bv(bold, Bold);
+		fv(weight, Bold);
 		bv(italic, Italic);
 		bv(underline, Underline);
 		bv(strikeout, Strikeout);
@@ -137,6 +137,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 		
 		if (!scaleX) scaleX = 100;
 		if (!scaleY) scaleY = 100;
+		if (weight == -1) weight = 1;
 
 		UInt8 align = [[s objectForKey:@"Alignment"] intValue];
 		if (version == kSubTypeSSA) align = SSA2ASSAlignment(align);

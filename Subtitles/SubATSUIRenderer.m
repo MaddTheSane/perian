@@ -23,8 +23,10 @@ static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, unichar 
 	@public;
 	ATSUStyle style;
 	CGColorRef primaryColor, outlineColor, shadowColor;
-	Float32 outlineRadius, shadowDist, scaleX, scaleY, primaryAlpha, outlineAlpha, angle;
+	Float32 outlineRadius, shadowDist, scaleX, scaleY, primaryAlpha, outlineAlpha, angle, platformSizeScale, fontSize;
 	BOOL blurEdges;
+	ATSUFontID font;
+	ATSUVerticalCharacterType fontVertical;
 }
 -(SubATSUISpanEx*)initWithStyle:(ATSUStyle)style_ subStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs;
 -(SubATSUISpanEx*)clone;
@@ -72,6 +74,8 @@ static CGColorRef CloneCGColorWithAlpha(CGColorRef c, float alpha)
 
 -(SubATSUISpanEx*)initWithStyle:(ATSUStyle)style_ subStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs
 {
+	ByteCount unused;
+	
 	if (self = [super init]) {
 		ATSUCreateAndCopyStyle(style_, &style);
 		
@@ -85,6 +89,10 @@ static CGColorRef CloneCGColorWithAlpha(CGColorRef c, float alpha)
 		scaleX = sstyle->scaleX / 100.;
 		scaleY = sstyle->scaleY / 100.;
 		angle = sstyle->angle;
+		platformSizeScale = sstyle->platformSizeScale;
+		fontSize = sstyle->size;
+		ATSUGetAttribute(style, kATSUFontTag, sizeof(ATSUFontID), &font, &unused);
+		ATSUGetAttribute(style, kATSUVerticalCharacterTag, sizeof(ATSUVerticalCharacterType), &fontVertical, &unused);
 	}
 	
 	return self;
@@ -105,6 +113,10 @@ static CGColorRef CloneCGColorWithAlpha(CGColorRef c, float alpha)
 	ret->scaleX = scaleX;
 	ret->scaleY = scaleY;
 	ret->angle = angle;
+	ret->platformSizeScale = platformSizeScale;
+	ret->fontSize = fontSize;
+	ret->font = font;
+	ret->fontVertical = fontVertical;
 	
 	return [ret autorelease];
 }
@@ -307,16 +319,16 @@ static void CleanupFontIDCache()
 
 // XXX: Assumes ATSUFontID = ATSFontRef. This is true.
 static ATSUFontID GetFontIDForSSAName(NSString *name)
-{
+{		
+	if (fontIDCache) {
+		NSNumber *idN = [fontIDCache objectForKey:[name lowercaseString]];
+		
+		if (idN) return [idN intValue];
+	} else
+		fontIDCache = [[NSMutableDictionary alloc] init];
+	
 	ByteCount nlen = [name length];
 	unichar *uname = (unichar*)[name cStringUsingEncoding:NSUnicodeStringEncoding];
-	
-	if (!fontIDCache) fontIDCache = [[NSMutableDictionary alloc] init];
-	
-	NSNumber *idN = [fontIDCache objectForKey:[name lowercaseString]];
-		
-	if (idN) return [idN intValue];
-	
 	ATSUFontID font;
 	
 	// should be kFontMicrosoftPlatform for the platform code
@@ -365,13 +377,13 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	ATSFontRef fontRef = font;
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
 	Fixed size;
-	Boolean b = s->bold, i = s->italic, u = s->underline, st = s->strikeout;
+	Boolean b = s->weight > 0, i = s->italic, u = s->underline, st = s->strikeout;
 	ATSUStyle style;
 		
 	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font, &vertical};
 	
 	if (!s->platformSizeScale) s->platformSizeScale = GetWinFontSizeScale(fontRef);
-	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY);
+	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY); //FIXME several other values also change relative to PlayRes but aren't handled
 	
 	ATSUCreateStyle(&style);
 	ATSUSetAttributes(style, sizeof(tags) / sizeof(ATSUAttributeTag), tags, sizes, vals);
@@ -417,6 +429,14 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	[spanEx release];
 }
 
+static void UpdateFontNameSize(SubATSUISpanEx *spanEx, float screenScale)
+{
+	Fixed fSize = FloatToFixed(spanEx->fontSize * spanEx->platformSizeScale * screenScale);
+	SetATSUStyleOther(spanEx->style, kATSUFontTag, sizeof(ATSUFontID), &spanEx->font);
+	SetATSUStyleOther(spanEx->style, kATSUVerticalCharacterTag, sizeof(ATSUVerticalCharacterType), &spanEx->fontVertical);
+	SetATSUStyleOther(spanEx->style, kATSUSizeTag, sizeof(Fixed), &fSize);
+}
+
 enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for color/border changes in the middle of lines
 	  renderManualShadows = 2, // CG shadows can't change inside a line... probably
 	  renderComplexTransforms = 4}; // can't draw text at all, have to transform each vertex. needed for 3D perspective, or \frz in the middle of a line
@@ -442,7 +462,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 	
 	switch (tag) {
 		case tag_b:
-			bv();
+			bv(); // XXX font weight variations
 			SetATSUStyleFlag(spanEx->style, kATSUQDBoldfaceTag, bval != 0);
 			break; 
 		case tag_i:
@@ -469,20 +489,14 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_fn:
 			sv();
-			{
-				ATSUVerticalCharacterType vertical = ParseFontVerticality(&sval) ? kATSUStronglyVertical : kATSUStronglyHorizontal;
-				ATSUFontID font = GetFontIDForSSAName(sval);
-				
-				if (font) {
-					SetATSUStyleFlag(spanEx->style, kATSUVerticalCharacterTag, vertical);
-					SetATSUStyleOther(spanEx->style, kATSUFontTag, sizeof(ATSUFontID), &font);
-				}
-			}
+			spanEx->fontVertical = ParseFontVerticality(&sval) ? kATSUStronglyVertical : kATSUStronglyHorizontal;
+			spanEx->font = GetFontIDForSSAName(sval);
+			UpdateFontNameSize(spanEx, screenScaleY);
 			break;
 		case tag_fs:
 			fv();
-			fixval = FloatToFixed(fval * div->styleLine->platformSizeScale);
-			SetATSUStyleOther(spanEx->style, kATSUSizeTag, sizeof(Fixed), &fixval);
+			spanEx->fontSize = fval;
+			UpdateFontNameSize(spanEx, screenScaleY);
 			break;
 		case tag_1c:
 			CGColorRelease(spanEx->primaryColor);
@@ -522,8 +536,8 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			SetATSUStyleOther(spanEx->style, kATSUAfterWithStreamShiftTag, sizeof(Fixed), &fixval);
 			break;
 		case tag_frz:
-			if (!isFirstSpan) div->render_complexity |= renderComplexTransforms; // this one's hard
 			fv();
+			if (!isFirstSpan) div->render_complexity |= renderComplexTransforms; // this one's hard
 			spanEx->angle = fval;
 			break;
 		case tag_1a:
@@ -561,7 +575,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_be:
 			bv();
-			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts; // XXX blur edges
 			spanEx->blurEdges = bval;
 			break;
 		default:
