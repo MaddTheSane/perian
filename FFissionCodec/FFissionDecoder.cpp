@@ -379,10 +379,13 @@ void FFissionDecoder::AppendInputData(const void* inInputData, UInt32& ioInputDa
 #define AV_RL16(x) EndianU16_LtoN(*(uint16_t *)(x))
 #define AV_RB16(x) EndianU16_BtoN(*(uint16_t *)(x))
 
-int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *packet, int packetSize, int channelCount)
+int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *packet, int packetSize, int channelCount, int bigEndian)
 {
 	if(packetSize < 96)
 		return 0;
+	
+	static const uint8_t p_sync_le[6] = { 0x72, 0xF8, 0x1F, 0x4E, 0x00, 0x00 };
+	static const uint8_t p_sync_be[6] = { 0xF8, 0x72, 0x4E, 0x1F, 0x00, 0x00 };
 	
 	uint32_t mrk = AV_RB16(packet) << 16 | AV_RB16(packet + 2);
 	unsigned int frameSize = 0;
@@ -408,76 +411,83 @@ int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *p
 
 	blockCount++;
 	frameSize++;
-	int originalFrameSize = frameSize;
-	if(packetSize < frameSize)
-		return 0;
-
-	uint16_t newFrame[frameSize * 4 / 7];
-	if(repackage)
-	{
-		int spareBitCount = 0;
-		uint16_t spareBits = 0;
-		uint16_t *newFrameData = newFrame;
-		int i;
-		
-		for(i=0; i<frameSize; i+= 2)
-		{
-			uint16_t readBits = (mrk == DCA_MARKER_RAW_BE) ? AV_RB16(packet + i) : AV_RL16(packet + i);
-			uint16_t newData = spareBits | readBits >> (2 + spareBitCount);
-			if(newData & 0x2000)
-				*newFrameData = newData | 0xc000;
-			else
-				*newFrameData = newData;
-			spareBits = (readBits << (12 - spareBitCount)) & 0x3fff;
-			spareBitCount += 2;
-			if(spareBitCount == 14)
-			{
-				if(spareBits & 0x2000)
-					newFrameData[1] = spareBits | 0xc000;
-				else
-					newFrameData[1] = spareBits;
-				spareBitCount = 0;
-				spareBits = 0;
-				newFrameData += 2;
-			}
-			else
-				newFrameData++;
-		}
-		if(spareBitCount != 0)
-		{
-			spareBits << 14 - spareBitCount;
-			if(spareBits & 0x2000)
-				newFrameData[1] = spareBits | 0xc000;
-			else
-				newFrameData[1] = spareBits;
-			newFrameData ++;
-		}
-		
-		packet = (uint8_t *)newFrame;
-		frameSize = (newFrameData - newFrame) * 2;
+	
+	int spdif_type;
+	switch (blockCount) {
+		case 16:
+			spdif_type = 0x0b; //512-sample bursts
+			break;
+		case 32:
+			spdif_type = 0x0c; //1024-sample bursts
+			break;
+		case 64:
+			spdif_type = 0x0d; //2048-sample bursts
+			break;
+		default:
+			return -1;
+			break;
 	}
-		
+	
 	int totalSize = blockCount * 256 * channelCount / 4;
-	if(channelCount == 2)
+	memset(outputBuffer, 0, totalSize);
+	int offset = 2;
+	
+	if(bigEndian)
 	{
-		memcpy(outputBuffer, packet, frameSize);
-		memset(outputBuffer+frameSize, 0, totalSize - frameSize);
+		memcpy(outputBuffer+offset, p_sync_be, 4);
+		offset += channelCount * 2;
+		outputBuffer[offset] = 0;
+		outputBuffer[offset+1] = spdif_type;
+		outputBuffer[offset+2] = (frameSize >> 5) & 0xff;
+		outputBuffer[offset+3] = (frameSize << 3) & 0xff;
 	}
 	else
 	{
-		memset(outputBuffer, 0, totalSize);
-		int i;
-		int offset = 2;
-		for(i=0; i<frameSize; i+= 4)
-		{
-			memcpy(outputBuffer + offset, packet + i, 4);
-			offset += 2 * channelCount;
-		}
+		memcpy(outputBuffer+offset, p_sync_le, 4);
+		offset += channelCount * 2;
+		outputBuffer[offset] = spdif_type;
+		outputBuffer[offset+1] = 0;
+		outputBuffer[offset+2] = (frameSize << 3) & 0xff;
+		outputBuffer[offset+3] = (frameSize >> 5) & 0xff;
 	}
 	
-	*outBufUsed = totalSize;
+	offset += channelCount * 2;
 	
-	return originalFrameSize;
+	if((mrk == DCA_MARKER_RAW_BE || mrk == DCA_MARKER_14B_BE) && !bigEndian)
+	{
+		int i;
+		int count = frameSize & ~0x3;
+		for(i=0; i<count; i+=4)
+		{
+			outputBuffer[offset] = packet[i+1];
+			outputBuffer[offset+1] = packet[i];
+			outputBuffer[offset+2] = packet[i+3];
+			outputBuffer[offset+3] = packet[i+2];
+			offset += channelCount * 2;
+		}
+		switch (frameSize & 0x3) {
+			case 3:
+				outputBuffer[offset+3] = packet[i+2];
+			case 2:
+				outputBuffer[offset] = packet[i+1];
+			case 1:
+				outputBuffer[offset+1] = packet[i];
+			default:
+				break;
+		}
+	}
+	else
+	{
+		int i;
+		for(i=0; i<frameSize; i+=4)
+		{
+			memcpy(outputBuffer + offset, packet+i, 4);
+			offset += channelCount * 2;
+		}
+	}
+
+	*outBufUsed = totalSize;
+	return frameSize;
 }
 
 UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
@@ -516,7 +526,7 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 		outBufUsed = outBufSize;
 		int len;
 		if(dtsPassthrough)
-			len = produceDTSPassthroughPackets(outputBuffer, &outBufUsed, packet, packetSize, avContext->channels);
+			len = produceDTSPassthroughPackets(outputBuffer, &outBufUsed, packet, packetSize, avContext->channels, mOutputFormat.mFormatFlags & kLinearPCMFormatFlagIsBigEndian);
 		else
 			len = avcodec_decode_audio2(avContext, (int16_t *)outputBuffer, &outBufUsed, packet, packetSize);
 		
