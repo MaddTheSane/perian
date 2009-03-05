@@ -559,6 +559,9 @@ bail:
 	else
 		storage->movieLoadState == kMovieLoadStateError;
 		
+	if (result == -1)
+		result = invalidMovie; // a bit better error message
+	
 	return result;
 } /* FFAvi_MovieImportDataRef */
 

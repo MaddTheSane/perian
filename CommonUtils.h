@@ -38,10 +38,18 @@ ComponentResult ReadESDSDescExt(Handle descExt, UInt8 **buffer, int *size);
 
 int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type);
 
+// does the current process break if we signal droppable frames?
 int IsFrameDroppingEnabled();
+
+// does the current process break if we return errors in Preflight?
 int forcePerianToDecode();
-	
+
 int IsAltivecSupported();
+
+// CFPreferencesCopyAppValue() wrapper which checks the type of the value returned
+CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type);
+	
+#define PERIAN_PREF_DOMAIN CFSTR("org.perian.Perian")
 
 #ifdef __cplusplus
 }

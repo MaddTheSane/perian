@@ -342,10 +342,7 @@ static int isApplicationNameInList(CFStringRef prefOverride, const CFStringRef *
 	if (!processInformation)
 		return FALSE;
 	
-	CFArrayRef list = CFPreferencesCopyAppValue(prefOverride, CFSTR("org.perian.Perian"));
-	if(list && CFGetTypeID(list) != CFArrayGetTypeID())
-		list = NULL;
-	
+	CFArrayRef list = CopyPreferencesValueTyped(prefOverride, CFArrayGetTypeID());
 	CFStringRef myProcessName = getProcessName(processInformation);
 	int ret;
 	
@@ -399,4 +396,16 @@ int IsAltivecSupported()
 	}
 	
 	return altivec;
+}
+
+CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type)
+{
+	CFPropertyListRef val = CFPreferencesCopyAppValue(key, PERIAN_PREF_DOMAIN);
+	
+	if (val && CFGetTypeID(val) != type) {
+		CFRelease(val);
+		val = NULL;
+	}
+	
+	return val;
 }

@@ -589,7 +589,6 @@
 		if(currentInstallStatus(pieceStatus) == InstallStatusOutdated)
 		{
 			//Remove the old one here
-			int tag = 0;
 			BOOL result = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
 			if(result == NO)
 				ret = NO;
@@ -611,7 +610,6 @@
 			ret = [self _authenticatedRemove:[containingDir stringByAppendingPathComponent:component]];
 		else
 		{
-			int tag = 0;
 			ret = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
 		}
 	}

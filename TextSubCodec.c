@@ -263,13 +263,7 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 // may receive more than one ImageCodecBeginBand call before receiving an ImageCodecDrawBand call.
 pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompressParams *p, ImageSubCodecDecompressRecord *drp, long flags)
 {
-	long offsetH, offsetV;
 	TextSubDecompressRecord *myDrp = (TextSubDecompressRecord *)drp->userDecompressRecord;
-
-	offsetH = (long)(p->dstRect.left - p->dstPixMap.bounds.left) * (long)(p->dstPixMap.pixelSize >> 3);
-	offsetV = (long)(p->dstRect.top - p->dstPixMap.bounds.top) * (long)drp->rowBytes;
-
-	drp->baseAddr = p->dstPixMap.baseAddr + offsetH + offsetV;
 	
 	// Let base codec know that all our frames are key frames (a.k.a., sync samples)
 	// This allows the base codec to perform frame dropping on our behalf if needed 

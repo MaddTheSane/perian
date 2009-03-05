@@ -6,8 +6,8 @@ if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 	MACOSX_DEPLOYMENT_TARGET="10.4"
 fi
 
-generalConfigureOptions="--disable-muxers --disable-encoders --disable-stripping --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-vhook --disable-ffserver"
-cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -ggdb -gstabs -Dattribute_deprecated= -w"
+generalConfigureOptions="--disable-muxers --disable-encoders --disable-stripping --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-ffserver"
+cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -g -Dattribute_deprecated= -w"
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
@@ -190,7 +190,4 @@ echo -n "$buildid_ffmpeg" > $OUTPUT_FILE
 
 mkdir "$SYMROOT/Universal" || true
 cp "$BUILT_PRODUCTS_DIR/Universal"/* "$SYMROOT/Universal"
-if [ "$BUILD_STYLE" = "Deployment" ] ; then
-    strip -S "$SYMROOT/Universal"/*.a
-fi
 ranlib "$SYMROOT/Universal"/*.a

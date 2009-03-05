@@ -691,11 +691,6 @@ int determine_header_offset(ff_global_ptr storage) {
 	/* Seek backwards to get a manually read packet for file offset */
 	if(formatContext->streams[0]->index_entries == NULL || storage->componentType == 'FLV ')
 	{
-		if (IS_AVI(storage->componentType))
-			//Try to seek to the first frame; don't care if it fails
-			// Is this really needed for AVIs w/out an index? It seems to work fine without, 
-			// and it seems that with it the first frame is skipped.
-			av_seek_frame(formatContext, -1, 0, 0);
 		storage->header_offset = 0;
 	}
 	else
@@ -703,7 +698,7 @@ int determine_header_offset(ff_global_ptr storage) {
 		int streamsRead = 0;
 		AVStream *st;
 		
-		result = av_seek_frame(formatContext, -1, 0, 0);
+		result = av_seek_frame(formatContext, -1, 0, AVSEEK_FLAG_ANY);
 		if(result < 0) goto bail;
 		
 		result = av_read_frame(formatContext, &packet);
@@ -734,11 +729,11 @@ int determine_header_offset(ff_global_ptr storage) {
 		}
 		
 		// seek back to the beginning, otherwise av_read_frame-based decoding will skip a few packets.
-		av_seek_frame(formatContext, -1, 0, 0);
+		av_seek_frame(formatContext, -1, 0, AVSEEK_FLAG_ANY | AVSEEK_FLAG_BACKWARD);
 	}
 		
 bail:
-	return(result);
+	return result;
 }
 
 /* This function imports the avi represented by the AVFormatContext to the movie media represented

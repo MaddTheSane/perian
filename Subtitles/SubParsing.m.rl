@@ -270,7 +270,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			NSString *strval=NULL;
 			unsigned curX, curY;
 			int intnum = 0;
-			BOOL reached_end = NO, startNewLayout = NO, setAlignForDiv = NO, dropThisSpan = NO;
+			BOOL reachedEnd = NO, setWrapStyle = NO, setPosition = NO, setAlignForDiv = NO, dropThisSpan = NO;
 			
 			%%{
 				action bold {tag(b, intnum);}
@@ -324,25 +324,22 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				}
 				
 				action wrapstyle {
-					if (!startNewLayout) {
-						startNewLayout = YES;
+					if (!setWrapStyle) {
+						setWrapStyle = YES;
 						
-						if ([div->text length] > 0) {[divs addObject:div]; div = [div nextDivWithDelegate:delegate];}
+						div->wrapStyle = intnum;
+
 					}
-					
-					div->wrapStyle = intnum;
 				}
 				
 				action position {
-					if (!startNewLayout) {
-						startNewLayout = YES;
+					if (!setPosition) {
+						setPosition = YES;
 						
-						if ([div->text length] > 0) {[divs addObject:div]; div = [div nextDivWithDelegate:delegate];}
+						div->posX = curX;
+						div->posY = curY;
+						div->positioned = YES;
 					}
-					
-					div->posX = curX;
-					div->posY = curY;
-					div->positioned = YES;
 				}
 
 				intnum = ("-"? [0-9]+) >paramset %setintnum;
@@ -422,16 +419,15 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				action enter_tag {
 					if (dropThisSpan) chars_deleted += p - outputbegin;
 					else if (p > outputbegin) [div->text appendString:send()];
-					if (p == pe) reached_end = YES;
+					if (p == pe) reachedEnd = YES;
 					
 					if (p != pb) {
 						[div->spans addObject:current_span];
 						
-						if (!reached_end) current_span = [current_span cloneWithDelegate:delegate];
+						if (!reachedEnd) current_span = [current_span cloneWithDelegate:delegate];
 					}
 					
 					last_tag_start = p;
-					dropThisSpan = NO;
 				}
 				
 				action exit_tag {			
@@ -441,18 +437,12 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					current_span->offset = (p - pb) - chars_deleted;
 					outputbegin = p;
 					
-					if (startNewLayout) {
-						startNewLayout = NO;
-						setAlignForDiv = NO;
-						chars_deleted = outputbegin - pb;
-					}
-					
 					p--;
 				}
 								
 				special = ("\\" :> any) @backslash_handler | tag >enter_tag @exit_tag;
 				sub_text_char = [^\\{];
-				sub_text = sub_text_char*;
+				sub_text = sub_text_char+;
 				
 				main := ((sub_text | special)* "\\"?) %/enter_tag;
 			}%%
@@ -461,7 +451,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			%%write exec;
 			%%write eof;
 
-			if (!reached_end) Codecprintf(NULL, "parse error: %s\n", [inputText UTF8String]);
+			if (!reachedEnd) Codecprintf(NULL, "parse error: %s\n", [inputText UTF8String]);
 			if (linebuf[linelen-1] == '\\') [div->text appendString:@"\\"];
 			[divs addObject:div];
 		}

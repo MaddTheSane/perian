@@ -123,7 +123,7 @@ NSMutableDictionary*	mCache = 0;
 				Handle nameData = Get1Resource(thng->componentName.resType, thng->componentName.resID);
 
 				if (firstType == 0 && singletype)
-					firstType = [singletype copy];
+					firstType = singletype;
 				
 				if (desc.componentType == 'vdig')
 					singletype = @"Camera Driver";
@@ -232,9 +232,12 @@ NSMutableDictionary*	mCache = 0;
 	
 	UseResFile(saveRes);
 
-	if (isDirectory && bundleRef && resFile >= 0)
+	if (isDirectory && bundleRef)
 	{
-		CFBundleCloseBundleResourceMap(bundleRef, resFile);
+		if (resFile >= 0)
+			CFBundleCloseBundleResourceMap(bundleRef, resFile);
+		
+		CFRelease(bundleRef);
 	}
 	else if (!isDirectory && resFile >= 0)
 	{

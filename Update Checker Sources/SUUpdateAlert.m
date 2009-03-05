@@ -15,10 +15,10 @@
 
 - initWithAppcastItem:(SUAppcastItem *)item
 {
-	NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"SUUpdateAlert" ofType:@"nib"];
+	NSBundle *current = [NSBundle bundleForClass:[self class]];
+	NSString *path = [current pathForResource:@"SUUpdateAlert" ofType:@"nib"];
 	if (!path) // slight hack to resolve issues with running with in configurations
 	{
-		NSBundle *current = [NSBundle bundleForClass:[self class]];
 		NSBundle *framework = [NSBundle mainBundle];
 		path = [framework pathForResource:@"SUUpdateAlert" ofType:@"nib"];
 	}

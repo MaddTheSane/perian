@@ -88,7 +88,7 @@
 	}
 	
 	NSString *skippedVersion = [[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY];
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+
 	if (updateAvailable && (!skippedVersion || 
 		(skippedVersion && ![skippedVersion isEqualToString:[latest versionString]]))) {
 		if(manualRun)
