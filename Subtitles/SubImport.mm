@@ -716,7 +716,7 @@ static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHa
 	return theMedia;
 }
 
-static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTime, uint16_t *endTime, uint8_t *forced) {
+static Boolean ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTime, uint16_t *endTime, uint8_t *forced) {
 	// to set whether the key sequences 0x01 - 0x02 have been seen
 	Boolean loop = TRUE;
 	*startTime = *endTime = 0;
@@ -725,6 +725,8 @@ static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTim
 	int controlOffset = (packet[2] << 8) + packet[3];
 	while(loop)
 	{	
+		if(controlOffset > length)
+			return NO;
 		uint8_t *controlSeq = packet + controlOffset;
 		int32_t i = 4;
 		int32_t end = length - controlOffset;
@@ -778,7 +780,7 @@ static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTim
 					
 				default:
 					Codecprintf(NULL, " !! Unknown control sequence 0x%02x  aborting (offset %x)\n", controlSeq[i], i);
-					loop = FALSE;
+					return NO;
 					break;
 			}
 		}
@@ -788,6 +790,7 @@ static void ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTim
 			loop = false;
 		}
 	}
+	return YES;
 }
 
 typedef struct {
@@ -837,7 +840,8 @@ static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onl
 		
 		uint16_t startTimestamp, endTimestamp;
 		uint8_t forced;
-		ReadPacketTimes(extracted, extractedSize, &startTimestamp, &endTimestamp, &forced);
+		if(!ReadPacketTimes(extracted, extractedSize, &startTimestamp, &endTimestamp, &forced))
+			continue;
 		if(onlyForced && !forced)
 			continue;
 		if(forced)
