@@ -117,7 +117,7 @@ else
             if [ `arch` = ppc ] ; then
                 "$SRCROOT/ffmpeg/configure" --cc=$CC --enable-cross-compile --arch=i386 --extra-ldflags="$cflags -arch i386" --extra-cflags="-arch i386 $cflags $optcflags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
             else
-                "$SRCROOT/ffmpeg/configure" --cc=$CC --extra-cflags="$cflags $optcflags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
+                "$SRCROOT/ffmpeg/configure" --cc=$CC --extra-ldflags="$cflags -arch i386" --extra-cflags="-arch i386 $cflags $optcflags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
             fi
         
             make depend > /dev/null 2>&1 || true

@@ -74,7 +74,7 @@ void FFMpegCodecprintf(void* ptr, int level, const char* fmt, va_list vl)
     static int print_prefix=1;
 	int print_header = 1;
     AVClass* avc= ptr ? *(AVClass**)ptr : NULL;
-    if(level>av_log_level)
+    if(level>av_log_get_level())
         return;
 
     if(print_prefix && avc) {
