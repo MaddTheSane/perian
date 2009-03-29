@@ -1187,11 +1187,9 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 {
 	if (self = [super init]) {
 		lines = [[NSMutableArray alloc] init];
-		outpackets = [[NSMutableArray alloc] init];
 		finished = NO;
-		write_gap = NO;
-		toReturn = nil;
-		last_time = 0;
+		last_begin_time = last_end_time = 0;
+		linesInput = 0;
 	}
 	
 	return self;
@@ -1199,24 +1197,20 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 
 -(void)dealloc
 {
-	[outpackets release];
 	[lines release];
 	[super dealloc];
 }
 
--(void)addLine:(SubLine *)sline
+static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, void *unused)
 {
-	if (sline->begin_time < sline->end_time)
-		[lines addObject:sline];
-}
-
-static int cmp_line(id a, id b, void* unused)
-{			
-	SubLine *av = (SubLine*)a, *bv = (SubLine*)b;
+	SubLine *al = (SubLine*)a, *bl = (SubLine*)b;
 	
-	if (av->begin_time > bv->begin_time) return NSOrderedDescending;
-	if (av->begin_time < bv->begin_time) return NSOrderedAscending;
-	return NSOrderedSame;
+	if (al->begin_time > bl->begin_time) return kCFCompareGreaterThan;
+	if (al->begin_time < bl->begin_time) return kCFCompareLessThan;
+	
+	if (al->no > bl->no) return kCFCompareGreaterThan;
+	if (al->no < bl->no) return kCFCompareLessThan;
+	return kCFCompareEqualTo;
 }
 
 static int cmp_uint(const void *a, const void *b)
@@ -1228,186 +1222,121 @@ static int cmp_uint(const void *a, const void *b)
 	return 0;
 }
 
-static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
+-(void)addLine:(SubLine *)line
 {
-	return (base >= test_s) && (base < test_e);
+	if (line->begin_time >= line->end_time) {
+		if (line->begin_time)
+			Codecprintf(NULL, "Invalid times (%d and %d) for line \"%s\"", line->begin_time, line->end_time, [line->line UTF8String]);
+		return;
+	}
+	
+	line->no = linesInput++;
+	
+	int nlines = [lines count];
+	
+	if (!nlines || line->begin_time > ((SubLine*)[lines objectAtIndex:nlines-1])->begin_time) {
+		[lines addObject:line];
+	} else {
+		CFIndex i = CFArrayBSearchValues((CFArrayRef)lines, CFRangeMake(0, nlines), line, CompareLinesByBeginTime, NULL);
+		
+		if (i >= nlines)
+			[lines addObject:line];
+		else
+			[lines insertObject:line atIndex:i];
+	}
+	
 }
 
--(void)refill
+-(SubLine*)getNextRealSerializedPacket
 {
-	unsigned num = [lines count];
-	unsigned min_allowed = finished ? 1 : 2;
-	if (num < min_allowed) return;
-	unsigned times[num*2], last_last_end = 0;
-	SubLine *slines[num], *last=nil;
-	bool last_has_invalid_end = false;
-	
-	[lines sortUsingFunction:cmp_line context:nil];
-	[lines getObjects:slines];
-#ifdef SS_DEBUG
-	NSLog(@"pre - %@",lines);
-#endif	
-	//leave early if all subtitle lines overlap
+	int nlines = [lines count];
+	SubLine *first = [lines objectAtIndex:0];
+	int i;
+
 	if (!finished) {
-		bool all_overlap = true;
-		int i;
-		
-		for (i=0;i < num-1;i++) {
-			SubLine *c = slines[i], *n = slines[i+1];
-			if (c->end_time <= n->begin_time) {all_overlap = false; break;}
-		}
-		
-		if (all_overlap) return;
-		
-		for (i=0;i < num-1;i++) {
-			if (isinrange(slines[num-1]->begin_time, slines[i]->begin_time, slines[i]->end_time)) {
-				num = i + 1; break;
+		if (nlines > 1) {
+			unsigned maxEndTime = first->end_time;
+			
+			for (i = 1; i < nlines; i++) {
+				SubLine *l = [lines objectAtIndex:i];
+				
+				if (l->begin_time >= maxEndTime) {
+					goto canOutput;
+				}
+				
+				maxEndTime = MAX(maxEndTime, l->end_time);
 			}
 		}
+		
+		return nil;
 	}
 	
-	for (int i=0;i < num;i++) {
-		times[i*2]   = slines[i]->begin_time;
-		times[i*2+1] = slines[i]->end_time;
+canOutput:
+	NSMutableString *str = [NSMutableString stringWithString:first->line];
+	unsigned begin_time = last_end_time, end_time = first->end_time;
+	int deleted = 0;
+		
+	for (i = 1; i < nlines; i++) {
+		SubLine *l = [lines objectAtIndex:i];
+		if (l->begin_time >= end_time) break;
+		
+		//shorten packet end time if another shorter time (begin or end) is found
+		//as long as it isn't the begin time
+		end_time = MIN(end_time, l->end_time);
+		if (l->begin_time > begin_time)
+			end_time = MIN(end_time, l->begin_time);
+		
+		if (l->begin_time <= begin_time)
+			[str appendString:l->line];
 	}
 	
-	qsort(times, num*2, sizeof(unsigned), cmp_uint);
-	
-	for (int i=0;i < num*2; i++) {
-		if (i > 0 && times[i-1] == times[i]) continue;
-		NSMutableString *accum = nil;
-		unsigned start = times[i], last_end = start, next_start=times[num*2-1], end = start;
-		bool finishedOutput = false, is_last_line = false;
+	for (i = 0; i < nlines; i++) {
+		SubLine *l = [lines objectAtIndex:i - deleted];
 		
-		// Add on packets until we find one that marks it ending (by starting later)
-		// ...except if we know this is the last input packet from the stream, then we have to explicitly flush it
-		if (finished && (times[i] == slines[num-1]->begin_time || times[i] == slines[num-1]->end_time)) finishedOutput = is_last_line = true;
-		
-		for (int j=0; j < num; j++) {
-			if (isinrange(times[i], slines[j]->begin_time, slines[j]->end_time)) {
-				
-				// find the next line that starts after this one
-				if (j != num-1) {
-					unsigned ns = slines[j]->end_time;
-					for (int h = j; h < num; h++) if (slines[h]->begin_time != slines[j]->begin_time) {ns = slines[h]->begin_time; break;}
-						next_start = MIN(next_start, ns);
-				} else next_start = slines[j]->end_time;
-				
-				last_end = MAX(slines[j]->end_time, last_end);
-				if (accum) [accum appendString:slines[j]->line]; else accum = [[slines[j]->line mutableCopy] autorelease];
-			} else if (j == num-1) finishedOutput = true;
-		}
-		
-		if (accum && finishedOutput) {
-			[accum deleteCharactersInRange:NSMakeRange([accum length] - 1, 1)]; // delete last newline
-#ifdef SS_DEBUG
-			NSLog(@"%d - %d %d",start,last_end,next_start);	
-#endif
-			if (last_has_invalid_end) {
-				if (last_end < next_start) { 
-					int j, set;
-					for (j=i; j >= 0; j--) if (times[j] == last->begin_time) break;
-					set = times[j+1];
-					last->end_time = set;
-				} else last->end_time = MIN(last_last_end,start); 
-			}
-			end = last_end;
-			last_has_invalid_end = false;
-			if (last_end > next_start && !is_last_line) last_has_invalid_end = true;
-			SubLine *event = [[SubLine alloc] initWithLine:accum start:start end:end];
-			
-			[outpackets addObject:event];
-			
-			last_last_end = last_end;
-			last = event;
+		if (l->end_time == end_time) {
+			[lines removeObjectAtIndex:i - deleted];
+			deleted++;
 		}
 	}
 	
-	if (last_has_invalid_end) {
-		last->end_time = times[num*2 - 3]; // end time of line before last
-	}
-#ifdef SS_DEBUG
-	NSLog(@"out - %@",outpackets);
-#endif
-	
-	if (finished) [lines removeAllObjects];
-	else {
-		num = [lines count];
-		for (int i = 0; i < num-1; i++) {
-			if (isinrange(slines[num-1]->begin_time, slines[i]->begin_time, slines[i]->end_time)) break;
-			[lines removeObject:slines[i]];
-		}
-	}
-#ifdef SS_DEBUG
-	NSLog(@"post - %@",lines);
-#endif
-}
-
--(SubLine*)_getSerializedPacket
-{
-	if ([outpackets count] == 0)  {
-		[self refill];
-		if ([outpackets count] == 0) 
-			return nil;
-	}
-	
-	SubLine *sl = [outpackets objectAtIndex:0];
-	[outpackets removeObjectAtIndex:0];
-	
-	[sl autorelease];
-	return sl;
+	return [[SubLine alloc] initWithLine:str start:begin_time end:end_time];
 }
 
 -(SubLine*)getSerializedPacket
 {
-	if (!last_time) {
-		SubLine *ret = [self _getSerializedPacket];
-		if (ret) {
-			last_time = ret->end_time;
-			write_gap = YES;
-		}
-		return ret;
-	}
-	
-restart:
-	
-	if (write_gap) {
-		SubLine *next = [self _getSerializedPacket];
-		SubLine *sl;
+	int nlines = [lines count];
 
-		if (!next) return nil;
-
-		toReturn = [next retain];
-		
-		write_gap = NO;
-		
-		if (toReturn->begin_time > last_time) sl = [[SubLine alloc] initWithLine:@"\n" start:last_time end:toReturn->begin_time];
-		else goto restart;
-		
-		return [sl autorelease];
+	if (!nlines) return nil;
+	
+	SubLine *nextline = [lines objectAtIndex:0], *ret;
+	
+	if (nextline->begin_time > last_end_time) {
+		ret = [[SubLine alloc] initWithLine:@"\n" start:last_end_time end:nextline->begin_time];
 	} else {
-		SubLine *ret = toReturn;
-		last_time = ret->end_time;
-		write_gap = YES;
-		
-		toReturn = nil;
-		return [ret autorelease];
+		ret = [self getNextRealSerializedPacket];
 	}
+	
+	if (!ret) return nil;
+	
+	last_begin_time = ret->begin_time;
+	last_end_time   = ret->end_time;
+		
+	return [ret autorelease];
 }
 
--(void)setFinished:(BOOL)f
+-(void)setFinished:(BOOL)_finished
 {
-	finished = f;
+	finished = _finished;
 }
 
 -(BOOL)isEmpty
 {
-	return [lines count] == 0 && [outpackets count] == 0 && !toReturn;
+	return [lines count] == 0;
 }
 
 -(NSString*)description
 {
-	return [NSString stringWithFormat:@"i: %d o: %d finished inputting: %d",[lines count],[outpackets count],finished];
+	return [NSString stringWithFormat:@"lines left: %d finished inputting: %d",[lines count],finished];
 }
 @end
 
@@ -1419,6 +1348,7 @@ restart:
 		line = [l retain];
 		begin_time = s;
 		end_time = e;
+		no = 0;
 	}
 	
 	return self;
@@ -1432,7 +1362,7 @@ restart:
 
 -(NSString*)description
 {
-	return [NSString stringWithFormat:@"\"%@\", from %d s to %d s",line,begin_time,end_time];
+	return [NSString stringWithFormat:@"\"%@\", from %d s to %d s",[line substringToIndex:[line length]-1],begin_time,end_time];
 }
 @end
 

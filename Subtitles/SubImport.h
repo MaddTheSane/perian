@@ -40,16 +40,19 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, Ti
 	@public
 	NSString *line;
 	unsigned begin_time, end_time;
+	unsigned no; // line number, used only by SubSerializer
 }
 -(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e;
 @end
 
 @interface SubSerializer : NSObject
 {
-	NSMutableArray *lines, *outpackets;
-	BOOL finished, write_gap;
-	unsigned last_time;
-	SubLine *toReturn;
+	// input lines, sorted by 1. beginning time 2. original insertion order
+	NSMutableArray *lines;
+	BOOL finished;
+	
+	unsigned last_begin_time, last_end_time;
+	unsigned linesInput;
 }
 -(void)addLine:(SubLine *)sline;
 -(void)setFinished:(BOOL)finished;
@@ -65,7 +68,6 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, Ti
 }
 
 - (id)initWithTime:(long)time offset:(long)offset;
-
 @end
 
 

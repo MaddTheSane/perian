@@ -36,7 +36,7 @@ extern "C"
 @interface SubRenderSpan : NSObject {
 	@public;
 	UniCharArrayOffset offset;
-	__strong void *ex;
+	id ex;
 	SubRenderer *delegate;
 }
 +(SubRenderSpan*)startingSpanForDiv:(SubRenderDiv*)div delegate:(SubRenderer*)delegate;

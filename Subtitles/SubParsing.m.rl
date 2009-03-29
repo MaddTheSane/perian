@@ -40,7 +40,16 @@
 	[super dealloc];
 }
 
--(void)finalize {[delegate releaseSpanExtra:ex]; [super finalize];}
+-(void)finalize
+{
+	[delegate releaseSpanExtra:ex];
+	[super finalize];
+}
+
+-(NSString*)description
+{
+	return [NSString stringWithFormat:@"Span at %d: %@", offset, [delegate describeSpanEx:ex]];
+}
 @end
 
 @implementation SubRenderDiv
@@ -191,15 +200,6 @@ void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSA
 %%machine SSAtag;
 %%write data;
 
-static NSMutableString *FilterSlashEscapes(NSMutableString *s)
-{
-	[s replaceOccurrencesOfString:@"\\n" withString:@"\n" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [s length])];
-	unichar nbsp = 0xA0;
-	
-	[s replaceOccurrencesOfString:@"\\h" withString:[NSString stringWithCharacters:&nbsp length:1] options:0 range: NSMakeRange(0,[s length])];
-	return s;
-}
-
 static int compare_layer(const void *a, const void *b)
 {
 	const SubRenderDiv *divA = *(id*)a, *divB = *(id*)b;
@@ -305,6 +305,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				action sethexnum {intnum = strtoul([psend() UTF8String], NULL, 16);}
 				action setfloatnum {floatnum = [psend() floatValue];}
 				action setstringval {strval = psend();}
+				action nullstring {strval = @"";}
 				action setxypos {curX=curY=-1; sscanf([psend() UTF8String], "(%d,%d)", &curX, &curY);}
 				
 				action ssaalign {
@@ -345,7 +346,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				intnum = ("-"? [0-9]+) >paramset %setintnum;
 				flag = [01] >paramset %setintnum;
 				floatnum = ("-"? [0-9]+ ("." [0-9]*)?) >paramset %setfloatnum;
-				string = ([^\\}]*) >paramset %setstringval;
+				string = (([^\\}]+) >paramset %setstringval | "" %nullstring );
 				color = ("H"|"&"){,2} (xdigit+) >paramset %sethexnum "&"?;
 				parens = "(" [^)]* ")";
 				xypos = ("(" "-"? [0-9]+ "," "-"? [0-9]+ ")") >paramset %setxypos;
@@ -358,6 +359,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"bord" floatnum %outlinesize
 							|"shad" floatnum %shadowdist
 							|"be" flag %bluredge
+							|"blur" floatnum
 							|"fn" string %fontname
 							|"fs" floatnum %fontsize
 							|"fscx" floatnum %scalex

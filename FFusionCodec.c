@@ -1017,7 +1017,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	FFusionDebugPrint("%p BeginBand #%d. (%sdecoded, packed %d)\n", glob, p->frameNumber, not(myDrp->decoded), glob->packedType);
 	
 	if (!glob->avContext) {
-		fprintf(stderr, "Perian Codec: QT tried to call BeginBand without preflighting!\n");
+		fprintf(stderr, "Perian: QT tried to call BeginBand without preflighting!\n");
 		return internalComponentErr;
 	}
 	

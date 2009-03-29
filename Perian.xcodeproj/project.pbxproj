@@ -274,7 +274,7 @@
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).dot",
 			);
-			script = "RAGEL=${PROJECT_DIR}/Subtitles/ragel\nRLCODEGEN=${PROJECT_DIR}/Subtitles/rlgen-cd\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
+			script = "RAGEL=${PROJECT_DIR}/Subtitles/ragel\nRLCODEGEN=${PROJECT_DIR}/Subtitles/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
 		};
 /* End PBXBuildRule section */
 

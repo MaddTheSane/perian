@@ -302,4 +302,5 @@ BOOL IsScriptASS(NSDictionary *headers)
 -(void)releaseStyleExtra:(void*)ex {}
 -(void)releaseSpanExtra:(void*)ex {}
 -(float)aspectRatio {return 4./3.;}
+-(NSString*)describeSpanEx:(void*)ex {return @"";}
 @end

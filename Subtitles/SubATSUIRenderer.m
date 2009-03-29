@@ -118,7 +118,12 @@ static CGColorRef CloneCGColorWithAlpha(CGColorRef c, float alpha)
 	ret->font = font;
 	ret->fontVertical = fontVertical;
 	
-	return [ret autorelease];
+	return ret;
+}
+
+-(NSString*)description
+{
+	return [NSString stringWithFormat:@"SpanEx with alpha %f/%f", primaryAlpha, outlineAlpha];
 }
 @end
 
@@ -415,7 +420,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 
 -(void*)spanExtraFromRenderDiv:(SubRenderDiv*)div
 {
-	return [[[SubATSUISpanEx alloc] initWithStyle:(ATSUStyle)div->styleLine->ex subStyle:div->styleLine colorSpace:srgbCSpace] autorelease];
+	return [[SubATSUISpanEx alloc] initWithStyle:(ATSUStyle)div->styleLine->ex subStyle:div->styleLine colorSpace:srgbCSpace];
 }
 
 -(void*)cloneSpanExtra:(SubRenderSpan*)span
@@ -423,10 +428,16 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	return [(SubATSUISpanEx*)span->ex clone];
 }
 
--(void)disposeSpanExtra:(void*)ex
+-(void)releaseSpanExtra:(void*)ex
 {
 	SubATSUISpanEx *spanEx = ex;
 	[spanEx release];
+}
+
+-(NSString*)describeSpanEx:(void*)ex
+{
+	SubATSUISpanEx *spanEx = ex;
+	return [spanEx description];
 }
 
 static void UpdateFontNameSize(SubATSUISpanEx *spanEx, float screenScale)
@@ -839,7 +850,7 @@ static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *d
 typedef struct {
 	UniCharArrayOffset *breaks;
 	ItemCount breakCount;
-	unsigned lStart, lEnd;
+	int lStart, lEnd;
 	SInt8 direction;
 } BreakContext;
 
@@ -869,7 +880,6 @@ static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanE
 			
 			if_different(outlineAlpha) {
 				if (endLayer) CGContextEndTransparencyLayer(c);
-				
 				CGContextSetAlpha(c, spanEx->outlineAlpha);
 				if (spanEx->outlineAlpha != 1.) {
 					endLayer = YES;
@@ -905,7 +915,7 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 		lineLen--;
 		if (!lineLen) return;
 	}
-	
+
 	if (textType == kTextLayerOutline && div->styleLine->borderStyle == kSubBorderStyleBox) {
 		ATSUTextMeasurement lineWidth, lineHeight, lineX, lineY;
 		UniCharArrayOffset breaks[2] = {thisBreak, thisBreak + lineLen};
@@ -943,30 +953,31 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 			RenderActualLine(layout, thisBreak, linelen, penX, penY, c, div, firstSpanEx, textType);
 			extraHeight = div->styleLine->outlineRadius;
 		} else {
-			int j, spans = [div->spans count];
+			int j, nspans = [div->spans count];
 			
 			//linear search for the next span to draw
-			for (j = 0; j < spans; j++) {
+			//XXX not at all sure how this works or if it's correct
+			for (j = 0; j < nspans; j++) {
 				SubRenderSpan *span = [div->spans objectAtIndex:j];
 				SubATSUISpanEx *spanEx = span->ex;
 				UniCharArrayOffset spanLen, drawStart, drawLen;
 				
-				if (j < spans-1) {
+				if (j < nspans-1) {
 					SubRenderSpan *nextSpan = [div->spans objectAtIndex:j+1];
 					spanLen = nextSpan->offset - span->offset;
 				} else spanLen = [div->text length] - span->offset;
-				
-				if (spanLen == 0) continue;
-				if ((span->offset + spanLen) < thisBreak) continue; // too early
-				if (span->offset >= nextBreak) break; // too far ahead
 				
 				if (span->offset < thisBreak) { // text spans a newline
 					drawStart = thisBreak;
 					drawLen = spanLen - (thisBreak - span->offset);
 				} else {
 					drawStart = span->offset;
-					drawLen = spanLen;
+					drawLen = MIN(spanLen, nextBreak - span->offset);
 				}
+				
+				if (spanLen == 0 || drawLen == 0) continue;
+				if ((span->offset + spanLen) < thisBreak) continue; // too early
+				if (span->offset >= nextBreak) break; // too far ahead
 
 				endLayer = SetupCGForSpan(c, spanEx, lastSpanEx, div, textType, endLayer);
 				RenderActualLine(layout, drawStart, drawLen, (textType == kTextLayerShadow) ? (penX + FloatToFixed(spanEx->shadowDist)) : penX, 
@@ -979,7 +990,7 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 
 		penY += breakc.direction * (GetLineHeight(layout, thisBreak) + FloatToFixed(extraHeight));
 	}
-	
+		
 	if (endLayer) CGContextEndTransparencyLayer(c);
 
 	return penY;
@@ -1040,7 +1051,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 			resetPens = YES;
 			lastLayer = div->layer;
 		}
-		
+				
 		NSRect marginRect = NSMakeRect(div->marginL, div->marginV, context->resX - div->marginL - div->marginR, context->resY - div->marginV - div->marginV);
 		
 		marginRect.origin.x *= screenScaleX;
@@ -1173,21 +1184,20 @@ void SubPrerollFromHeader(char *header, int headerLen)
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	SubtitleRendererPtr s = headerLen ? SubInitForSSA(header, headerLen, 640, 480)
 								      : SubInitNonSSA(640, 480);
-	
 	/*
 	CGColorSpaceRef csp = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	void *buf = malloc(640 * 480 * 4);
 	CGContextRef c = CGBitmapContextCreate(buf,640,480,8,640 * 4,csp,kCGImageAlphaPremultipliedFirst);
 	
 	if (!headerLen) {
-		SubRenderPacket(s, c, (CFStringRef)@"to Be continued", 640, 480);
+		SubRenderPacket(s, c, (CFStringRef)@"Abcde .", 640, 480);
 	} else {
 		NSArray *styles = [s->context->styles allValues];
 		int i, nstyles = [styles count];
 		
 		for (i = 0; i < nstyles; i++) {
 			SubStyle *sty = [styles objectAtIndex:i];
-			NSString *line = [NSString stringWithFormat:@"0,0,%@,,0,0,0,,{\fs1}If you are seeing this message, your player doesn't fully support the formatted subtitle track. It is recommended you switch to the unformatted track.", sty->name];
+			NSString *line = [NSString stringWithFormat:@"0,0,%@,,0,0,0,,Abcde .", sty->name];
 			SubRenderPacket(s, c, (CFStringRef)line, 640, 480);
 		}
 	}

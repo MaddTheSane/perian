@@ -12,7 +12,7 @@
 #include <stdarg.h>
 #include "log.h"
 
-#define CODEC_HEADER			"Perian Codec: "
+#define CODEC_HEADER			"Perian: "
 
 static int Codecvprintf(FILE *fileLog, const char *format, va_list va, int print_header)
 {

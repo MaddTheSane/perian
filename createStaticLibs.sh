@@ -154,40 +154,41 @@ else
         fi
         make -j3
     fi
+
+	#######################
+	# lipo/copy shlibs
+	#######################
+	BUILDDIR="$BUILT_PRODUCTS_DIR/Universal"
+	INTEL="$BUILT_PRODUCTS_DIR/intel"
+	PPC="$BUILT_PRODUCTS_DIR/ppc"
+	
+	rm -rf "$BUILDDIR"
+	mkdir "$BUILDDIR"
+	echo $buildi386 $buildppc
+	if [ $buildi386 -eq $buildppc ] ; then
+		# lipo them
+		for aa in "$INTEL"/*/*.a ; do
+			echo lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
+			lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
+		done
+	else
+		if [ $buildppc -gt 0 ] ; then
+			archDir="ppc"
+			BUILDARCHDIR=$PPC
+		else
+			archDir="intel"
+			BUILDARCHDIR=$INTEL
+		fi
+		# just copy them
+		for aa in "$BUILDARCHDIR"/*/*.a ; do
+			echo cp "$aa" `echo -n $aa | sed 's/'$archDir'\/.*\//Universal\//'`
+			cp "$aa" `echo -n $aa | sed 's/'$archDir'\/.*\//Universal\//'`
+		done
+	fi
+	echo -n "$buildid_ffmpeg" > $OUTPUT_FILE
+	
+	mkdir "$SYMROOT/Universal" || true
+	cp "$BUILT_PRODUCTS_DIR/Universal"/* "$SYMROOT/Universal"
+	ranlib "$SYMROOT/Universal"/*.a
+
 fi
-
-#######################
-# lipo/copy shlibs
-#######################
-BUILDDIR="$BUILT_PRODUCTS_DIR/Universal"
-INTEL="$BUILT_PRODUCTS_DIR/intel"
-PPC="$BUILT_PRODUCTS_DIR/ppc"
-
-rm -rf "$BUILDDIR"
-mkdir "$BUILDDIR"
-echo $buildi386 $buildppc
-if [ $buildi386 -eq $buildppc ] ; then
-    # lipo them
-    for aa in "$INTEL"/*/*.a ; do
-        echo lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
-        lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
-    done
-else
-    if [ $buildppc -gt 0 ] ; then
-        archDir="ppc"
-        BUILDARCHDIR=$PPC
-    else
-        archDir="intel"
-        BUILDARCHDIR=$INTEL
-    fi
-    # just copy them
-    for aa in "$BUILDARCHDIR"/*/*.a ; do
-        echo cp "$aa" `echo -n $aa | sed 's/'$archDir'\/.*\//Universal\//'`
-        cp "$aa" `echo -n $aa | sed 's/'$archDir'\/.*\//Universal\//'`
-    done
-fi
-echo -n "$buildid_ffmpeg" > $OUTPUT_FILE
-
-mkdir "$SYMROOT/Universal" || true
-cp "$BUILT_PRODUCTS_DIR/Universal"/* "$SYMROOT/Universal"
-ranlib "$SYMROOT/Universal"/*.a
