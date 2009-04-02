@@ -696,7 +696,6 @@
 		F57676050BE1A18300B2434B /* FrameBuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FrameBuffer.h; sourceTree = "<group>"; };
 		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
-		F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBPerianPanePListGenerator.h; sourceTree = "<group>"; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -844,7 +843,6 @@
 				61D517710AE0402E00A671E1 /* CommonUtils.h */,
 				61D517720AE0402E00A671E1 /* CommonUtils.c */,
 				6116E74E0B4738CE0020F1CE /* CodecIDs.h */,
-				3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */,
 			);
 			indentWidth = 4;
 			name = Source;
@@ -970,6 +968,7 @@
 				3D2623160C6A60B700FD1242 /* SubRenderer.h */,
 				3D211A210B6B1A660051299D /* SubUtilities.h */,
 				3D211A220B6B1A660051299D /* SubUtilities.m */,
+				3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */,
 				3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */,
 				6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */,
 				6123D6230AD0A3FE003EDE52 /* VobSubCodec.h */,
@@ -1145,7 +1144,6 @@
 				113077FE0D50139500ECDECC /* ECQTComponent.h */,
 				83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */,
 				83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */,
-				F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */,
 				F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */,
 			);
 			name = PrefPane;
