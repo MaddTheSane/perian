@@ -117,7 +117,6 @@ typedef struct
     AVCodec			*avCodec;
     AVCodecContext	*avContext;
     OSType			componentType;
-    char			hasy420;
 	FILE			*fileLog;
 	AVFrame			lastDisplayedFrame;
 	FFusionPacked	packedType;
@@ -316,15 +315,6 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 {
     ComponentResult err;
     ComponentDescription descout;
-    ComponentDescription cd;
-    Component c = 0;
-    long bitfield;
-	
-    cd.componentType = 'imdc';
-    cd.componentSubType = 'y420';
-    cd.componentManufacturer = 0;
-    cd.componentFlags = 0;
-    cd.componentFlagsMask = 0;
     
     GetComponentInfo((Component)self, &descout, 0, 0, 0);
 	
@@ -348,7 +338,6 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         glob->drawBandUPP = NULL;
         glob->pixelTypes = NewHandle(10 * sizeof(OSType));
         glob->avCodec = 0;
-        glob->hasy420 = 0;
         glob->componentType = descout.componentSubType;
 		glob->packedType = PACKED_ALL_IN_FIRST_FRAME;  //Unless we have reason to believe otherwise.
 		glob->data.frames = NULL;
@@ -359,23 +348,6 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 			glob->fileLog = fopen(path, "a");
 		}
 		glob->shouldUseReturnedFrame = 0;
-
-//        c = FindNextComponent(c, &cd);
-		
-        if (c != 0)
-        {            
-            Gestalt(gestaltSystemVersion, &bitfield);
-            
-            if (bitfield >= 0x1010)
-            {
-  //              Codecprintf(glob->fileLog, "Use speedy y420 component\n");
-                glob->hasy420 = 1;
-            }
-        }
-        else
-        {
-  //          Codecprintf(glob->fileLog, "Use slow y420 component\n");
-        }
 		
         // Open and target an instance of the base decompressor as we delegate
         // most of our calls to the base decompressor instance
@@ -874,43 +846,26 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
     capabilities->wantedPixelSize = 0;
     
-    // Type of pixels used in output
-    // If QuickTime got the y420 component it is cool
-    // since libavcodec ouputs y420
-    // If not we'll do some king of conversion to 2vuy
-    
     HLock(glob->pixelTypes);
     pos = *((OSType **)glob->pixelTypes);
     
     index = 0;
 	
 	if (!err) {
-	switch (glob->avContext->pix_fmt)
-	{
-		case PIX_FMT_BGR24:
-			pos[index++] = k24RGBPixelFormat;
-			break;
-		case PIX_FMT_RGB32:
-			pos[index++] = k32ARGBPixelFormat;
-			break;
-		case PIX_FMT_RGB24:
-			pos[index++] = k24RGBPixelFormat;
-			break;
-		case PIX_FMT_YUVA420P:
-			pos[index++] = k4444YpCbCrA8PixelFormat;
-			break;
-		case PIX_FMT_YUV420P:
-		default:
-			if (glob->hasy420)
-			{
-				pos[index++] = 'y420';
-			}
-			else
-			{
-				pos[index++] = k2vuyPixelFormat;        
-			}
-			break;
-	}
+		OSType qtPixFmt = ColorConversionDstForPixFmt(glob->avContext->pix_fmt);
+		
+		/*
+		 an error here means either
+		 1) a color converter for this format isn't implemented
+		 2) we know QT doesn't like this format and will give us argb 32bit instead
+		 
+		 in the case of 2 we have to special-case bail right here, since errors
+		 in BeginBand are ignored
+		 */
+		if (qtPixFmt)
+			pos[index++] = qtPixFmt;
+		else
+			err = featureUnsupported;
 	}
     
     pos[index++] = 0;
@@ -1017,8 +972,12 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	FFusionDebugPrint("%p BeginBand #%d. (%sdecoded, packed %d)\n", glob, p->frameNumber, not(myDrp->decoded), glob->packedType);
 	
 	if (!glob->avContext) {
-		fprintf(stderr, "Perian: QT tried to call BeginBand without preflighting!\n");
+		Codecprintf(glob->fileLog, "Perian: QT tried to call BeginBand without preflighting!\n");
 		return internalComponentErr;
+	}
+	
+	if (p->frameNumber == 0 && myDrp->pixelFormat != ColorConversionDstForPixFmt(glob->avContext->pix_fmt)) {
+		Codecprintf(glob->fileLog, "QT gave us unwanted pixelFormat %s (%08x), this will not work\n", FourCCString(myDrp->pixelFormat), myDrp->pixelFormat);
 	}
 	
 	if(myDrp->decoded)
@@ -1364,7 +1323,6 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 
 			if (!glob->colorConv.clear) {
 				err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, NULL, myDrp->pixelFormat);
-				
 				if (err) goto err;
 			}
 			
@@ -1380,12 +1338,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	
 	if (!glob->colorConv.convert) {
 		err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, picture, myDrp->pixelFormat);
-		
-		if (err) {
-			Codecprintf(glob->fileLog, "Unsupported conversion from pixel format %d to %s (%08x) buffer\n",
-						glob->avContext->pix_fmt, FourCCString(myDrp->pixelFormat), myDrp->pixelFormat);
-			goto err;
-		}
+		if (err) goto err;
 	}
 	
 	glob->colorConv.convert(picture, (UInt8*)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height);

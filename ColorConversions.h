@@ -39,4 +39,5 @@ typedef struct ColorConversionFuncs {
 	ColorClearFuncPtr      clear;
 } ColorConversionFuncs;
 
+extern OSType ColorConversionDstForPixFmt(enum PixelFormat ffPixFmt);
 extern int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFmt, AVFrame *ffPicture, OSType qtPixFmt);
