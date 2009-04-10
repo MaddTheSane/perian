@@ -7,7 +7,7 @@ VERSION=1.1.3
 BETA=FALSE
 SRC_DIR=..
 BUILD_DIR=build
-ATV_BUILD_DIR=ATVComponents
+COMMAND_BUILD_DIR=CommandLineComponents
 RELEASE_NAME=Perian
 PERIAN_DIR=$(BUILD_DIR)/Perian
 ART_DIR=Artwork
@@ -31,13 +31,13 @@ BUILDFLAGS="BUILDCONFIGURATION=$(BUILDSTYLE)"
 
 release: compile createfolder diskimage
 
-atv: compile
+command: compile
 	@# clean build dir
-	rm -rf $(ATV_BUILD_DIR)
-	mkdir $(ATV_BUILD_DIR)
-	cp $(PERIAN_BUILD_DIR)/Perian.prefPane/Contents/Resources/Components/*.zip $(PERIAN_BUILD_DIR)/Perian.prefPane/Contents/Resources/Components/*/*.zip $(ATV_BUILD_DIR)
-	cp ATV-Perian-Install.sh $(ATV_BUILD_DIR)
-	makeself --nocrc --nocomp --nox11 ATVComponents Perian-ATV-$(VERSION).sh Perian ./ATV-Perian-Install.sh
+	rm -rf $(COMMAND_BUILD_DIR)
+	mkdir $(COMMAND_BUILD_DIR)
+	cp $(PERIAN_BUILD_DIR)/Perian.prefPane/Contents/Resources/Components/*.zip $(PERIAN_BUILD_DIR)/Perian.prefPane/Contents/Resources/Components/*/*.zip $(COMMAND_BUILD_DIR)
+	cp CommandLine-Perian-Install.sh $(COMMAND_BUILD_DIR)
+	makeself --nocrc --nocomp --nox11 $(COMMAND_BUILD_DIR) Perian-CommandLine-$(VERSION).sh Perian ./CommandLine-Perian-Install.sh
 
 compile:
 	$(MAKE) $(BUILDFLAGS) -C $(SRC_DIR)
