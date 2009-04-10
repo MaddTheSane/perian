@@ -23,6 +23,8 @@
 			<dict>
 				<key>cancelDynRangeSheet</key>
 				<string>id</string>
+				<key>dismissMultiChannelSheet</key>
+				<string>id</string>
 				<key>installUninstall</key>
 				<string>id</string>
 				<key>launchDonate</key>
@@ -64,6 +66,8 @@
 				<string>NSButton</string>
 				<key>button_loadExternalSubtitles</key>
 				<string>NSButton</string>
+				<key>button_multiChannelNeverShow</key>
+				<string>NSButton</string>
 				<key>button_updateCheck</key>
 				<string>NSButton</string>
 				<key>button_website</key>
@@ -84,11 +88,15 @@
 				<string>NSTextField</string>
 				<key>textField_installStatus</key>
 				<string>NSTextField</string>
+				<key>textField_multiChannelText</key>
+				<string>NSTextField</string>
 				<key>textField_updateStatus</key>
 				<string>NSTextField</string>
 				<key>textView_about</key>
 				<string>NSTextView</string>
 				<key>window_dynRangeSheet</key>
+				<string>NSWindow</string>
+				<key>window_multiChannelSheet</key>
 				<string>NSWindow</string>
 			</dict>
 			<key>SUPERCLASS</key>

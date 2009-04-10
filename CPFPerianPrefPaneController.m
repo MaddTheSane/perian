@@ -26,6 +26,7 @@
 #define LastInstalledVersionKey CFSTR("LastInstalledVersion")
 #define AC3TwoChannelModeKey CFSTR("twoChannelMode")
 #define ExternalSubtitlesKey CFSTR("LoadExternalSubtitles")
+#define DontShowMultiChannelWarning CFSTR("DontShowMultiChannelWarning")
 
 //Old
 #define AC3StereoOverDolbyKey CFSTR("useStereoOverDolby")
@@ -881,6 +882,15 @@
 	}
 }
 
+- (void)displayMultiChannelWarning
+{
+	NSString *multiChannelWarning = NSLocalizedString(@"<p style=\"font: 13pt Lucida Grande;\">Multi-Channel Output is not Dolby Digital Passthrough!  It is designed for those with multiple dicrete speakers connected to their mac.  If you selected this expecting passthrough, you are following the wrong instructions.  Follow <a href=\"http://www.cod3r.com/2008/02/the-correct-way-to-enable-ac3-passthrough-with-quicktime/\">these</a> instead.</p>", @"");
+	NSAttributedString *multiChannelWarningAttr = [[NSAttributedString alloc] initWithHTML:[multiChannelWarning dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:nil];
+	[textField_multiChannelText setAttributedStringValue:multiChannelWarningAttr];
+	[multiChannelWarningAttr release];
+	[NSApp beginSheet:window_multiChannelSheet modalForWindow:[[self mainView] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
+}
+
 - (IBAction)set2ChannelModePopup:(id)sender;
 {
 	int selected = [popup_outputMode indexOfSelectedItem];
@@ -897,6 +907,8 @@
 			break;
 		case 3:
 			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:0];
+			if(![self getBoolFromKey:DontShowMultiChannelWarning forAppID:perianAppID withDefault:NO])
+				[self displayMultiChannelWarning];
 			break;
 		default:
 			break;
@@ -953,6 +965,14 @@
 	[NSApp endSheet:window_dynRangeSheet];
 	[self saveAC3DynamicRange:nextDynValue];
 	[window_dynRangeSheet orderOut:self];
+}
+
+- (IBAction)dismissMultiChannelSheet:(id)sender
+{
+	[NSApp endSheet:window_multiChannelSheet];
+	[self setKey:DontShowMultiChannelWarning forAppID:perianAppID fromBool:[button_multiChannelNeverShow state]];
+	[window_multiChannelSheet orderOut:self];
+	CFPreferencesAppSynchronize(perianAppID);
 }
 
 #pragma mark Subtitles

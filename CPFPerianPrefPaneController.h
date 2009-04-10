@@ -89,6 +89,10 @@ typedef enum
 	
 	IBOutlet NSButton					*button_loadExternalSubtitles;
 	
+	IBOutlet NSWindow					*window_multiChannelSheet;
+	IBOutlet NSTextField				*textField_multiChannelText;
+	IBOutlet NSButton					*button_multiChannelNeverShow;
+	
 	//About
 	IBOutlet NSTextView					*textView_about;
 	IBOutlet NSButton					*button_website;
@@ -125,6 +129,8 @@ typedef enum
 - (IBAction)setAC3DynamicRangeSlider:(id)sender;
 - (IBAction)cancelDynRangeSheet:(id)sender;
 - (IBAction)saveDynRangeSheet:(id)sender;
+
+- (IBAction)dismissMultiChannelSheet:(id)sender;
 
 //Component List
 - (NSString *)checkComponentStatusByBundleIdentifier:(NSString *)bundleID;

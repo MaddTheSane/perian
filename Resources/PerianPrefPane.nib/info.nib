@@ -5,15 +5,16 @@
 	<key>IBFramework Version</key>
 	<string>677</string>
 	<key>IBLastKnownRelativeProjectPath</key>
-	<string>Perian.xcodeproj</string>
+	<string>../Perian.xcodeproj</string>
 	<key>IBOldestOS</key>
 	<integer>5</integer>
 	<key>IBOpenObjects</key>
 	<array>
 		<integer>32</integer>
+		<integer>245</integer>
 	</array>
 	<key>IBSystem Version</key>
-	<string>9F33</string>
+	<string>9G55</string>
 	<key>targetFramework</key>
 	<string>IBCocoaFramework</string>
 </dict>
