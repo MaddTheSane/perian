@@ -232,10 +232,14 @@ void FFusionRunUpdateCheck()
         CFStringRef absLocation = CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app");
         if(CFStringGetFileSystemRepresentation(absLocation, fileRep, 1024))
             if(FSPathMakeRef((UInt8 *)fileRep, updateCheckRef, NULL) != noErr)
-                return;  //We have failed
+                goto err;  //We have failed
     }
 	pthread_t thread;
 	pthread_create(&thread, NULL, launchUpdateChecker, updateCheckRef);
+	
+	return;
+err:
+	free(updateCheckRef);
 }
 
 static void RecomputeMaxCounts(FFusionGlobals glob)

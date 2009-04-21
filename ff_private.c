@@ -209,7 +209,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	AudioStreamBasicDescription asbd;
 	AVCodecContext *codec;
 	UInt32 ioSize;
-	OSStatus err;
+	OSStatus err = noErr;
 	
 	uint8_t *cookie = NULL;
 	size_t cookieSize = 0;
@@ -227,28 +227,45 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		asbd.mFormatID = 'ms\0\0' + codec->codec_tag; /* the number is stored in the last byte => big endian */
 	
 	/* Ask the AudioToolbox about vbr of the codec */
+	// FIXME this sets vbr even if it was encoded in CBR mode
+	// which means our mBytesPerPacket is wrong for CBR mp3 (does not really matter)
 	ioSize = sizeof(UInt32);
 	AudioFormatGetProperty(kAudioFormatProperty_FormatIsVBR, sizeof(AudioStreamBasicDescription), &asbd, &ioSize, &map->vbr);
 	
+	cookie = create_cookie(codec, &cookieSize, asbd.mFormatID, map->vbr);
+	
 	/* ask the toolbox about more information */
-	ioSize = sizeof(AudioStreamBasicDescription);
-	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
+	// FIXME the cookie for AAC is wrong somehow, passing it in breaks FormatInfo & ASBDFromESDS
+	// either fix it (like in MKV) or just ignore it
+	if (asbd.mFormatID != kAudioFormatMPEG4AAC) {
+		ioSize = sizeof(AudioStreamBasicDescription);
+		err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, &cookie, &ioSize, &asbd);
+		if (err || !asbd.mFormatID)
+			fprintf(stderr, "AudioFormatGetProperty dislikes the magic cookie (error %ld / format id %lx)\n", err, asbd.mFormatID);
+	}
 	
 	/* Set some fields of the AudioStreamBasicDescription. Then ask the AudioToolbox
 		* to fill as much as possible before creating the SoundDescriptionHandle */
 	asbd.mSampleRate = codec->sample_rate;
 	asbd.mChannelsPerFrame = codec->channels;
-	if(!map->vbr && asbd.mBytesPerPacket == 0) /* This works for all the tested codecs. but is there any better way? */
+	if(!map->vbr && !asbd.mBytesPerPacket) /* This works for all the tested codecs. but is there any better way? */
 		asbd.mBytesPerPacket = codec->block_align; /* this is tested for alaw/mulaw/msadpcm */
-	asbd.mFramesPerPacket = codec->frame_size; /* works for mp3, all other codecs this is 0 anyway */
-	asbd.mBitsPerChannel = codec->bits_per_coded_sample;
 	
-	// this probably isn't quite right; FLV doesn't set frame_size or block_align, 
-	// but we need > 0 frames per packet or Apple's mp3 decoder won't work
+	/*
+	 FIXME: 
+	 - at least ffmp3 does not set these values without parsing+the decoder being enabled
+	   (so we avoid overwriting them from above for now)
+	 - it is unclear whether the ASBD values correspond to decoded or encoded data (same for lavc)
+	 - this should be 0 for formats with variable framesPerPacket
+	 - lavc frame_size is in bytes, mFramesPerPacket is in frames (maybe)
+	 */
+	if (!asbd.mFramesPerPacket)
+		asbd.mFramesPerPacket = codec->frame_size;
 	if (asbd.mFormatID == kAudioFormatMPEG4AAC)
 		asbd.mFramesPerPacket = 1024;
-	else if (asbd.mBytesPerPacket == 0 && asbd.mFramesPerPacket == 0)
+	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket)
 		asbd.mFramesPerPacket = 1;
+	asbd.mBitsPerChannel = codec->bits_per_coded_sample;
 	
 	// if we don't have mBytesPerPacket, we can't import as CBR. Probably should be VBR, and the codec
 	// either lied about kAudioFormatProperty_FormatIsVBR or isn't present
@@ -308,24 +325,26 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		aclSize = sizeof(AudioChannelLayout);
 	}
 	
-	if (asbd.mSampleRate > 0) {
-		err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, NULL, 0, kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndHdl);
+	if (asbd.mSampleRate > 0) {		
+		err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, cookie, cookieSize, kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndHdl);
+		
 		if(err) {
 			fprintf(stderr, "AVI IMPORTER: Error %ld creating the sound description\n", err);
-			return err;
+			goto bail;
 		}
-	
-		/* Create the magic cookie */
-		cookie = create_cookie(codec, &cookieSize, asbd.mFormatID, map->vbr);
-		if(cookie) {
-			err = QTSoundDescriptionSetProperty(sndHdl, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie,
-												cookieSize, cookie);
-			if(err) fprintf(stderr, "AVI IMPORTER: Error %ld appending the magic cookie to the sound description\n", err);
-			av_free(cookie);
+		
+		// QTSoundDescriptionCreate sets this to 576 which is wrong
+		if ((**sndHdl).version == 1 && asbd.mFormatID == kAudioFormatMPEGLayer3) {
+			SoundDescriptionV1Handle v1h = (SoundDescriptionV1Handle)sndHdl;
+			(**v1h).samplesPerPacket = 1152;
 		}
 	}	
 	map->sampleHdl = (SampleDescriptionHandle)sndHdl;
 	map->asbd = asbd;
+	
+bail:
+	if(cookie)
+		av_free(cookie);
 	
 	return noErr;
 } /* initialize_audio_map() */
