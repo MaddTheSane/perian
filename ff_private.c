@@ -234,16 +234,6 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	
 	cookie = create_cookie(codec, &cookieSize, asbd.mFormatID, map->vbr);
 	
-	/* ask the toolbox about more information */
-	// FIXME the cookie for AAC is wrong somehow, passing it in breaks FormatInfo & ASBDFromESDS
-	// either fix it (like in MKV) or just ignore it
-	if (asbd.mFormatID != kAudioFormatMPEG4AAC) {
-		ioSize = sizeof(AudioStreamBasicDescription);
-		err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, &cookie, &ioSize, &asbd);
-		if (err || !asbd.mFormatID)
-			fprintf(stderr, "AudioFormatGetProperty dislikes the magic cookie (error %ld / format id %lx)\n", err, asbd.mFormatID);
-	}
-	
 	/* Set some fields of the AudioStreamBasicDescription. Then ask the AudioToolbox
 		* to fill as much as possible before creating the SoundDescriptionHandle */
 	asbd.mSampleRate = codec->sample_rate;
@@ -251,19 +241,22 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	if(!map->vbr && !asbd.mBytesPerPacket) /* This works for all the tested codecs. but is there any better way? */
 		asbd.mBytesPerPacket = codec->block_align; /* this is tested for alaw/mulaw/msadpcm */
 	
+	/* ask the toolbox about more information */
+	ioSize = sizeof(AudioStreamBasicDescription);
+	err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
+	if (err || !asbd.mFormatID)
+		fprintf(stderr, "AudioFormatGetProperty dislikes the magic cookie (error %ld / format id %lx)\n", err, asbd.mFormatID);
+	
 	/*
 	 FIXME: 
 	 - at least ffmp3 does not set these values without parsing+the decoder being enabled
 	   (so we avoid overwriting them from above for now)
-	 - it is unclear whether the ASBD values correspond to decoded or encoded data (same for lavc)
-	 - this should be 0 for formats with variable framesPerPacket
-	 - lavc frame_size is in bytes, mFramesPerPacket is in frames (maybe)
+	 - this possibly should be 0 for formats with variable framesPerPacket like Vorbis
+	 - lavc frame_size is in samples, mFramesPerPacket is in frames (maybe)
 	 */
 	if (!asbd.mFramesPerPacket)
 		asbd.mFramesPerPacket = codec->frame_size;
-	if (asbd.mFormatID == kAudioFormatMPEG4AAC)
-		asbd.mFramesPerPacket = 1024;
-	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket)
+	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket) //FIXME what is this for?
 		asbd.mFramesPerPacket = 1;
 	asbd.mBitsPerChannel = codec->bits_per_coded_sample;
 	
@@ -331,12 +324,6 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		if(err) {
 			fprintf(stderr, "AVI IMPORTER: Error %ld creating the sound description\n", err);
 			goto bail;
-		}
-		
-		// QTSoundDescriptionCreate sets this to 576 which is wrong
-		if ((**sndHdl).version == 1 && asbd.mFormatID == kAudioFormatMPEGLayer3) {
-			SoundDescriptionV1Handle v1h = (SoundDescriptionV1Handle)sndHdl;
-			(**v1h).samplesPerPacket = 1152;
 		}
 	}	
 	map->sampleHdl = (SampleDescriptionHandle)sndHdl;
