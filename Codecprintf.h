@@ -19,6 +19,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#ifndef CODECPRINTF_H
+#define CODECPRINTF_H
+#include <stdio.h>
+#include <QuickTime/QuickTime.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,4 +36,5 @@ void FFMpegCodecprintf(void* ptr, int level, const char* fmt, va_list vl);
 
 #ifdef __cplusplus
 }
+#endif
 #endif

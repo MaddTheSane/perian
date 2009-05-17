@@ -283,7 +283,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 		srgbCSpace = GetSRGBColorSpace();
 		
 		UCCreateTextBreakLocator(NULL, 0, kUCTextBreakLineMask, &breakLocator);
-		[[SubContext alloc] initWithHeaders:headers styles:styles extraData:header delegate:self];
+		[[SubContext alloc] initWithHeaders:headers styles:styles delegate:self];
 	}
 	
 	return self;

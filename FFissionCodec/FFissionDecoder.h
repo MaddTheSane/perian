@@ -23,7 +23,6 @@
 #define __FFISSIONDECODER_H__
 
 #include "FFissionCodec.h"
-#include "avcodec.h"
 #include "RingBuffer.h"
 
 class FFissionDecoder : public FFissionCodec

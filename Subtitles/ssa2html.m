@@ -1,10 +1,24 @@
 /*
- *  ssa2html.m
- *  SSARender2
+ * ssa2html
+ * Created by Alexander Strange on 7/28/07.
  *
- *  Created by Alexander Strange on 7/28/07.
- *  Copyright 2007 __MyCompanyName__. All rights reserved.
+ * A primitive .ssa/.ass to HTML converter.
  *
+ * This file is part of Perian.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #import "SubImport.h"
@@ -28,9 +42,17 @@
 		[html appendString:@"<html>\n"];
 		[html appendString:@"<head>\n"];
 		[html appendString:@"<meta http-equiv=\"Content-type\" content=\"text/html; charset=UTF-8\" />\n"];
+		[html appendString:@"<meta name=\"generator\" content=\"ssa2html\" />\n"];
 	}
 	
 	return self;
+}
+
+-(void)dealloc
+{
+	[sc release];
+	[html release];
+	[super dealloc];
 }
 
 -(void)completedHeaderParsing:(SubContext*)sc_
@@ -38,14 +60,27 @@
 	sc = sc_;
 	[html appendFormat:@"<title>%@</title>\n",[sc->headers objectForKey:@"Title"]];
 	[html appendString:@"<style type=\"text/css\">\n"];
-	[html appendFormat:@".screen {width: %dpx; height: %dpx; background-color: gray; position: relative}\n.bottom {bottom: 20px; position: absolute} .top {top: 20px; position: absolute}\n",sc->resX,sc->resY];
+	[html appendFormat:@".screen {width: %fpx; height: %fpx; background-color: gray; position: relative; display: table}\n.bottom {bottom: 20px; position: absolute} .top {top: 20px; position: absolute}\n",sc->resX,sc->resY];
 }
 
 static const NSString *haligns[] = {@"left", @"center", @"right"};
+static const NSString *valigns[] = {@"bottom", @"middle", @"top"};
+
+// font-weight actually seems to be enumerated 100|200|...|900
+// but, like, whatever
+static NSString *FontWeightStringForWeight(Float32 weight)
+{
+	if (weight == 0)
+		return @"normal";
+	else if (weight == 1)
+		return @"bold";
+	else
+		return [NSString stringWithFormat:@"%d", (int)weight];
+}
 
 -(void*)completedStyleParsing:(SubStyle*)s
 {
-	[html appendFormat:@".%@ {display: inline-block; clear: none;\n",s->name];
+	[html appendFormat:@".%@ {display: table-cell; clear: none;\n",s->name];
 	[html appendFormat:@"font-family: \"%@\"; ",s->fontname];
 	[html appendFormat:@"font-size: %fpt;\n",s->size * (72./96.)];
 	[html appendFormat:@"color: #%X%X%X;\n",(int)(s->primaryColor.red*255.),(int)(s->primaryColor.green*255.),(int)(s->primaryColor.blue*255.)];
@@ -56,9 +91,10 @@ static const NSString *haligns[] = {@"left", @"center", @"right"};
 					  s->shadowDist*2., s->shadowDist*2.];
 	[html appendFormat:@"text-outline: #%X%X%X %fpx 0;\n",(int)(s->shadowColor.red*255.),(int)(s->shadowColor.green*255.),(int)(s->shadowColor.blue*255.),
 		s->outlineRadius];
-	[html appendFormat:@"width: %dpx;\n",sc->resX - s->marginL - s->marginR];
-	[html appendFormat:@"font-weight: %@; font-style: %@; text-decoration: %@;\n",s->bold ? @"bold" : @"normal", s->italic ? @"italic" : @"normal", s->underline ? @"underline" : (s->strikeout ? @"line-through" : @"none")];
+	[html appendFormat:@"width: %fpx;\n",sc->resX - s->marginL - s->marginR];
+	[html appendFormat:@"font-weight: %@; font-style: %@; text-decoration: %@;\n",FontWeightStringForWeight(s->weight), s->italic ? @"italic" : @"normal", s->underline ? @"underline" : (s->strikeout ? @"line-through" : @"none")];
 	[html appendFormat:@"text-align: %@;\n", haligns[s->alignH]];
+	[html appendFormat:@"vertical-align: %@;\n", valigns[s->alignV]];
 	[html appendString:@"}\n"];
 	
 	return nil;
@@ -73,21 +109,27 @@ static const NSString *haligns[] = {@"left", @"center", @"right"};
 
 NSString *htmlfilter(NSString *s)
 {
-	NSMutableString *ms = [s mutableCopy];
+	NSMutableString *ms = [[s mutableCopy] autorelease];
 	
-	[ms replaceOccurrencesOfString:@"\n" withString:@"<br>" options:0 range:NSMakeRange(0, [ms length])];
+	[ms replaceOccurrencesOfString:@"\n" withString:@"<br>\n" options:0 range:NSMakeRange(0, [ms length])];
 //	[ms replaceOccurrencesOfString:[NSString stringWithFormat:@"%C",0x00A0] withString:@"&nbsp;" options:0 range:NSMakeRange(0, [ms length])];
 	return ms;
 }
 
 -(void*)spanExtraFromRenderDiv:(SubRenderDiv*)div
 {
-	return [NSMutableString string];
+	return [[NSMutableString string] retain];
 }
 
 -(void*)cloneSpanExtra:(SubRenderSpan*)span
 {
-	return [NSMutableString string];
+	return [[NSMutableString string] retain];
+}
+
+-(void)releaseSpanExtra:(void*)ex
+{
+	NSMutableString *s = (NSMutableString*)ex;
+	[s release];
 }
 
 -(void)spanChangedTag:(SSATagType)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p
@@ -126,6 +168,7 @@ NSString *htmlfilter(NSString *s)
 			break;
 		case tag_fs:
 			fv();
+			//this is wrong, see GetWinFontSizeScale()
 			[sty appendFormat:@"font-size: %fpt; ", fp * (72./96.)];
 			break;
 		case tag_1c:
@@ -148,7 +191,7 @@ NSString *htmlfilter(NSString *s)
 		SubRenderDiv *div = [divs objectAtIndex:i];
 		int j, spancount = [div->spans count], spans = 1, close_div = 0;
 		
-		if (div->posX > -1) {
+		if (div->positioned) {
 			[html appendFormat:@"<div style=\"top: %dpx; left: %dpx; position: absolute\">", div->posY, div->posX];
 			close_div = 1;
 		}
@@ -207,33 +250,51 @@ NSString *htmlfilter(NSString *s)
 
 -(void)endOfFile
 {
-	[html appendString:@"</body></html>"];
+	[html appendString:@"</body></html>\n"];
 }
 @end
 
 int main(int argc, char *argv[])
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	SubContext *sc; SubSerializer *ss;
+{	
+	if (argc != 2)
+		return 1;
+
+	NSAutoreleasePool *outer_pool = [[NSAutoreleasePool alloc] init];
+	SubContext *sc; SubSerializer *ss = [[SubSerializer alloc] init];
 	SubHTMLExporter *htm = [[SubHTMLExporter alloc] init];
-	
-	SubLoadSSAFromPath([NSString stringWithUTF8String:argv[1]],&sc,&ss,htm);
+	NSAutoreleasePool *inner_pool = [[NSAutoreleasePool alloc] init];
+
+	//start of lameness
+	//it should only have to call subparsessafile here, or something
+	NSString *header = LoadSSAFromPath([NSString stringWithUTF8String:argv[1]], ss);
+	[ss setFinished:YES];
+	unsigned hlength = [header length];
+	unichar uheader[[header length]];
+	[header getCharacters:uheader];
+	NSDictionary *headers;
+	NSArray *styles;
+	SubParseSSAFile(uheader, hlength, &headers, &styles, NULL);
+	sc = [[SubContext alloc] initWithHeaders:headers styles:styles delegate:htm];
+	//end(?) of lameness
+	//other part of lameness: some sub objects are autoreleased instead of manually released
+	//fix this so inner_pool can be deleted
 	
 	[htm endOfHead];
 	
 	while (![ss isEmpty]) {
-		NSAutoreleasePool *pool2 = [[NSAutoreleasePool alloc] init];
-
 		SubLine *sl = [ss getSerializedPacket];
 		if ([sl->line length] == 1) continue;
 		
 		[htm addSub:sl];
-		[pool2 release];
 	}
 	
 	[htm endOfFile];
 	
 	printf([htm->html UTF8String]);
-	[pool release];
+	[inner_pool release];
+	[ss release];
+	[htm release];
+	[outer_pool release];
+
 	return 0;
 }

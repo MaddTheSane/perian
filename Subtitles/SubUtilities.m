@@ -99,7 +99,7 @@ static const short frequencies[] = {
 	-1912, 4259, 2573, 8866, 55, 0, 0, -2247, -831, -3788, -3043, 0, 0, 3412, 2921, 1251, 
 	0, 0, 1377, 520, 1344, 0, -1123, 0, 0, -1213, 2208, -458, -794, 2636, 3824, 0};
 
-static BOOL DifferentiateLatin12(const unsigned char *data, int length)
+BOOL STDifferentiateLatin12(const unsigned char *data, int length)
 {
 	// generated from french/german (latin1) and hungarian/romanian (latin2)
 	
@@ -112,7 +112,7 @@ static BOOL DifferentiateLatin12(const unsigned char *data, int length)
 	return frcount <= 0;
 }
 
-extern NSString *STLoadFileWithUnknownEncoding(NSString *path)
+NSString *STLoadFileWithUnknownEncoding(NSString *path)
 {
 	NSData *data = [NSData dataWithContentsOfMappedFile:path];
 	UniversalDetector *ud = [[UniversalDetector alloc] init];
@@ -130,7 +130,7 @@ extern NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	latin2 = [enc_str isEqualToString:@"windows-1250"];
 	
 	if (latin2) {
-		if (DifferentiateLatin12([data bytes], [data length])) { // seems to actually be latin1
+		if (STDifferentiateLatin12([data bytes], [data length])) { // seems to actually be latin1
 			enc = NSWindowsCP1252StringEncoding;
 			enc_str = @"windows-1252";
 		}

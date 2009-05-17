@@ -31,6 +31,7 @@ extern NSArray *STSplitStringWithCount(NSString *str, NSString *split, size_t co
 extern NSMutableString *STStandardizeStringNewlines(NSString *str);
 extern NSString *STLoadFileWithUnknownEncoding(NSString *path);
 extern void STSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *, const void *));
+extern BOOL STDifferentiateLatin12(const unsigned char *data, int length);
 #ifdef __cplusplus
 }
 #endif

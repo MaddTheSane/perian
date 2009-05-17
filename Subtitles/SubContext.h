@@ -59,10 +59,9 @@ typedef ATSURGBAlphaColor SubRGBAColor;
 	UInt8 scriptType, collisions, wrapStyle;
 	NSDictionary *styles; SubStyle *defaultStyle;
 	NSDictionary *headers;
-	NSString *headertext;
 }
 
--(SubContext*)initWithHeaders:(NSDictionary *)headers styles:(NSArray *)styles extraData:(NSString *)ed delegate:(SubRenderer*)delegate;
+-(SubContext*)initWithHeaders:(NSDictionary *)headers styles:(NSArray *)styles delegate:(SubRenderer*)delegate;
 -(SubContext*)initWithNonSSAType:(UInt8)type delegate:(SubRenderer*)delegate;
 -(SubStyle*)styleForName:(NSString *)name;
 @end

@@ -122,6 +122,25 @@
 		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; settings = {COMPILER_FLAGS = "-O3 -fweb -fno-reorder-blocks -fomit-frame-pointer"; }; };
 		3D95B9010E208965007C8F51 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D95B9000E208965007C8F51 /* libbz2.dylib */; };
 		3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D95B9000E208965007C8F51 /* libbz2.dylib */; };
+		3DAD08250FBF7DA9001E156F /* ssa2html.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAD08240FBF7DA9001E156F /* ssa2html.m */; };
+		3DAD08580FBF80D8001E156F /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD08570FBF80D8001E156F /* libobjc.dylib */; };
+		3DAD08590FBF80DF001E156F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
+		3DAD085A0FBF80E7001E156F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
+		3DAD08600FBF8194001E156F /* SubContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SubContext.m */; };
+		3DAD08610FBF8196001E156F /* SubImport.mm in Sources */ = {isa = PBXBuildFile; fileRef = 61D514DD0ADF3DBA00A671E1 /* SubImport.mm */; };
+		3DAD08620FBF8197001E156F /* SubParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */; };
+		3DAD08630FBF8198001E156F /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
+		3DAD087C0FBF82A2001E156F /* Codecprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 113F58990A6B091600509987 /* Codecprintf.c */; };
+		3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
+		3DAD08900FBF848B001E156F /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
+		3DAD09AF0FBFAB68001E156F /* detect-encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAD09AE0FBFAB68001E156F /* detect-encoding.m */; };
+		3DAD09F80FBFAFD0001E156F /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
+		3DAD09FB0FBFAFFF001E156F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
+		3DAD09FC0FBFB004001E156F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
+		3DAD09FD0FBFB007001E156F /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD08570FBF80D8001E156F /* libobjc.dylib */; };
+		3DAD09FE0FBFB00F001E156F /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
+		3DAD0A120FBFB145001E156F /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */; };
+		3DAD0A130FBFB14D001E156F /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */; };
 		3DB2BB290B6C92F000416863 /* SubATSUIRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
@@ -276,6 +295,18 @@
 			);
 			script = "RAGEL=${PROJECT_DIR}/Subtitles/ragel\nRLCODEGEN=${PROJECT_DIR}/Subtitles/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
 		};
+		3DAD086E0FBF8225001E156F /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.c.rl *.cpp.rl *.cp.rl *.cxx.rl *.m.rl *.mm.rl";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).dot",
+			);
+			script = "RAGEL=${PROJECT_DIR}/Subtitles/ragel\nRLCODEGEN=${PROJECT_DIR}/Subtitles/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
+		};
 /* End PBXBuildRule section */
 
 /* Begin PBXContainerItemProxy section */
@@ -305,6 +336,20 @@
 			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 3DBF4F570BCD396800DA401A;
+			remoteInfo = universaldetector;
+		};
+		3DAD08910FBF84A4001E156F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DBF4F560BCD396800DA401A;
+			remoteInfo = universaldetector;
+		};
+		3DAD09F90FBFAFE1001E156F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DBF4F560BCD396800DA401A;
 			remoteInfo = universaldetector;
 		};
 		3DB3517E0BCF004B009357B8 /* PBXContainerItemProxy */ = {
@@ -513,6 +558,12 @@
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
 		3D95B9000E208965007C8F51 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = /usr/lib/libbz2.dylib; sourceTree = "<absolute>"; };
+		3DAD08080FBF7C6F001E156F /* ssa2html */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ssa2html; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DAD08240FBF7DA9001E156F /* ssa2html.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ssa2html.m; path = Subtitles/ssa2html.m; sourceTree = "<group>"; };
+		3DAD08570FBF80D8001E156F /* libobjc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.dylib; path = /usr/lib/libobjc.dylib; sourceTree = "<absolute>"; };
+		3DAD09A80FBFAB08001E156F /* detect-encoding */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "detect-encoding"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DAD09AE0FBFAB68001E156F /* detect-encoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "detect-encoding.m"; path = "Subtitles/detect-encoding.m"; sourceTree = "<group>"; };
+		3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "/usr/lib/libstdc++.6.dylib"; sourceTree = "<absolute>"; };
 		3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubATSUIRenderer.h; path = Subtitles/SubATSUIRenderer.h; sourceTree = "<group>"; };
 		3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SubATSUIRenderer.m; path = Subtitles/SubATSUIRenderer.m; sourceTree = "<group>"; };
 		6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACBaseCodec.cpp; sourceTree = "<group>"; };
@@ -727,6 +778,31 @@
 				3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */,
 				3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */,
 				3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */,
+				3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DAD08060FBF7C6F001E156F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DAD08580FBF80D8001E156F /* libobjc.dylib in Frameworks */,
+				3DAD08590FBF80DF001E156F /* CoreFoundation.framework in Frameworks */,
+				3DAD085A0FBF80E7001E156F /* Foundation.framework in Frameworks */,
+				3DAD08900FBF848B001E156F /* libuniversaldetector.a in Frameworks */,
+				3DAD0A130FBFB14D001E156F /* libstdc++.6.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DAD09A60FBFAB08001E156F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DAD09F80FBFAFD0001E156F /* libuniversaldetector.a in Frameworks */,
+				3DAD09FB0FBFAFFF001E156F /* CoreFoundation.framework in Frameworks */,
+				3DAD09FC0FBFB004001E156F /* Foundation.framework in Frameworks */,
+				3DAD09FD0FBFB007001E156F /* libobjc.dylib in Frameworks */,
+				3DAD0A120FBFB145001E156F /* libstdc++.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -784,6 +860,8 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */,
+				3DAD08570FBF80D8001E156F /* libobjc.dylib */,
 				3D95B9000E208965007C8F51 /* libbz2.dylib */,
 				F539CD110B62BC82005A72C9 /* Foundation.framework */,
 				1162A0530B51ECE1006591C8 /* WebKit.framework */,
@@ -893,6 +971,8 @@
 				83D1D6C80B4C794700E09EC9 /* Perian.prefPane */,
 				F5CFD1B40B50009000616865 /* PerianPanePListGenerator */,
 				116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */,
+				3DAD08080FBF7C6F001E156F /* ssa2html */,
+				3DAD09A80FBFAB08001E156F /* detect-encoding */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -957,6 +1037,8 @@
 		6123D61D0AD0A052003EDE52 /* Subtitles */ = {
 			isa = PBXGroup;
 			children = (
+				3DAD09AE0FBFAB68001E156F /* detect-encoding.m */,
+				3DAD08240FBF7DA9001E156F /* ssa2html.m */,
 				3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */,
 				3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */,
 				3D211A1E0B6B1A540051299D /* SubContext.h */,
@@ -1320,6 +1402,41 @@
 			productReference = 11A70AC10A3D0105002058D4 /* Perian.component */;
 			productType = "com.apple.product-type.bundle";
 		};
+		3DAD08070FBF7C6F001E156F /* ssa2html */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DAD080D0FBF7C71001E156F /* Build configuration list for PBXNativeTarget "ssa2html" */;
+			buildPhases = (
+				3DAD08050FBF7C6F001E156F /* Sources */,
+				3DAD08060FBF7C6F001E156F /* Frameworks */,
+			);
+			buildRules = (
+				3DAD086E0FBF8225001E156F /* PBXBuildRule */,
+			);
+			dependencies = (
+				3DAD08920FBF84A4001E156F /* PBXTargetDependency */,
+			);
+			name = ssa2html;
+			productName = ssa2html;
+			productReference = 3DAD08080FBF7C6F001E156F /* ssa2html */;
+			productType = "com.apple.product-type.tool";
+		};
+		3DAD09A70FBFAB08001E156F /* detect-encoding */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DAD09AD0FBFAB59001E156F /* Build configuration list for PBXNativeTarget "detect-encoding" */;
+			buildPhases = (
+				3DAD09A50FBFAB08001E156F /* Sources */,
+				3DAD09A60FBFAB08001E156F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3DAD09FA0FBFAFE1001E156F /* PBXTargetDependency */,
+			);
+			name = "detect-encoding";
+			productName = "detect-encoding";
+			productReference = 3DAD09A80FBFAB08001E156F /* detect-encoding */;
+			productType = "com.apple.product-type.tool";
+		};
 		61CB10FE0ACDF350007994BD /* ebml */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 61CB11030ACDF37C007994BD /* Build configuration list for PBXNativeTarget "ebml" */;
@@ -1433,6 +1550,8 @@
 				F5CFD2DB0B5012AA00616865 /* A52Codec */,
 				116C42510B5041BD00FB0738 /* PerianUpdateChecker */,
 				F5121EB70EB3A54A0048EF67 /* Make SVN Rev */,
+				3DAD08070FBF7C6F001E156F /* ssa2html */,
+				3DAD09A70FBFAB08001E156F /* detect-encoding */,
 			);
 		};
 /* End PBXProject section */
@@ -1657,6 +1776,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3DAD08050FBF7C6F001E156F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DAD08250FBF7DA9001E156F /* ssa2html.m in Sources */,
+				3DAD08600FBF8194001E156F /* SubContext.m in Sources */,
+				3DAD08610FBF8196001E156F /* SubImport.mm in Sources */,
+				3DAD08620FBF8197001E156F /* SubParsing.m.rl in Sources */,
+				3DAD08630FBF8198001E156F /* SubUtilities.m in Sources */,
+				3DAD087C0FBF82A2001E156F /* Codecprintf.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DAD09A50FBFAB08001E156F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DAD09AF0FBFAB68001E156F /* detect-encoding.m in Sources */,
+				3DAD09FE0FBFB00F001E156F /* SubUtilities.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61CB10FC0ACDF350007994BD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1740,6 +1881,16 @@
 			isa = PBXTargetDependency;
 			target = 11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */;
 			targetProxy = 11BA3DAF0A61EE90008AF206 /* PBXContainerItemProxy */;
+		};
+		3DAD08920FBF84A4001E156F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = universaldetector;
+			targetProxy = 3DAD08910FBF84A4001E156F /* PBXContainerItemProxy */;
+		};
+		3DAD09FA0FBFAFE1001E156F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = universaldetector;
+			targetProxy = 3DAD09F90FBFAFE1001E156F /* PBXContainerItemProxy */;
 		};
 		3DB3517F0BCF004B009357B8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1833,8 +1984,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
@@ -1852,7 +2001,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
-				ZERO_LINK = YES;
 			};
 			name = Development;
 		};
@@ -1860,7 +2008,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1877,7 +2024,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -1887,7 +2033,6 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_GC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
@@ -1897,18 +2042,11 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(BUILT_PRODUCTS_DIR)",
-					"ffmpeg/**",
-					libebml,
-					libmatroska,
-				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -1920,7 +2058,6 @@
 				PRODUCT_NAME = Perian;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
 				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
 			};
 			name = Development;
 		};
@@ -1930,8 +2067,6 @@
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_DYNAMIC_NO_PIC = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_GC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1942,18 +2077,11 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(BUILT_PRODUCTS_DIR)",
-					"ffmpeg/**",
-					libebml,
-					libmatroska,
-				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				OTHER_CFLAGS_i386 = "-march=pentium-m -mtune=nocona $(OTHER_CFLAGS)";
 				OTHER_CFLAGS_ppc = "$(OTHER_CFLAGS)";
@@ -1962,7 +2090,6 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -1986,8 +2113,16 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG_BUILD;
+				HEADER_SEARCH_PATHS = (
+					libmatroska,
+					libebml,
+					"ffmpeg/**",
+					"$(BUILT_PRODUCTS_DIR)",
+				);
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -2006,8 +2141,16 @@
 				);
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_STRICT_ALIASING = YES;
+				HEADER_SEARCH_PATHS = (
+					libmatroska,
+					libebml,
+					"ffmpeg/**",
+					"$(BUILT_PRODUCTS_DIR)",
+				);
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
@@ -2030,7 +2173,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = s;
@@ -2039,7 +2181,6 @@
 				PRODUCT_NAME = ebml;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2047,7 +2188,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/lib;
@@ -2055,7 +2195,6 @@
 				PRODUCT_NAME = matroska;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2065,7 +2204,6 @@
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_GC = YES;
 				GCC_FAST_MATH = YES;
 				GCC_MODEL_TUNING = G5;
@@ -2077,24 +2215,15 @@
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(BUILT_PRODUCTS_DIR)",
-					"ffmpeg/**",
-					libebml,
-					libmatroska,
-				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				OTHER_CFLAGS_i386 = "-march=pentium-m -frerun-cse-after-loop $(OTHER_CFLAGS)";
 				OTHER_CFLAGS_ppc = "-mcpu=G3 -mtune=G5 -funroll-loops -mmultiple $(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
 					"-read_only_relocs",
 					suppress,
 				);
@@ -2103,7 +2232,6 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2111,10 +2239,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Debug In QuickTime Player";
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2122,10 +2248,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Setup Build Directories";
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2133,10 +2257,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = A52Codec;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2144,7 +2266,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2158,7 +2279,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2166,10 +2286,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = CreatePrefPanePlist;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2177,7 +2295,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2196,7 +2313,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2204,7 +2320,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -2221,7 +2336,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2233,9 +2347,17 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG_BUILD;
 				GCC_STRICT_ALIASING = YES;
+				HEADER_SEARCH_PATHS = (
+					libmatroska,
+					libebml,
+					"ffmpeg/**",
+					"$(BUILT_PRODUCTS_DIR)",
+				);
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -2246,12 +2368,86 @@
 			};
 			name = "Deployment+Debug";
 		};
+		3DAD080A0FBF7C70001E156F /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = ssa2html;
+			};
+			name = Development;
+		};
+		3DAD080B0FBF7C70001E156F /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = ssa2html;
+			};
+			name = Deployment;
+		};
+		3DAD080C0FBF7C70001E156F /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = ssa2html;
+			};
+			name = "Deployment+Debug";
+		};
+		3DAD09AA0FBFAB0A001E156F /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = "detect-encoding";
+			};
+			name = Development;
+		};
+		3DAD09AB0FBFAB0A001E156F /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = "detect-encoding";
+			};
+			name = Deployment;
+		};
+		3DAD09AC0FBFAB0A001E156F /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = "detect-encoding";
+			};
+			name = "Deployment+Debug";
+		};
 		61CB11040ACDF37C007994BD /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2260,7 +2456,6 @@
 				PRODUCT_NAME = ebml;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = Development;
 		};
@@ -2268,7 +2463,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = s;
@@ -2277,7 +2471,6 @@
 				PRODUCT_NAME = ebml;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2285,8 +2478,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2295,7 +2486,6 @@
 				PRODUCT_NAME = matroska;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = Development;
 		};
@@ -2303,7 +2493,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/lib;
@@ -2311,7 +2500,6 @@
 				PRODUCT_NAME = matroska;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2319,8 +2507,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2350,7 +2536,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
-				ZERO_LINK = YES;
 			};
 			name = Development;
 		};
@@ -2358,7 +2543,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2377,7 +2561,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2385,7 +2568,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Make SVN Rev";
 			};
@@ -2396,9 +2578,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PRODUCT_NAME = "Make SVN Rev";
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2413,7 +2593,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Debug In QuickTime Player";
@@ -2424,10 +2603,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Debug In QuickTime Player";
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2435,8 +2612,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2451,7 +2626,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
-				ZERO_LINK = YES;
 			};
 			name = Development;
 		};
@@ -2459,7 +2633,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2473,7 +2646,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2481,7 +2653,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = CreatePrefPanePlist;
@@ -2492,10 +2663,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = CreatePrefPanePlist;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2503,7 +2672,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = A52Codec;
@@ -2514,10 +2682,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = A52Codec;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2525,7 +2691,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Setup Build Directories";
@@ -2536,10 +2701,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Setup Build Directories";
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2582,6 +2745,26 @@
 				11D4ED480A3CE59A0066D45F /* Development */,
 				11D4ED490A3CE59A0066D45F /* Deployment */,
 				3D4BBE510B59EE0A000EDE04 /* Deployment+Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3DAD080D0FBF7C71001E156F /* Build configuration list for PBXNativeTarget "ssa2html" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DAD080A0FBF7C70001E156F /* Development */,
+				3DAD080B0FBF7C70001E156F /* Deployment */,
+				3DAD080C0FBF7C70001E156F /* Deployment+Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3DAD09AD0FBFAB59001E156F /* Build configuration list for PBXNativeTarget "detect-encoding" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DAD09AA0FBFAB0A001E156F /* Development */,
+				3DAD09AB0FBFAB0A001E156F /* Deployment */,
+				3DAD09AC0FBFAB0A001E156F /* Deployment+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Development;

@@ -99,10 +99,8 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, Ti
 
 @end
 
-
-extern void SubLoadSSAFromPath(NSString *path, SubContext **meta, SubSerializer **lines, SubRenderer *renderer);
-extern void SubLoadSRTFromPath(NSString *path, SubContext **meta, SubSerializer **lines, SubRenderer *renderer);
-
+extern NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss);
+	
 #endif
 
 #ifdef __cplusplus

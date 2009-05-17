@@ -185,7 +185,7 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
 	return timeval * sign;
 }
 
-static NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
+NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
 {
 	NSString *nssSub = STLoadFileWithUnknownEncoding(path);
 	

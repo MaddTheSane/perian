@@ -240,10 +240,9 @@ BOOL IsScriptASS(NSDictionary *headers)
 	}
 }
 
--(SubContext*)initWithHeaders:(NSDictionary *)headers_ styles:(NSArray *)styles_ extraData:(NSString *)ed delegate:(SubRenderer*)delegate
+-(SubContext*)initWithHeaders:(NSDictionary *)headers_ styles:(NSArray *)styles_ delegate:(SubRenderer*)delegate
 {
 	if (self = [super init]) {
-		headertext = [ed retain];
 		headers = [headers_ retain];
 		[self readHeaders];
 		
@@ -281,7 +280,6 @@ BOOL IsScriptASS(NSDictionary *headers)
 		collisions = kSubCollisionsNormal;
 		wrapStyle = kSubLineWrapBottomWider;
 		styles = headers = nil;
-		headertext = nil;
 		[delegate completedHeaderParsing:self];
 
 		defaultStyle = [[SubStyle defaultStyleWithDelegate:delegate] retain];		
@@ -295,7 +293,6 @@ BOOL IsScriptASS(NSDictionary *headers)
 	[styles release];
 	[defaultStyle release];
 	[headers release];
-	[headertext release];
 	[super dealloc];
 }
 
