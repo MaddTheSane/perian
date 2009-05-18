@@ -92,7 +92,6 @@
 		11629EF40B51E4FB006591C8 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
 		11629FD10B51E65F006591C8 /* NSString+extras.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629FD00B51E65F006591C8 /* NSString+extras.m */; };
 		1162A0540B51ECE1006591C8 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1162A0530B51ECE1006591C8 /* WebKit.framework */; };
-		116C42920B50463600FB0738 /* UpdateCheckerMainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */; };
 		116C42BC0B504C7C00FB0738 /* SUAppcast.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42BB0B504C7C00FB0738 /* SUAppcast.m */; };
 		116C42E80B504D2700FB0738 /* RSS.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E50B504D2700FB0738 /* RSS.m */; };
 		116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E70B504D2700FB0738 /* SUAppcastItem.m */; };
@@ -141,6 +140,8 @@
 		3DAD09FE0FBFB00F001E156F /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
 		3DAD0A120FBFB145001E156F /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */; };
 		3DAD0A130FBFB14D001E156F /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */; };
+		3DAD0AAC0FC133E7001E156F /* PerianPrefPane.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */; };
+		3DAD0AC10FC1365E001E156F /* UpdateCheckerMainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.nib */; };
 		3DB2BB290B6C92F000416863 /* SubATSUIRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
@@ -264,7 +265,6 @@
 		61D517730AE0402E00A671E1 /* CommonUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D517720AE0402E00A671E1 /* CommonUtils.c */; };
 		61FD41330B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61FD41320B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp */; };
 		83D1D6CF0B4C7AC400E09EC9 /* PreferencePanes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */; };
-		83D1D6DE0B4C7F8300E09EC9 /* PerianPrefPane.nib in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */; };
 		83D1D6E20B4C81F200E09EC9 /* CPFPerianPrefPaneController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */; };
 		83D1D6F50B4C85AB00E09EC9 /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		8F483B550A642644002CCA73 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B540A642644002CCA73 /* libavformat.a */; };
@@ -518,7 +518,6 @@
 		116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PerianUpdateChecker-Info.plist"; path = "Plists/PerianUpdateChecker-Info.plist"; sourceTree = "<group>"; };
 		116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateCheckerAppDelegate.h; sourceTree = "<group>"; };
 		116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateCheckerAppDelegate.m; sourceTree = "<group>"; };
-		116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = UpdateCheckerMainMenu.nib; path = "Update Checker Sources/UpdateCheckerMainMenu.nib"; sourceTree = "<group>"; };
 		116C42BA0B504C7C00FB0738 /* SUAppcast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUAppcast.h; sourceTree = "<group>"; };
 		116C42BB0B504C7C00FB0738 /* SUAppcast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUAppcast.m; sourceTree = "<group>"; };
 		116C42E40B504D2700FB0738 /* RSS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSS.h; sourceTree = "<group>"; };
@@ -564,6 +563,8 @@
 		3DAD09A80FBFAB08001E156F /* detect-encoding */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "detect-encoding"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DAD09AE0FBFAB68001E156F /* detect-encoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "detect-encoding.m"; path = "Subtitles/detect-encoding.m"; sourceTree = "<group>"; };
 		3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "/usr/lib/libstdc++.6.dylib"; sourceTree = "<absolute>"; };
+		3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = PerianPrefPane.xib; path = Resources/PerianPrefPane.xib; sourceTree = "<group>"; };
+		3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = UpdateCheckerMainMenu.nib; path = "Update Checker Sources/UpdateCheckerMainMenu.nib"; sourceTree = "<group>"; };
 		3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubATSUIRenderer.h; path = Subtitles/SubATSUIRenderer.h; sourceTree = "<group>"; };
 		3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SubATSUIRenderer.m; path = Subtitles/SubATSUIRenderer.m; sourceTree = "<group>"; };
 		6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACBaseCodec.cpp; sourceTree = "<group>"; };
@@ -725,7 +726,6 @@
 		83D1D6C80B4C794700E09EC9 /* Perian.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
 		83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PerianPane-Info.plist"; path = "Plists/PerianPane-Info.plist"; sourceTree = "<group>"; };
 		83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PreferencePanes.framework; path = /System/Library/Frameworks/PreferencePanes.framework; sourceTree = "<absolute>"; };
-		83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = PerianPrefPane.nib; path = Resources/PerianPrefPane.nib; sourceTree = "<group>"; };
 		83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CPFPerianPrefPaneController.h; sourceTree = "<group>"; };
 		83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CPFPerianPrefPaneController.m; sourceTree = "<group>"; };
 		83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = Perian_icon.icns; path = Resources/Perian_icon.icns; sourceTree = "<group>"; };
@@ -887,9 +887,9 @@
 			children = (
 				11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */,
 				11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */,
-				116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */,
+				3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.nib */,
 				83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */,
-				83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */,
+				3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */,
 				83D1D6D00B4C7AD200E09EC9 /* Frameworks */,
 				613CD51C0AD1FB650098A825 /* TextSubCodec.r */,
 				6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */,
@@ -1606,9 +1606,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				116C42920B50463600FB0738 /* UpdateCheckerMainMenu.nib in Resources */,
 				1184A3680B50586C00C8452A /* SUUpdateAlert.nib in Resources */,
 				1184A3840B505A8800C8452A /* SUStatus.nib in Resources */,
+				3DAD0AC10FC1365E001E156F /* UpdateCheckerMainMenu.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1626,10 +1626,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5EB823E0BA7221F001064E5 /* PerianUpdateChecker.app in Resources */,
-				83D1D6DE0B4C7F8300E09EC9 /* PerianPrefPane.nib in Resources */,
 				83D1D6F50B4C85AB00E09EC9 /* Perian_icon.icns in Resources */,
 				11BEFB2D0C18E23E00BC9324 /* Read Me.rtf in Resources */,
 				11207C730C2F4A4E002A0FF0 /* ComponentInfo.plist in Resources */,
+				3DAD0AAC0FC133E7001E156F /* PerianPrefPane.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2295,6 +2295,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2507,6 +2508,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2543,6 +2545,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
