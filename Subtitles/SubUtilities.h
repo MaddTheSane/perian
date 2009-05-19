@@ -32,6 +32,8 @@ extern NSMutableString *STStandardizeStringNewlines(NSString *str);
 extern NSString *STLoadFileWithUnknownEncoding(NSString *path);
 extern void STSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *, const void *));
 extern BOOL STDifferentiateLatin12(const unsigned char *data, int length);
+extern const unichar *STUnicodeForString(NSString *str);
+
 #ifdef __cplusplus
 }
 #endif

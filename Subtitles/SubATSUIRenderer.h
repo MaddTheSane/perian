@@ -30,7 +30,6 @@ extern "C"
 
 @interface SubATSUIRenderer : SubRenderer {
 	SubContext *context;
-	unichar *ubuffer;
 	UniCharArrayOffset *breakbuffer;
 	ATSUTextLayout layout;
 	float screenScaleX, screenScaleY, videoWidth, videoHeight;

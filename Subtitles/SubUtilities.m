@@ -127,7 +127,7 @@ NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	enc = [ud encoding];
 	conf = [ud confidence];
 	enc_str = [ud MIMECharset];
-	latin2 = [enc_str isEqualToString:@"windows-1250"];
+	latin2 = enc == NSWindowsCP1250StringEncoding;
 	
 	if (latin2) {
 		if (STDifferentiateLatin12([data bytes], [data length])) { // seems to actually be latin1
@@ -153,6 +153,24 @@ NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	[ud release];
 	
 	return res;
+}
+
+const unichar *STUnicodeForString(NSString *str)
+{
+	const unichar *p = CFStringGetCharactersPtr((CFStringRef)str);
+	
+	if (!p) {
+		NSData *data = [str dataUsingEncoding:NSUnicodeStringEncoding];
+		
+		p = [data bytes];
+		
+		//dataUsingEncoding: adds a BOM
+		//skip it so the string length will match the input string
+		if (*p == 0xfeff)
+			p++;
+	}
+	
+	return p;
 }
 
 CFMutableStringRef CopyHomeDirectory()

@@ -146,17 +146,19 @@ static NSArray *SplitByFormat(NSString *format, NSArray *lines)
 	return ar;
 }
 
-void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSArray **styles, NSArray **subs)
+void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles, NSArray **subs)
 {
-	const unichar *p = ssa, *pe = ssa + len, *strbegin = p;
-	int cs=0;
-	
+	unsigned len = [ssastr length];
+	const unichar *ssa = STUnicodeForString(ssastr);
 	NSMutableDictionary *hd = [NSMutableDictionary dictionary];
 	NSMutableArray *stylearr = [NSMutableArray array], *eventarr = [NSMutableArray array], *cur_array=NULL;
 	NSCharacterSet *wcs = [NSCharacterSet whitespaceCharacterSet];
 	NSString *str=NULL, *styleformat=NULL, *eventformat=NULL;
 	
-#define send() [NSString stringWithCharacters:strbegin length:p-strbegin]
+	const unichar *p = ssa, *pe = ssa + len, *strbegin = p;
+	int cs=0;
+	
+#define send() [[[NSString alloc] initWithCharactersNoCopy:(unichar*)strbegin length:p-strbegin freeWhenDone:NO] autorelease]
 	
 	%%{
 		alphtype unsigned short;
@@ -192,7 +194,7 @@ void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSA
 		
 		styles = stylename % {cur_array=stylearr;} nl :> (format %{styleformat=str;})? <: (sline*);
 		
-		event_txt = (("Dialogue:" ws* %sstart str %csvlineend) | str);
+		event_txt = (("Dialogue:" ws* %sstart str %csvlineend %/csvlineend) | str);
 		event = event_txt :> nl;
 			
 		lines = "[Events]" %setupevents nl :> (format %{eventformat=str;})? <: (event*);
@@ -221,7 +223,7 @@ static int compare_layer(const void *a, const void *b)
 	return 0;
 }
 
-NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate, unichar *linebuf)
+NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate)
 {
 	packet = STStandardizeStringNewlines(packet);
 	NSArray *lines = (context->scriptType == kSubTypeSRT) ? [NSArray arrayWithObject:[packet substringToIndex:[packet length]-1]] : [packet componentsSeparatedByString:@"\n"];
@@ -265,16 +267,15 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 		div->alignV = div->styleLine->alignV;
 		
 		size_t linelen = [inputText length];
-		[inputText getCharacters:linebuf];
-		linebuf[linelen] = 0;
+		const unichar *linebuf = STUnicodeForString(inputText);
 		
 #undef send
-#define send() [NSString stringWithCharacters:outputbegin length:p-outputbegin]
-#define psend() [NSString stringWithCharacters:parambegin length:p-parambegin]
+#define send()  [[[NSString alloc] initWithCharactersNoCopy:(unichar*)outputbegin length:p-outputbegin freeWhenDone:NO] autorelease]
+#define psend() [[[NSString alloc] initWithCharactersNoCopy:(unichar*)parambegin length:p-parambegin freeWhenDone:NO] autorelease]
 #define tag(tagt, p) [delegate spanChangedTag:tag_##tagt span:current_span div:div param:&(p)]
 				
 		{
-			unichar *p = linebuf, *pe = linebuf + linelen, *outputbegin = p, *parambegin=p, *last_tag_start=p;
+			const unichar *p = linebuf, *pe = linebuf + linelen, *outputbegin = p, *parambegin=p, *last_tag_start=p;
 			const unichar *pb = p;
 			int cs = 0;
 			SubRenderSpan *current_span = [SubRenderSpan startingSpanForDiv:div delegate:delegate];

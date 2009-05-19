@@ -187,21 +187,14 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
 
 NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
 {
-	NSString *nssSub = STLoadFileWithUnknownEncoding(path);
+	NSString *ssa = STLoadFileWithUnknownEncoding(path);
 	
-	if (!nssSub) return nil;
-	
-	size_t slen = [nssSub length], flen = sizeof(unichar) * (slen+1);
-	unichar *subdata = (unichar*)malloc(flen);
-	[nssSub getCharacters:subdata];
-	
-	if (subdata[slen-1] != '\n') subdata[slen++] = '\n'; // append newline if missing
+	if (!ssa) return nil;
 	
 	NSDictionary *headers;
 	NSArray *subs;
 	
-	SubParseSSAFile(subdata, slen, &headers, NULL, &subs);
-	free(subdata);
+	SubParseSSAFile(ssa, &headers, NULL, &subs);
 	
 	int i, numlines = [subs count];
 	
@@ -215,7 +208,7 @@ NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
 		[sl autorelease];
 	}
 		
-	return [nssSub substringToIndex:[nssSub rangeOfString:@"[Events]" options:NSLiteralSearch].location];
+	return [ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location];
 }
 
 #pragma mark SAMI Parsing

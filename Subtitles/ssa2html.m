@@ -216,7 +216,7 @@ NSString *htmlfilter(NSString *s)
 -(void)addSub:(SubLine*)sl
 {	
 	unichar *ubuf = malloc(sizeof(unichar) * [sl->line length]);
-	NSArray *divs = SubParsePacket(sl->line, sc, self, ubuf);
+	NSArray *divs = SubParsePacket(sl->line, sc, self);
 	free(ubuf);
 	NSMutableArray *top = [NSMutableArray array], *bot = [NSMutableArray array], *abs = [NSMutableArray array];
 	int div_count = [divs count], i;
@@ -268,12 +268,10 @@ int main(int argc, char *argv[])
 	//it should only have to call subparsessafile here, or something
 	NSString *header = LoadSSAFromPath([NSString stringWithUTF8String:argv[1]], ss);
 	[ss setFinished:YES];
-	unsigned hlength = [header length];
-	unichar uheader[[header length]];
-	[header getCharacters:uheader];
+
 	NSDictionary *headers;
 	NSArray *styles;
-	SubParseSSAFile(uheader, hlength, &headers, &styles, NULL);
+	SubParseSSAFile(header, &headers, &styles, NULL);
 	sc = [[SubContext alloc] initWithHeaders:headers styles:styles delegate:htm];
 	//end(?) of lameness
 	//other part of lameness: some sub objects are autoreleased instead of manually released

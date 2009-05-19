@@ -55,8 +55,8 @@ extern "C"
 -(SubRenderSpan*)cloneWithDelegate:(SubRenderer*)delegate;
 @end
 
-extern void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSArray **styles, NSArray **subs);
-extern NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate, unichar *linebuf);
+extern void SubParseSSAFile(NSString *ssa, NSDictionary **headers, NSArray **styles, NSArray **subs);
+extern NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate);
 
 #ifdef __cplusplus
 }

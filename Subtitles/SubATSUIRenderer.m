@@ -26,7 +26,7 @@
 #import "Codecprintf.h"
 
 static float GetWinFontSizeScale(ATSFontRef font);
-static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities);
+static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities);
 
 #define declare_bitfield(name, bits) unsigned char name[bits / 8 + 1]; bzero(name, sizeof(name));
 #define bitfield_set(name, bit) name[(bit) / 8] |= 1 << ((bit) % 8);
@@ -244,7 +244,6 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 {
 	if (self = [super init]) {
 		ATSUCreateTextLayout(&layout);
-		ubuffer = malloc(sizeof(unichar) * 128);
 		breakbuffer = malloc(sizeof(UniCharArrayOffset) * 2);
 		
 		srgbCSpace = GetSRGBColorSpace();
@@ -262,18 +261,12 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 -(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoWidth:(float)width videoHeight:(float)height;
 {
 	if (self = [super init]) {
-		unsigned hlength = [header length];
-		unichar *uheader = malloc(sizeof(unichar) * hlength);
-		
 		header = STStandardizeStringNewlines(header);
-		[header getCharacters:uheader];
 		
 		NSDictionary *headers;
 		NSArray *styles;
-		SubParseSSAFile(uheader, hlength, &headers, &styles, NULL);
-		free(uheader);
+		SubParseSSAFile(header, &headers, &styles, NULL);
 		
-		ubuffer = malloc(sizeof(unichar) * 128);
 		breakbuffer = malloc(sizeof(UniCharArrayOffset) * 2);
 		
 		videoWidth = width;
@@ -293,7 +286,6 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 {
 	[context release];
 	free(breakbuffer);
-	free(ubuffer);
 	CGColorSpaceRelease(srgbCSpace);
 	UCDisposeTextBreakLocator(&breakLocator);
 	ATSUDisposeTextLayout(layout);
@@ -303,7 +295,6 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 -(void)finalize
 {
 	free(breakbuffer);
-	free(ubuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
 	ATSUDisposeTextLayout(layout);
 	[super finalize];
@@ -791,7 +782,7 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 	return (numBreaks == 0) ? 0 : lastBreakOffset;
 }
 
-static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, Fixed breakingWidth, unichar *utext, unsigned textLen, ItemCount numHardBreaks)
+static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, Fixed breakingWidth, const unichar *utext, unsigned textLen, ItemCount numHardBreaks)
 {
 	UniCharArrayOffset hardBreaks[numHardBreaks+2];
 	declare_bitfield(breakOpportunities, textLen);
@@ -829,7 +820,7 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 	}
 }
 
-static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, UniCharArrayOffset *breaks, ItemCount *nbreaks, Fixed breakingWidth, unichar *utext, unsigned textLen)
+static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, UniCharArrayOffset *breaks, ItemCount *nbreaks, Fixed breakingWidth, const unichar *utext, unsigned textLen)
 {
 	ItemCount breakCount=0;
 	
@@ -1038,8 +1029,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 -(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(float)cWidth height:(float)cHeight
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	ubuffer = realloc(ubuffer, sizeof(unichar) * [packet length]);
-	NSArray *divs = SubParsePacket(packet, context, self, ubuffer);
+	NSArray *divs = SubParsePacket(packet, context, self);
 	unsigned div_count = [divs count], lastLayer = 0;
 	int i;
 	Fixed bottomPen = 0, topPen = 0, centerPen = 0, *storePen=NULL;
@@ -1057,8 +1047,9 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	for (i = 0; i < div_count; i++) {
 		SubRenderDiv *div = [divs objectAtIndex:i];
 		unsigned textLen = [div->text length];
-		BOOL resetPens = NO;
 		if (!textLen || ![div->spans count]) continue;
+		BOOL resetPens = NO;
+		const unichar *ubuffer = STUnicodeForString(div->text);
 						
 		if (div->layer != lastLayer) {
 			resetPens = YES;
@@ -1074,8 +1065,6 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 
 		Fixed penY, penX, breakingWidth = FloatToFixed(marginRect.size.width);
 		BreakContext breakc = {0}; ItemCount breakCount;
-
-		[div->text getCharacters:ubuffer];
 		
 		ATSUSetTextPointerLocation(layout, ubuffer, kATSUFromTextBeginning, kATSUToTextEnd, textLen);		
 		ATSUSetTransientFontMatching(layout,TRUE);
@@ -1344,7 +1333,7 @@ static float GetWinFontSizeScale(ATSFontRef font)
 	return (winSize && unitsPerEM) ? ((float)unitsPerEM / (float)winSize) : 1;
 }
 
-static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities)
+static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities)
 {
 	UniCharArrayOffset lastBreak = 0;
 	
