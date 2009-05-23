@@ -155,12 +155,14 @@ NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	return res;
 }
 
-const unichar *STUnicodeForString(NSString *str)
+const unichar *STUnicodeForString(NSString *str, NSData **datap)
 {
 	const unichar *p = CFStringGetCharactersPtr((CFStringRef)str);
 	
+	*datap = nil;
+	
 	if (!p) {
-		NSData *data = [str dataUsingEncoding:NSUnicodeStringEncoding];
+		NSData *data = [[str dataUsingEncoding:NSUnicodeStringEncoding] retain];
 		
 		p = [data bytes];
 		
@@ -168,6 +170,8 @@ const unichar *STUnicodeForString(NSString *str)
 		//skip it so the string length will match the input string
 		if (*p == 0xfeff)
 			p++;
+		
+		*datap = data;
 	}
 	
 	return p;

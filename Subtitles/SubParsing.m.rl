@@ -149,7 +149,8 @@ static NSArray *SplitByFormat(NSString *format, NSArray *lines)
 void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles, NSArray **subs)
 {
 	unsigned len = [ssastr length];
-	const unichar *ssa = STUnicodeForString(ssastr);
+	NSData *ssaData;
+	const unichar *ssa = STUnicodeForString(ssastr, &ssaData);
 	NSMutableDictionary *hd = [NSMutableDictionary dictionary];
 	NSMutableArray *stylearr = [NSMutableArray array], *eventarr = [NSMutableArray array], *cur_array=NULL;
 	NSCharacterSet *wcs = [NSCharacterSet whitespaceCharacterSet];
@@ -205,6 +206,8 @@ void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles,
 	%%write init;
 	%%write exec;
 	%%write eof;
+
+	[ssaData release];
 
 	*headers = hd;
 	if (styles) *styles = SplitByFormat(styleformat, stylearr);
@@ -266,15 +269,15 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 		div->alignH = div->styleLine->alignH;
 		div->alignV = div->styleLine->alignV;
 		
-		size_t linelen = [inputText length];
-		const unichar *linebuf = STUnicodeForString(inputText);
-		
 #undef send
 #define send()  [[[NSString alloc] initWithCharactersNoCopy:(unichar*)outputbegin length:p-outputbegin freeWhenDone:NO] autorelease]
 #define psend() [[[NSString alloc] initWithCharactersNoCopy:(unichar*)parambegin length:p-parambegin freeWhenDone:NO] autorelease]
 #define tag(tagt, p) [delegate spanChangedTag:tag_##tagt span:current_span div:div param:&(p)]
 				
 		{
+			size_t linelen = [inputText length];
+			NSData *linebufData;
+			const unichar *linebuf = STUnicodeForString(inputText, &linebufData);
 			const unichar *p = linebuf, *pe = linebuf + linelen, *outputbegin = p, *parambegin=p, *last_tag_start=p;
 			const unichar *pb = p;
 			int cs = 0;
@@ -468,6 +471,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 
 			if (!reachedEnd) Codecprintf(NULL, "parse error: %s\n", [inputText UTF8String]);
 			if (linebuf[linelen-1] == '\\') [div->text appendString:@"\\"];
+			[linebufData release];
 			[divs addObject:div];
 		}
 		

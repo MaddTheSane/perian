@@ -1049,8 +1049,9 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		unsigned textLen = [div->text length];
 		if (!textLen || ![div->spans count]) continue;
 		BOOL resetPens = NO;
-		const unichar *ubuffer = STUnicodeForString(div->text);
-						
+		NSData *ubufferData;
+		const unichar *ubuffer = STUnicodeForString(div->text, &ubufferData);
+		
 		if (div->layer != lastLayer) {
 			resetPens = YES;
 			lastLayer = div->layer;
@@ -1143,6 +1144,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		
 		penY = DrawOneTextDiv(c, layout, div, breakc, penX, penY);
 		
+		[ubufferData release];
 		if (storePen) *storePen = penY;
 	}
 	
