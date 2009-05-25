@@ -121,5 +121,6 @@ uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size);
 
 #define IS_AVI(x) (x == 'AVI ' || x == 'VfW ' || x == 'VFW ' || x == 'DIVX' || x == 'GVI ' || x == 'VP6 ')
 #define IS_NUV(x) (x == 'NUV ')
+#define IS_FLV(x) (x == 'FLV ')
 
 #endif
