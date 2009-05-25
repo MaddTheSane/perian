@@ -11,8 +11,10 @@ cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -g -Da
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
+	buildid_ffmpeg="${buildid_ffmpeg}Dev"
 else
     optcflags="-falign-loops=16 -fweb -fstrict-aliasing -finline-limit=1000"
+	buildid_ffmpeg="${buildid_ffmpeg}Dep"
 fi
 
 if what /usr/bin/ld | grep -q ld64-77; then
@@ -42,10 +44,10 @@ if [ "$CC" = "" ]; then
 	export CC
 fi
 
-OUTPUT_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
+BUILD_ID_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
 
-if [[ -e "$OUTPUT_FILE" ]] ; then
-    oldbuildid_ffmpeg=`cat "$OUTPUT_FILE"`
+if [[ -e "$BUILD_ID_FILE" ]] ; then
+    oldbuildid_ffmpeg=`cat "$BUILD_ID_FILE"`
 else
     oldbuildid_ffmpeg="buildme"
 fi
@@ -90,6 +92,7 @@ else
 	patch -p0 < Patches/ffmpeg-faltivec.diff
 	patch -p0 < Patches/ffmpeg-h264-nounrollcabac.diff
 	patch -p0 < Patches/ffmpeg-no-h264-warning.diff
+	patch -p0 < Patches/ffmpeg-mlp-no-mmx.diff
 	touch ffmpeg/patched
 
     echo -n "Building "
@@ -186,10 +189,20 @@ else
 			cp "$aa" `echo -n $aa | sed 's/'$archDir'\/.*\//Universal\//'`
 		done
 	fi
-	echo -n "$buildid_ffmpeg" > $OUTPUT_FILE
-	
+	echo -n "$buildid_ffmpeg" > $BUILD_ID_FILE
+fi
+
+FINAL_BUILD_ID_FILE="$SYMROOT/Universal/buildid"
+if [[ -e "$FINAL_BUILD_ID_FILE" ]] ; then
+    oldbuildid_ffmpeg=`cat "$FINAL_BUILD_ID_FILE"`
+else
+    oldbuildid_ffmpeg="buildme"
+fi
+
+if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
+    echo "Final static ffmpeg libs are up-to-date ; not copying"
+else
 	mkdir "$SYMROOT/Universal" || true
 	cp "$BUILT_PRODUCTS_DIR/Universal"/* "$SYMROOT/Universal"
 	ranlib "$SYMROOT/Universal"/*.a
-
 fi
