@@ -303,6 +303,7 @@ static const CFStringRef defaultFrameDroppingWhiteList[] = {
 	CFSTR("NicePlayer"),
 	CFSTR("Movie Time"),
 	CFSTR("Front Row"),
+	CFSTR("Spiral"),
 	CFSTR("Finder")
 };
 
