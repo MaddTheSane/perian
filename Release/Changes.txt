@@ -1,21 +1,27 @@
 1.1.4
 Features:
-- Forced VobSub subtitles are imported into a separate track
-- Added initial DTS passthrough via similar mechanisms as AC3
-- Accelerated Y420->Y422 color conversions
-- Added some more color conversions (allows playback of more codecs)
-Bug Fixes:
-- Corrected "Load External Subtitles" checkbox
-- Corrected crash/freeze when loading broken VobSub subtitles
-- Corrected import of lPCM in flv files.
-- Added ability for Perian to always be used for certain apps.  Fixed iChat AV
-- Corrected CRAM codec in browsers
-- Corrected rendering of newlines in SSA subtitles
-- Prevent an exception on SSA parse error
-- Never allow Apple's code to handle AC3 data anymore so passthrough works more often
-- Worked around a bug in FFmpeg where MKV files would have no enabled tracks
-- Better font sizes for \fn and \fs
-- Fixed several memory leaks
+- Forced VobSub subtitles are imported into a separate track [r1015]
+- Added initial DTS passthrough via similar mechanisms as AC3 [r1024]
+- Support old ffmpeg-generated MKV files with no enabled tracks [r1021]
+Fixes:
+- Fixed "Load External Subtitles" checkbox [r998]
+- Fixed crash/freeze when loading broken VobSub subtitles [r1000, 1034]
+- Fixed import of uncompressed audio in FLV [r1007]
+- Fixed import of audio tracks in AVI; should improve iApps [r1042]
+- Fixed CRAM codec AVI in browsers [r1010]
+- Worked around bug in iChat codec loading [r1008]
+- Never allows Apple's code to handle AC3 data anymore so passthrough works more often [r1014]
+- Doesn't try to decode some RGB colorspaces (such as in Camtasia) that aren't supported [r1039]
+- Fixed some 16-bit RGB codecs on Intel [r1039]
+- Fixed importing movie files with no video tracks (regression from r706) [r1042]
+Subtitles:
+- Fixed garbage characters appearing at the end of a line with some fonts [r1013]
+- Better handling of invalid SSA files [r1013]
+- Fixed rendering of multi-layer subtitles [r1016]
+- Fixed SRT files using ',' for decimals [r1019]
+- Ignore SSA shapes and \blur instead of misrendering them [r1027, 1036]
+- Disabled vertical font support again to fix files wrongly using it for Latin text [r1027]
+- Fixed subtitles in MKV wrongly displaying at the end of a video [r1036]
 
 1.1.3
 - Enabled Indeo 2/3 decodecs
