@@ -529,7 +529,13 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 		if(dtsPassthrough)
 			len = produceDTSPassthroughPackets(outputBuffer, &outBufUsed, packet, packetSize, avContext->channels, mOutputFormat.mFormatFlags & kLinearPCMFormatFlagIsBigEndian);
 		else
-			len = avcodec_decode_audio2(avContext, (int16_t *)outputBuffer, &outBufUsed, packet, packetSize);
+		{
+			AVPacket pkt;
+			av_init_packet(&pkt);
+			pkt.data = packet;
+			pkt.size = packetSize;
+			len = avcodec_decode_audio3(avContext, (int16_t *)outputBuffer, &outBufUsed, &pkt);
+		}
 		
 		if (len < 0) {
 			Codecprintf(NULL, "Error decoding audio frame\n");
