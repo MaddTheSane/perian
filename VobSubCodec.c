@@ -333,7 +333,11 @@ ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCodecDeco
 		memcpy(glob->codecData, drp->codecData, myDrp->bufferSize);
 	}
 	
-	ret = avcodec_decode_subtitle(glob->avContext, &glob->subtitle, &got_sub, glob->codecData, myDrp->bufferSize);
+	AVPacket pkt;
+	av_init_packet(&pkt);
+	pkt.data = glob->codecData;
+	pkt.size = myDrp->bufferSize;
+	ret = avcodec_decode_subtitle2(glob->avContext, &glob->subtitle, &got_sub, &pkt);
 	
 	if (ret < 0 || !got_sub) {
 		Codecprintf(NULL, "Error decoding DVD subtitle %d / %ld\n", ret, myDrp->bufferSize);

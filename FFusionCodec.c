@@ -293,7 +293,11 @@ static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avct
     tmpContext.codec_tag = avctx->codec_tag;
     
     avcodec_open(&tmpContext, codec);
-    avcodec_decode_video(&tmpContext, &tmpFrame, &got_picture, (UInt8*)data, bufferSize);
+	AVPacket pkt;
+	av_init_packet(&pkt);
+	pkt.data = (UInt8*)data;
+	pkt.size = bufferSize;
+    avcodec_decode_video2(&tmpContext, &tmpFrame, &got_picture, &pkt);
     pix_fmt = tmpContext.pix_fmt;
     avcodec_close(&tmpContext);
     
@@ -1721,7 +1725,11 @@ OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dat
 	FFusionDebugPrint("%p Decompress %d bytes.\n", glob, length);
     avcodec_get_frame_defaults(picture);
 	
-	len = avcodec_decode_video(context, picture, &got_picture, dataPtr, length);
+	AVPacket pkt;
+	av_init_packet(&pkt);
+	pkt.data = dataPtr;
+	pkt.size = length;
+	len = avcodec_decode_video2(context, picture, &got_picture, &pkt);
 	
 	if (len < 0)
 	{            
