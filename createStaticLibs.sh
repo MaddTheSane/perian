@@ -92,7 +92,6 @@ else
 	patch -p0 < Patches/ffmpeg-faltivec.diff
 	patch -p0 < Patches/ffmpeg-h264-nounrollcabac.diff
 	patch -p0 < Patches/ffmpeg-no-h264-warning.diff
-	patch -p1 < Patches/ffmpeg-h264-crash-fix.diff
 	touch ffmpeg/patched
 
     echo -n "Building "
