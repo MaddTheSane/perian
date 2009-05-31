@@ -1380,7 +1380,7 @@ pascal ComponentResult FFusionCodecEndBand(FFusionGlobals glob, ImageSubCodecDec
 	FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
 	glob->stats.type[drp->frameType].end_calls++;
 	FFusionBuffer *buf = myDrp->buffer;
-	if(buf)
+	if(buf && buf->frame)
 		releaseBuffer(glob->avContext, buf);
 	
 	FFusionDebugPrint("%p EndBand #%d.\n", glob, myDrp->frameNumber);
