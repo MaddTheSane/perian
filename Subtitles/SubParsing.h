@@ -36,7 +36,7 @@ extern "C"
 	unsigned marginL, marginR, marginV;
 	NSMutableArray *spans;
 	
-	int posX, posY;
+	float posX, posY;
 	UInt8 alignH, alignV, wrapStyle, render_complexity;
 	BOOL positioned;
 	

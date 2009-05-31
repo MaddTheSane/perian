@@ -284,7 +284,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			SubRenderSpan *current_span = [SubRenderSpan startingSpanForDiv:div delegate:delegate];
 			unsigned chars_deleted = 0; float floatnum = 0;
 			NSString *strval=NULL;
-			unsigned curX, curY;
+			float curX, curY;
 			int intnum = 0;
 			BOOL reachedEnd = NO, setWrapStyle = NO, setPosition = NO, setAlignForDiv = NO, dropThisSpan = NO;
 			
@@ -322,8 +322,8 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				action setfloatnum {floatnum = [psend() floatValue];}
 				action setstringval {strval = psend();}
 				action nullstring {strval = @"";}
-				action setxypos {curX=curY=-1; sscanf([psend() UTF8String], "(%d,%d)", &curX, &curY);}
-				
+				action setpos {curX=curY=0; sscanf([psend() UTF8String], "(%f,%f", &curX, &curY);}
+
 				action ssaalign {
 					if (!setAlignForDiv) {
 						setAlignForDiv = YES;
@@ -361,11 +361,13 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 
 				intnum = ("-"? [0-9]+) >paramset %setintnum;
 				flag = [01] >paramset %setintnum;
-				floatnum = ("-"? [0-9]+ ("." [0-9]*)?) >paramset %setfloatnum;
+				floatn = ("-"? ([0-9]+ ("." [0-9]*)?) | ([0-9]* "." [0-9]+));
+				floatnum = floatn >paramset %setfloatnum;
 				string = (([^\\}]+) >paramset %setstringval | "" %nullstring );
 				color = ("H"|"&"){,2} (xdigit+) >paramset %sethexnum "&"?;
 				parens = "(" [^)]* ")";
-				xypos = ("(" "-"? [0-9]+ "," "-"? [0-9]+ ")") >paramset %setxypos;
+				pos = ("(" floatn "," floatn ")") >paramset %setpos;
+				move = ("(" (floatn ","){3,5} floatn ")") >paramset %setpos;
 				
 				cmd = "\\" (
 							"b" intnum %bold
@@ -399,7 +401,8 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|([kK] [fo]? intnum)
 							|"q" intnum %wrapstyle
 							|"r" string %stylerevert
-							|"pos" xypos %position
+							|"pos" pos %position
+							|"move" move %position
 							|"t" parens
 							|"org" parens
 							|("fad" "e"? parens)

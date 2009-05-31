@@ -24,6 +24,7 @@ Subtitles:
 - Ignore SSA shapes and \blur instead of misrendering them [r1027, 1036]
 - Disabled vertical font support again to fix files wrongly using it for Latin text [r1027]
 - Fixed subtitles in MKV wrongly displaying at the end of a video [r1036]
+- Fixed sub-pixel \pos and the starting position of \move [r1063]
 
 1.1.3
 - Enabled Indeo 2/3 decodecs

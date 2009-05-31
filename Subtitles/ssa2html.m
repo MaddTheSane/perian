@@ -192,7 +192,7 @@ NSString *htmlfilter(NSString *s)
 		int j, spancount = [div->spans count], spans = 1, close_div = 0;
 		
 		if (div->positioned) {
-			[html appendFormat:@"<div style=\"top: %dpx; left: %dpx; position: absolute\">", div->posY, div->posX];
+			[html appendFormat:@"<div style=\"top: %fpx; left: %fpx; position: absolute\">", div->posY, div->posX];
 			close_div = 1;
 		}
 				
@@ -226,7 +226,7 @@ NSString *htmlfilter(NSString *s)
 	for (i = 0; i < div_count; i++) {
 		SubRenderDiv *div = [divs objectAtIndex:i];
 		
-		if (div->posX > -1) [abs addObject:div]; else if (div->alignV == kSubAlignmentTop) [top addObject:div]; else [bot insertObject:div atIndex:0];
+		if (div->positioned) [abs addObject:div]; else if (div->alignV == kSubAlignmentTop) [top addObject:div]; else [bot insertObject:div atIndex:0];
 	}
 	
 	if ([top count]) {
