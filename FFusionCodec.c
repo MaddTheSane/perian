@@ -53,8 +53,8 @@ void inline swapFrame(AVFrame * *a, AVFrame * *b)
 // Types
 //---------------------------------------------------------------------------
 
-// 32 because that's ffmpeg's INTERNAL_BUFFER_SIZE
-#define FFUSION_MAX_BUFFERS 32
+// 64 because that's 2 * ffmpeg's INTERNAL_BUFFER_SIZE and QT sometimes uses more than 32
+#define FFUSION_MAX_BUFFERS 64
 
 typedef struct
 {
@@ -1687,6 +1687,7 @@ static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic)
 	if(buf->ffmpegUsing)
 	{
 		buf->ffmpegUsing = 0;
+		avcodec_default_release_buffer(s, buf->frame);
 		releaseBuffer(s, buf);
 	}
 }
@@ -1704,10 +1705,7 @@ static void releaseBuffer(AVCodecContext *s, FFusionBuffer *buf)
 //	FFusionGlobals glob = (FFusionGlobals)s->opaque;
 //	FFusionDebugPrint("%p Released Buffer %p #%d to %d.\n", glob, buf, buf->frameNumber, buf->retainCount);
 	if(!buf->retainCount)
-	{
 		buf->returnedFrame.data[0] = NULL;
-		avcodec_default_release_buffer(s, buf->frame);
-	}
 }
 
 //-----------------------------------------------------------------
