@@ -299,16 +299,17 @@ int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type)
 }
 
 static const CFStringRef defaultFrameDroppingWhiteList[] = {
-	CFSTR("QuickTime Player"),
-	CFSTR("NicePlayer"),
-	CFSTR("Movie Time"),
+	CFSTR("Finder"),
 	CFSTR("Front Row"),
-	CFSTR("Spiral"),
-	CFSTR("Finder")
+	CFSTR("Movie Time"),
+	CFSTR("Movist"),
+	CFSTR("NicePlayer"),
+	CFSTR("QuickTime Player"),
+	CFSTR("Spiral")
 };
 
 static const CFStringRef defaultForcedAppList[] = {
-	CFSTR("iChat"),
+	CFSTR("iChat")
 };
 
 static int findNameInList(CFStringRef loadingApp, const CFStringRef *names, int count)
