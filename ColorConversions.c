@@ -421,6 +421,31 @@ static FASTCALL void Y422toY422(AVFrame *picture, UInt8 *o, int outRB, unsigned 
 	}
 }
 
+static FASTCALL void Y410toY422(AVFrame *picture, UInt8 *o, int outRB, unsigned width, unsigned height)
+{
+	UInt8	*yc = picture->data[0], *u = picture->data[1], *v = picture->data[2];
+	int		rY = picture->linesize[0], rU = picture->linesize[1], rV = picture->linesize[2];
+	int		x, y, halfwidth = width / 2;
+	
+	for (y = 0; y < height; y++) {
+		for (x = 0; x < halfwidth; x++) {
+			int x2 = x * 2, x4 = x * 4;
+			o[x4] = u[x/2];
+			o[x4 + 1] = yc[x2];
+			o[x4 + 2] = v[x/2];
+			o[x4 + 3] = yc[x2 + 1];
+		}
+		
+		o += outRB;
+		yc += rY;
+		
+		if (y % 4 == 3) {
+			u += rU;
+			v += rV;
+		}
+	}
+}
+
 static void ClearRGB(UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height, int bytesPerPixel)
 {
 	int y;
@@ -484,21 +509,23 @@ static FASTCALL void ClearY422(UInt8 *baseAddr, int rowBytes, unsigned width, un
 OSType ColorConversionDstForPixFmt(enum PixelFormat ffPixFmt)
 {
 	switch (ffPixFmt) {
-		case PIX_FMT_YUV420P:
-			return k2vuyPixelFormat; //disables "fast YUV" path
+		case PIX_FMT_RGB555LE:
+		case PIX_FMT_RGB555BE:
+			return k16BE555PixelFormat;
 		case PIX_FMT_BGR24:
 			return k24RGBPixelFormat; //XXX try k24BGRPixelFormat
-		case PIX_FMT_RGB32: // XXX not a specific pixel format
-			return k32ARGBPixelFormat;
 		case PIX_FMT_RGB24:
 			return k24RGBPixelFormat;
+		case PIX_FMT_RGB32: // XXX not a specific pixel format, need LE & BE like 16-bit
+			return k32ARGBPixelFormat;
+		case PIX_FMT_YUV410P:
+			return k2vuyPixelFormat;
+		case PIX_FMT_YUV420P:
+			return k2vuyPixelFormat; //disables "fast YUV" path
 		case PIX_FMT_YUV422P:
 			return k2vuyPixelFormat;
 		case PIX_FMT_YUVA420P:
 			return k4444YpCbCrA8PixelFormat;
-		case PIX_FMT_RGB555LE:
-		case PIX_FMT_RGB555BE:
-			return k16BE555PixelFormat;
 		default:
 			return 0; // error
 	}
@@ -537,14 +564,6 @@ int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFm
 			funcs->clear = ClearRGB24;
 			funcs->convert = RGB24toRGB24;
 			break;
-		case PIX_FMT_YUV422P:
-			funcs->clear = ClearY422;
-			funcs->convert = Y422toY422;
-			break;
-		case PIX_FMT_YUVA420P:
-			funcs->clear = ClearV408;
-			funcs->convert = YA420toV408;
-			break;
 		case PIX_FMT_RGB555LE:
 			funcs->clear = ClearRGB16;
 			funcs->convert = RGB16LEtoRGB16;
@@ -552,6 +571,18 @@ int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFm
 		case PIX_FMT_RGB555BE:
 			funcs->clear = ClearRGB16;
 			funcs->convert = RGB16toRGB16;
+			break;
+		case PIX_FMT_YUV410P:
+			funcs->clear = ClearY422;
+			funcs->convert = Y410toY422;
+			break;
+		case PIX_FMT_YUV422P:
+			funcs->clear = ClearY422;
+			funcs->convert = Y422toY422;
+			break;
+		case PIX_FMT_YUVA420P:
+			funcs->clear = ClearV408;
+			funcs->convert = YA420toV408;
 			break;
 		default:
 			return paramErr;

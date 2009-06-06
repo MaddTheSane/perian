@@ -714,6 +714,17 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				codecID = CODEC_ID_VP6A;
 				break;
 				
+			case 'RT21':
+				codecID = CODEC_ID_INDEO2;
+				break;
+				
+			case 'IV31':
+			case 'IV32':
+			case 'iv31':
+			case 'iv32':
+				codecID = CODEC_ID_INDEO3;
+				break;
+				
             default:
 				Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
         }
@@ -1523,14 +1534,14 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX4CodecInfoResID, (Handle *)&tempCodecInfo);
                 break;
 				
-			case 'IV31':	// Indeo 3
+            case 'IV31':	// Indeo 3
             case 'IV32':
-			case 'iv31':
+            case 'iv31':
             case 'iv32':
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kIndeo3CodecInfoResID, (Handle *)&tempCodecInfo);
                 break;
 				
-			case 'RT21':	// Indeo 2
+            case 'RT21':	// Indeo 2
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kIndeo2CodecInfoResID, (Handle *)&tempCodecInfo);
                 break;
                 
