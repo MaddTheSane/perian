@@ -54,16 +54,22 @@ void FFusionDataFree(FFusionData *data)
 	av_free(data->ringBuffer);
 }
 
+//Expands both the frame array and the ring buffer.
+//Old data is kept in the previousData pointer to be dealloced when done
 static void expansion(FFusionData *data, int dataSize)
 {
+	//Create the prev structure to hold all existing frames
 	FFusionData *prev = malloc(sizeof(FFusionData));
+	//Move all frames to prev
 	memcpy(prev, data, sizeof(FFusionData));
 	int i;
 	for(i=0; i<data->frameSize; i++)
 		data->frames[i].data = prev;
 	
+	//Create new data
 	int newRingSize = MAX(dataSize * 10, data->ringSize * 2);
 	FFusionDataSetup(data, data->frameSize * 2, newRingSize);
+	//Preserve pointer to old data
 	data->previousData = prev;
 }
 
@@ -78,6 +84,7 @@ uint8_t *FFusionCreateEntireDataBuffer(FFusionData *data, uint8_t *buffer, int b
 	return data->ringBuffer;
 }
 
+//Find dataSize bytes in ringbuffer, expand if none available
 static uint8_t *createBuffer(FFusionData *data, int dataSize)
 {
 	if(data->ringWrite >= data->ringRead)
@@ -109,6 +116,7 @@ static uint8_t *createBuffer(FFusionData *data, int dataSize)
 	}
 }
 
+//Insert buffer into ring buffer
 static uint8_t *insertIntoBuffer(FFusionData *data, uint8_t *buffer, int dataSize)
 {
 	uint8_t *ret = createBuffer(data, dataSize);
@@ -119,6 +127,7 @@ static uint8_t *insertIntoBuffer(FFusionData *data, uint8_t *buffer, int dataSiz
 
 FrameData *FFusionDataAppend(FFusionData *data, uint8_t *buffer, int dataSize, int type)
 {
+	//Find an available frame
 	if((data->frameWrite + 1) % data->frameSize == data->frameRead)
 	{
 		expansion(data, dataSize);
@@ -166,6 +175,7 @@ void FFusionDataSetUnparsed(FFusionData *data, uint8_t *buffer, int bufferSize)
 	}
 }
 
+//Seems to be unused
 void FFusionDataReadUnparsed(FFusionData *data)
 {
 	data->ringWrite -= data->unparsedFrames.dataSize;
@@ -193,6 +203,7 @@ void FFusionDataMarkRead(FrameData *toData)
 	data->ringRead = toData->buffer + toData->dataSize - data->ringBuffer;
 	if(data->previousData != NULL)
 	{
+		//If there's previous data, free it since we are now done with it
 		FFusionDataFree(data->previousData);
 		data->previousData = NULL;
 	}
@@ -207,6 +218,7 @@ FrameData *FFusionDataFind(FFusionData *data, int frameNumber)
 			return data->frames + i;
 	}
 	if(data->previousData != NULL)
+		//Check previous data as well
 		return FFusionDataFind(data->previousData, frameNumber);
 	
 	return NULL;
