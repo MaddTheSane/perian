@@ -166,10 +166,10 @@ void FFusionDataSetUnparsed(FFusionData *data, uint8_t *buffer, int bufferSize)
 		//This part was already unparsed; don't memcpy again
 		unparsed->dataSize = bufferSize;
 	}
+	else
 	{
 		unparsed->buffer = insertIntoBuffer(data, buffer, bufferSize);
 		if (unparsed->buffer) {
-			memcpy(unparsed->buffer, buffer, bufferSize);
 			unparsed->dataSize = bufferSize;
 		}		
 	}
