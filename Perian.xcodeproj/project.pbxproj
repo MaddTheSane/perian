@@ -292,7 +292,7 @@
 			outputFiles = (
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
 			);
-			script = "RAGEL=${PROJECT_DIR}/Subtitles/ragel\nRLCODEGEN=${PROJECT_DIR}/Subtitles/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
+			script = "RAGEL=${PROJECT_DIR}/Binaries/ragel\nRLCODEGEN=${PROJECT_DIR}/Binaries/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
 		};
 		3DAD086E0FBF8225001E156F /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
@@ -303,7 +303,7 @@
 			outputFiles = (
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
 			);
-			script = "RAGEL=${PROJECT_DIR}/Subtitles/ragel\nRLCODEGEN=${PROJECT_DIR}/Subtitles/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
+			script = "RAGEL=${PROJECT_DIR}/Binaries/ragel\nRLCODEGEN=${PROJECT_DIR}/Binaries/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
 		};
 /* End PBXBuildRule section */
 

@@ -1,5 +1,5 @@
 #!/bin/sh -v
-PATH=/usr/local/bin:/sw/bin:/opt/local/bin:/usr/bin:$PATH
+PATH=/usr/local/bin:/sw/bin:/opt/local/bin:/usr/bin:$PWD/Binaries:$PATH
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
 if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
