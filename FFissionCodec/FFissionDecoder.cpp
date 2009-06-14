@@ -101,7 +101,10 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0
 		CFRelease(pass);
 	}
 	else
-		dtsPassthrough = 0;	
+		dtsPassthrough = 0;
+	
+	int initialMap[6] = {0, 1, 2, 3, 4, 5};
+	memcpy(fullChannelMap, initialMap, sizeof(initialMap));
 }
 
 FFissionDecoder::~FFissionDecoder()
@@ -326,6 +329,27 @@ void FFissionDecoder::OpenAVCodec()
 	}
 	if(mInputFormat.mFormatID != kAudioFormatDTS)
 		dtsPassthrough = 0;
+	else
+	{
+		switch (mInputFormat.mChannelsPerFrame) {
+			case 3:
+			case 6:
+			{
+				int chanMap[6] = {1, 2, 0, 5, 3, 4};//L R C -> C L R  and  L R C LFE Ls Rs -> C L R Ls Rs LFE
+				memcpy(fullChannelMap, chanMap, sizeof(chanMap));
+				break;
+			}
+			case 4:
+			case 5:
+			{
+				int chanMap[6] = {1, 2, 0, 3, 4, 5};//L R C Cs -> C L R Cs  and  L R C Ls Rs -> C L R Ls Rs
+				memcpy(fullChannelMap, chanMap, sizeof(chanMap));
+				break;
+			}
+			default:
+				break;
+		}
+	}
 }
 
 void FFissionDecoder::SetCurrentOutputFormat(const AudioStreamBasicDescription& inOutputFormat)
@@ -491,6 +515,25 @@ int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *p
 	return frameSize;
 }
 
+UInt32 FFissionDecoder::InterleaveSamples(void *outputDataUntyped, Byte *inputDataUntyped, int amountToCopy)
+{
+	SInt16 *outputData = (SInt16 *)outputDataUntyped;
+	SInt16 *inputData = (SInt16 *)inputDataUntyped;
+	int channelCount = avContext->channels;
+	int framesToCopy = amountToCopy / channelCount / 2;
+	for(int i=0; i<framesToCopy; i++)
+	{
+		for(int j=0; j<channelCount; j++)
+		{
+			outputData[fullChannelMap[j]] = inputData[j];
+		}
+		outputData += channelCount;
+		inputData += channelCount;
+	}
+	
+	return framesToCopy * channelCount * 2;
+}
+
 UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 											 UInt32& ioOutputDataByteSize,	// number of bytes written to outOutputData
 											 UInt32& ioNumberPackets, 
@@ -510,7 +553,7 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 	// we have leftovers from the last packet, use that first
 	if (outBufUsed > 0) {
 		int amountToCopy = FFMIN(outBufUsed, ioOutputDataByteSize);
-		memcpy(outData, outputBuffer, amountToCopy);
+		amountToCopy = InterleaveSamples(outData, outputBuffer, amountToCopy);
 		outBufUsed -= amountToCopy;
 		written += amountToCopy;
 		
@@ -549,7 +592,7 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 		
 		// copy up to the amount requested
 		int amountToCopy = FFMIN(outBufUsed, ioOutputDataByteSize - written);
-		memcpy(outData + written, outputBuffer, amountToCopy);
+		amountToCopy = InterleaveSamples(outData + written, outputBuffer, amountToCopy);
 		outBufUsed -= amountToCopy;
 		written += amountToCopy;
 		

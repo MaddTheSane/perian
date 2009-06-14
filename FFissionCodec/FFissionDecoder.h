@@ -43,6 +43,7 @@ public:
 	virtual UInt32 GetVersion() const;
 
 	virtual void AppendInputData(const void* inInputData, UInt32& ioInputDataByteSize, UInt32& ioNumberPackets, const AudioStreamPacketDescription* inPacketDescription);
+	virtual UInt32 InterleaveSamples(void *outputDataUntyped, Byte *inputDataUntyped, int amountToCopy);
 	virtual UInt32 ProduceOutputPackets(void* outOutputData, UInt32& ioOutputDataByteSize, UInt32& ioNumberPackets, AudioStreamPacketDescription* outPacketDescription);
 	
 private:
@@ -59,6 +60,7 @@ private:
 	int outBufSize;
 	int outBufUsed;
 	bool dtsPassthrough;
+	int fullChannelMap[6];
 };
 
 // kAudioCodecPropertyHasVariablePacketByteSizes is queried before our input format is set,
