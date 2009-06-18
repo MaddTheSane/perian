@@ -16,6 +16,7 @@ Fixes:
 - Fixed importing movie files with no video tracks (regression from r706) [r1042]
 - Fixed H264 crash in put_h264_qpel8_h_lowpass_l2_ssse3
 - Fixed crash with corrupt first frame [r1061]
+- Fixed BMP/RLE in AVI [r1078]
 Subtitles:
 - Fixed garbage characters appearing at the end of a line with some fonts [r1013]
 - Better handling of invalid SSA files [r1013]
