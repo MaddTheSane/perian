@@ -39,7 +39,7 @@ if [ "$CC" = "" ]; then
 		CC="gcc-4.2"
 		x86tune="core2"
 	else
-		CC="gcc"
+		CC="gcc-4.0"
 	fi
 	export CC
 fi
