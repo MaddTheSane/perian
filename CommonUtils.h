@@ -1,10 +1,22 @@
 /*
- *  CommonUtils.h
- *  Perian
+ * CommonUtils.h
+ * Created by David Conrad on 10/13/06.
  *
- *  Created by David Conrad on 10/13/06.
- *  Copyright 2006 Perian Project. All rights reserved.
+ * This file is part of Perian.
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef __COMMONUTILS_H__
@@ -38,7 +50,18 @@ ComponentResult ReadESDSDescExt(Handle descExt, UInt8 **buffer, int *size);
 
 int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type);
 
+// does the current process break if we signal droppable frames?
 int IsFrameDroppingEnabled();
+
+// does the current process break if we return errors in Preflight?
+int forcePerianToDecode();
+
+int IsAltivecSupported();
+
+// CFPreferencesCopyAppValue() wrapper which checks the type of the value returned
+CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type);
+	
+#define PERIAN_PREF_DOMAIN CFSTR("org.perian.Perian")
 
 #ifdef __cplusplus
 }

@@ -63,7 +63,7 @@
 		register_avcodec(&x##_encoder); }
 #define REGISTER_DECODER(x) { \
 	extern AVCodec x##_decoder; \
-		register_avcodec(&x##_decoder); }
+		avcodec_register(&x##_decoder); }
 #define REGISTER_ENCDEC(x)  REGISTER_ENCODER(x); REGISTER_DECODER(x)
 
 #define REGISTER_PARSER(x) { \
@@ -123,6 +123,8 @@ void init_FFmpeg()
 		REGISTER_DECODER(tscc);
 		REGISTER_DECODER(vp6a);
 		REGISTER_DECODER(zmbv);
+		REGISTER_DECODER(indeo2);
+		REGISTER_DECODER(indeo3);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
@@ -373,7 +375,7 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 			OSType fourcc = get_avi_strf_fourcc(byteContext);
 			enum CodecID id = codec_get_id(codec_bmp_tags, BSWAP(fourcc));
 			
-			if (id == CODEC_ID_MJPEG || id == CODEC_ID_DVVIDEO || id == CODEC_ID_RAWVIDEO || id == CODEC_ID_NONE || id == CODEC_ID_MSVIDEO1)
+			if (id == CODEC_ID_MJPEG || id == CODEC_ID_DVVIDEO || id == CODEC_ID_RAWVIDEO || id == CODEC_ID_MSVIDEO1 || id == CODEC_ID_MSRLE)
 				*valid = 0;
 			
 			url_fclose(byteContext);
@@ -557,6 +559,9 @@ bail:
 	else
 		storage->movieLoadState == kMovieLoadStateError;
 		
+	if (result == -1)
+		result = invalidMovie; // a bit better error message
+	
 	return result;
 } /* FFAvi_MovieImportDataRef */
 

@@ -18,6 +18,17 @@
 			name = "ffmpeg Static Libraries";
 			productName = "Version Macros and Static Libraries";
 		};
+		F5121EB70EB3A54A0048EF67 /* Make SVN Rev */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F5121EBB0EB3A5680048EF67 /* Build configuration list for PBXAggregateTarget "Make SVN Rev" */;
+			buildPhases = (
+				F5121EB60EB3A54A0048EF67 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Make SVN Rev";
+			productName = "Make SVN Rev";
+		};
 		F59E09EA0A670E3D0019A3F0 /* Debug In QuickTime Player */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = F59E0A0B0A670E950019A3F0 /* Build configuration list for PBXAggregateTarget "Debug In QuickTime Player" */;
@@ -47,7 +58,6 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = F5CFD2EA0B5012E800616865 /* Build configuration list for PBXAggregateTarget "A52Codec" */;
 			buildPhases = (
-				3D79C0540DFBA1FF00EEFE22 /* ShellScript */,
 				F5CFD2E00B5012BC00616865 /* CopyFiles */,
 				F5CFD2E30B5012DB00616865 /* CopyFiles */,
 			);
@@ -82,7 +92,6 @@
 		11629EF40B51E4FB006591C8 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
 		11629FD10B51E65F006591C8 /* NSString+extras.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629FD00B51E65F006591C8 /* NSString+extras.m */; };
 		1162A0540B51ECE1006591C8 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1162A0530B51ECE1006591C8 /* WebKit.framework */; };
-		116C42920B50463600FB0738 /* UpdateCheckerMainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */; };
 		116C42BC0B504C7C00FB0738 /* SUAppcast.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42BB0B504C7C00FB0738 /* SUAppcast.m */; };
 		116C42E80B504D2700FB0738 /* RSS.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E50B504D2700FB0738 /* RSS.m */; };
 		116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E70B504D2700FB0738 /* SUAppcastItem.m */; };
@@ -112,6 +121,27 @@
 		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; settings = {COMPILER_FLAGS = "-O3 -fweb -fno-reorder-blocks -fomit-frame-pointer"; }; };
 		3D95B9010E208965007C8F51 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D95B9000E208965007C8F51 /* libbz2.dylib */; };
 		3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D95B9000E208965007C8F51 /* libbz2.dylib */; };
+		3DAD08250FBF7DA9001E156F /* ssa2html.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAD08240FBF7DA9001E156F /* ssa2html.m */; };
+		3DAD08580FBF80D8001E156F /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD08570FBF80D8001E156F /* libobjc.dylib */; };
+		3DAD08590FBF80DF001E156F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
+		3DAD085A0FBF80E7001E156F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
+		3DAD08600FBF8194001E156F /* SubContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SubContext.m */; };
+		3DAD08610FBF8196001E156F /* SubImport.mm in Sources */ = {isa = PBXBuildFile; fileRef = 61D514DD0ADF3DBA00A671E1 /* SubImport.mm */; };
+		3DAD08620FBF8197001E156F /* SubParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */; };
+		3DAD08630FBF8198001E156F /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
+		3DAD087C0FBF82A2001E156F /* Codecprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 113F58990A6B091600509987 /* Codecprintf.c */; };
+		3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
+		3DAD08900FBF848B001E156F /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
+		3DAD09AF0FBFAB68001E156F /* detect-encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAD09AE0FBFAB68001E156F /* detect-encoding.m */; };
+		3DAD09F80FBFAFD0001E156F /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
+		3DAD09FB0FBFAFFF001E156F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
+		3DAD09FC0FBFB004001E156F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
+		3DAD09FD0FBFB007001E156F /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD08570FBF80D8001E156F /* libobjc.dylib */; };
+		3DAD09FE0FBFB00F001E156F /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
+		3DAD0A120FBFB145001E156F /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */; };
+		3DAD0A130FBFB14D001E156F /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */; };
+		3DAD0AAC0FC133E7001E156F /* PerianPrefPane.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */; };
+		3DAD0AC10FC1365E001E156F /* UpdateCheckerMainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.nib */; };
 		3DB2BB290B6C92F000416863 /* SubATSUIRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
@@ -235,7 +265,6 @@
 		61D517730AE0402E00A671E1 /* CommonUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D517720AE0402E00A671E1 /* CommonUtils.c */; };
 		61FD41330B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61FD41320B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp */; };
 		83D1D6CF0B4C7AC400E09EC9 /* PreferencePanes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */; };
-		83D1D6DE0B4C7F8300E09EC9 /* PerianPrefPane.nib in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */; };
 		83D1D6E20B4C81F200E09EC9 /* CPFPerianPrefPaneController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */; };
 		83D1D6F50B4C85AB00E09EC9 /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		8F483B550A642644002CCA73 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B540A642644002CCA73 /* libavformat.a */; };
@@ -257,14 +286,24 @@
 		3D74F53C0B6DB50C0018BAC0 /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
-			filePatterns = "*.c.rl *.cpp.rl *.cp.rl *.cxx.rl *.m.rl *.mm.rl";
+			filePatterns = "*.rl";
 			fileType = pattern.proxy;
 			isEditable = 1;
 			outputFiles = (
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
-				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE).dot",
 			);
-			script = "RAGEL=${PROJECT_DIR}/Subtitles/ragel\nRLCODEGEN=${PROJECT_DIR}/Subtitles/rlgen-cd\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
+			script = "RAGEL=${PROJECT_DIR}/Binaries/ragel\nRLCODEGEN=${PROJECT_DIR}/Binaries/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
+		};
+		3DAD086E0FBF8225001E156F /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.rl";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
+			);
+			script = "RAGEL=${PROJECT_DIR}/Binaries/ragel\nRLCODEGEN=${PROJECT_DIR}/Binaries/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
 		};
 /* End PBXBuildRule section */
 
@@ -297,6 +336,20 @@
 			remoteGlobalIDString = 3DBF4F570BCD396800DA401A;
 			remoteInfo = universaldetector;
 		};
+		3DAD08910FBF84A4001E156F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DBF4F560BCD396800DA401A;
+			remoteInfo = universaldetector;
+		};
+		3DAD09F90FBFAFE1001E156F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DBF4F560BCD396800DA401A;
+			remoteInfo = universaldetector;
+		};
 		3DB3517E0BCF004B009357B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
@@ -317,6 +370,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 61CB11760ACDF4D8007994BD;
 			remoteInfo = matroska;
+		};
+		F5121EBC0EB3A5AE0048EF67 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F5121EB70EB3A54A0048EF67;
+			remoteInfo = "Make SVN Rev";
 		};
 		F59E09EB0A670E420019A3F0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -456,7 +516,6 @@
 		116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PerianUpdateChecker-Info.plist"; path = "Plists/PerianUpdateChecker-Info.plist"; sourceTree = "<group>"; };
 		116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateCheckerAppDelegate.h; sourceTree = "<group>"; };
 		116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateCheckerAppDelegate.m; sourceTree = "<group>"; };
-		116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = UpdateCheckerMainMenu.nib; path = "Update Checker Sources/UpdateCheckerMainMenu.nib"; sourceTree = "<group>"; };
 		116C42BA0B504C7C00FB0738 /* SUAppcast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUAppcast.h; sourceTree = "<group>"; };
 		116C42BB0B504C7C00FB0738 /* SUAppcast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUAppcast.m; sourceTree = "<group>"; };
 		116C42E40B504D2700FB0738 /* RSS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSS.h; sourceTree = "<group>"; };
@@ -496,6 +555,14 @@
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
 		3D95B9000E208965007C8F51 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = /usr/lib/libbz2.dylib; sourceTree = "<absolute>"; };
+		3DAD08080FBF7C6F001E156F /* ssa2html */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ssa2html; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DAD08240FBF7DA9001E156F /* ssa2html.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ssa2html.m; path = Subtitles/ssa2html.m; sourceTree = "<group>"; };
+		3DAD08570FBF80D8001E156F /* libobjc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.dylib; path = /usr/lib/libobjc.dylib; sourceTree = "<absolute>"; };
+		3DAD09A80FBFAB08001E156F /* detect-encoding */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "detect-encoding"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DAD09AE0FBFAB68001E156F /* detect-encoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "detect-encoding.m"; path = "Subtitles/detect-encoding.m"; sourceTree = "<group>"; };
+		3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "/usr/lib/libstdc++.6.dylib"; sourceTree = "<absolute>"; };
+		3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = PerianPrefPane.xib; path = Resources/PerianPrefPane.xib; sourceTree = "<group>"; };
+		3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = UpdateCheckerMainMenu.nib; path = "Update Checker Sources/UpdateCheckerMainMenu.nib"; sourceTree = "<group>"; };
 		3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubATSUIRenderer.h; path = Subtitles/SubATSUIRenderer.h; sourceTree = "<group>"; };
 		3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SubATSUIRenderer.m; path = Subtitles/SubATSUIRenderer.m; sourceTree = "<group>"; };
 		6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACBaseCodec.cpp; sourceTree = "<group>"; };
@@ -657,10 +724,9 @@
 		83D1D6C80B4C794700E09EC9 /* Perian.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
 		83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PerianPane-Info.plist"; path = "Plists/PerianPane-Info.plist"; sourceTree = "<group>"; };
 		83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PreferencePanes.framework; path = /System/Library/Frameworks/PreferencePanes.framework; sourceTree = "<absolute>"; };
-		83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = PerianPrefPane.nib; sourceTree = "<group>"; };
 		83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CPFPerianPrefPaneController.h; sourceTree = "<group>"; };
 		83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CPFPerianPrefPaneController.m; sourceTree = "<group>"; };
-		83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Perian_icon.icns; sourceTree = "<group>"; };
+		83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = Perian_icon.icns; path = Resources/Perian_icon.icns; sourceTree = "<group>"; };
 		8F483B540A642644002CCA73 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = build/Universal/libavformat.a; sourceTree = "<group>"; };
 		8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		8F483B8B0A642886002CCA73 /* PerianAviImporter.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianAviImporter.r; sourceTree = "<group>"; };
@@ -679,7 +745,6 @@
 		F57676050BE1A18300B2434B /* FrameBuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FrameBuffer.h; sourceTree = "<group>"; };
 		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
-		F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBPerianPanePListGenerator.h; sourceTree = "<group>"; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -711,6 +776,31 @@
 				3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */,
 				3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */,
 				3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */,
+				3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DAD08060FBF7C6F001E156F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DAD08580FBF80D8001E156F /* libobjc.dylib in Frameworks */,
+				3DAD08590FBF80DF001E156F /* CoreFoundation.framework in Frameworks */,
+				3DAD085A0FBF80E7001E156F /* Foundation.framework in Frameworks */,
+				3DAD08900FBF848B001E156F /* libuniversaldetector.a in Frameworks */,
+				3DAD0A130FBFB14D001E156F /* libstdc++.6.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DAD09A60FBFAB08001E156F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DAD09F80FBFAFD0001E156F /* libuniversaldetector.a in Frameworks */,
+				3DAD09FB0FBFAFFF001E156F /* CoreFoundation.framework in Frameworks */,
+				3DAD09FC0FBFB004001E156F /* Foundation.framework in Frameworks */,
+				3DAD09FD0FBFB007001E156F /* libobjc.dylib in Frameworks */,
+				3DAD0A120FBFB145001E156F /* libstdc++.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -768,6 +858,8 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */,
+				3DAD08570FBF80D8001E156F /* libobjc.dylib */,
 				3D95B9000E208965007C8F51 /* libbz2.dylib */,
 				F539CD110B62BC82005A72C9 /* Foundation.framework */,
 				1162A0530B51ECE1006591C8 /* WebKit.framework */,
@@ -793,9 +885,9 @@
 			children = (
 				11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */,
 				11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */,
-				116C42910B50463600FB0738 /* UpdateCheckerMainMenu.nib */,
+				3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.nib */,
 				83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */,
-				83D1D6DD0B4C7F8300E09EC9 /* PerianPrefPane.nib */,
+				3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */,
 				83D1D6D00B4C7AD200E09EC9 /* Frameworks */,
 				613CD51C0AD1FB650098A825 /* TextSubCodec.r */,
 				6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */,
@@ -827,10 +919,12 @@
 				61D517710AE0402E00A671E1 /* CommonUtils.h */,
 				61D517720AE0402E00A671E1 /* CommonUtils.c */,
 				6116E74E0B4738CE0020F1CE /* CodecIDs.h */,
-				3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */,
 			);
+			indentWidth = 4;
 			name = Source;
 			sourceTree = "<group>";
+			tabWidth = 4;
+			usesTabs = 1;
 		};
 		116C425C0B50420D00FB0738 /* Update Checker Sources */ = {
 			isa = PBXGroup;
@@ -875,6 +969,8 @@
 				83D1D6C80B4C794700E09EC9 /* Perian.prefPane */,
 				F5CFD1B40B50009000616865 /* PerianPanePListGenerator */,
 				116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */,
+				3DAD08080FBF7C6F001E156F /* ssa2html */,
+				3DAD09A80FBFAB08001E156F /* detect-encoding */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -939,6 +1035,8 @@
 		6123D61D0AD0A052003EDE52 /* Subtitles */ = {
 			isa = PBXGroup;
 			children = (
+				3DAD09AE0FBFAB68001E156F /* detect-encoding.m */,
+				3DAD08240FBF7DA9001E156F /* ssa2html.m */,
 				3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */,
 				3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */,
 				3D211A1E0B6B1A540051299D /* SubContext.h */,
@@ -950,6 +1048,7 @@
 				3D2623160C6A60B700FD1242 /* SubRenderer.h */,
 				3D211A210B6B1A660051299D /* SubUtilities.h */,
 				3D211A220B6B1A660051299D /* SubUtilities.m */,
+				3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */,
 				3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */,
 				6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */,
 				6123D6230AD0A3FE003EDE52 /* VobSubCodec.h */,
@@ -1125,7 +1224,6 @@
 				113077FE0D50139500ECDECC /* ECQTComponent.h */,
 				83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */,
 				83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */,
-				F5CFD1BC0B5000CE00616865 /* GBPerianPanePListGenerator.h */,
 				F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */,
 			);
 			name = PrefPane;
@@ -1286,7 +1384,6 @@
 				11A70ABE0A3D0105002058D4 /* Sources */,
 				11A70ABF0A3D0105002058D4 /* Frameworks */,
 				11A70ADC0A3D0156002058D4 /* Rez */,
-				11BA3E510A61F2CE008AF206 /* ShellScript */,
 			);
 			buildRules = (
 				3D74F53C0B6DB50C0018BAC0 /* PBXBuildRule */,
@@ -1296,11 +1393,47 @@
 				61CB12100ACE0FB1007994BD /* PBXTargetDependency */,
 				61CB12120ACE0FB1007994BD /* PBXTargetDependency */,
 				3DB3517F0BCF004B009357B8 /* PBXTargetDependency */,
+				F5121EBD0EB3A5AE0048EF67 /* PBXTargetDependency */,
 			);
 			name = Perian;
 			productName = Perian;
 			productReference = 11A70AC10A3D0105002058D4 /* Perian.component */;
 			productType = "com.apple.product-type.bundle";
+		};
+		3DAD08070FBF7C6F001E156F /* ssa2html */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DAD080D0FBF7C71001E156F /* Build configuration list for PBXNativeTarget "ssa2html" */;
+			buildPhases = (
+				3DAD08050FBF7C6F001E156F /* Sources */,
+				3DAD08060FBF7C6F001E156F /* Frameworks */,
+			);
+			buildRules = (
+				3DAD086E0FBF8225001E156F /* PBXBuildRule */,
+			);
+			dependencies = (
+				3DAD08920FBF84A4001E156F /* PBXTargetDependency */,
+			);
+			name = ssa2html;
+			productName = ssa2html;
+			productReference = 3DAD08080FBF7C6F001E156F /* ssa2html */;
+			productType = "com.apple.product-type.tool";
+		};
+		3DAD09A70FBFAB08001E156F /* detect-encoding */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DAD09AD0FBFAB59001E156F /* Build configuration list for PBXNativeTarget "detect-encoding" */;
+			buildPhases = (
+				3DAD09A50FBFAB08001E156F /* Sources */,
+				3DAD09A60FBFAB08001E156F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3DAD09FA0FBFAFE1001E156F /* PBXTargetDependency */,
+			);
+			name = "detect-encoding";
+			productName = "detect-encoding";
+			productReference = 3DAD09A80FBFAB08001E156F /* detect-encoding */;
+			productType = "com.apple.product-type.tool";
 		};
 		61CB10FE0ACDF350007994BD /* ebml */ = {
 			isa = PBXNativeTarget;
@@ -1414,6 +1547,9 @@
 				F5CFD3BA0B50142100616865 /* Setup Build Directories */,
 				F5CFD2DB0B5012AA00616865 /* A52Codec */,
 				116C42510B5041BD00FB0738 /* PerianUpdateChecker */,
+				F5121EB70EB3A54A0048EF67 /* Make SVN Rev */,
+				3DAD08070FBF7C6F001E156F /* ssa2html */,
+				3DAD09A70FBFAB08001E156F /* detect-encoding */,
 			);
 		};
 /* End PBXProject section */
@@ -1468,9 +1604,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				116C42920B50463600FB0738 /* UpdateCheckerMainMenu.nib in Resources */,
 				1184A3680B50586C00C8452A /* SUUpdateAlert.nib in Resources */,
 				1184A3840B505A8800C8452A /* SUStatus.nib in Resources */,
+				3DAD0AC10FC1365E001E156F /* UpdateCheckerMainMenu.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1488,10 +1624,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5EB823E0BA7221F001064E5 /* PerianUpdateChecker.app in Resources */,
-				83D1D6DE0B4C7F8300E09EC9 /* PerianPrefPane.nib in Resources */,
 				83D1D6F50B4C85AB00E09EC9 /* Perian_icon.icns in Resources */,
 				11BEFB2D0C18E23E00BC9324 /* Read Me.rtf in Resources */,
 				11207C730C2F4A4E002A0FF0 /* ComponentInfo.plist in Resources */,
+				3DAD0AAC0FC133E7001E156F /* PerianPrefPane.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1527,31 +1663,21 @@
 			shellPath = /bin/sh;
 			shellScript = "source $SRCROOT/createStaticLibs.sh";
 		};
-		11BA3E510A61F2CE008AF206 /* ShellScript */ = {
+		F5121EB60EB3A54A0048EF67 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/.svn/dir-wcprops",
+				"$(SRCROOT)/ffmpeg/.svn/dir-wcprops",
 			);
 			outputPaths = (
+				"$(TARGET_BUILD_DIR)/include/SVNRevision.h",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Xcode auto-versioning script for Subversion\n# by Axel Andersson, modified by Daniel Jalkut to add\n# \"--revision HEAD\" to the svn info line, which allows\n# the latest revision to always be used.\n\n# further modified by Augie Fackler to be gross and sh-based in places\n# so that you can have svn installed anywhere\nPATH=$PATH:/usr/local/bin:/usr/bin:/sw/bin:/opt/local/bin\nffmpeg_rev=`cat \"$SYMROOT/Universal/buildid\"`\nREV=`svnversion -n ./`\necho $REV\n\necho | perl <<EOF\nuse strict;\ndie \"\\$0: Must be run from Xcode\" unless \\$ENV{\"BUILT_PRODUCTS_DIR\"};\n\nmy \\$INFO = \"\\$ENV{BUILT_PRODUCTS_DIR}/\\$ENV{WRAPPER_NAME}/Contents/Info.plist\";\n\nmy \\$version = \"$REV\";\n\n# (Match the last group of digits and optional letter M/S):\n\n# ugly yet functional (barely) regex by Daniel Jalkut:\n#$version =~ s/([\\d]*:)(\\d+[M|S]*).*/$2/;\n\n# better yet still functional regex via Kevin \"Regex Nerd\" Ballard\n(\\$version =~ m/\\d+[MS]*\\$/) && (\\$version = \\$&);\n\nopen(FH, \"\\$INFO\") or die \"\\$0: \\$INFO: $!\";\nmy \\$info = join(\"\", <FH>);\nclose(FH);\n\n#\\$info =~ s/([\\t ]+<key>CFBundleVersion<\\/key>\\n[\\t ]+<string>).*?(<\\/string>)/\\$1\\$version\\$2/;\n\\$info =~ s/SVNREVISION/\\$version/;\n\\$info =~ s/FFMPEGREVISION/$ffmpeg_rev/;\n\nopen(FH, \">\\$INFO\") or die \"\\$0: \\$INFO: \\$!\";\nprint FH \\$info;\nclose(FH);\nEOF\n";
-		};
-		3D79C0540DFBA1FF00EEFE22 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "pushd a52codec/build\nln -s Deployment+Debug Development || true\nln -s Development Deployment || true\nln -s Deployment Deployment+Debug || true\npopd";
+			shellScript = "source scripts/getSVNRevision.sh";
 		};
 		F535FCD50B4D605900F00D14 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1648,6 +1774,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3DAD08050FBF7C6F001E156F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DAD08250FBF7DA9001E156F /* ssa2html.m in Sources */,
+				3DAD08600FBF8194001E156F /* SubContext.m in Sources */,
+				3DAD08610FBF8196001E156F /* SubImport.mm in Sources */,
+				3DAD08620FBF8197001E156F /* SubParsing.m.rl in Sources */,
+				3DAD08630FBF8198001E156F /* SubUtilities.m in Sources */,
+				3DAD087C0FBF82A2001E156F /* Codecprintf.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DAD09A50FBFAB08001E156F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DAD09AF0FBFAB68001E156F /* detect-encoding.m in Sources */,
+				3DAD09FE0FBFB00F001E156F /* SubUtilities.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61CB10FC0ACDF350007994BD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1732,6 +1880,16 @@
 			target = 11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */;
 			targetProxy = 11BA3DAF0A61EE90008AF206 /* PBXContainerItemProxy */;
 		};
+		3DAD08920FBF84A4001E156F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = universaldetector;
+			targetProxy = 3DAD08910FBF84A4001E156F /* PBXContainerItemProxy */;
+		};
+		3DAD09FA0FBFAFE1001E156F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = universaldetector;
+			targetProxy = 3DAD09F90FBFAFE1001E156F /* PBXContainerItemProxy */;
+		};
 		3DB3517F0BCF004B009357B8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = universaldetector;
@@ -1746,6 +1904,11 @@
 			isa = PBXTargetDependency;
 			target = 61CB11760ACDF4D8007994BD /* matroska */;
 			targetProxy = 61CB12110ACE0FB1007994BD /* PBXContainerItemProxy */;
+		};
+		F5121EBD0EB3A5AE0048EF67 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			targetProxy = F5121EBC0EB3A5AE0048EF67 /* PBXContainerItemProxy */;
 		};
 		F59E09EC0A670E420019A3F0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1819,14 +1982,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
@@ -1838,7 +2000,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
-				ZERO_LINK = YES;
 			};
 			name = Development;
 		};
@@ -1846,12 +2007,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
@@ -1863,7 +2024,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -1873,25 +2033,21 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_GC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(BUILT_PRODUCTS_DIR)",
-					"ffmpeg/**",
-					libebml,
-					libmatroska,
-				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Carbon,
@@ -1903,7 +2059,6 @@
 				PRODUCT_NAME = Perian;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
 				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
 			};
 			name = Development;
 		};
@@ -1913,26 +2068,22 @@
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_GC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(BUILT_PRODUCTS_DIR)",
-					"ffmpeg/**",
-					libebml,
-					libmatroska,
-				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				OTHER_CFLAGS_i386 = "-march=pentium-m -mtune=nocona $(OTHER_CFLAGS)";
 				OTHER_CFLAGS_ppc = "$(OTHER_CFLAGS)";
@@ -1941,7 +2092,6 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -1962,14 +2112,24 @@
 		11D4ED480A3CE59A0066D45F /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DEBUG_INFORMATION_FORMAT = stabs;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ALTIVEC_EXTENSIONS = YES;
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG_BUILD;
+				HEADER_SEARCH_PATHS = (
+					libmatroska,
+					libebml,
+					"ffmpeg/**",
+					"$(BUILT_PRODUCTS_DIR)",
+				);
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
 				);
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
 			name = Development;
@@ -1981,14 +2141,24 @@
 					ppc,
 					i386,
 				);
-				DEBUG_INFORMATION_FORMAT = stabs;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_STRICT_ALIASING = YES;
+				HEADER_SEARCH_PATHS = (
+					libmatroska,
+					libebml,
+					"ffmpeg/**",
+					"$(BUILT_PRODUCTS_DIR)",
+				);
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
 				);
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				STRIP_INSTALLED_PRODUCT = NO;
 			};
@@ -2005,16 +2175,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = ebml;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2022,15 +2191,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
+				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = matroska;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2040,7 +2208,6 @@
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_GC = YES;
 				GCC_FAST_MATH = YES;
 				GCC_MODEL_TUNING = G5;
@@ -2048,25 +2215,20 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
 				GCC_STRICT_ALIASING = YES;
+				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(BUILT_PRODUCTS_DIR)",
-					"ffmpeg/**",
-					libebml,
-					libmatroska,
-				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
-				OTHER_CFLAGS_i386 = "-march=pentium-m -mtune=nocona $(OTHER_CFLAGS)";
-				OTHER_CFLAGS_ppc = "$(OTHER_CFLAGS)";
+				OTHER_CFLAGS_i386 = "-march=pentium-m -frerun-cse-after-loop $(OTHER_CFLAGS)";
+				OTHER_CFLAGS_ppc = "-mcpu=G3 -mtune=G5 -funroll-loops -mmultiple $(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = (
-					"-framework",
-					Carbon,
 					"-read_only_relocs",
 					suppress,
 				);
@@ -2075,7 +2237,6 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = component;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2083,10 +2244,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Debug In QuickTime Player";
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2094,10 +2253,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Setup Build Directories";
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2105,10 +2262,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = A52Codec;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2116,11 +2271,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INSTALL_PATH = "$(HOME)/bin";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2130,7 +2285,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2138,10 +2292,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = CreatePrefPanePlist;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2149,12 +2301,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2165,7 +2321,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2173,12 +2328,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
@@ -2190,7 +2345,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
-				ZERO_LINK = NO;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2200,16 +2354,102 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
 				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = stabs;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG_BUILD;
 				GCC_STRICT_ALIASING = YES;
+				HEADER_SEARCH_PATHS = (
+					libmatroska,
+					libebml,
+					"ffmpeg/**",
+					"$(BUILT_PRODUCTS_DIR)",
+				);
+				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
 				);
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 				STRIP_INSTALLED_PRODUCT = NO;
+			};
+			name = "Deployment+Debug";
+		};
+		3DAD080A0FBF7C70001E156F /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = ssa2html;
+			};
+			name = Development;
+		};
+		3DAD080B0FBF7C70001E156F /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = ssa2html;
+			};
+			name = Deployment;
+		};
+		3DAD080C0FBF7C70001E156F /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = ssa2html;
+			};
+			name = "Deployment+Debug";
+		};
+		3DAD09AA0FBFAB0A001E156F /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = "detect-encoding";
+			};
+			name = Development;
+		};
+		3DAD09AB0FBFAB0A001E156F /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = "detect-encoding";
+			};
+			name = Deployment;
+		};
+		3DAD09AC0FBFAB0A001E156F /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = "detect-encoding";
 			};
 			name = "Deployment+Debug";
 		};
@@ -2217,17 +2457,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = ebml;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = Development;
 		};
@@ -2235,16 +2473,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = ebml;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2252,17 +2489,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = matroska;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = Development;
 		};
@@ -2270,15 +2505,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
+				GCC_VERSION = 4.0;
 				INSTALL_PATH = /usr/local/lib;
 				PREBINDING = NO;
 				PRODUCT_NAME = matroska;
 				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2287,12 +2521,12 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
 				GCC_WARN_SHADOW = YES;
@@ -2304,6 +2538,9 @@
 				GCC_WARN_UNUSED_VALUE = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2314,7 +2551,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
-				ZERO_LINK = YES;
 			};
 			name = Development;
 		};
@@ -2322,12 +2558,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2338,15 +2578,38 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
+		};
+		F5121EB80EB3A54A0048EF67 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Make SVN Rev";
+			};
+			name = Development;
+		};
+		F5121EB90EB3A54A0048EF67 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				PRODUCT_NAME = "Make SVN Rev";
+			};
+			name = Deployment;
+		};
+		F5121EBA0EB3A54A0048EF67 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Make SVN Rev";
+			};
+			name = "Deployment+Debug";
 		};
 		F59E0A0C0A670E950019A3F0 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Debug In QuickTime Player";
@@ -2357,10 +2620,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Debug In QuickTime Player";
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2368,13 +2629,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INSTALL_PATH = "$(HOME)/bin";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2384,7 +2644,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
-				ZERO_LINK = YES;
 			};
 			name = Development;
 		};
@@ -2392,11 +2651,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INSTALL_PATH = "$(HOME)/bin";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -2406,7 +2665,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2414,7 +2672,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = CreatePrefPanePlist;
@@ -2425,10 +2682,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = CreatePrefPanePlist;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2436,7 +2691,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = A52Codec;
@@ -2447,10 +2701,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = A52Codec;
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2458,7 +2710,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Setup Build Directories";
@@ -2469,10 +2720,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Setup Build Directories";
-				ZERO_LINK = NO;
 			};
 			name = Deployment;
 		};
@@ -2519,6 +2768,26 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Development;
 		};
+		3DAD080D0FBF7C71001E156F /* Build configuration list for PBXNativeTarget "ssa2html" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DAD080A0FBF7C70001E156F /* Development */,
+				3DAD080B0FBF7C70001E156F /* Deployment */,
+				3DAD080C0FBF7C70001E156F /* Deployment+Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		3DAD09AD0FBFAB59001E156F /* Build configuration list for PBXNativeTarget "detect-encoding" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DAD09AA0FBFAB0A001E156F /* Development */,
+				3DAD09AB0FBFAB0A001E156F /* Deployment */,
+				3DAD09AC0FBFAB0A001E156F /* Deployment+Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
 		61CB11030ACDF37C007994BD /* Build configuration list for PBXNativeTarget "ebml" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2545,6 +2814,16 @@
 				83D1D6CB0B4C794900E09EC9 /* Development */,
 				83D1D6CC0B4C794900E09EC9 /* Deployment */,
 				3D4BBE4F0B59EE0A000EDE04 /* Deployment+Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Development;
+		};
+		F5121EBB0EB3A5680048EF67 /* Build configuration list for PBXAggregateTarget "Make SVN Rev" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5121EB80EB3A54A0048EF67 /* Development */,
+				F5121EB90EB3A54A0048EF67 /* Deployment */,
+				F5121EBA0EB3A54A0048EF67 /* Deployment+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Development;

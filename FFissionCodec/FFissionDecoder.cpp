@@ -1,29 +1,34 @@
 /*
- *  FFissionDecoder.cpp
+ * FFissionDecoder.cpp
+ * Copyright (c) 2006 David Conrad
  *
- *  Copyright (c) 2006  David Conrad
+ * This file is part of Perian.
  *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; 
- *  version 2.1 of the License.
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public
- *  License along with this program; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 
 #include "FFissionDecoder.h"
 #include "ACCodecDispatch.h"
 #include "FFusionCodec.h"
 #include "Codecprintf.h"
 #include "CodecIDs.h"
+#include "dca.h"
+
+#define MY_APP_DOMAIN CFSTR("org.perian.Perian")
+#define PASSTHROUGH_KEY CFSTR("attemptDTSPassthrough")
 
 typedef struct CookieAtomHeader {
     long           size;
@@ -80,6 +85,26 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0
 	outBufUsed = 0;
 	outBufSize = AVCODEC_MAX_AUDIO_FRAME_SIZE;
 	outputBuffer = new Byte[outBufSize];
+	
+	CFStringRef myApp = MY_APP_DOMAIN;
+	CFPreferencesAppSynchronize(myApp);
+	CFTypeRef pass = CFPreferencesCopyAppValue(PASSTHROUGH_KEY, myApp);
+	if(pass != NULL)
+	{
+		CFTypeID type = CFGetTypeID(pass);
+		if(type == CFStringGetTypeID())
+			dtsPassthrough = CFStringGetIntValue((CFStringRef)pass);
+		else if(type == CFNumberGetTypeID())
+			CFNumberGetValue((CFNumberRef)pass, kCFNumberIntType, &dtsPassthrough);
+		else
+			dtsPassthrough = 0;
+		CFRelease(pass);
+	}
+	else
+		dtsPassthrough = 0;
+	
+	int initialMap[6] = {0, 1, 2, 3, 4, 5};
+	memcpy(fullChannelMap, initialMap, sizeof(initialMap));
 }
 
 FFissionDecoder::~FFissionDecoder()
@@ -231,8 +256,7 @@ void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioP
 	
 	switch (inPropertyID) {
 		case kAudioCodecPropertyNameCFString:
-			CFStringRef name = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian FFmpeg audio decoder"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
-			*(CFStringRef*)outPropertyData = name;
+			*(CFStringRef*)outPropertyData = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian FFmpeg audio decoder"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
 			break; 
 			
 		case kAudioCodecPropertyInputBufferSize:
@@ -286,7 +310,7 @@ void FFissionDecoder::OpenAVCodec()
 	avContext->channels = mInputFormat.mChannelsPerFrame;
 	avContext->block_align = mInputFormat.mBytesPerPacket;
 	avContext->frame_size = mInputFormat.mFramesPerPacket;
-	avContext->bits_per_sample = mInputFormat.mBitsPerChannel;
+	avContext->bits_per_coded_sample = mInputFormat.mBitsPerChannel;
 	
 	if (avContext->sample_rate == 0) {
 		Codecprintf(NULL, "Invalid sample rate %d\n", avContext->sample_rate);
@@ -302,6 +326,29 @@ void FFissionDecoder::OpenAVCodec()
 		Codecprintf(NULL, "error opening audio avcodec\n");
 		avCodec = NULL;
 		CODEC_THROW(kAudioCodecUnsupportedFormatError);
+	}
+	if(mInputFormat.mFormatID != kAudioFormatDTS)
+		dtsPassthrough = 0;
+	else
+	{
+		switch (mInputFormat.mChannelsPerFrame) {
+			case 3:
+			case 6:
+			{
+				int chanMap[6] = {1, 2, 0, 5, 3, 4};//L R C -> C L R  and  L R C LFE Ls Rs -> C L R Ls Rs LFE
+				memcpy(fullChannelMap, chanMap, sizeof(chanMap));
+				break;
+			}
+			case 4:
+			case 5:
+			{
+				int chanMap[6] = {1, 2, 0, 3, 4, 5};//L R C Cs -> C L R Cs  and  L R C Ls Rs -> C L R Ls Rs
+				memcpy(fullChannelMap, chanMap, sizeof(chanMap));
+				break;
+			}
+			default:
+				break;
+		}
 	}
 }
 
@@ -354,6 +401,139 @@ void FFissionDecoder::AppendInputData(const void* inInputData, UInt32& ioInputDa
 	}
 }
 
+#define AV_RL16(x) EndianU16_LtoN(*(uint16_t *)(x))
+#define AV_RB16(x) EndianU16_BtoN(*(uint16_t *)(x))
+
+int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *packet, int packetSize, int channelCount, int bigEndian)
+{
+	if(packetSize < 96)
+		return 0;
+	
+	static const uint8_t p_sync_le[6] = { 0x72, 0xF8, 0x1F, 0x4E, 0x00, 0x00 };
+	static const uint8_t p_sync_be[6] = { 0xF8, 0x72, 0x4E, 0x1F, 0x00, 0x00 };
+	
+	uint32_t mrk = AV_RB16(packet) << 16 | AV_RB16(packet + 2);
+	unsigned int frameSize = 0;
+	unsigned int blockCount = 0;
+	bool repackage = 0;
+
+	switch (mrk) {
+		case DCA_MARKER_RAW_BE:
+			blockCount = (AV_RB16(packet + 4) >> 2) & 0x7f;
+			frameSize = (AV_RB16(packet + 4) & 0x3) << 12 | (AV_RB16(packet + 6) >> 4) & 0xfff;
+			repackage = 1;
+			break;
+		case DCA_MARKER_RAW_LE:
+			blockCount = (AV_RL16(packet + 4) >> 2) & 0x7f;
+			frameSize = (AV_RL16(packet + 4) & 0x3) << 12 | (AV_RL16(packet + 6) >> 4) & 0xfff;
+			repackage = 1;
+			break;
+		case DCA_MARKER_14B_BE:
+		case DCA_MARKER_14B_LE:
+		default:
+			return -1;
+	}
+
+	blockCount++;
+	frameSize++;
+	
+	int spdif_type;
+	switch (blockCount) {
+		case 16:
+			spdif_type = 0x0b; //512-sample bursts
+			break;
+		case 32:
+			spdif_type = 0x0c; //1024-sample bursts
+			break;
+		case 64:
+			spdif_type = 0x0d; //2048-sample bursts
+			break;
+		default:
+			return -1;
+			break;
+	}
+	
+	int totalSize = blockCount * 256 * channelCount / 4;
+	memset(outputBuffer, 0, totalSize);
+	int offset = 2;
+	
+	if(bigEndian)
+	{
+		memcpy(outputBuffer+offset, p_sync_be, 4);
+		offset += channelCount * 2;
+		outputBuffer[offset] = 0;
+		outputBuffer[offset+1] = spdif_type;
+		outputBuffer[offset+2] = (frameSize >> 5) & 0xff;
+		outputBuffer[offset+3] = (frameSize << 3) & 0xff;
+	}
+	else
+	{
+		memcpy(outputBuffer+offset, p_sync_le, 4);
+		offset += channelCount * 2;
+		outputBuffer[offset] = spdif_type;
+		outputBuffer[offset+1] = 0;
+		outputBuffer[offset+2] = (frameSize << 3) & 0xff;
+		outputBuffer[offset+3] = (frameSize >> 5) & 0xff;
+	}
+	
+	offset += channelCount * 2;
+	
+	if((mrk == DCA_MARKER_RAW_BE || mrk == DCA_MARKER_14B_BE) && !bigEndian)
+	{
+		int i;
+		int count = frameSize & ~0x3;
+		for(i=0; i<count; i+=4)
+		{
+			outputBuffer[offset] = packet[i+1];
+			outputBuffer[offset+1] = packet[i];
+			outputBuffer[offset+2] = packet[i+3];
+			outputBuffer[offset+3] = packet[i+2];
+			offset += channelCount * 2;
+		}
+		switch (frameSize & 0x3) {
+			case 3:
+				outputBuffer[offset+3] = packet[i+2];
+			case 2:
+				outputBuffer[offset] = packet[i+1];
+			case 1:
+				outputBuffer[offset+1] = packet[i];
+			default:
+				break;
+		}
+	}
+	else
+	{
+		int i;
+		for(i=0; i<frameSize; i+=4)
+		{
+			memcpy(outputBuffer + offset, packet+i, 4);
+			offset += channelCount * 2;
+		}
+	}
+
+	*outBufUsed = totalSize;
+	return frameSize;
+}
+
+UInt32 FFissionDecoder::InterleaveSamples(void *outputDataUntyped, Byte *inputDataUntyped, int amountToCopy)
+{
+	SInt16 *outputData = (SInt16 *)outputDataUntyped;
+	SInt16 *inputData = (SInt16 *)inputDataUntyped;
+	int channelCount = avContext->channels;
+	int framesToCopy = amountToCopy / channelCount / 2;
+	for(int i=0; i<framesToCopy; i++)
+	{
+		for(int j=0; j<channelCount; j++)
+		{
+			outputData[fullChannelMap[j]] = inputData[j];
+		}
+		outputData += channelCount;
+		inputData += channelCount;
+	}
+	
+	return framesToCopy * channelCount * 2;
+}
+
 UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 											 UInt32& ioOutputDataByteSize,	// number of bytes written to outOutputData
 											 UInt32& ioNumberPackets, 
@@ -373,7 +553,7 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 	// we have leftovers from the last packet, use that first
 	if (outBufUsed > 0) {
 		int amountToCopy = FFMIN(outBufUsed, ioOutputDataByteSize);
-		memcpy(outData, outputBuffer, amountToCopy);
+		amountToCopy = InterleaveSamples(outData, outputBuffer, amountToCopy);
 		outBufUsed -= amountToCopy;
 		written += amountToCopy;
 		
@@ -388,7 +568,17 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 		
 		// decode one packet to our buffer
 		outBufUsed = outBufSize;
-		int len = avcodec_decode_audio2(avContext, (int16_t *)outputBuffer, &outBufUsed, packet, packetSize);
+		int len;
+		if(dtsPassthrough)
+			len = produceDTSPassthroughPackets(outputBuffer, &outBufUsed, packet, packetSize, avContext->channels, mOutputFormat.mFormatFlags & kLinearPCMFormatFlagIsBigEndian);
+		else
+		{
+			AVPacket pkt;
+			av_init_packet(&pkt);
+			pkt.data = packet;
+			pkt.size = packetSize;
+			len = avcodec_decode_audio3(avContext, (int16_t *)outputBuffer, &outBufUsed, &pkt);
+		}
 		
 		if (len < 0) {
 			Codecprintf(NULL, "Error decoding audio frame\n");
@@ -402,7 +592,7 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 		
 		// copy up to the amount requested
 		int amountToCopy = FFMIN(outBufUsed, ioOutputDataByteSize - written);
-		memcpy(outData + written, outputBuffer, amountToCopy);
+		amountToCopy = InterleaveSamples(outData + written, outputBuffer, amountToCopy);
 		outBufUsed -= amountToCopy;
 		written += amountToCopy;
 		

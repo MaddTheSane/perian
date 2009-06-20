@@ -1,10 +1,22 @@
 /*
- *  CommonUtils.c
- *  Perian
+ * CommonUtils.h
+ * Created by David Conrad on 10/13/06.
  *
- *  Created by David Conrad on 10/13/06.
- *  Copyright 2006 Perian Project. All rights reserved.
+ * This file is part of Perian.
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "avcodec.h"
@@ -287,11 +299,17 @@ int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type)
 }
 
 static const CFStringRef defaultFrameDroppingWhiteList[] = {
-	CFSTR("QuickTime Player"),
-	CFSTR("NicePlayer"),
-	CFSTR("Movie Time"),
+	CFSTR("Finder"),
 	CFSTR("Front Row"),
-	CFSTR("Finder")
+	CFSTR("Movie Time"),
+	CFSTR("Movist"),
+	CFSTR("NicePlayer"),
+	CFSTR("QuickTime Player"),
+	CFSTR("Spiral")
+};
+
+static const CFStringRef defaultForcedAppList[] = {
+	CFSTR("iChat")
 };
 
 static int findNameInList(CFStringRef loadingApp, const CFStringRef *names, int count)
@@ -299,51 +317,109 @@ static int findNameInList(CFStringRef loadingApp, const CFStringRef *names, int 
 	int i;
 
 	for (i = 0; i < count; i++) {
+		if (CFGetTypeID(names[i]) != CFStringGetTypeID())
+			continue;
 		if (CFStringCompare(loadingApp, names[i], 0) == kCFCompareEqualTo) return 1;
 	}
 
 	return 0;
 }
 
+static CFDictionaryRef getMyProcessInformation()
+{
+	ProcessSerialNumber myProcess;
+	GetCurrentProcess(&myProcess);
+	CFDictionaryRef processInformation;
+	
+	processInformation = ProcessInformationCopyDictionary(&myProcess, kProcessDictionaryIncludeAllInformationMask);
+	return processInformation;
+}
+
+static CFStringRef getProcessName(CFDictionaryRef processInformation)
+{
+	CFStringRef path = CFDictionaryGetValue(processInformation, kCFBundleExecutableKey);
+	CFRange entireRange = CFRangeMake(0, CFStringGetLength(path)), basename;
+	
+	CFStringFindWithOptions(path, CFSTR("/"), entireRange, kCFCompareBackwards, &basename);
+	
+	basename.location += 1; //advance past "/"
+	basename.length = entireRange.length - basename.location;
+	
+	CFStringRef myProcessName = CFStringCreateWithSubstring(NULL, path, basename);
+	return myProcessName;
+}
+
+static int isApplicationNameInList(CFStringRef prefOverride, const CFStringRef *defaultList, unsigned int defaultListCount)
+{
+	CFDictionaryRef processInformation = getMyProcessInformation();
+	
+	if (!processInformation)
+		return FALSE;
+	
+	CFArrayRef list = CopyPreferencesValueTyped(prefOverride, CFArrayGetTypeID());
+	CFStringRef myProcessName = getProcessName(processInformation);
+	int ret;
+	
+	if (list) {
+		int count = CFArrayGetCount(list);
+		CFStringRef names[count];
+		
+		CFArrayGetValues(list, CFRangeMake(0, count), (void *)names);
+		ret = findNameInList(myProcessName, names, count);
+		CFRelease(list);
+	} else {
+		ret = findNameInList(myProcessName, defaultList, defaultListCount);
+	}
+	CFRelease(myProcessName);
+	CFRelease(processInformation);
+	
+	return ret;
+}
+
 int IsFrameDroppingEnabled()
 {
 	static int enabled = -1;
 	
-	if (enabled == -1) {
-		ProcessSerialNumber myProcess;
-		GetCurrentProcess(&myProcess);
-		CFDictionaryRef processInformation;
+	if (enabled == -1)
+		enabled = isApplicationNameInList(CFSTR("FrameDroppingWhiteList"),
+										  defaultFrameDroppingWhiteList,
+										  sizeof(defaultFrameDroppingWhiteList)/sizeof(defaultFrameDroppingWhiteList[0]));
+	return enabled;
+}
+
+int forcePerianToDecode()
+{
+	static int forced = -1;
+	
+	if(forced == -1)
+		forced = isApplicationNameInList(CFSTR("ForcePerianAppList"),
+										 defaultForcedAppList,
+										 sizeof(defaultForcedAppList)/sizeof(defaultForcedAppList[0]));
+	return forced;
+}
+
+int IsAltivecSupported()
+{
+	static int altivec = -1;
+	
+	if (altivec == -1) {
+		long response = 0;
+		int err = Gestalt(gestaltPowerPCProcessorFeatures, &response);
 		
-        processInformation = ProcessInformationCopyDictionary(&myProcess, kProcessDictionaryIncludeAllInformationMask);
-        
-        if (!processInformation) enabled = FALSE;
-		else {
-            CFArrayRef list = CFPreferencesCopyAppValue(CFSTR("FrameDroppingWhiteList"), CFSTR("org.perian.Perian"));
-            CFStringRef path = CFDictionaryGetValue(processInformation, kCFBundleExecutableKey);
-            CFRange entireRange = CFRangeMake(0, CFStringGetLength(path)), basename;
-            
-            CFStringFindWithOptions(path, CFSTR("/"), entireRange, kCFCompareBackwards, &basename);
-            
-            basename.location += 1; //advance past "/"
-            basename.length = entireRange.length - basename.location;
-            
-            CFStringRef myProcessName = CFStringCreateWithSubstring(NULL, path, basename);
-            
-            if (list) {
-                int count = CFArrayGetCount(list);
-                CFStringRef names[count];
-                
-                CFArrayGetValues(list, CFRangeMake(0, count), (void *)names);
-                enabled = findNameInList(myProcessName, names, count);
-                CFRelease(list);
-            } else {
-                int count = sizeof(defaultFrameDroppingWhiteList)/sizeof(defaultFrameDroppingWhiteList[0]);
-                enabled = findNameInList(myProcessName, defaultFrameDroppingWhiteList, count);
-            }
-            CFRelease(myProcessName);
-            CFRelease(processInformation);
-        }
+		altivec = !err && ((response & gestaltPowerPCHasVectorInstructions) != 0);
 	}
 	
-	return enabled;
+	return altivec;
+}
+
+CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type)
+{
+	CFPropertyListRef val = CFPreferencesCopyAppValue(key, PERIAN_PREF_DOMAIN);
+	
+	if (val && CFGetTypeID(val) != type) {
+		CFRelease(val);
+		val = NULL;
+	}
+	
+	return val;
 }

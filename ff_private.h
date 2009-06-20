@@ -35,7 +35,7 @@ struct _NCStream {
 	Media media;
 	UInt32 vbr;
 	AVRational base;
-	int64_t lastpts;
+	int64_t lastdts;
 	SampleReference64Ptr sampleTable;
 	SampleReference64Record lastSample;
 	TimeValue duration;
@@ -107,8 +107,9 @@ ComponentResult create_placeholder_track(Movie movie, Track *placeholderTrack, T
 void send_movie_changed_notification(Movie movie);
 
 OSType map_video_codec_to_mov_tag(enum CodecID codec_id);
-void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map);
-uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID);
+OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id);
+void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map, int channels);
+uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID, int vbr);
 Handle create_strf_ext(AVCodecContext *codec);
 void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW, Fixed displayH, Fixed pixelW, Fixed pixelH);
 
@@ -118,7 +119,8 @@ uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size);
 
 #define BSWAP(a) ( (((a)&0xff) << 24) | (((a)&0xff00) << 8) | (((a)&0xff0000) >> 8) | (((a) >> 24) & 0xff) )
 
-#define IS_AVI(x) (x == 'AVI ' || x == 'VfW ' || x == 'VFW ')
+#define IS_AVI(x) (x == 'AVI ' || x == 'VfW ' || x == 'VFW ' || x == 'DIVX' || x == 'GVI ' || x == 'VP6 ')
 #define IS_NUV(x) (x == 'NUV ')
+#define IS_FLV(x) (x == 'FLV ')
 
 #endif

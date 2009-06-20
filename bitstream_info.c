@@ -1,10 +1,22 @@
 /*
- *  bitstream_info.c
- *  Perian
+ * bitstream_info.h
+ * Created by Graham Booker on 1/6/07.
  *
- *  Created by Graham Booker on 1/6/07.
- *  Copyright 2007 Graham Booker. All rights reserved.
+ * This file is part of Perian.
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "bitstream_info.h"
@@ -19,11 +31,15 @@
 #include "avcodec.h"
 
 #include "bswap.h"
+#include "libavutil/internal.h"
 #include "mpegvideo.h"
 #include "parser.h"
 #include "golomb.h"
 
 #include "CodecIDs.h"
+
+#undef malloc
+#undef free
 
 int inline MININT(int a, int b)
 {
@@ -140,10 +156,7 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	/* Setup the AudioStreamBasicDescription and AudioChannelLayout */
 	memset(asbd, 0, sizeof(AudioStreamBasicDescription));
 	asbd->mSampleRate = sample_rate >> shift;
-	if(offset == 0 && buff_size == framesize)
-		asbd->mFormatID = kAudioFormatAC3;
-	else
-		asbd->mFormatID = kAudioFormatAC3MS;
+	asbd->mFormatID = kAudioFormatAC3MS;
 	asbd->mChannelsPerFrame = nfchans_tbl[acmod] + lfe;
 	
 	memset(acl, 0, sizeof(AudioChannelLayout));
@@ -256,6 +269,7 @@ typedef struct H264ParserContext_s
 	int poc_type;
 	int log2_max_frame_num;
 	int frame_mbs_only_flag;
+	int num_reorder_frames;
 	int pic_order_present_flag;
 
 	int log2_max_poc_lsb;
@@ -335,6 +349,24 @@ static void skip_scaling_matrices(GetBitContext *gb){
 	}
 }
 
+static void skip_hrd_parameters(GetBitContext *gb)
+{
+	int cpb_cnt_minus1 = get_ue_golomb(gb);
+	get_bits(gb, 4);	//bit_rate_scale
+	get_bits(gb, 4);	//cpb_size_scale
+	int i;
+	for(i=0; i<=cpb_cnt_minus1; i++)
+	{
+		get_ue_golomb(gb);	//bit_rate_value_minus1[i]
+		get_ue_golomb(gb);	//cpb_size_value_minus1[i]
+		get_bits1(gb);		//cbr_flag[i]
+	}
+	get_bits(gb, 5);	//initial_cpb_removal_delay_length_minus1
+	get_bits(gb, 5);	//cpb_removal_delay_length_minus1
+	get_bits(gb, 5);	//dpb_output_delay_length_minus1
+	get_bits(gb, 5);	//time_offset_length
+}
+
 static void decode_sps(H264ParserContext *context, const uint8_t *buf, int buf_size)
 {
 	GetBitContext getbit, *gb = &getbit;
@@ -379,7 +411,78 @@ static void decode_sps(H264ParserContext *context, const uint8_t *buf, int buf_s
 	context->gaps_in_frame_num_value_allowed_flag = get_bits1(gb);		//gaps_in_frame_num_value_allowed_flag
 	get_ue_golomb(gb);	//pic_width_in_mbs_minus1
 	get_ue_golomb(gb);	//pic_height_in_map_units_minus1
-	context->frame_mbs_only_flag = get_bits1(gb);
+	int mbs_only = get_bits1(gb);
+	context->frame_mbs_only_flag = mbs_only;
+#if 0		//This is a test to get num_reorder_frames
+	if(!mbs_only)
+		get_bits1(gb);	//mb_adaptive_frame_field_flag
+	get_bits1(gb);		//direct_8x8_inference_flag
+	if(get_bits1(gb))	//frame_cropping_flag
+	{
+		get_ue_golomb(gb);	//frame_crop_left_offset
+		get_ue_golomb(gb);	//frame_crop_right_offset
+		get_ue_golomb(gb);	//frame_crop_top_offset
+		get_ue_golomb(gb);	//frame_crop_bottom_offset
+	}
+	if(get_bits1(gb))	//vui_parameters_present_flag
+	{
+		if(get_bits1(gb))	//aspect_ratio_info_present_flag
+		{
+			if(get_bits(gb, 8) == 255)	//aspect_ratio_idc
+			{
+				get_bits(gb, 16);	//sar_width
+				get_bits(gb, 16);	//sar_height
+			}
+		}
+		if(get_bits1(gb))	//overscan_info_present_flag
+			get_bits1(gb);	//overscan_appropriate_flag
+		if(get_bits1(gb))	//video_signal_type_present_flag
+		{
+			get_bits(gb, 3);	//video_format
+			get_bits1(gb);		//video_full_range_flag
+			if(get_bits1(gb))	//colour_description_present_flag
+			{
+				get_bits(gb, 8);	//colour_primaries
+				get_bits(gb, 8);	//transfer_characteristics
+				get_bits(gb, 8);	//matrix_coefficients
+			}
+		}
+		if(get_bits1(gb))	//chroma_loc_info_present_flag
+		{
+			get_ue_golomb(gb);	//chroma_sample_loc_type_top_field
+			get_ue_golomb(gb);	//chroma_sample_loc_type_bottom_field
+		}
+		if(get_bits1(gb))	//timing_info_present_flag
+		{
+			get_bits(gb, 32);	//num_units_in_tick
+			get_bits(gb, 32);	//time_scale
+			get_bits1(gb);	//fixed_frame_rate_flag
+		}
+		int nal_hrd_parameters_present_flag = get_bits1(gb);
+		if(nal_hrd_parameters_present_flag)
+		{
+			skip_hrd_parameters(gb);
+		}
+		int vcl_hrd_parameters_present_flag = get_bits1(gb);
+		if(vcl_hrd_parameters_present_flag)
+		{
+			skip_hrd_parameters(gb);
+		}
+		if(nal_hrd_parameters_present_flag || vcl_hrd_parameters_present_flag)
+			get_bits1(gb);	//low_delay_hrd_flag
+		get_bits1(gb);	//pic_struct_present_flag
+		if(get_bits1(gb))	//bitstream_restriction_flag
+		{
+			get_bits1(gb);	//motion_vectors_over_pic_boundaries_flag
+			get_ue_golomb(gb);	//max_bytes_per_pic_denom
+			get_ue_golomb(gb);	//max_bits_per_mb_denom
+			get_ue_golomb(gb);	//log2_max_mv_length_horizontal
+			get_ue_golomb(gb);	//log2_max_mv_length_vertical
+			context->num_reorder_frames = get_ue_golomb(gb);
+			get_ue_golomb(gb);	//max_dec_frame_buffering			
+		}
+	}
+#endif
 }
 
 static void decode_pps(H264ParserContext *context, const uint8_t *buf, int buf_size)
@@ -877,20 +980,35 @@ void ffusionLogDebugInfo(FFusionParserContext *parser, FILE *log)
 	}
 }
 
-int ffusionIsParsedVideoDecodable(FFusionParserContext *parser)
+FFusionDecodeAbilities ffusionIsParsedVideoDecodable(FFusionParserContext *parser)
 {
-	if (!parser) return 1;
+	if (!parser) return FFUSION_PREFER_DECODE;
 	
 	if (parser->parserStructure == &ffusionH264Parser) {
 		H264ParserContext *h264parser = parser->internalContext;
+		FFusionDecodeAbilities ret = FFUSION_PREFER_DECODE;
 		
-		// don't try to decode interlaced or 4:2:2 H.264
-		return (h264parser->frame_mbs_only_flag == 1) && (h264parser->chroma_format_idc <= 1);
+		//QT is bad at high profile
+		//FIXME QT is also bad at B-pyramid (sps.vui.num_reorder_frames > 1)
+		//but to parse that we should just use ffh264 directly
+		if(h264parser->profile_idc < 100 && !CFPreferencesGetAppBooleanValue(CFSTR("DecodeAllProfiles"), CFSTR("org.perian.Perian"), NULL))
+			ret = FFUSION_PREFER_NOT_DECODE;
+		
+		//PAFF/MBAFF
+		//ffmpeg is ok at this now but we can't test it (not enough AVCHD samples)
+		//and the quicktime api for it may or may not actually exist
+		if(!h264parser->frame_mbs_only_flag)
+			ret = FFUSION_CANNOT_DECODE;
+		
+		//4:2:2 chroma
+		if(h264parser->chroma_format_idc > 1)
+			ret = FFUSION_CANNOT_DECODE;
+		
+		return ret;
 	}
 	
-	return 1;
+	return FFUSION_PREFER_DECODE;
 }
-
 #ifdef DEBUG_BUILD
 //FFMPEG doesn't configure properly (their fault), so define their idoticly undefined symbols.
 int ff_epzs_motion_search(MpegEncContext * s, int *mx_ptr, int *my_ptr, int P[10][2], int src_index, int ref_index, int16_t (*last_mv)[2], int ref_mv_scale, int size, int h){return 0;}

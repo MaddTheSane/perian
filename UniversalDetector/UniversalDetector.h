@@ -20,6 +20,8 @@
 -(NSStringEncoding)encoding;
 -(float)confidence;
 
+-(void)debugDump;
+
 +(UniversalDetector *)detector;
 
 @end

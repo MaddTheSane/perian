@@ -22,10 +22,14 @@
 
 #include "ff_private.h"
 #include "avcodec.h"
+#include "libavutil/internal.h"
 #include "mpegaudio.h"
 #include "Codecprintf.h"
 #include "CommonUtils.h"
 #include "CodecIDs.h"
+
+#undef malloc
+#undef free
 
 #include <CoreServices/CoreServices.h>
 #include <AudioToolbox/AudioToolbox.h>
@@ -169,7 +173,8 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	(*imgHdl)->idSize = sizeof(ImageDescription);
 	
 	if (!((*imgHdl)->cType = map_video_codec_to_mov_tag(codec->codec_id)))
-		(*imgHdl)->cType = BSWAP(codec->codec_tag);
+		if(!((*imgHdl)->cType = BSWAP(codec->codec_tag)))
+			(*imgHdl)->cType = forced_map_video_codec_to_mov_tag(codec->codec_id);
 //	FourCCprintf("fourcc: ", (*imgHdl)->cType);
 	
 	(*imgHdl)->temporalQuality = codecMaxQuality;
@@ -178,7 +183,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	(*imgHdl)->height = codec->height;
 	(*imgHdl)->hRes = 72 << 16;
 	(*imgHdl)->vRes = 72 << 16;
-	(*imgHdl)->depth = codec->bits_per_sample;
+	(*imgHdl)->depth = codec->bits_per_coded_sample;
 	(*imgHdl)->clutID = -1; // no color lookup table...
 	
 	// 12 is invalid in mov
@@ -204,7 +209,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	AudioStreamBasicDescription asbd;
 	AVCodecContext *codec;
 	UInt32 ioSize;
-	OSStatus err;
+	OSStatus err = noErr;
 	
 	uint8_t *cookie = NULL;
 	size_t cookieSize = 0;
@@ -217,33 +222,43 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	map->media = media;
 	
 	memset(&asbd,0,sizeof(asbd));
-	map_avi_to_mov_tag(codec->codec_id, &asbd, map);
+	map_avi_to_mov_tag(codec->codec_id, &asbd, map, codec->channels);
 	if(asbd.mFormatID == 0) /* no know codec, use the ms tag */
 		asbd.mFormatID = 'ms\0\0' + codec->codec_tag; /* the number is stored in the last byte => big endian */
 	
 	/* Ask the AudioToolbox about vbr of the codec */
+	// FIXME this sets vbr even if it was encoded in CBR mode
+	// which means our mBytesPerPacket is wrong for CBR mp3 (does not really matter)
 	ioSize = sizeof(UInt32);
 	AudioFormatGetProperty(kAudioFormatProperty_FormatIsVBR, sizeof(AudioStreamBasicDescription), &asbd, &ioSize, &map->vbr);
 	
-	/* ask the toolbox about more information */
-	ioSize = sizeof(AudioStreamBasicDescription);
-	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
+	cookie = create_cookie(codec, &cookieSize, asbd.mFormatID, map->vbr);
 	
 	/* Set some fields of the AudioStreamBasicDescription. Then ask the AudioToolbox
 		* to fill as much as possible before creating the SoundDescriptionHandle */
 	asbd.mSampleRate = codec->sample_rate;
 	asbd.mChannelsPerFrame = codec->channels;
-	if(!map->vbr) /* This works for all the tested codecs. but is there any better way? */
+	if(!map->vbr && !asbd.mBytesPerPacket) /* This works for all the tested codecs. but is there any better way? */
 		asbd.mBytesPerPacket = codec->block_align; /* this is tested for alaw/mulaw/msadpcm */
-	asbd.mFramesPerPacket = codec->frame_size; /* works for mp3, all other codecs this is 0 anyway */
-	asbd.mBitsPerChannel = codec->bits_per_sample;
 	
-	// this probably isn't quite right; FLV doesn't set frame_size or block_align, 
-	// but we need > 0 frames per packet or Apple's mp3 decoder won't work
-	if (asbd.mFormatID == kAudioFormatMPEG4AAC)
-		asbd.mFramesPerPacket = 1024;
-	else if (asbd.mBytesPerPacket == 0 && asbd.mFramesPerPacket == 0)
+	/* ask the toolbox about more information */
+	ioSize = sizeof(AudioStreamBasicDescription);
+	err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
+	if (err || !asbd.mFormatID)
+		fprintf(stderr, "AudioFormatGetProperty dislikes the magic cookie (error %ld / format id %lx)\n", err, asbd.mFormatID);
+	
+	/*
+	 FIXME: 
+	 - at least ffmp3 does not set these values without parsing+the decoder being enabled
+	   (so we avoid overwriting them from above for now)
+	 - this possibly should be 0 for formats with variable framesPerPacket like Vorbis
+	 - lavc frame_size is in samples, mFramesPerPacket is in frames (maybe)
+	 */
+	if (!asbd.mFramesPerPacket)
+		asbd.mFramesPerPacket = codec->frame_size;
+	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket) //FIXME what is this for?
 		asbd.mFramesPerPacket = 1;
+	asbd.mBitsPerChannel = codec->bits_per_coded_sample;
 	
 	// if we don't have mBytesPerPacket, we can't import as CBR. Probably should be VBR, and the codec
 	// either lied about kAudioFormatProperty_FormatIsVBR or isn't present
@@ -281,45 +296,42 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	int useDefault = 1;
 	if(asbd.mFormatID == kAudioFormatAC3 || asbd.mFormatID == 'ms \0')
 	{
+		QTMetaDataRef trackMetaData;
+		OSErr error = QTCopyTrackMetaData(targetTrack, &trackMetaData);
+		if(error == noErr)
+		{
+			const char *prop = "Surround";
+			OSType key = 'name';
+			error = QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL);
+			QTMetaDataRelease(trackMetaData);
+		}
 		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size))
 		{
 			useDefault = 0;
 			aclSize = sizeof(AudioChannelLayout);
-			QTMetaDataRef trackMetaData;
-			OSErr error = QTCopyTrackMetaData(targetTrack, &trackMetaData);
-			if(error == noErr)
-			{
-				const char *prop = "Surround";
-				OSType key = 'name';
-				error = QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL);
-				QTMetaDataRelease(trackMetaData);
-			}
 		}
 	}
 	if(useDefault && asbd.mChannelsPerFrame > 2)
 	{
+		asbd.mFramesPerPacket = 0;
 		acl = GetDefaultChannelLayout(&asbd);
 		aclSize = sizeof(AudioChannelLayout);
 	}
 	
-	if (asbd.mSampleRate > 0) {
-		err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, NULL, 0, kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndHdl);
+	if (asbd.mSampleRate > 0) {		
+		err = QTSoundDescriptionCreate(&asbd, aclSize == 0 ? NULL : &acl, aclSize, cookie, cookieSize, kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndHdl);
+		
 		if(err) {
 			fprintf(stderr, "AVI IMPORTER: Error %ld creating the sound description\n", err);
-			return err;
-		}
-	
-		/* Create the magic cookie */
-		cookie = create_cookie(codec, &cookieSize, asbd.mFormatID);
-		if(cookie) {
-			err = QTSoundDescriptionSetProperty(sndHdl, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie,
-												cookieSize, cookie);
-			if(err) fprintf(stderr, "AVI IMPORTER: Error %ld appending the magic cookie to the sound description\n", err);
-			av_free(cookie);
+			goto bail;
 		}
 	}	
 	map->sampleHdl = (SampleDescriptionHandle)sndHdl;
 	map->asbd = asbd;
+	
+bail:
+	if(cookie)
+		av_free(cookie);
 	
 	return noErr;
 } /* initialize_audio_map() */
@@ -339,8 +351,19 @@ OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
 	return 0;
 }
 
+OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
+{
+	switch (codec_id) {
+		case CODEC_ID_H264:
+			return 'H264';
+		case CODEC_ID_MPEG4:
+			return 'MP4S';
+	}
+	return 0;
+}
+
 /* maps the codec_id tag of libavformat to a constant the AudioToolbox can work with */
-void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map)
+void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map, int channels)
 {
 	switch(codec_id) {
 		case CODEC_ID_MP2:
@@ -356,10 +379,12 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 		case CODEC_ID_PCM_S16LE:
 			asbd->mFormatID = kAudioFormatLinearPCM;
 			asbd->mFormatFlags = kLinearPCMFormatFlagIsSignedInteger;
+			asbd->mBytesPerPacket = 2 * channels;
 			break;
 		case CODEC_ID_PCM_U8:
 			asbd->mFormatID = kAudioFormatLinearPCM;
 			asbd->mFormatFlags = kLinearPCMFormatFlagIsBigEndian;
+			asbd->mBytesPerPacket = channels;
 			break;
 		case CODEC_ID_PCM_ALAW:
 			asbd->mFormatID = kAudioFormatALaw;
@@ -397,7 +422,7 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 /* This function creates a magic cookie basec on the codec parameter and formatID
  * Return value: a pointer to a magic cookie which has to be av_free()'d
  * in cookieSize, the size of the magic cookie is returned to the caller */
-uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID)
+uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID, int vbr)
 {
 	uint8_t *result = NULL;
 	uint8_t *ptr;
@@ -427,9 +452,12 @@ uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatI
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->codec_tag));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->channels));
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->sample_rate));
-	ptr = write_int32(ptr, EndianS32_NtoL(codec->bit_rate / 8));
+	if(vbr)
+		ptr = write_int32(ptr, 0);
+	else
+		ptr = write_int32(ptr, EndianS32_NtoL(codec->bit_rate / 8));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->block_align));
-	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_sample));
+	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_coded_sample));
 	ptr = write_int16(ptr, EndianS16_NtoL(codec->extradata_size));
 	/* now the remaining stuff */
 	ptr = write_data(ptr, codec->extradata, codec->extradata_size);
@@ -488,7 +516,7 @@ Handle create_strf_ext(AVCodecContext *codec)
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->height));
 	ptr = write_int16(ptr, EndianS16_NtoL(1)); /* planes */
 	
-	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_sample ? codec->bits_per_sample : 24)); /* depth */
+	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_coded_sample ? codec->bits_per_coded_sample : 24)); /* depth */
 	/* compression type */
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->codec_tag));
 	ptr = write_int32(ptr, EndianS32_NtoL(codec->width * codec->height * 3));
@@ -551,12 +579,13 @@ static void add_metadata(AVFormatContext *ic, Movie theMovie)
     QTMetaDataRelease(movie_metadata);
 }
 
-static void get_track_dimensions_for_codec(AVCodecContext *codec, Fixed *fixedWidth, Fixed *fixedHeight)
+static void get_track_dimensions_for_codec(AVStream *st, Fixed *fixedWidth, Fixed *fixedHeight)
 {	
+	AVCodecContext *codec = st->codec;
 	*fixedHeight = IntToFixed(codec->height);
 
-	if (!codec->sample_aspect_ratio.num) *fixedWidth = IntToFixed(codec->width);
-	else *fixedWidth = FloatToFixed(codec->width * av_q2d(codec->sample_aspect_ratio));
+	if (!st->sample_aspect_ratio.num) *fixedWidth = IntToFixed(codec->width);
+	else *fixedWidth = FloatToFixed(codec->width * av_q2d(st->sample_aspect_ratio));
 }
 
 void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW, Fixed displayH, Fixed pixelW, Fixed pixelH)
@@ -619,7 +648,7 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 		if(st->codec->codec_type == CODEC_TYPE_VIDEO) {
 			Fixed width, height;
 			
-			get_track_dimensions_for_codec(st->codec, &width, &height);
+			get_track_dimensions_for_codec(st, &width, &height);
 			track = NewMovieTrack(theMovie, width, height, kNoVolume);
 
             // XXX Support for 'old' NUV files, that didn't put the codec_tag in the file. 
@@ -668,11 +697,6 @@ int determine_header_offset(ff_global_ptr storage) {
 	/* Seek backwards to get a manually read packet for file offset */
 	if(formatContext->streams[0]->index_entries == NULL || storage->componentType == 'FLV ')
 	{
-		if (IS_AVI(storage->componentType))
-			//Try to seek to the first frame; don't care if it fails
-			// Is this really needed for AVIs w/out an index? It seems to work fine without, 
-			// and it seems that with it the first frame is skipped.
-			av_seek_frame(formatContext, -1, 0, 0);
 		storage->header_offset = 0;
 	}
 	else
@@ -680,7 +704,7 @@ int determine_header_offset(ff_global_ptr storage) {
 		int streamsRead = 0;
 		AVStream *st;
 		
-		result = av_seek_frame(formatContext, -1, 0, 0);
+		result = av_seek_frame(formatContext, -1, 0, AVSEEK_FLAG_ANY);
 		if(result < 0) goto bail;
 		
 		result = av_read_frame(formatContext, &packet);
@@ -711,11 +735,11 @@ int determine_header_offset(ff_global_ptr storage) {
 		}
 		
 		// seek back to the beginning, otherwise av_read_frame-based decoding will skip a few packets.
-		av_seek_frame(formatContext, -1, 0, 0);
+		av_seek_frame(formatContext, -1, 0, AVSEEK_FLAG_ANY | AVSEEK_FLAG_BACKWARD);
 	}
 		
 bail:
-	return(result);
+	return result;
 }
 
 /* This function imports the avi represented by the AVFormatContext to the movie media represented
@@ -833,11 +857,11 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 		{
 			/* Add all of the samples to the media */
 			AddMediaSampleReferences64(ncstr->media, ncstr->sampleHdl, sampleNum, ncstr->sampleTable, NULL);
-			free(ncstr->sampleTable);			
 
 			/* The index is both present and not empty */
 			*hadIndex = 1;
 		}
+		free(ncstr->sampleTable);			
 	}
 	
 	if(*hadIndex == 0)
@@ -954,6 +978,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			flags |= mediaSampleNotSync;
 		
 		if(IS_NUV(storage->componentType) && codecContext->codec_id == CODEC_ID_MP3) trustPacketDuration = false;
+		if(IS_FLV(storage->componentType) && codecContext->codec_id == CODEC_ID_H264) trustPacketDuration = false;
 		
 		memset(&sampleRec, 0, sizeof(sampleRec));
 		sampleRec.dataOffset.hi = packet.pos >> 32;
@@ -975,7 +1000,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		//add any samples waiting to be added
 		if(ncstream->lastSample.numberOfSamples > 0) {
 			//calculate the duration of the sample before adding it
-			ncstream->lastSample.durationPerSample = (packet.pts - ncstream->lastpts) * ncstream->base.num;
+			ncstream->lastSample.durationPerSample = (packet.dts - ncstream->lastdts) * ncstream->base.num;
 			
 			AddMediaSampleReferences64(ncstream->media, ncstream->sampleHdl, 1, &ncstream->lastSample, NULL);
 		}
@@ -990,7 +1015,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			// keep the duration of the last sample, so we can use it if it's the last frame
 			sampleRec.durationPerSample = ncstream->lastSample.durationPerSample;
 			ncstream->lastSample = sampleRec;
-			ncstream->lastpts = packet.pts;
+			ncstream->lastdts = packet.dts;
 		} else {
 			ncstream->lastSample.numberOfSamples = 0;
 			

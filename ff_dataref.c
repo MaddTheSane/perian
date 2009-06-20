@@ -150,7 +150,7 @@ bail:
 		return written;
 } /* dataref_write() */
 
-static offset_t dataref_seek(URLContext *h, offset_t pos, int whence)
+static int64_t dataref_seek(URLContext *h, int64_t pos, int whence)
 {
 	dataref_private *p = (dataref_private*)h->priv_data;
 	

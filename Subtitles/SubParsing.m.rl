@@ -1,10 +1,22 @@
 /*
- *  SubParsing.c
- *  SSARender2
+ * SubParsing.m.rl
+ * Created by Alexander Strange on 7/25/07.
  *
- *  Created by Alexander Strange on 7/25/07.
- *  Copyright 2007 __MyCompanyName__. All rights reserved.
+ * This file is part of Perian.
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #import "SubParsing.h"
@@ -40,7 +52,16 @@
 	[super dealloc];
 }
 
--(void)finalize {[delegate releaseSpanExtra:ex]; [super finalize];}
+-(void)finalize
+{
+	[delegate releaseSpanExtra:ex];
+	[super finalize];
+}
+
+-(NSString*)description
+{
+	return [NSString stringWithFormat:@"Span at %d: %@", offset, [delegate describeSpanEx:ex]];
+}
 @end
 
 @implementation SubRenderDiv
@@ -64,7 +85,7 @@
 		posX = posY = 0;
 		alignH = kSubAlignmentMiddle; alignV = kSubAlignmentBottom;
 		
-		is_shape = positioned = NO;
+		positioned = NO;
 		render_complexity = 0;
 	}
 	
@@ -90,7 +111,6 @@
 	div->alignV  = alignV;
   div->wrapStyle = wrapStyle;
   
-    div->is_shape = NO;
 	div->positioned = positioned;
 	div->render_complexity = render_complexity;
 	
@@ -126,17 +146,20 @@ static NSArray *SplitByFormat(NSString *format, NSArray *lines)
 	return ar;
 }
 
-void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSArray **styles, NSArray **subs)
+void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles, NSArray **subs)
 {
-	const unichar *p = ssa, *pe = ssa + len, *strbegin = p;
-	int cs=0;
-	
+	unsigned len = [ssastr length];
+	NSData *ssaData;
+	const unichar *ssa = STUnicodeForString(ssastr, &ssaData);
 	NSMutableDictionary *hd = [NSMutableDictionary dictionary];
 	NSMutableArray *stylearr = [NSMutableArray array], *eventarr = [NSMutableArray array], *cur_array=NULL;
 	NSCharacterSet *wcs = [NSCharacterSet whitespaceCharacterSet];
 	NSString *str=NULL, *styleformat=NULL, *eventformat=NULL;
 	
-#define send() [NSString stringWithCharacters:strbegin length:p-strbegin]
+	const unichar *p = ssa, *pe = ssa + len, *strbegin = p;
+	int cs=0;
+	
+#define send() [[[NSString alloc] initWithCharactersNoCopy:(unichar*)strbegin length:p-strbegin freeWhenDone:NO] autorelease]
 	
 	%%{
 		alphtype unsigned short;
@@ -172,7 +195,7 @@ void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSA
 		
 		styles = stylename % {cur_array=stylearr;} nl :> (format %{styleformat=str;})? <: (sline*);
 		
-		event_txt = (("Dialogue:" ws* %sstart str %csvlineend) | str);
+		event_txt = (("Dialogue:" ws* %sstart str %csvlineend %/csvlineend) | str);
 		event = event_txt :> nl;
 			
 		lines = "[Events]" %setupevents nl :> (format %{eventformat=str;})? <: (event*);
@@ -184,6 +207,8 @@ void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSA
 	%%write exec;
 	%%write eof;
 
+	[ssaData release];
+
 	*headers = hd;
 	if (styles) *styles = SplitByFormat(styleformat, stylearr);
 	if (subs) *subs = SplitByFormat(eventformat, eventarr);
@@ -192,25 +217,16 @@ void SubParseSSAFile(const unichar *ssa, size_t len, NSDictionary **headers, NSA
 %%machine SSAtag;
 %%write data;
 
-static NSMutableString *FilterSlashEscapes(NSMutableString *s)
-{
-	[s replaceOccurrencesOfString:@"\\n" withString:@"\n" options:NSCaseInsensitiveSearch range:NSMakeRange(0, [s length])];
-	unichar nbsp = 0xA0;
-	
-	[s replaceOccurrencesOfString:@"\\h" withString:[NSString stringWithCharacters:&nbsp length:1] options:0 range: NSMakeRange(0,[s length])];
-	return s;
-}
-
 static int compare_layer(const void *a, const void *b)
 {
-	const SubRenderDiv *divA = a, *divB = b;
-	
+	const SubRenderDiv *divA = *(id*)a, *divB = *(id*)b;
+
 	if (divA->layer < divB->layer) return -1;
 	else if (divA->layer > divB->layer) return 1;
 	return 0;
 }
 
-NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate, unichar *linebuf)
+NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate)
 {
 	packet = STStandardizeStringNewlines(packet);
 	NSArray *lines = (context->scriptType == kSubTypeSRT) ? [NSArray arrayWithObject:[packet substringToIndex:[packet length]-1]] : [packet componentsSeparatedByString:@"\n"];
@@ -253,24 +269,24 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 		div->alignH = div->styleLine->alignH;
 		div->alignV = div->styleLine->alignV;
 		
-		size_t linelen = [inputText length];
-		[inputText getCharacters:linebuf];
-		linebuf[linelen] = 0;
-		
 #undef send
-#define send() [NSString stringWithCharacters:outputbegin length:p-outputbegin]
-#define psend() [NSString stringWithCharacters:parambegin length:p-parambegin]
+#define send()  [[[NSString alloc] initWithCharactersNoCopy:(unichar*)outputbegin length:p-outputbegin freeWhenDone:NO] autorelease]
+#define psend() [[[NSString alloc] initWithCharactersNoCopy:(unichar*)parambegin length:p-parambegin freeWhenDone:NO] autorelease]
 #define tag(tagt, p) [delegate spanChangedTag:tag_##tagt span:current_span div:div param:&(p)]
 				
 		{
-			unichar *p = linebuf, *pe = linebuf + linelen, *outputbegin = p, *parambegin=p, *last_cmd_start=p;
+			size_t linelen = [inputText length];
+			NSData *linebufData;
+			const unichar *linebuf = STUnicodeForString(inputText, &linebufData);
+			const unichar *p = linebuf, *pe = linebuf + linelen, *outputbegin = p, *parambegin=p, *last_tag_start=p;
 			const unichar *pb = p;
 			int cs = 0;
 			SubRenderSpan *current_span = [SubRenderSpan startingSpanForDiv:div delegate:delegate];
-			unsigned chars_deleted = 0; int intnum = 0; float floatnum = 0;
+			unsigned chars_deleted = 0; float floatnum = 0;
 			NSString *strval=NULL;
-			unsigned curX, curY;
-			BOOL reached_end = NO, startNewLayout = NO;
+			float curX, curY;
+			int intnum = 0;
+			BOOL reachedEnd = NO, setWrapStyle = NO, setPosition = NO, setAlignForDiv = NO, dropThisSpan = NO;
 			
 			%%{
 				action bold {tag(b, intnum);}
@@ -298,51 +314,60 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				action outlinea {tag(3a, intnum);}
 				action shadowa {tag(4a, intnum);}
 				action stylerevert {tag(r, strval);}
+				action drawingmode {tag(p, floatnum); dropThisSpan = floatnum > 0;}
 
 				action paramset {parambegin=p;}
 				action setintnum {intnum = [psend() intValue];}
 				action sethexnum {intnum = strtoul([psend() UTF8String], NULL, 16);}
 				action setfloatnum {floatnum = [psend() floatValue];}
 				action setstringval {strval = psend();}
-				action setxypos {curX=curY=-1; sscanf([psend() UTF8String], "(%d,%d)", &curX, &curY);}
-				
+				action nullstring {strval = @"";}
+				action setpos {curX=curY=0; sscanf([psend() UTF8String], "(%f,%f", &curX, &curY);}
+
 				action ssaalign {
-					if (outputbegin == pb) ParseASSAlignment(SSA2ASSAlignment(intnum), &div->alignH, &div->alignV);
+					if (!setAlignForDiv) {
+						setAlignForDiv = YES;
+						
+						ParseASSAlignment(SSA2ASSAlignment(intnum), &div->alignH, &div->alignV);
+					}
 				}
 				
 				action align {
-					if (outputbegin == pb) ParseASSAlignment(intnum, &div->alignH, &div->alignV);
+					if (!setAlignForDiv) {
+						setAlignForDiv = YES;
+						
+						ParseASSAlignment(intnum, &div->alignH, &div->alignV);
+					}
 				}
 				
 				action wrapstyle {
-					if (!startNewLayout) {
-						startNewLayout = YES;
+					if (!setWrapStyle) {
+						setWrapStyle = YES;
 						
-						if ([div->text length] > 0) {[divs addObject:div]; div = [div nextDivWithDelegate:delegate];}
+						div->wrapStyle = intnum;
+
 					}
-					
-					div->wrapStyle = intnum;
 				}
 				
 				action position {
-					if (!startNewLayout) {
-						startNewLayout = YES;
+					if (!setPosition) {
+						setPosition = YES;
 						
-						if ([div->text length] > 0) {[divs addObject:div]; div = [div nextDivWithDelegate:delegate];}
+						div->posX = curX;
+						div->posY = curY;
+						div->positioned = YES;
 					}
-					
-					div->posX = curX;
-					div->posY = curY;
-					div->positioned = YES;
 				}
 
 				intnum = ("-"? [0-9]+) >paramset %setintnum;
 				flag = [01] >paramset %setintnum;
-				floatnum = ([0-9]+ ("." [0-9]*)?) >paramset %setfloatnum;
-				string = ([^\\}]*) >paramset %setstringval;
+				floatn = ("-"? ([0-9]+ ("." [0-9]*)?) | ([0-9]* "." [0-9]+));
+				floatnum = floatn >paramset %setfloatnum;
+				string = (([^\\}]+) >paramset %setstringval | "" %nullstring );
 				color = ("H"|"&"){,2} (xdigit+) >paramset %sethexnum "&"?;
 				parens = "(" [^)]* ")";
-				xypos = ("(" "-"? [0-9]+ "," "-"? [0-9]+ ")") >paramset %setxypos;
+				pos = ("(" floatn "," floatn ")") >paramset %setpos;
+				move = ("(" (floatn ","){3,5} floatn ")") >paramset %setpos;
 				
 				cmd = "\\" (
 							"b" intnum %bold
@@ -352,6 +377,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"bord" floatnum %outlinesize
 							|"shad" floatnum %shadowdist
 							|"be" flag %bluredge
+							|"blur" floatnum
 							|"fn" string %fontname
 							|"fs" floatnum %fontsize
 							|"fscx" floatnum %scalex
@@ -375,19 +401,21 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|([kK] [fo]? intnum)
 							|"q" intnum %wrapstyle
 							|"r" string %stylerevert
-							|"pos" xypos %position
+							|"pos" pos %position
+							|"move" move %position
 							|"t" parens
 							|"org" parens
 							|("fad" "e"? parens)
 							|"clip" parens
-							|"p" floatnum
+							|"p" floatnum %drawingmode
 							|"pbo" floatnum
 					   );
 				
-				cmd_list = "{" (cmd* | any*) :> "}";
+				tag = "{" (cmd* | any*) :> "}";
 
 				action backslash_handler {
-					[div->text appendString:send()];					
+					p--;
+					[div->text appendString:send()];
 					unichar c = *(p+1), o=c;
 					
 					if (c) {
@@ -398,48 +426,44 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							case 'h':
 								o = 0xA0; //non-breaking space
 								break;
-							default:
-								o = c;
 						}
+						
+						[div->text appendFormat:@"%C",o];
 					}
-					
-					[div->text appendFormat:@"%C",o];
 					
 					chars_deleted++;
 					
-					outputbegin = p+2;
+					p++;
+					outputbegin = p+1;
 				}
 				
-				action enter_tag {					
-					if (p > outputbegin) [div->text appendString:send()];
+				action enter_tag {
+					if (dropThisSpan) chars_deleted += p - outputbegin;
+					else if (p > outputbegin) [div->text appendString:send()];
+					if (p == pe) reachedEnd = YES;
 					
 					if (p != pb) {
 						[div->spans addObject:current_span];
-						current_span = [current_span cloneWithDelegate:delegate];
+						
+						if (!reachedEnd) current_span = [current_span cloneWithDelegate:delegate];
 					}
 					
-					last_cmd_start = p;
-					if (p == pe) reached_end = YES;
+					last_tag_start = p;
 				}
 				
 				action exit_tag {			
 					p++;
-					chars_deleted += (p - last_cmd_start);
+					chars_deleted += (p - last_tag_start);
 					
 					current_span->offset = (p - pb) - chars_deleted;
 					outputbegin = p;
 					
-					if (startNewLayout) {
-						startNewLayout = NO;
-						chars_deleted = outputbegin - pb;
-					}
-					
 					p--;
 				}
 								
-				special = ("\\" any) >backslash_handler | cmd_list >enter_tag @exit_tag;
+				special = ("\\" :> any) @backslash_handler | tag >enter_tag @exit_tag;
 				sub_text_char = [^\\{];
-				sub_text = sub_text_char*;
+				sub_text = sub_text_char+;
 				
 				main := ((sub_text | special)* "\\"?) %/enter_tag;
 			}%%
@@ -448,8 +472,9 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			%%write exec;
 			%%write eof;
 
-			if (!reached_end) Codecprintf(NULL, "parse error: %s\n", [inputText UTF8String]);
+			if (!reachedEnd) Codecprintf(NULL, "parse error: %s\n", [inputText UTF8String]);
 			if (linebuf[linelen-1] == '\\') [div->text appendString:@"\\"];
+			[linebufData release];
 			[divs addObject:div];
 		}
 		

@@ -60,6 +60,17 @@ class wrappedUniversalDetector:public nsUniversalDetector
 		if(mDetectedCharset) return true;
 		return false;
 	}
+    
+    void debug()
+    {
+        for (PRInt32 i = 0; i < NUM_OF_CHARSET_PROBERS; i++)
+        {
+            // If no data was received the array might stay filled with nulls
+            // the way it was initialized in the constructor.
+            if (mCharSetProbers[i])
+                mCharSetProbers[i]->DumpStatus();
+        }
+    }
 
 	void reset() { Reset(); }
 };
@@ -144,6 +155,12 @@ class wrappedUniversalDetector:public nsUniversalDetector
 {
 	if(!charset) [self MIMECharset];
 	return confidence;
+}
+
+-(void)debugDump
+{
+    wrappedUniversalDetector *detector=(wrappedUniversalDetector *)detectorptr;
+    return detector->debug();
 }
 
 +(UniversalDetector *)detector

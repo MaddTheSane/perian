@@ -63,6 +63,8 @@
 #define kMPEG2Name		"MPEG-2 Video"
 #define kFRAPSName		"Fraps"
 #define kSnowName		"Snow"
+#define kIndeo2Name		"Intel Indeo 2"
+#define kIndeo3Name		"Intel Indeo 3"
 #define kNuvName		"NuppelVideo"
 #define kTSCCName		"Techsmith Screen Capture"
 #define kZMBVName		"DosBox Capture"
@@ -89,6 +91,8 @@
 #define kFRAPSNameResID		273
 #define kSnowNameResID		274
 #define kNuvNameResID		275
+#define kIndeo2NameResID		276
+#define kIndeo3NameResID		277
 #define kTSCCNameResID		305
 #define kZMBVNameResID		307
 #define kVP6ANameResID		309
@@ -118,6 +122,8 @@
 #define kTSCCInfoResID		306
 #define kZMBVInfoResID		308
 #define kVP6AInfoResID		310
+#define kIndeo2InfoResID		311
+#define kIndeo3InfoResID		312
 
 // These flags specify information about the capabilities of the component
 // Works with 1-bit, 8-bit, 16-bit and 32-bit Pixel Maps
@@ -186,6 +192,57 @@ resource 'cdci' (kDivX2CodecInfoResID) {
 
 resource 'cdci' (kDivX3CodecInfoResID) {
 	kDivX3Name,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+
+//---------------------------------------------------------------------------
+// Intel Indeo 2 Description Resource
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kIndeo2CodecInfoResID) {
+	kIndeo2Name,				// Type
+	1,					// Version
+	1,					// Revision level
+	kFFusionCodecManufacturer,			// Manufacturer
+	kFFusionDecompressionFlags,		// Decompression Flags
+	0,					// Compression Flags
+	kFFusionFormatFlags,			// Format Flags
+	128,					// Compression Accuracy
+	128,					// Decomression Accuracy
+	200,					// Compression Speed
+	200,					// Decompression Speed
+	128,					// Compression Level
+	0,					// Reserved
+	1,					// Minimum Height
+	1,					// Minimum Width
+	0,					// Decompression Pipeline Latency
+	0,					// Compression Pipeline Latency
+	0					// Private Data
+};
+
+//---------------------------------------------------------------------------
+// Intel Indeo 3 Description Resource
+//---------------------------------------------------------------------------
+
+resource 'cdci' (kIndeo3CodecInfoResID) {
+	kIndeo3Name,				// Type
 	1,					// Version
 	1,					// Revision level
 	kFFusionCodecManufacturer,			// Manufacturer
@@ -3281,6 +3338,74 @@ resource 'thng' (337) {
 };
 
 //---------------------------------------------------------------------------
+// Indeo 3 Components
+//---------------------------------------------------------------------------
+resource 'thng' (339) {
+	decompressorComponentType,              // Type
+	'IV32',                                 // SubType
+	kFFusionCodecManufacturer,                      // Manufacturer
+	0,                                      // - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',                                 // Name Type
+	kIndeo3NameResID,                        // Name ID
+	'STR ',                                 // Info Type
+	kIndeo3InfoResID,                        // Info ID
+	0,                                      // Icon Type
+	0,                                      // Icon ID
+	kFFusionCodecVersion,                   // Version
+	componentHasMultiplePlatforms +         // Registration Flags 
+	componentDoAutoVersion,                 // Registration Flags
+	0,                                      // Resource ID of Icon Family
+	{
+		kFFusionDecompressionFlags, 
+		'dlle',                         // Entry point found by symbol name 'dlle' resource
+		256,                            // ID of 'dlle' resource
+		platformPowerPCNativeEntryPoint,
+		kFFusionDecompressionFlags,
+		'dlle',
+		256,
+		platformIA32NativeEntryPoint,
+	};
+};
+
+//---------------------------------------------------------------------------
+// Indeo 2 Components
+//---------------------------------------------------------------------------
+resource 'thng' (340) {
+	decompressorComponentType,              // Type
+	'RT21',                                 // SubType
+	kFFusionCodecManufacturer,                      // Manufacturer
+	0,                                      // - use componentHasMultiplePlatforms
+	0,
+	0,
+	0,
+	'STR ',                                 // Name Type
+	kIndeo2NameResID,                        // Name ID
+	'STR ',                                 // Info Type
+	kIndeo2InfoResID,                        // Info ID
+	0,                                      // Icon Type
+	0,                                      // Icon ID
+	kFFusionCodecVersion,                   // Version
+	componentHasMultiplePlatforms +         // Registration Flags 
+	componentDoAutoVersion,                 // Registration Flags
+	0,                                      // Resource ID of Icon Family
+	{
+		kFFusionDecompressionFlags, 
+		'dlle',                         // Entry point found by symbol name 'dlle' resource
+		256,                            // ID of 'dlle' resource
+		platformPowerPCNativeEntryPoint,
+		kFFusionDecompressionFlags,
+		'dlle',
+		256,
+		platformIA32NativeEntryPoint,
+	};
+};
+
+
+
+//---------------------------------------------------------------------------
 // Component Name Resources
 //---------------------------------------------------------------------------
 
@@ -3374,6 +3499,14 @@ resource 'STR ' (kZMBVNameResID) {
 
 resource 'STR ' (kVP6ANameResID) {
 	"On2 VP6A (Perian)"
+};
+
+resource 'STR ' (kIndeo2NameResID) {
+	"Indeo 2 (Perian)"
+};
+
+resource 'STR ' (kIndeo3NameResID) {
+	"Indeo 3 (Perian)"
 };
 
 //---------------------------------------------------------------------------
@@ -3470,6 +3603,14 @@ resource 'STR ' (kZMBVInfoResID) {
 
 resource 'STR ' (kVP6AInfoResID) {
 	"Decompresses video stored in On2 VP6A format."
+};
+
+resource 'STR ' (kIndeo2InfoResID) {
+	"Decompresses video stored in Intel's Indeo 2 format."
+};
+
+resource 'STR ' (kIndeo3InfoResID) {
+	"Decompresses video stored in Intel's Indeo 3 format."
 };
 
 //---------------------------------------------------------------------------

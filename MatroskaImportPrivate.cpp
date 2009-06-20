@@ -355,6 +355,17 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	for (int i = 0; i < tracks.size(); i++) {
 		SetTrackEnabled(tracks[i].theTrack, tracks[i].isEnabled);
 	}
+	// ensure that at least one track in each alternate group (type) is enabled
+	// ffmpeg used to write a TrackDefault of 0 for all tracks
+	for (int i = 0; i < tracks.size(); i++) {
+		if (!GetTrackEnabled(tracks[i].theTrack)) {
+			Track alternate = GetTrackAlternate(tracks[i].theTrack);
+			while (alternate != tracks[i].theTrack && !GetTrackEnabled(alternate))
+				alternate = GetTrackAlternate(alternate);
+			if (alternate == tracks[i].theTrack)
+				SetTrackEnabled(tracks[i].theTrack, 1);
+		}
+	}
 	seenTracks = true;
 	return noErr;
 }

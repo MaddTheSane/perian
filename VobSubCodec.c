@@ -1,3 +1,23 @@
+/*
+ * VobSubCodec.h
+ * Created by David Conrad on 3/4/06.
+ *
+ * This file is part of Perian.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
@@ -61,7 +81,7 @@ typedef struct {
 
 
 // dest must be at least as large as src
-void ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize);
+int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes);
 static ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketControlData *controlDataOut);
 extern void initLib();
 
@@ -117,8 +137,9 @@ ComponentResult VobSubCodecClose(VobSubCodecGlobals glob, ComponentInstance self
 		}
 		if (glob->subtitle.rects) {
 			for (i = 0; i < glob->subtitle.num_rects; i++) {
-				av_free(glob->subtitle.rects[i].rgba_palette);
-				av_free(glob->subtitle.rects[i].bitmap);
+				av_freep(glob->subtitle.rects[i]->pict.data[0]);
+				av_freep(glob->subtitle.rects[i]->pict.data[1]);
+				av_freep(glob->subtitle.rects[i]);
 			}
 			av_free(glob->subtitle.rects);
 		}
@@ -286,6 +307,12 @@ ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCodecDeco
 	UInt8 *data = (UInt8 *) drp->codecData;
 	int ret, got_sub;
 	
+	if(myDrp->bufferSize < 4)
+	{
+		myDrp->decoded = true;
+		return noErr;
+	}
+	
 	if (glob->codecData == NULL) {
 		glob->codecData = malloc(myDrp->bufferSize + 2);
 		glob->bufferSize = myDrp->bufferSize + 2;
@@ -301,12 +328,16 @@ ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCodecDeco
 	// if it's raw spu data, the 1st 2 bytes are the length of the data
 	} else if (data[0] + data[1] == 0) {
 		// remove the MPEG framing
-		ExtractVobSubPacket(glob->codecData, data, myDrp->bufferSize);
+		myDrp->bufferSize = ExtractVobSubPacket(glob->codecData, data, myDrp->bufferSize, NULL);
 	} else {
 		memcpy(glob->codecData, drp->codecData, myDrp->bufferSize);
 	}
 	
-	ret = avcodec_decode_subtitle(glob->avContext, &glob->subtitle, &got_sub, glob->codecData, myDrp->bufferSize);
+	AVPacket pkt;
+	av_init_packet(&pkt);
+	pkt.data = glob->codecData;
+	pkt.size = myDrp->bufferSize;
+	ret = avcodec_decode_subtitle2(glob->avContext, &glob->subtitle, &got_sub, &pkt);
 	
 	if (ret < 0 || !got_sub) {
 		Codecprintf(NULL, "Error decoding DVD subtitle %d / %ld\n", ret, myDrp->bufferSize);
@@ -333,31 +364,34 @@ ComponentResult VobSubCodecDrawBand(VobSubCodecGlobals glob, ImageSubCodecDecomp
 	
 	// clear the buffer to pure transparent
 	memset(drp->baseAddr, 0, myDrp->height * drp->rowBytes);
+	if(myDrp->bufferSize < 4)
+		return noErr;
 	
 	err = ReadPacketControls(data, glob->palette, &controlData);
 	if (err == noErr)
 		usePalette = true;
 	
 	for (i = 0; i < glob->subtitle.num_rects; i++) {
-		AVSubtitleRect *rect = &glob->subtitle.rects[i];
+		AVSubtitleRect *rect = glob->subtitle.rects[i];
 		uint8_t *line = (uint8_t *)drp->baseAddr + drp->rowBytes * rect->y + rect->x*4;
-		uint8_t *sub = rect->bitmap;
+		uint8_t *sub = rect->pict.data[0];
 		unsigned int w = FFMIN(rect->w, myDrp->width  - rect->x);
 		unsigned int h = FFMIN(rect->h, myDrp->height - rect->y);
+		uint32_t *palette = (uint32_t *)rect->pict.data[1];
 		
 		if (usePalette) {
 			for (j = 0; j < 4; j++)
-				rect->rgba_palette[j] = controlData.pixelColor[j];
+				palette[j] = controlData.pixelColor[j];
 		}
 		
 		for (y = 0; y < h; y++) {
 			uint32_t *pixel = (uint32_t *) line;
 			
 			for (x = 0; x < w; x++)
-				pixel[x] = rect->rgba_palette[sub[x]];
+				pixel[x] = palette[sub[x]];
 			
 			line += drp->rowBytes;
-			sub += rect->linesize;
+			sub += rect->pict.linesize[0];
 		}
 	}
 	
@@ -405,15 +439,16 @@ ComponentResult VobSubCodecGetCodecInfo(VobSubCodecGlobals glob, CodecInfo *info
 	return err;
 }
 
-void ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize) {
+int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes) {
 	int copiedBytes = 0;
 	UInt8 *currentPacket = framedSrc;
+	int packetSize = INT_MAX;
 	
-	while (currentPacket - framedSrc < srcSize) {
+	while (currentPacket - framedSrc < srcSize && copiedBytes < packetSize) {
 		// 3-byte start code: 0x00 00 01
 		if (currentPacket[0] + currentPacket[1] != 0 || currentPacket[2] != 1) {
 			Codecprintf(NULL, "VobSub Codec: !! Unknown header: %02x %02x %02x\n", currentPacket[0], currentPacket[1], currentPacket[2]);
-			return;
+			return copiedBytes;
 		}
 		
 		int packet_length;
@@ -452,6 +487,10 @@ void ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize) {
 					   // we don't want the 1-byte stream ID, or the header
 					   packet_length - 1 - (header_data_length + 3));
 				
+				if(packetSize == INT_MAX)
+				{
+					packetSize = dest[0] << 8 | dest[1];
+				}
 				copiedBytes += packet_length - 1 - (header_data_length + 3);
 				currentPacket += packet_length + 6;
 				break;
@@ -459,9 +498,13 @@ void ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize) {
 			default:
 				// unknown packet, probably video, return for now
 				Codecprintf(NULL, "VobSubCodec - Unknown packet type %x, aborting\n", (int)currentPacket[3]);
-				return;
+				return copiedBytes;
 		} // switch (currentPacket[3])
 	} // while (currentPacket - framedSrc < srcSize)
+	if(usedSrcBytes != NULL)
+		*usedSrcBytes = currentPacket - framedSrc;
+	
+	return copiedBytes;
 }
 
 ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketControlData *controlDataOut) {

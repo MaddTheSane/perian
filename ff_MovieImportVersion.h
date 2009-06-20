@@ -23,7 +23,7 @@
 #ifndef __FF_MOVIEIMPORTVERSION__
 #define __FF_MOVIEIMPORTVERSION__
 
-#define kFFAviComponentVersion 0x00010005
+#define kFFAviComponentVersion 0x00010006
 
 #define kChristophManufacturer 'Peri'
 

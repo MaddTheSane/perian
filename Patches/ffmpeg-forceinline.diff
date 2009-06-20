@@ -5,7 +5,7 @@ Index: ffmpeg/libavcodec/h264.c
 @@ -5368,16 +5368,16 @@
  }
  
- #ifndef CONFIG_SMALL
+ #if !CONFIG_SMALL
 -static void decode_cabac_residual_dc( H264Context *h, DCTELEM *block, int cat, int n, const uint8_t *scantable, const uint32_t *qmul, int max_coeff ) {
 +static av_noinline void decode_cabac_residual_dc( H264Context *h, DCTELEM *block, int cat, int n, const uint8_t *scantable, const uint32_t *qmul, int max_coeff ) {
      decode_cabac_residual_internal(h, block, cat, n, scantable, qmul, max_coeff, 1);
@@ -19,6 +19,6 @@ Index: ffmpeg/libavcodec/h264.c
  
 -static void decode_cabac_residual( H264Context *h, DCTELEM *block, int cat, int n, const uint8_t *scantable, const uint32_t *qmul, int max_coeff ) {
 +static av_always_inline void decode_cabac_residual( H264Context *h, DCTELEM *block, int cat, int n, const uint8_t *scantable, const uint32_t *qmul, int max_coeff ) {
- #ifdef CONFIG_SMALL
+ #if CONFIG_SMALL
      decode_cabac_residual_internal(h, block, cat, n, scantable, qmul, max_coeff, cat == 0 || cat == 3);
  #else

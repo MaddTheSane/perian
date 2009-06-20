@@ -1,3 +1,23 @@
+/*
+ * TextSubCodec.c
+ * Created by David Conrad on 3/21/06.
+ *
+ * This file is part of Perian.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #if __MACH__
     #include <Carbon/Carbon.h>
@@ -12,7 +32,7 @@
 #include "SubATSUIRenderer.h"
 
 // Constants
-const UInt8 kNumPixelFormatsSupportedTextSub = 1;
+const UInt8 kNumPixelFormatsSupportedTextSub = 2;
 
 // Data structures
 typedef struct TextSubGlobalsRecord {
@@ -35,6 +55,7 @@ typedef struct {
     long        dataSize;
     
     Ptr             baseAddr;
+	OSType			pixelFormat;
 } TextSubDecompressRecord;
 
 // Setup required for ComponentDispatchHelper.c
@@ -204,7 +225,8 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
     
     // we want ARGB because Quartz can use it easily
     // Todo: add other possible pixel formats Quartz can handle
-    *formats++	= k32ARGBPixelFormat;
+    *formats++	= k32RGBAPixelFormat;
+	*formats++	= k32ARGBPixelFormat;
 	*formats++	= 0;
 	
 	// Specify the minimum image band height supported by the component
@@ -216,7 +238,6 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 
 	// Indicate the wanted destination using the wantedDestinationPixelTypeH previously set up
 	capabilities->wantedPixelSize  = 0; 	
-    **glob->wantedDestinationPixelTypeH = k32ARGBPixelFormat;
     
 	p->wantedDestinationPixelTypes = glob->wantedDestinationPixelTypeH;
 
@@ -262,18 +283,13 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 // may receive more than one ImageCodecBeginBand call before receiving an ImageCodecDrawBand call.
 pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompressParams *p, ImageSubCodecDecompressRecord *drp, long flags)
 {
-	long offsetH, offsetV;
 	TextSubDecompressRecord *myDrp = (TextSubDecompressRecord *)drp->userDecompressRecord;
-
-	offsetH = (long)(p->dstRect.left - p->dstPixMap.bounds.left) * (long)(p->dstPixMap.pixelSize >> 3);
-	offsetV = (long)(p->dstRect.top - p->dstPixMap.bounds.top) * (long)drp->rowBytes;
-
-	drp->baseAddr = p->dstPixMap.baseAddr + offsetH + offsetV;
 	
 	// Let base codec know that all our frames are key frames (a.k.a., sync samples)
 	// This allows the base codec to perform frame dropping on our behalf if needed 
     drp->frameType = kCodecFrameTypeKey;
 
+	myDrp->pixelFormat = p->dstPixMap.pixelFormat;
 	myDrp->width = p->dstRect.right - p->dstRect.left;
 	myDrp->height = p->dstRect.bottom - p->dstRect.top;
 	myDrp->depth = (**p->imageDescription).depth;
@@ -296,10 +312,11 @@ pascal ComponentResult TextSubCodecBeginBand(TextSubGlobals glob, CodecDecompres
 pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDecompressRecord *drp)
 {
 	TextSubDecompressRecord *myDrp = (TextSubDecompressRecord *)drp->userDecompressRecord;
-	
+	CGImageAlphaInfo alphaFormat = (myDrp->pixelFormat == k32ARGBPixelFormat) ? kCGImageAlphaPremultipliedFirst : kCGImageAlphaPremultipliedLast;
+
     CGContextRef c = CGBitmapContextCreate(drp->baseAddr, myDrp->width, myDrp->height,
 										   8, drp->rowBytes,  glob->colorSpace,
-										   kCGImageAlphaPremultipliedFirst);
+										   alphaFormat);
 	
 	CGContextClearRect(c, CGRectMake(0,0, myDrp->width, myDrp->height));
 	

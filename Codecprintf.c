@@ -1,10 +1,22 @@
 /*
- *  Codecprintf.c
- *  Perian
+ * Codecprintf.c
+ * Created by Augie Fackler on 7/16/06.
  *
- *  Created by Augie Fackler on 7/16/06.
- *  Copyright 2006 Perian Project. All rights reserved.
+ * This file is part of Perian.
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "Codecprintf.h"
@@ -12,7 +24,7 @@
 #include <stdarg.h>
 #include "log.h"
 
-#define CODEC_HEADER			"Perian Codec: "
+#define CODEC_HEADER			"Perian: "
 
 static int Codecvprintf(FILE *fileLog, const char *format, va_list va, int print_header)
 {
@@ -50,15 +62,21 @@ int Codecprintf(FILE *fileLog, const char *format, ...)
 
 const char *FourCCString(FourCharCode c)
 {
-    static unsigned char fourcc[5] = {0};
+    static char fourcc[sizeof("0xFFFF")] = {0};
     int i;
     
-    for (i = 0; i < 4; i++) fourcc[i] = c >> 8*(3-i);
+	//not a fourcc or twocc
+	if (c < '\0\0AA') {
+		snprintf(fourcc, sizeof(fourcc), "%#x", (unsigned)c);
+	} else {
+		for (i = 0; i < 4; i++) fourcc[i] = c >> 8*(3-i);
+		fourcc[4] = '\0';
+	}
     
     return (char*)fourcc;
 }
 
-void FourCCprintf (char *string, FourCharCode a)
+void FourCCprintf(const char *string, FourCharCode a)
 {
     Codecprintf(NULL, "%s%s\n", string, FourCCString(a));
 }
@@ -68,7 +86,7 @@ void FFMpegCodecprintf(void* ptr, int level, const char* fmt, va_list vl)
     static int print_prefix=1;
 	int print_header = 1;
     AVClass* avc= ptr ? *(AVClass**)ptr : NULL;
-    if(level>av_log_level)
+    if(level>av_log_get_level())
         return;
 
     if(print_prefix && avc) {

@@ -1,10 +1,23 @@
-//
-//  SubUtilities.m
-//  SSARender2
-//
-//  Created by Alexander Strange on 7/28/07.
-//  Copyright 2007 __MyCompanyName__. All rights reserved.
-//
+/*
+ * SubUtilities.m
+ * Created by Alexander Strange on 7/28/07.
+ *
+ * This file is part of Perian.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #import "SubUtilities.h"
 #import "UniversalDetector.h"
@@ -50,6 +63,8 @@ NSArray *STSplitStringWithCount(NSString *str, NSString *split, size_t count)
 
 NSMutableString *STStandardizeStringNewlines(NSString *str)
 {
+	if(str == nil)
+		return nil;
 	NSMutableString *ms = [NSMutableString stringWithString:str];
 	[ms replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
 	[ms replaceOccurrencesOfString:@"\r" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
@@ -62,14 +77,14 @@ void STSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *
 	id  objs[count];
 	
 	[array getObjects:objs];
-	mergesort(objs, count, sizeof(void*), compare);
+	mergesort(objs, count, sizeof(id), compare);
 	[array setArray:[NSArray arrayWithObjects:objs count:count]];
 }
 
 static const short frequencies[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-	674, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 1026, 29, -1258, 539, -930, -652, -815, -487, -2526, -2161, 146, -956, -914, 1149, -102, 
 	293, -2675, -923, -597, 339, 110, 247, 9, 0, 1024, 1239, 0, 0, 0, 0, 0, 
@@ -84,7 +99,7 @@ static const short frequencies[] = {
 	-1912, 4259, 2573, 8866, 55, 0, 0, -2247, -831, -3788, -3043, 0, 0, 3412, 2921, 1251, 
 	0, 0, 1377, 520, 1344, 0, -1123, 0, 0, -1213, 2208, -458, -794, 2636, 3824, 0};
 
-static BOOL DifferentiateLatin12(const unsigned char *data, int length)
+BOOL STDifferentiateLatin12(const unsigned char *data, int length)
 {
 	// generated from french/german (latin1) and hungarian/romanian (latin2)
 	
@@ -97,7 +112,7 @@ static BOOL DifferentiateLatin12(const unsigned char *data, int length)
 	return frcount <= 0;
 }
 
-extern NSString *STLoadFileWithUnknownEncoding(NSString *path)
+NSString *STLoadFileWithUnknownEncoding(NSString *path)
 {
 	NSData *data = [NSData dataWithContentsOfMappedFile:path];
 	UniversalDetector *ud = [[UniversalDetector alloc] init];
@@ -112,10 +127,10 @@ extern NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	enc = [ud encoding];
 	conf = [ud confidence];
 	enc_str = [ud MIMECharset];
-	latin2 = [enc_str isEqualToString:@"windows-1250"];
+	latin2 = enc == NSWindowsCP1250StringEncoding;
 	
 	if (latin2) {
-		if (DifferentiateLatin12([data bytes], [data length])) { // seems to actually be latin1
+		if (STDifferentiateLatin12([data bytes], [data length])) { // seems to actually be latin1
 			enc = NSWindowsCP1252StringEncoding;
 			enc_str = @"windows-1252";
 		}
@@ -138,6 +153,28 @@ extern NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	[ud release];
 	
 	return res;
+}
+
+const unichar *STUnicodeForString(NSString *str, NSData **datap)
+{
+	const unichar *p = CFStringGetCharactersPtr((CFStringRef)str);
+	
+	*datap = nil;
+	
+	if (!p) {
+		NSData *data = [[str dataUsingEncoding:NSUnicodeStringEncoding] retain];
+		
+		p = [data bytes];
+		
+		//dataUsingEncoding: adds a BOM
+		//skip it so the string length will match the input string
+		if (*p == 0xfeff)
+			p++;
+		
+		*datap = data;
+	}
+	
+	return p;
 }
 
 CFMutableStringRef CopyHomeDirectory()

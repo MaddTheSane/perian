@@ -1,99 +1,159 @@
 /*
- *  FrameBuffer.c
- *  Perian
+ * FrameBuffer.c
+ * Created by Graham Booker on 1/30/07.
  *
- *  Created by Graham Booker on 1/30/07.
- *  Copyright 2007 Perian Project. All rights reserved.
+ * This file is part of Perian.
  *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "FrameBuffer.h"
 #include "avcodec.h"
+#include <sys/param.h>
 
 void FFusionDataSetup(FFusionData *data, int dataSize, int bufferSize)
 {
-	data->read = 0;
-	data->write = 0;
-	data->frames = malloc(sizeof(FrameData *) * dataSize);
+	memset(data, 0, sizeof(FFusionData));
+	int framesSize = sizeof(FrameData) * dataSize;
+	data->frames = malloc(framesSize);
+	memset(data->frames, 0, framesSize);
 	
 	int i;
 	for(i=0; i<dataSize; i++)
 	{
-		FrameData *fdata = malloc(sizeof(FrameData));
-		data->frames[i] = fdata;
-		fdata->buffer = av_malloc(bufferSize);
-		fdata->bufferSize = bufferSize;
+		FrameData *fdata = data->frames + i;
+		fdata->buffer = NULL;
+		fdata->data = data;
 	}
-	data->size = dataSize;
-	data->buffer = av_malloc(bufferSize);
-	data->bufferSize = bufferSize;
-	data->startBufferSize = bufferSize;
+	data->frameSize = dataSize;
+
+	data->ringBuffer = av_malloc(bufferSize);
+	data->ringSize = bufferSize;
 }
 
 void FFusionDataFree(FFusionData *data)
 {
-	int i;
-	for(i=0; i<data->size; i++)
-	{
-		av_free(data->frames[i]->buffer);
-		free(data->frames[i]);
-	}
 	free(data->frames);
-	av_free(data->buffer);
+	if(data->previousData != NULL)
+	{
+		FFusionDataFree(data->previousData);
+		free(data->previousData);
+	}
+	av_free(data->ringBuffer);
 }
 
-int FFusionCreateDataBuffer(FFusionData *data, uint8_t *buffer, int bufferSize)
+//Expands both the frame array and the ring buffer.
+//Old data is kept in the previousData pointer to be dealloced when done
+static void expansion(FFusionData *data, int dataSize)
 {
-	data->buffer = av_fast_realloc(data->buffer, &data->bufferSize, bufferSize + FF_INPUT_BUFFER_PADDING_SIZE);
-	if (data->buffer) {
-		uint8_t *dataPtr = data->buffer;
+	//Create the prev structure to hold all existing frames
+	FFusionData *prev = malloc(sizeof(FFusionData));
+	//Move all frames to prev
+	memcpy(prev, data, sizeof(FFusionData));
+	int i;
+	for(i=0; i<data->frameSize; i++)
+		data->frames[i].data = prev;
+	
+	//Create new data
+	int newRingSize = MAX(dataSize * 10, data->ringSize * 2);
+	FFusionDataSetup(data, data->frameSize * 2, newRingSize);
+	//Preserve pointer to old data
+	data->previousData = prev;
+}
+
+uint8_t *FFusionCreateEntireDataBuffer(FFusionData *data, uint8_t *buffer, int bufferSize)
+{
+	data->ringBuffer = av_fast_realloc(data->ringBuffer, &(data->ringSize), bufferSize + FF_INPUT_BUFFER_PADDING_SIZE);
+	if (data->ringBuffer) {
+		uint8_t *dataPtr = data->ringBuffer;
 		memcpy(dataPtr, buffer, bufferSize);
 		memset(dataPtr + bufferSize, 0, FF_INPUT_BUFFER_PADDING_SIZE);
 	}
-	return data->buffer != NULL;
+	return data->ringBuffer;
 }
 
-FrameData *FFusionDataAppend(FFusionData *data, int dataSize, int type)
+//Find dataSize bytes in ringbuffer, expand if none available
+static uint8_t *createBuffer(FFusionData *data, int dataSize)
 {
-	if((data->write + 1) % data->size == data->read)
+	if(data->ringWrite >= data->ringRead)
 	{
-		int newSize = data->size * 2;
-		FrameData * *newData = malloc(sizeof(FrameData *) * newSize);
-		memcpy(newData, data->frames + data->read, (data->size - data->read) * sizeof(FrameData));
-		if(data->read != 0)
-			memcpy(newData + (data->size - data->read), data->frames, data->read * sizeof(FrameData));
-		
-		int i;
-		for(i=data->size; i<newSize; i++)
+		//Write is after read
+		if(data->ringWrite + dataSize + FF_INPUT_BUFFER_PADDING_SIZE < data->ringSize)
 		{
-			FrameData *newFrame = malloc(sizeof(FrameData));
-			newData[i] = newFrame;
-			newFrame->buffer = av_malloc(data->startBufferSize);
-			newFrame->bufferSize = data->startBufferSize;
+			//Found at end
+			int offset = data->ringWrite;
+			data->ringWrite = offset + dataSize;
+			return data->ringBuffer + offset;
 		}
-		data->read = 0;
-		data->write = data->size;
-		data->size = newSize;
-		free(data->frames);
-		data->frames = newData;
+		else
+			//Can't fit at end, loop
+			data->ringWrite = 0;
+	}
+	if(data->ringWrite + dataSize + FF_INPUT_BUFFER_PADDING_SIZE < data->ringRead)
+	{
+		//Found at write
+		int offset = data->ringWrite;
+		data->ringWrite = offset + dataSize;
+		return data->ringBuffer + offset;
+	}
+	else
+	{
+		expansion(data, dataSize);
+		data->ringWrite = dataSize;
+		return data->ringBuffer;
+	}
+}
+
+//Insert buffer into ring buffer
+static uint8_t *insertIntoBuffer(FFusionData *data, uint8_t *buffer, int dataSize)
+{
+	uint8_t *ret = createBuffer(data, dataSize);
+	memcpy(ret, buffer, dataSize);
+	memset(ret + dataSize, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+	return ret;
+}
+
+FrameData *FFusionDataAppend(FFusionData *data, uint8_t *buffer, int dataSize, int type)
+{
+	//Find an available frame
+	if((data->frameWrite + 1) % data->frameSize == data->frameRead)
+	{
+		expansion(data, dataSize);
 	}
 	
-	FrameData *dest = data->frames[data->write];
-	uint8_t *tbuff = dest->buffer;
-	dest->buffer = data->buffer;
-	data->buffer = tbuff;
+	FrameData *dest = data->frames + data->frameWrite;
 	
-	unsigned int tsize = dest->bufferSize;
-	dest->bufferSize = data->bufferSize;
-	data->bufferSize = tsize;
-	
+	if(data->unparsedFrames.buffer == buffer)
+	{		
+		//This was an unparsed frame, don't memcpy; it's already in the correct place.
+		dest->buffer = buffer;
+		data->unparsedFrames.buffer += dataSize;
+		data->unparsedFrames.dataSize -= dataSize;
+	}
+	else
+	{
+		uint8_t *saveBuffer = insertIntoBuffer(data, buffer, dataSize);
+		dest->buffer = saveBuffer;
+	}
 	dest->dataSize = dataSize;
 	dest->type = type;
 	dest->prereqFrame = NULL;
 	dest->decoded = FALSE;
 	dest->nextFrame = NULL;
 	
-	data->write = (data->write + 1) % data->size;
+	data->frameWrite = (data->frameWrite + 1) % data->frameSize;
 	return dest;
 }
 
@@ -101,11 +161,25 @@ void FFusionDataSetUnparsed(FFusionData *data, uint8_t *buffer, int bufferSize)
 {
 	FrameData *unparsed = &(data->unparsedFrames);
 	
-	unparsed->buffer = av_fast_realloc(unparsed->buffer, &unparsed->bufferSize, bufferSize);
-	if (unparsed->buffer) {
-		memcpy(unparsed->buffer, buffer, bufferSize);
+	if(unparsed->buffer == buffer)
+	{
+		//This part was already unparsed; don't memcpy again
 		unparsed->dataSize = bufferSize;
 	}
+	else
+	{
+		unparsed->buffer = insertIntoBuffer(data, buffer, bufferSize);
+		if (unparsed->buffer) {
+			unparsed->dataSize = bufferSize;
+		}		
+	}
+}
+
+//Seems to be unused
+void FFusionDataReadUnparsed(FFusionData *data)
+{
+	data->ringWrite -= data->unparsedFrames.dataSize;
+	data->unparsedFrames.dataSize = 0;
 }
 
 FrameData *FrameDataCheckPrereq(FrameData * toData)
@@ -116,32 +190,36 @@ FrameData *FrameDataCheckPrereq(FrameData * toData)
 	return prereq;
 }
 
-void FFusionDataMarkRead(FFusionData *data, FrameData *toData)
+void FFusionDataMarkRead(FrameData *toData)
 {
 	if(toData == NULL)
 		return;
 	
-	if(toData->prereqFrame != NULL && toData->prereqFrame->hold)
+	if(toData->prereqFrame != NULL)
 		return;
 	
-	int i;
-	for(i=data->read; i!=data->write; i = (i + 1) % data->size)
+	FFusionData *data = toData->data;
+	data->frameRead = toData - data->frames + 1;
+	data->ringRead = toData->buffer + toData->dataSize - data->ringBuffer;
+	if(data->previousData != NULL)
 	{
-		if(data->frames[i] == toData)
-		{
-			data->read = (i + 1) % data->size;
-			break;
-		}		
+		//If there's previous data, free it since we are now done with it
+		FFusionDataFree(data->previousData);
+		data->previousData = NULL;
 	}
 }
 
 FrameData *FFusionDataFind(FFusionData *data, int frameNumber)
 {
 	int i;
-	for(i=data->read; i!=data->write; i = (i + 1) % data->size)
+	for(i=data->frameRead; i!=data->frameWrite; i = (i + 1) % data->frameSize)
 	{
-		if(data->frames[i]->frameNumber == frameNumber)
-			return data->frames[i];
+		if(data->frames[i].frameNumber == frameNumber)
+			return data->frames + i;
 	}
+	if(data->previousData != NULL)
+		//Check previous data as well
+		return FFusionDataFind(data->previousData, frameNumber);
+	
 	return NULL;
 }

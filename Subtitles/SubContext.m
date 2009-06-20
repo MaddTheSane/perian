@@ -1,10 +1,23 @@
-//
-//  SubContext.m
-//  SSARender2
-//
-//  Created by Alexander Strange on 7/28/07.
-//  Copyright 2007 __MyCompanyName__. All rights reserved.
-//
+/*
+ * SubContext.m
+ * Created by Alexander Strange on 7/28/07.
+ *
+ * This file is part of Perian.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #import "SubContext.h"
 #import "SubParsing.h"
@@ -67,7 +80,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 {
 	if ([*fontname characterAtIndex:0] == '@') {
 		*fontname = [*fontname substringFromIndex:1];
-		return YES;
+		//return YES; // XXX vertical
 	}
 	return NO;
 }
@@ -88,7 +101,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 	sty->outlineRadius = 1.5;
 	sty->shadowDist = 2;
 	sty->marginL = sty->marginR = sty->marginV = 20;
-	sty->bold = YES;
+	sty->weight = 1;
 	sty->italic = sty->underline = sty->strikeout = NO;
 	sty->alignH = kSubAlignmentCenter;
 	sty->alignV = kSubAlignmentBottom;
@@ -120,7 +133,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 		if (tmp) outlineColor = shadowColor = ParseSSAColorString(tmp);
 		cv(outlineColor, OutlineColour);
 		cv(shadowColor, ShadowColour);
-		bv(bold, Bold);
+		fv(weight, Bold);
 		bv(italic, Italic);
 		bv(underline, Underline);
 		bv(strikeout, Strikeout);
@@ -137,6 +150,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 		
 		if (!scaleX) scaleX = 100;
 		if (!scaleY) scaleY = 100;
+		if (weight == -1) weight = 1;
 
 		UInt8 align = [[s objectForKey:@"Alignment"] intValue];
 		if (version == kSubTypeSSA) align = SSA2ASSAlignment(align);
@@ -226,10 +240,9 @@ BOOL IsScriptASS(NSDictionary *headers)
 	}
 }
 
--(SubContext*)initWithHeaders:(NSDictionary *)headers_ styles:(NSArray *)styles_ extraData:(NSString *)ed delegate:(SubRenderer*)delegate
+-(SubContext*)initWithHeaders:(NSDictionary *)headers_ styles:(NSArray *)styles_ delegate:(SubRenderer*)delegate
 {
 	if (self = [super init]) {
-		headertext = [ed retain];
 		headers = [headers_ retain];
 		[self readHeaders];
 		
@@ -267,7 +280,6 @@ BOOL IsScriptASS(NSDictionary *headers)
 		collisions = kSubCollisionsNormal;
 		wrapStyle = kSubLineWrapBottomWider;
 		styles = headers = nil;
-		headertext = nil;
 		[delegate completedHeaderParsing:self];
 
 		defaultStyle = [[SubStyle defaultStyleWithDelegate:delegate] retain];		
@@ -281,7 +293,6 @@ BOOL IsScriptASS(NSDictionary *headers)
 	[styles release];
 	[defaultStyle release];
 	[headers release];
-	[headertext release];
 	[super dealloc];
 }
 
@@ -301,4 +312,5 @@ BOOL IsScriptASS(NSDictionary *headers)
 -(void)releaseStyleExtra:(void*)ex {}
 -(void)releaseSpanExtra:(void*)ex {}
 -(float)aspectRatio {return 4./3.;}
+-(NSString*)describeSpanEx:(void*)ex {return @"";}
 @end

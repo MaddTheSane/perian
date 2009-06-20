@@ -1,3 +1,23 @@
+/*
+ * CPFPerianPrefPaneController.m
+ *
+ * This file is part of Perian.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 #import "CPFPerianPrefPaneController.h"
 #import "UpdateCheckerAppDelegate.h"
 #include <sys/stat.h>
@@ -6,6 +26,7 @@
 #define LastInstalledVersionKey CFSTR("LastInstalledVersion")
 #define AC3TwoChannelModeKey CFSTR("twoChannelMode")
 #define ExternalSubtitlesKey CFSTR("LoadExternalSubtitles")
+#define DontShowMultiChannelWarning CFSTR("DontShowMultiChannelWarning")
 
 //Old
 #define AC3StereoOverDolbyKey CFSTR("useStereoOverDolby")
@@ -86,10 +107,10 @@
 	CFRelease(numRef);
 }
 
-- (int)getIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(int)defaultValue
+- (unsigned int)getUnsignedIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(int)defaultValue
 {
 	CFPropertyListRef value;
-	int ret = defaultValue;
+	unsigned int ret = defaultValue;
 	
 	value = CFPreferencesCopyAppValue(key, appID);
 	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
@@ -124,6 +145,26 @@
 }
 
 - (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromString:(NSString *)value
+{
+	CFPreferencesSetAppValue(key, value, appID);
+}
+
+- (NSDate *)getDateFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
+{
+	CFPropertyListRef value;
+	NSDate *ret = nil;
+	
+	value = CFPreferencesCopyAppValue(key, appID);
+	if(value && CFGetTypeID(value) == CFDateGetTypeID())
+		ret = [[(NSDate *)value retain] autorelease];
+	
+	if(value)
+		CFRelease(value);
+	
+	return ret;
+}
+
+- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromDate:(NSDate *)value
 {
 	CFPreferencesSetAppValue(key, value, appID);
 }
@@ -353,15 +394,14 @@
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
 	}
 	
-	NSDate *updateDate = (NSDate *)CFPreferencesCopyAppValue((CFStringRef)NEXT_RUN_KEY, perianAppID);
+	NSDate *updateDate = [self getDateFromKey:(CFStringRef)NEXT_RUN_KEY forAppID:perianAppID];
 	if([updateDate timeIntervalSinceNow] > 1000000000) //futureDate
 		[button_autoUpdateCheck setIntValue:0];
 	else
 		[button_autoUpdateCheck setIntValue:1];
-	[updateDate release];
 	
 	/* A52 Prefs */
-	int twoChannelMode = [self getIntFromKey:AC3TwoChannelModeKey forAppID:a52AppID withDefault:0xffffffff];
+	unsigned int twoChannelMode = [self getUnsignedIntFromKey:AC3TwoChannelModeKey forAppID:a52AppID withDefault:0xffffffff];
 	if(twoChannelMode != 0xffffffff)
 	{
 		/* sanity checks */
@@ -393,6 +433,11 @@
 	}
 	
 	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
+
+	if([self getBoolFromKey:ExternalSubtitlesKey forAppID:perianAppID withDefault:YES])
+		[button_loadExternalSubtitles setState:1];
+	else
+		[button_loadExternalSubtitles setState:0];
 }
 
 - (void)didUnselect
@@ -565,8 +610,7 @@
 		if(currentInstallStatus(pieceStatus) == InstallStatusOutdated)
 		{
 			//Remove the old one here
-			int tag = 0;
-			BOOL result = [[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:containingDir destination:@"" files:[NSArray arrayWithObject:component] tag:&tag];
+			BOOL result = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
 			if(result == NO)
 				ret = NO;
 		}
@@ -584,11 +628,10 @@
 		containingDir = [self basePathForType:type user:!userInstalled];
 
 		if(userInstalled)
-			[self _authenticatedRemove:[containingDir stringByAppendingPathComponent:component]];
+			ret = [self _authenticatedRemove:[containingDir stringByAppendingPathComponent:component]];
 		else
 		{
-			int tag = 0;
-			[[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation source:containingDir destination:@"" files:[NSArray arrayWithObject:component] tag:&tag];
+			ret = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
 		}
 	}
 	return ret;
@@ -798,7 +841,7 @@
 	
 	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(updateCheckStatusChanged:) name:UPDATE_STATUS_NOTIFICATION object:nil];
-	CFPreferencesSetAppValue((CFStringRef)MANUAL_RUN_KEY, [NSNumber numberWithBool:YES], perianAppID);
+	[self setKey:(CFStringRef)MANUAL_RUN_KEY forAppID:perianAppID fromBool:YES];
 	CFPreferencesAppSynchronize(perianAppID);
 	OSStatus status = FSPathMakeRef((UInt8 *)[[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Resources/PerianUpdateChecker.app"] fileSystemRepresentation], &updateCheckRef, NULL);
 	if(status != noErr)
@@ -811,9 +854,9 @@
 {
 	CFStringRef key = (CFStringRef)NEXT_RUN_KEY;
 	if([button_autoUpdateCheck intValue])
-		CFPreferencesSetAppValue(key, [NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN], perianAppID);
+		[self setKey:key forAppID:perianAppID fromDate:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN]];
 	else
-		CFPreferencesSetAppValue(key, [NSDate distantFuture], perianAppID);
+		[self setKey:key forAppID:perianAppID fromDate:[NSDate distantFuture]];
     
     CFPreferencesAppSynchronize(perianAppID);
 } 
@@ -839,6 +882,15 @@
 	}
 }
 
+- (void)displayMultiChannelWarning
+{
+	NSString *multiChannelWarning = NSLocalizedString(@"<p style=\"font: 13pt Lucida Grande;\">Multi-Channel Output is not Dolby Digital Passthrough!  It is designed for those with multiple discrete speakers connected to their mac.  If you selected this expecting passthrough, you are following the wrong instructions.  Follow <a href=\"http://www.cod3r.com/2008/02/the-correct-way-to-enable-ac3-passthrough-with-quicktime/\">these</a> instead.</p>", @"");
+	NSAttributedString *multiChannelWarningAttr = [[NSAttributedString alloc] initWithHTML:[multiChannelWarning dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:nil];
+	[textField_multiChannelText setAttributedStringValue:multiChannelWarningAttr];
+	[multiChannelWarningAttr release];
+	[NSApp beginSheet:window_multiChannelSheet modalForWindow:[[self mainView] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
+}
+
 - (IBAction)set2ChannelModePopup:(id)sender;
 {
 	int selected = [popup_outputMode indexOfSelectedItem];
@@ -855,6 +907,8 @@
 			break;
 		case 3:
 			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:0];
+			if(![self getBoolFromKey:DontShowMultiChannelWarning forAppID:perianAppID withDefault:NO])
+				[self displayMultiChannelWarning];
 			break;
 		default:
 			break;
@@ -911,6 +965,14 @@
 	[NSApp endSheet:window_dynRangeSheet];
 	[self saveAC3DynamicRange:nextDynValue];
 	[window_dynRangeSheet orderOut:self];
+}
+
+- (IBAction)dismissMultiChannelSheet:(id)sender
+{
+	[NSApp endSheet:window_multiChannelSheet];
+	[self setKey:DontShowMultiChannelWarning forAppID:perianAppID fromBool:[button_multiChannelNeverShow state]];
+	[window_multiChannelSheet orderOut:self];
+	CFPreferencesAppSynchronize(perianAppID);
 }
 
 #pragma mark Subtitles

@@ -1,9 +1,21 @@
+/*
+ * ECQTComponent.m
+ * Copyright (c) 2006 Ken Aspeslagh
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 //
 //  ECQTComponent.m
 //  QTManager
 //
 //  Created by Ken on 12/15/07.
-//  Copyright 2007 __MyCompanyName__. All rights reserved.
 //
 
 #import "ECQTComponent.h"
@@ -123,7 +135,7 @@ NSMutableDictionary*	mCache = 0;
 				Handle nameData = Get1Resource(thng->componentName.resType, thng->componentName.resID);
 
 				if (firstType == 0 && singletype)
-					firstType = [singletype copy];
+					firstType = singletype;
 				
 				if (desc.componentType == 'vdig')
 					singletype = @"Camera Driver";
@@ -232,9 +244,12 @@ NSMutableDictionary*	mCache = 0;
 	
 	UseResFile(saveRes);
 
-	if (isDirectory && bundleRef && resFile >= 0)
+	if (isDirectory && bundleRef)
 	{
-		CFBundleCloseBundleResourceMap(bundleRef, resFile);
+		if (resFile >= 0)
+			CFBundleCloseBundleResourceMap(bundleRef, resFile);
+		
+		CFRelease(bundleRef);
 	}
 	else if (!isDirectory && resFile >= 0)
 	{

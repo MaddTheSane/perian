@@ -28,7 +28,7 @@
 //Global Header
 //---------------------------------------------------------------------------
 
-#define kFFusionCodecVersion		(0x00030004)
+#define kFFusionCodecVersion		(0x00030005)
 
 #define kDivX1CodecInfoResID		256
 #define kDivX2CodecInfoResID		257
@@ -50,6 +50,8 @@
 #define kFRAPSCodecInfoResID		273
 #define kSnowCodecInfoResID			274
 #define kNuvCodecInfoResID			275
+#define kIndeo2CodecInfoResID			276
+#define kIndeo3CodecInfoResID			277
 #define kTSCCCodecInfoResID			305
 #define kZMBVCodecInfoResID			307
 #define kVP6ACodecInfoResID			309

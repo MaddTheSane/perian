@@ -53,8 +53,8 @@ void inline swapFrame(AVFrame * *a, AVFrame * *b)
 // Types
 //---------------------------------------------------------------------------
 
-// 32 because that's ffmpeg's INTERNAL_BUFFER_SIZE
-#define FFUSION_MAX_BUFFERS 32
+// 64 because that's 2 * ffmpeg's INTERNAL_BUFFER_SIZE and QT sometimes uses more than 32
+#define FFUSION_MAX_BUFFERS 64
 
 typedef struct
 {
@@ -117,7 +117,6 @@ typedef struct
     AVCodec			*avCodec;
     AVCodecContext	*avContext;
     OSType			componentType;
-    char			hasy420;
 	FILE			*fileLog;
 	AVFrame			lastDisplayedFrame;
 	FFusionPacked	packedType;
@@ -129,6 +128,7 @@ typedef struct
 	FFusionData		data;
 	struct decode_glob	decode;
 	struct decode_stats stats;
+	ColorConversionFuncs colorConv;
 } FFusionGlobalsRecord, *FFusionGlobals;
 
 typedef struct
@@ -150,7 +150,7 @@ typedef struct
 // Prototypes of private subroutines
 //---------------------------------------------------------------------------
 
-static OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length);
+static OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, long width, long height, AVFrame *picture, long length);
 static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic);
 static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
 static void releaseBuffer(AVCodecContext *s, FFusionBuffer *buf);
@@ -202,7 +202,7 @@ void FFusionRunUpdateCheck()
 {
 	if (FFusionAlreadyRanUpdateCheck) return;
 
-    CFDateRef lastRunDate = CFPreferencesCopyAppValue(CFSTR("NextRunDate"), CFSTR("org.perian.Perian"));
+    CFDateRef lastRunDate = CopyPreferencesValueTyped(CFSTR("NextRunDate"), CFDateGetTypeID());
     CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
     
 	FFusionAlreadyRanUpdateCheck = 1;
@@ -232,10 +232,14 @@ void FFusionRunUpdateCheck()
         CFStringRef absLocation = CFSTR("/Library/PreferencePanes/Perian.prefPane/Contents/Resources/PerianUpdateChecker.app");
         if(CFStringGetFileSystemRepresentation(absLocation, fileRep, 1024))
             if(FSPathMakeRef((UInt8 *)fileRep, updateCheckRef, NULL) != noErr)
-                return;  //We have failed
+                goto err;  //We have failed
     }
 	pthread_t thread;
 	pthread_create(&thread, NULL, launchUpdateChecker, updateCheckRef);
+	
+	return;
+err:
+	free(updateCheckRef);
 }
 
 static void RecomputeMaxCounts(FFusionGlobals glob)
@@ -289,7 +293,11 @@ static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avct
     tmpContext.codec_tag = avctx->codec_tag;
     
     avcodec_open(&tmpContext, codec);
-    avcodec_decode_video(&tmpContext, &tmpFrame, &got_picture, (UInt8*)data, bufferSize);
+	AVPacket pkt;
+	av_init_packet(&pkt);
+	pkt.data = (UInt8*)data;
+	pkt.size = bufferSize;
+    avcodec_decode_video2(&tmpContext, &tmpFrame, &got_picture, &pkt);
     pix_fmt = tmpContext.pix_fmt;
     avcodec_close(&tmpContext);
     
@@ -315,15 +323,6 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 {
     ComponentResult err;
     ComponentDescription descout;
-    ComponentDescription cd;
-    Component c = 0;
-    long bitfield;
-	
-    cd.componentType = 'imdc';
-    cd.componentSubType = 'y420';
-    cd.componentManufacturer = 0;
-    cd.componentFlags = 0;
-    cd.componentFlagsMask = 0;
     
     GetComponentInfo((Component)self, &descout, 0, 0, 0);
 	
@@ -338,7 +337,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
     }
     else
     {
-		CFStringRef pathToLogFile = CFPreferencesCopyAppValue(CFSTR("DebugLogFile"), CFSTR("org.perian.Perian"));
+		CFStringRef pathToLogFile = CopyPreferencesValueTyped(CFSTR("DebugLogFile"), CFStringGetTypeID());
 		char path[PATH_MAX];
         SetComponentInstanceStorage(self, (Handle)glob);
 
@@ -347,7 +346,6 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         glob->drawBandUPP = NULL;
         glob->pixelTypes = NewHandle(10 * sizeof(OSType));
         glob->avCodec = 0;
-        glob->hasy420 = 0;
         glob->componentType = descout.componentSubType;
 		glob->packedType = PACKED_ALL_IN_FIRST_FRAME;  //Unless we have reason to believe otherwise.
 		glob->data.frames = NULL;
@@ -358,23 +356,6 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 			glob->fileLog = fopen(path, "a");
 		}
 		glob->shouldUseReturnedFrame = 0;
-
-//        c = FindNextComponent(c, &cd);
-		
-        if (c != 0)
-        {            
-            Gestalt(gestaltSystemVersion, &bitfield);
-            
-            if (bitfield >= 0x1010)
-            {
-  //              Codecprintf(glob->fileLog, "Use speedy y420 component\n");
-                glob->hasy420 = 1;
-            }
-        }
-        else
-        {
-  //          Codecprintf(glob->fileLog, "Use slow y420 component\n");
-        }
 		
         // Open and target an instance of the base decompressor as we delegate
         // most of our calls to the base decompressor instance
@@ -391,7 +372,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 		
 		// we allocate some space for copying the frame data since we need some padding at the end
 		// for ffmpeg's optimized bitstream readers. Size doesn't really matter, it'll grow if need be
-		FFusionDataSetup(&(glob->data), 256, 64*1024);
+		FFusionDataSetup(&(glob->data), 256, 1024*1024);
         FFusionRunUpdateCheck();
     }
     
@@ -509,7 +490,7 @@ pascal ComponentResult FFusionCodecGetMPWorkFunction(FFusionGlobals glob, Compon
 
 pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodecDecompressCapabilities *cap)
 {
-	Boolean doExperimentalFlags = CFPreferencesGetAppBooleanValue(CFSTR("ExperimentalQTFlags"), CFSTR("org.perian.Perian"), NULL);
+	Boolean doExperimentalFlags = CFPreferencesGetAppBooleanValue(CFSTR("ExperimentalQTFlags"), PERIAN_PREF_DOMAIN, NULL);
 	
     // Secifies the size of the ImageSubCodecDecompressRecord structure
     // and say we can support asyncronous decompression
@@ -532,6 +513,20 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 	}
 	
     return noErr;
+}
+
+static inline int shouldDecode(FFusionGlobals glob, enum CodecID codecID)
+{
+	FFusionDecodeAbilities decode = FFUSION_PREFER_DECODE;
+	if (glob->componentType == 'avc1')
+		decode = ffusionIsParsedVideoDecodable(glob->begin.parser);
+	if(decode > FFUSION_CANNOT_DECODE && 
+	   (codecID == CODEC_ID_H264 || codecID == CODEC_ID_MPEG4) && CFPreferencesGetAppBooleanValue(CFSTR("PreferAppleCodecs"), PERIAN_PREF_DOMAIN, NULL))
+		decode = FFUSION_PREFER_NOT_DECODE;
+	if(decode > FFUSION_CANNOT_DECODE)
+		if(forcePerianToDecode())
+			decode = FFUSION_PREFER_DECODE;
+	return decode > FFUSION_PREFER_NOT_DECODE;
 }
 
 //-----------------------------------------------------------------
@@ -719,6 +714,17 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				codecID = CODEC_ID_VP6A;
 				break;
 				
+			case 'RT21':
+				codecID = CODEC_ID_INDEO2;
+				break;
+				
+			case 'IV31':
+			case 'IV32':
+			case 'iv31':
+			case 'iv32':
+				codecID = CODEC_ID_INDEO3;
+				break;
+				
             default:
 				Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
         }
@@ -742,7 +748,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         
         glob->avContext->width = (**p->imageDescription).width;
         glob->avContext->height = (**p->imageDescription).height;
-		glob->avContext->bits_per_sample = (**p->imageDescription).depth;
+		glob->avContext->bits_per_coded_sample = (**p->imageDescription).depth;
 		
         // We also pass the FourCC since it allows the H263 hybrid decoder
         // to make the difference between the various flavours of DivX
@@ -803,9 +809,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		if (glob->fileLog)
 			ffusionLogDebugInfo(glob->begin.parser, glob->fileLog);
 		
-		// XXX: at the moment ffmpeg can't handle interlaced H.264 right
-		// specifically PAFF + spatial prediction
-		if (glob->componentType == 'avc1' && !ffusionIsParsedVideoDecodable(glob->begin.parser))
+		if (!shouldDecode(glob, codecID))
 			err = featureUnsupported;
 		
 		// some hooks into ffmpeg's buffer allocation to get frames in 
@@ -816,6 +820,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		
 		// multi-slice decoding
 		SetupMultithreadedDecoding(glob->avContext, codecID);
+		
+		//fast flag
+		if (CFPreferencesGetAppBooleanValue(CFSTR("UseFastDecode"), PERIAN_PREF_DOMAIN, NULL))
+			glob->avContext->flags2 |= CODEC_FLAG2_FAST;
 		
         // Finally we open the avcodec 
         
@@ -857,43 +865,26 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
     capabilities->wantedPixelSize = 0;
     
-    // Type of pixels used in output
-    // If QuickTime got the y420 component it is cool
-    // since libavcodec ouputs y420
-    // If not we'll do some king of conversion to 2vuy
-    
     HLock(glob->pixelTypes);
     pos = *((OSType **)glob->pixelTypes);
     
     index = 0;
 	
 	if (!err) {
-	switch (glob->avContext->pix_fmt)
-	{
-		case PIX_FMT_BGR24:
-			pos[index++] = k24RGBPixelFormat;
-			break;
-		case PIX_FMT_RGB32:
-			pos[index++] = k32ARGBPixelFormat;
-			break;
-		case PIX_FMT_RGB24:
-			pos[index++] = k24RGBPixelFormat;
-			break;
-		case PIX_FMT_YUVA420P:
-			pos[index++] = k4444YpCbCrA8PixelFormat;
-			break;
-		case PIX_FMT_YUV420P:
-		default:
-			if (glob->hasy420)
-			{
-				pos[index++] = 'y420';
-			}
-			else
-			{
-				pos[index++] = k2vuyPixelFormat;        
-			}
-			break;
-	}
+		OSType qtPixFmt = ColorConversionDstForPixFmt(glob->avContext->pix_fmt);
+		
+		/*
+		 an error here means either
+		 1) a color converter for this format isn't implemented
+		 2) we know QT doesn't like this format and will give us argb 32bit instead
+		 
+		 in the case of 2 we have to special-case bail right here, since errors
+		 in BeginBand are ignored
+		 */
+		if (qtPixFmt)
+			pos[index++] = qtPixFmt;
+		else
+			err = featureUnsupported;
 	}
     
     pos[index++] = 0;
@@ -911,6 +902,31 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 	capabilities->flags |= codecCanAsync | codecCanAsyncWhen;
 	
 	FFusionDebugPrint("%p Preflight requesting colorspace '%s'. (error %d)\n", glob, FourCCString(pos[0]), err);
+	
+	Boolean keyExists = FALSE;
+	int loopFilterSkip = CFPreferencesGetAppIntegerValue(CFSTR("SkipLoopFilter"), PERIAN_PREF_DOMAIN, &keyExists);
+	if(keyExists)
+	{
+		enum AVDiscard loopFilterValue = AVDISCARD_DEFAULT;
+		switch (loopFilterSkip) {
+			case 1:
+				loopFilterValue = AVDISCARD_NONREF;
+				break;
+			case 2:
+				loopFilterValue = AVDISCARD_BIDIR;
+				break;
+			case 3:
+				loopFilterValue = AVDISCARD_NONKEY;
+				break;
+			case 4:
+				loopFilterValue = AVDISCARD_ALL;
+				break;
+			default:
+				break;
+		}
+		glob->avContext->skip_loop_filter = loopFilterValue;
+		FFusionDebugPrint("%p Preflight set skip loop filter to %d", glob, loopFilterValue);
+	}
 	
     return err;
 }
@@ -945,7 +961,6 @@ static int qtTypeForFrameInfo(int original, int fftype, int skippable)
 
 pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompressParams *p, ImageSubCodecDecompressRecord *drp, long flags)
 {	
-    long offsetH, offsetV;
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
 	int redisplayFirstFrame = 0;
 	int type = 0;
@@ -963,10 +978,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     KeyMap		currentKeyMap;
     int			userPreference; */
     ///////
-	
-    offsetH = (long)(p->dstRect.left - p->dstPixMap.bounds.left) * (long)(p->dstPixMap.pixelSize >> 3);
-    offsetV = (long)(p->dstRect.top - p->dstPixMap.bounds.top) * (long)drp->rowBytes;
-    
+
     myDrp->width = (**p->imageDescription).width;
     myDrp->height = (**p->imageDescription).height;
     myDrp->depth = (**p->imageDescription).depth;
@@ -979,8 +991,12 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	FFusionDebugPrint("%p BeginBand #%d. (%sdecoded, packed %d)\n", glob, p->frameNumber, not(myDrp->decoded), glob->packedType);
 	
 	if (!glob->avContext) {
-		fprintf(stderr, "Perian Codec: QT tried to call BeginBand without preflighting!\n");
+		Codecprintf(glob->fileLog, "Perian: QT tried to call BeginBand without preflighting!\n");
 		return internalComponentErr;
+	}
+	
+	if (p->frameNumber == 0 && myDrp->pixelFormat != ColorConversionDstForPixFmt(glob->avContext->pix_fmt)) {
+		Codecprintf(glob->fileLog, "QT gave us unwanted pixelFormat %s (%08x), this will not work\n", FourCCString(myDrp->pixelFormat), myDrp->pixelFormat);
 	}
 	
 	if(myDrp->decoded)
@@ -1009,9 +1025,6 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 				drp->frameType = qtTypeForFrameInfo(drp->frameType, myDrp->frameData->type, myDrp->frameData->skippabble);
 				myDrp->frameNumber = p->frameNumber;
 				myDrp->GOPStartFrameNumber = glob->begin.lastIFrame;
-				frameData->hold = 0;
-				if(frameData->prereqFrame)
-					frameData->prereqFrame->hold = 1;
 				return noErr;
 			}
 		}
@@ -1019,7 +1032,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 		{
 			/* Reset context, safe marking in such a case */
 			glob->begin.lastFrameType = FF_I_TYPE;
-			glob->data.unparsedFrames.dataSize = 0;
+			FFusionDataReadUnparsed(&(glob->data));
 			glob->begin.lastPFrameData = NULL;
 			redisplayFirstFrame = 1;
 		}
@@ -1064,8 +1077,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 				/* Seems to be switching back to packed in one frame; switch back*/
 				glob->packedType = PACKED_ALL_IN_FIRST_FRAME;
 			
-			if(FFusionCreateDataBuffer(&(glob->data), (uint8_t *)drp->codecData, parsedBufSize))
-				myDrp->frameData = FFusionDataAppend(&(glob->data), parsedBufSize, type);
+			myDrp->frameData = FFusionDataAppend(&(glob->data), buffer, parsedBufSize, type);
 			if(type != FF_I_TYPE)
 				myDrp->frameData->prereqFrame = glob->begin.lastPFrameData;
 			if(glob->packedType == PACKED_DELAY_BY_ONE_FRAME)
@@ -1110,8 +1122,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 						/* Mark the next P or I frame, predictive decoding */
 						glob->begin.lastPFrameData->nextFrame = myDrp->frameData;
 					glob->begin.lastPFrameData = myDrp->frameData;
-					if(FFusionCreateDataBuffer(&(glob->data), buffer, parsedBufSize))
-						myDrp->frameData = FFusionDataAppend(&(glob->data), parsedBufSize, type);
+					myDrp->frameData = FFusionDataAppend(&(glob->data), buffer, parsedBufSize, type);
 					myDrp->frameData->prereqFrame = glob->begin.lastPFrameData;
 					buffer += parsedBufSize;
 					bufferSize -= parsedBufSize;
@@ -1119,10 +1130,10 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 				if(bufferSize > 0)
 					FFusionDataSetUnparsed(&(glob->data), buffer, bufferSize);
 				else
-					glob->data.unparsedFrames.dataSize = 0;
+					FFusionDataReadUnparsed(&(glob->data));
 			}
 			else
-				glob->data.unparsedFrames.dataSize = 0;
+				FFusionDataReadUnparsed(&(glob->data));
 			myDrp->bufferSize = 0;
 		}
 		else
@@ -1152,18 +1163,18 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     return noErr;
 }
 
-static OSErr PrereqDecompress(FFusionGlobals glob, FrameData *prereq, AVCodecContext *context, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture)
+static OSErr PrereqDecompress(FFusionGlobals glob, FrameData *prereq, AVCodecContext *context, long width, long height, AVFrame *picture)
 {
 	FFusionDebugPrint("%p prereq-decompressing frame #%d.\n", glob, prereq->frameNumber);
 	
 	FrameData *preprereq = FrameDataCheckPrereq(prereq);
 	if(preprereq)
-		PrereqDecompress(glob, preprereq, context, dataProc, width, height, picture);
+		PrereqDecompress(glob, preprereq, context, width, height, picture);
 	
 	unsigned char *dataPtr = (unsigned char *)prereq->buffer;
 	int dataSize = prereq->dataSize;
 	
-	OSErr err = FFusionDecompress(glob, context, dataPtr, dataProc, width, height, picture, dataSize);
+	OSErr err = FFusionDecompress(glob, context, dataPtr, width, height, picture, dataSize);
 	
 	return err;
 }
@@ -1178,8 +1189,6 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	glob->stats.type[drp->frameType].decode_calls++;
 	RecomputeMaxCounts(glob);
 	FFusionDebugPrint("%p DecodeBand #%d qtType %d. (packed %d)\n", glob, myDrp->frameNumber, drp->frameType, glob->packedType);
-
-	avcodec_get_frame_defaults(&tempFrame);
 	
 	// QuickTime will drop H.264 frames when necessary if a sample dependency table exists
 	// we don't want to flush buffers in that case.
@@ -1213,7 +1222,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 		else
 #endif
 			glob->decode.futureBuffer = NULL;
-		FFusionDataMarkRead(&(glob->data), myDrp->frameData);
+		FFusionDataMarkRead(myDrp->frameData);
 		glob->decode.lastFrame = myDrp->frameNumber;
 		return err;
 	}
@@ -1229,7 +1238,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 		
 		if(prereq)
 		{
-			err = PrereqDecompress(glob, prereq, glob->avContext, NULL, myDrp->width, myDrp->height, &tempFrame);
+			PrereqDecompress(glob, prereq, glob->avContext, myDrp->width, myDrp->height, &tempFrame);
 			if(tempFrame.data[0] != NULL)
 			{
 				glob->decode.futureBuffer = (FFusionBuffer *)tempFrame.opaque;
@@ -1244,13 +1253,10 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	{
 		/* data is already set up properly for us */
 		dataSize = myDrp->bufferSize;
-		FFusionCreateDataBuffer(&(glob->data), (uint8_t *)drp->codecData, dataSize);
-		dataPtr = glob->data.buffer;
+		dataPtr = FFusionCreateEntireDataBuffer(&(glob->data), (uint8_t *)drp->codecData, dataSize);
 	}
-	ICMDataProcRecordPtr dataProc = drp->dataProcRecord.dataProc ? &drp->dataProcRecord : NULL;
 		
-	avcodec_get_frame_defaults(&tempFrame);
-	err = FFusionDecompress(glob, glob->avContext, dataPtr, dataProc, myDrp->width, myDrp->height, &tempFrame, dataSize);
+	err = FFusionDecompress(glob, glob->avContext, dataPtr, myDrp->width, myDrp->height, &tempFrame, dataSize);
 			
 	if (glob->packedType == PACKED_QUICKTIME_KNOWS_ORDER) {
 		myDrp->buffer = &glob->buffers[glob->lastAllocatedBuffer];
@@ -1273,7 +1279,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	myDrp->decoded = true;
 	if (myDrp->buffer) myDrp->buffer->returnedFrame = tempFrame;
 	
-	FFusionDataMarkRead(&(glob->data), frameData);
+	FFusionDataMarkRead(frameData);
 	
 	return err;
 }
@@ -1304,16 +1310,17 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 {
     OSErr err = noErr;
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
-	int i, j;
+	AVFrame *picture;
 	
 	glob->stats.type[drp->frameType].draw_calls++;
 	RecomputeMaxCounts(glob);
 	FFusionDebugPrint("%p DrawBand #%d. (%sdecoded)\n", glob, myDrp->frameNumber, not(myDrp->decoded));
 	
-	if(!myDrp->decoded)
+	if(!myDrp->decoded) {
 		err = FFusionCodecDecodeBand(glob, drp, 0);
-	
-	AVFrame *picture;
+
+		if (err) goto err;
+	}
 	
 	if (myDrp->buffer)
 	{
@@ -1329,65 +1336,33 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 			picture = &myDrp->buffer->returnedFrame;
 		else if(glob->lastDisplayedFrame.data[0] != NULL)
 			//Display last frame
-			picture = &(glob->lastDisplayedFrame);
-		else
-		{ 
-			//Can't display anything so put up a black frame
-			Ptr addr = drp->baseAddr; 
-			for(i=0; i<myDrp->height; i++) 
-			{ 
-				for(j=0; j<myDrp->width*2; j+=2) 
-				{ 
-					addr[j] = 0x80; 
-					addr[j+1] = 0x10; 
-					addr[j+2] = 0x80; 
-					addr[j+3] = 0x10; 
-				} 
-				addr += drp->rowBytes; 
-			} 
-			return noErr; 
+			picture = &glob->lastDisplayedFrame;
+		else {
+			//Display black (no frame decoded yet)
+
+			if (!glob->colorConv.clear) {
+				err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, NULL, myDrp->pixelFormat);
+				if (err) goto err;
+			}
+			
+			glob->colorConv.clear((UInt8*)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height);
+			return noErr;
 		}
 	}
 	else
 	{
-		memcpy(&(glob->lastDisplayedFrame), picture, sizeof(AVFrame));
+		if (myDrp->buffer)
+			glob->lastDisplayedFrame = *picture;
 	}
 	
-	if (myDrp->pixelFormat == 'y420' && glob->avContext->pix_fmt == PIX_FMT_YUV420P)
-	{
-		FastY420((UInt8 *)drp->baseAddr, picture);
-	}
-	else if (myDrp->pixelFormat == k2vuyPixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUV420P)
-	{
-		Y420toY422((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else if (myDrp->pixelFormat == k24RGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_BGR24)
-	{
-		BGR24toRGB24((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else if (myDrp->pixelFormat == k32ARGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_RGB32)
-	{
-		RGB32toRGB32((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else if (myDrp->pixelFormat == k24RGBPixelFormat && glob->avContext->pix_fmt == PIX_FMT_RGB24)
-	{
-		RGB24toRGB24((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else if (myDrp->pixelFormat == k2vuyPixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUV422P)
-	{
-		Y422toY422((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else if (myDrp->pixelFormat == k4444YpCbCrA8PixelFormat && glob->avContext->pix_fmt == PIX_FMT_YUVA420P)
-	{
-		YA420toV408((UInt8 *)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height, picture);
-	}
-	else
-	{
-		Codecprintf(glob->fileLog, "Unsupported conversion from PIX_FMT %d to %c%c%c%c (%08x) buffer\n",
-					glob->avContext->pix_fmt, myDrp->pixelFormat >> 24 & 0xff, myDrp->pixelFormat >> 16 & 0xff, 
-					myDrp->pixelFormat >> 8 & 0xff, myDrp->pixelFormat & 0xff, myDrp->pixelFormat);
+	if (!glob->colorConv.convert) {
+		err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, picture, myDrp->pixelFormat);
+		if (err) goto err;
 	}
 	
+	glob->colorConv.convert(picture, (UInt8*)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height);
+	
+err:
     return err;
 }
 
@@ -1416,7 +1391,7 @@ pascal ComponentResult FFusionCodecEndBand(FFusionGlobals glob, ImageSubCodecDec
 	FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
 	glob->stats.type[drp->frameType].end_calls++;
 	FFusionBuffer *buf = myDrp->buffer;
-	if(buf)
+	if(buf && buf->frame)
 		releaseBuffer(glob->avContext, buf);
 	
 	FFusionDebugPrint("%p EndBand #%d.\n", glob, myDrp->frameNumber);
@@ -1558,6 +1533,17 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
             case 'UMP4':
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX4CodecInfoResID, (Handle *)&tempCodecInfo);
                 break;
+				
+            case 'IV31':	// Indeo 3
+            case 'IV32':
+            case 'iv31':
+            case 'iv32':
+                err = GetComponentResource((Component)glob->self, codecInfoResourceType, kIndeo3CodecInfoResID, (Handle *)&tempCodecInfo);
+                break;
+				
+            case 'RT21':	// Indeo 2
+                err = GetComponentResource((Component)glob->self, codecInfoResourceType, kIndeo2CodecInfoResID, (Handle *)&tempCodecInfo);
+                break;
                 
             case 'DX50':
                 err = GetComponentResource((Component)glob->self, codecInfoResourceType, kDivX5CodecInfoResID, (Handle *)&tempCodecInfo);
@@ -1681,9 +1667,6 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
     return err;
 }
 
-#define kSpoolChunkSize (16384)
-#define kInfiniteDataSize (0x7fffffff)
-
 static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic)
 {
 	FFusionGlobals glob = s->opaque;
@@ -1715,6 +1698,7 @@ static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic)
 	if(buf->ffmpegUsing)
 	{
 		buf->ffmpegUsing = 0;
+		avcodec_default_release_buffer(s, buf->frame);
 		releaseBuffer(s, buf);
 	}
 }
@@ -1732,10 +1716,7 @@ static void releaseBuffer(AVCodecContext *s, FFusionBuffer *buf)
 //	FFusionGlobals glob = (FFusionGlobals)s->opaque;
 //	FFusionDebugPrint("%p Released Buffer %p #%d to %d.\n", glob, buf, buf->frameNumber, buf->retainCount);
 	if(!buf->retainCount)
-	{
 		buf->returnedFrame.data[0] = NULL;
-		avcodec_default_release_buffer(s, buf->frame);
-	}
 }
 
 //-----------------------------------------------------------------
@@ -1744,45 +1725,27 @@ static void releaseBuffer(AVCodecContext *s, FFusionBuffer *buf)
 // This function calls libavcodec to decompress one frame.
 //-----------------------------------------------------------------
 
-OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, ICMDataProcRecordPtr dataProc, long width, long height, AVFrame *picture, long length)
+OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, long width, long height, AVFrame *picture, long length)
 {
     OSErr err = noErr;
     int got_picture = false;
     int len = 0;
-    long availableData = dataProc ? codecMinimumDataSize : kInfiniteDataSize;
 	
 	FFusionDebugPrint("%p Decompress %d bytes.\n", glob, length);
-    picture->data[0] = 0;
+    avcodec_get_frame_defaults(picture);
 	
-    while (!got_picture && length != 0) 
-    {
-        if (availableData < kSpoolChunkSize) 
-        {
-            // get some more source data
-            
-            err = InvokeICMDataUPP((Ptr *)&dataPtr, length, dataProc->dataRefCon, dataProc->dataProc);
-			
-            if (err == eofErr) err = noErr;
-            if (err) return err;
-			
-            availableData = codecMinimumDataSize;
-        }
-		
-        len = avcodec_decode_video(context, picture, &got_picture, dataPtr, length);
-		
-        if (len < 0)
-        {            
-            got_picture = 0;
-			Codecprintf(glob->fileLog, "Error while decoding frame\n");
-            
-            return noErr;
-        }
-        
-        availableData -= len;
-        dataPtr += len;
-		length -= len;
-    }
-    return err;
+	AVPacket pkt;
+	av_init_packet(&pkt);
+	pkt.data = dataPtr;
+	pkt.size = length;
+	len = avcodec_decode_video2(context, picture, &got_picture, &pkt);
+	
+	if (len < 0)
+	{            
+		Codecprintf(glob->fileLog, "Error while decoding frame\n");
+	} 
+	
+	return err;
 }
 
 static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID)

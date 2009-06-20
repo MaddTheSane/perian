@@ -1,10 +1,23 @@
-//
-//  SubImport.m
-//  SSARender2
-//
-//  Created by Alexander Strange on 7/24/07.
-//  Copyright 2007 __MyCompanyName__. All rights reserved.
-//
+/*
+ * SubImport.mm
+ * Created by Alexander Strange on 7/24/07.
+ *
+ * This file is part of Perian.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <QuickTime/QuickTime.h>
 #include "CommonUtils.h"
@@ -15,6 +28,10 @@
 #import "SubUtilities.h"
 
 //#define SS_DEBUG
+
+extern "C" {
+	int ExtractVobSubPacket(UInt8 *dest, const UInt8 *framedSrc, int srcSize, int *usedSrcBytes);
+}
 
 #pragma mark C
 
@@ -63,6 +80,8 @@ short GetFilenameLanguage(CFStringRef filename)
 	return lang;
 }
 
+//Use ugly transparency ("transparent" blend mode) for files imported in Front Row
+//At the moment it doesn't support graphicsModePreBlackAlpha
 static bool ShouldEngageFrontRowHack(void)
 {
 	bool ret;
@@ -72,7 +91,8 @@ static bool ShouldEngageFrontRowHack(void)
 	NSString *applicationName = [[NSProcessInfo processInfo] processName];
 	long minorVersion;
 	Gestalt(gestaltSystemVersionMinor, &minorVersion);
-	CFPreferencesGetAppBooleanValue(CFSTR("PerianFrontRowSubtitleHack"),CFSTR("org.perian.Perian"),&isSet);
+	if (!CFPreferencesGetAppBooleanValue(CFSTR("PerianFrontRowSubtitleHack"),CFSTR("org.perian.Perian"),&isSet))
+		isSet = 1;
 	
 	ret = (minorVersion == 5) && [applicationName isEqualToString:@"Front Row"] && isSet;
 	[pool release];
@@ -145,45 +165,50 @@ static NSString *MatroskaPacketizeLine(NSDictionary *sub, int n)
 		[sub objectForKey:@"Text"]];
 }
 
-static unsigned ParseSSATime(NSString *time)
+static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign)
 {
-	unsigned hour, minute, second, millisecond;
+	unsigned hour, minute, second, subsecond, timeval;
+	char separator;
+	int sign = 1;
 	
-	sscanf([time UTF8String],"%u:%u:%u.%u",&hour,&minute,&second,&millisecond);
+	if (hasSign && *time == '-') {
+		sign = -1;
+		time++;
+	}
 	
-	return hour * 100 * 60 * 60 + minute * 100 * 60 + second * 100 + millisecond;
+	if (sscanf(time,"%u:%u:%u%[,.:]%u",&hour,&minute,&second,&separator,&subsecond) < 5)
+		return 0;
+	
+	timeval = hour * 60 * 60 + minute * 60 + second;
+	timeval = secondScale * timeval + subsecond;
+	
+	return timeval * sign;
 }
 
-static NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
+NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
 {
-	NSString *nssSub = STLoadFileWithUnknownEncoding(path);
+	NSString *ssa = STLoadFileWithUnknownEncoding(path);
 	
-	if (!nssSub) return nil;
-	
-	size_t slen = [nssSub length], flen = sizeof(unichar) * (slen+1);
-	unichar *subdata = (unichar*)malloc(flen);
-	[nssSub getCharacters:subdata];
-	
-	if (subdata[slen-1] != '\n') subdata[slen++] = '\n'; // append newline if missing
+	if (!ssa) return nil;
 	
 	NSDictionary *headers;
 	NSArray *subs;
 	
-	SubParseSSAFile(subdata, slen, &headers, NULL, &subs);
-	free(subdata);
+	SubParseSSAFile(ssa, &headers, NULL, &subs);
 	
 	int i, numlines = [subs count];
 	
 	for (i = 0; i < numlines; i++) {
 		NSDictionary *sub = [subs objectAtIndex:i];
 		SubLine *sl = [[SubLine alloc] initWithLine:MatroskaPacketizeLine(sub, i) 
-											  start:ParseSSATime([sub objectForKey:@"Start"]) end:ParseSSATime([sub objectForKey:@"End"])];
+											  start:ParseSubTime([[sub objectForKey:@"Start"] UTF8String],100,NO)
+												end:ParseSubTime([[sub objectForKey:@"End"] UTF8String],100,NO)];
 		
 		[ss addLine:sl];
 		[sl autorelease];
 	}
 		
-	return [nssSub substringToIndex:[nssSub rangeOfString:@"[Events]" options:NSLiteralSearch].location];
+	return [ssa substringToIndex:[ssa rangeOfString:@"[Events]" options:NSLiteralSearch].location];
 }
 
 #pragma mark SAMI Parsing
@@ -200,7 +225,6 @@ static void LoadSRTFromPath(NSString *path, SubSerializer *ss)
 	NSString *res=nil;
 	[sc setCharactersToBeSkipped:nil];
 	
-	int h, m, s, ms;
 	unsigned startTime=0, endTime=0;
 	
 	enum {
@@ -219,16 +243,13 @@ static void LoadSRTFromPath(NSString *path, SubSerializer *ss)
 					[sc setScanLocation:[sc scanLocation]+1];
 				break;
 			case TIMESTAMP:
-				[sc scanInt:&h];  [sc scanString:@":" intoString:nil];
-				[sc scanInt:&m];  [sc scanString:@":" intoString:nil];				
-				[sc scanInt:&s];  [sc scanString:@"," intoString:nil];				
-				[sc scanInt:&ms]; [sc scanString:@" --> " intoString:nil];
-				startTime = ms + s*1000 + m*1000*60 + h*1000*60*60;
-				[sc scanInt:&h];  [sc scanString:@":" intoString:nil];
-				[sc scanInt:&m];  [sc scanString:@":" intoString:nil];				
-				[sc scanInt:&s];  [sc scanString:@"," intoString:nil];				
-				[sc scanInt:&ms]; [sc scanString:@"\n" intoString:nil];	
-				endTime = ms + s*1000 + m*1000*60 + h*1000*60*60;
+				[sc scanUpToString:@" --> " intoString:&res];
+				[sc scanString:@" --> " intoString:nil];
+				startTime = ParseSubTime([res UTF8String], 1000, NO);
+				
+				[sc scanUpToString:@"\n" intoString:&res];
+				[sc scanString:@"\n" intoString:nil];
+				endTime = ParseSubTime([res UTF8String], 1000, NO);
 				state = LINES;
 				break;
 			case LINES:
@@ -647,9 +668,390 @@ bail:
 	return err;
 }
 
+#pragma mark IDX Parsing
+
+static NSString *getNextVobSubLine(NSEnumerator *lineEnum)
+{
+	NSString *line;
+	while ((line = [lineEnum nextObject]) != nil) {
+		//Reject empty lines which may contain whitespace
+		if([line length] < 3)
+			continue;
+		
+		if([line characterAtIndex:0] == '#')
+			continue;
+		
+		break;
+	}
+	return line;
+}
+
+static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHandle *imgDescHand, Handle dataRef, OSType dataRefType, VobSubTrack *track)
+{
+	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
+	*imgDescHand = imgDesc;
+	(*imgDesc)->idSize = sizeof(ImageDescription);
+	(*imgDesc)->cType = kSubFormatVobSub;
+	(*imgDesc)->frameCount = 1;
+	(*imgDesc)->depth = 32;
+	(*imgDesc)->clutID = -1;
+	Fixed trackWidth = IntToFixed(movieBox.right - movieBox.left);
+	Fixed trackHeight = IntToFixed(movieBox.bottom - movieBox.top);
+	(*imgDesc)->width = FixedToInt(trackWidth);
+	(*imgDesc)->height = FixedToInt(trackHeight);
+	Track theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
+	if(theTrack == NULL)
+		return NULL;
+	
+	Media theMedia = NewTrackMedia(theTrack, VideoMediaType, 1000, dataRef, dataRefType);
+	if(theMedia == NULL)
+	{
+		DisposeMovieTrack(theTrack);
+		return NULL;
+	}
+	MediaHandler mh = GetMediaHandler(theMedia);
+	MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
+	SetTrackLayer(theTrack, -1);
+	
+	Handle imgDescExt = NewHandle([track->privateData length]);
+	memcpy(*imgDescExt, [track->privateData bytes], [track->privateData length]);
+	
+	AddImageDescriptionExtension(imgDesc, imgDescExt, kVobSubIdxExtension);
+	DisposeHandle(imgDescExt);
+	
+	return theMedia;
+}
+
+static Boolean ReadPacketTimes(uint8_t *packet, uint32_t length, uint16_t *startTime, uint16_t *endTime, uint8_t *forced) {
+	// to set whether the key sequences 0x01 - 0x02 have been seen
+	Boolean loop = TRUE;
+	*startTime = *endTime = 0;
+	*forced = 0;
+
+	int controlOffset = (packet[2] << 8) + packet[3];
+	while(loop)
+	{	
+		if(controlOffset > length)
+			return NO;
+		uint8_t *controlSeq = packet + controlOffset;
+		int32_t i = 4;
+		int32_t end = length - controlOffset;
+		uint16_t timestamp = (controlSeq[0] << 8) | controlSeq[1];
+		uint16_t nextOffset = (controlSeq[2] << 8) + controlSeq[3];
+		while (i < end) {
+			switch (controlSeq[i]) {
+				case 0x00:
+					*forced = 1;
+					i++;
+					break;
+					
+				case 0x01:
+					*startTime = (timestamp << 10) / 90;
+					i++;
+					break;
+				
+				case 0x02:
+					*endTime = (timestamp << 10) / 90;
+					i++;
+					loop = false;
+					break;
+					
+				case 0x03:
+					// palette info, we don't care
+					i += 3;
+					break;
+					
+				case 0x04:
+					// alpha info, we don't care
+					i += 3;
+					break;
+					
+				case 0x05:
+					// coordinates of image, ffmpeg takes care of this
+					i += 7;
+					break;
+					
+				case 0x06:
+					// offset of the first graphic line, and second, ffmpeg takes care of this
+					i += 5;
+					break;
+					
+				case 0xff:
+					// end of control sequence
+					if(controlOffset == nextOffset)
+						loop = false;
+					controlOffset = nextOffset;
+					i = INT_MAX;
+					break;
+					
+				default:
+					Codecprintf(NULL, " !! Unknown control sequence 0x%02x  aborting (offset %x)\n", controlSeq[i], i);
+					return NO;
+					break;
+			}
+		}
+		if(i != INT_MAX)
+		{
+			//End of packet
+			loop = false;
+		}
+	}
+	return YES;
+}
+
+typedef struct {
+	Movie theMovie;
+	OSType dataRefType;
+	Handle dataRef;
+	int imageWidth;
+	int imageHeight;
+	Rect movieBox;
+	NSData *subFileData;
+} VobSubInfo;
+
+static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onlyForced, Track *theTrack, uint8_t *hasForcedSubtitles)
+{
+	ImageDescriptionHandle imgDesc;
+	Media trackMedia = createVobSubMedia(info.theMovie, info.movieBox, &imgDesc, info.dataRef, info.dataRefType, track);
+	if(info.imageWidth != 0)
+	{
+		(*imgDesc)->width = info.imageWidth;
+		(*imgDesc)->height = info.imageHeight;
+	}
+	
+	int sampleCount = [track->samples count];
+	int totalSamples = 0;
+	SampleReference64Ptr samples = (SampleReference64Ptr)calloc(sampleCount*2, sizeof(SampleReference64Record));
+	SampleReference64Ptr sample = samples;
+	int i;
+	uint32_t lastTime = 0;
+	VobSubSample *firstSample = nil;
+	for(i=0; i<sampleCount; i++)
+	{
+		VobSubSample *currentSample = [track->samples objectAtIndex:i];
+		int offset = currentSample->fileOffset;
+		int nextOffset;
+		if(i == sampleCount - 1)
+			nextOffset = [info.subFileData length];
+		else
+			nextOffset = ((VobSubSample *)[track->samples objectAtIndex:i+1])->fileOffset;
+		int size = nextOffset - offset;
+		if(size < 0)
+			//Skip samples for which we cannot determine size
+			continue;
+		
+		NSData *subData = [info.subFileData subdataWithRange:NSMakeRange(offset, size)];
+		uint8_t *extracted = (uint8_t *)malloc(size);
+		int extractedSize = ExtractVobSubPacket(extracted, (const UInt8 *)[subData bytes], size, &size);
+		
+		uint16_t startTimestamp, endTimestamp;
+		uint8_t forced;
+		if(!ReadPacketTimes(extracted, extractedSize, &startTimestamp, &endTimestamp, &forced))
+			continue;
+		if(onlyForced && !forced)
+			continue;
+		if(forced)
+			*hasForcedSubtitles = forced;
+		free(extracted);
+		uint32_t startTime = currentSample->timeStamp + startTimestamp;
+		uint32_t endTime = currentSample->timeStamp + endTimestamp;
+		int duration = endTimestamp - startTimestamp;
+		if(duration <= 0)
+			//Skip samples which are broken
+			continue;
+		if(firstSample == nil)
+		{
+			currentSample->timeStamp = startTime;
+			firstSample = currentSample;
+		}
+		else if(lastTime != startTime)
+		{
+			//insert a sample with no real data, to clear the subs
+			memset(sample, 0, sizeof(SampleReference64Record));
+			sample->durationPerSample = startTime - lastTime;
+			sample->numberOfSamples = 1;
+			sample->dataSize = 1;
+			totalSamples++;
+			sample++;
+		}
+		
+		sample->dataOffset.hi = 0;
+		sample->dataOffset.lo = offset;
+		sample->dataSize = size;
+		sample->sampleFlags = 0;
+		sample->durationPerSample = duration;
+		sample->numberOfSamples = 1;
+		lastTime = endTime;
+		totalSamples++;
+		sample++;
+	}
+	AddMediaSampleReferences64(trackMedia, (SampleDescriptionHandle)imgDesc, totalSamples, samples, NULL);
+	free(samples);
+	NSString *langStr = track->language;
+	int lang = langUnspecified;
+	if([langStr length] == 3)
+	{
+		char langCStr[4] = "";
+		
+		CFStringGetCString((CFStringRef)langStr, langCStr, 4, kCFStringEncodingASCII);
+		lang = ISO639_2ToQTLangCode(langCStr);
+	}
+	else if([langStr length] == 2)
+	{
+		char langCStr[3] = "";
+		
+		CFStringGetCString((CFStringRef)langStr, langCStr, 3, kCFStringEncodingASCII);
+		lang = ISO639_1ToQTLangCode(langCStr);				
+	}
+	SetMediaLanguage(trackMedia, lang);
+	
+	TimeValue mediaDuration = GetMediaDuration(trackMedia);
+	TimeValue movieTimeScale = GetMovieTimeScale(info.theMovie);
+	*theTrack = GetMediaTrack(trackMedia);
+	if(firstSample == nil)
+		firstSample = [track->samples objectAtIndex:0];
+	return InsertMediaIntoTrack(*theTrack, (firstSample->timeStamp * movieTimeScale)/1000, 0, mediaDuration, fixed1);
+}
+
+typedef enum {
+	VOB_SUB_STATE_READING_PRIVATE,
+	VOB_SUB_STATE_READING_TRACK_HEADER,
+	VOB_SUB_STATE_READING_DELAY,
+	VOB_SUB_STATE_READING_TRACK_DATA
+} VobSubState;
+
 static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	UInt8 path[PATH_MAX];
+	
+	FSRefMakePath(theDirectory, path, PATH_MAX);
+	NSString *nsPath = [[NSString stringWithUTF8String:(char *)path] stringByAppendingPathComponent:(NSString *)filename];
+	NSString *idxContent = [NSString stringWithContentsOfFile:nsPath];
+	NSData *privateData = nil;
 	ComponentResult err = noErr;
+	
+	VobSubState state = VOB_SUB_STATE_READING_PRIVATE;
+	VobSubTrack *currentTrack = nil;
+	int imageWidth = 0, imageHeight = 0;
+	long delay=0;
+
+	NSString *subFileName = [[nsPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sub"];
+
+	if([[NSFileManager defaultManager] fileExistsAtPath:subFileName] && [idxContent length]) {
+	int subFileSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:subFileName traverseLink:NO] objectForKey:NSFileSize] intValue];
+	
+	NSArray *lines = [idxContent componentsSeparatedByString:@"\n"];
+	NSMutableArray *privateLines = [NSMutableArray array];
+	NSEnumerator *lineEnum = [lines objectEnumerator];
+	NSString *line;
+	Rect movieBox;
+	GetMovieBox(theMovie, &movieBox);
+	
+	NSMutableArray *tracks = [NSMutableArray array];
+	
+	while((line = getNextVobSubLine(lineEnum)) != NULL)
+	{
+		if([line hasPrefix:@"timestamp: "])
+			state = VOB_SUB_STATE_READING_TRACK_DATA;
+		else if([line hasPrefix:@"id: "])
+		{
+			if(privateData == nil)
+			{
+				NSString *allLines = [privateLines componentsJoinedByString:@"\n"];
+				privateData = [allLines dataUsingEncoding:NSUTF8StringEncoding];
+			}
+			state = VOB_SUB_STATE_READING_TRACK_HEADER;
+		}
+		else if([line hasPrefix:@"delay: "])
+			state = VOB_SUB_STATE_READING_DELAY;
+		else if(state != VOB_SUB_STATE_READING_PRIVATE)
+			state = VOB_SUB_STATE_READING_TRACK_HEADER;
+		
+		switch(state)
+		{
+			case VOB_SUB_STATE_READING_PRIVATE:
+				[privateLines addObject:line];
+				if([line hasPrefix:@"size: "])
+				{
+					sscanf([line UTF8String], "size: %dx%d", &imageWidth, &imageHeight);
+				}
+				break;
+			case VOB_SUB_STATE_READING_TRACK_HEADER:
+				if([line hasPrefix:@"id: "])
+				{
+					char *langStr = (char *)malloc([line length]);
+					int index;
+					sscanf([line UTF8String], "id: %s index: %d", langStr, &index);
+					int langLength = strlen(langStr);
+					if(langLength > 0 && langStr[langLength-1] == ',')
+						langStr[langLength-1] = 0;
+					NSString *language = [NSString stringWithUTF8String:langStr];
+					
+					currentTrack = [[VobSubTrack alloc] initWithPrivateData:privateData language:language andIndex:index];
+					[tracks addObject:currentTrack];
+					[currentTrack release];
+				}
+				break;
+			case VOB_SUB_STATE_READING_DELAY:
+				delay = ParseSubTime([[line substringFromIndex:7] UTF8String], 1000, YES);
+				break;
+			case VOB_SUB_STATE_READING_TRACK_DATA:
+			{
+				char *timeStr = (char *)malloc([line length]);
+				unsigned int position;
+				sscanf([line UTF8String], "timestamp: %s filepos: %x", timeStr, &position);
+				long time = ParseSubTime(timeStr, 1000, YES);
+				free(timeStr);
+				if(position > subFileSize)
+					position = subFileSize;
+				[currentTrack addSampleTime:time + delay offset:position];
+			}
+				break;
+		}
+	}
+		
+	if([tracks count])
+	{
+		OSType dataRefType;
+		Handle dataRef = NULL;
+		
+		NSData *subFileData = [NSData dataWithContentsOfMappedFile:subFileName];
+		FSRef subFile;
+		FSPathMakeRef((const UInt8 *)[subFileName fileSystemRepresentation], &subFile, NULL);
+		FSSpec theFile;
+		FSGetCatalogInfo(&subFile, kFSCatInfoNone, NULL, NULL, &theFile, NULL);
+		
+		if((err = QTNewDataReferenceFromFSSpec(&theFile, 0, &dataRef, &dataRefType)) != noErr)
+			goto bail;
+		
+		NSEnumerator *trackEnum = [tracks objectEnumerator];
+		VobSubTrack *track = nil;
+		while((track = [trackEnum nextObject]) != nil)
+		{
+			Track theTrack;
+			VobSubInfo info = {theMovie, dataRefType, dataRef, imageWidth, imageHeight, movieBox, subFileData};
+			uint8_t hasForced = 0;
+			err = loadTrackIntoMovie(track, info, 0, &theTrack, &hasForced);
+			if(hasForced)
+			{
+				Track forcedTrack;
+				err = loadTrackIntoMovie(track, info, 1, &forcedTrack, &hasForced);
+				if(*firstSubTrack == NULL)
+					*firstSubTrack = forcedTrack;
+				else
+					SetTrackAlternate(*firstSubTrack, forcedTrack);
+			}
+			
+			if (*firstSubTrack == NULL)
+				*firstSubTrack = theTrack;
+			else
+				SetTrackAlternate(*firstSubTrack, theTrack);
+		}
+	}
+	}
+bail:
+	[pool release];
 	
 	return err;
 }
@@ -791,11 +1193,9 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 {
 	if (self = [super init]) {
 		lines = [[NSMutableArray alloc] init];
-		outpackets = [[NSMutableArray alloc] init];
 		finished = NO;
-		write_gap = NO;
-		toReturn = nil;
-		last_time = 0;
+		last_begin_time = last_end_time = 0;
+		linesInput = 0;
 	}
 	
 	return self;
@@ -803,24 +1203,20 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 
 -(void)dealloc
 {
-	[outpackets release];
 	[lines release];
 	[super dealloc];
 }
 
--(void)addLine:(SubLine *)sline
+static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, void *unused)
 {
-	if (sline->begin_time < sline->end_time)
-		[lines addObject:sline];
-}
-
-static int cmp_line(id a, id b, void* unused)
-{			
-	SubLine *av = (SubLine*)a, *bv = (SubLine*)b;
+	SubLine *al = (SubLine*)a, *bl = (SubLine*)b;
 	
-	if (av->begin_time > bv->begin_time) return NSOrderedDescending;
-	if (av->begin_time < bv->begin_time) return NSOrderedAscending;
-	return NSOrderedSame;
+	if (al->begin_time > bl->begin_time) return kCFCompareGreaterThan;
+	if (al->begin_time < bl->begin_time) return kCFCompareLessThan;
+	
+	if (al->no > bl->no) return kCFCompareGreaterThan;
+	if (al->no < bl->no) return kCFCompareLessThan;
+	return kCFCompareEqualTo;
 }
 
 static int cmp_uint(const void *a, const void *b)
@@ -832,186 +1228,121 @@ static int cmp_uint(const void *a, const void *b)
 	return 0;
 }
 
-static bool isinrange(unsigned base, unsigned test_s, unsigned test_e)
+-(void)addLine:(SubLine *)line
 {
-	return (base >= test_s) && (base < test_e);
+	if (line->begin_time >= line->end_time) {
+		if (line->begin_time)
+			Codecprintf(NULL, "Invalid times (%d and %d) for line \"%s\"", line->begin_time, line->end_time, [line->line UTF8String]);
+		return;
+	}
+	
+	line->no = linesInput++;
+	
+	int nlines = [lines count];
+	
+	if (!nlines || line->begin_time > ((SubLine*)[lines objectAtIndex:nlines-1])->begin_time) {
+		[lines addObject:line];
+	} else {
+		CFIndex i = CFArrayBSearchValues((CFArrayRef)lines, CFRangeMake(0, nlines), line, CompareLinesByBeginTime, NULL);
+		
+		if (i >= nlines)
+			[lines addObject:line];
+		else
+			[lines insertObject:line atIndex:i];
+	}
+	
 }
 
--(void)refill
+-(SubLine*)getNextRealSerializedPacket
 {
-	unsigned num = [lines count];
-	unsigned min_allowed = finished ? 1 : 2;
-	if (num < min_allowed) return;
-	unsigned times[num*2], last_last_end = 0;
-	SubLine *slines[num], *last=nil;
-	bool last_has_invalid_end = false;
-	
-	[lines sortUsingFunction:cmp_line context:nil];
-	[lines getObjects:slines];
-#ifdef SS_DEBUG
-	NSLog(@"pre - %@",lines);
-#endif	
-	//leave early if all subtitle lines overlap
+	int nlines = [lines count];
+	SubLine *first = [lines objectAtIndex:0];
+	int i;
+
 	if (!finished) {
-		bool all_overlap = true;
-		int i;
-		
-		for (i=0;i < num-1;i++) {
-			SubLine *c = slines[i], *n = slines[i+1];
-			if (c->end_time <= n->begin_time) {all_overlap = false; break;}
-		}
-		
-		if (all_overlap) return;
-		
-		for (i=0;i < num-1;i++) {
-			if (isinrange(slines[num-1]->begin_time, slines[i]->begin_time, slines[i]->end_time)) {
-				num = i + 1; break;
+		if (nlines > 1) {
+			unsigned maxEndTime = first->end_time;
+			
+			for (i = 1; i < nlines; i++) {
+				SubLine *l = [lines objectAtIndex:i];
+				
+				if (l->begin_time >= maxEndTime) {
+					goto canOutput;
+				}
+				
+				maxEndTime = MAX(maxEndTime, l->end_time);
 			}
 		}
+		
+		return nil;
 	}
 	
-	for (int i=0;i < num;i++) {
-		times[i*2]   = slines[i]->begin_time;
-		times[i*2+1] = slines[i]->end_time;
+canOutput:
+	NSMutableString *str = [NSMutableString stringWithString:first->line];
+	unsigned begin_time = last_end_time, end_time = first->end_time;
+	int deleted = 0;
+		
+	for (i = 1; i < nlines; i++) {
+		SubLine *l = [lines objectAtIndex:i];
+		if (l->begin_time >= end_time) break;
+		
+		//shorten packet end time if another shorter time (begin or end) is found
+		//as long as it isn't the begin time
+		end_time = MIN(end_time, l->end_time);
+		if (l->begin_time > begin_time)
+			end_time = MIN(end_time, l->begin_time);
+		
+		if (l->begin_time <= begin_time)
+			[str appendString:l->line];
 	}
 	
-	qsort(times, num*2, sizeof(unsigned), cmp_uint);
-	
-	for (int i=0;i < num*2; i++) {
-		if (i > 0 && times[i-1] == times[i]) continue;
-		NSMutableString *accum = nil;
-		unsigned start = times[i], last_end = start, next_start=times[num*2-1], end = start;
-		bool finishedOutput = false, is_last_line = false;
+	for (i = 0; i < nlines; i++) {
+		SubLine *l = [lines objectAtIndex:i - deleted];
 		
-		// Add on packets until we find one that marks it ending (by starting later)
-		// ...except if we know this is the last input packet from the stream, then we have to explicitly flush it
-		if (finished && (times[i] == slines[num-1]->begin_time || times[i] == slines[num-1]->end_time)) finishedOutput = is_last_line = true;
-		
-		for (int j=0; j < num; j++) {
-			if (isinrange(times[i], slines[j]->begin_time, slines[j]->end_time)) {
-				
-				// find the next line that starts after this one
-				if (j != num-1) {
-					unsigned ns = slines[j]->end_time;
-					for (int h = j; h < num; h++) if (slines[h]->begin_time != slines[j]->begin_time) {ns = slines[h]->begin_time; break;}
-						next_start = MIN(next_start, ns);
-				} else next_start = slines[j]->end_time;
-				
-				last_end = MAX(slines[j]->end_time, last_end);
-				if (accum) [accum appendString:slines[j]->line]; else accum = [[slines[j]->line mutableCopy] autorelease];
-			} else if (j == num-1) finishedOutput = true;
-		}
-		
-		if (accum && finishedOutput) {
-			[accum deleteCharactersInRange:NSMakeRange([accum length] - 1, 1)]; // delete last newline
-#ifdef SS_DEBUG
-			NSLog(@"%d - %d %d",start,last_end,next_start);	
-#endif
-			if (last_has_invalid_end) {
-				if (last_end < next_start) { 
-					int j, set;
-					for (j=i; j >= 0; j--) if (times[j] == last->begin_time) break;
-					set = times[j+1];
-					last->end_time = set;
-				} else last->end_time = MIN(last_last_end,start); 
-			}
-			end = last_end;
-			last_has_invalid_end = false;
-			if (last_end > next_start && !is_last_line) last_has_invalid_end = true;
-			SubLine *event = [[SubLine alloc] initWithLine:accum start:start end:end];
-			
-			[outpackets addObject:event];
-			
-			last_last_end = last_end;
-			last = event;
+		if (l->end_time == end_time) {
+			[lines removeObjectAtIndex:i - deleted];
+			deleted++;
 		}
 	}
 	
-	if (last_has_invalid_end) {
-		last->end_time = times[num*2 - 3]; // end time of line before last
-	}
-#ifdef SS_DEBUG
-	NSLog(@"out - %@",outpackets);
-#endif
-	
-	if (finished) [lines removeAllObjects];
-	else {
-		num = [lines count];
-		for (int i = 0; i < num-1; i++) {
-			if (isinrange(slines[num-1]->begin_time, slines[i]->begin_time, slines[i]->end_time)) break;
-			[lines removeObject:slines[i]];
-		}
-	}
-#ifdef SS_DEBUG
-	NSLog(@"post - %@",lines);
-#endif
-}
-
--(SubLine*)_getSerializedPacket
-{
-	if ([outpackets count] == 0)  {
-		[self refill];
-		if ([outpackets count] == 0) 
-			return nil;
-	}
-	
-	SubLine *sl = [outpackets objectAtIndex:0];
-	[outpackets removeObjectAtIndex:0];
-	
-	[sl autorelease];
-	return sl;
+	return [[SubLine alloc] initWithLine:str start:begin_time end:end_time];
 }
 
 -(SubLine*)getSerializedPacket
 {
-	if (!last_time) {
-		SubLine *ret = [self _getSerializedPacket];
-		if (ret) {
-			last_time = ret->end_time;
-			write_gap = YES;
-		}
-		return ret;
-	}
-	
-restart:
-	
-	if (write_gap) {
-		SubLine *next = [self _getSerializedPacket];
-		SubLine *sl;
+	int nlines = [lines count];
 
-		if (!next) return nil;
-
-		toReturn = [next retain];
-		
-		write_gap = NO;
-		
-		if (toReturn->begin_time > last_time) sl = [[SubLine alloc] initWithLine:@"\n" start:last_time end:toReturn->begin_time];
-		else goto restart;
-		
-		return [sl autorelease];
+	if (!nlines) return nil;
+	
+	SubLine *nextline = [lines objectAtIndex:0], *ret;
+	
+	if (nextline->begin_time > last_end_time) {
+		ret = [[SubLine alloc] initWithLine:@"\n" start:last_end_time end:nextline->begin_time];
 	} else {
-		SubLine *ret = toReturn;
-		last_time = ret->end_time;
-		write_gap = YES;
-		
-		toReturn = nil;
-		return [ret autorelease];
+		ret = [self getNextRealSerializedPacket];
 	}
+	
+	if (!ret) return nil;
+	
+	last_begin_time = ret->begin_time;
+	last_end_time   = ret->end_time;
+		
+	return [ret autorelease];
 }
 
--(void)setFinished:(BOOL)f
+-(void)setFinished:(BOOL)_finished
 {
-	finished = f;
+	finished = _finished;
 }
 
 -(BOOL)isEmpty
 {
-	return [lines count] == 0 && [outpackets count] == 0 && !toReturn;
+	return [lines count] == 0;
 }
 
 -(NSString*)description
 {
-	return [NSString stringWithFormat:@"i: %d o: %d finished inputting: %d",[lines count],[outpackets count],finished];
+	return [NSString stringWithFormat:@"lines left: %d finished inputting: %d",[lines count],finished];
 }
 @end
 
@@ -1023,6 +1354,7 @@ restart:
 		line = [l retain];
 		begin_time = s;
 		end_time = e;
+		no = 0;
 	}
 	
 	return self;
@@ -1036,8 +1368,62 @@ restart:
 
 -(NSString*)description
 {
-	return [NSString stringWithFormat:@"\"%@\", from %d s to %d s",line,begin_time,end_time];
+	return [NSString stringWithFormat:@"\"%@\", from %d s to %d s",[line substringToIndex:[line length]-1],begin_time,end_time];
 }
+@end
+
+@implementation VobSubSample
+
+- (id)initWithTime:(long)time offset:(long)offset
+{
+	self = [super init];
+	if(!self)
+		return self;
+	
+	timeStamp = time;
+	fileOffset = offset;
+	
+	return self;
+}
+
+@end
+
+@implementation VobSubTrack
+
+- (id)initWithPrivateData:(NSData *)idxPrivateData language:(NSString *)lang andIndex:(int)trackIndex
+{
+	self = [super init];
+	if(!self)
+		return self;
+	
+	privateData = [idxPrivateData retain];
+	language = [lang retain];
+	index = trackIndex;
+	samples = [[NSMutableArray alloc] init];
+	
+	return self;
+}
+
+- (void)dealloc
+{
+	[privateData release];
+	[language release];
+	[samples release];
+	[super dealloc];
+}
+
+- (void)addSample:(VobSubSample *)sample
+{
+	[samples addObject:sample];
+}
+
+- (void)addSampleTime:(long)time offset:(long)offset
+{
+	VobSubSample *sample = [[VobSubSample alloc] initWithTime:time offset:offset];
+	[self addSample:sample];
+	[sample release];
+}
+
 @end
 
 #pragma mark C++ Wrappers
