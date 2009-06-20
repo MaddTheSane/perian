@@ -25,7 +25,7 @@
 
 #define kManufacturer           'Peri'
 
-#define kTextSubCodecVersion    (0x00020002)
+#define kTextSubCodecVersion    (0x00020003)
 
 #define kSSASubCodecResource   250
 #define kTextSubCodecResource   252
