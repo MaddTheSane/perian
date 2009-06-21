@@ -398,6 +398,9 @@ static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vos
 		if (kAACFrequencyIndexes[i] == freq) {freq_index = i; break;}
 	}
 	
+	if (profile == 5)
+		profile = 2; // disable SBR
+	
 	if (freq_index != 15) {
 		*vosBuf++ = (profile << 3) | (freq_index >> 1);
 		*vosBuf++ = (freq_index << 7) | (channels << 3);
@@ -410,6 +413,10 @@ static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vos
 		*vosBuf++ = ((freq & 1) << 7) | (channels << 3);
 		*vosLen = 5;
 	}
+	
+	//FIXME for when SBR is supported:
+	//write the extension data here
+	//(see libavformat matroskadec.c)
 }
 
 // the esds atom creation is based off of the routines for it in ffmpeg's movenc.c
@@ -446,14 +453,19 @@ static uint8_t* putDescr(uint8_t *buffer, int tag, unsigned int size)
 //   + SL descriptor
 //    + dunno               (1 byte)
 
-uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *esdsLen, int trackID, bool audio)
+uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *esdsLen, int trackID, bool audio, bool write_version)
 {
 	int decoderSpecificInfoLen = vosLen ? descrLength(vosLen) : 0;
+	int versionLen = write_version ? 4 : 0;
 	
-	*esdsLen = descrLength(3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
+	*esdsLen = versionLen + descrLength(3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
 	uint8_t *esds = (uint8_t*)malloc(*esdsLen);
 	UInt8 *pos = (UInt8 *) esds;
-		
+	
+	// esds atom version (only needed for ImageDescription extension)
+	if (write_version)
+		pos = write_int32(pos, 0);
+	
 	// ES Descriptor
 	pos = putDescr(pos, 0x03, 3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
 	pos = write_int16(pos, EndianS16_NtoB(trackID));
@@ -507,16 +519,18 @@ static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	uint8_t *vosBuf = codecPrivate ? codecPrivate->GetBuffer() : NULL;
 	size_t esdsLen;
 	
-	if (audio && !vosBuf) {
+	// QT doesn't like most SBR setup data (5 bytes) so pretend it's LC
+	if (audio && (!vosBuf || vosLen > 2)) {
 		RecreateAACVOS(tr_entry, aacBuf, &vosLen);
 		vosBuf = aacBuf;
-	}
+	} else if (!audio && !vosBuf)
+		return NULL;
 
-	Handle esdsExt = NewHandleClear(4);
-	uint8_t *esds = CreateEsdsFromSetupData(vosBuf, vosLen, &esdsLen, trackID, audio);
+	uint8_t *esds = CreateEsdsFromSetupData(vosBuf, vosLen, &esdsLen, trackID, audio, !audio);
 	
-	PtrAndHand(esds, esdsExt, esdsLen);
-	free((char*)esds);
+	Handle esdsExt;
+	PtrToHand(esds, &esdsExt, esdsLen);
+	free(esds);
 	
 	return esdsExt;
 }
@@ -550,7 +564,7 @@ ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, SampleDescriptionHandle des
 	if (dir == kToSampleDescription) {
 		Handle esdsExt = CreateEsdsExt(tr_entry, true);
 				
-		QTSoundDescriptionSetProperty(sndDesc, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie, GetHandleSize(esdsExt) - 4, (*esdsExt) + 4);
+		QTSoundDescriptionSetProperty(sndDesc, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie, GetHandleSize(esdsExt), *esdsExt);
 		DisposeHandle((Handle) esdsExt);
 	}
 
@@ -588,42 +602,27 @@ ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription
 	Handle esdsExt = CreateEsdsExt(tr_entry, true);
 	OSStatus err = noErr;
 	
-	if (esdsExt) {
-		// the magic cookie for AAC is the esds atom
-		// but only the AAC-specific part; Apple seems to want the entire thing for this stuff
-		// so this block doesn't really do anything at the moment
-		// actually, it wants to skip the 4 byte version at the front
-		Ptr magicCookie = *esdsExt + 4;
-		ByteCount cookieSize = GetHandleSize(esdsExt) - 4, asbdSize = sizeof(*asbd), aclSize = sizeof(*acl);
-		
-		err = AudioFormatGetProperty(kAudioFormatProperty_ASBDFromESDS,
-									 cookieSize,
-									 magicCookie,
-									 &asbdSize,
-									 asbd);
-		if (err != noErr) 
-			FourCCprintf("MatroskaQT: Error creating ASBD from AAC esds", err);
-		
-		err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutFromESDS,
-									 cookieSize,
-									 magicCookie,
-									 &aclSize,
-									 acl);
-		if (err != noErr) 
-			FourCCprintf("MatroskaQT: Error creating ACL from AAC esds", err);
-		
-		DisposeHandle(esdsExt);
-	} else {
-		// if we don't have a esds atom, all we can do is get the profile of the AAC
-		// and hope there isn't a custom channel configuration 
-		// (how would we get the esds in that case?)
-		// FIXME check for codec string
-		// and OutputSamplingFrequency (for SBR)
-		
-		asbd->mFormatFlags = kMPEG4Object_AAC_LC;
-		Codecprintf(NULL, "MatroskaQT: AAC track, but no esds atom\n");
-	}
-
+	Ptr magicCookie = *esdsExt;
+	ByteCount cookieSize = GetHandleSize(esdsExt), asbdSize = sizeof(*asbd), aclSize = sizeof(*acl);
+	
+	err = AudioFormatGetProperty(kAudioFormatProperty_ASBDFromESDS,
+								 cookieSize,
+								 magicCookie,
+								 &asbdSize,
+								 asbd);
+	if (err != noErr) 
+		FourCCprintf("MatroskaQT: Error creating ASBD from AAC esds ", err);
+	
+	err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutFromESDS,
+								 cookieSize,
+								 magicCookie,
+								 &aclSize,
+								 acl);
+	if (err != noErr) 
+		FourCCprintf("MatroskaQT: Error creating ACL from AAC esds ", err);
+	
+	DisposeHandle(esdsExt);
+	
 	return err;
 }
 
