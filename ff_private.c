@@ -433,7 +433,7 @@ uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatI
 	int size = 0;
 	
 	if (formatID == kAudioFormatMPEG4AAC) {
-		return CreateEsdsFromSetupData(codec->extradata, codec->extradata_size, cookieSize, 1, true);
+		return CreateEsdsFromSetupData(codec->extradata, codec->extradata_size, cookieSize, 1, true, false);
 	}
 	
 	/* Do we need an endia atom, too? */
