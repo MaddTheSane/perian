@@ -458,6 +458,14 @@
 	[super dealloc];
 }
 
+- (void) finalize
+{
+	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
+	if(auth != nil)
+		AuthorizationFree(auth, 0);
+	[super finalize];
+}
+
 #pragma mark Install/Uninstall
 
 /* Shamelessly ripped from Sparkle */
