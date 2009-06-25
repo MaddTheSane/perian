@@ -252,7 +252,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 		videoHeight = height;
 		
 		UCCreateTextBreakLocator(NULL, 0, kUCTextBreakLineMask, &breakLocator);
-		[[SubContext alloc] initWithNonSSAType:kSubTypeSRT delegate:self];
+		context = [[SubContext alloc] initWithNonSSAType:kSubTypeSRT delegate:self];
 	}
 	
 	return self;
@@ -276,7 +276,7 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 		srgbCSpace = GetSRGBColorSpace();
 		
 		UCCreateTextBreakLocator(NULL, 0, kUCTextBreakLineMask, &breakLocator);
-		[[SubContext alloc] initWithHeaders:headers styles:styles delegate:self];
+		context = [[SubContext alloc] initWithHeaders:headers styles:styles delegate:self];
 	}
 	
 	return self;
@@ -302,9 +302,8 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 
 -(void)completedHeaderParsing:(SubContext*)sc
 {
-	context = sc;
-	screenScaleX = videoWidth / context->resX;
-	screenScaleY = videoHeight / context->resY;
+	screenScaleX = videoWidth / sc->resX;
+	screenScaleY = videoHeight / sc->resY;
 }
 
 -(float)aspectRatio
@@ -1185,7 +1184,6 @@ void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int
 
 void SubPrerollFromHeader(char *header, int headerLen)
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	SubtitleRendererPtr s = headerLen ? SubInitForSSA(header, headerLen, 640, 480)
 								      : SubInitNonSSA(640, 480);
 	/*
@@ -1212,7 +1210,6 @@ void SubPrerollFromHeader(char *header, int headerLen)
 	*/
 	
 	SubDisposeRenderer(s);
-	[pool release];
 }
 
 void SubDisposeRenderer(SubtitleRendererPtr s)

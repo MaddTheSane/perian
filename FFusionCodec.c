@@ -31,6 +31,7 @@
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
 #include <Accelerate/Accelerate.h>
+#include <sys/sysctl.h>
 
 #include "FFusionCodec.h"
 #include "EI_Image.h"
@@ -413,7 +414,7 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
 		
 		if (glob->begin.parser)
 		{
-			freeFFusionParser(glob->begin.parser);
+			ffusionParserFree(glob->begin.parser);
 		}
 		
 		if (glob->pixelTypes)

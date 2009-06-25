@@ -109,6 +109,7 @@ extern NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss);
 class CXXSubSerializer
 {
 	__strong void *priv;
+	int retainCount;
 	
 public:
 	CXXSubSerializer();

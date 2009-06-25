@@ -23,6 +23,7 @@
 #include <QuickTime/QuickTime.h>
 #include "VobSubCodec.h"
 #include "Codecprintf.h"
+#include "CommonUtils.h"
 #include <zlib.h>
 #include "avcodec.h"
 #include "intreadwrite.h"
@@ -84,6 +85,7 @@ typedef struct {
 int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes);
 static ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketControlData *controlDataOut);
 extern void initLib();
+extern void init_FFmpeg();
 
 ComponentResult VobSubCodecOpen(VobSubCodecGlobals glob, ComponentInstance self)
 {

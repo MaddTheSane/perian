@@ -102,6 +102,7 @@ FrameData *FFusionDataAppend(FFusionData *data, uint8_t *buffer, int dataSize, i
  */
 void FFusionDataSetUnparsed(FFusionData *data, uint8_t *buffer, int bufferSize);
 
+void FFusionDataReadUnparsed(FFusionData *data);
 
 /*!
  * @brief Mark a frame as no longer needed

@@ -555,9 +555,9 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 
 bail:
 	if(result == noErr)
-		storage->movieLoadState == kMovieLoadStateLoaded;
+		storage->movieLoadState = kMovieLoadStateLoaded;
 	else
-		storage->movieLoadState == kMovieLoadStateError;
+		storage->movieLoadState = kMovieLoadStateError;
 		
 	if (result == -1)
 		result = invalidMovie; // a bit better error message

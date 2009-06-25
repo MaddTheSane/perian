@@ -1432,6 +1432,7 @@ CXXSubSerializer::CXXSubSerializer()
 {
 	priv = [[SubSerializer alloc] init];
     CFRetain(priv);
+	retainCount = 1;
 }
 
 CXXSubSerializer::~CXXSubSerializer()
@@ -1471,17 +1472,16 @@ const char *CXXSubSerializer::popPacket(size_t *size, unsigned *start, unsigned 
 }
 
 void CXXSubSerializer::release()
-{
-	SubSerializer *s = (SubSerializer*)priv;
-	int r = [s retainCount];
+{	
+	retainCount--;
 	
-	if (r == 1) delete this;
-	else [s release];
+	if (!retainCount)
+		delete this;
 }
 
 void CXXSubSerializer::retain()
 {
-	[(SubSerializer*)priv retain];
+	retainCount++;
 }
 
 bool CXXSubSerializer::empty()
