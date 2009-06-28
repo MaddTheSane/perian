@@ -116,6 +116,7 @@ pascal ComponentResult TextSubCodecOpen(TextSubGlobals glob, ComponentInstance s
 	glob->drawBandUPP = NULL;
 	glob->ssa = NULL;
 	glob->colorSpace = NULL;
+	glob->translateSRT = true;
 	
 	// Open and target an instance of the base decompressor as we delegate
 	// most of our calls to the base decompressor instance
@@ -247,11 +248,7 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 	capabilities->extendHeight = 0;
 	
 	capabilities->flags |= codecCanAsync | codecCanAsyncWhen | codecCanScale;
-	capabilities->flags2 |= codecDrawsHigherQualityScaled;
-    
-	glob->colorSpace = NULL;
-	glob->translateSRT = true;
-	glob->ssa = NULL;
+	capabilities->flags2 |= codecDrawsHigherQualityScaled;    
 	
 	if (!glob->ssa) {
 		if ((**p->imageDescription).cType == kSubFormatSSA) {

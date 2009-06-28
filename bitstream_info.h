@@ -58,6 +58,7 @@ typedef enum {
 
 void initFFusionParsers();
 FFusionParserContext *ffusionParserInit(int codec_id);
+void ffusionParserFree(FFusionParserContext *parser);
 int ffusionParseExtraData(FFusionParserContext *parser, const uint8_t *buf, int buf_size);
 int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable);
 void ffusionLogDebugInfo(FFusionParserContext *parser, FILE *log);

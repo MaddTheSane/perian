@@ -406,7 +406,7 @@ int IsAltivecSupported()
 		long response = 0;
 		int err = Gestalt(gestaltPowerPCProcessorFeatures, &response);
 		
-		altivec = !err && ((response & gestaltPowerPCHasVectorInstructions) != 0);
+		altivec = !err && ((response & (1 << gestaltPowerPCHasVectorInstructions)) != 0);
 	}
 	
 	return altivec;

@@ -35,6 +35,8 @@
 #include "mpegvideo.h"
 #include "parser.h"
 #include "golomb.h"
+#include "mpeg4video_parser.h"
+#include "Codecprintf.h"
 
 #include "CodecIDs.h"
 
@@ -867,18 +869,19 @@ void initFFusionParsers()
 	}
 }
 
-void freeFFusionParser(FFusionParserContext *parser)
+void ffusionParserFree(FFusionParserContext *parser)
 {
+	AVCodecParser *avparse = parser->parserStructure->avparse;
+	
 	if(parser->pc)
 	{
-		if(parser->pc->priv_data)
-			av_free(parser->pc->priv_data);
+		if (avparse->parser_close)
+			avparse->parser_close(parser->pc);
+		av_free(parser->pc->priv_data);
 		av_free(parser->pc);
 	}
-	if(parser->avctx)
-		av_free(parser->avctx);
-	if(parser->internalContext)
-		av_free(parser->internalContext);
+	av_free(parser->avctx);
+	av_free(parser->internalContext);
 	free(parser);
 }
 
@@ -887,8 +890,7 @@ FFusionParserContext *ffusionParserInit(int codec_id)
     AVCodecParserContext *s;
     AVCodecParser *parser;
 	FFusionParser *ffParser;
-    int ret;
-	struct AVCodecContext *ctx = avcodec_alloc_context();
+    int ret, i;
 	
     if(codec_id == CODEC_ID_NONE)
         return NULL;
@@ -897,12 +899,10 @@ FFusionParserContext *ffusionParserInit(int codec_id)
 	
     for(ffParser = ffusionFirstParser; ffParser != NULL; ffParser = ffParser->next) {
 		parser = ffParser->avparse;
-        if (parser->codec_ids[0] == codec_id ||
-            parser->codec_ids[1] == codec_id ||
-            parser->codec_ids[2] == codec_id ||
-            parser->codec_ids[3] == codec_id ||
-            parser->codec_ids[4] == codec_id)
-            goto found;
+		
+		for (i = 0; i < 5; i++)
+			if (parser->codec_ids[i] == codec_id)
+				goto found;
     }
     return NULL;
 found:
@@ -927,7 +927,7 @@ found:
 	s->flags |= PARSER_FLAG_COMPLETE_FRAMES;
 	
 	FFusionParserContext *parserContext = malloc(sizeof(FFusionParserContext));
-	parserContext->avctx = ctx;
+	parserContext->avctx = avcodec_alloc_context();
 	parserContext->pc = s;
 	parserContext->parserStructure = ffParser;
 	if(ffParser->internalContextSize)

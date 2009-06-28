@@ -267,7 +267,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 		[defaultStyle retain];
 		
 	}
-	
+
 	return self;
 }
 
@@ -284,7 +284,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 
 		defaultStyle = [[SubStyle defaultStyleWithDelegate:delegate] retain];		
 	}
-	
+
 	return self;
 }
 
