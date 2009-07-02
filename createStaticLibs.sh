@@ -13,7 +13,7 @@ if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
 	buildid_ffmpeg="${buildid_ffmpeg}Dev"
 else
-    optcflags="-falign-loops=16 -fweb -fstrict-aliasing -finline-limit=1000"
+    optcflags="-falign-loops=16 -fweb -fstrict-aliasing -finline-limit=1000 -freorder-blocks"
 	buildid_ffmpeg="${buildid_ffmpeg}Dep"
 fi
 
@@ -113,6 +113,7 @@ else
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
         	optcflags="$optcflags -mtune=$x86tune -frerun-cse-after-loop" 
+        	appendcflags="-fno-unswitch-loops" #these disable things in -O3 so must be at the end
         fi
 
         cd "$BUILDDIR"
@@ -131,6 +132,9 @@ else
             unset CFLAGS;
             cd ..
         fi
+        
+        perl -pi -e "s/-O3/-O3 $appendcflags/g" config.mak
+        
         make -j3
     fi
     
