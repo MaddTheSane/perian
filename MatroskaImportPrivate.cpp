@@ -516,7 +516,6 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	asbd.mFormatID = MkvGetFourCC(&kaxTrack);
 	asbd.mSampleRate = Float64(sampleFreq);
 	asbd.mChannelsPerFrame = uint32(numChannels);
-	asbd.mFramesPerPacket = 1;		// needed for mp3 and v1 SoundDescription, maybe others
 	
 	MkvFinishAudioDescriptions(&kaxTrack, &asbd, &acl);
 	
@@ -524,6 +523,10 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
 	if(asbd.mChannelsPerFrame == 0)
 		asbd.mChannelsPerFrame = 1;		// avoid a div by zero
+	if(asbd.mFramesPerPacket == 0)
+		asbd.mFramesPerPacket = 1; //in case of PCM or broken codecs
+	                               //note: this is completely wrong, but less so than 0
+
 	
 	// FIXME mChannelLayoutTag == 0 is valid
 	// but we don't use channel position lists (yet) so it's safe for now

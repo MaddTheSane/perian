@@ -364,11 +364,11 @@ struct MatroskaQT_AACProfileName
 static const MatroskaQT_AACProfileName kMatroskaAACProfiles[] = {
 	{"A_AAC/MPEG2/MAIN", 1},
 	{"A_AAC/MPEG2/LC", 2},
-	{"A_AAC/MPEG2/LC/SBR", 5},
+	{"A_AAC/MPEG2/LC/SBR", 2},
 	{"A_AAC/MPEG2/SSR", 3},
 	{"A_AAC/MPEG4/MAIN", 1},
 	{"A_AAC/MPEG4/LC", 2},
-	{"A_AAC/MPEG4/LC/SBR", 5},
+	{"A_AAC/MPEG4/LC/SBR", 2},
 	{"A_AAC/MPEG4/SSR", 3},
 	{"A_AAC/MPEG4/LTP", 4}
 };
@@ -378,15 +378,27 @@ static const unsigned kAACFrequencyIndexes[] = {
 	11025, 8000, 7350
 };
 
+static int FindAACFreqIndex(double freq)
+{
+	unsigned ifreq = freq;
+	
+	for (int i = 0; i < sizeof(kAACFrequencyIndexes)/sizeof(unsigned); i++) {
+		if (kAACFrequencyIndexes[i] == ifreq) return i;
+	}
+	
+	return 15;
+}
+
 static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vosLen)
 {
-	unsigned char profile = 2, freq_index = 15;
 	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
 	KaxTrackAudio & audioTrack = GetChild<KaxTrackAudio>(*tr_entry);
 	KaxAudioSamplingFreq & sampleFreq = GetChild<KaxAudioSamplingFreq>(audioTrack);
 	KaxAudioChannels & numChannels = GetChild<KaxAudioChannels>(audioTrack);
-	unsigned freq = unsigned((double)sampleFreq), channels = unsigned(numChannels);
-
+	KaxAudioOutputSamplingFreq * outputFreq = FindChild<KaxAudioOutputSamplingFreq>(audioTrack);
+	unsigned channels = unsigned(numChannels);
+	unsigned profile = 2, freq_index = FindAACFreqIndex(sampleFreq);
+	uint8_t *vosStart = vosBuf;
 	string codecString(*tr_codec);
 
 	for (int i = 0; i < sizeof(kMatroskaAACProfiles)/sizeof(MatroskaQT_AACProfileName); i++) {
@@ -394,29 +406,23 @@ static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vos
 		if (strcmp(codecString.c_str(), prof->name) == 0) {profile = prof->profile; break;}
 	}
 	
-	for (int i = 0; i < sizeof(kAACFrequencyIndexes)/sizeof(unsigned); i++) {
-		if (kAACFrequencyIndexes[i] == freq) {freq_index = i; break;}
+	*vosBuf++ = (profile << 3) | (freq_index >> 1);
+	*vosBuf++ = (freq_index << 7) | (channels << 3);
+	
+	if (freq_index == 15)
+		Codecprintf(NULL, "unrecognized AAC frequency not supported\n");
+	
+	if (outputFreq) {
+		unsigned output_freq_index = FindAACFreqIndex(*outputFreq);
+		
+		//SBR extension
+		//not sure why we still use object type 2 (LC) instead of 5 (HE)
+		*vosBuf++ = 0x56;
+		*vosBuf++ = 0xE5;
+		*vosBuf++ = 0x80 | (output_freq_index << 3);
 	}
 	
-	if (profile == 5)
-		profile = 2; // disable SBR
-	
-	if (freq_index != 15) {
-		*vosBuf++ = (profile << 3) | (freq_index >> 1);
-		*vosBuf++ = (freq_index << 7) | (channels << 3);
-		*vosLen = 2;
-	} else {		
-		*vosBuf++ = (profile << 3) | (freq_index >> 1);
-		*vosBuf++ = (freq_index << 7) | (freq >> (24 - 7));
-		*vosBuf++ = (freq >> (24 - 7 - 8));
-		*vosBuf++ = (freq >> (24 - 7 - 16));
-		*vosBuf++ = ((freq & 1) << 7) | (channels << 3);
-		*vosLen = 5;
-	}
-	
-	//FIXME for when SBR is supported:
-	//write the extension data here
-	//(see libavformat matroskadec.c)
+	*vosLen = vosBuf - vosStart;
 }
 
 // the esds atom creation is based off of the routines for it in ffmpeg's movenc.c
@@ -519,13 +525,12 @@ static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	uint8_t *vosBuf = codecPrivate ? codecPrivate->GetBuffer() : NULL;
 	size_t esdsLen;
 	
-	// QT doesn't like most SBR setup data (5 bytes) so pretend it's LC
-	if (audio && (!vosBuf || vosLen > 2)) {
+	if (audio && !vosBuf) {
 		RecreateAACVOS(tr_entry, aacBuf, &vosLen);
 		vosBuf = aacBuf;
 	} else if (!audio && !vosBuf)
 		return NULL;
-
+	
 	uint8_t *esds = CreateEsdsFromSetupData(vosBuf, vosLen, &esdsLen, trackID, audio, !audio);
 	
 	Handle esdsExt;
