@@ -38,7 +38,7 @@ extern "C"
 	
 	float posX, posY;
 	UInt8 alignH, alignV, wrapStyle, render_complexity;
-	BOOL positioned;
+	BOOL positioned, shouldResetPens;
 	
 	unsigned layer;
 }

@@ -1095,7 +1095,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		NSData *ubufferData;
 		const unichar *ubuffer = STUnicodeForString(div->text, &ubufferData);
 		
-		if (div->layer != lastLayer) {
+		if (div->layer != lastLayer || div->shouldResetPens) {
 			resetPens = YES;
 			lastLayer = div->layer;
 		}
