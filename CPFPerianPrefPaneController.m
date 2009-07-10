@@ -381,7 +381,13 @@
 		/*Check for temp after an update */
 		BOOL isDir = NO;
 		NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
+	
+		//10.4 doesn't have NSInteger, but 64-bit requires it
+#ifdef __LP64__
+		NSInteger tag;
+#else
 		int tag;
+#endif
 		
 		if([[NSFileManager defaultManager] fileExistsAtPath:tempPrefPane isDirectory:&isDir] && isDir)
 			[[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation 
