@@ -24,6 +24,7 @@
 #import "SubParsing.h"
 #import "SubUtilities.h"
 #import "Codecprintf.h"
+#import "CommonUtils.h"
 
 static float GetWinFontSizeScale(ATSFontRef font);
 static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities);
@@ -253,6 +254,8 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 		
 		UCCreateTextBreakLocator(NULL, 0, kUCTextBreakLineMask, &breakLocator);
 		context = [[SubContext alloc] initWithNonSSAType:kSubTypeSRT delegate:self];
+		
+		drawTextBounds = CFPreferencesGetAppBooleanValue(CFSTR("DrawSubTextBounds"), PERIAN_PREF_DOMAIN, NULL);
 	}
 	
 	return self;
@@ -277,6 +280,8 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 		
 		UCCreateTextBreakLocator(NULL, 0, kUCTextBreakLineMask, &breakLocator);
 		context = [[SubContext alloc] initWithHeaders:headers styles:styles delegate:self];
+		
+		drawTextBounds = CFPreferencesGetAppBooleanValue(CFSTR("DrawSubTextBounds"), PERIAN_PREF_DOMAIN, NULL);
 	}
 	
 	return self;
@@ -364,10 +369,11 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 				font = fontIDs[x];
 				break;
 			}
-		}
-		
-		if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)@"Helvetica",kATSOptionFlagsDefault); // final fallback
+		}		
 	}
+	
+	if (font == kATSUInvalidFontID && ![name isEqualToString:@"Helvetica"])
+		font = GetFontIDForSSAName(@"Helvetica"); // final fallback
 	
 	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:[name lowercaseString]];
 	 
@@ -466,6 +472,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 	Fixed fixval;
 	CGColorRef color;
 	CGAffineTransform mat;
+	ATSFontRef oldFont;
 	
 #define bv() bval = *(int*)p;
 #define iv() ival = *(int*)p;
@@ -503,8 +510,10 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_fn:
 			sv();
+			oldFont = spanEx->font;
 			spanEx->fontVertical = ParseFontVerticality(&sval) ? kATSUStronglyVertical : kATSUStronglyHorizontal;
 			spanEx->font = GetFontIDForSSAName(sval);
+			if (oldFont != spanEx->font) spanEx->platformSizeScale = GetWinFontSizeScale(spanEx->font);
 			UpdateFontNameSize(spanEx, screenScaleY);
 			break;
 		case tag_fs:
@@ -599,6 +608,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 
 #pragma mark Rendering Helper Functions
 
+// XXX see comment for GetTypographicRectangleForLayout
 static ATSUTextMeasurement GetLineHeight(ATSUTextLayout layout, UniCharArrayOffset lpos)
 {
 	ATSUTextMeasurement ascent, descent;
@@ -617,6 +627,8 @@ static void ExpandCGRect(CGRect *rect, float radius)
 	rect->size.width += radius*2.;
 }
 
+// XXX some broken fonts have very wrong typographic values set, and so this occasionally gives nonsense
+// it should be checked against the real pixel box (see #if 0 below), but for correct fonts it looks much better
 static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed extraHeight, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
 {
 	ATSTrapezoid trap = {0};
@@ -652,6 +664,38 @@ static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArray
 	*width = largeRect.right - largeRect.left;
 }
 
+// Draw the text bounds on screen under the actual text
+// Note that it almost never appears where it's supposed to be, and I'm not sure if that's my fault or ATSUI's
+static void VisualizeLayoutLineHeights(CGContextRef c, ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed extraHeight, Fixed penX, Fixed penY, float screenHeight)
+{
+	ATSTrapezoid trap = {0};
+	Rect pixRect = {0};
+	ItemCount trapCount;
+	int i;
+	
+	CGContextSetLineWidth(c, 3.0);
+	
+	for (i = breakCount; i >= 0; i--) {
+		UniCharArrayOffset end = breaks[i+1];
+
+		ATSUMeasureTextImage(layout, breaks[i], end-breaks[i], 0, 0, &pixRect);
+		ATSUGetGlyphBounds(layout, 0, 0, breaks[i], end-breaks[i], kATSUseDeviceOrigins, 1, &trap, &trapCount);
+		
+		CGContextSetRGBStrokeColor(c, 1,0,0,1);
+		CGContextBeginPath(c);
+		CGContextMoveToPoint(c, FixedToFloat(penX + trap.upperLeft.x),  FixedToFloat(penY + trap.lowerLeft.y));
+		CGContextAddLineToPoint(c, FixedToFloat(penX + trap.upperRight.x),  FixedToFloat(penY + trap.lowerRight.y));
+		CGContextAddLineToPoint(c, FixedToFloat(penX + trap.lowerRight.x),  FixedToFloat(penY + trap.upperRight.y));
+		CGContextAddLineToPoint(c, FixedToFloat(penX + trap.lowerLeft.x),  FixedToFloat(penY + trap.upperLeft.y));
+		CGContextClosePath(c);
+		CGContextStrokePath(c);
+		CGContextSetRGBStrokeColor(c, 0, 0, 1, 1);
+		CGContextStrokeRect(c, CGRectMake(FixedToFloat(penX) + pixRect.left, FixedToFloat(penY) + pixRect.top, pixRect.right - pixRect.left, pixRect.bottom - pixRect.top));
+		
+		penY += GetLineHeight(layout, breaks[i]) + extraHeight;
+	}
+}
+
 #if 0
 static void GetImageBoundingBoxForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed extraHeight, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
 {
@@ -673,7 +717,7 @@ static void GetImageBoundingBoxForLayout(ATSUTextLayout layout, UniCharArrayOffs
 		largeRect.left = MIN(largeRect.left, rect.left);
 		largeRect.top = MIN(largeRect.top, rect.top);
 		largeRect.right = MAX(largeRect.right, rect.right);
-			}
+	}
 	
 	
 	if (lX) *lX = IntToFixed(largeRect.left);
@@ -1074,21 +1118,33 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		
 		breakbuffer = FindLineBreaks(layout, div, breakLocator, breakbuffer, &breakCount, breakingWidth, ubuffer, textLen);
 
-		ATSUTextMeasurement imageWidth, imageHeight;
+		ATSUTextMeasurement imageWidth, imageHeight, descent;
 		UniCharArrayOffset *breaks = breakbuffer;
-
+		
 		if (div->positioned || div->alignV == kSubAlignmentMiddle)
 			GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
-
+		
+		if (div->positioned || div->alignV == kSubAlignmentBottom)
+			ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
+		
+#if 0
+		{
+			ATSUTextMeasurement ascent, descent;
+			
+			ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineAscentTag,  sizeof(ATSUTextMeasurement), &ascent,  NULL);
+			ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
+			
+			NSLog(@"\"%@\" descent %f ascent %f\n", div->text, FixedToFloat(descent), FixedToFloat(ascent));
+		}
+#endif
+		
 		if (!div->positioned) {
 			penX = FloatToFixed(NSMinX(marginRect));
 
 			switch(div->alignV) {
 				case kSubAlignmentBottom: default:
 					if (!bottomPen || resetPens) {
-						ATSUTextMeasurement bottomLineDescent;
-						ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &bottomLineDescent, NULL);
-						penY = FloatToFixed(NSMinY(marginRect)) + bottomLineDescent;
+						penY = FloatToFixed(NSMinY(marginRect)) + descent;
 					} else penY = bottomPen;
 					
 					storePen = &bottomPen; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
@@ -1109,7 +1165,6 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 					break;
 			}
 		} else {
-			ATSUTextMeasurement descent;
 			penX = FloatToFixed(div->posX * screenScaleX);
 			penY = FloatToFixed((context->resY - div->posY) * screenScaleY);
 			
@@ -1118,8 +1173,6 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 				case kSubAlignmentRight: penX -= imageWidth;
 			}
 			
-			ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
-
 			switch (div->alignV) {
 				case kSubAlignmentMiddle: penY -= imageHeight / 2; break;
 				case kSubAlignmentTop: penY -= imageHeight; break;
@@ -1138,6 +1191,9 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 			SetATSULayoutOther(layout, kATSULineRotationTag, sizeof(Fixed), &fangle);
 		}
 		
+		if (drawTextBounds)
+			VisualizeLayoutLineHeights(c, layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), penX, penY, cHeight);
+
 		breakc.breakCount = breakCount;
 		breakc.breaks = breaks;
 		
@@ -1305,8 +1361,9 @@ typedef struct TT_OS2
 #pragma options align=reset
 
 // Windows and OS X use different TrueType fields to measure text.
-// Some Windows fonts have one field set incorrectly, so we have to compensate.
+// Some Windows fonts have one field set incorrectly(?), so we have to compensate.
 // XXX This function doesn't read from the right fonts; if we're using italic variant, it should get the ATSFontRef for that
+// XXX^2 This should be cached
 static float GetWinFontSizeScale(ATSFontRef font)
 {
 	TT_Header headTable = {0};

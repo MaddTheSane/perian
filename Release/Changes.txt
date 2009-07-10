@@ -20,6 +20,7 @@ Fixes:
 - Fixed BMP/RLE in AVI [r1078]
 - Fixed several memory leaks [r1086]
 - Fixed a problem with wrong channel order in DTS 5.1 [r1076]
+- Fixed possible conflict with UniversalDetector.framework [r1100]
 Subtitles:
 - Fixed garbage characters appearing at the end of a line with some fonts [r1013]
 - Better handling of invalid SSA files [r1013]
