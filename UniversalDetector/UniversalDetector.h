@@ -1,5 +1,6 @@
 #import <Cocoa/Cocoa.h>
 
+#define UniversalDetector SubUniversalDetector
 
 @interface UniversalDetector:NSObject
 {
