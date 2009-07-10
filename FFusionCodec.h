@@ -29,33 +29,37 @@
 //---------------------------------------------------------------------------
 
 #define kFFusionCodecVersion		(0x00030005)
-
-#define kDivX1CodecInfoResID		256
-#define kDivX2CodecInfoResID		257
-#define kDivX3CodecInfoResID		258
-#define kDivX4CodecInfoResID		259
-#define kDivX5CodecInfoResID		260
-#define k3ivxCodecInfoResID			261
-#define kXVIDCodecInfoResID			262
-#define kMPEG4CodecInfoResID		263
-#define kH264CodecInfoResID			264
-#define kFLV1CodecInfoResID			265
-#define kFlashSVCodecInfoResID		266
-#define kVP6CodecInfoResID			267
-#define kI263CodecInfoResID			268
-#define kVP3CodecInfoResID			269
-#define kHuffYUVCodecInfoResID		270
-#define kMPEG1CodecInfoResID		271
-#define kMPEG2CodecInfoResID		272
-#define kFRAPSCodecInfoResID		273
-#define kSnowCodecInfoResID			274
-#define kNuvCodecInfoResID			275
-#define kIndeo2CodecInfoResID			276
-#define kIndeo3CodecInfoResID			277
-#define kTSCCCodecInfoResID			305
-#define kZMBVCodecInfoResID			307
-#define kVP6ACodecInfoResID			309
-
 #define kFFusionCodecManufacturer	'Peri'
+
+enum {
+	kDivX1CodecInfoResID		= 256,
+	kDivX2CodecInfoResID,
+	kDivX3CodecInfoResID,
+	kDivX4CodecInfoResID,
+	kDivX5CodecInfoResID,
+	k3ivxCodecInfoResID,
+	kXVIDCodecInfoResID,
+	kMPEG4CodecInfoResID,
+	kH264CodecInfoResID,
+	kFLV1CodecInfoResID,
+	kFlashSVCodecInfoResID,
+	kVP6CodecInfoResID,
+	kI263CodecInfoResID,
+	kVP3CodecInfoResID,
+	kHuffYUVCodecInfoResID,
+	kMPEG1CodecInfoResID,
+	kMPEG2CodecInfoResID,
+	kFRAPSCodecInfoResID,
+	kSnowCodecInfoResID,
+	kNuvCodecInfoResID,
+	kIndeo2CodecInfoResID,
+	kIndeo3CodecInfoResID,
+	kTSCCCodecInfoResID,
+	kZMBVCodecInfoResID,
+	kVP6ACodecInfoResID,
+	kPERIANCODECLASTID,
+};
+
+#define kFFusionCodecCount kPERIANCODECLASTID - kDivX1CodecInfoResID
 
 #define kOptionKeyModifier		0x04

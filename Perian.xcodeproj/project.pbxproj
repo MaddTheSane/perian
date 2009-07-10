@@ -277,6 +277,7 @@
 		F53E18E50B4F483C003A0471 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53E18E40B4F483C003A0471 /* Security.framework */; };
 		F57676060BE1A18300B2434B /* FrameBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = F57676040BE1A18300B2434B /* FrameBuffer.c */; };
 		F57755F50B51EB1800C7D833 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
+		F59B2AB91007A0D000FAAAD8 /* PerianResources.r in CopyFiles */ = {isa = PBXBuildFile; fileRef = F59B2AB81007A0D000FAAAD8 /* PerianResources.r */; };
 		F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		F5CFD1C10B5000DF00616865 /* GBPerianPanePListGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */; };
 		F5CFD3B20B5013EA00616865 /* A52Codec.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D60B5012A100616865 /* A52Codec.component */; };
@@ -474,6 +475,7 @@
 			dstSubfolderSpec = 0;
 			files = (
 				F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */,
+				F59B2AB91007A0D000FAAAD8 /* PerianResources.r in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -747,6 +749,7 @@
 		F57676040BE1A18300B2434B /* FrameBuffer.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FrameBuffer.c; sourceTree = "<group>"; };
 		F57676050BE1A18300B2434B /* FrameBuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FrameBuffer.h; sourceTree = "<group>"; };
 		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
+		F59B2AB81007A0D000FAAAD8 /* PerianResources.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianResources.r; sourceTree = "<group>"; };
 		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
@@ -904,6 +907,7 @@
 				6116E54E0B43C27B0020F1CE /* FFissionCodec.r */,
 				6116E55D0B43C29F0020F1CE /* XCAResources.r */,
 				F50D440903EAD8E701B1D299 /* Images */,
+				F59B2AB81007A0D000FAAAD8 /* PerianResources.r */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
