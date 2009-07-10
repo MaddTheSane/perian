@@ -33,6 +33,7 @@ extern "C"
 	UniCharArrayOffset *breakbuffer;
 	ATSUTextLayout layout;
 	float screenScaleX, screenScaleY, videoWidth, videoHeight;
+	BOOL drawTextBounds;
 	@public;
 	CGColorSpaceRef srgbCSpace;
 	TextBreakLocatorRef breakLocator;
