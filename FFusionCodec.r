@@ -187,7 +187,7 @@
 #define kCodecManufacturer kFFusionCodecManufacturer
 
 #define kCodecInfoResID kH264CodecInfoResID
-#define kCodecName "H.264 (Perian)"
+#define kCodecName "H.264"
 #define kCodecDescription "Decompresses video stored in H.264 format."
 #define kCodecSubType 'H264'
 #include "PerianResources.r"
