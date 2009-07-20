@@ -21,7 +21,7 @@
 
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
-#include "VobSubCodec.h"
+#include "PerianResourceIDs.h"
 #include "Codecprintf.h"
 #include "CommonUtils.h"
 #include <zlib.h>
@@ -431,7 +431,7 @@ ComponentResult VobSubCodecGetCodecInfo(VobSubCodecGlobals glob, CodecInfo *info
 	} else {
 		CodecInfo **tempCodecInfo;
 
-		err = GetComponentResource((Component)glob->self, codecInfoResourceType, kVobSubCodecResource, (Handle *)&tempCodecInfo);
+		err = GetComponentResource((Component)glob->self, codecInfoResourceType, kVobSubCodecResourceID, (Handle *)&tempCodecInfo);
 		if (err == noErr) {
 			*info = **tempCodecInfo;
 			DisposeHandle((Handle)tempCodecInfo);

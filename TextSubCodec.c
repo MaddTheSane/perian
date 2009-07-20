@@ -28,7 +28,7 @@
     #include <ImageCodec.h>
 #endif
 
-#include "TextSubCodec.h"
+#include "PerianResourceIDs.h"
 #include "SubATSUIRenderer.h"
 
 // Constants
@@ -427,9 +427,9 @@ pascal ComponentResult TextSubCodecGetCodecInfo(TextSubGlobals glob, CodecInfo *
 	GetComponentInfo((Component)glob->self, &desc, 0, 0, 0);
 	
 	if (desc.componentSubType == kSubFormatSSA)
-		resid = kSSASubCodecResource;
+		resid = kSSASubCodecResourceID;
 	else
-		resid = kTextSubCodecResource;
+		resid = kTextSubCodecResourceID;
 
 	if (info == NULL) {
 		err = paramErr;

@@ -33,7 +33,7 @@
 #include <Accelerate/Accelerate.h>
 #include <sys/sysctl.h>
 
-#include "FFusionCodec.h"
+#include "PerianResourceIDs.h"
 #include "EI_Image.h"
 #include "avcodec.h"
 #include "Codecprintf.h"

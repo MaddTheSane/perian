@@ -13,6 +13,31 @@
 
 #ifdef kCodecName
 
+#ifdef AudioComponentType
+
+resource 'thga' (kCodecInfoResID) {
+	decompressorComponentType,		// Type
+	kCodecSubType,					// SubType
+	kCodecManufacturer,				// Manufacturer
+	0,								// Flags
+	0,								// Flags Mask
+	0,								// Code type
+	0,								// Code ID
+	'strn',							// Name Type
+	kCodecInfoResID,				// Name ID
+	'stri',							// Info Type
+	kCodecInfoResID,				// Info ID
+	0,								// Icon type
+	0,								// Icon ID
+    'miss',							// Alias component type
+    'base',							// Alias component subtype
+    0,								// Alias component manufacturer
+    0,								// Alias component flags
+    0,								// Alias component flags mask
+};
+
+#else  //!AudioComponentType
+
 resource 'cdci' (kCodecInfoResID) {
 	kCodecName,						// Type
 	1,								// Version
@@ -34,13 +59,13 @@ resource 'cdci' (kCodecInfoResID) {
 	0								// Private Data
 };
 
-#define kCodecNameResID kCodecCount + kCodecInfoResID
+#endif  //AudioComponentType
 
-resource 'STR ' (kCodecNameResID) {
+resource 'strn' (kCodecInfoResID) {
 	kCodecName " (Perian)"
 };
 
-resource 'STR ' (kCodecInfoResID) {
+resource 'stri' (kCodecInfoResID) {
 	kCodecDescription
 };
 
@@ -54,9 +79,9 @@ resource 'thng' (kCurrentTHNGResID) {
 	0,
 	0,
 	0,
-	'STR ',							// Name Type
-	kCodecNameResID,				// Name ID
-	'STR ',							// Info Type
+	'strn',							// Name Type
+	kCodecInfoResID,				// Name ID
+	'stri',							// Info Type
 	kCodecInfoResID,				// Info ID
 	0,								// Icon Type
 	0,								// Icon ID
@@ -67,11 +92,11 @@ resource 'thng' (kCurrentTHNGResID) {
 	{
 		kDecompressionFlags, 
 		'dlle',						// Entry point found by symbol name 'dlle' resource
-		256,						// ID of 'dlle' resource
+		kEntryPointID,				// ID of 'dlle' resource
 		platformPowerPCNativeEntryPoint,
 		kDecompressionFlags,
 		'dlle',
-		256,
+		kEntryPointID,
 		platformIA32NativeEntryPoint,
 	};
 };

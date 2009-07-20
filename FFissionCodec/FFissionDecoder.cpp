@@ -22,7 +22,7 @@
 
 #include "FFissionDecoder.h"
 #include "ACCodecDispatch.h"
-#include "FFusionCodec.h"
+#include "PerianResourceIDs.h"
 #include "Codecprintf.h"
 #include "CodecIDs.h"
 #include "dca.h"

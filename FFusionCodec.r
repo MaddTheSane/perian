@@ -46,12 +46,12 @@
 
 #define kFormatFlags ( codecInfoDepth32 | codecInfoDepth24 | codecInfoDepth16 | codecInfoDepth8 | codecInfoDepth1 )
 
-#include "FFusionCodec.h"
+#include "PerianResourceIDs.h"
 
-#define kStartTHNGResID 256
+#define kStartTHNGResID kDivX1CodecInfoResID
 #define kCodecManufacturer kFFusionCodecManufacturer
-#define kCodecCount kFFusionCodecCount
 #define kCodecVersion kFFusionCodecVersion
+#define kEntryPointID kDivX1CodecInfoResID
 
 #define kCodecInfoResID kDivX1CodecInfoResID
 #define kCodecName "MS-MPEG4 v1"
@@ -329,7 +329,7 @@
 // Code Entry Point for Mach-O
 //---------------------------------------------------------------------------
 
-resource 'dlle' (256) {
+resource 'dlle' (kDivX1CodecInfoResID) {
         "FFusionCodecComponentDispatch"
 };
 
