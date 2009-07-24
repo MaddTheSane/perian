@@ -4,6 +4,179 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.matroska.Matroska</string>
+			<key>UTTypeDescription</key>
+			<string>Matroska video</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.movie</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>mkv</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.adobe.flash-video</string>
+			<key>UTTypeDescription</key>
+			<string>Flash Video</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.movie</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>flv</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.mythtv.nuppelvideo</string>
+			<key>UTTypeDescription</key>
+			<string>NuppelVideo Movie</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.movie</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>nuv</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.true-audio.true-audio</string>
+			<key>UTTypeDescription</key>
+			<string>TrueAudio file</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.audio</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>tta</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>mkv</string>
+				<string>mka</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>video/x-matroska</string>
+				<string>audio/x-matroska</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Matroska video</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>MKV </string>
+                <string>MKA </string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.matroska</string>
+			</array>
+			<key>LSTypeIsPackage</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>flv</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>video/x-flv</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Flash Video</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>FLV </string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.adobe.flash-video</string>
+			</array>
+			<key>LSTypeIsPackage</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>nuv</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>audio/x-nuv</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>NuppelVideo Movie</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>NUV </string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.mythtv.nuppelvideo</string>
+			</array>
+			<key>LSTypeIsPackage</key>
+			<false/>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>tta</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>audio/x-tta</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>True Audio</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>TTA </string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.true-audio.true-audio</string>
+			</array>
+			<key>LSTypeIsPackage</key>
+			<false/>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>Perian</string>
 	<key>CFBundleGetInfoString</key>
@@ -13,11 +186,11 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
-	<string>BNDL</string>
+	<string>thng</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.1.4</string>
 	<key>CFBundleSignature</key>
-	<string>????</string>
+	<string>Peri</string>
 	<key>CFBundleVersion</key>
 	<string>1.1.4</string>
 	<key>CSResourcesFileMapped</key>
