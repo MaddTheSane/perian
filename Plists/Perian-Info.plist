@@ -4,17 +4,19 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
-	<key>UTExportedTypeDeclarations</key>
+	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>org.matroska.Matroska</string>
+			<string>org.perian.matroska</string>
 			<key>UTTypeDescription</key>
 			<string>Matroska video</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.movie</string>
 			</array>
+			<key>UTTypeReferenceURL</key>
+			<string>http://www.matroska.org/</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -25,13 +27,15 @@
 		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.adobe.flash-video</string>
+			<string>org.perian.flash-video</string>
 			<key>UTTypeDescription</key>
 			<string>Flash Video</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.movie</string>
 			</array>
+			<key>UTTypeReferenceURL</key>
+			<string>http://www.adobe.com/devnet/flv/</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -42,13 +46,15 @@
 		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>org.mythtv.nuppelvideo</string>
+			<string>org.perian.nuppelvideo</string>
 			<key>UTTypeDescription</key>
 			<string>NuppelVideo Movie</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.movie</string>
 			</array>
+			<key>UTTypeReferenceURL</key>
+			<string>http://www.mythtv.org/wiki/NuppelVideo</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -59,13 +65,15 @@
 		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.true-audio.true-audio</string>
+			<string>org.perian.true-audio</string>
 			<key>UTTypeDescription</key>
 			<string>TrueAudio file</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.audio</string>
 			</array>
+			<key>UTTypeReferenceURL</key>
+			<string>http://www.true-audio.com/</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -93,13 +101,13 @@
 			<key>CFBundleTypeOSTypes</key>
 			<array>
 				<string>MKV </string>
-                <string>MKA </string>
+				<string>MKA </string>
 			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>public.matroska</string>
+				<string>org.perian.matroska</string>
 			</array>
 			<key>LSTypeIsPackage</key>
 			<false/>
@@ -123,7 +131,7 @@
 			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.adobe.flash-video</string>
+				<string>org.perian.flash-video</string>
 			</array>
 			<key>LSTypeIsPackage</key>
 			<false/>
@@ -147,7 +155,7 @@
 			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>org.mythtv.nuppelvideo</string>
+				<string>org.perian.nuppelvideo</string>
 			</array>
 			<key>LSTypeIsPackage</key>
 			<false/>
@@ -171,7 +179,7 @@
 			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.true-audio.true-audio</string>
+				<string>org.perian.true-audio</string>
 			</array>
 			<key>LSTypeIsPackage</key>
 			<false/>
