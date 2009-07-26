@@ -82,7 +82,7 @@ typedef struct {
 
 
 // dest must be at least as large as src
-int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes);
+int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes, int index);
 static ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketControlData *controlDataOut);
 extern void initLib();
 extern void init_FFmpeg();
@@ -330,7 +330,7 @@ ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCodecDeco
 	// if it's raw spu data, the 1st 2 bytes are the length of the data
 	} else if (data[0] + data[1] == 0) {
 		// remove the MPEG framing
-		myDrp->bufferSize = ExtractVobSubPacket(glob->codecData, data, myDrp->bufferSize, NULL);
+		myDrp->bufferSize = ExtractVobSubPacket(glob->codecData, data, myDrp->bufferSize, NULL, -1);
 	} else {
 		memcpy(glob->codecData, drp->codecData, myDrp->bufferSize);
 	}
@@ -441,7 +441,7 @@ ComponentResult VobSubCodecGetCodecInfo(VobSubCodecGlobals glob, CodecInfo *info
 	return err;
 }
 
-int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes) {
+int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes, int index) {
 	int copiedBytes = 0;
 	UInt8 *currentPacket = framedSrc;
 	int packetSize = INT_MAX;
@@ -482,18 +482,24 @@ int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrc
 				packet_length += currentPacket[5];
 				
 				int header_data_length = currentPacket[8];
-				
-				memcpy(&dest[copiedBytes], 
-					   // header's 9 bytes + extension, we don't want 1st byte of packet
-					   &currentPacket[9 + header_data_length + 1], 
-					   // we don't want the 1-byte stream ID, or the header
-					   packet_length - 1 - (header_data_length + 3));
-				
-				if(packetSize == INT_MAX)
+				int packetIndex = currentPacket[header_data_length + 9] & 0x1f;
+				if(index == -1)
+					index = packetIndex;
+				if(index == packetIndex)
 				{
-					packetSize = dest[0] << 8 | dest[1];
+					int blockSize = packet_length - 1 - (header_data_length + 3);
+					memcpy(&dest[copiedBytes], 
+						   // header's 9 bytes + extension, we don't want 1st byte of packet
+						   &currentPacket[9 + header_data_length + 1], 
+						   // we don't want the 1-byte stream ID, or the header
+						   blockSize);
+					copiedBytes += blockSize;
+
+					if(packetSize == INT_MAX)
+					{
+						packetSize = dest[0] << 8 | dest[1];
+					}
 				}
-				copiedBytes += packet_length - 1 - (header_data_length + 3);
 				currentPacket += packet_length + 6;
 				break;
 				

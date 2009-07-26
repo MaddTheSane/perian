@@ -30,7 +30,7 @@
 //#define SS_DEBUG
 
 extern "C" {
-	int ExtractVobSubPacket(UInt8 *dest, const UInt8 *framedSrc, int srcSize, int *usedSrcBytes);
+	int ExtractVobSubPacket(UInt8 *dest, const UInt8 *framedSrc, int srcSize, int *usedSrcBytes, int index);
 }
 
 #pragma mark C
@@ -811,6 +811,10 @@ typedef struct {
 
 static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onlyForced, Track *theTrack, uint8_t *hasForcedSubtitles)
 {
+	int sampleCount = [track->samples count];
+	if(sampleCount == 0)
+		return noErr;
+	
 	ImageDescriptionHandle imgDesc;
 	Media trackMedia = createVobSubMedia(info.theMovie, info.movieBox, &imgDesc, info.dataRef, info.dataRefType, track);
 	if(info.imageWidth != 0)
@@ -819,7 +823,6 @@ static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onl
 		(*imgDesc)->height = info.imageHeight;
 	}
 	
-	int sampleCount = [track->samples count];
 	int totalSamples = 0;
 	SampleReference64Ptr samples = (SampleReference64Ptr)calloc(sampleCount*2, sizeof(SampleReference64Record));
 	SampleReference64Ptr sample = samples;
@@ -842,7 +845,8 @@ static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onl
 		
 		NSData *subData = [info.subFileData subdataWithRange:NSMakeRange(offset, size)];
 		uint8_t *extracted = (uint8_t *)malloc(size);
-		int extractedSize = ExtractVobSubPacket(extracted, (const UInt8 *)[subData bytes], size, &size);
+		//The index here likely should really be track->index, but I'm not sure we can really trust it.
+		int extractedSize = ExtractVobSubPacket(extracted, (const UInt8 *)[subData bytes], size, &size, -1);
 		
 		uint16_t startTimestamp, endTimestamp;
 		uint8_t forced;
@@ -1029,11 +1033,11 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 		VobSubTrack *track = nil;
 		while((track = [trackEnum nextObject]) != nil)
 		{
-			Track theTrack;
+			Track theTrack = NULL;
 			VobSubInfo info = {theMovie, dataRefType, dataRef, imageWidth, imageHeight, movieBox, subFileData};
 			uint8_t hasForced = 0;
 			err = loadTrackIntoMovie(track, info, 0, &theTrack, &hasForced);
-			if(hasForced)
+			if(theTrack && hasForced)
 			{
 				Track forcedTrack;
 				err = loadTrackIntoMovie(track, info, 1, &forcedTrack, &hasForced);
@@ -1045,7 +1049,7 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 			
 			if (*firstSubTrack == NULL)
 				*firstSubTrack = theTrack;
-			else
+			else if(theTrack)
 				SetTrackAlternate(*firstSubTrack, theTrack);
 		}
 	}

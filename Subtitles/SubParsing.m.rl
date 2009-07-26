@@ -358,6 +358,10 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 						div->positioned = YES;
 					}
 				}
+				
+				action origin {
+					div->shouldResetPens = YES;
+				}
 
 				intnum = ("-"? [0-9]+) >paramset %setintnum;
 				flag = [01] >paramset %setintnum;
@@ -404,7 +408,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"pos" pos %position
 							|"move" move %position
 							|"t" parens
-							|"org" parens
+							|"org" parens %origin
 							|("fad" "e"? parens)
 							|"clip" parens
 							|"p" floatnum %drawingmode
