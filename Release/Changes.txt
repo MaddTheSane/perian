@@ -32,7 +32,7 @@ Subtitles:
 - Better handling of \move and \org [r1063, r1103]
 Notes:
 - Compilation under 10.4 is no longer supported.
-- AC3Codec has been deprecated and will be replaced by an LGPL decoder in a future release.
+- A52Codec has been deprecated and will be replaced by an LGPL decoder in a future release.
 
 1.1.3
 - Enabled Indeo 2/3 decodecs
