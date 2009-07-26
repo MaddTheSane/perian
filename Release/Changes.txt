@@ -29,9 +29,10 @@ Subtitles:
 - Ignored SSA shapes and \blur instead of misparsing them [r1027, 1036]
 - Disabled vertical font support again to fix files wrongly using it for Latin text [r1027]
 - Fixed subtitles in MKV wrongly displaying at the end of a video [r1036]
-- Fixed text position with \move [r1063]
-
-Compilation under 10.4 is no longer supported.
+- Better handling of \move and \org [r1063,r1103]
+Notes:
+- Compilation under 10.4 is no longer supported.
+- AC3Codec has been deprecated and will be replaced by an LGPL decoder in a future release.
 
 1.1.3
 - Enabled Indeo 2/3 decodecs
