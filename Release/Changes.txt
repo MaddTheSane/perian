@@ -6,9 +6,9 @@ Features:
 - 10.6-compatible preference pane [r1085]
 Fixes:
 - Fixed "Load External Subtitles" checkbox [r998]
-- Fixed crash/freeze when loading broken VobSub subtitles [r1000, 1034]
+- Fixed crash/freeze when loading broken VobSub subtitles [r1000, r1034]
 - Fixed import of uncompressed audio in FLV [r1007]
-- Fixed import of some audio tracks; should improve iApps [r1042,r1088]
+- Fixed import of some audio tracks; should improve iApps [r1042, r1088]
 - Fixed CRAM codec AVI in browsers [r1010]
 - Worked around bug in iChat codec loading [r1008]
 - Never allows Apple's code to handle AC3 data anymore so passthrough works more often [r1014]
@@ -26,10 +26,10 @@ Subtitles:
 - Better handling of invalid SSA files [r1013]
 - Fixed rendering of multi-layer subtitles [r1016]
 - Fixed SRT files using ',' for decimals [r1019]
-- Ignored SSA shapes and \blur instead of misparsing them [r1027, 1036]
+- Ignored SSA shapes and \blur instead of misparsing them [r1027, r1036]
 - Disabled vertical font support again to fix files wrongly using it for Latin text [r1027]
 - Fixed subtitles in MKV wrongly displaying at the end of a video [r1036]
-- Better handling of \move and \org [r1063,r1103]
+- Better handling of \move and \org [r1063, r1103]
 Notes:
 - Compilation under 10.4 is no longer supported.
 - AC3Codec has been deprecated and will be replaced by an LGPL decoder in a future release.
