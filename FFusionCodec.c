@@ -42,6 +42,7 @@
 #include "FrameBuffer.h"
 #include "CommonUtils.h"
 #include "pthread.h"
+#include "CodecIDs.h"
 
 void inline swapFrame(AVFrame * *a, AVFrame * *b)
 {
@@ -560,175 +561,23 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 	
     if (!glob->avCodec)
     {
-		enum CodecID codecID = CODEC_ID_MPEG4;
-		
 		init_FFmpeg();
 		initFFusionParsers();
+
+		OSType componentType = glob->componentType;
+		enum CodecID codecID = getCodecID(componentType);
 		
-        switch (glob->componentType)
-        {
-            case 'MPG4':	// MS-MPEG4 v1
-            case 'mpg4':
-            case 'DIV1':
-            case 'div1':
-                codecID = CODEC_ID_MSMPEG4V1;
-				break;
-				
-            case 'MP42':	// MS-MPEG4 v2
-            case 'mp42':
-            case 'DIV2':
-            case 'div2':
-                codecID = CODEC_ID_MSMPEG4V2;
-				break;
-				
-            case 'div6':	// DivX 3
-            case 'DIV6':
-            case 'div5':
-            case 'DIV5':
-            case 'div4':
-            case 'DIV4':
-            case 'div3':
-            case 'DIV3':
-            case 'MP43':
-            case 'mp43':
-            case 'MPG3':
-            case 'mpg3':
-            case 'AP41':
-            case 'COL0':
-            case 'col0':
-            case 'COL1':
-            case 'col1':
-            case '3IVD':	// 3ivx
-            case '3ivd':
-                codecID = CODEC_ID_MSMPEG4V3;
-				break;
-				
-			case 'mp4v':	// MPEG4 part 2 in mov/mp4
-				glob->packedType = PACKED_QUICKTIME_KNOWS_ORDER;
-            case 'divx':	// DivX 4
-            case 'DIVX':
-            case 'mp4s':
-            case 'MP4S':
-            case 'm4s2':
-            case 'M4S2':
-            case 0x04000000:
-            case 'UMP4':
-            case 'DX50':	// DivX 5
-            case 'XVID':	// XVID
-            case 'xvid':
-            case 'XviD':
-            case 'XVIX':
-            case 'BLZ0':
-            case '3IV2':	// 3ivx
-            case '3iv2':
-			case 'RMP4':	// Miscellaneous
-			case 'SEDG':
-			case 'WV1F':
-			case 'FMP4':
-			case 'SMP4':
-                codecID = CODEC_ID_MPEG4;
-				break;
+		if(componentType == 'mp4v' || componentType == 'avc1')
+			glob->packedType = PACKED_QUICKTIME_KNOWS_ORDER;
+		
+		else if(componentType == 'VP30' || componentType == 'VP31')
+			glob->shouldUseReturnedFrame = TRUE;
 
-			case 'avc1':	// H.264 in mov/mp4/mkv
-				glob->packedType = PACKED_QUICKTIME_KNOWS_ORDER;
-			case 'H264':	// H.264 in AVI
-			case 'h264':
-			case 'X264':
-			case 'x264':
-			case 'AVC1':
-			case 'DAVC':
-			case 'VSSH':
-				codecID = CODEC_ID_H264;
-				break;
-
-			case 'FLV1':
-				codecID = CODEC_ID_FLV1;
-				break;
-
-			case 'FSV1':
-				codecID = CODEC_ID_FLASHSV;
-				break;
-
-			case 'VP60':
-			case 'VP61':
-			case 'VP62':
-				codecID = CODEC_ID_VP6;
-				break;
-
-			case 'VP6F':
-			case 'FLV4':
-				codecID = CODEC_ID_VP6F;
-				break;
-
-			case 'I263':
-			case 'i263':
-				codecID = CODEC_ID_H263I;
-				break;
-
-			case 'VP30':
-			case 'VP31':
-				glob->shouldUseReturnedFrame = TRUE;
-				codecID = CODEC_ID_VP3;
-				break;
-				
-			case 'HFYU':
-				codecID = CODEC_ID_HUFFYUV;
-				break;
-
-			case 'FFVH':
-				codecID = CODEC_ID_FFVHUFF;
-				break;
-				
-			case 'MPEG':
-			case 'mpg1':
-			case 'mp1v':
-				codecID = CODEC_ID_MPEG1VIDEO;
-				break;
-				
-			case 'MPG2':
-			case 'mpg2':
-			case 'mp2v':
-				codecID = CODEC_ID_MPEG2VIDEO;
-				break;
-				
-			case 'FPS1':
-				codecID = CODEC_ID_FRAPS;
-				break;
-				
-			case 'SNOW':
-				codecID = CODEC_ID_SNOW;
-				break;
-
-            case 'RJPG':
-            case 'NUV1':
-                codecID = CODEC_ID_NUV;
-                break;
-			case 'tscc':
-				codecID = CODEC_ID_TSCC;
-				break;
-				
-			case 'ZMBV':
-				codecID = CODEC_ID_ZMBV;
-				break;
-				
-			case 'VP6A':
-				codecID = CODEC_ID_VP6A;
-				break;
-				
-			case 'RT21':
-				codecID = CODEC_ID_INDEO2;
-				break;
-				
-			case 'IV31':
-			case 'IV32':
-			case 'iv31':
-			case 'iv32':
-				codecID = CODEC_ID_INDEO3;
-				break;
-				
-            default:
-				Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
-        }
+		if(codecID == CODEC_ID_NONE)
+		{
+			Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
+			codecID = CODEC_ID_MPEG4;
+		}
 		
 		glob->avCodec = avcodec_find_decoder(codecID);
 //		if(glob->packedType != PACKED_QUICKTIME_KNOWS_ORDER)

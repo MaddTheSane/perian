@@ -1,0 +1,3 @@
+#!/bin/sh
+
+m4 "${SCRIPT_INPUT_FILE_0}" > "${SCRIPT_OUTPUT_FILE_0}"

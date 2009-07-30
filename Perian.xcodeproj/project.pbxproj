@@ -110,7 +110,6 @@
 		11C85ED80A641E6400DF3D73 /* ff_dataref.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED30A641E6400DF3D73 /* ff_dataref.c */; };
 		11C85EDA0A641E6400DF3D73 /* ff_private.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED60A641E6400DF3D73 /* ff_private.c */; };
 		11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */; };
-		11C85FE60A64314500DF3D73 /* FFusionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = F560DF0203D622D001ABA332 /* FFusionCodec.r */; };
 		11F28DAD0B52EB75000AF78C /* SUUpdateAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */; };
 		3D0A03BD100692E20087E580 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
 		3D0A03BE100692E30087E580 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
@@ -150,15 +149,12 @@
 		6116E5530B43C27B0020F1CE /* ACSimpleCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E53E0B43C27B0020F1CE /* ACSimpleCodec.cpp */; };
 		6116E5570B43C27B0020F1CE /* CAStreamBasicDescription.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5490B43C27B0020F1CE /* CAStreamBasicDescription.cpp */; };
 		6116E5580B43C27B0020F1CE /* FFissionCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */; };
-		6116E5590B43C27B0020F1CE /* FFissionCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = 6116E54E0B43C27B0020F1CE /* FFissionCodec.r */; };
 		6116E55A0B43C27B0020F1CE /* FFissionDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */; };
 		6116E61C0B44A5A70020F1CE /* GetCodecBundle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5400B43C27B0020F1CE /* GetCodecBundle.cpp */; };
 		6116E6200B44A5B30020F1CE /* CADebugMacros.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5460B43C27B0020F1CE /* CADebugMacros.cpp */; };
 		6116E6220B44A5BC0020F1CE /* CABundleLocker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5430B43C27B0020F1CE /* CABundleLocker.cpp */; };
 		6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */; };
-		6123D6270AD0A3FF003EDE52 /* VobSubCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = 6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */; };
 		613CD51E0AD1FB650098A825 /* TextSubCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = 613CD51A0AD1FB650098A825 /* TextSubCodec.c */; };
-		613CD51F0AD1FB650098A825 /* TextSubCodec.r in Rez */ = {isa = PBXBuildFile; fileRef = 613CD51C0AD1FB650098A825 /* TextSubCodec.r */; };
 		6156986F0BCDA87700E17ADE /* ringbuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6156986D0BCDA87700E17ADE /* ringbuffer.cpp */; };
 		61CB11200ACDF3A2007994BD /* Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11070ACDF3A2007994BD /* Debug.h */; };
 		61CB11210ACDF3A2007994BD /* EbmlBinary.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11080ACDF3A2007994BD /* EbmlBinary.h */; };
@@ -272,6 +268,8 @@
 		8F483B550A642644002CCA73 /* libavformat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B540A642644002CCA73 /* libavformat.a */; };
 		8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */; };
 		8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */ = {isa = PBXBuildFile; fileRef = 8F483B8B0A642886002CCA73 /* PerianAviImporter.r */; };
+		F50E79F61014F62500D3E6FF /* codecID.c.m4 in Sources */ = {isa = PBXBuildFile; fileRef = F50E79F51014F61B00D3E6FF /* codecID.c.m4 */; };
+		F50E79F71014F62D00D3E6FF /* codecResources.r.m4 in Rez */ = {isa = PBXBuildFile; fileRef = F50E79F41014F61B00D3E6FF /* codecResources.r.m4 */; };
 		F52286260B50625E00F8CF7D /* bitstream_info.c in Sources */ = {isa = PBXBuildFile; fileRef = F52286250B50625E00F8CF7D /* bitstream_info.c */; };
 		F539CD120B62BC82005A72C9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
 		F53E18E50B4F483C003A0471 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53E18E40B4F483C003A0471 /* Security.framework */; };
@@ -306,6 +304,17 @@
 				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
 			);
 			script = "RAGEL=${PROJECT_DIR}/Binaries/ragel\nRLCODEGEN=${PROJECT_DIR}/Binaries/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
+		};
+		F50E79EE1014F53A00D3E6FF /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.m4";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}",
+			);
+			script = "[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || [ ${SOURCE_ROOT}/codecList.m4 -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || [ ${SOURCE_ROOT}/defines.m4 -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\nm4 ${INPUT_FILE_PATH} > ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}";
 		};
 /* End PBXBuildRule section */
 
@@ -588,15 +597,12 @@
 		6116E54A0B43C27B0020F1CE /* CAStreamBasicDescription.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CAStreamBasicDescription.h; sourceTree = "<group>"; };
 		6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionCodec.cpp; sourceTree = "<group>"; };
 		6116E54D0B43C27B0020F1CE /* FFissionCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FFissionCodec.h; sourceTree = "<group>"; };
-		6116E54E0B43C27B0020F1CE /* FFissionCodec.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; name = FFissionCodec.r; path = FFissionCodec/FFissionCodec.r; sourceTree = "<group>"; };
 		6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionDecoder.cpp; sourceTree = "<group>"; };
 		6116E5500B43C27B0020F1CE /* FFissionDecoder.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FFissionDecoder.h; sourceTree = "<group>"; };
 		6116E74E0B4738CE0020F1CE /* CodecIDs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodecIDs.h; sourceTree = "<group>"; };
 		6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = VobSubCodec.c; sourceTree = "<group>"; };
-		6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; path = VobSubCodec.r; sourceTree = "<group>"; };
 		6123D6250AD0A3FF003EDE52 /* VobSubCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = VobSubCodecDispatch.h; sourceTree = "<group>"; };
 		613CD51A0AD1FB650098A825 /* TextSubCodec.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = TextSubCodec.c; sourceTree = "<group>"; };
-		613CD51C0AD1FB650098A825 /* TextSubCodec.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; path = TextSubCodec.r; sourceTree = "<group>"; };
 		613CD51D0AD1FB650098A825 /* TextSubCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = TextSubCodecDispatch.h; sourceTree = "<group>"; };
 		6156986D0BCDA87700E17ADE /* ringbuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ringbuffer.cpp; sourceTree = "<group>"; };
 		6156986E0BCDA87700E17ADE /* ringbuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ringbuffer.h; sourceTree = "<group>"; };
@@ -731,7 +737,8 @@
 		8F483B8B0A642886002CCA73 /* PerianAviImporter.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianAviImporter.r; sourceTree = "<group>"; };
 		8F483BBC0A642B3D002CCA73 /* ff_MovieImportDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_MovieImportDispatch.h; sourceTree = "<group>"; };
 		F50D440703EAD8DF01B1D299 /* FFusion.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = FFusion.icns; sourceTree = "<group>"; };
-		F50E7730101100D500D3E6FF /* PerianResourceIDs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PerianResourceIDs.h; sourceTree = "<group>"; };
+		F50E79F41014F61B00D3E6FF /* codecResources.r.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = codecResources.r.m4; sourceTree = "<group>"; };
+		F50E79F51014F61B00D3E6FF /* codecID.c.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = codecID.c.m4; sourceTree = "<group>"; };
 		F52286240B50625E00F8CF7D /* bitstream_info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bitstream_info.h; sourceTree = "<group>"; };
 		F52286250B50625E00F8CF7D /* bitstream_info.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bitstream_info.c; sourceTree = "<group>"; };
 		F539CD110B62BC82005A72C9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -739,11 +746,13 @@
 		F560DECD03D61B6101ABA332 /* Components.k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Components.k.h; sourceTree = "<group>"; };
 		F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodecDispatch.h; sourceTree = "<group>"; };
 		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFusionCodec.c; sourceTree = "<group>"; };
-		F560DF0203D622D001ABA332 /* FFusionCodec.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = FFusionCodec.r; sourceTree = "<group>"; };
 		F57676040BE1A18300B2434B /* FrameBuffer.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = FrameBuffer.c; sourceTree = "<group>"; };
 		F57676050BE1A18300B2434B /* FrameBuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FrameBuffer.h; sourceTree = "<group>"; };
 		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		F59B2AB81007A0D000FAAAD8 /* PerianResources.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianResources.r; sourceTree = "<group>"; };
+		F5C89F8110220B2F0032D02A /* codecList.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = codecList.m4; sourceTree = "<group>"; };
+		F5C89FC410220C800032D02A /* defines.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = defines.m4; sourceTree = "<group>"; };
+		F5C89FC510220C800032D02A /* PerianResourceIDs.h.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PerianResourceIDs.h.m4; sourceTree = "<group>"; };
 		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
@@ -885,23 +894,22 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F5C89FC410220C800032D02A /* defines.m4 */,
+				F5C89FC510220C800032D02A /* PerianResourceIDs.h.m4 */,
+				F5C89F8110220B2F0032D02A /* codecList.m4 */,
+				F50E79F41014F61B00D3E6FF /* codecResources.r.m4 */,
 				11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */,
 				11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */,
 				3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.nib */,
 				83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */,
 				3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */,
 				83D1D6D00B4C7AD200E09EC9 /* Frameworks */,
-				613CD51C0AD1FB650098A825 /* TextSubCodec.r */,
-				6123D6240AD0A3FE003EDE52 /* VobSubCodec.r */,
 				61D691590AC8E382000EFC7D /* MatroskaImport.r */,
 				61D691540AC8E382000EFC7D /* MatroskaExport.r */,
 				8F483B8B0A642886002CCA73 /* PerianAviImporter.r */,
 				089C167EFE841241C02AAC07 /* InfoPlist.strings */,
-				F560DF0203D622D001ABA332 /* FFusionCodec.r */,
-				6116E54E0B43C27B0020F1CE /* FFissionCodec.r */,
 				F50D440903EAD8E701B1D299 /* Images */,
 				F59B2AB81007A0D000FAAAD8 /* PerianResources.r */,
-				F50E7730101100D500D3E6FF /* PerianResourceIDs.h */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -916,6 +924,7 @@
 				6123D61D0AD0A052003EDE52 /* Subtitles */,
 				6116E5360B43C27B0020F1CE /* ACPublic */,
 				6116E5420B43C27B0020F1CE /* CAPublicUtility */,
+				F50E79F51014F61B00D3E6FF /* codecID.c.m4 */,
 				F560DECD03D61B6101ABA332 /* Components.k.h */,
 				113F58980A6B091600509987 /* Codecprintf.h */,
 				113F58990A6B091600509987 /* Codecprintf.c */,
@@ -1381,12 +1390,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */;
 			buildPhases = (
+				F50E79E81014F42F00D3E6FF /* ShellScript */,
 				11A70ABD0A3D0105002058D4 /* Resources */,
 				11A70ABE0A3D0105002058D4 /* Sources */,
 				11A70ABF0A3D0105002058D4 /* Frameworks */,
 				11A70ADC0A3D0156002058D4 /* Rez */,
 			);
 			buildRules = (
+				F50E79EE1014F53A00D3E6FF /* PBXBuildRule */,
 				3D74F53C0B6DB50C0018BAC0 /* PBXBuildRule */,
 			);
 			dependencies = (
@@ -1639,12 +1650,9 @@
 			isa = PBXRezBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F50E79F71014F62D00D3E6FF /* codecResources.r.m4 in Rez */,
 				8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */,
-				11C85FE60A64314500DF3D73 /* FFusionCodec.r in Rez */,
 				61CB12260ACE1074007994BD /* MatroskaImport.r in Rez */,
-				6123D6270AD0A3FF003EDE52 /* VobSubCodec.r in Rez */,
-				613CD51F0AD1FB650098A825 /* TextSubCodec.r in Rez */,
-				6116E5590B43C27B0020F1CE /* FFissionCodec.r in Rez */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1663,6 +1671,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "source $SRCROOT/createStaticLibs.sh";
+		};
+		F50E79E81014F42F00D3E6FF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/PerianResourceIDs.h.m4",
+				"$(SRCROOT)/defines.m4",
+				"$(SRCROOT)/codecList.m4",
+				"$(SRCROOT)/scripts/generateCodecIDs.sh",
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/PerianResourceIDs.h",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here\nsource \"${SCRIPT_INPUT_FILE_3}\"";
 		};
 		F5121EB60EB3A54A0048EF67 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1742,6 +1768,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F50E79F61014F62500D3E6FF /* codecID.c.m4 in Sources */,
 				3D211A300B6B1AD80051299D /* SubParsing.m.rl in Sources */,
 				11C85ED80A641E6400DF3D73 /* ff_dataref.c in Sources */,
 				11C85EDA0A641E6400DF3D73 /* ff_private.c in Sources */,

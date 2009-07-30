@@ -103,4 +103,8 @@ enum {
 	kSubFormatVobSub                        = 'SPU ',
 };
 
+#ifndef REZ
+int getCodecID(OSType componentType);
+#endif
+
 #endif
