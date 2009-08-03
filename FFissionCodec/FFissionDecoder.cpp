@@ -455,7 +455,7 @@ int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *p
 	
 	int totalSize = blockCount * 256 * channelCount / 4;
 	memset(outputBuffer, 0, totalSize);
-	int offset = 2;
+	int offset = 0;
 	
 	if(bigEndian)
 	{
