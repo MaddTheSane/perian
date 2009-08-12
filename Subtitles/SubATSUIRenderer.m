@@ -1207,7 +1207,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	[pool release];
 }
 
-SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int height)
+SubtitleRendererPtr SubInitSSA(char *header, size_t headerLen, int width, int height)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO];
@@ -1240,7 +1240,7 @@ void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int
 
 void SubPrerollFromHeader(char *header, int headerLen)
 {
-	SubtitleRendererPtr s = headerLen ? SubInitForSSA(header, headerLen, 640, 480)
+	SubtitleRendererPtr s = headerLen ? SubInitSSA(header, headerLen, 640, 480)
 								      : SubInitNonSSA(640, 480);
 	/*
 	CGColorSpaceRef csp = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);

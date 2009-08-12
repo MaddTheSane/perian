@@ -52,7 +52,7 @@ typedef void *SubtitleRendererPtr;
 
 #endif
 
-extern SubtitleRendererPtr SubInitForSSA(char *header, size_t headerLen, int width, int height);
+extern SubtitleRendererPtr SubInitSSA(char *header, size_t headerLen, int width, int height);
 extern SubtitleRendererPtr SubInitNonSSA(int width, int height);
 extern CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s);
 extern void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight);

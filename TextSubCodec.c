@@ -260,7 +260,7 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 				Handle ssaheader;
 				GetImageDescriptionExtension(p->imageDescription,&ssaheader,kSubFormatSSA,1);
 				
-				glob->ssa = SubInitForSSA(*ssaheader, GetHandleSize(ssaheader), (**p->imageDescription).width, (**p->imageDescription).height);
+				glob->ssa = SubInitSSA(*ssaheader, GetHandleSize(ssaheader), (**p->imageDescription).width, (**p->imageDescription).height);
 			} 
 		} 
 		
@@ -334,21 +334,7 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	}
 	
 	SubRenderPacket(glob->ssa,c,buf,myDrp->width,myDrp->height);
-	
-#if 0
-	{
-		CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, "/subtitle.pdf", strlen("/subtitle.pdf"), 0);
-		CGRect rect = CGRectMake(0,0, myDrp->width, myDrp->height);
-		CGContextRef pc = CGPDFContextCreateWithURL(url, &rect, NULL);
 		
-		CGPDFContextBeginPage(pc, NULL);
-		SubRenderPacket(glob->ssa,pc,buf,myDrp->width,myDrp->height);
-		CGPDFContextEndPage(pc);
-		CGContextRelease(pc);
-		CFRelease(url);
-	}
-#endif
-	
 	CFRelease(buf);
 	
 leave:

@@ -119,6 +119,21 @@
 		3D211A300B6B1AD80051299D /* SubParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */; };
 		3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
 		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; settings = {COMPILER_FLAGS = "-O3 -fweb -fno-reorder-blocks -fomit-frame-pointer"; }; };
+		3D802EAB1032B8B00034BF4A /* SubContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SubContext.m */; };
+		3D802EAC1032B8B00034BF4A /* SubImport.mm in Sources */ = {isa = PBXBuildFile; fileRef = 61D514DD0ADF3DBA00A671E1 /* SubImport.mm */; };
+		3D802EAD1032B8B00034BF4A /* SubParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */; };
+		3D802EAE1032B8B00034BF4A /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
+		3D802EAF1032B8B00034BF4A /* Codecprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 113F58990A6B091600509987 /* Codecprintf.c */; };
+		3D802EB11032B8B00034BF4A /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD08570FBF80D8001E156F /* libobjc.dylib */; };
+		3D802EB21032B8B00034BF4A /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
+		3D802EB31032B8B00034BF4A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
+		3D802EB41032B8B00034BF4A /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
+		3D802EB51032B8B00034BF4A /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */; };
+		3D802EBF1032B9860034BF4A /* SubATSUIRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */; };
+		3D802EC31032B9B50034BF4A /* ssa2pdf.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D802EC21032B9B50034BF4A /* ssa2pdf.m */; };
+		3D802F06103365DB0034BF4A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
+		3D802F171033662F0034BF4A /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
+		3D802F8610336EE90034BF4A /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D802F8510336EE90034BF4A /* ApplicationServices.framework */; };
 		3D95B9010E208965007C8F51 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D95B9000E208965007C8F51 /* libbz2.dylib */; };
 		3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D95B9000E208965007C8F51 /* libbz2.dylib */; };
 		3DAD08250FBF7DA9001E156F /* ssa2html.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAD08240FBF7DA9001E156F /* ssa2html.m */; };
@@ -294,6 +309,17 @@
 			);
 			script = "RAGEL=${PROJECT_DIR}/Binaries/ragel\nRLCODEGEN=${PROJECT_DIR}/Binaries/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
 		};
+		3D802EB61032B8B00034BF4A /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.rl";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILES_DIR)/$(INPUT_FILE_BASE)",
+			);
+			script = "RAGEL=${PROJECT_DIR}/Binaries/ragel\nRLCODEGEN=${PROJECT_DIR}/Binaries/rlgen-cd\n[ ${INPUT_FILE_PATH} -nt ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE} ] || exit 0\n${RAGEL} ${INPUT_FILE_PATH} | ${RLCODEGEN} -T0 -o ${DERIVED_FILES_DIR}/${INPUT_FILE_BASE}\n";
+		};
 		3DAD086E0FBF8225001E156F /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
@@ -345,6 +371,13 @@
 			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 3DBF4F570BCD396800DA401A;
+			remoteInfo = universaldetector;
+		};
+		3D802EA81032B8B00034BF4A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DBF4F560BCD396800DA401A;
 			remoteInfo = universaldetector;
 		};
 		3DAD08910FBF84A4001E156F /* PBXContainerItemProxy */ = {
@@ -565,6 +598,9 @@
 		3D4A34870D8B03F700A07563 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
+		3D802EBB1032B8B00034BF4A /* ssa2pdf */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ssa2pdf; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D802EC21032B9B50034BF4A /* ssa2pdf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ssa2pdf.m; path = Subtitles/ssa2pdf.m; sourceTree = "<group>"; };
+		3D802F8510336EE90034BF4A /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		3D95B9000E208965007C8F51 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = /usr/lib/libbz2.dylib; sourceTree = "<absolute>"; };
 		3DAD08080FBF7C6F001E156F /* ssa2html */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ssa2html; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DAD08240FBF7DA9001E156F /* ssa2html.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ssa2html.m; path = Subtitles/ssa2html.m; sourceTree = "<group>"; };
@@ -789,6 +825,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3D802EB01032B8B00034BF4A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3D802EB11032B8B00034BF4A /* libobjc.dylib in Frameworks */,
+				3D802EB21032B8B00034BF4A /* CoreFoundation.framework in Frameworks */,
+				3D802EB31032B8B00034BF4A /* Foundation.framework in Frameworks */,
+				3D802EB41032B8B00034BF4A /* libuniversaldetector.a in Frameworks */,
+				3D802EB51032B8B00034BF4A /* libstdc++.6.dylib in Frameworks */,
+				3D802F06103365DB0034BF4A /* Cocoa.framework in Frameworks */,
+				3D802F171033662F0034BF4A /* Carbon.framework in Frameworks */,
+				3D802F8610336EE90034BF4A /* ApplicationServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3DAD08060FBF7C6F001E156F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -869,6 +920,7 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				3D802F8510336EE90034BF4A /* ApplicationServices.framework */,
 				3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */,
 				3DAD08570FBF80D8001E156F /* libobjc.dylib */,
 				3D95B9000E208965007C8F51 /* libbz2.dylib */,
@@ -984,6 +1036,7 @@
 				116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */,
 				3DAD08080FBF7C6F001E156F /* ssa2html */,
 				3DAD09A80FBFAB08001E156F /* detect-encoding */,
+				3D802EBB1032B8B00034BF4A /* ssa2pdf */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1050,6 +1103,7 @@
 			children = (
 				3DAD09AE0FBFAB68001E156F /* detect-encoding.m */,
 				3DAD08240FBF7DA9001E156F /* ssa2html.m */,
+				3D802EC21032B9B50034BF4A /* ssa2pdf.m */,
 				3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */,
 				3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */,
 				3D211A1E0B6B1A540051299D /* SubContext.h */,
@@ -1412,6 +1466,24 @@
 			productReference = 11A70AC10A3D0105002058D4 /* Perian.component */;
 			productType = "com.apple.product-type.bundle";
 		};
+		3D802EA61032B8B00034BF4A /* ssa2pdf */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3D802EB71032B8B00034BF4A /* Build configuration list for PBXNativeTarget "ssa2pdf" */;
+			buildPhases = (
+				3D802EA91032B8B00034BF4A /* Sources */,
+				3D802EB01032B8B00034BF4A /* Frameworks */,
+			);
+			buildRules = (
+				3D802EB61032B8B00034BF4A /* PBXBuildRule */,
+			);
+			dependencies = (
+				3D802EA71032B8B00034BF4A /* PBXTargetDependency */,
+			);
+			name = ssa2pdf;
+			productName = ssa2html;
+			productReference = 3D802EBB1032B8B00034BF4A /* ssa2pdf */;
+			productType = "com.apple.product-type.tool";
+		};
 		3DAD08070FBF7C6F001E156F /* ssa2html */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3DAD080D0FBF7C71001E156F /* Build configuration list for PBXNativeTarget "ssa2html" */;
@@ -1562,6 +1634,7 @@
 				F5121EB70EB3A54A0048EF67 /* Make SVN Rev */,
 				3DAD08070FBF7C6F001E156F /* ssa2html */,
 				3DAD09A70FBFAB08001E156F /* detect-encoding */,
+				3D802EA61032B8B00034BF4A /* ssa2pdf */,
 			);
 		};
 /* End PBXProject section */
@@ -1802,6 +1875,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3D802EA91032B8B00034BF4A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3D802EAB1032B8B00034BF4A /* SubContext.m in Sources */,
+				3D802EAC1032B8B00034BF4A /* SubImport.mm in Sources */,
+				3D802EAD1032B8B00034BF4A /* SubParsing.m.rl in Sources */,
+				3D802EAE1032B8B00034BF4A /* SubUtilities.m in Sources */,
+				3D802EAF1032B8B00034BF4A /* Codecprintf.c in Sources */,
+				3D802EBF1032B9860034BF4A /* SubATSUIRenderer.m in Sources */,
+				3D802EC31032B9B50034BF4A /* ssa2pdf.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3DAD08050FBF7C6F001E156F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1907,6 +1994,11 @@
 			isa = PBXTargetDependency;
 			target = 11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */;
 			targetProxy = 11BA3DAF0A61EE90008AF206 /* PBXContainerItemProxy */;
+		};
+		3D802EA71032B8B00034BF4A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = universaldetector;
+			targetProxy = 3D802EA81032B8B00034BF4A /* PBXContainerItemProxy */;
 		};
 		3DAD08920FBF84A4001E156F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2135,6 +2227,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
@@ -2154,6 +2247,7 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx10.4;
+				STRIP_STYLE = debugging;
 			};
 			name = Deployment;
 		};
@@ -2299,6 +2393,7 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
 				PRODUCT_NAME = Perian;
 				SDKROOT = macosx10.4;
 				"SDKROOT[arch=*]" = macosx10.4;
@@ -2345,6 +2440,56 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx10.4;
+			};
+			name = "Deployment+Debug";
+		};
+		3D802EB81032B8B00034BF4A /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"",
+					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Versions/A/Frameworks\"",
+				);
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = ssa2pdf;
+			};
+			name = Development;
+		};
+		3D802EB91032B8B00034BF4A /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"",
+					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Versions/A/Frameworks\"",
+				);
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = ssa2pdf;
+			};
+			name = Deployment;
+		};
+		3D802EBA1032B8B00034BF4A /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(DEVELOPER_DIR)/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks\"",
+					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Versions/A/Frameworks\"",
+				);
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = ssa2pdf;
 			};
 			name = "Deployment+Debug";
 		};
@@ -2499,6 +2644,7 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
 				PRODUCT_NAME = Perian;
 				SDKROOT = macosx10.4;
 				"SDKROOT[arch=*]" = macosx10.4;
@@ -2530,6 +2676,7 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
 				PRODUCT_NAME = Perian;
 				SDKROOT = macosx10.4;
 				"SDKROOT[arch=*]" = macosx10.4;
@@ -2721,6 +2868,16 @@
 				11D4ED480A3CE59A0066D45F /* Development */,
 				11D4ED490A3CE59A0066D45F /* Deployment */,
 				3D4BBE510B59EE0A000EDE04 /* Deployment+Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Deployment+Debug";
+		};
+		3D802EB71032B8B00034BF4A /* Build configuration list for PBXNativeTarget "ssa2pdf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3D802EB81032B8B00034BF4A /* Development */,
+				3D802EB91032B8B00034BF4A /* Deployment */,
+				3D802EBA1032B8B00034BF4A /* Deployment+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Deployment+Debug";
