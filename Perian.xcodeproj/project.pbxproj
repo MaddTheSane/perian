@@ -82,6 +82,19 @@
 		};
 /* End PBXAggregateTarget section */
 
+/* Begin PBXAppleScriptBuildPhase section */
+		3DE8D6FA1044447E0007C7E7 /* AppleScript */ = {
+			isa = PBXAppleScriptBuildPhase;
+			buildActionMask = 2147483647;
+			contextName = "";
+			files = (
+				3DE8D6F9104444690007C7E7 /* Application.applescript in AppleScript */,
+			);
+			isSharedContext = 0;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXAppleScriptBuildPhase section */
+
 /* Begin PBXBuildFile section */
 		11207C730C2F4A4E002A0FF0 /* ComponentInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */; };
 		112E0C820A6436BA00DB4C29 /* FFusionCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F560DF0003D61D0101ABA332 /* FFusionCodec.c */; };
@@ -159,6 +172,12 @@
 		3DB2BB290B6C92F000416863 /* SubATSUIRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */; };
 		3DD34C791019B16A006905AB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167EFE841241C02AAC07 /* InfoPlist.strings */; };
 		3DE8D6C31043BE350007C7E7 /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
+		3DE8D6F1104444420007C7E7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE8D6EF104444420007C7E7 /* main.m */; };
+		3DE8D6F9104444690007C7E7 /* Application.applescript in AppleScript */ = {isa = PBXBuildFile; fileRef = 3DE8D6EE104444420007C7E7 /* Application.applescript */; settings = {ATTRIBUTES = (Debug, ); }; };
+		3DE8D74F10444A6E0007C7E7 /* OpenerMainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */; };
+		3DE8D78510444E500007C7E7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
+		3DE8D9C910444E680007C7E7 /* AppleScriptKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */; };
+		3DE8D9D5104451A80007C7E7 /* Perian - Open in QT Player.app in Resources */ = {isa = PBXBuildFile; fileRef = 3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
 		6116E5530B43C27B0020F1CE /* ACSimpleCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E53E0B43C27B0020F1CE /* ACSimpleCodec.cpp */; };
@@ -401,6 +420,13 @@
 			remoteGlobalIDString = 3DBF4F560BCD396800DA401A;
 			remoteInfo = universaldetector;
 		};
+		3DE8D9CD1044501E0007C7E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DE8D6DD104440F60007C7E7;
+			remoteInfo = "Perian Opener";
+		};
 		61CB120F0ACE0FB1007994BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
@@ -612,6 +638,12 @@
 		3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = UpdateCheckerMainMenu.nib; path = "Update Checker Sources/UpdateCheckerMainMenu.nib"; sourceTree = "<group>"; };
 		3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubATSUIRenderer.h; path = Subtitles/SubATSUIRenderer.h; sourceTree = "<group>"; };
 		3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SubATSUIRenderer.m; path = Subtitles/SubATSUIRenderer.m; sourceTree = "<group>"; };
+		3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Perian - Open in QT Player.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DE8D6EE104444420007C7E7 /* Application.applescript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.applescript; path = Application.applescript; sourceTree = "<group>"; };
+		3DE8D6EF104444420007C7E7 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "PerianOpener-Info.plist"; path = "Plists/PerianOpener-Info.plist"; sourceTree = "<group>"; };
+		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = OpenerMainMenu.xib; path = Opener/OpenerMainMenu.xib; sourceTree = "<group>"; };
+		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = /System/Library/Frameworks/AppleScriptKit.framework; sourceTree = "<absolute>"; };
 		6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACBaseCodec.cpp; sourceTree = "<group>"; };
 		6116E5380B43C27B0020F1CE /* ACBaseCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACBaseCodec.h; sourceTree = "<group>"; };
 		6116E5390B43C27B0020F1CE /* ACCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACCodec.cpp; sourceTree = "<group>"; };
@@ -772,7 +804,7 @@
 		8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		8F483B8B0A642886002CCA73 /* PerianAviImporter.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianAviImporter.r; sourceTree = "<group>"; };
 		8F483BBC0A642B3D002CCA73 /* ff_MovieImportDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_MovieImportDispatch.h; sourceTree = "<group>"; };
-		F50E79F41014F61B00D3E6FF /* codecResources.r.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = codecResources.r.m4; sourceTree = "<group>"; };
+		F50E79F41014F61B00D3E6FF /* codecResources.r.m4 */ = {isa = PBXFileReference; explicitFileType = sourcecode.c; fileEncoding = 4; path = codecResources.r.m4; sourceTree = "<group>"; };
 		F50E79F51014F61B00D3E6FF /* codecID.c.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = codecID.c.m4; sourceTree = "<group>"; };
 		F52286240B50625E00F8CF7D /* bitstream_info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bitstream_info.h; sourceTree = "<group>"; };
 		F52286250B50625E00F8CF7D /* bitstream_info.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bitstream_info.c; sourceTree = "<group>"; };
@@ -785,9 +817,9 @@
 		F57676050BE1A18300B2434B /* FrameBuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FrameBuffer.h; sourceTree = "<group>"; };
 		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		F59B2AB81007A0D000FAAAD8 /* PerianResources.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianResources.r; sourceTree = "<group>"; };
-		F5C89F8110220B2F0032D02A /* codecList.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = codecList.m4; sourceTree = "<group>"; };
-		F5C89FC410220C800032D02A /* defines.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = defines.m4; sourceTree = "<group>"; };
-		F5C89FC510220C800032D02A /* PerianResourceIDs.h.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PerianResourceIDs.h.m4; sourceTree = "<group>"; };
+		F5C89F8110220B2F0032D02A /* codecList.m4 */ = {isa = PBXFileReference; explicitFileType = sourcecode.c; fileEncoding = 4; path = codecList.m4; sourceTree = "<group>"; };
+		F5C89FC410220C800032D02A /* defines.m4 */ = {isa = PBXFileReference; explicitFileType = sourcecode.c; fileEncoding = 4; path = defines.m4; sourceTree = "<group>"; };
+		F5C89FC510220C800032D02A /* PerianResourceIDs.h.m4 */ = {isa = PBXFileReference; explicitFileType = sourcecode.c; fileEncoding = 4; path = PerianResourceIDs.h.m4; sourceTree = "<group>"; };
 		F5CFD1B40B50009000616865 /* PerianPanePListGenerator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PerianPanePListGenerator; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GBPerianPanePListGenerator.m; sourceTree = "<group>"; };
 		F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = A52Codec.xcodeproj; path = a52codec/A52Codec.xcodeproj; sourceTree = "<group>"; };
@@ -863,6 +895,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3DE8D6DC104440F60007C7E7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DE8D78510444E500007C7E7 /* Cocoa.framework in Frameworks */,
+				3DE8D9C910444E680007C7E7 /* AppleScriptKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61CB10FD0ACDF350007994BD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -916,6 +957,7 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */,
 				3D802F8510336EE90034BF4A /* ApplicationServices.framework */,
 				3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */,
 				3DAD08570FBF80D8001E156F /* libobjc.dylib */,
@@ -944,6 +986,7 @@
 			children = (
 				11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */,
 				83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */,
+				3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */,
 				116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */,
 				F5C89FC410220C800032D02A /* defines.m4 */,
 				F5C89FC510220C800032D02A /* PerianResourceIDs.h.m4 */,
@@ -951,6 +994,7 @@
 				F50E79F41014F61B00D3E6FF /* codecResources.r.m4 */,
 				11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */,
 				11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */,
+				3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */,
 				3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.nib */,
 				83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */,
 				3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */,
@@ -969,6 +1013,7 @@
 			isa = PBXGroup;
 			children = (
 				116C425C0B50420D00FB0738 /* Update Checker Sources */,
+				3DE8D6ED104444420007C7E7 /* Opener */,
 				83D1D6DF0B4C81E000E09EC9 /* PrefPane */,
 				F53AD5E20B2A4EC000D93AC9 /* FFMPEG */,
 				61D691460AC8E333000EFC7D /* Matroska */,
@@ -1036,6 +1081,7 @@
 				3DAD08080FBF7C6F001E156F /* ssa2html */,
 				3DAD09A80FBFAB08001E156F /* detect-encoding */,
 				3D802EBB1032B8B00034BF4A /* ssa2pdf */,
+				3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1048,6 +1094,15 @@
 				3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3DE8D6ED104444420007C7E7 /* Opener */ = {
+			isa = PBXGroup;
+			children = (
+				3DE8D6EE104444420007C7E7 /* Application.applescript */,
+				3DE8D6EF104444420007C7E7 /* main.m */,
+			);
+			path = Opener;
 			sourceTree = "<group>";
 		};
 		6116E5360B43C27B0020F1CE /* ACPublic */ = {
@@ -1517,6 +1572,24 @@
 			productReference = 3DAD09A80FBFAB08001E156F /* detect-encoding */;
 			productType = "com.apple.product-type.tool";
 		};
+		3DE8D6DD104440F60007C7E7 /* PerianOpener */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3DE8D6E4104440F70007C7E7 /* Build configuration list for PBXNativeTarget "PerianOpener" */;
+			buildPhases = (
+				3DE8D6FA1044447E0007C7E7 /* AppleScript */,
+				3DE8D6DA104440F60007C7E7 /* Resources */,
+				3DE8D6DB104440F60007C7E7 /* Sources */,
+				3DE8D6DC104440F60007C7E7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PerianOpener;
+			productName = "Perian Opener";
+			productReference = 3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */;
+			productType = "com.apple.product-type.application";
+		};
 		61CB10FE0ACDF350007994BD /* ebml */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 61CB11030ACDF37C007994BD /* Build configuration list for PBXNativeTarget "ebml" */;
@@ -1567,6 +1640,7 @@
 				F5CFD2F10B50132E00616865 /* PBXTargetDependency */,
 				F5CFD25E0B500B9400616865 /* PBXTargetDependency */,
 				F5EB82360BA72208001064E5 /* PBXTargetDependency */,
+				3DE8D9CE1044501E0007C7E7 /* PBXTargetDependency */,
 			);
 			name = PerianPane;
 			productName = PerianPane;
@@ -1633,6 +1707,7 @@
 				3DAD08070FBF7C6F001E156F /* ssa2html */,
 				3DAD09A70FBFAB08001E156F /* detect-encoding */,
 				3D802EA61032B8B00034BF4A /* ssa2pdf */,
+				3DE8D6DD104440F60007C7E7 /* PerianOpener */,
 			);
 		};
 /* End PBXProject section */
@@ -1702,6 +1777,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3DE8D6DA104440F60007C7E7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DE8D74F10444A6E0007C7E7 /* OpenerMainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		83D1D6C40B4C794700E09EC9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1711,6 +1794,7 @@
 				11BEFB2D0C18E23E00BC9324 /* Read Me.rtf in Resources */,
 				11207C730C2F4A4E002A0FF0 /* ComponentInfo.plist in Resources */,
 				3DAD0AAC0FC133E7001E156F /* PerianPrefPane.xib in Resources */,
+				3DE8D9D5104451A80007C7E7 /* Perian - Open in QT Player.app in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1909,6 +1993,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3DE8D6DB104440F60007C7E7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3DE8D6F1104444420007C7E7 /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61CB10FC0ACDF350007994BD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2012,6 +2104,11 @@
 			isa = PBXTargetDependency;
 			name = universaldetector;
 			targetProxy = 3DB3517E0BCF004B009357B8 /* PBXContainerItemProxy */;
+		};
+		3DE8D9CE1044501E0007C7E7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3DE8D6DD104440F60007C7E7 /* PerianOpener */;
+			targetProxy = 3DE8D9CD1044501E0007C7E7 /* PBXContainerItemProxy */;
 		};
 		61CB12100ACE0FB1007994BD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2571,6 +2668,48 @@
 			};
 			name = "Deployment+Debug";
 		};
+		3DE8D6E1104440F70007C7E7 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_NAME = "Perian - Open in QT Player";
+			};
+			name = Development;
+		};
+		3DE8D6E2104440F70007C7E7 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				GCC_DYNAMIC_NO_PIC = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_NAME = "Perian - Open in QT Player";
+			};
+			name = Deployment;
+		};
+		3DE8D6E3104440F70007C7E7 /* Deployment+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_DYNAMIC_NO_PIC = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_NAME = "Perian - Open in QT Player";
+			};
+			name = "Deployment+Debug";
+		};
 		61CB11040ACDF37C007994BD /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2896,6 +3035,16 @@
 				3DAD09AA0FBFAB0A001E156F /* Development */,
 				3DAD09AB0FBFAB0A001E156F /* Deployment */,
 				3DAD09AC0FBFAB0A001E156F /* Deployment+Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Deployment+Debug";
+		};
+		3DE8D6E4104440F70007C7E7 /* Build configuration list for PBXNativeTarget "PerianOpener" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3DE8D6E1104440F70007C7E7 /* Development */,
+				3DE8D6E2104440F70007C7E7 /* Deployment */,
+				3DE8D6E3104440F70007C7E7 /* Deployment+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Deployment+Debug";

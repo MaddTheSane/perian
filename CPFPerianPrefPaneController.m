@@ -651,6 +651,23 @@
 	return ret;
 }
 
+- (void)lsRegisterApps
+{
+	NSString *resourcePath = [[self bundle] resourcePath];
+	NSDictionary *infoDict = [self myInfoDict];
+	NSDictionary *apps = [infoDict objectForKey:AppsToRegisterDictionaryKey];
+	
+	NSEnumerator *appEnum = [apps objectEnumerator];
+	NSString *app = nil;
+
+	while ((app = [appEnum nextObject]))
+	{
+		NSURL *url = [NSURL fileURLWithPath:[resourcePath stringByAppendingPathComponent:app]];
+		
+		LSRegisterURL((CFURLRef)url, true);
+	}
+}
+
 - (void)install:(id)sender
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -695,6 +712,9 @@
 		AuthorizationFree(auth, 0);
 		auth = nil;
 	}
+	
+	[self lsRegisterApps];
+	
 	[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
 	[pool release];
 }

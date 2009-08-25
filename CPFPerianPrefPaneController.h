@@ -28,6 +28,7 @@
 #define PERIAN_NO_BUNDLE_ID_FORMAT @"org.perian.No.Bundle.ID.%@"
 
 #define ComponentInfoDictionaryKey	@"Components"
+#define AppsToRegisterDictionaryKey @"ApplicationsToRegister"
 
 #define BundleVersionKey @"CFBundleVersion"
 #define BundleIdentifierKey @"CFBundleIdentifier"
