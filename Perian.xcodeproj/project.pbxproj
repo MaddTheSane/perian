@@ -158,6 +158,7 @@
 		3DAD0AC10FC1365E001E156F /* UpdateCheckerMainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.nib */; };
 		3DB2BB290B6C92F000416863 /* SubATSUIRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */; };
 		3DD34C791019B16A006905AB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167EFE841241C02AAC07 /* InfoPlist.strings */; };
+		3DE8D6C31043BE350007C7E7 /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
 		6116E5530B43C27B0020F1CE /* ACSimpleCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E53E0B43C27B0020F1CE /* ACSimpleCodec.cpp */; };
@@ -908,9 +909,6 @@
 				089C1671FE841209C02AAC07 /* External Frameworks and Libraries */,
 				19C28FB4FE9D528D11CA2CBB /* Products */,
 				F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */,
-				11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */,
-				83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */,
-				116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */,
 			);
 			name = "ffmpeg DivX";
 			sourceTree = "<group>";
@@ -944,6 +942,9 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */,
+				83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */,
+				116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */,
 				F5C89FC410220C800032D02A /* defines.m4 */,
 				F5C89FC510220C800032D02A /* PerianResourceIDs.h.m4 */,
 				F5C89F8110220B2F0032D02A /* codecList.m4 */,
@@ -1697,6 +1698,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3DD34C791019B16A006905AB /* InfoPlist.strings in Resources */,
+				3DE8D6C31043BE350007C7E7 /* Perian_icon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
