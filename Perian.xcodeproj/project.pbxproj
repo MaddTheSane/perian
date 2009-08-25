@@ -105,7 +105,6 @@
 		11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA20A3CE8C10066D45F /* libavutil.a */; };
 		11A70AD20A3D0131002058D4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1156DBD80A3CE9F500963B0E /* libz.dylib */; };
 		11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EED50A3CE7EC0066D45F /* QuickTime.framework */; };
-		11A70AD90A3D0149002058D4 /* FFusion.icns in Resources */ = {isa = PBXBuildFile; fileRef = F50D440703EAD8DF01B1D299 /* FFusion.icns */; };
 		11BEFB2D0C18E23E00BC9324 /* Read Me.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */; };
 		11C85ED80A641E6400DF3D73 /* ff_dataref.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED30A641E6400DF3D73 /* ff_dataref.c */; };
 		11C85EDA0A641E6400DF3D73 /* ff_private.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED60A641E6400DF3D73 /* ff_private.c */; };
@@ -772,7 +771,6 @@
 		8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		8F483B8B0A642886002CCA73 /* PerianAviImporter.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianAviImporter.r; sourceTree = "<group>"; };
 		8F483BBC0A642B3D002CCA73 /* ff_MovieImportDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_MovieImportDispatch.h; sourceTree = "<group>"; };
-		F50D440703EAD8DF01B1D299 /* FFusion.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = FFusion.icns; sourceTree = "<group>"; };
 		F50E79F41014F61B00D3E6FF /* codecResources.r.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = codecResources.r.m4; sourceTree = "<group>"; };
 		F50E79F51014F61B00D3E6FF /* codecID.c.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = codecID.c.m4; sourceTree = "<group>"; };
 		F52286240B50625E00F8CF7D /* bitstream_info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bitstream_info.h; sourceTree = "<group>"; };
@@ -1297,7 +1295,6 @@
 		F50D440903EAD8E701B1D299 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				F50D440703EAD8DF01B1D299 /* FFusion.icns */,
 			);
 			name = Images;
 			sourceTree = "<group>";
@@ -1700,7 +1697,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3DD34C791019B16A006905AB /* InfoPlist.strings in Resources */,
-				11A70AD90A3D0149002058D4 /* FFusion.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
