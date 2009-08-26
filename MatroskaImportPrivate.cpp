@@ -523,10 +523,6 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
 	if(asbd.mChannelsPerFrame == 0)
 		asbd.mChannelsPerFrame = 1;		// avoid a div by zero
-	if(asbd.mFramesPerPacket == 0)
-		asbd.mFramesPerPacket = 1; //in case of PCM or broken codecs
-	                               //note: this is completely wrong, but less so than 0
-
 	
 	// FIXME mChannelLayoutTag == 0 is valid
 	// but we don't use channel position lists (yet) so it's safe for now
