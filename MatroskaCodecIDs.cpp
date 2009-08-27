@@ -378,6 +378,14 @@ static const unsigned kAACFrequencyIndexes[] = {
 	11025, 8000, 7350
 };
 
+static bool ShouldWriteSBRExt(unsigned output_freq_index)
+{
+	if (output_freq_index == 0)
+		return CFPreferencesGetAppBooleanValue(CFSTR("Allow96kSBR"), PERIAN_PREF_DOMAIN, NULL);
+	
+	return true;
+}
+
 static int FindAACFreqIndex(double freq)
 {
 	unsigned ifreq = freq;
@@ -414,12 +422,12 @@ static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vos
 	
 	if (outputFreq) {
 		unsigned output_freq_index = FindAACFreqIndex(*outputFreq);
-		
-		//SBR extension
-		//not sure why we still use object type 2 (LC) instead of 5 (HE)
-		*vosBuf++ = 0x56;
-		*vosBuf++ = 0xE5;
-		*vosBuf++ = 0x80 | (output_freq_index << 3);
+				
+		if (ShouldWriteSBRExt(output_freq_index)) {
+			*vosBuf++ = 0x56;
+			*vosBuf++ = 0xE5;
+			*vosBuf++ = 0x80 | (output_freq_index << 3);
+		}
 	}
 	
 	*vosLen = vosBuf - vosStart;
@@ -525,7 +533,9 @@ static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	uint8_t *vosBuf = codecPrivate ? codecPrivate->GetBuffer() : NULL;
 	size_t esdsLen;
 	
-	if (audio && !vosBuf) {
+	// vosLen > 2 means SBR; some of those must be rewritten to avoid QT bugs(?)
+	// FIXME remove when QT works with them
+	if (audio && (!vosBuf || vosLen > 2)) {
 		RecreateAACVOS(tr_entry, aacBuf, &vosLen);
 		vosBuf = aacBuf;
 	} else if (!audio && !vosBuf)
