@@ -103,13 +103,17 @@ else
         echo "PPC-only"
     fi
     
-    mkdir "$BUILT_PRODUCTS_DIR"
+    if [ ! -d "$BUILT_PRODUCTS_DIR" ] ; then
+        mkdir "$BUILT_PRODUCTS_DIR"
+    fi
     #######################
     # Intel shlibs
     #######################
     if [ $buildi386 -gt 0 ] ; then
         BUILDDIR="$BUILT_PRODUCTS_DIR/intel"
-        mkdir "$BUILDDIR"
+        if [ ! -d "$BUILDDIR" ] ; then
+            mkdir "$BUILDDIR"
+        fi
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
         	optcflags="$optcflags -mtune=$x86tune -frerun-cse-after-loop" 
@@ -143,7 +147,9 @@ else
     #######################
     if [ $buildppc -gt 0 ] ; then
         BUILDDIR="$BUILT_PRODUCTS_DIR/ppc"
-        mkdir "$BUILDDIR"
+        if [ ! -d "$BUILDDIR" ] ; then
+            mkdir "$BUILDDIR"
+        fi
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
        		optcflags="$optcflags -mcpu=G3 -mtune=G5 -funroll-loops -mmultiple"
@@ -205,7 +211,9 @@ fi
 if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
     echo "Final static ffmpeg libs are up-to-date ; not copying"
 else
-	mkdir "$SYMROOT/Universal" || true
+	if [ ! -d "$SYMROOT/Universal" ] ; then
+		mkdir "$SYMROOT/Universal"
+	fi
 	cp "$BUILT_PRODUCTS_DIR/Universal"/* "$SYMROOT/Universal"
 	ranlib "$SYMROOT/Universal"/*.a
 fi
