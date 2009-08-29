@@ -41,7 +41,8 @@ ResourceOnly(<!	#define cmpThreadSafeOnMac 0x10000000!>)
 ResourceOnly(<!#endif!>)
 
 EntryPoint(kFFissionCodecManufacturer, kFFissionCodecVersion, kWMA1MSCodecResourceID, "FFissionDecoderEntry", cmpThreadSafeOnMac, )
-Codec(kWMA1MSCodecResourceID, CODEC_ID_WMAV1, "Windows Media Audio 1", "An AudioCodec that decodes WMA v1 into linear PCM", kAudioFormatWMA2MS)
+Codec(kWMA1MSCodecResourceID, CODEC_ID_WMAV1, "Windows Media Audio 1", "An AudioCodec that decodes WMA v1 into linear PCM", kAudioFormatWMA1MS)
+Codec(kWMA2MSCodecResourceID, CODEC_ID_WMAV2, "Windows Media Audio 2", "An AudioCodec that decodes WMA v2 into linear PCM", kAudioFormatWMA2MS)
 Codec(kFlashADPCMCodecResourceID, CODEC_ID_ADPCM_SWF, "Flash ADPCM", "An AudioCodec that decodes Flash ADPCM into linear PCM", kAudioFormatFlashADPCM)
 
 EntryPoint(kFFissionCodecManufacturer, kFFissionCodecVersion, kXiphVorbisCodecResourceID, "FFissionVBRDecoderEntry", cmpThreadSafeOnMac, )

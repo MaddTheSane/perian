@@ -48,7 +48,7 @@ static const CodecPair kAllInputFormats[] =
 	{ kAudioFormatFlashADPCM, CODEC_ID_ADPCM_SWF },
 	{ kAudioFormatXiphVorbis, CODEC_ID_VORBIS },
 	{ kAudioFormatMPEGLayer2, CODEC_ID_MP2 },
-	{ kAudioFormatMPEGLayer1, CODEC_ID_MP2 },
+	{ kAudioFormatMPEGLayer1, CODEC_ID_MP1 },
 	{ 0x6d730050, CODEC_ID_MP2 },
 	{ kAudioFormatTTA, CODEC_ID_TTA },
 	{ kAudioFormatDTS, CODEC_ID_DTS },
