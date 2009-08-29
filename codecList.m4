@@ -47,7 +47,7 @@ Codec(kFlashADPCMCodecResourceID, CODEC_ID_ADPCM_SWF, "Flash ADPCM", "An AudioCo
 
 EntryPoint(kFFissionCodecManufacturer, kFFissionCodecVersion, kXiphVorbisCodecResourceID, "FFissionVBRDecoderEntry", cmpThreadSafeOnMac, )
 Codec(kXiphVorbisCodecResourceID, CODEC_ID_VORBIS, "Vorbis", "An AudioCodec that decodes Vorbis into linear PCM", kAudioFormatXiphVorbis)
-Codec(kMPEG1L1CodecResourceID, CODEC_ID_MP2, "MPEG-1 Layer 1", "An AudioCodec that decodes MPEG-1 layer 1 audio into linear PCM", '.mp1')
+Codec(kMPEG1L1CodecResourceID, CODEC_ID_MP1, "MPEG-1 Layer 1", "An AudioCodec that decodes MPEG-1 layer 1 audio into linear PCM", '.mp1')
 Codec(kMPEG1L12CodecResourceID, CODEC_ID_MP2, "MPEG-1 Layer 1/2", "An AudioCodec that decodes MPEG-1 layer 1 or 2 audio into linear PCM", 0x6d730050)
 Codec(kMPEG1L2CodecResourceID, CODEC_ID_MP2, "MPEG-1 Layer 2", "An AudioCodec that decodes MPEG-1 layer 2 audio into linear PCM", '.mp2')
 Codec(kTrueAudioCodecResourceID, CODEC_ID_TTA, "True Audio", "An AudioCodec that decodes True Audio into linear PCM", kAudioFormatTTA)
