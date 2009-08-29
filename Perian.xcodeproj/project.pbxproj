@@ -2306,7 +2306,7 @@
 					libmatroska,
 					libebml,
 					"ffmpeg/**",
-					"$(BUILT_PRODUCTS_DIR)",
+					"\"$(BUILT_PRODUCTS_DIR)\"",
 				);
 				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				ONLY_ACTIVE_ARCH = YES;
@@ -2333,7 +2333,7 @@
 					libmatroska,
 					libebml,
 					"ffmpeg/**",
-					"$(BUILT_PRODUCTS_DIR)",
+					"\"$(BUILT_PRODUCTS_DIR)\"",
 				);
 				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
@@ -2527,7 +2527,7 @@
 					libmatroska,
 					libebml,
 					"ffmpeg/**",
-					"$(BUILT_PRODUCTS_DIR)",
+					"\"$(BUILT_PRODUCTS_DIR)\"",
 				);
 				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				OTHER_CFLAGS_i386 = "-march=pentium-m -frerun-cse-after-loop $(OTHER_CFLAGS)";
@@ -2677,6 +2677,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = "Perian - Open in QT Player";
@@ -2691,6 +2692,7 @@
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = "Perian - Open in QT Player";
@@ -2704,6 +2706,7 @@
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				GCC_VERSION = 4.0;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = "Perian - Open in QT Player";
