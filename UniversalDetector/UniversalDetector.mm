@@ -1,4 +1,6 @@
+#define uint32 CSSM_uint32
 #import "UniversalDetector.h"
+#undef uint32
 
 #import "nscore.h"
 #import "nsUniversalDetector.h"

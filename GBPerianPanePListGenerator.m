@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
 	{
 		NSString *directory = [componentDir stringByAppendingPathComponent:[types objectAtIndex:i]];
 		NSString *extension = [extensions objectAtIndex:i];
+		//note: the warning below can't be fixed, the method's replacement isn't in 10.4
 		NSEnumerator *dirEnum = [[fileManager directoryContentsAtPath:directory] objectEnumerator];
 		NSString *candidate = nil;
 		

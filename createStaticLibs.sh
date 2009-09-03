@@ -18,30 +18,17 @@ else
 fi
 
 if what /usr/bin/ld | grep -q ld64-77; then
-  no_pic=0
-else
-  no_pic=1
-fi
-
-if [ $no_pic -gt 0 ]; then
-    cflags="$cflags -mdynamic-no-pic" # ld can't handle -fno-pic on ppc
-else
-    #no-pic only on pre-leopard
-    echo "warning: Due to issues with Xcode 3.0, Perian will run very slowly! Please upgrade Xcode or fix Patches/ffmpeg.diff!";
-    generalConfigureOptions="$generalConfigureOptions --disable-decoder=cavs --disable-decoder=vc1 --disable-decoder=wmv3 --disable-mmx --enable-shared"
+    echo "Xcode 3.1 is required to build Perian";
+    exit 1
 fi 
 
-export cflags
-
 x86tune="generic"
-if [ "$CC" = "" ]; then
-	if [[ -e /usr/bin/gcc-4.2 && -e /Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.2.1 ]]; then
-		CC="gcc-4.2"
-		x86tune="core2"
-	else
-		CC="gcc-4.0"
-	fi
-	export CC
+x86flags=""
+
+if [ -e /usr/bin/gcc-4.2 ]; then
+	CC="gcc-4.2"
+	x86tune="core2"
+	x86flags="--param max-completely-peel-times=2"
 fi
 
 BUILD_ID_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
@@ -112,8 +99,7 @@ else
         mkdir -p "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
-        	optcflags="$optcflags -mtune=$x86tune -frerun-cse-after-loop" 
-        	appendcflags="-fno-unswitch-loops" #these disable things in -O3 so must be at the end
+        	optcflags="$optcflags -mtune=$x86tune $x86flags -frerun-cse-after-loop" 
         fi
 
         cd "$BUILDDIR"
@@ -132,9 +118,7 @@ else
             unset CFLAGS;
             cd ..
         fi
-        
-        perl -pi -e "s/-O3/-O3 $appendcflags/g" config.mak
-        
+                
         make -j3
     fi
     

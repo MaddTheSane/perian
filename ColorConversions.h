@@ -23,10 +23,10 @@
 #include <Carbon/Carbon.h>
 #include "libavcodec/avcodec.h"
 
-#ifndef __i386__
-#define FASTCALL
-#else
+#if defined(__i386__) && !defined(__llvm__)
 #define FASTCALL __attribute__((fastcall))
+#else
+#define FASTCALL
 #endif
 
 typedef void ColorConversionFunc(AVFrame *inPicture, UInt8 *outBaseAddr, int outRowBytes, unsigned outWidth, unsigned outHeight) FASTCALL;
