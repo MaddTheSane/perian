@@ -12,7 +12,7 @@ echo $REV
 
 cat > $SCRIPT_OUTPUT_FILE_0 <<EOF
 #define SVNREVISION $REV
-#define SVNREVISION_C_STRING \"$REV\"
+#define SVNREVISION_C_STRING "$REV"
 #define FFMPEGREVISION $ffmpeg_rev
-#define FFMPEGREVISION_C_STRING \"$ffmpeg_rev\"
+#define FFMPEGREVISION_C_STRING "$ffmpeg_rev"
 EOF

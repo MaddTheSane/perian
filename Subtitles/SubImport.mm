@@ -931,7 +931,7 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 	
 	FSRefMakePath(theDirectory, path, PATH_MAX);
 	NSString *nsPath = [[NSString stringWithUTF8String:(char *)path] stringByAppendingPathComponent:(NSString *)filename];
-	NSString *idxContent = [NSString stringWithContentsOfFile:nsPath];
+	NSString *idxContent = STLoadFileWithUnknownEncoding(nsPath);
 	NSData *privateData = nil;
 	ComponentResult err = noErr;
 	
