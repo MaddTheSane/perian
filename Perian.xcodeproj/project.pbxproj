@@ -2234,6 +2234,7 @@
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
+					"-force_cpusubtype_ALL",
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
 				PRODUCT_NAME = Perian;
@@ -2263,6 +2264,7 @@
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
+					"-force_cpusubtype_ALL",
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
 				PRODUCT_NAME = Perian;
@@ -2300,7 +2302,7 @@
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG_BUILD;
 				GCC_STRICT_ALIASING = YES;
-				"GCC_VERSION[arch=ppc]" = 4.0;
+				GCC_VERSION = 4.2;
 				HEADER_SEARCH_PATHS = (
 					libmatroska,
 					libebml,
@@ -2333,7 +2335,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_STRICT_ALIASING = YES;
-				"GCC_VERSION[arch=ppc]" = 4.0;
+				GCC_VERSION = 4.2;
 				HEADER_SEARCH_PATHS = (
 					libmatroska,
 					libebml,
@@ -2397,6 +2399,7 @@
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
+					"-force_cpusubtype_ALL",
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
 				PRODUCT_NAME = Perian;
@@ -2507,7 +2510,7 @@
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG_BUILD;
 				GCC_STRICT_ALIASING = YES;
-				"GCC_VERSION[arch=ppc]" = 4.0;
+				GCC_VERSION = 4.2;
 				HEADER_SEARCH_PATHS = (
 					libmatroska,
 					libebml,
