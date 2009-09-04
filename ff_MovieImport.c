@@ -25,12 +25,14 @@
 #include "Codecprintf.h"
 #include "riff.h"
 #include "SubImport.h"
+#include "CommonUtils.h"
 
 /* This one is a little big in ffmpeg and private anyway */
 #define PROBE_BUF_SIZE 64
 
 #include <CoreServices/CoreServices.h>
 #include <QuickTime/QuickTime.h>
+#include <pthread.h>
 
 #define MOVIEIMPORT_BASENAME()		FFAvi_MovieImport
 #define MOVIEIMPORT_GLOBALS()		ff_global_ptr storage
@@ -46,6 +48,30 @@
 #include <QuickTime/ComponentDispatchHelper.c>
 
 #pragma mark -
+
+static int PerianLockMgrCallback(void **mutex, enum AVLockOp op)
+{
+	pthread_mutex_t **m = (pthread_mutex_t **)mutex;
+	int ret = 0;
+	
+	switch (op) {
+		case AV_LOCK_CREATE:
+			*m = malloc(sizeof(pthread_mutex_t));
+			ret = pthread_mutex_init(*m, NULL);
+			break;
+		case AV_LOCK_OBTAIN:
+			ret = pthread_mutex_lock(*m);
+			break;
+		case AV_LOCK_RELEASE:
+			ret = pthread_mutex_unlock(*m);
+			break;
+		case AV_LOCK_DESTROY:
+			ret = pthread_mutex_destroy(*m);
+			free(*m);
+	}
+	
+	return ret;
+}
 
 #define REGISTER_MUXER(x) { \
 	extern AVOutputFormat x##_muxer; \
@@ -80,17 +106,20 @@ void init_FFmpeg()
 	* the libavformat only once or we get an endlos loop when registering the same
 	* element twice!! */
 	static Boolean inited = FALSE;
+	int unlock = PerianInitEnter(&inited);
 	
 	/* Register the Parser of ffmpeg, needed because we do no proper setup of the libraries */
 	if(!inited) {
 		inited = TRUE;
+		avcodec_init();
+		av_lockmgr_register(PerianLockMgrCallback);
+
 		REGISTER_DEMUXER(avi);
 		REGISTER_DEMUXER(flv);
 		REGISTER_DEMUXER(tta);
 		REGISTER_DEMUXER(nuv);
 		register_parsers();
 		
-		avcodec_init();
 		REGISTER_DECODER(msmpeg4v1);
 		REGISTER_DECODER(msmpeg4v2);
 		REGISTER_DECODER(msmpeg4v3);
@@ -128,6 +157,8 @@ void init_FFmpeg()
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
+	
+	PerianInitExit(unlock);
 }
 
 /************************************

@@ -22,6 +22,7 @@
 #include "avcodec.h"
 #include "CommonUtils.h"
 #import <Carbon/Carbon.h>
+#import <pthread.h>
 
 typedef struct LanguageTriplet {
 	char twoChar[3];
@@ -422,4 +423,21 @@ CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type)
 	}
 	
 	return val;
+}
+
+static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+int PerianInitEnter(volatile Boolean *inited)
+{
+	if (*inited)
+		return FALSE;
+	
+	pthread_mutex_lock(&init_mutex);
+	return TRUE;
+}
+
+void PerianInitExit(int unlock)
+{
+	if (unlock)
+		pthread_mutex_unlock(&init_mutex);
 }

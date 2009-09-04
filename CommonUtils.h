@@ -60,6 +60,11 @@ int IsAltivecSupported();
 
 // CFPreferencesCopyAppValue() wrapper which checks the type of the value returned
 CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type);
+
+// critical region for initializing stuff
+// component/ffmpeg initialization should be the only thing that really needs a mutex
+int PerianInitEnter(volatile Boolean *inited);
+void PerianInitExit(int unlock);
 	
 #define PERIAN_PREF_DOMAIN CFSTR("org.perian.Perian")
 

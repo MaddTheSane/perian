@@ -25,6 +25,7 @@
 #include <QuickTime/QuickTime.h>
 
 #import "ac3tab.h"
+#import "CommonUtils.h"
 //ffmpeg's struct Picture conflicts with QuickDraw's
 #define Picture MPEGPICTURE
 
@@ -861,12 +862,16 @@ void registerFFusionParsers(FFusionParser *parser)
 void initFFusionParsers()
 {
 	static Boolean inited = FALSE;
-	if(inited == FALSE)
+	int unlock = PerianInitEnter(&inited);
+	
+	if(!inited)
 	{
 		inited = TRUE;
 		registerFFusionParsers(&ffusionMpeg4VideoParser);
 		registerFFusionParsers(&ffusionH264Parser);
 	}
+	
+	PerianInitExit(unlock);
 }
 
 void ffusionParserFree(FFusionParserContext *parser)
