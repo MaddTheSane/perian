@@ -30,6 +30,8 @@ enum {kSubAlignmentBottom, kSubAlignmentMiddle, kSubAlignmentTop};
 enum {kSubBorderStyleNormal = 1, kSubBorderStyleBox = 3};
 enum {kSubPositionNone = INT_MAX};
 
+extern NSString * const kSubDefaultFontName;
+
 typedef ATSURGBAlphaColor SubRGBAColor;
 
 @interface SubStyle : NSObject {	

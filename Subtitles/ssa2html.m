@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
 	
 	[htm endOfFile];
 	
-	printf([htm->html UTF8String]);
+	puts([htm->html UTF8String]);
 	[inner_pool release];
 	[ss release];
 	[htm release];

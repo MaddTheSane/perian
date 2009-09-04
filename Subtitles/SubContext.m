@@ -22,6 +22,8 @@
 #import "SubContext.h"
 #import "SubParsing.h"
 
+NSString * const kSubDefaultFontName = @"Helvetica";
+
 @implementation SubStyle
 
 SubRGBAColor ParseSSAColor(unsigned rgb)
@@ -90,7 +92,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 	SubStyle *sty = [[[SubStyle alloc] init] autorelease];
 	
 	sty->name = @"*Default";
-	sty->fontname = @"Helvetica";
+	sty->fontname = kSubDefaultFontName;
 	sty->platformSizeScale = 1;
 	sty->size = 32 * sqrt([delegate aspectRatio] / (4./3.));
 	sty->primaryColor = (SubRGBAColor){1,1,1,1};

@@ -25,6 +25,7 @@
 #import "SubUtilities.h"
 #import "Codecprintf.h"
 #import "CommonUtils.h"
+#import <pthread.h>
 
 static float GetWinFontSizeScale(ATSFontRef font);
 static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities);
@@ -317,7 +318,9 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 }
 
 static NSMutableDictionary *fontIDCache = nil;
-static ATSUFontID fontCount=-1, *fontIDs = NULL;
+static ItemCount fontCount;
+static ATSUFontID *fontIDs = NULL;
+static pthread_mutex_t fontIDMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void CleanupFontIDCache() __attribute__((destructor));
 static void CleanupFontIDCache()
@@ -332,25 +335,43 @@ static void CleanupFontIDCache()
 
 // XXX: Assumes ATSUFontID = ATSFontRef. This is true.
 static ATSUFontID GetFontIDForSSAName(NSString *name)
-{		
-	if (fontIDCache) {
-		NSNumber *idN = [fontIDCache objectForKey:[name lowercaseString]];
-		
-		if (idN) return [idN intValue];
-	} else
-		fontIDCache = [[NSMutableDictionary alloc] init];
+{	
+	NSNumber *idN = nil;
+	NSString *lcname = [name lowercaseString];
+	
+	if (fontIDCache)
+		idN = [fontIDCache objectForKey:lcname];
+	
+	if (idN)
+		return [idN intValue];
+	
+	if (pthread_mutex_trylock(&fontIDMutex)) {
+		// if another thread is looking a font up, it might be the same font
+		// so restart and check the cache again
+		pthread_mutex_lock(&fontIDMutex);
+		pthread_mutex_unlock(&fontIDMutex);
+		return GetFontIDForSSAName(name);
+	}
+	
+	if (!fontIDCache)
+		fontIDCache = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
+					   [NSNumber numberWithInt:ATSFontFindFromName((CFStringRef)kSubDefaultFontName, kATSOptionFlagsDefault)],
+					   kSubDefaultFontName, nil];
 	
 	ByteCount nlen = [name length];
-	unichar *uname = (unichar*)[name cStringUsingEncoding:NSUnicodeStringEncoding];
+	NSData *unameData;
+	const unichar *uname = STUnicodeForString(name, &unameData);
 	ATSUFontID font;
 	
 	// should be kFontMicrosoftPlatform for the platform code
-	// but isn't for bug workarounds
+	// but isn't for bug workarounds in 10.4
 	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
 	
-	if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)name, kATSOptionFlagsDefault); // for bugs in ATS under 10.4
+	[unameData release];
+	
+	if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)name, kATSOptionFlagsDefault);
 	if (font == kATSUInvalidFontID) { // try a case-insensitive search
-		if (fontCount == -1) {
+		if (!fontIDs) {
 			ATSUFontCount(&fontCount);
 			fontIDs = malloc(sizeof(ATSUFontID[fontCount]));
 			ATSUGetFontIDs(fontIDs, fontCount, &fontCount);
@@ -361,21 +382,23 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 		const ByteCount kBufLength = 1024/sizeof(unichar);
 		unichar buf[kBufLength];
 	  
-		for (x = 0; x < fontCount; x++) {
+		for (x = 0; x < fontCount && font == kATSUInvalidFontID; x++) {
 			ATSUFindFontName(fontIDs[x], kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, kBufLength, (Ptr)buf, &len, &index);
-			NSString *fname = [NSString stringWithCharacters:buf length:len/sizeof(unichar)];
-			
-			if ([name caseInsensitiveCompare:fname] == NSOrderedSame) {
+			NSString *fname = [[NSString alloc] initWithCharactersNoCopy:buf length:len/sizeof(unichar) freeWhenDone:NO];
+
+			if ([name caseInsensitiveCompare:fname] == NSOrderedSame)
 				font = fontIDs[x];
-				break;
-			}
+			
+			[fname release];
 		}		
 	}
 	
-	if (font == kATSUInvalidFontID && ![name isEqualToString:@"Helvetica"])
-		font = GetFontIDForSSAName(@"Helvetica"); // final fallback
+	if (font == kATSUInvalidFontID && ![name isEqualToString:kSubDefaultFontName])
+		font = [[fontIDCache objectForKey:kSubDefaultFontName] intValue]; // final fallback
 	
-	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:[name lowercaseString]];
+	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:lcname];
+	
+	pthread_mutex_unlock(&fontIDMutex);
 	 
 	return font;
 }
