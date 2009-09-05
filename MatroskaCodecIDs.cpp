@@ -142,21 +142,7 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandl
 	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
 	
 	if (dir == kToSampleDescription) {
-		KaxCodecPrivate & codecPrivate = GetChild<KaxCodecPrivate>(*tr_entry);
-		
-		QTSoundDescriptionSetProperty(sndDesc, 
-		                              kQTPropertyClass_SoundDescription, 
-		                              kQTSoundDescriptionPropertyID_MagicCookie, 
-		                              codecPrivate.GetSize(), codecPrivate.GetBuffer());
-		
-		//XXX: What exactly was the point of all this?
-#if 0
-		Handle sndDescExt = NewHandle(0);
-		unsigned char *privateBuf;
-		int i;
-		int numPackets;
-		int *packetSizes;
-		int offset = 1;
+		Handle sndDescExt;
 		UInt32 uid = 0;
 		
 		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
@@ -167,55 +153,42 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandl
 		if (trackUID != NULL)
 			uid = uint32(*trackUID);
 		
-		privateBuf = (unsigned char *) codecPrivate->GetBuffer();
-		numPackets = privateBuf[0] + 1;
-		packetSizes = (int *) NewPtrClear(sizeof(int) * numPackets);
+		size_t privateSize = codecPrivate->GetSize();
+		UInt8 *privateBuf = (unsigned char *) codecPrivate->GetBuffer(), *privateEnd = privateBuf + privateSize;
 		
-		// get the sizes of the packets
-		packetSizes[numPackets - 1] = codecPrivate->GetSize() - 1;
-		int packetNum = 0;
-		for (i = 1; packetNum < numPackets - 1; i++) {
-			packetSizes[packetNum] += privateBuf[i];
-			if (privateBuf[i] < 255) {
-				packetSizes[numPackets - 1] -= packetSizes[packetNum];
-				packetNum++;
-			}
-			offset++;
-		}
-		
-		// first packet
 		unsigned long serialnoatom[3] = { EndianU32_NtoB(sizeof(serialnoatom)), 
 			EndianU32_NtoB(kCookieTypeOggSerialNo), 
 			EndianU32_NtoB(uid) };
-		unsigned long atomhead[2] = { EndianU32_NtoB(packetSizes[0] + sizeof(atomhead)), 
-			EndianU32_NtoB(kCookieTypeFLACStreaminfo) };
 		
-		PtrAndHand(serialnoatom, sndDescExt, sizeof(serialnoatom)); //check errors?
-		PtrAndHand(atomhead, sndDescExt, sizeof(atomhead)); //check errors?
-		PtrAndHand(&privateBuf[offset], sndDescExt, packetSizes[0]);
+		PtrToHand(serialnoatom, (Handle*)&sndDescExt, sizeof(serialnoatom));
 		
-		// metadata packets
-		for (i = 1; i < numPackets; i++) {
-			int j;
-			int additionalOffset = 0;
-			for (j = 0; j < i; j++) {
-				additionalOffset += packetSizes[j];
-			}
-			unsigned long atomhead2[2] = { EndianU32_NtoB(packetSizes[1] + sizeof(atomhead)), 
-				EndianU32_NtoB(kCookieTypeFLACMetadata) };
-			PtrAndHand(atomhead2, sndDescExt, sizeof(atomhead2));
-			PtrAndHand(&privateBuf[offset + additionalOffset], sndDescExt, packetSizes[1]);
+		privateBuf += 4; // skip 'fLaC'
+		
+		while ((privateEnd - privateBuf) > 4) {
+			uint32_t packetHeader = EndianU32_BtoN(*(uint32_t*)privateBuf);
+			int lastPacket = packetHeader >> 31, blockType = (packetHeader >> 24) & 0x7F;
+			uint32_t packetSize = (packetHeader & 0xFFFFFF) + 4;
+			uint32_t xiphHeader[2] = {EndianU32_NtoB(packetSize),
+				EndianU32_NtoB(blockType ? kCookieTypeFLACMetadata : kCookieTypeFLACStreaminfo)};
+						
+			if ((privateEnd - privateBuf) < packetSize)
+				break;
+			
+			PtrAndHand(xiphHeader, sndDescExt, sizeof(xiphHeader));
+			PtrAndHand(privateBuf, sndDescExt, packetSize);
+			
+			privateBuf += packetSize;
+			
+			if (lastPacket)
+				break;
 		}
-		// add the extension
-		unsigned long endAtom[2] = { EndianU32_NtoB(sizeof(endAtom)), 
-			EndianU32_NtoB(kAudioTerminatorAtomType) };
-		PtrAndHand(endAtom, sndDescExt, sizeof(endAtom));
 		
-		AddSoundDescriptionExtension(sndDesc, sndDescExt, siDecompressionParams);
-		
-		DisposePtr((Ptr)packetSizes);
+		QTSoundDescriptionSetProperty(sndDesc, 
+		                              kQTPropertyClass_SoundDescription, 
+		                              kQTSoundDescriptionPropertyID_MagicCookie, 
+		                              GetHandleSize(sndDescExt), *sndDescExt);		
+
 		DisposeHandle(sndDescExt);
-#endif
 	}
 	return noErr;
 }
@@ -709,8 +682,8 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 			case kAudioFormatXiphVorbis:
 				return DescExt_XiphVorbis(tr_entry, desc, dir);
 				
-//			case kAudioFormatXiphFLAC:
-//				return DescExt_XiphFLAC(tr_entry, desc, dir);
+			case kAudioFormatXiphFLAC:
+				return DescExt_XiphFLAC(tr_entry, desc, dir);
 				
 			case kVideoFormatXiphTheora:
 				return DescExt_XiphTheora(tr_entry, desc, dir);
