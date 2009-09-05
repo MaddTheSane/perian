@@ -159,8 +159,8 @@ else
 	if [ $buildi386 -eq $buildppc ] ; then
 		# lipo them
 		for aa in "$INTEL"/*/*.a ; do
-			echo lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
-			lipo -create $aa `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
+			echo lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
+			lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
 		done
 	else
 		if [ $buildppc -gt 0 ] ; then
