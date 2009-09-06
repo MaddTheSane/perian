@@ -68,6 +68,7 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, SampleDescriptionHan
 	if (dir == kToSampleDescription) {
 		Handle sndDescExt = NewHandle(0);
 		unsigned char *privateBuf;
+		size_t privateSize;
 		int i;
 		int numPackets;
 		int *packetSizes;
@@ -82,12 +83,13 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, SampleDescriptionHan
 		if (trackUID != NULL)
 			uid = uint32(*trackUID);
 		
+		privateSize = codecPrivate->GetSize();
 		privateBuf = (unsigned char *) codecPrivate->GetBuffer();
 		numPackets = privateBuf[0] + 1;
 		packetSizes = (int *) NewPtrClear(sizeof(int) * numPackets);
 		
 		// get the sizes of the packets
-		packetSizes[numPackets - 1] = codecPrivate->GetSize() - 1;
+		packetSizes[numPackets - 1] = privateSize - 1;
 		int packetNum = 0;
 		for (i = 1; packetNum < numPackets - 1; i++) {
 			packetSizes[packetNum] += privateBuf[i];
@@ -97,7 +99,13 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, SampleDescriptionHan
 			}
 			offset++;
 		}
+		packetSizes[numPackets - 1] -= offset - 1;
 		
+		if (offset+packetSizes[0]+packetSizes[1]+packetSizes[2] > privateSize) {
+			DisposePtr((Ptr)packetSizes);
+			return invalidAtomErr;
+		}
+
 		// first packet
 		unsigned long serialnoatom[3] = { EndianU32_NtoB(sizeof(serialnoatom)), 
 			EndianU32_NtoB(kCookieTypeOggSerialNo), 
@@ -120,14 +128,11 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, SampleDescriptionHan
 			EndianU32_NtoB(kCookieTypeVorbisCodebooks) };
 		PtrAndHand(atomhead3, sndDescExt, sizeof(atomhead3));
 		PtrAndHand(&privateBuf[offset + packetSizes[1] + packetSizes[0]], sndDescExt, packetSizes[2]);
-		
-		// add the extension
-		unsigned long endAtom[2] = { EndianU32_NtoB(sizeof(endAtom)), 
-			EndianU32_NtoB(kAudioTerminatorAtomType) };
-		PtrAndHand(endAtom, sndDescExt, sizeof(endAtom));
-		
-		AddSoundDescriptionExtension(sndDesc, sndDescExt, siDecompressionParams);
-		
+
+		QTSoundDescriptionSetProperty(sndDesc, 
+		                              kQTPropertyClass_SoundDescription, 
+		                              kQTSoundDescriptionPropertyID_MagicCookie, 
+		                              GetHandleSize(sndDescExt), *sndDescExt);		
 		DisposePtr((Ptr)packetSizes);
 		DisposeHandle(sndDescExt);
 	}
@@ -201,6 +206,7 @@ ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHan
 	if (dir == kToSampleDescription) {
 		Handle imgDescExt = NewHandle(0);
 		unsigned char *privateBuf;
+		size_t privateSize;
 		int i;
 		int numPackets;
 		int *packetSizes;
@@ -215,12 +221,13 @@ ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHan
 		if (trackUID != NULL)
 			uid = uint32(*trackUID);
 		
+		privateSize = codecPrivate->GetSize();
 		privateBuf = (unsigned char *) codecPrivate->GetBuffer();
 		numPackets = privateBuf[0] + 1;
 		packetSizes = (int *) NewPtrClear(sizeof(int) * numPackets);
 		
 		// get the sizes of the packets
-		packetSizes[numPackets - 1] = codecPrivate->GetSize() - 1;
+		packetSizes[numPackets - 1] = privateSize - 1;
 		int packetNum = 0;
 		for (i = 1; packetNum < numPackets - 1; i++) {
 			packetSizes[packetNum] += privateBuf[i];
@@ -229,6 +236,12 @@ ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHan
 				packetNum++;
 			}
 			offset++;
+		}
+		packetSizes[numPackets - 1] -= offset - 1;
+		
+		if (offset+packetSizes[0]+packetSizes[1]+packetSizes[2] > privateSize) {
+			DisposePtr((Ptr)packetSizes);
+			return invalidAtomErr;
 		}
 		
 		// first packet
