@@ -50,6 +50,7 @@ private:
 	void SetupExtradata(OSType formatID);
 	int ConvertXiphVorbisCookie();
 	void OpenAVCodec();
+	void CloseAVCodec();
 	
 	UInt32 kIntPCMOutFormatFlag;
 	Byte *magicCookie;

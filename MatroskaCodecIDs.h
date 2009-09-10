@@ -53,7 +53,7 @@ typedef enum {
 } DescExtDirection;
 
 extern ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
-extern ComponentResult MkvFinishAudioDescriptions(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl);
+extern ComponentResult MkvFinishAudioDescription(KaxTrackEntry *tr_entry, Handle *cookie, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl);
 extern FourCharCode MkvGetFourCC(KaxTrackEntry *tr_entry);
 
 extern "C"{

@@ -65,6 +65,21 @@ static CodecID GetCodecID(OSType formatID)
 	return CODEC_ID_NONE;
 }
 
+//CA tends to not set the magic cookie immediately, but we need it to open most codecs
+//so check this to not open the codec until it's possible
+//FIXME or we could just open the codec and ignore errors?
+static bool CodecRequiresExtradata(OSType formatID)
+{
+	switch (formatID) {
+		case kAudioFormatWMA1MS:
+		case kAudioFormatWMA2MS:
+		case kAudioFormatXiphVorbis:
+		case kAudioFormatTTA:
+			return true;
+	}
+	
+	return false;
+}
 
 FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0)
 {
@@ -121,6 +136,8 @@ void FFissionDecoder::Initialize(const AudioStreamBasicDescription* inInputForma
 		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
 	
 	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
+	
+	OpenAVCodec();	
 }
 
 void FFissionDecoder::Uninitialize()
@@ -152,7 +169,9 @@ void FFissionDecoder::SetMagicCookie(const void* inMagicCookieData, UInt32 inMag
 	} else
 		magicCookie = NULL;
 	
-	FFissionCodec::SetMagicCookie(inMagicCookieData, inMagicCookieDataByteSize);
+	FFissionCodec::SetMagicCookie(inMagicCookieData, inMagicCookieDataByteSize);	
+	
+	CloseAVCodec();
 }
 
 void FFissionDecoder::SetupExtradata(OSType formatID)
@@ -278,11 +297,8 @@ void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& i
 		CODEC_THROW(kAudioCodecStateError);
 	}
 	
-	if (avCodec) {
-		avcodec_close(avContext);
-		avCodec = NULL;
-	}
-	
+	CloseAVCodec();
+
 	CodecID codecID = GetCodecID(inInputFormat.mFormatID);
 	
 	// check to make sure the input format is legal
@@ -292,19 +308,25 @@ void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& i
 	}
 	
 	// tell our base class about the new format
-	FFissionCodec::SetCurrentInputFormat(inInputFormat);
+	FFissionCodec::SetCurrentInputFormat(inInputFormat);	
 }
 	
 void FFissionDecoder::OpenAVCodec()
 {
 	if (!mIsInitialized)
 		CODEC_THROW(kAudioCodecStateError);
+		
+	// it's initialized, but not enough. wait for more to be set
+	// note it should never get a magicCookie but no input format
+	if (!magicCookie && CodecRequiresExtradata(mInputFormat.mFormatID))
+		return;
+	
+	CloseAVCodec();
 	
 	CodecID codecID = GetCodecID(mInputFormat.mFormatID);
-	
 	avCodec = avcodec_find_decoder(codecID);
 	
-	avcodec_get_context_defaults(avContext);
+	avcodec_get_context_defaults2(avContext, CODEC_TYPE_AUDIO);
 	
 	avContext->sample_rate = mInputFormat.mSampleRate;
 	avContext->channels = mInputFormat.mChannelsPerFrame;
@@ -349,6 +371,14 @@ void FFissionDecoder::OpenAVCodec()
 			default:
 				break;
 		}
+	}
+}
+
+void FFissionDecoder::CloseAVCodec()
+{
+	if (avCodec) {
+		avcodec_close(avContext);
+		avCodec = NULL;
 	}
 }
 
@@ -541,10 +571,13 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 {
 	UInt32 ans;
 	
+	if (!mIsInitialized)
+		CODEC_THROW(kAudioCodecStateError);
+	
 	if (!avCodec)
 		OpenAVCodec();
 	
-	if (!mIsInitialized || !avCodec)
+	if (!avCodec)
 		CODEC_THROW(kAudioCodecStateError);
 	
 	UInt32 written = 0;

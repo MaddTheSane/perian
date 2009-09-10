@@ -488,14 +488,15 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 
 ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
 {
-	SoundDescriptionHandle sndDesc;
+	SoundDescriptionHandle sndDesc = NULL;
 	AudioStreamBasicDescription asbd = {0};
 	AudioChannelLayout acl = {0};
     AudioChannelLayout *pacl = &acl;
     ByteCount acl_size = sizeof(acl);
 	ByteCount ioSize = sizeof(asbd);
 	ByteCount cookieSize = 0;
-	Ptr magicCookie = NULL;
+	Handle cookieH = NULL;
+	Ptr cookie = NULL;
 	
 	mkvTrack.theTrack = NewMovieTrack(theMovie, 0, 0, kFullVolume);
 	if (mkvTrack.theTrack == NULL)
@@ -517,10 +518,14 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	asbd.mSampleRate = Float64(sampleFreq);
 	asbd.mChannelsPerFrame = uint32(numChannels);
 	
-	MkvFinishAudioDescriptions(&kaxTrack, &asbd, &acl);
+	MkvFinishAudioDescription(&kaxTrack, &cookieH, &asbd, &acl);
+	if (cookieH) {
+		cookie = *cookieH;
+		cookieSize = GetHandleSize(cookieH);
+	}
 	
 	// get more info about the codec
-	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, NULL, &ioSize, &asbd);
+	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
 	if(asbd.mChannelsPerFrame == 0)
 		asbd.mChannelsPerFrame = 1;		// avoid a div by zero
 	
@@ -532,8 +537,9 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 		acl_size = 0;
 	}
 	
-	OSStatus err = QTSoundDescriptionCreate(&asbd, pacl, acl_size, magicCookie, cookieSize, 
+	OSStatus err = QTSoundDescriptionCreate(&asbd, pacl, acl_size, cookie, cookieSize, 
 											kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndDesc);
+	DisposeHandle(cookieH);
 	if (err) {
 		Codecprintf(NULL, "Borked audio track entry, hoping we can parse the track for asbd\n");
 		DisposeHandle((Handle)sndDesc);
@@ -541,8 +547,6 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	}
 	
 	mkvTrack.desc = (SampleDescriptionHandle) sndDesc;
-	err = MkvFinishSampleDescription(&kaxTrack, mkvTrack.desc, kToSampleDescription);
-	if (err) return err;
 	
 	err = QTSampleTableCreateMutable(NULL, GetMovieTimeScale(theMovie), NULL, &mkvTrack.sampleTable);
 	if (err) return err;

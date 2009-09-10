@@ -60,10 +60,9 @@ ComponentResult DescExt_H264(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 
 // xiph-qt expects these this sound extension to have been created from first 3 packets
 // which are stored in CodecPrivate in Matroska
-ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
+ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, Handle *cookie, DescExtDirection dir)
 {
-	if (!tr_entry || !desc) return paramErr;
-	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
+	if (!tr_entry || !cookie) return paramErr;
 	
 	if (dir == kToSampleDescription) {
 		Handle sndDescExt = NewHandle(0);
@@ -129,22 +128,18 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, SampleDescriptionHan
 		PtrAndHand(atomhead3, sndDescExt, sizeof(atomhead3));
 		PtrAndHand(&privateBuf[offset + packetSizes[1] + packetSizes[0]], sndDescExt, packetSizes[2]);
 
-		QTSoundDescriptionSetProperty(sndDesc, 
-		                              kQTPropertyClass_SoundDescription, 
-		                              kQTSoundDescriptionPropertyID_MagicCookie, 
-		                              GetHandleSize(sndDescExt), *sndDescExt);		
+		*cookie = sndDescExt;
+
 		DisposePtr((Ptr)packetSizes);
-		DisposeHandle(sndDescExt);
 	}
 	return noErr;
 }
 
 // xiph-qt expects these this sound extension to have been created in this way
 // from the packets which are stored in the CodecPrivate element in Matroska
-ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
+ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, Handle *cookie, DescExtDirection dir)
 {
-	if (!tr_entry || !desc) return paramErr;
-	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
+	if (!tr_entry || !cookie) return paramErr;
 	
 	if (dir == kToSampleDescription) {
 		Handle sndDescExt;
@@ -188,12 +183,7 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, SampleDescriptionHandl
 				break;
 		}
 		
-		QTSoundDescriptionSetProperty(sndDesc, 
-		                              kQTPropertyClass_SoundDescription, 
-		                              kQTSoundDescriptionPropertyID_MagicCookie, 
-		                              GetHandleSize(sndDescExt), *sndDescExt);		
-
-		DisposeHandle(sndDescExt);
+		*cookie = sndDescExt;	
 	}
 	return noErr;
 }
@@ -366,7 +356,7 @@ static const unsigned kAACFrequencyIndexes[] = {
 
 static bool ShouldWriteSBRExt(unsigned output_freq_index)
 {
-	if (output_freq_index == 0)
+	if (output_freq_index < 3)
 		return CFPreferencesGetAppBooleanValue(CFSTR("Allow96kSBR"), PERIAN_PREF_DOMAIN, NULL);
 	
 	return true;
@@ -557,16 +547,12 @@ ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 	return noErr;
 }
 
-ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
+ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, Handle *cookie, DescExtDirection dir)
 {
-	if (!tr_entry || !desc) return paramErr;
-	SoundDescriptionHandle sndDesc = (SoundDescriptionHandle) desc;
+	if (!tr_entry || !cookie) return paramErr;
 	
 	if (dir == kToSampleDescription) {
-		Handle esdsExt = CreateEsdsExt(tr_entry, true);
-				
-		QTSoundDescriptionSetProperty(sndDesc, kQTPropertyClass_SoundDescription, kQTSoundDescriptionPropertyID_MagicCookie, GetHandleSize(esdsExt), *esdsExt);
-		DisposeHandle((Handle) esdsExt);
+		*cookie = CreateEsdsExt(tr_entry, true);
 	}
 
 	return noErr;
@@ -579,50 +565,28 @@ ComponentResult ASBDExt_LPCM(KaxTrackEntry *tr_entry, AudioStreamBasicDescriptio
 	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
 	if (!tr_codec) return paramErr;
 	string codecid(*tr_codec);
+	bool isFloat = codecid == MKV_A_PCM_FLOAT;
 	
-	// is this correct here?
-	asbd->mBytesPerPacket = asbd->mFramesPerPacket = asbd->mChannelsPerFrame * asbd->mBitsPerChannel / 8;
-	
-	if (codecid == MKV_A_PCM_BIG)
-		asbd->mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;
-	// not sure about signedness; I think it should all be unsigned, 
-	// but saying 16 bits unsigned doesn't work, nor does signed 8 bits
-	else if (codecid == MKV_A_PCM_LIT && asbd->mBitsPerChannel > 8)
-		asbd->mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
-	else if (codecid == MKV_A_PCM_FLOAT)
-		asbd->mFormatFlags |= kLinearPCMFormatFlagIsFloat;
+	asbd->mFormatFlags = CalculateLPCMFlags(asbd->mBitsPerChannel, asbd->mBitsPerChannel, isFloat, isFloat ? false : (codecid == MKV_A_PCM_BIG), false);
+	if (asbd->mBitsPerChannel == 8)
+		asbd->mFormatFlags &= ~kLinearPCMFormatFlagIsSignedInteger;
 	
 	return noErr;
 }
 
-ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
+ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, Handle cookie, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
 {
 	if (!tr_entry || !asbd) return paramErr;
-	// newer Matroska files have the esds atom stored in the codec private
-	// use it for our AudioStreamBasicDescription and AudioChannelLayout if possible
-	Handle esdsExt = CreateEsdsExt(tr_entry, true);
+	ByteCount cookieSize = GetHandleSize(cookie), aclSize = sizeof(*acl);
 	OSStatus err = noErr;
-	
-	Ptr magicCookie = *esdsExt;
-	ByteCount cookieSize = GetHandleSize(esdsExt), asbdSize = sizeof(*asbd), aclSize = sizeof(*acl);
-	
-	err = AudioFormatGetProperty(kAudioFormatProperty_ASBDFromESDS,
-								 cookieSize,
-								 magicCookie,
-								 &asbdSize,
-								 asbd);
-	if (err != noErr) 
-		FourCCprintf("MatroskaQT: Error creating ASBD from AAC esds ", err);
-	
+
 	err = AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutFromESDS,
 								 cookieSize,
-								 magicCookie,
+								 *cookie,
 								 &aclSize,
 								 acl);
 	if (err != noErr) 
 		FourCCprintf("MatroskaQT: Error creating ACL from AAC esds ", err);
-	
-	DisposeHandle(esdsExt);
 	
 	return err;
 }
@@ -642,15 +606,6 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 		memcpy(*imgDescExt, codecPrivate.GetBuffer(), codecPrivate.GetSize());
 		
 		AddImageDescriptionExtension((ImageDescriptionHandle) desc, imgDescExt, 'strf');
-		
-	} else if (codecString == MKV_A_MS) {
-		// WAVFORMATEX is stored in the private data, and some codecs (WMA) need it to decode
-		KaxCodecPrivate & codecPrivate = GetChild<KaxCodecPrivate>(*tr_entry);
-		
-		QTSoundDescriptionSetProperty((SoundDescriptionHandle) desc, 
-		                              kQTPropertyClass_SoundDescription, 
-		                              kQTSoundDescriptionPropertyID_MagicCookie, 
-		                              codecPrivate.GetSize(), codecPrivate.GetBuffer());
 		
 	} else if (codecString == MKV_V_QT) {
 		// This seems to work fine, but there's something it's missing to get the 
@@ -691,13 +646,7 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 		switch ((*desc)->dataFormat) {
 			case kH264CodecType:
 				return DescExt_H264(tr_entry, desc, dir);
-				
-			case kAudioFormatXiphVorbis:
-				return DescExt_XiphVorbis(tr_entry, desc, dir);
-				
-			case kAudioFormatXiphFLAC:
-				return DescExt_XiphFLAC(tr_entry, desc, dir);
-				
+								
 			case kVideoFormatXiphTheora:
 				return DescExt_XiphTheora(tr_entry, desc, dir);
 				
@@ -712,10 +661,6 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 				
 			case kMPEG4VisualCodecType:
 				return DescExt_mp4v(tr_entry, desc, dir);
-				
-			case kAudioFormatMPEG4AAC:
-			case kMPEG4AudioFormat:
-				return DescExt_aac(tr_entry, desc, dir);
 				
 			case kSubFormatSSA:
 				return DescExt_SSA(tr_entry, desc, dir);
@@ -802,14 +747,39 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 }
 
 
-ComponentResult MkvFinishAudioDescriptions(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
+ComponentResult MkvFinishAudioDescription(KaxTrackEntry *tr_entry, Handle *cookie, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
 {
+	KaxCodecID & tr_codec = GetChild<KaxCodecID>(*tr_entry);
+	KaxCodecPrivate & codecPrivate = GetChild<KaxCodecPrivate>(*tr_entry);
+	string codecString(tr_codec);
+	
+	if (codecString == MKV_A_MS) {
+		PtrToHand(codecPrivate.GetBuffer(), cookie, codecPrivate.GetSize());
+	}
+	
+	switch (asbd->mFormatID) {
+		case kAudioFormatXiphVorbis:
+			DescExt_XiphVorbis(tr_entry, cookie, kToSampleDescription);
+			break;
+			
+		case kAudioFormatXiphFLAC:
+			DescExt_XiphFLAC(tr_entry, cookie, kToSampleDescription);
+			break;
+			
+		case kAudioFormatMPEG4AAC:
+		case kMPEG4AudioFormat:
+			DescExt_aac(tr_entry, cookie, kToSampleDescription);
+			break;
+	}
+	
 	switch (asbd->mFormatID) {
 		case kAudioFormatMPEG4AAC:
-			return ASBDExt_AAC(tr_entry, asbd, acl);
+			ASBDExt_AAC(tr_entry, *cookie, asbd, acl);
+			break;
 			
 		case kAudioFormatLinearPCM:
-			return ASBDExt_LPCM(tr_entry, asbd);
+			ASBDExt_LPCM(tr_entry, asbd);
+			break;
 	}
 	return noErr;
 }
