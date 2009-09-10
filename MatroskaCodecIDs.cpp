@@ -48,12 +48,12 @@ ComponentResult DescExt_H264(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 			return noErr;
 		}
 		
-		Handle imgDescExt = NewHandle(codecPrivate->GetSize());
-		memcpy(*imgDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
+		Handle imgDescExt;
+		PtrToHand(codecPrivate->GetBuffer(), &imgDescExt, codecPrivate->GetSize());
 		
 		AddImageDescriptionExtension(imgDesc, imgDescExt, 'avcC');
 		
-		DisposeHandle((Handle) imgDescExt);
+		DisposeHandle(imgDescExt);
 	}
 	return noErr;
 }
@@ -65,13 +65,11 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, Handle *cookie, Desc
 	if (!tr_entry || !cookie) return paramErr;
 	
 	if (dir == kToSampleDescription) {
-		Handle sndDescExt = NewHandle(0);
+		Handle sndDescExt;
 		unsigned char *privateBuf;
 		size_t privateSize;
-		int i;
-		int numPackets;
-		int *packetSizes;
-		int offset = 1;
+		uint8_t numPackets;
+		int offset = 1, i;
 		UInt32 uid = 0;
 		
 		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
@@ -85,7 +83,9 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, Handle *cookie, Desc
 		privateSize = codecPrivate->GetSize();
 		privateBuf = (unsigned char *) codecPrivate->GetBuffer();
 		numPackets = privateBuf[0] + 1;
-		packetSizes = (int *) NewPtrClear(sizeof(int) * numPackets);
+		
+		int packetSizes[numPackets];
+		memset(packetSizes, 0, sizeof(packetSizes));
 		
 		// get the sizes of the packets
 		packetSizes[numPackets - 1] = privateSize - 1;
@@ -101,36 +101,32 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, Handle *cookie, Desc
 		packetSizes[numPackets - 1] -= offset - 1;
 		
 		if (offset+packetSizes[0]+packetSizes[1]+packetSizes[2] > privateSize) {
-			DisposePtr((Ptr)packetSizes);
 			return invalidAtomErr;
 		}
 
 		// first packet
-		unsigned long serialnoatom[3] = { EndianU32_NtoB(sizeof(serialnoatom)), 
+		uint32_t serial_header_atoms[3+2] = { EndianU32_NtoB(3*4), 
 			EndianU32_NtoB(kCookieTypeOggSerialNo), 
-			EndianU32_NtoB(uid) };
-		unsigned long atomhead[2] = { EndianU32_NtoB(packetSizes[0] + sizeof(atomhead)), 
+			EndianU32_NtoB(uid),
+			EndianU32_NtoB(packetSizes[0] + 2*4), 
 			EndianU32_NtoB(kCookieTypeVorbisHeader) };
 		
-		PtrAndHand(serialnoatom, sndDescExt, sizeof(serialnoatom)); //check errors?
-		PtrAndHand(atomhead, sndDescExt, sizeof(atomhead)); //check errors?
+		PtrToHand(serial_header_atoms, &sndDescExt, sizeof(serial_header_atoms));
 		PtrAndHand(&privateBuf[offset], sndDescExt, packetSizes[0]);
 		
 		// second packet
-		unsigned long atomhead2[2] = { EndianU32_NtoB(packetSizes[1] + sizeof(atomhead)), 
+		uint32_t atomhead2[2] = { EndianU32_NtoB(packetSizes[1] + sizeof(atomhead2)), 
 			EndianU32_NtoB(kCookieTypeVorbisComments) };
 		PtrAndHand(atomhead2, sndDescExt, sizeof(atomhead2));
 		PtrAndHand(&privateBuf[offset + packetSizes[0]], sndDescExt, packetSizes[1]);
 		
 		// third packet
-		unsigned long atomhead3[2] = { EndianU32_NtoB(packetSizes[2] + sizeof(atomhead)), 
+		uint32_t atomhead3[2] = { EndianU32_NtoB(packetSizes[2] + sizeof(atomhead3)), 
 			EndianU32_NtoB(kCookieTypeVorbisCodebooks) };
 		PtrAndHand(atomhead3, sndDescExt, sizeof(atomhead3));
 		PtrAndHand(&privateBuf[offset + packetSizes[1] + packetSizes[0]], sndDescExt, packetSizes[2]);
 
 		*cookie = sndDescExt;
-
-		DisposePtr((Ptr)packetSizes);
 	}
 	return noErr;
 }
@@ -194,13 +190,11 @@ ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHan
 	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
 	
 	if (dir == kToSampleDescription) {
-		Handle imgDescExt = NewHandle(0);
+		Handle imgDescExt;
 		unsigned char *privateBuf;
 		size_t privateSize;
-		int i;
-		int numPackets;
-		int *packetSizes;
-		int offset = 1;
+		uint8_t numPackets;
+		int offset = 1, i;
 		UInt32 uid = 0;
 		
 		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
@@ -214,7 +208,9 @@ ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHan
 		privateSize = codecPrivate->GetSize();
 		privateBuf = (unsigned char *) codecPrivate->GetBuffer();
 		numPackets = privateBuf[0] + 1;
-		packetSizes = (int *) NewPtrClear(sizeof(int) * numPackets);
+		
+		int packetSizes[numPackets];
+		memset(packetSizes, 0, sizeof(packetSizes));
 		
 		// get the sizes of the packets
 		packetSizes[numPackets - 1] = privateSize - 1;
@@ -230,39 +226,36 @@ ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHan
 		packetSizes[numPackets - 1] -= offset - 1;
 		
 		if (offset+packetSizes[0]+packetSizes[1]+packetSizes[2] > privateSize) {
-			DisposePtr((Ptr)packetSizes);
 			return invalidAtomErr;
 		}
 		
 		// first packet
-		unsigned long serialnoatom[3] = { EndianU32_NtoB(sizeof(serialnoatom)), 
-			EndianU32_NtoB(kCookieTypeOggSerialNo), EndianU32_NtoB(uid) };
-		unsigned long atomhead[2] = { EndianU32_NtoB(packetSizes[0] + sizeof(atomhead)), 
+		uint32_t serial_header_atoms[3+2] = { EndianU32_NtoB(3*4), 
+			EndianU32_NtoB(kCookieTypeOggSerialNo), EndianU32_NtoB(uid),
+			EndianU32_NtoB(packetSizes[0] + 2*4), 
 			EndianU32_NtoB(kCookieTypeTheoraHeader) };
 		
-		PtrAndHand(serialnoatom, imgDescExt, sizeof(serialnoatom)); //check errors?
-		PtrAndHand(atomhead, imgDescExt, sizeof(atomhead)); //check errors?
+		PtrToHand(serial_header_atoms, &imgDescExt, sizeof(serial_header_atoms));
 		PtrAndHand(&privateBuf[offset], imgDescExt, packetSizes[0]);
 		
 		// second packet
-		unsigned long atomhead2[2] = { EndianU32_NtoB(packetSizes[1] + sizeof(atomhead)), 
+		uint32_t atomhead2[2] = { EndianU32_NtoB(packetSizes[1] + sizeof(atomhead2)), 
 			EndianU32_NtoB(kCookieTypeTheoraComments) };
 		PtrAndHand(atomhead2, imgDescExt, sizeof(atomhead2));
 		PtrAndHand(&privateBuf[offset + packetSizes[0]], imgDescExt, packetSizes[1]);
 		
 		// third packet
-		unsigned long atomhead3[2] = { EndianU32_NtoB(packetSizes[2] + sizeof(atomhead)), 
+		uint32_t atomhead3[2] = { EndianU32_NtoB(packetSizes[2] + sizeof(atomhead3)), 
 			EndianU32_NtoB(kCookieTypeTheoraCodebooks) };
 		PtrAndHand(atomhead3, imgDescExt, sizeof(atomhead3));
 		PtrAndHand(&privateBuf[offset + packetSizes[1] + packetSizes[0]], imgDescExt, packetSizes[2]);
 		
 		// add the extension
-		unsigned long endAtom[2] = { EndianU32_NtoB(sizeof(endAtom)), EndianU32_NtoB(kAudioTerminatorAtomType) };
+		uint32_t endAtom[2] = { EndianU32_NtoB(sizeof(endAtom)), EndianU32_NtoB(kAudioTerminatorAtomType) };
 		PtrAndHand(endAtom, imgDescExt, sizeof(endAtom));
 		
 		AddImageDescriptionExtension(imgDesc, imgDescExt, kTheoraDescExtension);
 		
-		DisposePtr((Ptr)packetSizes);
 		DisposeHandle(imgDescExt);
 	}
 	return noErr;
@@ -279,12 +272,12 @@ ComponentResult DescExt_VobSub(KaxTrackEntry *tr_entry, SampleDescriptionHandle 
 		if (codecPrivate == NULL)
 			return invalidAtomErr;
 		
-		Handle imgDescExt = NewHandle(codecPrivate->GetSize());
-		memcpy(*imgDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
+		Handle imgDescExt;
+		PtrToHand(codecPrivate->GetBuffer(), &imgDescExt, codecPrivate->GetSize());
 		
 		AddImageDescriptionExtension(imgDesc, imgDescExt, kVobSubIdxExtension);
 		
-		DisposeHandle((Handle) imgDescExt);
+		DisposeHandle(imgDescExt);
 	}
 	return noErr;
 }
@@ -299,12 +292,12 @@ ComponentResult DescExt_SSA(KaxTrackEntry *tr_entry, SampleDescriptionHandle des
 		if (codecPrivate == NULL)
 			return invalidAtomErr;
 		
-		Handle imgDescExt = NewHandle(codecPrivate->GetSize());
-		memcpy(*imgDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
-		
+		Handle imgDescExt;
+		PtrToHand(codecPrivate->GetBuffer(), &imgDescExt, codecPrivate->GetSize());
+
 		AddImageDescriptionExtension(imgDesc, imgDescExt, kSubFormatSSA);
 		
-		DisposeHandle((Handle) imgDescExt);
+		DisposeHandle(imgDescExt);
 	}
 	return noErr;
 }
@@ -319,12 +312,12 @@ ComponentResult DescExt_Real(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 		if (codecPrivate == NULL)
 			return invalidAtomErr;
 		
-		Handle imgDescExt = NewHandle(codecPrivate->GetSize());
-		memcpy(*imgDescExt, codecPrivate->GetBuffer(), codecPrivate->GetSize());
-		
+		Handle imgDescExt;
+		PtrToHand(codecPrivate->GetBuffer(), &imgDescExt, codecPrivate->GetSize());
+
 		AddImageDescriptionExtension(imgDesc, imgDescExt, kRealVideoExtension);
 		
-		DisposeHandle((Handle) imgDescExt);
+		DisposeHandle(imgDescExt);
 	}
 	return noErr;
 }
@@ -387,7 +380,7 @@ static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vos
 
 	for (int i = 0; i < sizeof(kMatroskaAACProfiles)/sizeof(MatroskaQT_AACProfileName); i++) {
 		const MatroskaQT_AACProfileName *prof = &kMatroskaAACProfiles[i];
-		if (strcmp(codecString.c_str(), prof->name) == 0) {profile = prof->profile; break;}
+		if (codecString == prof->name) {profile = prof->profile; break;}
 	}
 	
 	*vosBuf++ = (profile << 3) | (freq_index >> 1);
@@ -624,8 +617,8 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 		// need it to decode
 		KaxCodecPrivate & codecPrivate = GetChild<KaxCodecPrivate>(*tr_entry);
 		
-		Handle imgDescExt = NewHandle(codecPrivate.GetSize());
-		memcpy(*imgDescExt, codecPrivate.GetBuffer(), codecPrivate.GetSize());
+		Handle imgDescExt;
+		PtrToHand(codecPrivate.GetBuffer(), &imgDescExt, codecPrivate.GetSize());
 		
 		AddImageDescriptionExtension((ImageDescriptionHandle) desc, imgDescExt, 'strf');
 		
