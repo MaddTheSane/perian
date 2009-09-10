@@ -269,7 +269,7 @@
 		else
 			userInstalled = YES;
 
-#warning TODO(durin42) Should filter out components that aren't installed from this list.
+//#warning TODO(durin42) Should filter out components that aren't installed from this list.
 		componentReplacementInfo = [[NSArray alloc] initWithContentsOfFile:[[[self bundle] resourcePath] stringByAppendingPathComponent:ComponentInfoPlist]];
 	}
 	

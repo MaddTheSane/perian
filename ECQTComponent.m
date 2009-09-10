@@ -39,7 +39,7 @@ NSMutableDictionary*	mCache = 0;
 -(id)initWithPath:(NSString*)path
 {
 //	NSLog(@"init with %@", path);
-#warning TODO(durin42) There's a lot of caching here - I don't think we really need it to be efficient.
+//#warning TODO(durin42) There's a lot of caching here - I don't think we really need it to be efficient.
 	if (!mCache)
 	{
 		mCache = [[NSMutableDictionary dictionary] retain];
