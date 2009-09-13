@@ -49,10 +49,10 @@ static const CodecPair kAllInputFormats[] =
 	{ kAudioFormatXiphVorbis, CODEC_ID_VORBIS },
 	{ kAudioFormatMPEGLayer2, CODEC_ID_MP2 },
 	{ kAudioFormatMPEGLayer1, CODEC_ID_MP1 },
-	{ 0x6d730050, CODEC_ID_MP2 },
-	{ kAudioFormatTTA, CODEC_ID_TTA },
+	{ 'ms\0\0' + 0x50, CODEC_ID_MP2 },
 	{ kAudioFormatDTS, CODEC_ID_DTS },
 	{ kAudioFormatNellymoser, CODEC_ID_NELLYMOSER },
+	{ kAudioFormatTTA, CODEC_ID_TTA},
 	{ 0, CODEC_ID_NONE }
 };
 
@@ -79,6 +79,14 @@ static bool CodecRequiresExtradata(OSType formatID)
 	}
 	
 	return false;
+}
+
+// parse waveformatex in extradata back into the AVCodecContext
+// block_align is then put into the ASBD when clients call FormatInfo (well, hopefully)
+static void ParseWaveFormat(const WaveFormatEx *wEx, AVCodecContext *avContext)
+{
+	avContext->block_align = wEx->nBlockAlign;
+	avContext->bit_rate = wEx->nAvgBytesPerSec * 8;
 }
 
 FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0)
@@ -134,7 +142,7 @@ void FFissionDecoder::Initialize(const AudioStreamBasicDescription* inInputForma
 {
 	if (inMagicCookieByteSize > 0)
 		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
-	
+		
 	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
 	
 	OpenAVCodec();	
@@ -177,7 +185,7 @@ void FFissionDecoder::SetMagicCookie(const void* inMagicCookieData, UInt32 inMag
 void FFissionDecoder::SetupExtradata(OSType formatID)
 {
 	if (!magicCookie) return;
-	
+		
 	switch (formatID) {
 		case kAudioFormatWMA1MS:
 		case kAudioFormatWMA2MS:
@@ -185,6 +193,8 @@ void FFissionDecoder::SetupExtradata(OSType formatID)
 			if (magicCookieSize < 12 + 18 + 8 + 8)
 				return;
 			
+			ParseWaveFormat((WaveFormatEx*)(magicCookie + 12 + 8), avContext);
+						
 			avContext->extradata = magicCookie + 12 + 18 + 8;
 			avContext->extradata_size = magicCookieSize - 12 - 18 - 8 - 8;
 			break;
@@ -303,7 +313,7 @@ void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& i
 	
 	// check to make sure the input format is legal
 	if (avcodec_find_decoder(codecID) == NULL) {
-		Codecprintf(NULL, "Unsupported input format id %4.4s\n", &inInputFormat.mFormatID);
+		Codecprintf(NULL, "Unsupported input format id %s\n", FourCCString(inInputFormat.mFormatID));
 		CODEC_THROW(kAudioCodecUnsupportedFormatError);
 	}
 	

@@ -584,28 +584,6 @@ ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, Handle cookie, AudioStreamB
 	return err;
 }
 
-struct WAVEFORMATEX {
-	uint16_t wFormatTag;
-	uint16_t nChannels;
-	uint32_t nSamplesPerSec;
-	uint32_t nAvgBytesPerSec;
-	uint16_t nBlockAlign;
-	uint16_t wBitsPerSample;
-	uint16_t cbSize;
-} __attribute__((packed));
-
-ComponentResult ASBDExt_MSACM(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)
-{
-	if (!tr_entry || !asbd) return paramErr;
-	KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-	if (!codecPrivate || codecPrivate->GetSize() < sizeof(WAVEFORMATEX)) return noErr;
-	WAVEFORMATEX *wEx = (WAVEFORMATEX*)codecPrivate->GetBuffer();
-	
-	asbd->mBytesPerPacket = EndianU16_LtoN(wEx->nBlockAlign);
-	
-	return noErr;
-}
-
 ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
 {
 	KaxCodecID & tr_codec = GetChild<KaxCodecID>(*tr_entry);
@@ -770,7 +748,6 @@ ComponentResult MkvFinishAudioDescription(KaxTrackEntry *tr_entry, Handle *cooki
 	
 	if (codecString == MKV_A_MS) {
 		PtrToHand(codecPrivate.GetBuffer(), cookie, codecPrivate.GetSize());
-		ASBDExt_MSACM(tr_entry, asbd);
 	}
 	
 	switch (asbd->mFormatID) {

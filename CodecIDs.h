@@ -104,6 +104,18 @@ enum {
 };
 
 #ifndef REZ
+struct WaveFormatEx {
+	uint16_t wFormatTag;
+	uint16_t nChannels;
+	uint32_t nSamplesPerSec;
+	uint32_t nAvgBytesPerSec;
+	uint16_t nBlockAlign;
+	uint16_t wBitsPerSample;
+	uint16_t cbSize;
+} __attribute__((packed));
+
+typedef struct WaveFormatEx WaveFormatEx;
+
 int getCodecID(OSType componentType);
 #endif
 
