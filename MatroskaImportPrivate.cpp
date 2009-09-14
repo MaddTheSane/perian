@@ -756,6 +756,8 @@ ComponentResult MatroskaImport::ReadAttachments(KaxAttachments &attachments)
 	
 	while (attachedFile && attachedFile->GetSize() > 0) {
 		string fileMimeType = GetChild<KaxMimeType>(*attachedFile);
+		string fileName = UTFstring(GetChild<KaxFileName>(*attachedFile)).GetUTF8();
+		
 		/* The only attachments handled here are fonts, which currently can be truetype or opentype.
 		   application/x-* is probably not a permanent MIME type, but it is current practice... */
 		if (fileMimeType == "application/x-truetype-font" || fileMimeType == "application/x-font-otf") {
@@ -766,6 +768,33 @@ ComponentResult MatroskaImport::ReadAttachments(KaxAttachments &attachments)
 				ATSFontActivateFromMemory(fontData.GetBuffer(), fontData.GetSize(), kATSFontContextLocal, 
 				                          kATSFontFormatUnspecified, NULL, kATSOptionFlagsDefault, &container);
 			}
+		}
+		
+		bool isCoverArt = false, isJPEG;
+		
+		if (fileName == "cover.jpg") {
+			isCoverArt = isJPEG = true;
+		} else if (fileName == "cover.png") {
+			isCoverArt = true;
+			isJPEG = false;
+		}
+		
+		if (isCoverArt) {
+			KaxFileData & fileData = GetChild<KaxFileData>(*attachedFile);
+			FourCharCode key = 'covr'; //iTunes cover art tag
+			QTMetaDataRef movieMetaData;
+			OSStatus err = QTCopyMovieMetaData(theMovie, &movieMetaData);
+
+			err = QTMetaDataAddItem(movieMetaData, 
+							  kQTMetaDataStorageFormatiTunes, kQTMetaDataKeyFormatiTunesShortForm, 
+							  (UInt8 *)&key, sizeof(key),
+							  fileData.GetBuffer(), 
+							  fileData.GetSize(), 
+							  isJPEG ? kQTMetaDataTypeJPEGImage : kQTMetaDataTypePNGImage, NULL);
+			if (err)
+				Codecprintf(NULL, "MKV: Error adding cover art %d\n", err);
+			
+			QTMetaDataRelease(movieMetaData);
 		}
 		
 		attachedFile = &GetNextChild<KaxAttached>(attachments, *attachedFile);
