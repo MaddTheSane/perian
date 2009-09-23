@@ -85,8 +85,8 @@ static bool CodecRequiresExtradata(OSType formatID)
 // block_align is then put into the ASBD when clients call FormatInfo (well, hopefully)
 static void ParseWaveFormat(const WaveFormatEx *wEx, AVCodecContext *avContext)
 {
-	avContext->block_align = wEx->nBlockAlign;
-	avContext->bit_rate = wEx->nAvgBytesPerSec * 8;
+	avContext->block_align = EndianU16_LtoN(wEx->nBlockAlign);
+	avContext->bit_rate = EndianU32_LtoN(wEx->nAvgBytesPerSec) * 8;
 }
 
 FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0)
