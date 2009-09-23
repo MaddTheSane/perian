@@ -293,6 +293,7 @@ static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avct
     tmpContext.width = avctx->width;
     tmpContext.height = avctx->height;
     tmpContext.codec_tag = avctx->codec_tag;
+	tmpContext.codec_id  = avctx->codec_id;
     
     avcodec_open(&tmpContext, codec);
 	AVPacket pkt;
@@ -589,7 +590,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         // we do the same for the AVCodecContext since all context values are
         // correctly initialized when calling the alloc function
         
-        glob->avContext = avcodec_alloc_context();
+        glob->avContext = avcodec_alloc_context2(CODEC_TYPE_VIDEO);
 		
 		// Use low delay
 		glob->avContext->flags |= CODEC_FLAG_LOW_DELAY;
@@ -603,6 +604,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         // We also pass the FourCC since it allows the H263 hybrid decoder
         // to make the difference between the various flavours of DivX
         glob->avContext->codec_tag = Endian32_Swap(glob->componentType);
+		glob->avContext->codec_id  = codecID;
         
 		// avc1 requires the avcC extension
 		if (glob->componentType == 'avc1') {

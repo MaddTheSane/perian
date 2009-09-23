@@ -343,6 +343,7 @@ void FFissionDecoder::OpenAVCodec()
 	avContext->block_align = mInputFormat.mBytesPerPacket;
 	avContext->frame_size = mInputFormat.mFramesPerPacket;
 	avContext->bits_per_coded_sample = mInputFormat.mBitsPerChannel;
+	avContext->codec_id = codecID;
 	
 	if (avContext->sample_rate == 0) {
 		Codecprintf(NULL, "Invalid sample rate %d\n", avContext->sample_rate);
