@@ -1178,14 +1178,18 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 {
 	if (dataRefType != AliasDataHandlerSubType) return noErr;
 	
-	CFStringRef cfPath;
+	CFStringRef cfPath = NULL;
 	FSRef ref;
 	uint8_t path[PATH_MAX];
 	
-	QTGetDataReferenceFullPathCFString(dataRef, dataRefType, kQTPOSIXPathStyle, &cfPath);
+	OSErr err = QTGetDataReferenceFullPathCFString(dataRef, dataRefType, kQTPOSIXPathStyle, &cfPath);
+	if(err != noErr) return err;
+	
 	CFStringGetCString(cfPath, (char*)path, PATH_MAX, kCFStringEncodingUTF8);
-	FSPathMakeRef(path, &ref, NULL);
+	err = FSPathMakeRef(path, &ref, NULL);
 	CFRelease(cfPath);
+	
+	if(err != noErr) return err;
 	
 	return LoadExternalSubtitles(&ref, theMovie);
 }
