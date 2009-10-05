@@ -44,7 +44,7 @@
 #undef malloc
 #undef free
 
-int inline MININT(int a, int b)
+static int inline MININT(int a, int b)
 {
 	return a < b ? a : b;
 }
