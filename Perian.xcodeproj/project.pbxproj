@@ -98,7 +98,6 @@
 /* Begin PBXBuildFile section */
 		11207C730C2F4A4E002A0FF0 /* ComponentInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */; };
 		112E0C820A6436BA00DB4C29 /* FFusionCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F560DF0003D61D0101ABA332 /* FFusionCodec.c */; };
-		113077FF0D50139500ECDECC /* ECQTComponent.m in Sources */ = {isa = PBXBuildFile; fileRef = 113077FD0D50139500ECDECC /* ECQTComponent.m */; };
 		113F589A0A6B091600509987 /* Codecprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 113F58990A6B091600509987 /* Codecprintf.c */; };
 		11629EE10B51E482006591C8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629EE00B51E482006591C8 /* main.m */; };
 		11629EEB0B51E4F1006591C8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
@@ -2071,7 +2070,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				83D1D6E20B4C81F200E09EC9 /* CPFPerianPrefPaneController.m in Sources */,
-				113077FF0D50139500ECDECC /* ECQTComponent.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
