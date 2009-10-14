@@ -20,17 +20,22 @@
 *
 ****************************************************************************/
 
-#define kChristophManufacturer 'Peri'
+#define kPerianManufacturer 'Peri'
 
 #define thng_RezTemplateVersion 2
 
-#include "ff_MovieImportVersion.h"
+#include "PerianResourceIDs.h"
 #include <Carbon/Carbon.r>
 #include <QuickTime/QuickTime.r>
 #undef __CARBON_R__
 #undef __CORESERVICES_R__
 #undef __CARBONCORE_R__
 #undef __COMPONENTS_R__
+
+#define kAVIthngResID 512
+#define kFLVthngResID 515
+#define kTTAthngResID 517
+#define kNuvthngResID 518
 
 #define kFFAvi_MovieImportFlags \
 ( canMovieImportFiles | canMovieImportInPlace | canMovieImportDataReferences | canMovieImportValidateFile \
@@ -42,7 +47,7 @@
 resource 'thng' (kAVIthngResID) {
 	'eat ',					// Type
 	'VfW ',					// SubType
-	kChristophManufacturer,	// Manufacturer
+	kPerianManufacturer,	// Manufacturer
 	0,
 	0,
 	0,
@@ -73,7 +78,7 @@ resource 'thng' (kAVIthngResID) {
 resource 'thga' (513) {
 	'eat ',					// Type
 	'VFW ',					// SubType
-	kChristophManufacturer,	// Manufacturer
+	kPerianManufacturer,	// Manufacturer
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
@@ -87,7 +92,7 @@ resource 'thga' (513) {
 								// TARGET COMPONENT ---------------
 	'eat ',						// Type
 	'VfW ',						// SubType
-	kChristophManufacturer,		// Manufaturer
+	kPerianManufacturer,		// Manufaturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
 	'thnr', kAVIthngResID,				// Component public resource identifier
@@ -97,7 +102,7 @@ resource 'thga' (513) {
 resource 'thga' (514) {
 	'eat ',					// Type
 	'AVI ',					// SubType
-	kChristophManufacturer,	// Manufacturer
+	kPerianManufacturer,	// Manufacturer
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
@@ -111,7 +116,7 @@ resource 'thga' (514) {
 								// TARGET COMPONENT ---------------
 	'eat ',						// Type
 	'VfW ',						// SubType
-	kChristophManufacturer,		// Manufaturer
+	kPerianManufacturer,		// Manufaturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
 	'thnr', kAVIthngResID,				// Component public resource identifier
@@ -121,7 +126,7 @@ resource 'thga' (514) {
 resource 'thga' (515) {
 	'eat ',					// Type
 	'DIVX',					// SubType
-	kChristophManufacturer,	// Manufacturer
+	kPerianManufacturer,	// Manufacturer
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
@@ -135,7 +140,7 @@ resource 'thga' (515) {
 								// TARGET COMPONENT ---------------
 	'eat ',						// Type
 	'VfW ',						// SubType
-	kChristophManufacturer,		// Manufaturer
+	kPerianManufacturer,		// Manufaturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
 	'thnr', kAVIthngResID,				// Component public resource identifier
@@ -145,7 +150,7 @@ resource 'thga' (515) {
 resource 'thga' (516) {
 	'eat ',					// Type
 	'GVI ',					// SubType
-	kChristophManufacturer,	// Manufacturer
+	kPerianManufacturer,	// Manufacturer
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
@@ -159,7 +164,7 @@ resource 'thga' (516) {
 								// TARGET COMPONENT ---------------
 	'eat ',						// Type
 	'VfW ',						// SubType
-	kChristophManufacturer,		// Manufaturer
+	kPerianManufacturer,		// Manufaturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
 	'thnr', kAVIthngResID,				// Component public resource identifier
@@ -169,7 +174,7 @@ resource 'thga' (516) {
 resource 'thga' (517) {
 	'eat ',					// Type
 	'VP6 ',					// SubType
-	kChristophManufacturer,	// Manufacturer
+	kPerianManufacturer,	// Manufacturer
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
@@ -183,7 +188,7 @@ resource 'thga' (517) {
 								// TARGET COMPONENT ---------------
 	'eat ',						// Type
 	'VfW ',						// SubType
-	kChristophManufacturer,		// Manufaturer
+	kPerianManufacturer,		// Manufaturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
 	'thnr', kAVIthngResID,				// Component public resource identifier

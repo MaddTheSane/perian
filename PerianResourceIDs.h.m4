@@ -16,11 +16,14 @@ define(<!StartResourceID!>, <!128!>)dnl
 #define kVobSubCodecManufacturer	kPerianManufacturer
 #define kFFissionCodecManufacturer	kPerianManufacturer
 
-#define kFFusionCodecVersion		(0x00030005)
-#define kTextSubCodecVersion		(0x00020003)
-#define kVobSubCodecVersion			(0x00020003)
+#define kPerianBaseVersion			(0x00000003)
+#define kFFusionCodecVersion		(kPerianBaseVersion+0x00030002)
+#define kTextSubCodecVersion		kPerianBaseVersion
+#define kVobSubCodecVersion			kPerianBaseVersion
 #define kFFissionCodecVersion		kFFusionCodecVersion
-
+#define kMatroskaImportVersion		(kPerianBaseVersion+0x00020001)
+#define kFFAviComponentVersion		(kPerianBaseVersion+0x00010003)
+		
 enum{
 include(<!codecList.m4!>)
 };

@@ -29,7 +29,7 @@
 #include <matroska/KaxCluster.h>
 #include <matroska/KaxBlock.h>
 
-#include "MatroskaImportVersion.h"
+#include "PerianResourceIDs.h"
 #include "MatroskaImport.h"
 #include "SubImport.h"
 #include "Codecprintf.h"

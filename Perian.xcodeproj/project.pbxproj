@@ -790,7 +790,6 @@
 		61D691580AC8E382000EFC7D /* MatroskaImport.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MatroskaImport.h; sourceTree = "<group>"; };
 		61D691590AC8E382000EFC7D /* MatroskaImport.r */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.rez; path = MatroskaImport.r; sourceTree = "<group>"; };
 		61D6915A0AC8E382000EFC7D /* MatroskaImportDispatch.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MatroskaImportDispatch.h; sourceTree = "<group>"; };
-		61D6915B0AC8E382000EFC7D /* MatroskaImportVersion.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MatroskaImportVersion.h; sourceTree = "<group>"; };
 		61D6915C0AC8E382000EFC7D /* MkvExportPrivate.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MkvExportPrivate.cpp; sourceTree = "<group>"; };
 		61D6915D0AC8E382000EFC7D /* MkvExportPrivate.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MkvExportPrivate.h; sourceTree = "<group>"; };
 		61FD41320B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatroskaImportPrivate.cpp; sourceTree = "<group>"; };
@@ -1311,7 +1310,6 @@
 				61D691580AC8E382000EFC7D /* MatroskaImport.h */,
 				61FD41320B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp */,
 				61D6915A0AC8E382000EFC7D /* MatroskaImportDispatch.h */,
-				61D6915B0AC8E382000EFC7D /* MatroskaImportVersion.h */,
 			);
 			name = Import;
 			sourceTree = "<group>";
@@ -2235,7 +2233,7 @@
 					suppress,
 					"-force_cpusubtype_ALL",
 				);
-				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
+				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
 				PRODUCT_NAME = Perian;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
 				WARNING_CFLAGS = "-Wimplicit";
@@ -2266,7 +2264,7 @@
 					suppress,
 					"-force_cpusubtype_ALL",
 				);
-				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
+				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
 				PRODUCT_NAME = Perian;
 				WARNING_CFLAGS = "-Wimplicit";
 				WRAPPER_EXTENSION = component;
@@ -2402,7 +2400,7 @@
 					suppress,
 					"-force_cpusubtype_ALL",
 				);
-				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1";
+				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
 				PRODUCT_NAME = Perian;
 				WARNING_CFLAGS = "-Wimplicit";
 				WRAPPER_EXTENSION = component;

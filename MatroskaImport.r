@@ -76,7 +76,7 @@
 	#undef __COMPONENTS_R__
 #endif
 
-#include "MatroskaImportVersion.h"
+#include "PerianResourceIDs.h"
 
 #define kMkvImportResource	510
 

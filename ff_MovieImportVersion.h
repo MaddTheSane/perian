@@ -23,9 +23,7 @@
 #ifndef __FF_MOVIEIMPORTVERSION__
 #define __FF_MOVIEIMPORTVERSION__
 
-#define kFFAviComponentVersion 0x00010006
-
-#define kChristophManufacturer 'Peri'
+#include "PerianResourceIDs.h"
 
 #define kAVIthngResID 512
 #define kFLVthngResID 515
