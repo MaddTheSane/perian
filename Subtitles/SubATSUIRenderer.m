@@ -632,12 +632,12 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 #pragma mark Rendering Helper Functions
 
 // XXX see comment for GetTypographicRectangleForLayout
-static ATSUTextMeasurement GetLineHeight(ATSUTextLayout layout, UniCharArrayOffset lpos)
+static ATSUTextMeasurement GetLineHeight(ATSUTextLayout layout, UniCharArrayOffset lpos, Boolean includeDescent)
 {
-	ATSUTextMeasurement ascent, descent;
+	ATSUTextMeasurement ascent = 0, descent = 0;
 	
 	ATSUGetLineControl(layout, lpos, kATSULineAscentTag,  sizeof(ATSUTextMeasurement), &ascent,  NULL);
-	ATSUGetLineControl(layout, lpos, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
+	if (includeDescent) ATSUGetLineControl(layout, lpos, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
 	
 	return ascent + descent;
 }
@@ -666,7 +666,7 @@ static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArray
 		
 		ATSUGetGlyphBounds(layout, 0, baseY, breaks[i], end-breaks[i], kATSUseDeviceOrigins, 1, &trap, &trapCount);
 
-		baseY += GetLineHeight(layout, breaks[i]) + extraHeight;
+		baseY += GetLineHeight(layout, breaks[i], YES) + extraHeight;
 		
 		rect.bottom = MAX(trap.lowerLeft.y, trap.lowerRight.y);
 		rect.left = MIN(trap.lowerLeft.x, trap.upperLeft.x);
@@ -715,7 +715,7 @@ static void VisualizeLayoutLineHeights(CGContextRef c, ATSUTextLayout layout, Un
 		CGContextSetRGBStrokeColor(c, 0, 0, 1, 1);
 		CGContextStrokeRect(c, CGRectMake(FixedToFloat(penX) + pixRect.left, FixedToFloat(penY) + pixRect.top, pixRect.right - pixRect.left, pixRect.bottom - pixRect.top));
 		
-		penY += GetLineHeight(layout, breaks[i]) + extraHeight;
+		penY += GetLineHeight(layout, breaks[i], YES) + extraHeight;
 	}
 }
 
@@ -732,7 +732,7 @@ static void GetImageBoundingBoxForLayout(ATSUTextLayout layout, UniCharArrayOffs
 		
 		ATSUMeasureTextImage(layout, breaks[i], end-breaks[i], 0, baseY, &rect);
 		
-		baseY += GetLineHeight(layout, breaks[i]) + extraHeight;
+		baseY += GetLineHeight(layout, breaks[i], YES) + extraHeight;
 		
 		if (i == breakCount) largeRect = rect;
 		
@@ -1058,7 +1058,7 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 		
 		}
 
-		penY += breakc.direction * (GetLineHeight(layout, thisBreak) + FloatToFixed(extraHeight));
+		penY += breakc.direction * (GetLineHeight(layout, thisBreak, YES) + FloatToFixed(extraHeight));
 	}
 		
 	if (endLayer) CGContextEndTransparencyLayer(c);
@@ -1181,7 +1181,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 					break;
 				case kSubAlignmentTop:
 					if (!topPen || resetPens) {
-						penY = FloatToFixed(NSMaxY(marginRect)) - GetLineHeight(layout, kATSUFromTextBeginning);
+						penY = FloatToFixed(NSMaxY(marginRect)) - GetLineHeight(layout, kATSUFromTextBeginning, NO);
 					} else penY = topPen;
 					
 					storePen = &topPen; breakc.lStart = 0; breakc.lEnd = breakCount+1; breakc.direction = -1;
