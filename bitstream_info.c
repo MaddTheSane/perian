@@ -979,8 +979,9 @@ void ffusionLogDebugInfo(FFusionParserContext *parser, FILE *log)
 		if (parser->parserStructure == &ffusionH264Parser) {
 			H264ParserContext *h264parser = parser->internalContext;
 			
-			Codecprintf(log, "H.264 format: profile %d level %d\n\tis_avc %d\n\tframe_mbs_only %d\n\tchroma_format_idc %d\n\tframe_num_gaps %d\n",
-						h264parser->profile_idc, h264parser->level_idc, h264parser->is_avc, h264parser->frame_mbs_only_flag, h264parser->chroma_format_idc, h264parser->gaps_in_frame_num_value_allowed_flag);
+			Codecprintf(log, "H.264 format: profile %d level %d\n\tis_avc %d\n\tframe_mbs_only %d\n\tchroma_format_idc %d\n\tframe_num_gaps %d\n\tnum_reorder_frames %d\n",
+						h264parser->profile_idc, h264parser->level_idc, h264parser->is_avc, h264parser->frame_mbs_only_flag, h264parser->chroma_format_idc, h264parser->gaps_in_frame_num_value_allowed_flag,
+						h264parser->num_reorder_frames);
 		}
 	}
 }
@@ -994,9 +995,10 @@ FFusionDecodeAbilities ffusionIsParsedVideoDecodable(FFusionParserContext *parse
 		FFusionDecodeAbilities ret = FFUSION_PREFER_DECODE;
 		
 		//QT is bad at high profile
-		//FIXME QT is also bad at B-pyramid (sps.vui.num_reorder_frames > 1)
-		//but to parse that we should just use ffh264 directly
-		if(h264parser->profile_idc < 100 && !CFPreferencesGetAppBooleanValue(CFSTR("DecodeAllProfiles"), CFSTR("org.perian.Perian"), NULL))
+		//and x264 B-pyramid (sps.vui.num_reorder_frames > 1)
+		//FIXME x264 will generate pyramid differently soon (core 78+), and that might work better
+		if(h264parser->profile_idc < 100 && h264parser->num_reorder_frames < 2 && 
+		   !CFPreferencesGetAppBooleanValue(CFSTR("DecodeAllProfiles"), PERIAN_PREF_DOMAIN, NULL))
 			ret = FFUSION_PREFER_NOT_DECODE;
 		
 		//PAFF/MBAFF
