@@ -164,7 +164,7 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, Handle *cookie, DescEx
 			uint32_t packetHeader = EndianU32_BtoN(*(uint32_t*)privateBuf);
 			int lastPacket = packetHeader >> 31, blockType = (packetHeader >> 24) & 0x7F;
 			uint32_t packetSize = (packetHeader & 0xFFFFFF) + 4;
-			uint32_t xiphHeader[2] = {EndianU32_NtoB(packetSize),
+			uint32_t xiphHeader[2] = {EndianU32_NtoB(packetSize + sizeof(xiphHeader)),
 				EndianU32_NtoB(blockType ? kCookieTypeFLACMetadata : kCookieTypeFLACStreaminfo)};
 						
 			if ((privateEnd - privateBuf) < packetSize)
