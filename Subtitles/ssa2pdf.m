@@ -23,6 +23,8 @@
 #import "SubImport.h"
 #import "SubParsing.h"
 
+// vv These are Apple private API! Don't use them just because this does!
+// I have a good reason for it, I promise!
 extern CGContextRef CGPSContextCreateWithURL(CFURLRef url, const CGRect *mediaBox, CFDictionaryRef auxiliaryInfo);
 extern void CGPSContextClose(CGContextRef c);
 
