@@ -78,9 +78,14 @@ static NSString *FontWeightStringForWeight(Float32 weight)
 		return [NSString stringWithFormat:@"%d", (int)weight];
 }
 
+static NSString *EscapeCSSIdentifier(NSString *s)
+{
+	return [s stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+}
+
 -(void*)completedStyleParsing:(SubStyle*)s
 {
-	[html appendFormat:@".%@ {display: table-cell; clear: none;\n",s->name];
+	[html appendFormat:@".%@ {display: table-cell; clear: none;\n",EscapeCSSIdentifier(s->name)];
 	[html appendFormat:@"font-family: \"%@\"; ",s->fontname];
 	[html appendFormat:@"font-size: %fpt;\n",s->size * (72./96.)];
 	[html appendFormat:@"color: #%X%X%X;\n",(int)(s->primaryColor.red*255.),(int)(s->primaryColor.green*255.),(int)(s->primaryColor.blue*255.)];
@@ -196,7 +201,7 @@ NSString *htmlfilter(NSString *s)
 			close_div = 1;
 		}
 				
-		[html appendFormat:@"<span class=\"%@\">", div->styleLine->name];
+		[html appendFormat:@"<span class=\"%@\">", EscapeCSSIdentifier(div->styleLine->name)];
 		
 		for (j = 0; j < spancount; j++) {
 			SubRenderSpan *span = [div->spans objectAtIndex:j];
