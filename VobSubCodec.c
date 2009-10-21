@@ -405,6 +405,15 @@ ComponentResult VobSubCodecEndBand(VobSubCodecGlobals glob, ImageSubCodecDecompr
 	return noErr;
 }
 
+// Gamma curve value for VobSub.
+// Not specified, so assume it's the same as the video on the DVD.
+// modern PAL uses NTSC-ish gamma, so don't even bother guessing it.
+ComponentResult VobSubCodecGetSourceDataGammaLevel(VobSubCodecGlobals glob, Fixed *sourceDataGammaLevel)
+{
+	*sourceDataGammaLevel = FloatToFixed(1/.45); // == ~2.2
+	return noErr;
+}
+
 ComponentResult VobSubCodecGetCodecInfo(VobSubCodecGlobals glob, CodecInfo *info)
 {
 	OSErr err = noErr;

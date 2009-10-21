@@ -85,7 +85,7 @@
                 ComponentDelegate (ValidateParameters)
                 ComponentDelegate (GetBaseMPWorkFunction)
                 ComponentDelegate (RequestGammaLevel)
-                ComponentDelegate (GetSourceDataGammaLevel)
+                ComponentCall     (GetSourceDataGammaLevel)
                 ComponentDelegate (GetDecompressLatency)
         ComponentRangeEnd (1)
         

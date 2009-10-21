@@ -358,6 +358,15 @@ pascal ComponentResult TextSubCodecEndBand(TextSubGlobals glob, ImageSubCodecDec
 	return noErr;
 }
 
+// ImageCodecGetSourceDataGammaLevel
+// Returns 1.8, the gamma for the Generic RGB Profile (didn't change on 10.6...).
+// We should really just render sRGB instead, but that doesn't have an exact gamma value.
+pascal ComponentResult TextSubCodecGetSourceDataGammaLevel(TextSubGlobals glob, Fixed *sourceDataGammaLevel)
+{
+	*sourceDataGammaLevel = FloatToFixed(1.8);
+	return noErr;
+}
+
 // ImageCodecGetCodecInfo
 //		Your component receives the ImageCodecGetCodecInfo request whenever an application calls the Image Compression Manager's GetCodecInfo function.
 // Your component should return a formatted compressor information structure defining its capabilities.

@@ -1311,6 +1311,30 @@ pascal ComponentResult FFusionCodecQueueStopping(FFusionGlobals glob)
     return noErr;
 }
 
+// Gamma curve value for FFusion video.
+ComponentResult FFusionCodecGetSourceDataGammaLevel(FFusionGlobals glob, Fixed *sourceDataGammaLevel)
+{
+	enum AVColorTransferCharacteristic color_trc = AVCOL_TRC_UNSPECIFIED;
+	float gamma;
+	
+	if (glob->avContext)
+		color_trc = glob->avContext->color_trc;
+	
+	switch (color_trc) {
+		case AVCOL_TRC_GAMMA28:
+			gamma = 2.8;
+			break;
+		case AVCOL_TRC_GAMMA22:
+			gamma = 2.2;
+			break;
+		default: // absolutely everything in the world will reach here
+			gamma = 1/.45; // and GAMMA22 is probably a typo for this anyway
+	}
+	
+	*sourceDataGammaLevel = FloatToFixed(gamma);
+	return noErr;
+}
+
 //-----------------------------------------------------------------
 // ImageCodecGetCodecInfo
 //-----------------------------------------------------------------

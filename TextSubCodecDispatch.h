@@ -81,7 +81,7 @@
 		ComponentDelegate (0x0026)
 		ComponentDelegate (0x0027)
 		ComponentDelegate (RequestGammaLevel)
-		ComponentDelegate (GetSourceDataGammaLevel)
+		ComponentCall     (GetSourceDataGammaLevel)
 		ComponentDelegate (0x002A)
 		ComponentDelegate (GetDecompressLatency)
 		ComponentDelegate (MergeFloatingImageOntoWindow)
