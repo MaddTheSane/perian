@@ -54,7 +54,7 @@
                 ComponentDelegate (PreDecompress)
                 ComponentDelegate (BandDecompress)
                 ComponentDelegate (Busy)
-                ComponentCall (GetCompressedImageSize)
+                ComponentDelegate (GetCompressedImageSize)
                 ComponentDelegate (GetSimilarity)
                 ComponentDelegate (TrimImage)
                 ComponentDelegate (RequestSettings)

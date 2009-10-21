@@ -358,48 +358,6 @@ pascal ComponentResult TextSubCodecEndBand(TextSubGlobals glob, ImageSubCodecDec
 	return noErr;
 }
 
-// ImageCodecQueueStarting
-// 		If your component supports asynchronous scheduled decompression, the base image decompressor calls your image decompressor component's
-// ImageCodecQueueStarting function before decompressing the frames in the queue. Your component is not required to implement this function.
-// It can implement the function if it needs to perform any tasks at this time, such as locking data structures.
-// The base image decompressor never calls the ImageCodecQueueStarting function at interrupt time.
-pascal ComponentResult TextSubCodecQueueStarting(TextSubGlobals glob)
-{
-#pragma unused(glob)
-	
-	return noErr;
-}
-
-// ImageCodecQueueStopping
-//		 If your image decompressor component supports asynchronous scheduled decompression, the ImageCodecQueueStopping function notifies
-// your component that the frames in the queue have been decompressed. Your component is not required to implement this function.
-// After your image decompressor component handles an ImageCodecQueueStopping call, it can perform any tasks that are required when decompression
-// of the frames is finished, such as disposing of data structures that are no longer needed. 
-// The base image decompressor never calls the ImageCodecQueueStopping function at interrupt time.
-pascal ComponentResult TextSubCodecQueueStopping(TextSubGlobals glob)
-{
-#pragma unused(glob)
-	
-	return noErr;
-}
-
-// ImageCodecGetCompressedImageSize
-// 		Your component receives the ImageCodecGetCompressedImageSize request whenever an application calls the ICM's GetCompressedImageSize function.
-// You can use the ImageCodecGetCompressedImageSize function when you are extracting a single image from a sequence; therefore, you don't have an
-// image description structure and don't know the exact size of one frame. In this case, the Image Compression Manager calls the component to determine
-// the size of the data. Your component should return a long integer indicating the number of bytes of data in the compressed image. You may want to store
-// the image size somewhere in the image description structure, so that you can respond to this request quickly. Only decompressors receive this request.
-pascal ComponentResult TextSubCodecGetCompressedImageSize(TextSubGlobals glob, ImageDescriptionHandle desc, Ptr data, long dataSize, ICMDataProcRecordPtr dataProc, long *size)
-{
-#pragma	unused(glob,dataProc,desc)
-	if (size == NULL) 
-		return paramErr;
-
-//	*size = EndianU32_BtoN(dataSize);
-
-	return noErr;
-}
-
 // ImageCodecGetCodecInfo
 //		Your component receives the ImageCodecGetCodecInfo request whenever an application calls the Image Compression Manager's GetCodecInfo function.
 // Your component should return a formatted compressor information structure defining its capabilities.

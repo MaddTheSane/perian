@@ -405,24 +405,6 @@ ComponentResult VobSubCodecEndBand(VobSubCodecGlobals glob, ImageSubCodecDecompr
 	return noErr;
 }
 
-ComponentResult VobSubCodecQueueStarting(VobSubCodecGlobals glob)
-{
-	return noErr;
-}
-
-ComponentResult VobSubCodecQueueStopping(VobSubCodecGlobals glob)
-{
-	return noErr;
-}
-
-ComponentResult VobSubCodecGetCompressedImageSize(VobSubCodecGlobals glob, ImageDescriptionHandle desc, Ptr data, long dataSize, ICMDataProcRecordPtr dataProc, long *size)
-{
-	if (size == NULL) 
-		return paramErr;
-	
-	return unimpErr;
-}
-
 ComponentResult VobSubCodecGetCodecInfo(VobSubCodecGlobals glob, CodecInfo *info)
 {
 	OSErr err = noErr;

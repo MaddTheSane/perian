@@ -34,7 +34,6 @@
 #include <sys/sysctl.h>
 
 #include "PerianResourceIDs.h"
-#include "EI_Image.h"
 #include "avcodec.h"
 #include "Codecprintf.h"
 #include "ColorConversions.h"
@@ -1251,6 +1250,9 @@ pascal ComponentResult FFusionCodecEndBand(FFusionGlobals glob, ImageSubCodecDec
     return noErr;
 }
 
+// The below two functions are "optional" and don't do anything.
+// But removing them just makes all movies display black screens.
+
 //-----------------------------------------------------------------
 // ImageCodecQueueStarting
 //-----------------------------------------------------------------
@@ -1286,33 +1288,6 @@ pascal ComponentResult FFusionCodecQueueStarting(FFusionGlobals glob)
 
 pascal ComponentResult FFusionCodecQueueStopping(FFusionGlobals glob)
 {	
-    return noErr;
-}
-
-//-----------------------------------------------------------------
-// ImageCodecGetCompressedImageSize
-//-----------------------------------------------------------------
-// Your component receives the ImageCodecGetCompressedImageSize request 
-// whenever an application calls the ICM's GetCompressedImageSize function.
-// You can use the ImageCodecGetCompressedImageSize function when you 
-// are extracting a single image from a sequence; therefore, you don't have 
-// an image description structure and don't know the exact size of one frame. 
-// In this case, the Image Compression Manager calls the component to determine
-// the size of the data. Your component should return a long integer indicating 
-// the number of bytes of data in the compressed image. You may want to store
-// the image size somewhere in the image description structure, so that you can 
-// respond to this request quickly. Only decompressors receive this request.
-//-----------------------------------------------------------------
-
-pascal ComponentResult FFusionCodecGetCompressedImageSize(FFusionGlobals glob, ImageDescriptionHandle desc, Ptr data, long dataSize, ICMDataProcRecordPtr dataProc, long *size)
-{
-    ImageFramePtr framePtr = (ImageFramePtr)data;
-	
-    if (size == NULL) 
-		return paramErr;
-	
-    *size = EndianU32_BtoN(framePtr->frameSize) + sizeof(ImageFrame);
-	
     return noErr;
 }
 
