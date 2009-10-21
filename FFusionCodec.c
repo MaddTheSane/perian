@@ -156,7 +156,6 @@ static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic);
 static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
 static void releaseBuffer(AVCodecContext *s, FFusionBuffer *buf);
 static FFusionBuffer *retainBuffer(FFusionGlobals glob, FFusionBuffer *buf);
-static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID);
 
 int GetPPUserPreference();
 void SetPPUserPreference(int value);
@@ -304,6 +303,49 @@ static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avct
     avcodec_close(&tmpContext);
     
     return pix_fmt;
+}
+
+static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID)
+{
+	int nthreads = 1;
+	size_t len = 4;
+	
+    // multithreading is only effective for mpeg1/2 and h.264 with slices
+    if (codecID != CODEC_ID_MPEG1VIDEO && codecID != CODEC_ID_MPEG2VIDEO && codecID != CODEC_ID_H264) return;
+    
+	// two threads on multicore, otherwise 1
+	if (sysctlbyname("hw.activecpu", &nthreads, &len, NULL, 0) == -1) nthreads = 1;
+	else nthreads = FFMIN(nthreads, 2);
+	
+	avcodec_thread_init(s, nthreads);
+}
+
+static void SetSkipLoopFilter(FFusionGlobals glob, AVCodecContext *avctx)
+{
+	Boolean keyExists = FALSE;
+	int loopFilterSkip = CFPreferencesGetAppIntegerValue(CFSTR("SkipLoopFilter"), PERIAN_PREF_DOMAIN, &keyExists);
+	if(keyExists)
+	{
+		enum AVDiscard loopFilterValue = AVDISCARD_DEFAULT;
+		switch (loopFilterSkip) {
+			case 1:
+				loopFilterValue = AVDISCARD_NONREF;
+				break;
+			case 2:
+				loopFilterValue = AVDISCARD_BIDIR;
+				break;
+			case 3:
+				loopFilterValue = AVDISCARD_NONKEY;
+				break;
+			case 4:
+				loopFilterValue = AVDISCARD_ALL;
+				break;
+			default:
+				break;
+		}
+		avctx->skip_loop_filter = loopFilterValue;
+		FFusionDebugPrint("%p Preflight set skip loop filter to %d", glob, loopFilterValue);
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -672,6 +714,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		// multi-slice decoding
 		SetupMultithreadedDecoding(glob->avContext, codecID);
 		
+		// deblock skipping for h264
+		SetSkipLoopFilter(glob, glob->avContext);
+		
 		//fast flag
 		if (CFPreferencesGetAppBooleanValue(CFSTR("UseFastDecode"), PERIAN_PREF_DOMAIN, NULL))
 			glob->avContext->flags2 |= CODEC_FLAG2_FAST;
@@ -753,31 +798,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 	capabilities->flags |= codecCanAsync | codecCanAsyncWhen;
 	
 	FFusionDebugPrint("%p Preflight requesting colorspace '%s'. (error %d)\n", glob, FourCCString(pos[0]), err);
-	
-	Boolean keyExists = FALSE;
-	int loopFilterSkip = CFPreferencesGetAppIntegerValue(CFSTR("SkipLoopFilter"), PERIAN_PREF_DOMAIN, &keyExists);
-	if(keyExists)
-	{
-		enum AVDiscard loopFilterValue = AVDISCARD_DEFAULT;
-		switch (loopFilterSkip) {
-			case 1:
-				loopFilterValue = AVDISCARD_NONREF;
-				break;
-			case 2:
-				loopFilterValue = AVDISCARD_BIDIR;
-				break;
-			case 3:
-				loopFilterValue = AVDISCARD_NONKEY;
-				break;
-			case 4:
-				loopFilterValue = AVDISCARD_ALL;
-				break;
-			default:
-				break;
-		}
-		glob->avContext->skip_loop_filter = loopFilterValue;
-		FFusionDebugPrint("%p Preflight set skip loop filter to %d", glob, loopFilterValue);
-	}
 	
     return err;
 }
@@ -1573,19 +1593,4 @@ OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dat
 	} 
 	
 	return err;
-}
-
-static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID)
-{
-	int nthreads = 1;
-	size_t len = 4;
-	
-    // multithreading is only effective for mpeg1/2 and h.264 with slices
-    if (codecID != CODEC_ID_MPEG1VIDEO && codecID != CODEC_ID_MPEG2VIDEO && codecID != CODEC_ID_H264) return;
-    
-	// two threads on multicore, otherwise 1
-	if (sysctlbyname("hw.activecpu", &nthreads, &len, NULL, 0) == -1) nthreads = 1;
-	else nthreads = FFMIN(nthreads, 2);
-	
-	avcodec_thread_init(s, nthreads);
 }
