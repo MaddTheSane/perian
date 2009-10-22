@@ -471,6 +471,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
     (*imgDesc)->clutID = -1;
 	
 	set_track_clean_aperture_ext(imgDesc, width, height, IntToFixed(uint32(pxl_width)), IntToFixed(uint32(pxl_height)));
+	set_track_colorspace_ext(imgDesc, width, height);
 	mkvTrack.desc = (SampleDescriptionHandle) imgDesc;
 	
 	// this sets up anything else needed in the description for the specific codec.

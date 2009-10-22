@@ -586,6 +586,8 @@ static void get_track_dimensions_for_codec(AVStream *st, Fixed *fixedWidth, Fixe
 	else *fixedWidth = FloatToFixed(codec->width * av_q2d(st->sample_aspect_ratio));
 }
 
+// Create the 'pasp' atom for video tracks. No guesswork required.
+// References http://www.uwasa.fi/~f76998/video/conversion/
 void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW, Fixed displayH, Fixed pixelW, Fixed pixelH)
 {
 	if (displayW == pixelW && displayH == pixelH)
@@ -606,6 +608,47 @@ void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW
 	AddImageDescriptionExtension(imgDesc, (Handle)pasp, kPixelAspectRatioImageDescriptionExtension);
 	
 	DisposeHandle((Handle)pasp);
+}
+
+// Create the 'nclc' atom for video tracks. Guessed entirely from image size following ffdshow.
+// FIXME read H.264 VUI/MPEG2 etc and especially read chroma positioning information.
+// this needs the parsers working
+// References: http://developer.apple.com/quicktime/icefloe/dispatch019.html
+// http://www.mir.com/DMG/chroma.html
+void set_track_colorspace_ext(ImageDescriptionHandle imgDescHandle, Fixed displayW, Fixed displayH)
+{
+	ImageDescription *imgDesc = *imgDescHandle;
+	Boolean isHd, isPAL; // otherwise NTSC
+	AVRational palRatio = (AVRational){5, 4}, displayRatio = (AVRational){displayW, displayH};
+	int colorPrimaries, transferFunction, yuvMatrix;
+	
+	isHd  = imgDesc->height >  576;
+	isPAL = imgDesc->height == 576 || av_cmp_q(palRatio, displayRatio) == 0;
+	
+	NCLCColorInfoImageDescriptionExtension **nclc = (NCLCColorInfoImageDescriptionExtension**)NewHandle(sizeof(NCLCColorInfoImageDescriptionExtension));
+		
+	if (isHd) {
+		colorPrimaries = kQTPrimaries_ITU_R709_2;
+		transferFunction = kQTTransferFunction_ITU_R709_2;
+		yuvMatrix = kQTMatrix_ITU_R_709_2;
+	} else if (isPAL) {
+		colorPrimaries = kQTPrimaries_EBU_3213;
+		transferFunction = kQTTransferFunction_ITU_R709_2;
+		yuvMatrix = kQTMatrix_ITU_R_601_4;
+	} else {
+		colorPrimaries = kQTPrimaries_SMPTE_C;
+		transferFunction = kQTTransferFunction_ITU_R709_2;
+		yuvMatrix = kQTMatrix_ITU_R_601_4;
+	}
+	
+	**nclc = (NCLCColorInfoImageDescriptionExtension){EndianU32_NtoB(kVideoColorInfoImageDescriptionExtensionType),
+													  EndianU16_NtoB(colorPrimaries),
+													  EndianU16_NtoB(transferFunction),
+													  EndianU16_NtoB(yuvMatrix)};
+	
+	AddImageDescriptionExtension(imgDescHandle, (Handle)nclc, kColorInfoImageDescriptionExtension);
+	
+	DisposeHandle((Handle)nclc);
 }
 
 /* This function prepares the movie to receivve the movie data,
@@ -646,6 +689,7 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 			
 			initialize_video_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
 			set_track_clean_aperture_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height, IntToFixed(st->codec->width), IntToFixed(st->codec->height));
+			set_track_colorspace_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height);
 		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
 			if (st->codec->sample_rate > 0) {
 				track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
