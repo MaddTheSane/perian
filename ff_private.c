@@ -588,18 +588,10 @@ static void get_track_dimensions_for_codec(AVStream *st, Fixed *fixedWidth, Fixe
 
 void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW, Fixed displayH, Fixed pixelW, Fixed pixelH)
 {
-	CleanApertureImageDescriptionExtension    **clap = (CleanApertureImageDescriptionExtension**)NewHandle(sizeof(CleanApertureImageDescriptionExtension));
+	if (displayW == pixelW && displayH == pixelH)
+		return;
+	
 	PixelAspectRatioImageDescriptionExtension **pasp = (PixelAspectRatioImageDescriptionExtension**)NewHandle(sizeof(PixelAspectRatioImageDescriptionExtension));
-	
-	int wN = pixelW, wD = fixed1, hN = pixelH, hD = fixed1;
-
-	av_reduce(&wN, &wD, wN, wD, INT_MAX);
-	av_reduce(&hN, &hD, hN, hD, INT_MAX);
-	
-	**clap = (CleanApertureImageDescriptionExtension){EndianU32_NtoB(wN), EndianU32_NtoB(wD),
-												      EndianU32_NtoB(hN), EndianU32_NtoB(hD), 
-													  EndianS32_NtoB(0), EndianU32_NtoB(1),
-													  EndianS32_NtoB(0), EndianU32_NtoB(1)};
 	
 	AVRational dar, invPixelSize, sar;
 	
@@ -611,10 +603,8 @@ void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW
 	
 	**pasp = (PixelAspectRatioImageDescriptionExtension){EndianU32_NtoB(sar.num), EndianU32_NtoB(sar.den)};
 	
-	AddImageDescriptionExtension(imgDesc, (Handle)clap, kCleanApertureImageDescriptionExtension);
 	AddImageDescriptionExtension(imgDesc, (Handle)pasp, kPixelAspectRatioImageDescriptionExtension);
 	
-	DisposeHandle((Handle)clap);
 	DisposeHandle((Handle)pasp);
 }
 
