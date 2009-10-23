@@ -43,19 +43,14 @@
 #include "pthread.h"
 #include "CodecIDs.h"
 
-void inline swapFrame(AVFrame * *a, AVFrame * *b)
-{
-	AVFrame *t = *a;
-	*a = *b;
-	*b = t;
-}
-
 //---------------------------------------------------------------------------
 // Types
 //---------------------------------------------------------------------------
 
 // 64 because that's 2 * ffmpeg's INTERNAL_BUFFER_SIZE and QT sometimes uses more than 32
 #define FFUSION_MAX_BUFFERS 64
+
+#define kNumPixelFormatsSupportedFFusion 1
 
 typedef struct
 {
@@ -348,6 +343,13 @@ static void SetSkipLoopFilter(FFusionGlobals glob, AVCodecContext *avctx)
 	}
 }
 
+static void swapFrame(AVFrame * *a, AVFrame * *b)
+{
+	AVFrame *t = *a;
+	*a = *b;
+	*b = t;
+}
+
 //---------------------------------------------------------------------------
 // Component Routines
 //---------------------------------------------------------------------------
@@ -388,7 +390,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         glob->self = self;
         glob->target = self;
         glob->drawBandUPP = NULL;
-        glob->pixelTypes = NewHandle(10 * sizeof(OSType));
+        glob->pixelTypes = NewHandleClear((kNumPixelFormatsSupportedFFusion+1) * sizeof(OSType));
         glob->avCodec = 0;
         glob->componentType = descout.componentSubType;
 		glob->packedType = PACKED_ALL_IN_FIRST_FRAME;  //Unless we have reason to believe otherwise.
@@ -761,7 +763,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     
     capabilities->wantedPixelSize = 0;
     
-    HLock(glob->pixelTypes);
     pos = *((OSType **)glob->pixelTypes);
     
     index = 0;
@@ -782,9 +783,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		else
 			err = featureUnsupported;
 	}
-    
-    pos[index++] = 0;
-    HUnlock(glob->pixelTypes);
 	
     p->wantedDestinationPixelTypes = (OSType **)glob->pixelTypes;
     

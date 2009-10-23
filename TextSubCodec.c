@@ -31,9 +31,6 @@
 #include "PerianResourceIDs.h"
 #include "SubATSUIRenderer.h"
 
-// Constants
-const UInt8 kNumPixelFormatsSupportedTextSub = 2;
-
 // Data structures
 typedef struct TextSubGlobalsRecord {
 	ComponentInstance		self;
@@ -71,7 +68,6 @@ typedef struct {
 
 #define	GET_DELEGATE_COMPONENT()	(storage->delegateComponent)
 
-
 #if __MACH__
 	#include <CoreServices/Components.k.h>
 	#include <QuickTime/ImageCodec.k.h>
@@ -81,7 +77,9 @@ typedef struct {
 	#include <ImageCodec.k.h>
 	#include <ComponentDispatchHelper.c>
 #endif
-	
+
+#define kNumPixelFormatsSupportedTextSub 2
+
 static CFMutableStringRef CFStringCreateMutableWithBytes(CFAllocatorRef alloc, char *cStr, size_t size, CFStringEncoding encoding) {
 	CFStringRef                s1 = CFStringCreateWithBytes(alloc,(UInt8*)cStr,size,encoding,false);
 	if (!s1) return NULL;
@@ -111,7 +109,7 @@ pascal ComponentResult TextSubCodecOpen(TextSubGlobals glob, ComponentInstance s
 
 	glob->self = self;
 	glob->target = self;
-	glob->wantedDestinationPixelTypeH = (OSType **)NewHandle(sizeof(OSType) * (kNumPixelFormatsSupportedTextSub + 1));
+	glob->wantedDestinationPixelTypeH = (OSType **)NewHandleClear((kNumPixelFormatsSupportedTextSub+1) * sizeof(OSType));
 	if (err = MemError()) goto bail;
 	glob->drawBandUPP = NULL;
 	glob->ssa = NULL;
@@ -228,7 +226,6 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
     // Todo: add other possible pixel formats Quartz can handle
     *formats++	= k32RGBAPixelFormat;
 	*formats++	= k32ARGBPixelFormat;
-	*formats++	= 0;
 	
 	// Specify the minimum image band height supported by the component
 	// bandInc specifies a common factor of supported image band heights - 

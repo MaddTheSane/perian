@@ -28,9 +28,6 @@
 #include "avcodec.h"
 #include "intreadwrite.h"
 
-// Constants
-const UInt8 kNumPixelFormatsSupportedVobSub = 1;
-
 // Data structures
 typedef struct	{
 	ComponentInstance       self;
@@ -80,6 +77,7 @@ typedef struct {
 #include <QuickTime/ImageCodec.k.h>
 #include <QuickTime/ComponentDispatchHelper.c>
 
+#define kNumPixelFormatsSupportedVobSub 1
 
 // dest must be at least as large as src
 int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes, int index);
@@ -98,7 +96,7 @@ ComponentResult VobSubCodecOpen(VobSubCodecGlobals glob, ComponentInstance self)
 
 	glob->self = self;
 	glob->target = self;
-	glob->wantedDestinationPixelTypeH = (OSType **)NewHandle(sizeof(OSType) * 2);
+	glob->wantedDestinationPixelTypeH = (OSType **)NewHandleClear((kNumPixelFormatsSupportedVobSub+1) * sizeof(OSType));
 	if (err = MemError()) goto bail;
 	glob->drawBandUPP = NULL;
 	
@@ -222,7 +220,6 @@ ComponentResult VobSubCodecPreflight(VobSubCodecGlobals glob, CodecDecompressPar
 	
 	// we want 4:4:4:4 ARGB
 	*formats++ = k32ARGBPixelFormat;
-	*formats++ = 0;
 	
 	p->wantedDestinationPixelTypes = glob->wantedDestinationPixelTypeH;
 
@@ -506,7 +503,7 @@ int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrc
 	return copiedBytes;
 }
 
-ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketControlData *controlDataOut) {
+static ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketControlData *controlDataOut) {
 	// to set whether the key sequences 0x03 - 0x06 have been seen
 	UInt16 controlSeqSeen = 0;
 	int i = 0;
