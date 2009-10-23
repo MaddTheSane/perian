@@ -21,6 +21,7 @@
 
 #include "FrameBuffer.h"
 #include "avcodec.h"
+#include "CommonUtils.h"
 #include <sys/param.h>
 
 void FFusionDataSetup(FFusionData *data, int dataSize, int bufferSize)
