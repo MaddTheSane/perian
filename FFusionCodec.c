@@ -1270,47 +1270,6 @@ pascal ComponentResult FFusionCodecEndBand(FFusionGlobals glob, ImageSubCodecDec
     return noErr;
 }
 
-// The below two functions are "optional" and don't do anything.
-// But removing them just makes all movies display black screens.
-
-//-----------------------------------------------------------------
-// ImageCodecQueueStarting
-//-----------------------------------------------------------------
-// If your component supports asynchronous scheduled decompression,
-// the base image decompressor calls your image decompressor 
-// component's ImageCodecQueueStarting function before decompressing 
-// the frames in the queue. Your component is not required to implement 
-// this function. It can implement the function if it needs to perform 
-// any tasks at this time, such as locking data structures.
-// The base image decompressor never calls the ImageCodecQueueStarting 
-// function at interrupt time.
-//-----------------------------------------------------------------
-
-pascal ComponentResult FFusionCodecQueueStarting(FFusionGlobals glob)
-{	
-    return noErr;
-}
-
-//-----------------------------------------------------------------
-// ImageCodecQueueStopping
-//-----------------------------------------------------------------
-// If your image decompressor component supports asynchronous scheduled 
-// decompression, the ImageCodecQueueStopping function notifies your 
-// component that the frames in the queue have been decompressed. 
-// Your component is not required to implement this function.
-// After your image decompressor component handles an ImageCodecQueueStopping 
-// call, it can perform any tasks that are required when decompression
-// of the frames is finished, such as disposing of data structures that 
-// are no longer needed. 
-// The base image decompressor never calls the ImageCodecQueueStopping 
-// function at interrupt time.
-//-----------------------------------------------------------------
-
-pascal ComponentResult FFusionCodecQueueStopping(FFusionGlobals glob)
-{	
-    return noErr;
-}
-
 // Gamma curve value for FFusion video.
 ComponentResult FFusionCodecGetSourceDataGammaLevel(FFusionGlobals glob, Fixed *sourceDataGammaLevel)
 {
