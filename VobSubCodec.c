@@ -383,7 +383,7 @@ ComponentResult VobSubCodecDrawBand(VobSubCodecGlobals glob, ImageSubCodecDecomp
 		
 		if (usePalette) {
 			for (j = 0; j < 4; j++)
-				palette[j] = controlData.pixelColor[j];
+				palette[j] = EndianU32_BtoN(controlData.pixelColor[j]);
 		}
 		
 		for (y = 0; y < h; y++) {
