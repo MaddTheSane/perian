@@ -75,11 +75,9 @@ static void expansion(FFusionData *data, int dataSize)
 
 uint8_t *FFusionCreateEntireDataBuffer(FFusionData *data, uint8_t *buffer, int bufferSize)
 {
-	data->ringBuffer = av_fast_realloc(data->ringBuffer, &(data->ringSize), bufferSize + FF_INPUT_BUFFER_PADDING_SIZE);
+	data->ringBuffer = fast_realloc_with_padding(data->ringBuffer, &data->ringSize, bufferSize);
 	if (data->ringBuffer) {
-		uint8_t *dataPtr = data->ringBuffer;
-		memcpy(dataPtr, buffer, bufferSize);
-		memset(dataPtr + bufferSize, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+		memcpy(data->ringBuffer, buffer, bufferSize);
 	}
 	return data->ringBuffer;
 }

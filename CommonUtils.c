@@ -441,3 +441,11 @@ void PerianInitExit(int unlock)
 	if (unlock)
 		pthread_mutex_unlock(&init_mutex);
 }
+
+void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_size)
+{
+	void *res = ptr;
+	av_fast_malloc(&res, size, min_size + FF_INPUT_BUFFER_PADDING_SIZE);
+	if (res) memset(res + min_size, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+	return res;
+}

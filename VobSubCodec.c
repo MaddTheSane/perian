@@ -292,7 +292,7 @@ void DecompressZlib(VobSubCodecGlobals glob, uint8_t *data, long *bufferSize)
 	
 	// reallocate our buffer to be big enough to store the decompressed packet
 	*bufferSize = AV_RB16(glob->codecData);
-	glob->codecData = av_fast_realloc(glob->codecData, &glob->bufferSize, *bufferSize);
+	glob->codecData = fast_realloc_with_padding(glob->codecData, &glob->bufferSize, *bufferSize);
 	
 	// then decompress the rest of it
 	strm.avail_out = glob->bufferSize - 2;
@@ -316,12 +316,12 @@ ComponentResult VobSubCodecDecodeBand(VobSubCodecGlobals glob, ImageSubCodecDeco
 	}
 	
 	if (glob->codecData == NULL) {
-		glob->codecData = malloc(myDrp->bufferSize + 2);
+		glob->codecData = av_malloc(myDrp->bufferSize + 2);
 		glob->bufferSize = myDrp->bufferSize + 2;
 	}
 	
 	// make sure we have enough space to store the packet
-	glob->codecData = av_fast_realloc(glob->codecData, &glob->bufferSize, myDrp->bufferSize + 2);
+	glob->codecData = fast_realloc_with_padding(glob->codecData, &glob->bufferSize, myDrp->bufferSize + 2);
 	
 	if (glob->compressed) {
 		DecompressZlib(glob, data, &myDrp->bufferSize);

@@ -65,7 +65,9 @@ CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type);
 // component/ffmpeg initialization should be the only thing that really needs a mutex
 int PerianInitEnter(volatile Boolean *inited);
 void PerianInitExit(int unlock);
-	
+
+void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_size);
+
 #define PERIAN_PREF_DOMAIN CFSTR("org.perian.Perian")
 
 #ifdef __cplusplus
