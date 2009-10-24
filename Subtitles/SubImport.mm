@@ -94,7 +94,9 @@ static bool ShouldEngageFrontRowHack(void)
 	if (!CFPreferencesGetAppBooleanValue(CFSTR("PerianFrontRowSubtitleHack"),CFSTR("org.perian.Perian"),&isSet))
 		isSet = 1;
 	
-	ret = (minorVersion >= 5) && (minorVersion <= 6) && [applicationName isEqualToString:@"Front Row"] && isSet;
+	bool systemVersionCheck = (minorVersion >= 5) && (minorVersion <= 6);
+	bool appNameCheck = ([applicationName isEqualToString:@"Front Row"] || [applicationName isEqualToString:@"CoreMediaAuthoringSourcePropertyHelper"]);
+	ret = systemVersionCheck && appNameCheck && isSet;
 	[pool release];
 	
 	return ret;
