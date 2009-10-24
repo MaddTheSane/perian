@@ -127,21 +127,21 @@ ComponentResult VobSubCodecClose(VobSubCodecGlobals glob, ComponentInstance self
 			DisposeImageCodecMPDrawBandUPP(glob->drawBandUPP);
 		}
 		if (glob->codecData) {
-			av_free(glob->codecData);
+			av_freep(&glob->codecData);
 		}
 		if (glob->avCodec) {
 			avcodec_close(glob->avContext);
 		}
 		if (glob->avContext) {
-			av_free(glob->avContext);
+			av_freep(&glob->avContext);
 		}
 		if (glob->subtitle.rects) {
 			for (i = 0; i < glob->subtitle.num_rects; i++) {
-				av_freep(glob->subtitle.rects[i]->pict.data[0]);
-				av_freep(glob->subtitle.rects[i]->pict.data[1]);
-				av_freep(glob->subtitle.rects[i]);
+				av_freep(&glob->subtitle.rects[i]->pict.data[0]);
+				av_freep(&glob->subtitle.rects[i]->pict.data[1]);
+				av_freep(&glob->subtitle.rects[i]);
 			}
-			av_free(glob->subtitle.rects);
+			av_freep(&glob->subtitle.rects);
 		}
 
 		DisposePtr((Ptr)glob);
