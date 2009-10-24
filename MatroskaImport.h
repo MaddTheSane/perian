@@ -160,6 +160,9 @@ private:
 	// update durationToAdd by adding durationSinceZeroSum.
 	int						displayOffsetSum;
 	SInt64					durationSinceZeroSum;
+	
+	// the timestamp of the first block, used to set delay for the track
+	TimeValue64				lowestPTS;
 };
 
 

@@ -909,6 +909,7 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 			TimeValue mediaDuration;
 			TimeScale mediaTimeScale;
 			TimeScale movieTimeScale;
+			int startTime = map[j].str->index_entries[0].timestamp;
 
 			mediaDuration = GetMediaDuration(media);
 			mediaTimeScale = GetMediaTimeScale(media);
@@ -926,6 +927,18 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 			track = GetMediaTrack(media);
 			result = InsertMediaIntoTrack(track, time.value.lo, 0, mediaDuration, fixed1);
 
+			// set audio/video start delay
+			// note str.start_time exists but is always 0 for AVI
+			if (startTime) {
+				TimeRecord startTimeRec;
+				startTimeRec.value.hi = 0;
+				startTimeRec.value.lo = startTime * map[j].str->time_base.num;
+				startTimeRec.scale = map[j].str->time_base.den;
+				startTimeRec.base = NULL;
+				ConvertTimeScale(&startTimeRec, movieTimeScale);
+				SetTrackOffset(track, startTimeRec.value.lo);
+			}
+			
 			if(result != noErr)
 				goto bail;
 			
@@ -960,9 +973,11 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 	ComponentResult dataResult; //used for data handler operations that can fail.
 	ComponentResult result;
 	TimeValue minLoadedTime;
+	TimeValue movieTimeScale = GetMovieTimeScale(storage->movie);
 	int64_t availableSize, margin;
 	long idling;
 	int readResult, framesProcessed, i;
+	int firstPts[storage->map_count];
 	short flags;
 	
 	dataHandler = storage->dataHandler;
@@ -989,6 +1004,9 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			if(dataResult == noErr) availableSize = longSize;
 		}
 	}
+	
+	for(i = 0; i < storage->map_count; i++)
+		firstPts[i] = -1;
 	
 	// record stream durations before we add any samples so that we know what to tell InsertMediaIntoTrack later
 	for(i = 0; i < storage->map_count; i++) {
@@ -1017,6 +1035,9 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		sampleRec.dataOffset.lo = (uint32_t)packet.pos;
 		sampleRec.dataSize = packet.size;
 		sampleRec.sampleFlags = flags;
+				
+		if(firstPts[packet.stream_index] < 0)
+			firstPts[packet.stream_index] = packet.pts;
 		
 		if(packet.size > storage->largestPacketSize)
 			storage->largestPacketSize = packet.size;
@@ -1105,6 +1126,16 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			
 			if(addedDuration > 0) {
 				result = InsertMediaIntoTrack(track, -1, prevDuration, addedDuration, fixed1);
+			}
+			
+			if (!prevDuration && firstPts[i] > 0) {
+				TimeRecord startTimeRec;
+				startTimeRec.value.hi = 0;
+				startTimeRec.value.lo = firstPts[i] * formatContext->streams[i]->time_base.num;
+				startTimeRec.scale = formatContext->streams[i]->time_base.den;
+				startTimeRec.base = NULL;
+				ConvertTimeScale(&startTimeRec, movieTimeScale);
+				SetTrackOffset(track, startTimeRec.value.lo);
 			}
 			ncstream->duration = -1;
 		}

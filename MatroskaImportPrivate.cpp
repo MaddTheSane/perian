@@ -1026,6 +1026,8 @@ void MatroskaTrack::ParseFirstBlock(KaxInternalBlock &block)
 	AudioChannelLayout acl = {0};
 	bool replaceSoundDesc = false;
 	
+	lowestPTS = block.GlobalTimecode();
+	
 	if (desc) {
 		switch ((*desc)->dataFormat) {
 			case kAudioFormatAC3:
@@ -1232,8 +1234,13 @@ void MatroskaTrack::AddSamplesToTrack()
 	err = InsertMediaIntoTrack(theTrack, -1, maxLoadedTime, durationToAdd, fixed1);
 	if (err)
 		Codecprintf(NULL, "MKV: error inserting media into track %d\n", err);
-	else
+	
+	if (!err) {
+		if (!maxLoadedTime && lowestPTS)
+			SetTrackOffset(theTrack, lowestPTS / timecodeScale);
+		
 		maxLoadedTime += durationToAdd;
+	}
 	
 	durationToAdd = 0;
 }
