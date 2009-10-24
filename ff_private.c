@@ -1119,7 +1119,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			TimeValue prevDuration = ncstream->duration;
 			TimeValue mediaDuration = GetMediaDuration(media);
 			TimeValue addedDuration = mediaDuration - prevDuration;
-			TimeValue mediaLoadedTime = GetMovieTimeScale(storage->movie) * (double)mediaDuration / (double)mediaTimeScale;
+			TimeValue mediaLoadedTime = movieTimeScale * mediaDuration / mediaTimeScale;
 			
 			if(minLoadedTime == -1 || mediaLoadedTime < minLoadedTime)
 				minLoadedTime = mediaLoadedTime;
