@@ -7,7 +7,7 @@ if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 fi
 
 generalConfigureOptions="--disable-muxers --disable-encoders --disable-stripping --disable-amd3dnow --enable-runtime-cpudetect --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-ffserver"
-cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -w"
+cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -w -D__DARWIN_UNIX03=0"
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
     generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
