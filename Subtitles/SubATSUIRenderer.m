@@ -1287,7 +1287,6 @@ void SubPrerollFromHeader(char *header, int headerLen)
 	free(buf);
 	CGColorSpaceRelease(csp);
 	*/
-	
 	SubDisposeRenderer(s);
 }
 

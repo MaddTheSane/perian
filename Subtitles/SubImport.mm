@@ -84,22 +84,13 @@ short GetFilenameLanguage(CFStringRef filename)
 //At the moment it doesn't support graphicsModePreBlackAlpha
 static bool ShouldEngageFrontRowHack(void)
 {
-	bool ret;
-	Boolean isSet;
-	
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSString *applicationName = [[NSProcessInfo processInfo] processName];
 	long minorVersion;
 	Gestalt(gestaltSystemVersionMinor, &minorVersion);
-	if (!CFPreferencesGetAppBooleanValue(CFSTR("PerianFrontRowSubtitleHack"),CFSTR("org.perian.Perian"),&isSet))
-		isSet = 1;
 	
-	bool systemVersionCheck = (minorVersion >= 5) && (minorVersion <= 6);
-	bool appNameCheck = ([applicationName isEqualToString:@"Front Row"] || [applicationName isEqualToString:@"CoreMediaAuthoringSourcePropertyHelper"]);
-	ret = systemVersionCheck && appNameCheck && isSet;
-	[pool release];
+	bool systemVersionCheck = minorVersion >= 5;
+	bool appNameCheck = IsTransparentSubtitleHackEnabled();
 	
-	return ret;
+	return systemVersionCheck && appNameCheck;
 }
 
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, 

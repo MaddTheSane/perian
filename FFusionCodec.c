@@ -570,7 +570,7 @@ static inline int shouldDecode(FFusionGlobals glob, enum CodecID codecID)
 	   (codecID == CODEC_ID_H264 || codecID == CODEC_ID_MPEG4) && CFPreferencesGetAppBooleanValue(CFSTR("PreferAppleCodecs"), PERIAN_PREF_DOMAIN, NULL))
 		decode = FFUSION_PREFER_NOT_DECODE;
 	if(decode > FFUSION_CANNOT_DECODE)
-		if(forcePerianToDecode())
+		if(IsForcedDecodeEnabled())
 			decode = FFUSION_PREFER_DECODE;
 	return decode > FFUSION_PREFER_NOT_DECODE;
 }

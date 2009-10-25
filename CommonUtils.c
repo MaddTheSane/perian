@@ -299,7 +299,7 @@ int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type)
 	return 0;
 }
 
-static const CFStringRef defaultFrameDroppingWhiteList[] = {
+static const CFStringRef defaultFrameDroppingList[] = {
 	CFSTR("Finder"),
 	CFSTR("Front Row"),
 	CFSTR("Movie Time"),
@@ -307,6 +307,11 @@ static const CFStringRef defaultFrameDroppingWhiteList[] = {
 	CFSTR("NicePlayer"),
 	CFSTR("QuickTime Player"),
 	CFSTR("Spiral")
+};
+
+static const CFStringRef defaultTransparentSubtitleList[] = {
+	CFSTR("CoreMediaAuthoringSourcePropertyHelper"),
+	CFSTR("Front Row")
 };
 
 static const CFStringRef defaultForcedAppList[] = {
@@ -383,12 +388,12 @@ int IsFrameDroppingEnabled()
 	
 	if (enabled == -1)
 		enabled = isApplicationNameInList(CFSTR("FrameDroppingWhiteList"),
-										  defaultFrameDroppingWhiteList,
-										  sizeof(defaultFrameDroppingWhiteList)/sizeof(defaultFrameDroppingWhiteList[0]));
+										  defaultFrameDroppingList,
+										  sizeof(defaultFrameDroppingList)/sizeof(defaultFrameDroppingList[0]));
 	return enabled;
 }
 
-int forcePerianToDecode()
+int IsForcedDecodeEnabled()
 {
 	static int forced = -1;
 	
@@ -396,6 +401,17 @@ int forcePerianToDecode()
 		forced = isApplicationNameInList(CFSTR("ForcePerianAppList"),
 										 defaultForcedAppList,
 										 sizeof(defaultForcedAppList)/sizeof(defaultForcedAppList[0]));
+	return forced;
+}
+
+int IsTransparentSubtitleHackEnabled()
+{
+	static int forced = -1;
+	
+	if(forced == -1)
+		forced = isApplicationNameInList(CFSTR("TransparentModeSubtitleAppList"),
+										 defaultTransparentSubtitleList,
+										 sizeof(defaultTransparentSubtitleList)/sizeof(defaultTransparentSubtitleList[0]));
 	return forced;
 }
 

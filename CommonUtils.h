@@ -54,7 +54,10 @@ int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type);
 int IsFrameDroppingEnabled();
 
 // does the current process break if we return errors in Preflight?
-int forcePerianToDecode();
+int IsForcedDecodeEnabled();
+
+// does the current process break if we use graphicsModePreBlackAlpha?
+int IsTransparentSubtitleHackEnabled();
 
 int IsAltivecSupported();
 
