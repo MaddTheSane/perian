@@ -250,6 +250,21 @@ static int parse_mpeg4_stream(FFusionParserContext *parser, const uint8_t *buf, 
 	return 1;
 }
 
+static int parse_mpeg12_stream(FFusionParserContext *ffparser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable)
+{
+	const uint8_t *out_unused;
+	int size_unused;
+	AVCodecParser *parser = ffparser->pc->parser;
+	
+	parser->parser_parse(ffparser->pc, ffparser->avctx, &out_unused, &size_unused, buf, buf_size);
+	
+	*out_buf_size = buf_size;
+	*type = ffparser->pc->pict_type;
+	*skippable = *type == FF_B_TYPE;
+	
+	return 1;
+}
+
 extern AVCodecParser mpeg4video_parser;
 
 FFusionParser ffusionMpeg4VideoParser = {
@@ -258,6 +273,16 @@ FFusionParser ffusionMpeg4VideoParser = {
 	NULL,
 	parse_mpeg4_extra,
 	parse_mpeg4_stream,
+};
+
+extern AVCodecParser mpegvideo_parser;
+
+static FFusionParser ffusionMpeg12VideoParser = {
+	&mpegvideo_parser,
+	0,
+	NULL,
+	NULL,
+	parse_mpeg12_stream,
 };
 
 typedef struct H264ParserContext_s
@@ -869,6 +894,7 @@ void initFFusionParsers()
 		inited = TRUE;
 		registerFFusionParsers(&ffusionMpeg4VideoParser);
 		registerFFusionParsers(&ffusionH264Parser);
+		registerFFusionParsers(&ffusionMpeg12VideoParser);
 	}
 	
 	PerianInitExit(unlock);
