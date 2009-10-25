@@ -44,11 +44,6 @@
 #undef malloc
 #undef free
 
-static int inline MININT(int a, int b)
-{
-	return a < b ? a : b;
-}
-
 static const int nfchans_tbl[8] = { 2, 1, 2, 3, 3, 4, 4, 5 };
 static const int ac3_layout_no_lfe[8] = {
 	kAudioChannelLayoutTag_Stereo,
@@ -267,9 +262,9 @@ static int parse_mpeg12_stream(FFusionParserContext *ffparser, const uint8_t *bu
 
 extern AVCodecParser mpeg4video_parser;
 
-FFusionParser ffusionMpeg4VideoParser = {
+static FFusionParser ffusionMpeg4VideoParser = {
 	&mpeg4video_parser,
-	sizeof(uint64_t),
+	0,
 	NULL,
 	parse_mpeg4_extra,
 	parse_mpeg4_stream,
@@ -725,7 +720,7 @@ static int inline decode_nals(H264ParserContext *context, const uint8_t *buf, in
 		int nal_ref_idc;
 		int slice_type = 0;
 		
-		if(decode_nal(buf + buf_index, MININT(nalsize, NAL_PEEK_SIZE), partOfNal, &decodedNalSize, &nalType, &nal_ref_idc))
+		if(decode_nal(buf + buf_index, FFMIN(nalsize, NAL_PEEK_SIZE), partOfNal, &decodedNalSize, &nalType, &nal_ref_idc))
 		{
 			int pts = 0;
 			if(nalType == 1 || nalType == 2)
@@ -868,7 +863,7 @@ static int parse_extra_data_h264(FFusionParserContext *parser, const uint8_t *bu
 
 extern AVCodecParser h264_parser;
 
-FFusionParser ffusionH264Parser = {
+static FFusionParser ffusionH264Parser = {
 	&h264_parser,
 	sizeof(H264ParserContext),
 	init_h264_parser,
@@ -876,7 +871,7 @@ FFusionParser ffusionH264Parser = {
 	parse_h264_stream,
 };
 
-FFusionParser *ffusionFirstParser = NULL;
+static FFusionParser *ffusionFirstParser = NULL;
 
 void registerFFusionParsers(FFusionParser *parser)
 {
