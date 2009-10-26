@@ -309,8 +309,13 @@ static const CFStringRef defaultFrameDroppingList[] = {
 	CFSTR("Spiral")
 };
 
-static const CFStringRef defaultTransparentSubtitleList[] = {
+static const CFStringRef defaultTransparentSubtitleList_10_6[] = {
 	CFSTR("CoreMediaAuthoringSourcePropertyHelper"),
+	CFSTR("Front Row"),
+	CFSTR("QTPlayerHelper")
+};
+
+static const CFStringRef defaultTransparentSubtitleList_10_5[] = {
 	CFSTR("Front Row")
 };
 
@@ -409,9 +414,22 @@ int IsTransparentSubtitleHackEnabled()
 	static int forced = -1;
 	
 	if(forced == -1)
-		forced = isApplicationNameInList(CFSTR("TransparentModeSubtitleAppList"),
-										 defaultTransparentSubtitleList,
-										 sizeof(defaultTransparentSubtitleList)/sizeof(defaultTransparentSubtitleList[0]));
+	{
+		long minorVersion;
+		Gestalt(gestaltSystemVersionMinor, &minorVersion);
+		
+		if (minorVersion == 5)
+			forced = isApplicationNameInList(CFSTR("TransparentModeSubtitleAppList"),
+											 defaultTransparentSubtitleList_10_5,
+											 sizeof(defaultTransparentSubtitleList_10_5)/sizeof(defaultTransparentSubtitleList_10_5[0]));
+		else if (minorVersion == 6)
+			forced = isApplicationNameInList(CFSTR("TransparentModeSubtitleAppList"),
+											 defaultTransparentSubtitleList_10_6,
+											 sizeof(defaultTransparentSubtitleList_10_6)/sizeof(defaultTransparentSubtitleList_10_6[0]));
+		else
+			forced = 0;
+	}
+
 	return forced;
 }
 

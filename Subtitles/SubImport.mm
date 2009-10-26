@@ -80,19 +80,6 @@ short GetFilenameLanguage(CFStringRef filename)
 	return lang;
 }
 
-//Use ugly transparency ("transparent" blend mode) for files imported in Front Row
-//At the moment it doesn't support graphicsModePreBlackAlpha
-static bool ShouldEngageFrontRowHack(void)
-{
-	long minorVersion;
-	Gestalt(gestaltSystemVersionMinor, &minorVersion);
-	
-	bool systemVersionCheck = minorVersion >= 5;
-	bool appNameCheck = IsTransparentSubtitleHackEnabled();
-	
-	return systemVersionCheck && appNameCheck;
-}
-
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, 
                               TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox)
 {
@@ -124,7 +111,7 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 			// finally, say that we're transparent
 			MediaHandler mh = GetMediaHandler(theMedia);
 			
-			if (ShouldEngageFrontRowHack()) {
+			if (IsTransparentSubtitleHackEnabled()) {
 				RGBColor blendColor = {0x0000, 0x0000, 0x0000};
 				MediaSetGraphicsMode(mh, transparent, &blendColor);
 			}
