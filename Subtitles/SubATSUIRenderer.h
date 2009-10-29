@@ -54,7 +54,6 @@ typedef void *SubtitleRendererPtr;
 
 extern SubtitleRendererPtr SubInitSSA(char *header, size_t headerLen, int width, int height);
 extern SubtitleRendererPtr SubInitNonSSA(int width, int height);
-extern CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s);
 extern void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight);
 extern void SubPrerollFromHeader(char *header, int headerLen);
 extern void SubDisposeRenderer(SubtitleRendererPtr s);

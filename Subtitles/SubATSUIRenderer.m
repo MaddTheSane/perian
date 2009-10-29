@@ -173,75 +173,6 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 
 @implementation SubATSUIRenderer
 
-// from Apple Q&A 1396
-static CGColorSpaceRef CreateICCColorSpaceFromPathToProfile (const char * iccProfilePath) {
-	CMProfileRef    iccProfile = NULL;
-	CGColorSpaceRef iccColorSpace = NULL;
-	CMProfileLocation loc;
-	
-	// Specify that the location of the profile will be a POSIX path to the profile.
-	loc.locType = cmPathBasedProfile;
-	
-	// Make sure the path is not larger then the buffer
-	if(strlen(iccProfilePath) > sizeof(loc.u.pathLoc.path))
-		return NULL;
-	
-	// Copy the path the profile into the CMProfileLocation structure
-	strcpy (loc.u.pathLoc.path, iccProfilePath);
-	
-	// Open the profile
-	if (CMOpenProfile(&iccProfile, &loc) != noErr)
-	{
-		iccProfile = (CMProfileRef) 0;
-		return NULL;
-	}
-	
-	// Create the ColorSpace with the open profile.
-	iccColorSpace = CGColorSpaceCreateWithPlatformColorSpace( iccProfile );
-	
-	// Close the profile now that we have what we need from it.
-	CMCloseProfile(iccProfile);
-	
-	return iccColorSpace;
-}
-
-static CGColorSpaceRef CreateColorSpaceFromSystemICCProfileName(CFStringRef profileName) {
-	FSRef pathToProfilesFolder;
-    FSRef pathToProfile;
-	
-	// Find the Systems Color Sync Profiles folder
-	if(FSFindFolder(kOnSystemDisk, kColorSyncProfilesFolderType,
-					kDontCreateFolder, &pathToProfilesFolder) == noErr) {
-		
-		// Make a UniChar string of the profile name
-		UniChar uniBuffer[sizeof(CMPathLocation)];
-		CFStringGetCharacters (profileName,CFRangeMake(0,CFStringGetLength(profileName)),uniBuffer);
-		
-		// Create a FSRef to the profile in the Systems Color Sync Profile folder
-		if(FSMakeFSRefUnicode (&pathToProfilesFolder,CFStringGetLength(profileName),uniBuffer,
-							   kUnicodeUTF8Format,&pathToProfile) == noErr) {
-			unsigned char path[sizeof(CMPathLocation)];
-			
-			// Write the posix path to the profile into our path buffer from the FSRef
-			if(FSRefMakePath (&pathToProfile,path,sizeof(CMPathLocation)) == noErr)
-				return CreateICCColorSpaceFromPathToProfile((char*)path);
-		}
-	}
-	
-	return NULL;
-}
-
-static CGColorSpaceRef CreateICCsRGBColorSpace() {
-	return CreateColorSpaceFromSystemICCProfileName(CFSTR("sRGB Profile.icc"));
-}
-
-static CGColorSpaceRef GetSRGBColorSpace() {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	CGColorSpaceRef cs = CreateICCsRGBColorSpace();
-	[pool release];
-	return cs;
-}
-
 -(SubATSUIRenderer*)initWithVideoWidth:(float)width videoHeight:(float)height;
 {
 	if (self = [super init]) {
@@ -292,7 +223,6 @@ static CGColorSpaceRef GetSRGBColorSpace() {
 {
 	[context release];
 	free(breakbuffer);
-	CGColorSpaceRelease(srgbCSpace);
 	UCDisposeTextBreakLocator(&breakLocator);
 	ATSUDisposeTextLayout(layout);
 	[super dealloc];
@@ -396,6 +326,12 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	if (font == kATSUInvalidFontID && ![name isEqualToString:kSubDefaultFontName])
 		font = [[fontIDCache objectForKey:kSubDefaultFontName] intValue]; // final fallback
 	
+	/*{
+		NSString *fontPSName = nil;
+		ATSFontGetPostScriptName(font, kATSOptionFlagsDefault, (CFStringRef*)&fontPSName);
+		NSLog(@"Font lookup: %@ -> %@", name, fontPSName);
+		[fontPSName autorelease];
+	}*/
 	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:lcname];
 	
 	pthread_mutex_unlock(&fontIDMutex);
@@ -1122,6 +1058,8 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 			resetPens = YES;
 			lastLayer = div->layer;
 		}
+		
+		//NSLog(@"%@", div);
 				
 		NSRect marginRect = NSMakeRect(div->marginL, div->marginV, context->resX - div->marginL - div->marginR, context->resY - div->marginV - div->marginV);
 		
@@ -1249,11 +1187,6 @@ SubtitleRendererPtr SubInitNonSSA(int width, int height)
 	CFRetain(s);
 	[pool release];
 	return s;
-}
-
-CGColorSpaceRef SubGetColorSpace(SubtitleRendererPtr s)
-{
-	return s->srgbCSpace;
 }
 
 void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)

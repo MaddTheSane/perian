@@ -245,6 +245,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 -(SubContext*)initWithHeaders:(NSDictionary *)headers_ styles:(NSArray *)styles_ delegate:(SubRenderer*)delegate
 {
 	if (self = [super init]) {
+		SubStyle *firstStyle = nil;
 		headers = [headers_ retain];
 		[self readHeaders];
 		
@@ -257,14 +258,18 @@ BOOL IsScriptASS(NSDictionary *headers)
 			
 			for (i=0; i < nstyles; i++) {
 				NSDictionary *style = [styles_ objectAtIndex:i];
-				[sdict setObject:[[[SubStyle alloc] initWithDictionary:style scriptVersion:scriptType delegate:delegate] autorelease]
-												forKey:[style objectForKey:@"Name"]];
+				SubStyle *sstyle = [[[SubStyle alloc] initWithDictionary:style scriptVersion:scriptType delegate:delegate] autorelease];
+				
+				if (!i) firstStyle = sstyle;
+				
+				[sdict setObject:sstyle forKey:[style objectForKey:@"Name"]];
 			}
 			
 			styles = sdict;
 		}
 		
 		defaultStyle = [styles objectForKey:@"Default"];
+		if (!defaultStyle) defaultStyle = firstStyle;
 		if (!defaultStyle) defaultStyle = [SubStyle defaultStyleWithDelegate:delegate];
 		[defaultStyle retain];
 		

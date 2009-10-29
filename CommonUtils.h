@@ -71,6 +71,9 @@ void PerianInitExit(int unlock);
 
 void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_size);
 
+// return an sRGB colorspace. safe to use on 10.4.
+CGColorSpaceRef GetSRGBColorSpace();
+
 #define PERIAN_PREF_DOMAIN CFSTR("org.perian.Perian")
 
 #ifdef __cplusplus

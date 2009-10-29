@@ -80,6 +80,19 @@ short GetFilenameLanguage(CFStringRef filename)
 	return lang;
 }
 
+static void AppendSRGBProfile(ImageDescriptionHandle imgDesc)
+{
+	CGColorSpaceRef cSpace = GetSRGBColorSpace();
+	CFDataRef cSpaceICC = CGColorSpaceCopyICCProfile(cSpace);
+	
+	if (!cSpaceICC)
+		return;
+	
+	ICMImageDescriptionSetProperty(imgDesc, kQTPropertyClass_ImageDescription,
+								   kICMImageDescriptionPropertyID_ICCProfile, sizeof(CFDataRef), &cSpaceICC);
+	CFRelease(cSpaceICC);
+}
+
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, 
                               TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox)
 {
@@ -102,6 +115,7 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 	if (!trackWidth || !trackHeight) {trackWidth = IntToFixed(640); trackHeight = IntToFixed(480);}
 	
 	if (imageExtension) AddImageDescriptionExtension(imgDesc, imageExtension, subType);
+	AppendSRGBProfile(imgDesc);
 	
 	theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
 	if (theTrack != NULL) {

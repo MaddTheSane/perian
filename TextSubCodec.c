@@ -142,9 +142,6 @@ pascal ComponentResult TextSubCodecClose(TextSubGlobals glob, ComponentInstance 
 		if (glob->drawBandUPP) {
 			DisposeImageCodecMPDrawBandUPP(glob->drawBandUPP);
 		}
-		if (glob->colorSpace) {
-			CGColorSpaceRelease(glob->colorSpace);
-		}
 		if (glob->ssa) SubDisposeRenderer(glob->ssa);
 		DisposePtr((Ptr)glob);
 	}
@@ -249,6 +246,9 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 	capabilities->flags2 |= codecDrawsHigherQualityScaled;    
 	
 	if (!glob->ssa) {
+		if (!glob->colorSpace)
+			glob->colorSpace = GetSRGBColorSpace();
+		
 		if ((**p->imageDescription).cType == kSubFormatSSA) {
 			long count;
 			glob->translateSRT = false;
@@ -263,8 +263,6 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 		} 
 		
 		if (!glob->ssa) glob->ssa = SubInitNonSSA((**p->imageDescription).width,(**p->imageDescription).height);
-				
-		glob->colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	}
 	
 	return noErr;
@@ -384,11 +382,10 @@ pascal ComponentResult TextSubCodecEndBand(TextSubGlobals glob, ImageSubCodecDec
 }
 
 // ImageCodecGetSourceDataGammaLevel
-// Returns 1.8, the gamma for the Generic RGB Profile (didn't change on 10.6...).
-// We should really just render sRGB instead, but that doesn't have an exact gamma value.
+// Returns 1.8, the gamma for sRGB.
 pascal ComponentResult TextSubCodecGetSourceDataGammaLevel(TextSubGlobals glob, Fixed *sourceDataGammaLevel)
 {
-	*sourceDataGammaLevel = FloatToFixed(1.8);
+	*sourceDataGammaLevel = FloatToFixed(2.2);
 	return noErr;
 }
 

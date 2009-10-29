@@ -23,6 +23,7 @@
 #include "CommonUtils.h"
 #import <Carbon/Carbon.h>
 #import <pthread.h>
+#import <dlfcn.h>
 
 typedef struct LanguageTriplet {
 	char twoChar[3];
@@ -482,4 +483,88 @@ void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_
 	av_fast_malloc(&res, size, min_size + FF_INPUT_BUFFER_PADDING_SIZE);
 	if (res) memset(res + min_size, 0, FF_INPUT_BUFFER_PADDING_SIZE);
 	return res;
+}
+
+// from Apple Q&A 1396
+static CGColorSpaceRef CreateICCColorSpaceFromPathToProfile (const char * iccProfilePath)
+{
+	CMProfileRef    iccProfile = NULL;
+	CGColorSpaceRef iccColorSpace = NULL;
+	CMProfileLocation loc;
+	
+	// Specify that the location of the profile will be a POSIX path to the profile.
+	loc.locType = cmPathBasedProfile;
+	
+	// Make sure the path is not larger then the buffer
+	if(strlen(iccProfilePath) > sizeof(loc.u.pathLoc.path))
+		return NULL;
+	
+	// Copy the path the profile into the CMProfileLocation structure
+	strcpy (loc.u.pathLoc.path, iccProfilePath);
+	
+	// Open the profile
+	if (CMOpenProfile(&iccProfile, &loc) != noErr)
+	{
+		iccProfile = (CMProfileRef) 0;
+		return NULL;
+	}
+	
+	// Create the ColorSpace with the open profile.
+	iccColorSpace = CGColorSpaceCreateWithPlatformColorSpace( iccProfile );
+	
+	// Close the profile now that we have what we need from it.
+	CMCloseProfile(iccProfile);
+	
+	return iccColorSpace;
+}
+
+static CGColorSpaceRef CreateColorSpaceFromSystemICCProfileName(CFStringRef profileName)
+{
+	FSRef pathToProfilesFolder;
+    FSRef pathToProfile;
+	
+	// Find the Systems Color Sync Profiles folder
+	if(FSFindFolder(kOnSystemDisk, kColorSyncProfilesFolderType,
+					kDontCreateFolder, &pathToProfilesFolder) == noErr) {
+		
+		// Make a UniChar string of the profile name
+		UniChar uniBuffer[sizeof(CMPathLocation)];
+		CFStringGetCharacters (profileName,CFRangeMake(0,CFStringGetLength(profileName)),uniBuffer);
+		
+		// Create a FSRef to the profile in the Systems Color Sync Profile folder
+		if(FSMakeFSRefUnicode (&pathToProfilesFolder,CFStringGetLength(profileName),uniBuffer,
+							   kUnicodeUTF8Format,&pathToProfile) == noErr) {
+			unsigned char path[sizeof(CMPathLocation)];
+			
+			// Write the posix path to the profile into our path buffer from the FSRef
+			if(FSRefMakePath (&pathToProfile,path,sizeof(CMPathLocation)) == noErr)
+				return CreateICCColorSpaceFromPathToProfile((char*)path);
+		}
+	}
+	
+	return NULL;
+}
+
+CGColorSpaceRef GetSRGBColorSpace()
+{
+	static Boolean loaded = FALSE;
+	static CGColorSpaceRef sRGBColorSpace;
+	int unlock = PerianInitEnter(&loaded);
+	CFStringRef *srgb;
+
+	if (!loaded) {
+		loaded = TRUE;
+
+		if ((srgb = dlsym(RTLD_NEXT, "kCGColorSpaceSRGB"))) {
+			sRGBColorSpace = CGColorSpaceCreateWithName(*srgb); // does not exist on 10.4
+		} else {
+			sRGBColorSpace = CreateColorSpaceFromSystemICCProfileName(CFSTR("sRGB Profile.icc"));
+		}
+		
+		CGColorSpaceRetain(sRGBColorSpace);
+	}
+	
+	PerianInitExit(unlock);
+	
+	return sRGBColorSpace;
 }
