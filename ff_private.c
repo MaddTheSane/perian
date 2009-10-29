@@ -592,9 +592,7 @@ void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW
 {
 	if (displayW == pixelW && displayH == pixelH)
 		return;
-	
-	PixelAspectRatioImageDescriptionExtension **pasp = (PixelAspectRatioImageDescriptionExtension**)NewHandle(sizeof(PixelAspectRatioImageDescriptionExtension));
-	
+		
 	AVRational dar, invPixelSize, sar;
 	
 	dar			   = (AVRational){displayW, displayH};
@@ -602,6 +600,11 @@ void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW
 	sar = av_mul_q(dar, invPixelSize);
 	
 	av_reduce(&sar.num, &sar.den, sar.num, sar.den, fixed1);
+	
+	if (sar.num == sar.den)
+		return;
+		
+	PixelAspectRatioImageDescriptionExtension **pasp = (PixelAspectRatioImageDescriptionExtension**)NewHandle(sizeof(PixelAspectRatioImageDescriptionExtension));
 	
 	**pasp = (PixelAspectRatioImageDescriptionExtension){EndianU32_NtoB(sar.num), EndianU32_NtoB(sar.den)};
 	
