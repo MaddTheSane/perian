@@ -680,7 +680,7 @@ static NSString *getNextVobSubLine(NSEnumerator *lineEnum)
 	return line;
 }
 
-static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHandle *imgDescHand, Handle dataRef, OSType dataRefType, VobSubTrack *track)
+static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHandle *imgDescHand, Handle dataRef, OSType dataRefType, VobSubTrack *track, int imageWidth, int imageHeight)
 {
 	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
 	*imgDescHand = imgDesc;
@@ -706,6 +706,12 @@ static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHa
 	MediaHandler mh = GetMediaHandler(theMedia);
 	MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
 	SetTrackLayer(theTrack, -1);
+	
+	if(imageWidth != 0)
+	{
+		(*imgDesc)->width = imageWidth;
+		(*imgDesc)->height = imageHeight;
+	}	
 	
 	Handle imgDescExt = NewHandle([track->privateData length]);
 	memcpy(*imgDescExt, [track->privateData bytes], [track->privateData length]);
@@ -810,12 +816,7 @@ static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onl
 		return noErr;
 	
 	ImageDescriptionHandle imgDesc;
-	Media trackMedia = createVobSubMedia(info.theMovie, info.movieBox, &imgDesc, info.dataRef, info.dataRefType, track);
-	if(info.imageWidth != 0)
-	{
-		(*imgDesc)->width = info.imageWidth;
-		(*imgDesc)->height = info.imageHeight;
-	}
+	Media trackMedia = createVobSubMedia(info.theMovie, info.movieBox, &imgDesc, info.dataRef, info.dataRefType, track, info.imageWidth, info.imageHeight);
 	
 	int totalSamples = 0;
 	SampleReference64Ptr samples = (SampleReference64Ptr)calloc(sampleCount*2, sizeof(SampleReference64Record));
