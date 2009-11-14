@@ -99,7 +99,7 @@ else
         mkdir -p "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
-        	optcflags="$optcflags -mtune=$x86tune $x86flags -frerun-cse-after-loop" 
+        	optcflags="$optcflags -mtune=$x86tune $x86flags -frerun-cse-after-loop -mdynamic-no-pic" 
         fi
 
         cd "$BUILDDIR"
