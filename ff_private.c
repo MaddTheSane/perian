@@ -110,6 +110,8 @@ int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSTy
 	else if(st->codec->codec_type == CODEC_TYPE_AUDIO)
 		initialize_audio_map(map, targetTrack, dataRef, dataRefType, storage->firstFrames + st->index);
 	
+	map->valid = map->media && map->sampleHdl;
+	
 	/* return the map */
 	storage->stream_map = map;
 	
@@ -244,8 +246,10 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	/* ask the toolbox about more information */
 	ioSize = sizeof(AudioStreamBasicDescription);
 	err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
-	if (err || !asbd.mFormatID)
+	if (err || !asbd.mFormatID) {
 		fprintf(stderr, "AudioFormatGetProperty dislikes the magic cookie (error %ld / format id %lx)\n", err, asbd.mFormatID);
+		goto bail;
+	}
 	
 	/*
 	 FIXME: 
@@ -706,6 +710,9 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 		} else
 			continue;
 		
+		// can't import samples if neither of these were created.
+		map[j].valid = map[j].media && map[j].sampleHdl;
+		
 		if (err) {
 			if (track)
 				DisposeMovieTrack(track);
@@ -818,7 +825,7 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 		codec = stream->codec;
 		
 		/* no stream we can read */
-		if(!ncstr->media)
+		if(!ncstr->valid)
 			continue;
 		
 		/* no index, we might as well skip */
@@ -905,8 +912,9 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 	
 	// insert media and set addedDuration;
 	for(j = 0; j < storage->map_count && result == noErr; j++) {
-		Media media = storage->stream_map[j].media;
-		if(media) {
+		ncstr = &map[j];
+		if(ncstr->valid) {
+			Media media = ncstr->media;
 			Track track;
 			TimeRecord time;
 			TimeValue mediaDuration;
@@ -1027,6 +1035,9 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		codecContext = stream->codec;
 		flags = 0;
 		
+		if (!ncstream->valid)
+			continue;
+		
 		if((packet.flags & PKT_FLAG_KEY) == 0)
 			flags |= mediaSampleNotSync;
 		
@@ -1116,7 +1127,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		ncstream = &storage->stream_map[i];
 		Media media = ncstream->media;
 		
-		if(media && (addSamples || readResult != 0)) {
+		if(ncstream->valid && (addSamples || readResult != 0)) {
 			Track track = GetMediaTrack(media);
 			TimeScale mediaTimeScale = GetMediaTimeScale(media);
 			TimeValue prevDuration = ncstream->duration;

@@ -29,6 +29,7 @@
 /* Data structres needed for import */
 struct _NCStream {
 	int index;
+	Boolean valid;
 	AVStream *str;
 	SampleDescriptionHandle sampleHdl;
 	AudioStreamBasicDescription asbd;
