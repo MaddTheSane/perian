@@ -380,8 +380,10 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"s" flag %strikeout
 							|"bord" floatnum %outlinesize
 							|"shad" floatnum %shadowdist
-							|"be" flag %bluredge
+							|"be" floatnum %bluredge
 							|"blur" floatnum
+							|"fax" floatnum
+							|"fay" floatnum
 							|"fn" string %fontname
 							|"fs" floatnum %fontsize
 							|"fscx" floatnum %scalex
@@ -410,9 +412,13 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"t" parens
 							|"org" parens %origin
 							|("fad" "e"? parens)
-							|"clip" parens
+							|"i"? "clip" parens
 							|"p" floatnum %drawingmode
 							|"pbo" floatnum
+							|"xbord" floatnum
+							|"ybord" floatnum
+							|"xshad" floatnum
+							|"yshad" floatnum
 					   );
 				
 				tag = "{" (cmd* | any*) :> "}";
