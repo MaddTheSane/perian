@@ -61,6 +61,9 @@ int IsTransparentSubtitleHackEnabled();
 
 int IsAltivecSupported();
 
+// is this font name known to be incompatible with ATSUI?
+int ShouldImportFontFileName(const char *filename);
+	
 // CFPreferencesCopyAppValue() wrapper which checks the type of the value returned
 CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type);
 

@@ -761,7 +761,8 @@ ComponentResult MatroskaImport::ReadAttachments(KaxAttachments &attachments)
 		
 		/* The only attachments handled here are fonts, which currently can be truetype or opentype.
 		   application/x-* is probably not a permanent MIME type, but it is current practice... */
-		if (fileMimeType == "application/x-truetype-font" || fileMimeType == "application/x-font-otf") {
+		if ((fileMimeType == "application/x-truetype-font" || fileMimeType == "application/x-font-otf") &&
+			ShouldImportFontFileName(fileName.c_str())) {
 			KaxFileData & fontData = GetChild<KaxFileData>(*attachedFile);
 			
 			if (fontData.GetSize()) {

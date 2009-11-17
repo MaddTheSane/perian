@@ -24,6 +24,7 @@
 #import <Carbon/Carbon.h>
 #import <pthread.h>
 #import <dlfcn.h>
+#import <fnmatch.h>
 
 typedef struct LanguageTriplet {
 	char twoChar[3];
@@ -410,14 +411,21 @@ int IsForcedDecodeEnabled()
 	return forced;
 }
 
+static int GetSystemMinorVersion()
+{
+	long minorVersion;
+	Gestalt(gestaltSystemVersionMinor, &minorVersion);
+	
+	return minorVersion;
+}
+
 int IsTransparentSubtitleHackEnabled()
 {
 	static int forced = -1;
 	
 	if(forced == -1)
 	{
-		long minorVersion;
-		Gestalt(gestaltSystemVersionMinor, &minorVersion);
+		int minorVersion = GetSystemMinorVersion();
 		
 		if (minorVersion == 5)
 			forced = isApplicationNameInList(CFSTR("TransparentModeSubtitleAppList"),
@@ -447,6 +455,17 @@ int IsAltivecSupported()
 	
 	return altivec;
 }
+
+
+// this could be a defaults setting, but no real call for it yet
+int ShouldImportFontFileName(const char *filename)
+{
+	// match DynaFont Labs (1997) fonts, which are in many files
+	// and completely break ATSUI on different OS versions
+	// FIXME: This font works when in ~/Library/Fonts (!). Check it again with CoreText.
+	return !(GetSystemMinorVersion() >= 6 && fnmatch("DF*.ttc", filename, 0) == 0);
+}
+
 
 CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type)
 {
