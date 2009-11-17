@@ -436,7 +436,7 @@ static void decode_sps(H264ParserContext *context, const uint8_t *buf, int buf_s
 	get_ue_golomb(gb);	//pic_height_in_map_units_minus1
 	int mbs_only = get_bits1(gb);
 	context->frame_mbs_only_flag = mbs_only;
-#if 0		//This is a test to get num_reorder_frames
+#if 1		//This is a test to get num_reorder_frames
 	if(!mbs_only)
 		get_bits1(gb);	//mb_adaptive_frame_field_flag
 	get_bits1(gb);		//direct_8x8_inference_flag
