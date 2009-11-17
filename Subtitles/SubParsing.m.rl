@@ -380,7 +380,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"s" flag %strikeout
 							|"bord" floatnum %outlinesize
 							|"shad" floatnum %shadowdist
-							|"be" floatnum %bluredge
+							|"be" floatnum
 							|"blur" floatnum
 							|"fax" floatnum
 							|"fay" floatnum
@@ -390,8 +390,8 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"fscy" floatnum %scaley
 							|"fsp" floatnum %tracking
 							|("fr" "z"? floatnum %frz)
-							|"frx" floatnum %frx
-							|"fry" floatnum %fry
+							|"frx" floatnum
+							|"fry" floatnum
 							|"fe" intnum
 							|("1"? "c" color %primaryc)
 							|"2c" color %secondaryc
