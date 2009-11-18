@@ -1,7 +1,7 @@
-Index: libavcodec/huffyuv.c
+Index: ffmpeg/libavcodec/huffyuv.c
 ===================================================================
---- libavcodec/huffyuv.c	(revision 20544)
-+++ libavcodec/huffyuv.c	(working copy)
+--- ffmpeg/libavcodec/huffyuv.c	(revision 20545)
++++ ffmpeg/libavcodec/huffyuv.c	(working copy)
 @@ -39,10 +39,12 @@
  #define B 3
  #define G 2
@@ -172,10 +172,10 @@ Index: libavcodec/huffyuv.c
      }
      emms_c();
  
-Index: libavcodec/dsputil.c
+Index: ffmpeg/libavcodec/dsputil.c
 ===================================================================
---- libavcodec/dsputil.c	(revision 20544)
-+++ libavcodec/dsputil.c	(working copy)
+--- ffmpeg/libavcodec/dsputil.c	(revision 20545)
++++ ffmpeg/libavcodec/dsputil.c	(working copy)
 @@ -3627,39 +3627,68 @@
      return acc;
  }
@@ -255,10 +255,10 @@ Index: libavcodec/dsputil.c
      c->add_hfyu_left_prediction_bgr32 = add_hfyu_left_prediction_bgr32_c;
      c->bswap_buf= bswap_buf;
  #if CONFIG_PNG_DECODER
-Index: libavcodec/dsputil.h
+Index: ffmpeg/libavcodec/dsputil.h
 ===================================================================
---- libavcodec/dsputil.h	(revision 20544)
-+++ libavcodec/dsputil.h	(working copy)
+--- ffmpeg/libavcodec/dsputil.h	(revision 20545)
++++ ffmpeg/libavcodec/dsputil.h	(working copy)
 @@ -350,7 +350,8 @@
      void (*sub_hfyu_median_prediction)(uint8_t *dst, const uint8_t *src1, const uint8_t *src2, int w, int *left, int *left_top);
      void (*add_hfyu_median_prediction)(uint8_t *dst, const uint8_t *top, const uint8_t *diff, int w, int *left, int *left_top);
