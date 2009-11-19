@@ -40,6 +40,7 @@ extern "C"
 
 short GetFilenameLanguage(CFStringRef filename);
 ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType dataRefType, Movie theMovie);
+void SetSubtitleMediaHandlerTransparent(MediaHandler mh);
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox);
 
 #ifdef __OBJC__

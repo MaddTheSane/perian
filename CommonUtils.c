@@ -313,6 +313,7 @@ static const CFStringRef defaultFrameDroppingList[] = {
 };
 
 static const CFStringRef defaultTransparentSubtitleList_10_6[] = {
+	CFSTR("CoreMediaAuthoringSessionHelper"),
 	CFSTR("CoreMediaAuthoringSourcePropertyHelper"),
 	CFSTR("Front Row"),
 	CFSTR("QTPlayerHelper")
@@ -587,4 +588,32 @@ CGColorSpaceRef GetSRGBColorSpace()
 	PerianInitExit(unlock);
 	
 	return sRGBColorSpace;
+}
+
+// Map 8-bit alpha (graphicsModePreBlackAlpha) to 1-bit alpha (transparent)
+// Pretty much this is just mapping all opaque black to (1,1,1,255)
+// Leaves ugly borders where AAing turned into opaque colors, but that's harder to deal with
+void ConvertImageToQDTransparent(Ptr baseAddr, OSType pixelFormat, int rowBytes, int width, int height)
+{
+	UInt32 alphaMask = EndianU32_BtoN((pixelFormat == k32ARGBPixelFormat) ? 0xFF000000 : 0xFF),
+		 replacement = EndianU32_BtoN((pixelFormat == k32ARGBPixelFormat) ? 0xFF010101 : 0x010101FF);
+	Ptr p = baseAddr;
+	int y, x;
+	
+	for (y = 0; y < height; y++) {
+		UInt32 *p32 = (UInt32*)p;
+		for (x = 0; x < width; x++) {
+			UInt32 px = *p32;
+			
+			// if px is black, and opaque (alpha == 255)
+			if (!(px & ~alphaMask) && (px & alphaMask == alphaMask)) {
+				// then set it to not-quite-black so it'll show up
+				*p32 = replacement;
+			}
+			
+			p32++;
+		}
+		
+		p += rowBytes;
+	}
 }

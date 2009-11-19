@@ -394,6 +394,9 @@ ComponentResult VobSubCodecDrawBand(VobSubCodecGlobals glob, ImageSubCodecDecomp
 		}
 	}
 	
+	if (IsTransparentSubtitleHackEnabled())
+		ConvertImageToQDTransparent(drp->baseAddr, k32ARGBPixelFormat, drp->rowBytes, myDrp->width, myDrp->height);
+	
 	return err;
 }
 

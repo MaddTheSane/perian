@@ -31,6 +31,7 @@
 
 extern "C" {
 	int ExtractVobSubPacket(UInt8 *dest, const UInt8 *framedSrc, int srcSize, int *usedSrcBytes, int index);
+	void set_track_colorspace_ext(ImageDescriptionHandle imgDescHandle, Fixed displayW, Fixed displayH);
 }
 
 #pragma mark C
@@ -80,6 +81,16 @@ static void AppendSRGBProfile(ImageDescriptionHandle imgDesc)
 	CFRelease(cSpaceICC);
 }
 
+void SetSubtitleMediaHandlerTransparent(MediaHandler mh)
+{
+	if (IsTransparentSubtitleHackEnabled()) {
+		RGBColor blendColor = {0x0000, 0x0000, 0x0000};
+		MediaSetGraphicsMode(mh, transparent, &blendColor);
+	}
+	else
+		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
+}
+
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, 
                               TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox)
 {
@@ -112,11 +123,7 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 			// finally, say that we're transparent
 			MediaHandler mh = GetMediaHandler(theMedia);
 			
-			if (IsTransparentSubtitleHackEnabled()) {
-				RGBColor blendColor = {0x0000, 0x0000, 0x0000};
-				MediaSetGraphicsMode(mh, transparent, &blendColor);
-			}
-			else MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
+			SetSubtitleMediaHandlerTransparent(mh);
 			
 			// subtitle tracks should be above the video track, which should be layer 0
 			SetTrackLayer(theTrack, -1);
@@ -677,6 +684,7 @@ static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHa
 	Fixed trackHeight = IntToFixed(movieBox.bottom - movieBox.top);
 	(*imgDesc)->width = FixedToInt(trackWidth);
 	(*imgDesc)->height = FixedToInt(trackHeight);
+	set_track_colorspace_ext(imgDesc, (*imgDesc)->width, (*imgDesc)->height);
 	Track theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
 	if(theTrack == NULL)
 		return NULL;
@@ -687,8 +695,8 @@ static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHa
 		DisposeMovieTrack(theTrack);
 		return NULL;
 	}
-	MediaHandler mh = GetMediaHandler(theMedia);
-	MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
+	MediaHandler mh = GetMediaHandler(theMedia);	
+	SetSubtitleMediaHandlerTransparent(mh);
 	SetTrackLayer(theTrack, -1);
 	
 	if(imageWidth != 0)

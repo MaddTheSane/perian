@@ -596,6 +596,8 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 			trackHeight = IntToFixed(height);
 		}
 		
+		set_track_colorspace_ext(imgDesc, width, height);
+		
 		mkvTrack.theTrack = NewMovieTrack(theMovie, trackWidth, trackHeight, kNoVolume);
 		if (mkvTrack.theTrack == NULL)
 			return GetMoviesError();
@@ -606,7 +608,7 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		
 		// finally, say that we're transparent
 		mh = GetMediaHandler(mkvTrack.theMedia);
-		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);
+		SetSubtitleMediaHandlerTransparent(mh);
 		
 		// subtitle tracks should be above the video track, which should be layer 0
 		SetTrackLayer(mkvTrack.theTrack, -1);
@@ -621,7 +623,7 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		emptyDataRefExtension[1] = EndianU32_NtoB(kDataRefExtensionInitializationData);
 		
 		PtrAndHand(&emptyDataRefExtension[0], mkvTrack.subDataRefHandler, sizeof(emptyDataRefExtension));
-		
+				
 		mkvTrack.theTrack = CreatePlaintextSubTrack(theMovie, imgDesc, GetMovieTimeScale(theMovie), mkvTrack.subDataRefHandler, HandleDataHandlerSubType, (*imgDesc)->cType, NULL, movieBox);
 		if (mkvTrack.theTrack == NULL)
 			return GetMoviesError();
