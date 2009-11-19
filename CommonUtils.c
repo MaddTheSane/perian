@@ -307,7 +307,7 @@ static const CFStringRef defaultFrameDroppingList[] = {
 	CFSTR("Movie Time"),
 	CFSTR("Movist"),
 	CFSTR("NicePlayer"),
-	CFSTR("QTKitDecodeServer"),
+	CFSTR("QTKitServer"),
 	CFSTR("QuickTime Player"),
 	CFSTR("Spiral")
 };
