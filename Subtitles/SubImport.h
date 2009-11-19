@@ -39,7 +39,6 @@ extern "C"
 #endif
 
 short GetFilenameLanguage(CFStringRef filename);
-ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie);
 ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType dataRefType, Movie theMovie);
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox);
 

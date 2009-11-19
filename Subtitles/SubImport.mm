@@ -54,28 +54,15 @@ short GetFilenameLanguage(CFStringRef filename)
 	findResult = CFStringFind(baseName, CFSTR("."), kCFCompareBackwards);
 	findResult.location++;
 	findResult.length = CFStringGetLength(baseName) - findResult.location;
+	langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
 	
 	// check for 3 char language code
-	if (findResult.length == 3) {
-		char langCStr[4] = "";
-		
-		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
-		CFStringGetCString(langStr, langCStr, 4, kCFStringEncodingASCII);
-		lang = ISO639_2ToQTLangCode(langCStr);
-		
-		CFRelease(langStr);
-		
-		// and for a 2 char language code
-	} else if (findResult.length == 2) {
-		char langCStr[3] = "";
-		
-		langStr = CFStringCreateWithSubstring(NULL, baseName, findResult);
-		CFStringGetCString(langStr, langCStr, 3, kCFStringEncodingASCII);
-		lang = ISO639_1ToQTLangCode(langCStr);
-		
-		CFRelease(langStr);
-	}
-	
+	if (findResult.length == 3)
+		lang = ISO639_2ToQTLangCode([(NSString*)langStr UTF8String]);
+	else if (findResult.length == 2) // and for a 2 char language code
+		lang = ISO639_1ToQTLangCode([(NSString*)langStr UTF8String]);
+
+	CFRelease(langStr);
 	CFRelease(baseName);
 	return lang;
 }
@@ -541,13 +528,10 @@ static void LoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount)
 	} while (![sc isAtEnd]);
 }
 
-static ComponentResult LoadSingleTextSubtitle(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack, int subtitleType, int whichTrack)
+static ComponentResult LoadSingleTextSubtitle(CFURLRef theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack, int subtitleType, int whichTrack)
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	UInt8 path[PATH_MAX];
-	
-	FSRefMakePath(theDirectory, path, PATH_MAX);
-	NSString *nsPath = [[NSString stringWithUTF8String:(char*)path] stringByAppendingPathComponent:(NSString*)filename];
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
+	NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString*)filename];
 	
 	SubSerializer *ss = [[SubSerializer alloc] init];
 	
@@ -889,19 +873,9 @@ static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onl
 	NSString *langStr = track->language;
 	int lang = langUnspecified;
 	if([langStr length] == 3)
-	{
-		char langCStr[4] = "";
-		
-		CFStringGetCString((CFStringRef)langStr, langCStr, 4, kCFStringEncodingASCII);
-		lang = ISO639_2ToQTLangCode(langCStr);
-	}
+		lang = ISO639_2ToQTLangCode([langStr UTF8String]);
 	else if([langStr length] == 2)
-	{
-		char langCStr[3] = "";
-		
-		CFStringGetCString((CFStringRef)langStr, langCStr, 3, kCFStringEncodingASCII);
-		lang = ISO639_1ToQTLangCode(langCStr);				
-	}
+		lang = ISO639_1ToQTLangCode([langStr UTF8String]);		
 	SetMediaLanguage(trackMedia, lang);
 	
 	TimeValue mediaDuration = GetMediaDuration(trackMedia);
@@ -919,13 +893,10 @@ typedef enum {
 	VOB_SUB_STATE_READING_TRACK_DATA
 } VobSubState;
 
-static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
+static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	UInt8 path[PATH_MAX];
-	
-	FSRefMakePath(theDirectory, path, PATH_MAX);
-	NSString *nsPath = [[NSString stringWithUTF8String:(char *)path] stringByAppendingPathComponent:(NSString *)filename];
+	NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString *)filename];
 	NSString *idxContent = STLoadFileWithUnknownEncoding(nsPath);
 	NSData *privateData = nil;
 	ComponentResult err = noErr;
@@ -1017,11 +988,9 @@ static ComponentResult LoadVobSubSubtitles(const FSRef *theDirectory, CFStringRe
 		
 		NSData *subFileData = [NSData dataWithContentsOfMappedFile:subFileName];
 		FSRef subFile;
-		FSPathMakeRef((const UInt8 *)[subFileName fileSystemRepresentation], &subFile, NULL);
-		FSSpec theFile;
-		FSGetCatalogInfo(&subFile, kFSCatInfoNone, NULL, NULL, &theFile, NULL);
+		FSPathMakeRef((const UInt8*)[subFileName fileSystemRepresentation], &subFile, NULL);
 		
-		if((err = QTNewDataReferenceFromFSSpec(&theFile, 0, &dataRef, &dataRefType)) != noErr)
+		if((err = QTNewDataReferenceFromFSRef(&subFile, 0, &dataRef, &dataRefType)) != noErr)
 			goto bail;
 		
 		NSEnumerator *trackEnum = [tracks objectEnumerator];
@@ -1064,25 +1033,20 @@ static Boolean ShouldLoadExternalSubtitles()
 	return isSet ? value : YES;
 }
 
-ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
+static ComponentResult LoadExternalSubtitles(CFURLRef theFileURL, Movie theMovie)
 {
 	ComponentResult err = noErr;
 	Track firstSubTrack = NULL;
-	HFSUniStr255 hfsFilename;
 	CFStringRef cfFilename = NULL;
 	FSRef parentDir;
 	FSIterator dirItr = NULL;
 	CFRange baseFilenameRange;
 	ItemCount filesFound;
 	Boolean containerChanged;
-	
-	if (!ShouldLoadExternalSubtitles()) return noErr;
-	
-	err = FSGetCatalogInfo(theFile, kFSCatInfoNone, NULL, &hfsFilename, NULL, &parentDir);
-	if (err) goto bail;
-	
+	CFURLRef parentURL;
+		
 	// find the location of the extension
-	cfFilename = CFStringCreateWithCharacters(NULL, hfsFilename.unicode, hfsFilename.length);
+	cfFilename = CFURLCopyLastPathComponent(theFileURL);
 	baseFilenameRange = CFStringFind(cfFilename, CFSTR("."), kCFCompareBackwards);
 	
 	// strip the extension
@@ -1093,6 +1057,9 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 		cfFilename = CFStringCreateWithSubstring(NULL, temp, baseFilenameRange);
 		CFRelease(temp);
 	}
+	
+	parentURL = CFURLCreateCopyDeletingLastPathComponent(NULL, theFileURL);
+	CFURLGetFSRef(parentURL, &parentDir);
 	
 	err = FSOpenIterator(&parentDir, kFSIterateFlat, &dirItr);
 	if (err) goto bail;
@@ -1107,7 +1074,7 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 				                   NULL, &foundFileRef, NULL, &hfsFoundFilename);
 		if (err) goto bail;
 		
-		cfFoundFilename = CFStringCreateWithCharacters(NULL, hfsFoundFilename.unicode, hfsFoundFilename.length);
+		cfFoundFilename = CFStringCreateWithCharactersNoCopy(NULL, hfsFoundFilename.unicode, hfsFoundFilename.length, kCFAllocatorNull);
 		cmpRes = CFStringCompareWithOptions(cfFoundFilename, cfFilename, baseFilenameRange, kCFCompareCaseInsensitive);
 		
 		// two files share the same base, so now check the extension of the found file
@@ -1133,8 +1100,9 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 						// VobSub
 						actRange = CFStringFind(cfFoundFilename, CFSTR(".idx"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 						if (actRange.length && actRange.location == extRange.location)
-							err = LoadVobSubSubtitles(&parentDir, cfFoundFilename, theMovie, &firstSubTrack);
+							err = LoadVobSubSubtitles(parentURL, cfFoundFilename, theMovie, &firstSubTrack);
 						else {
+							// SAMI
 							actRange = CFStringFind(cfFoundFilename, CFSTR(".smi"), kCFCompareCaseInsensitive | kCFCompareBackwards);
 							if (actRange.length && actRange.location == extRange.location)
 								subType = kSubTypeSMI;
@@ -1144,11 +1112,11 @@ ComponentResult LoadExternalSubtitles(const FSRef *theFile, Movie theMovie)
 			}
 			
 			if (subType == kSubTypeSMI) {
-				err = LoadSingleTextSubtitle(&parentDir, cfFoundFilename, theMovie, &firstSubTrack, kSubTypeSMI, 1);
-				if (!err) err = LoadSingleTextSubtitle(&parentDir, cfFoundFilename, theMovie, &firstSubTrack, kSubTypeSMI, 2);
+				err = LoadSingleTextSubtitle(parentURL, cfFoundFilename, theMovie, &firstSubTrack, kSubTypeSMI, 1);
+				if (!err) err = LoadSingleTextSubtitle(parentURL, cfFoundFilename, theMovie, &firstSubTrack, kSubTypeSMI, 2);
 			}
 			else if (subType != -1)
-				err = LoadSingleTextSubtitle(&parentDir, cfFoundFilename, theMovie, &firstSubTrack, subType, 0);
+				err = LoadSingleTextSubtitle(parentURL, cfFoundFilename, theMovie, &firstSubTrack, subType, 0);
 
 			if (err) goto bail;
 		}
@@ -1166,27 +1134,31 @@ bail:
 	if (cfFilename)
 		CFRelease(cfFilename);
 	
+	CFRelease(parentURL);
+	
 	return err;
 }
 
 ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType dataRefType, Movie theMovie)
 {
 	if (dataRefType != AliasDataHandlerSubType) return noErr;
-	
+	if (!ShouldLoadExternalSubtitles()) return noErr;
+
 	CFStringRef cfPath = NULL;
-	FSRef ref;
-	uint8_t path[PATH_MAX];
 	
 	OSErr err = QTGetDataReferenceFullPathCFString(dataRef, dataRefType, kQTPOSIXPathStyle, &cfPath);
 	if(err != noErr) return err;
-	
-	CFStringGetCString(cfPath, (char*)path, PATH_MAX, kCFStringEncodingUTF8);
-	err = FSPathMakeRef(path, &ref, NULL);
+
+	CFURLRef cfURL = CFURLCreateWithFileSystemPath(NULL, cfPath, kCFURLPOSIXPathStyle, FALSE);
 	CFRelease(cfPath);
 	
-	if(err != noErr) return err;
+	if (!cfURL) return noErr;
 	
-	return LoadExternalSubtitles(&ref, theMovie);
+	err = LoadExternalSubtitles(cfURL, theMovie);
+	
+	CFRelease(cfURL);
+	
+	return err;
 }
 
 #pragma mark Obj-C Classes
@@ -1445,11 +1417,10 @@ CXXSubSerializer::~CXXSubSerializer()
 
 void CXXSubSerializer::pushLine(const char *line, size_t size, unsigned start, unsigned end)
 {
-	NSString *str = [[NSString alloc] initWithBytes:line length:size encoding:NSUTF8StringEncoding];
-	NSString *strn = [str stringByAppendingString:@"\n"];
-	[str release];
+	NSMutableString *str = [[NSMutableString alloc] initWithBytes:line length:size encoding:NSUTF8StringEncoding];
+	[str appendString:@"\n"];
 	
-	SubLine *sl = [[SubLine alloc] initWithLine:strn start:start end:end];
+	SubLine *sl = [[SubLine alloc] initWithLine:str start:start end:end];
 	
 	[sl autorelease];
 	
