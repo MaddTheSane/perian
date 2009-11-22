@@ -1,0 +1,30 @@
+Index: ffmpeg/libavcodec/x86/dsputil_mmx.c
+===================================================================
+--- ffmpeg/libavcodec/x86/dsputil_mmx.c	(revision 20545)
++++ ffmpeg/libavcodec/x86/dsputil_mmx.c	(working copy)
+@@ -2579,6 +2579,25 @@
+     return res;
+ }
+ 
++#undef FF_MM_MMX
++#undef FF_MM_MMX2
++#undef FF_MM_3DNOW
++#undef FF_MM_3DNOWEXT
++#undef FF_MM_SSE
++#undef FF_MM_SSE2
++#undef CODEC_FLAG_BITEXACT
++
++#define ON 0 || 1
++#define OFF 0
++
++#define FF_MM_MMX ON
++#define FF_MM_MMX2 ON
++#define FF_MM_3DNOW OFF
++#define FF_MM_3DNOWEXT OFF
++#define FF_MM_SSE ON
++#define FF_MM_SSE2 ON
++#define CODEC_FLAG_BITEXACT 0
++
+ void dsputil_init_mmx(DSPContext* c, AVCodecContext *avctx)
+ {
+     mm_flags = mm_support();

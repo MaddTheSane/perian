@@ -78,6 +78,7 @@ else
 	patch -p0 < Patches/ffmpeg-no-interlaced.diff
 	patch -p0 < Patches/ffmpeg-faltivec.diff
 	patch -p0 < Patches/ffmpeg-no-h264-warning.diff
+	patch -p0 < Patches/ffmpeg-hardcode-dsputil.diff
 	patch -p0 < Patches/ffmpeg-bgr24-huffyuv.diff
 	touch ffmpeg/patched
 
