@@ -1041,10 +1041,11 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	if (cWidth != videoWidth || cHeight != videoHeight) CGContextScaleCTM(c, cWidth / videoWidth, cHeight / videoHeight);
 	SetATSULayoutOther(layout, kATSUCGContextTag, sizeof(CGContextRef), &c);
 	
-	CGContextSetLineCap(c, kCGLineCapRound);
+	CGContextSetLineCap(c, kCGLineCapRound); // these two are needed to avoid spiky outlines on some fonts
 	CGContextSetLineJoin(c, kCGLineJoinRound);
-	CGContextSetInterpolationQuality(c, kCGInterpolationHigh);
-	CGContextSetShouldSmoothFonts(c, NO); //disables subpixel AA for some reason
+	CGContextSetInterpolationQuality(c, kCGInterpolationLow);
+	CGContextSetShouldSmoothFonts(c, NO); // disables subpixel AA which suddenly appeared in some version of 10.5
+										  // note that it's not documented as doing this, but does the right thing anyway.
 	
 	for (i = 0; i < div_count; i++) {
 		SubRenderDiv *div = [divs objectAtIndex:i];
