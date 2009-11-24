@@ -178,7 +178,6 @@ static NSString *ColorString(SubRGBAColor *c)
 {
 	static const NSString *alignHStr[] = {@"left", @"center", @"right"};
 	static const NSString *alignVStr[] = {@"bottom", @"middle", @"top"};
-	static const NSString *bstyle[] = {@"normal", @"box"};
 	
 	return [NSString stringWithFormat:@""
 					 "SubStyle named \"%@\"\n"
@@ -196,7 +195,7 @@ static NSString *ColorString(SubRGBAColor *c)
 					 ColorString(&secondaryColor), outlineRadius, ColorString(&outlineColor),
 					 shadowDist, ColorString(&shadowColor), marginL, marginR, marginV,
 					 yes(bold), yes(italic), yes(underline), yes(strikeout), alignHStr[alignH],
-					 alignVStr[alignV], bstyle[borderStyle], platformSizeScale];
+					 alignVStr[alignV], (borderStyle == 3) ? @"box" : @"normal", platformSizeScale];
 }
 
 -(void)dealloc
