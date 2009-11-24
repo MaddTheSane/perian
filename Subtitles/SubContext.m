@@ -82,7 +82,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 {
 	if ([*fontname characterAtIndex:0] == '@') {
 		*fontname = [*fontname substringFromIndex:1];
-		//return YES; // XXX vertical
+		return YES;
 	}
 	return NO;
 }
@@ -158,6 +158,11 @@ BOOL ParseFontVerticality(NSString **fontname)
 		if (version == kSubTypeSSA) align = SSA2ASSAlignment(align);
 		
 		ParseASSAlignment(align, &alignH, &alignV);
+		
+		tmp = fontname;
+		vertical = ParseFontVerticality(&tmp);
+		if (vertical)
+			fontname = [tmp retain];
 		
 		platformSizeScale = 0;
 		ex = [delegate completedStyleParsing:self];

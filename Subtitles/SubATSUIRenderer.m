@@ -29,6 +29,7 @@
 
 static float GetWinFontSizeScale(ATSFontRef font);
 static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities);
+static ATSUFontID GetFontIDForSSAName(NSString *name);
 
 #define declare_bitfield(name, bits) unsigned char name[bits / 8 + 1]; bzero(name, sizeof(name));
 #define bitfield_set(name, bit) name[(bit) / 8] |= 1 << ((bit) % 8);
@@ -39,9 +40,8 @@ static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const un
 	ATSUStyle style;
 	CGColorRef primaryColor, outlineColor, shadowColor;
 	Float32 outlineRadius, shadowDist, scaleX, scaleY, primaryAlpha, outlineAlpha, angle, platformSizeScale, fontSize;
-	BOOL blurEdges;
+	BOOL blurEdges, vertical;
 	ATSUFontID font;
-	ATSUVerticalCharacterType fontVertical;
 }
 -(SubATSUISpanEx*)initWithStyle:(ATSUStyle)style_ subStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs;
 -(SubATSUISpanEx*)clone;
@@ -88,9 +88,7 @@ static CGColorRef CloneCGColorWithAlpha(CGColorRef c, float alpha)
 }
 
 -(SubATSUISpanEx*)initWithStyle:(ATSUStyle)style_ subStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs
-{
-	ByteCount unused;
-	
+{	
 	if (self = [super init]) {
 		ATSUCreateAndCopyStyle(style_, &style);
 		
@@ -106,8 +104,8 @@ static CGColorRef CloneCGColorWithAlpha(CGColorRef c, float alpha)
 		angle = sstyle->angle;
 		platformSizeScale = sstyle->platformSizeScale;
 		fontSize = sstyle->size;
-		ATSUGetAttribute(style, kATSUFontTag, sizeof(ATSUFontID), &font, &unused);
-		ATSUGetAttribute(style, kATSUVerticalCharacterTag, sizeof(ATSUVerticalCharacterType), &fontVertical, &unused);
+		vertical = sstyle->vertical;
+		font = GetFontIDForSSAName(sstyle->fontname);
 	}
 	
 	return self;
@@ -131,7 +129,8 @@ static CGColorRef CloneCGColorWithAlpha(CGColorRef c, float alpha)
 	ret->platformSizeScale = platformSizeScale;
 	ret->fontSize = fontSize;
 	ret->font = font;
-	ret->fontVertical = fontVertical;
+	ret->blurEdges = blurEdges;
+	ret->vertical = vertical;
 	
 	return ret;
 }
@@ -341,11 +340,10 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 
 -(void*)completedStyleParsing:(SubStyle*)s
 {
-	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag, kATSUVerticalCharacterTag};
-	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID), sizeof(ATSUVerticalCharacterType)};
+	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag};
+	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID)};
 	
 	NSString *fn = s->fontname;
-	ATSUVerticalCharacterType vertical = ParseFontVerticality(&fn) ? kATSUStronglyVertical : kATSUStronglyHorizontal;
 	ATSUFontID font = GetFontIDForSSAName(fn);
 	ATSFontRef fontRef = font;
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
@@ -353,7 +351,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	Boolean b = s->weight > 0, i = s->italic, u = s->underline, st = s->strikeout;
 	ATSUStyle style;
 		
-	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font, &vertical};
+	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font};
 	
 	if (!s->platformSizeScale) s->platformSizeScale = GetWinFontSizeScale(fontRef);
 	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY); //FIXME several other values also change relative to PlayRes but aren't handled
@@ -412,7 +410,6 @@ static void UpdateFontNameSize(SubATSUISpanEx *spanEx, float screenScale)
 {
 	Fixed fSize = FloatToFixed(spanEx->fontSize * spanEx->platformSizeScale * screenScale);
 	SetATSUStyleOther(spanEx->style, kATSUFontTag, sizeof(ATSUFontID), &spanEx->font);
-	SetATSUStyleOther(spanEx->style, kATSUVerticalCharacterTag, sizeof(ATSUVerticalCharacterType), &spanEx->fontVertical);
 	SetATSUStyleOther(spanEx->style, kATSUSizeTag, sizeof(Fixed), &fSize);
 }
 
@@ -470,7 +467,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 		case tag_fn:
 			sv();
 			oldFont = spanEx->font;
-			spanEx->fontVertical = ParseFontVerticality(&sval) ? kATSUStronglyVertical : kATSUStronglyHorizontal;
+			spanEx->vertical = ParseFontVerticality(&sval);
 			spanEx->font = GetFontIDForSSAName(sval);
 			if (oldFont != spanEx->font) spanEx->platformSizeScale = GetWinFontSizeScale(spanEx->font);
 			UpdateFontNameSize(spanEx, screenScaleY);
@@ -694,15 +691,56 @@ static void SetColor(CGContextRef c, int whichcolor, CGColorRef col)
 	else CGContextSetStrokeColorWithColor(c, col);
 }
 
-static void SetStyleSpanRuns(ATSUTextLayout layout, SubRenderDiv *div)
+static void MakeRunVertical(ATSUTextLayout layout, UniCharArrayOffset spanOffset, UniCharArrayOffset length)
+{
+	ATSUStyle style, vStyle;
+	ATSUVerticalCharacterType vertical = kATSUStronglyVertical;
+	
+	ATSUGetRunStyle(layout, spanOffset, &style, NULL, NULL);
+	ATSUCreateAndCopyStyle(style, &vStyle);
+	SetATSUStyleOther(vStyle, kATSUVerticalCharacterTag, sizeof(vertical), &vertical);
+	ATSUSetRunStyle(layout, vStyle, spanOffset, length);
+	ATSUDisposeStyle(vStyle);
+}
+
+static void EnableVerticalForSpan(ATSUTextLayout layout, SubRenderDiv *div, const unichar *ubuffer, UniCharArrayOffset spanOffset, UniCharArrayOffset length)
+{
+	const unichar tategakiLowerBound = 0x02F1; // copied from http://source.winehq.org/source/dlls/gdi32/freetype.c
+	int runStart, runAboveBound, i;
+	
+	runStart = spanOffset;
+	runAboveBound = ubuffer[spanOffset] >= tategakiLowerBound;
+	
+	for (i = spanOffset+1; i < spanOffset + length; i++) {
+		int isAboveBound = ubuffer[i] >= tategakiLowerBound;
+		
+		if (isAboveBound != runAboveBound) {
+			if (runAboveBound)
+				MakeRunVertical(layout, runStart, i - runStart);
+			runStart = i;
+			isAboveBound = runAboveBound;
+		}
+	}
+	
+	if (runAboveBound)
+		MakeRunVertical(layout, runStart, i - runStart);
+}
+
+static void SetStyleSpanRuns(ATSUTextLayout layout, SubRenderDiv *div, const unichar *ubuffer)
 {
 	unsigned span_count = [div->spans count];
 	int i;
 	
 	for (i = 0; i < span_count; i++) {
 		SubRenderSpan *span = [div->spans objectAtIndex:i];
-		UniCharArrayOffset next = (i == span_count-1) ? [div->text length] : ((SubRenderSpan*)[div->spans objectAtIndex:i+1])->offset;
-		ATSUSetRunStyle(layout, span_ex(span)->style, span->offset, next - span->offset);
+		UniCharArrayOffset next = (i == span_count-1) ? [div->text length] : ((SubRenderSpan*)[div->spans objectAtIndex:i+1])->offset, spanLen = next - span->offset;
+		SubATSUISpanEx *ex = span->ex;
+
+		ATSUSetRunStyle(layout, ex->style, span->offset, spanLen);
+		
+		if (ex->vertical) {
+			EnableVerticalForSpan(layout, div, ubuffer, span->offset, spanLen);
+		}
 	}
 }
 
@@ -1051,7 +1089,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		SubRenderDiv *div = [divs objectAtIndex:i];
 		unsigned textLen = [div->text length];
 		if (!textLen || ![div->spans count]) continue;
-		BOOL resetPens = NO;
+		BOOL resetPens = NO, resetGState = NO;
 		NSData *ubufferData;
 		const unichar *ubuffer = STUnicodeForString(div->text, &ubufferData);
 		
@@ -1061,7 +1099,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		}
 		
 		//NSLog(@"%@", div);
-				
+		
 		NSRect marginRect = NSMakeRect(div->marginL, div->marginV, context->resX - div->marginL - div->marginR, context->resY - div->marginV - div->marginV);
 		
 		marginRect.origin.x *= screenScaleX;
@@ -1076,7 +1114,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		ATSUSetTransientFontMatching(layout,TRUE);
 		
 		SetLayoutPositioning(layout, breakingWidth, div->alignH);
-		SetStyleSpanRuns(layout, div);
+		SetStyleSpanRuns(layout, div, ubuffer);
 		
 		breakbuffer = FindLineBreaks(layout, div, breakLocator, breakbuffer, &breakCount, breakingWidth, ubuffer, textLen);
 
@@ -1113,7 +1151,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 					break;
 				case kSubAlignmentMiddle:
 					if (!centerPen || resetPens) {
-						penY = (FloatToFixed(NSMidY(marginRect)) / 2) + (imageHeight / 2);
+						penY = FloatToFixed(NSMidY(marginRect)) - (imageHeight / 2) + descent;
 					} else penY = centerPen;
 					
 					storePen = &centerPen; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
@@ -1146,11 +1184,21 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 			storePen = NULL; breakc.lStart = breakCount; breakc.lEnd = -1; breakc.direction = 1;
 		}
 		
-		{
-			SubATSUISpanEx *firstspan = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
+		SubATSUISpanEx *firstspan = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
+
+		// FIXME: we can only rotate an entire line at once
+		if (firstspan->angle) {
 			Fixed fangle = FloatToFixed(firstspan->angle);
-			
 			SetATSULayoutOther(layout, kATSULineRotationTag, sizeof(Fixed), &fangle);
+			
+			// FIXME: awful hack for SSA vertical text idiom
+			// instead it needs to rotate text by hand or actually fix ATSUI's rotation origin
+			if (firstspan->vertical && 
+				div->alignV == kSubAlignmentMiddle && div->alignH == kSubAlignmentCenter) {
+				CGContextSaveGState(c);
+				CGContextTranslateCTM(c, FixedToFloat(imageWidth)/2, FixedToFloat(imageWidth)/2);
+				resetGState = YES;
+			}
 		}
 		
 		if (drawTextBounds)
@@ -1160,6 +1208,9 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		breakc.breaks = breaks;
 		
 		penY = DrawOneTextDiv(c, layout, div, breakc, penX, penY);
+		
+		if (resetGState)
+			CGContextRestoreGState(c);
 		
 		[ubufferData release];
 		if (storePen) *storePen = penY;
