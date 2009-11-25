@@ -283,11 +283,16 @@ static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avct
     enum PixelFormat pix_fmt;
     
     avcodec_get_context_defaults2(&tmpContext, CODEC_TYPE_VIDEO);
+	avcodec_get_frame_defaults(&tmpFrame);
     tmpContext.width = avctx->width;
     tmpContext.height = avctx->height;
+	tmpContext.flags = avctx->flags;
+	tmpContext.bits_per_coded_sample = avctx->bits_per_coded_sample;
     tmpContext.codec_tag = avctx->codec_tag;
 	tmpContext.codec_id  = avctx->codec_id;
-    
+	tmpContext.extradata = avctx->extradata;
+	tmpContext.extradata_size = avctx->extradata_size;
+	
     avcodec_open(&tmpContext, codec);
 	AVPacket pkt;
 	av_init_packet(&pkt);
