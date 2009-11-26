@@ -117,6 +117,7 @@ struct WaveFormatEx {
 typedef struct WaveFormatEx WaveFormatEx;
 
 int getCodecID(OSType componentType);
+pascal ComponentResult getPerianCodecInfo(ComponentInstance self, OSType componentType, void *info);
 #endif
 
 #endif

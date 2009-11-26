@@ -12,6 +12,8 @@ define(<!EntryPoint!>, <!!>)dnl
 define(<!ResourceOnly!>, <!!>)dnl
 #include "avcodec.h"
 #include "CodecIDs.h"
+#include <QuickTime/QuickTime.h>
+#include "PerianResourceIDs.h"
 
 int getCodecID(OSType componentType)
 {
@@ -25,4 +27,47 @@ include(<!codecList.m4!>)
 			break;
 	}
 	return codecID;
+}
+
+undefine(<!lastCase!>)dnl
+define(<!doCase!>, <!ifelse($1, lastCase, , <!ifdef(<!lastCase!>, <!			err = GetComponentResource((Component)self, codecInfoResourceType, lastCase, (Handle *)&tempCodecInfo);
+			break;
+		
+!>)!>)<!		case $2:!>
+define(<!lastCase!>, <!$1!>)!>)dnl
+define(<!Codec!>, <!printCaseStatement($1, shift(shift(shift(shift($@)))))!>)dnl
+
+pascal ComponentResult getPerianCodecInfo(ComponentInstance self, OSType componentType, void *info)
+{
+    OSErr err = noErr;
+	
+    if (info == NULL) 
+    {
+        err = paramErr;
+    }
+    else 
+    {
+        CodecInfo **tempCodecInfo;
+		
+        switch (componentType)
+        {
+include(<!codecList.m4!>)
+                err = GetComponentResource((Component)self, codecInfoResourceType, lastCase, (Handle *)&tempCodecInfo);
+                break;
+
+
+            default:	// should never happen but we have to handle the case
+                err = GetComponentResource((Component)self, codecInfoResourceType, kDivX4CodecInfoResID, (Handle *)&tempCodecInfo);
+				
+        }
+        
+        if (err == noErr) 
+        {
+            *((CodecInfo *)info) = **tempCodecInfo;
+            
+            DisposeHandle((Handle)tempCodecInfo);
+        }
+    }
+	
+    return err;
 }
