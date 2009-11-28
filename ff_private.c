@@ -259,7 +259,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	if (!asbd.mFramesPerPacket)
 		asbd.mFramesPerPacket = codec->frame_size;
 	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3) //MP3 Decode is broken on some versions of Tiger and the AppleTV
-		asbd.mFramesPerPacket = 1;
+		asbd.mFramesPerPacket = 1152;
 	asbd.mBitsPerChannel = codec->bits_per_coded_sample;
 	
 	// if we don't have mBytesPerPacket, we can't import as CBR. Probably should be VBR, and the codec
