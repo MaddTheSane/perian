@@ -838,7 +838,7 @@ static int parse_extra_data_h264(FFusionParserContext *parser, const uint8_t *bu
 	{
 		int size = AV_RB16(cur);
 		int out_size = 0;
-		uint8_t *decoded = malloc(size);
+		uint8_t *decoded = av_mallocz(size+FF_INPUT_BUFFER_PADDING_SIZE);
 		if(decode_nal(cur + 2, size, decoded, &out_size, &type, &ref))
 			decode_sps(context, decoded, out_size);
 		cur += size + 2;
@@ -849,7 +849,7 @@ static int parse_extra_data_h264(FFusionParserContext *parser, const uint8_t *bu
 	{
 		int size = AV_RB16(cur);
 		int out_size = 0;
-		uint8_t *decoded = malloc(size);
+		uint8_t *decoded = av_mallocz(size+FF_INPUT_BUFFER_PADDING_SIZE);
 		if(decode_nal(cur + 2, size, decoded, &out_size, &type, &ref))
 			decode_pps(context, decoded, out_size);
 		cur += size + 2;
