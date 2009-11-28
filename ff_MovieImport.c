@@ -479,6 +479,10 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	require_noerr(result,bail);
 	storage->format_context = ic;
 	
+	// because we don't have any parsers enabled, these counters are wrong
+	// since they suddenly count audio tracks which aren't usually added to them
+	ic->probesize = ic->max_analyze_duration = INT_MAX;
+	
 	/* Get the Stream Infos if not already read */
 	result = av_find_stream_info(ic);
 	
