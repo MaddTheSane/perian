@@ -373,8 +373,8 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 {
 	ComponentResult result = noErr;
 	DataHandler dataHandler = NULL;
-	uint8_t buf[PROBE_BUF_SIZE];
-	AVProbeData *pd = (AVProbeData *)malloc(sizeof(AVProbeData));
+	uint8_t buf[PROBE_BUF_SIZE + FF_INPUT_BUFFER_PADDING_SIZE] = {0};
+	AVProbeData pd;
 	ByteIOContext *byteContext;
 
 	/* default */
@@ -384,14 +384,14 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	result = OpenADataHandler(dataRef, dataRefType, NULL, 0, NULL, kDataHCanRead, &dataHandler);
 	if(result || !dataHandler) goto bail;
 	
-	pd->buf = buf;
-	pd->buf_size = PROBE_BUF_SIZE;
+	pd.buf = buf;
+	pd.buf_size = PROBE_BUF_SIZE;
 	
-	result = DataHScheduleData(dataHandler, (Ptr)(pd->buf), 0, PROBE_BUF_SIZE, 0, NULL, NULL);
+	result = DataHScheduleData(dataHandler, (Ptr)pd.buf, 0, PROBE_BUF_SIZE, 0, NULL, NULL);
 	require_noerr(result,bail);
 	
 	init_FFmpeg();
-	storage->format = av_probe_input_format(pd, 1);
+	storage->format = av_probe_input_format(&pd, 1);
 	if(storage->format != NULL) {
 		*valid = 255; /* This means we can read the data */
 		
@@ -416,7 +416,6 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 bail:
 		if(dataHandler)
 			CloseComponent(dataHandler);
-	free(pd);
 	
 	return result;
 } /* FFAvi_MovieImportValidateDataRef() */
