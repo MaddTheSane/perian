@@ -1347,7 +1347,6 @@ static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic)
 	if(buf->ffmpegUsing)
 	{
 		buf->ffmpegUsing = 0;
-		avcodec_default_release_buffer(s, buf->frame);
 		releaseBuffer(s, buf);
 	}
 }
@@ -1364,8 +1363,11 @@ static void releaseBuffer(AVCodecContext *s, FFusionBuffer *buf)
 	buf->retainCount--;
 //	FFusionGlobals glob = (FFusionGlobals)s->opaque;
 //	FFusionDebugPrint("%p Released Buffer %p #%d to %d.\n", glob, buf, buf->frameNumber, buf->retainCount);
-	if(!buf->retainCount)
+	if(!buf->retainCount && !buf->ffmpegUsing)
+	{
 		buf->returnedFrame.data[0] = NULL;
+		avcodec_default_release_buffer(s, buf->frame);
+	}
 }
 
 //-----------------------------------------------------------------
