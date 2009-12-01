@@ -202,7 +202,7 @@
 	<key>CFBundleSignature</key>
 	<string>PerO</string>
 	<key>CFBundleVersion</key>
-	<string>1.1.4</string>
+	<string>1.2b1</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>

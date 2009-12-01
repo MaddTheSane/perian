@@ -1,3 +1,25 @@
+1.2
+- Matroska cover art is now imported as iTunes cover art [r1149]
+- Video tracks now have their colorspace set based on the size of the video [r1170]
+Mac OS X 10.6/Snow Leopard compatibility fixes:
+- QuickTime Player 10 refused to open some files due to missing type identifiers [r1126]
+- Worked around 96khz HE-AAC audio tracks not playing or playing noise [r1128]
+- Extended Front Row subtitle hack to cover 10.6 and reduced its ugliness [r1130, r1186]
+- Worked around re-encoding files with subtitles not working [r1177]
+- Worked around some MKV embedded fonts being incompatible with 10.6 [r1193]
+- Fixed RGB HuffYUV video displaying black bars over the video on 10.6 [r1198]
+- Now compiles under Xcode 3.2
+Fixes:
+- Using a debugger on a process with Perian loaded printed warnings about missing files [r1122]
+- Fixed decoding of WMA audio tracks [r1131]
+- Fixed a crash in LoadExternalSubtitlesFromFileDataRef [r1153]
+- Fixed some VobSub video tracks displaying with wrong colors [r1171]
+- Better support for tracks with delayed start times [r1181]
+- Fixed MPEG1/2 in Matroska playing out of order [r1188]
+SSA:
+- Fixed some top-aligned subtitles being too low [r1163]
+- Vertical text is re-enabled and works somewhat better [r1208]
+
 1.1.4
 Features:
 - Forced VobSub subtitles are imported into a separate track [r1015]

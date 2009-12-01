@@ -16,7 +16,7 @@ define(<!StartResourceID!>, <!128!>)dnl
 #define kVobSubCodecManufacturer	kPerianManufacturer
 #define kFFissionCodecManufacturer	kPerianManufacturer
 
-#define kPerianBaseVersion			(0x00000003)
+#define kPerianBaseVersion			(0x00000004)
 #define kFFusionCodecVersion		(kPerianBaseVersion+0x00030002)
 #define kTextSubCodecVersion		kPerianBaseVersion
 #define kVobSubCodecVersion			kPerianBaseVersion
