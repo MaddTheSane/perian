@@ -920,6 +920,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 		int parsedBufSize;
 		uint8_t *buffer = (uint8_t *)drp->codecData;
 		int bufferSize = p->bufferSize;
+		int skipped;
 		
 		if(glob->data.unparsedFrames.dataSize != 0)
 		{
@@ -927,7 +928,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 			bufferSize = glob->data.unparsedFrames.dataSize;
 		}
 		
-		if(ffusionParse(glob->begin.parser, buffer, bufferSize, &parsedBufSize, &type, &skippable) == 0)
+		if(ffusionParse(glob->begin.parser, buffer, bufferSize, &parsedBufSize, &type, &skippable, &skipped) == 0 && (!skipped || glob->begin.futureType))
 		{
 			/* parse failed */
 			myDrp->bufferSize = bufferSize;
@@ -990,7 +991,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 				
 				buffer += parsedBufSize;
 				bufferSize -= parsedBufSize;
-				int success = ffusionParse(glob->begin.parser, buffer, bufferSize, &parsedBufSize, &type, &skippable);
+				int success = ffusionParse(glob->begin.parser, buffer, bufferSize, &parsedBufSize, &type, &skippable, &skipped);
 				if(success && type == FF_B_TYPE)
 				{
 					/* A B frame follows us, so setup the P frame for the future and set dependencies */

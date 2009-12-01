@@ -46,7 +46,7 @@ typedef struct FFusionParser
 	int (*parser_parse)(FFusionParserContext *parser,
 						const uint8_t *buf, int buf_size,
 						int *out_buf_size,
-						int *type, int *skippable);
+						int *type, int *skippable, int *skipped);
 	struct FFusionParser *next;
 } FFusionParser;
 
@@ -60,7 +60,7 @@ void initFFusionParsers();
 FFusionParserContext *ffusionParserInit(int codec_id);
 void ffusionParserFree(FFusionParserContext *parser);
 int ffusionParseExtraData(FFusionParserContext *parser, const uint8_t *buf, int buf_size);
-int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable);
+int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable, int *skipped);
 void ffusionLogDebugInfo(FFusionParserContext *parser, FILE *log);
 FFusionDecodeAbilities ffusionIsParsedVideoDecodable(FFusionParserContext *parser);
 

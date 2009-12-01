@@ -193,7 +193,7 @@ static int parse_mpeg4_extra(FFusionParserContext *parser, const uint8_t *buf, i
  * @param pts The PTS of the frame
  * @return 1 if a frame is found, 0 otherwise
  */
-static int parse_mpeg4_stream(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable)
+static int parse_mpeg4_stream(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable, int *skipped)
 {
 	ParseContext1 *pc1 = (ParseContext1 *)parser->pc->priv_data;
 	pc1->pc.frame_start_found = 0;
@@ -207,11 +207,19 @@ static int parse_mpeg4_stream(FFusionParserContext *parser, const uint8_t *buf, 
 	s->current_picture_ptr = &s->current_picture;
 	
 	init_get_bits(gb, buf, 8 * buf_size);
-	if(ff_mpeg4_decode_picture_header(s, gb) != 0)
+	int parse_res = ff_mpeg4_decode_picture_header(s, gb);
+	if(parse_res == FRAME_SKIPPED) {
+		*out_buf_size = buf_size;
+		*type = FF_P_TYPE;
+		*skippable = 1;
+		*skipped = 1;
+	}
+	if(parse_res != 0)
 		return 0;
 	
 	*type = s->pict_type;
 	*skippable = (*type == FF_B_TYPE);
+	*skipped = 0;
 #if 0 /*this was an attempt to figure out the PTS information and detect an out of order P frame before we hit its B frame */
 	int64_t *lastPtsPtr = (int64_t *)parser->internalContext;
 	int64_t lastPts = *lastPtsPtr;
@@ -245,7 +253,7 @@ static int parse_mpeg4_stream(FFusionParserContext *parser, const uint8_t *buf, 
 	return 1;
 }
 
-static int parse_mpeg12_stream(FFusionParserContext *ffparser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable)
+static int parse_mpeg12_stream(FFusionParserContext *ffparser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable, int *skipped)
 {
 	const uint8_t *out_unused;
 	int size_unused;
@@ -256,6 +264,7 @@ static int parse_mpeg12_stream(FFusionParserContext *ffparser, const uint8_t *bu
 	*out_buf_size = buf_size;
 	*type = ffparser->pc->pict_type;
 	*skippable = *type == FF_B_TYPE;
+	*skipped = 0;
 	
 	return 1;
 }
@@ -780,7 +789,7 @@ static int inline decode_nals(H264ParserContext *context, const uint8_t *buf, in
  * @param pts The PTS of the frame
  * @return 1 if a frame is found, 0 otherwise
  */
-static int parse_h264_stream(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable)
+static int parse_h264_stream(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable, int *skipped)
 {
 	int endOfFrame;
 	int size = 0;
@@ -812,6 +821,7 @@ static int parse_h264_stream(FFusionParserContext *parser, const uint8_t *buf, i
 		}
 	}while(decode_nals(parser->internalContext, parseBuf, parseSize, type, skippable) == 0 && size < buf_size);
 		
+	*skipped = 0;
 	*out_buf_size = size;
 	return 1;
 }
@@ -984,13 +994,14 @@ found:
  * @param buf_size Size of the input buffer
  * @param out_buf_size The number of bytes present in the first frame of data
  * @param type The frame Type: FF_*_TYPE
- * @param pts The PTS of the frame
+ * @param skippable If nothing depends on the frame
+ * @param skipped If the frame is an N-vop or equivalent
  * @return 1 if a frame is found, 0 otherwise
  */
-int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable)
+int ffusionParse(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable, int *skipped)
 {
 	if(parser->parserStructure->parser_parse)
-		return (parser->parserStructure->parser_parse)(parser, buf, buf_size, out_buf_size, type, skippable);
+		return (parser->parserStructure->parser_parse)(parser, buf, buf_size, out_buf_size, type, skippable, skipped);
 	return 0;
 }
 
