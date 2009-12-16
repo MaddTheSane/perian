@@ -234,10 +234,11 @@ ComponentResult MatroskaImport::ReadSegmentInfo(KaxInfo &segmentInfo)
 
 ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 {
-	Track firstVideoTrack = NULL;
-	Track firstAudioTrack = NULL;
-	Track firstSubtitleTrack = NULL;
+	Track firstVideoTrack = NULL; short firstVideoTrackLang = 0;
+	Track firstAudioTrack = NULL; short firstAudioTrackLang = 0;
+	Track firstSubtitleTrack = NULL; short firstSubtitleTrackLang = 0;
 	ComponentResult err = noErr;
+	bool foundAnEnabledTrack = false;
 	
 	if (seenTracks)
 		return noErr;
@@ -261,50 +262,6 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			mkvTrack.type = uint8(type);
 			mkvTrack.defaultDuration = uint32(defaultDuration) / float(timecodeScale) + .5;
 			
-			switch (uint8(type)) {
-				case track_video:
-					if (pass == 2) continue;
-					err = AddVideoTrack(track, mkvTrack);
-					if (err) return err;
-					
-					if (firstVideoTrack)
-						SetTrackAlternate(firstVideoTrack, mkvTrack.theTrack);
-					else
-						firstVideoTrack = mkvTrack.theTrack;
-					break;
-					
-				case track_audio:
-					if (pass == 2) continue;
-					err = AddAudioTrack(track, mkvTrack);
-					if (err) return err;
-					
-					if (firstAudioTrack)
-						SetTrackAlternate(firstAudioTrack, mkvTrack.theTrack);
-					else
-						firstAudioTrack = mkvTrack.theTrack;
-					break;
-					
-				case track_subtitle:
-					if (pass == 1) continue;
-					err = AddSubtitleTrack(track, mkvTrack);
-					if (err) return err;
-					if (mkvTrack.theTrack == NULL) continue;
-					
-					if (firstSubtitleTrack)
-						SetTrackAlternate(firstSubtitleTrack, mkvTrack.theTrack);
-					else
-						firstSubtitleTrack = mkvTrack.theTrack;
-					break;
-					
-				case track_complex:
-				case track_logo:
-				case track_buttons:
-				case track_control:
-					// not likely to be implemented soon
-				default:
-					continue;
-			}
-			
 			KaxTrackLanguage & trackLang = GetChild<KaxTrackLanguage>(track);
 			KaxTrackName & trackName = GetChild<KaxTrackName>(track);
 			KaxContentEncodings * encodings = FindChild<KaxContentEncodings>(track);
@@ -315,8 +272,58 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 				if (err) continue;
 			}
 			
-			long qtLang = ISO639_2ToQTLangCode(string(trackLang).c_str());
+			short qtLang = ISO639_2ToQTLangCode(string(trackLang).c_str());
 			SetMediaLanguage(mkvTrack.theMedia, qtLang);
+			
+			switch (uint8(type)) {
+				case track_video:
+					if (pass == 2) continue;
+					err = AddVideoTrack(track, mkvTrack);
+					if (err) return err;
+					
+					if (firstVideoTrack && qtLang != firstVideoTrackLang)
+						SetTrackAlternate(firstVideoTrack, mkvTrack.theTrack);
+					else {
+						firstVideoTrack = mkvTrack.theTrack;
+						firstVideoTrackLang = qtLang;
+					}
+					break;
+					
+				case track_audio:
+					if (pass == 2) continue;
+					err = AddAudioTrack(track, mkvTrack);
+					if (err) return err;
+					
+					if (firstAudioTrack && qtLang != firstAudioTrackLang)
+						SetTrackAlternate(firstAudioTrack, mkvTrack.theTrack);
+					else {
+						firstAudioTrack = mkvTrack.theTrack;
+						firstAudioTrackLang = qtLang;
+					}
+					break;
+					
+				case track_subtitle:
+					if (pass == 1) continue;
+					err = AddSubtitleTrack(track, mkvTrack);
+					if (err) return err;
+					if (mkvTrack.theTrack == NULL) continue;
+					
+					if (firstSubtitleTrack && qtLang != firstSubtitleTrackLang)
+						SetTrackAlternate(firstSubtitleTrack, mkvTrack.theTrack);
+					else {
+						firstSubtitleTrack = mkvTrack.theTrack;
+						firstSubtitleTrackLang = qtLang;
+					}
+					break;
+					
+				case track_complex:
+				case track_logo:
+				case track_buttons:
+				case track_control:
+					// not likely to be implemented soon
+				default:
+					continue;
+			}
 			
 			mkvTrack.isEnabled = uint8(enabled);
 			mkvTrack.usesLacing = uint8(lacing);
@@ -354,18 +361,21 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	
 	for (int i = 0; i < tracks.size(); i++) {
 		SetTrackEnabled(tracks[i].theTrack, tracks[i].isEnabled);
+		if (tracks[i].isEnabled)
+			foundAnEnabledTrack = true;
 	}
-	// ensure that at least one track in each alternate group (type) is enabled
 	// ffmpeg used to write a TrackDefault of 0 for all tracks
-	for (int i = 0; i < tracks.size(); i++) {
-		if (!GetTrackEnabled(tracks[i].theTrack)) {
-			Track alternate = GetTrackAlternate(tracks[i].theTrack);
-			while (alternate != tracks[i].theTrack && !GetTrackEnabled(alternate))
-				alternate = GetTrackAlternate(alternate);
-			if (alternate == tracks[i].theTrack)
-				SetTrackEnabled(tracks[i].theTrack, 1);
-		}
+	// ensure that at least one track of each media type is enabled, if none were originally
+	// this picks the first track, which may not be the best, but the situation is quite rare anyway
+	if (!foundAnEnabledTrack) {
+		if (firstVideoTrack)
+			SetTrackEnabled(firstVideoTrack, 1);
+		if (firstAudioTrack)
+			SetTrackEnabled(firstAudioTrack, 1);
+		if (firstSubtitleTrack)
+			SetTrackEnabled(firstSubtitleTrack, 1);
 	}
+	
 	seenTracks = true;
 	return noErr;
 }
@@ -625,7 +635,7 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		emptyDataRefExtension[1] = EndianU32_NtoB(kDataRefExtensionInitializationData);
 		
 		PtrAndHand(&emptyDataRefExtension[0], mkvTrack.subDataRefHandler, sizeof(emptyDataRefExtension));
-				
+
 		mkvTrack.theTrack = CreatePlaintextSubTrack(theMovie, imgDesc, GetMovieTimeScale(theMovie), mkvTrack.subDataRefHandler, HandleDataHandlerSubType, (*imgDesc)->cType, NULL, movieBox);
 		if (mkvTrack.theTrack == NULL)
 			return GetMoviesError();
