@@ -140,8 +140,7 @@ FFissionDecoder::~FFissionDecoder()
 
 void FFissionDecoder::Initialize(const AudioStreamBasicDescription* inInputFormat, const AudioStreamBasicDescription* inOutputFormat, const void* inMagicCookie, UInt32 inMagicCookieByteSize)
 {
-	if (inMagicCookieByteSize > 0)
-		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
+	SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
 		
 	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
 	
@@ -180,6 +179,9 @@ void FFissionDecoder::SetMagicCookie(const void* inMagicCookieData, UInt32 inMag
 	FFissionCodec::SetMagicCookie(inMagicCookieData, inMagicCookieDataByteSize);	
 	
 	CloseAVCodec();
+	
+	avContext->extradata_size = 0;
+	avContext->extradata = NULL;
 }
 
 void FFissionDecoder::SetupExtradata(OSType formatID)
@@ -200,8 +202,10 @@ void FFissionDecoder::SetupExtradata(OSType formatID)
 			break;
 			
 		case kAudioFormatXiphVorbis:
-			avContext->extradata_size = ConvertXiphVorbisCookie();
-			avContext->extradata = magicCookie;
+			if (!avContext->extradata) {
+				avContext->extradata_size = ConvertXiphVorbisCookie();
+				avContext->extradata = magicCookie;
+			}
 			break;
 			
 		default:
@@ -250,7 +254,7 @@ int FFissionDecoder::ConvertXiphVorbisCookie()
 	}
 	
 	int len = headerSize[0] + headerSize[1] + headerSize[2];
-	Byte *newCookie = new Byte[len + len/255 + 64];
+	Byte *newCookie = new Byte[len + len/255 + 64 + FF_INPUT_BUFFER_PADDING_SIZE];
 	ptr = newCookie;
 	
 	ptr[0] = 2;		// number of packets minus 1
