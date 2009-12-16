@@ -36,13 +36,31 @@ typedef struct _dataref_private dataref_private;
 
 /* DataRef Wrapper for QuickTime */
 
+static int dataref_update_filesize(dataref_private *private)
+{
+	wide fsize;
+	ComponentResult result = DataHGetFileSize64(private->dh, &fsize);
+	if(result == noErr) {
+		private->size = (int64_t)fsize.lo;
+		private->size += (int64_t)fsize.hi << 32;
+		// Our data handler supports wide offsets. Remember for later use.
+		private->supportsWideOffsets = 1;
+	} else {
+		long size32;
+		result = DataHGetFileSize(private->dh, &size32);
+		require_noerr(result, bail);
+		private->size = size32;
+	}
+bail:
+	return result;
+}
+
 /* !!! THIS FUNCTION ASSUMES h->priv_data IS VALID in contrary to the other open functions
 * found in ffmpeg */
 static int dataref_open(URLContext *h, const char *filename, int flags)
 {
 	ComponentResult result;
 	dataref_private *private;
-	wide fsize;
 	long access = 0;
 	
 	if(flags & URL_RDWR) {
@@ -72,32 +90,29 @@ static int dataref_open(URLContext *h, const char *filename, int flags)
 	private->pos = 0ll;
 	private->size = 0ll;
 	
-	result = DataHGetFileSize64(private->dh, &fsize);
-	if(result == noErr) {
-		private->size = (int64_t)fsize.lo;
-		private->size += (int64_t)fsize.hi << 32;
-		// Our data handler supports wide offsets. Remember for later use.
-		private->supportsWideOffsets = 1;
-	} else {
-		long size32;
-		result = DataHGetFileSize(private->dh, &size32);
-		require_noerr(result, bail);
-		private->size = size32;
-	}
-	
+	result = dataref_update_filesize(private);
+	require_noerr(result,bail);
 bail:
-		return result;
+	return result;
 } /* dataref_open() */
 
 static int dataref_read(URLContext *h, unsigned char *buf, int size)
 {
 	int result;
-	int64_t read;
-
 	dataref_private *p = (dataref_private*)h->priv_data;
+	int read;
+
+	if (p->pos + size > p->size) {
+		// it tried to read past the end
+		// but since we cache the size, it might be wrong
+		// try to update the size before clipping the request
+		dataref_update_filesize(p);
+	}
 	
-	read = p->size - p->pos;
-	read = (read < size) ? read : size;
+	if (p->pos >= p->size)
+		return 0; // can't read past the end
+	else
+		read = FFMIN(size, p->size - p->pos);
 	
 	if(p->supportsWideOffsets) {
 		wide offset;
@@ -162,9 +177,11 @@ static int64_t dataref_seek(URLContext *h, int64_t pos, int whence)
 			p->pos += pos;
 			break;
 		case SEEK_END:
+			dataref_update_filesize(p);
 			p->pos = p->size + pos;
 			break;
 		case AVSEEK_SIZE:
+			dataref_update_filesize(p);
 			return p->size;
 		default:
 			return -1;

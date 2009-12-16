@@ -16,6 +16,7 @@ Fixes:
 - Fixed some VobSub video tracks displaying with wrong colors [r1171]
 - Better support for tracks with delayed start times [r1181]
 - Fixed MPEG1/2 in Matroska playing out of order [r1188]
+- Fixed a crash opening files while they were being downloaded [r1227]
 SSA:
 - Fixed some top-aligned subtitles being too low [r1163]
 - Vertical text is re-enabled and works somewhat better [r1208]

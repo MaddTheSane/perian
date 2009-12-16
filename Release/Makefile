@@ -3,7 +3,7 @@
 # Plists - Modify all plists, they should all have version numbers.
 # Check the Perian.component target and PerianPane target.
 
-VERSION=1.2b1
+VERSION=1.2
 BETA=TRUE
 SRC_DIR=..
 BUILD_DIR=build
