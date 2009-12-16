@@ -571,13 +571,12 @@ CGColorSpaceRef GetSRGBColorSpace()
 	static Boolean loaded = FALSE;
 	static CGColorSpaceRef sRGBColorSpace;
 	int unlock = PerianInitEnter(&loaded);
-	CFStringRef *srgb;
 
 	if (!loaded) {
 		loaded = TRUE;
 
-		if ((srgb = dlsym(RTLD_NEXT, "kCGColorSpaceSRGB"))) {
-			sRGBColorSpace = CGColorSpaceCreateWithName(*srgb); // does not exist on 10.4
+		if (&kCGColorSpaceSRGB) {
+			sRGBColorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB); // does not exist on 10.4
 		} else {
 			sRGBColorSpace = CreateColorSpaceFromSystemICCProfileName(CFSTR("sRGB Profile.icc"));
 		}
