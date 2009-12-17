@@ -128,6 +128,8 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0
 	
 	int initialMap[6] = {0, 1, 2, 3, 4, 5};
 	memcpy(fullChannelMap, initialMap, sizeof(initialMap));
+	
+	avcodec_get_context_defaults2(avContext, CODEC_TYPE_AUDIO);
 }
 
 FFissionDecoder::~FFissionDecoder()
@@ -140,7 +142,7 @@ FFissionDecoder::~FFissionDecoder()
 
 void FFissionDecoder::Initialize(const AudioStreamBasicDescription* inInputFormat, const AudioStreamBasicDescription* inOutputFormat, const void* inMagicCookie, UInt32 inMagicCookieByteSize)
 {
-	if (inMagicCookieByteSize > 0)
+	if (inMagicCookie)
 		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
 		
 	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
@@ -180,6 +182,9 @@ void FFissionDecoder::SetMagicCookie(const void* inMagicCookieData, UInt32 inMag
 	FFissionCodec::SetMagicCookie(inMagicCookieData, inMagicCookieDataByteSize);	
 	
 	CloseAVCodec();
+	
+	avContext->extradata_size = 0;
+	avContext->extradata = NULL;
 }
 
 void FFissionDecoder::SetupExtradata(OSType formatID)
@@ -200,8 +205,10 @@ void FFissionDecoder::SetupExtradata(OSType formatID)
 			break;
 			
 		case kAudioFormatXiphVorbis:
-			avContext->extradata_size = ConvertXiphVorbisCookie();
-			avContext->extradata = magicCookie;
+			if (!avContext->extradata) {
+				avContext->extradata_size = ConvertXiphVorbisCookie();
+				avContext->extradata = magicCookie;
+			}
 			break;
 			
 		default:
@@ -250,7 +257,7 @@ int FFissionDecoder::ConvertXiphVorbisCookie()
 	}
 	
 	int len = headerSize[0] + headerSize[1] + headerSize[2];
-	Byte *newCookie = new Byte[len + len/255 + 64];
+	Byte *newCookie = new Byte[len + len/255 + 64 + FF_INPUT_BUFFER_PADDING_SIZE];
 	ptr = newCookie;
 	
 	ptr[0] = 2;		// number of packets minus 1
@@ -335,8 +342,6 @@ void FFissionDecoder::OpenAVCodec()
 	
 	CodecID codecID = GetCodecID(mInputFormat.mFormatID);
 	avCodec = avcodec_find_decoder(codecID);
-	
-	avcodec_get_context_defaults2(avContext, CODEC_TYPE_AUDIO);
 	
 	avContext->sample_rate = mInputFormat.mSampleRate;
 	avContext->channels = mInputFormat.mChannelsPerFrame;
