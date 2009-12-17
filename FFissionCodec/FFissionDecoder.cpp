@@ -128,6 +128,8 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0
 	
 	int initialMap[6] = {0, 1, 2, 3, 4, 5};
 	memcpy(fullChannelMap, initialMap, sizeof(initialMap));
+	
+	avcodec_get_context_defaults2(avContext, CODEC_TYPE_AUDIO);
 }
 
 FFissionDecoder::~FFissionDecoder()
@@ -140,7 +142,8 @@ FFissionDecoder::~FFissionDecoder()
 
 void FFissionDecoder::Initialize(const AudioStreamBasicDescription* inInputFormat, const AudioStreamBasicDescription* inOutputFormat, const void* inMagicCookie, UInt32 inMagicCookieByteSize)
 {
-	SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
+	if (inMagicCookie)
+		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
 		
 	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
 	
@@ -339,8 +342,6 @@ void FFissionDecoder::OpenAVCodec()
 	
 	CodecID codecID = GetCodecID(mInputFormat.mFormatID);
 	avCodec = avcodec_find_decoder(codecID);
-	
-	avcodec_get_context_defaults2(avContext, CODEC_TYPE_AUDIO);
 	
 	avContext->sample_rate = mInputFormat.mSampleRate;
 	avContext->channels = mInputFormat.mChannelsPerFrame;
