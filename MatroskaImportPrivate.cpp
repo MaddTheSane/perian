@@ -265,9 +265,7 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			KaxTrackLanguage & trackLang = GetChild<KaxTrackLanguage>(track);
 			KaxTrackName & trackName = GetChild<KaxTrackName>(track);
 			KaxContentEncodings * encodings = FindChild<KaxContentEncodings>(track);
-			
 			short qtLang = ISO639_2ToQTLangCode(string(trackLang).c_str());
-			SetMediaLanguage(mkvTrack.theMedia, qtLang);
 			
 			switch (uint8(type)) {
 				case track_video:
@@ -327,6 +325,8 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 				// just ignore the track if there's some problem with this element
 				if (err) continue;
 			}
+			
+			SetMediaLanguage(mkvTrack.theMedia, qtLang);
 			
 			if (!trackName.IsDefaultValue()) {
 				QTMetaDataRef trackMetaData;
