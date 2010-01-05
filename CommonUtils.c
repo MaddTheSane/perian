@@ -575,7 +575,7 @@ CGColorSpaceRef GetSRGBColorSpace()
 	if (!loaded) {
 		loaded = TRUE;
 
-		if (kCGColorSpaceSRGB) {
+		if (&kCGColorSpaceSRGB) {
 			sRGBColorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB); // does not exist on 10.4
 		} else {
 			sRGBColorSpace = CreateColorSpaceFromSystemICCProfileName(CFSTR("sRGB Profile.icc"));
