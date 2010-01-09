@@ -804,16 +804,9 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 	ic = storage->format_context;
 	header_offset = storage->header_offset;
 
-	*hadIndex = 0;
-	
-	// AVIs without an index currently add one entry to the index; assume that
-	// such a small index means that we should idle import instead. It shouldn't 
-	// take much longer if the index really is this small anyways.
-	for (j = 0; j < ic->nb_streams; j++) {
-		if (map[j].str->nb_index_entries <= 1)
-			goto bail;
-	}
-	
+	if(*hadIndex == 0)
+		goto bail;
+		
 	//FLVs have unusable indexes, so don't even bother.
 	if(storage->componentType == 'FLV ')
 		goto bail;

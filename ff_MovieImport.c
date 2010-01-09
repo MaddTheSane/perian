@@ -480,6 +480,18 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	require_noerr(result,bail);
 	storage->format_context = ic;
 	
+	// AVIs without an index currently add a few entries to the index so it can
+	// determine codec parameters.  Check for index existence here before it
+	// reads any packets.
+	hadIndex = 1;
+	for (j = 0; j < ic->nb_streams; j++) {
+		if (ic->streams[j]->nb_index_entries <= 1)
+		{
+			hadIndex = 0;
+			break;
+		}
+	}
+	
 	/* Get the Stream Infos if not already read */
 	result = av_find_stream_info(ic);
 	
