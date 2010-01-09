@@ -917,10 +917,10 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	
 	if(glob->begin.parser != NULL)
 	{
-		int parsedBufSize;
+		int parsedBufSize = 0;
 		uint8_t *buffer = (uint8_t *)drp->codecData;
 		int bufferSize = p->bufferSize;
-		int skipped;
+		int skipped = 0;
 		
 		if(glob->data.unparsedFrames.dataSize != 0)
 		{
