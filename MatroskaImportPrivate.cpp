@@ -372,7 +372,7 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	// ffmpeg used to write a TrackDefault of 0 for all tracks
 	// ensure that at least one track of each media type is enabled, if none were originally
 	// this picks the first track, which may not be the best, but the situation is quite rare anyway
-	// FIXME properly choose tracks based on forced/default/language flags, and consider turning auto-alternates back on
+	// FIXME: properly choose tracks based on forced/default/language flags, and consider turning auto-alternates back on
 	if (!videoEnabled && firstVideoTrack)
 		SetTrackEnabled(firstVideoTrack, 1);
 	if (!audioEnabled && firstAudioTrack)
@@ -546,7 +546,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3) //see ff_private.c initialize_audio_map
 		asbd.mFramesPerPacket = 1152;
 	
-	// FIXME mChannelLayoutTag == 0 is valid
+	// FIXME: mChannelLayoutTag == 0 is valid
 	// but we don't use channel position lists (yet) so it's safe for now
 	if (acl.mChannelLayoutTag == 0) acl = GetDefaultChannelLayout(&asbd);
 	if (acl.mChannelLayoutTag == 0) {
@@ -633,7 +633,7 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		
 	} else if ((*imgDesc)->cType == kSubFormatUTF8 || (*imgDesc)->cType == kSubFormatSSA || (*imgDesc)->cType == kSubFormatASS) {
 		if ((*imgDesc)->cType == kSubFormatASS) (*imgDesc)->cType = kSubFormatSSA; // no real reason to treat them differently
-		UInt32 emptyDataRefExtension[2]; // XXX the various uses of this bit of code should be unified
+		UInt32 emptyDataRefExtension[2]; // FIXME: the various uses of this bit of code should be unified
 		mkvTrack.subDataRefHandler = NewHandleClear(sizeof(Handle) + 1);
 		emptyDataRefExtension[0] = EndianU32_NtoB(sizeof(UInt32)*2);
 		emptyDataRefExtension[1] = EndianU32_NtoB(kDataRefExtensionInitializationData);

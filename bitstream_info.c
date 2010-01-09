@@ -1029,7 +1029,6 @@ FFusionDecodeAbilities ffusionIsParsedVideoDecodable(FFusionParserContext *parse
 		
 		//QT is bad at high profile
 		//and x264 B-pyramid (sps.vui.num_reorder_frames > 1)
-		//FIXME x264 will generate pyramid differently soon (core 78+), and that might work better
 		if(h264parser->profile_idc < 100 && h264parser->num_reorder_frames < 2 && 
 		   !CFPreferencesGetAppBooleanValue(CFSTR("DecodeAllProfiles"), PERIAN_PREF_DOMAIN, NULL))
 			ret = FFUSION_PREFER_NOT_DECODE;

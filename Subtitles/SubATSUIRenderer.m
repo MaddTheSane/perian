@@ -262,7 +262,7 @@ static void CleanupFontIDCache()
 	[pool release];
 }
 
-// XXX: Assumes ATSUFontID = ATSFontRef. This is true.
+// Assumes ATSUFontID = ATSFontRef. This is true.
 static ATSUFontID GetFontIDForSSAName(NSString *name)
 {	
 	NSNumber *idN = nil;
@@ -354,7 +354,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font};
 	
 	if (!s->platformSizeScale) s->platformSizeScale = GetWinFontSizeScale(fontRef);
-	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY); //FIXME several other values also change relative to PlayRes but aren't handled
+	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY); //FIXME: several other values also change relative to PlayRes but aren't handled
 	
 	ATSUCreateStyle(&style);
 	ATSUSetAttributes(style, sizeof(tags) / sizeof(ATSUAttributeTag), tags, sizes, vals);
@@ -439,7 +439,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 	
 	switch (tag) {
 		case tag_b:
-			bv(); // XXX font weight variations
+			bv(); // FIXME: font weight variations
 			SetATSUStyleFlag(spanEx->style, kATSUQDBoldfaceTag, bval != 0);
 			break; 
 		case tag_i:
@@ -554,7 +554,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_be:
 			bv();
-			if (!isFirstSpan) div->render_complexity |= renderMultipleParts; // XXX blur edges
+			if (!isFirstSpan) div->render_complexity |= renderMultipleParts; //FIXME: blur edges
 			spanEx->blurEdges = bval;
 			break;
 		default:
@@ -564,7 +564,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 
 #pragma mark Rendering Helper Functions
 
-// XXX see comment for GetTypographicRectangleForLayout
+// see comment for GetTypographicRectangleForLayout
 static ATSUTextMeasurement GetLineHeight(ATSUTextLayout layout, UniCharArrayOffset lpos, Boolean includeDescent)
 {
 	ATSUTextMeasurement ascent = 0, descent = 0;
@@ -583,7 +583,7 @@ static void ExpandCGRect(CGRect *rect, float radius)
 	rect->size.width += radius*2.;
 }
 
-// XXX some broken fonts have very wrong typographic values set, and so this occasionally gives nonsense
+// some broken fonts have very wrong typographic values set, and so this occasionally gives nonsense
 // it should be checked against the real pixel box (see #if 0 below), but for correct fonts it looks much better
 static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArrayOffset *breaks, ItemCount breakCount, Fixed extraHeight, Fixed *lX, Fixed *lY, Fixed *height, Fixed *width)
 {
@@ -954,7 +954,7 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 {
 	//ATS bug(?) with some fonts:
 	//drawing \n draws some random other character, so skip them
-	//XXX maybe don't store newlines in div->text at all
+	//FIXME: maybe don't store newlines in div->text at all
 	if ([div->text characterAtIndex:thisBreak+lineLen-1] == '\n') {
 		lineLen--;
 		if (!lineLen) return;
@@ -1000,7 +1000,7 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 			int j, nspans = [div->spans count];
 			
 			//linear search for the next span to draw
-			//XXX not at all sure how this works or if it's correct
+			//FIXME: make sure this never skips any spans
 			for (j = 0; j < nspans; j++) {
 				SubRenderSpan *span = [div->spans objectAtIndex:j];
 				SubATSUISpanEx *spanEx = span->ex;
@@ -1369,8 +1369,8 @@ typedef struct TT_OS2
 
 // Windows and OS X use different TrueType fields to measure text.
 // Some Windows fonts have one field set incorrectly(?), so we have to compensate.
-// XXX This function doesn't read from the right fonts; if we're using italic variant, it should get the ATSFontRef for that
-// XXX^2 This should be cached
+// FIXME: This function doesn't read from the right fonts; if we're using italic variant, it should get the ATSFontRef for that
+// This should be cached
 static float GetWinFontSizeScale(ATSFontRef font)
 {
 	TT_Header headTable = {0};

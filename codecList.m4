@@ -7,7 +7,7 @@ Codec(kDivX5CodecInfoResID, CODEC_ID_MPEG4, "DivX 5", "Decompresses video stored
 Codec(k3ivxCodecInfoResID, CODEC_ID_MPEG4, "3ivx", "Decompresses video stored in 3ivx format.", '3IVD', '3ivd', '3IV2', '3iv2')
 Codec(kXVIDCodecInfoResID, CODEC_ID_MPEG4, "Xvid", "Decompresses video stored in Xvid format.", 'XVID', 'xvid', 'XviD', 'XVIX', 'BLZ0')
 Codec(kMPEG4CodecInfoResID, CODEC_ID_MPEG4, "MPEG-4", "Decompresses video stored in MPEG-4 format.", 'RMP4', 'SEDG', 'WV1F', 'FMP4', 'SMP4')
-ResourceOnly(<!// XXX: can we do this without claiming Apple's manufacturer (and thus unregistering their decoder)?!>)
+ResourceOnly(<!// FIXME: can we do this without claiming Apple's manufacturer (and thus unregistering their decoder)?!>)
 ResourceOnly(<!#define kCodecManufacturer 'appl'!>)
 ResourceOnly(<!#define kCodecVersion kFFusionCodecVersion + 0x10!>)
 Codec(kMPEG4CodecInfoResID, CODEC_ID_MPEG4, "MPEG-4", "Decompresses video stored in MPEG-4 format.", 'mp4v')

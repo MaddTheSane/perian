@@ -617,7 +617,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		enum CodecID codecID = getCodecID(componentType);
 		
 		// official Apple/QT/ISO/etc fourccs are likely to have PTS vs DTS defined
-		// FIXME what this actually checks is whether the file has a 'ctts' atom, can we do that directly?
+		// FIXME: what this actually checks is whether the file has a 'ctts' atom, can we do that directly?
 		if(componentType == kMPEG4VisualCodecType || componentType == kH264CodecType ||
 		   componentType == kMPEG1VisualCodecType || componentType == kMPEG2VisualCodecType)
 			glob->packedType = PACKED_QUICKTIME_KNOWS_ORDER;

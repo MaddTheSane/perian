@@ -39,7 +39,7 @@
 #define likely(x) __builtin_expect(x, 1)
 
 //Handles the last row for Y420 videos with an odd number of luma rows
-//FIXME odd number of luma columns is not handled and they will be lost
+//FIXME: odd number of luma columns is not handled and they will be lost
 static void Y420toY422_lastrow(UInt8 *o, UInt8 *yc, UInt8 *uc, UInt8 *vc, unsigned halfWidth)
 {
 	int x;
@@ -513,10 +513,10 @@ OSType ColorConversionDstForPixFmt(enum PixelFormat ffPixFmt)
 		case PIX_FMT_RGB555BE:
 			return k16BE555PixelFormat;
 		case PIX_FMT_BGR24:
-			return k24RGBPixelFormat; //XXX try k24BGRPixelFormat
+			return k24RGBPixelFormat; //FIXME: try k24BGRPixelFormat
 		case PIX_FMT_RGB24:
 			return k24RGBPixelFormat;
-		case PIX_FMT_RGB32: // XXX not a specific pixel format, need LE & BE like 16-bit
+		case PIX_FMT_RGB32: // FIXME: not a specific pixel format, need LE & BE like 16-bit
 			return k32ARGBPixelFormat;
 		case PIX_FMT_YUV410P:
 			return k2vuyPixelFormat;

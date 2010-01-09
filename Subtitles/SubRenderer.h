@@ -36,7 +36,7 @@ typedef enum {
 #endif
 #endif
 
-// XXX these should be 'id' instead of 'void*' but it makes it easier to use ATSUStyle
+// these should be 'id' instead of 'void*' but it makes it easier to use ATSUStyle
 @interface SubRenderer : NSObject
 -(void)completedHeaderParsing:(SubContext*)sc;
 -(void*)completedStyleParsing:(SubStyle*)s;

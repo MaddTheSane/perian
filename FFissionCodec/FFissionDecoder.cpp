@@ -67,7 +67,6 @@ static CodecID GetCodecID(OSType formatID)
 
 //CA tends to not set the magic cookie immediately, but we need it to open most codecs
 //so check this to not open the codec until it's possible
-//FIXME or we could just open the codec and ignore errors?
 static bool CodecRequiresExtradata(OSType formatID)
 {
 	switch (formatID) {

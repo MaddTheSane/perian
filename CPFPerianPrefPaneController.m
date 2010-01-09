@@ -851,7 +851,7 @@
 {
 	NSString *status = [notification object];
 	
-	//FIXME localize these
+	//FIXME: localize these
 	if ([status isEqualToString:@"Starting"]) {
 		[textField_updateStatus setStringValue:@"Checking..."];
 	} else if ([status isEqualToString:@"Error"]) {

@@ -125,7 +125,7 @@ static void rescue_ntsc_timebase(AVRational *base)
 {
 	av_reduce(&base->num, &base->den, base->num, base->den, INT_MAX);
 	
-	if (base->num == 1) return; // XXX is this good enough?
+	if (base->num == 1) return; // FIXME: is this good enough?
 	
 	double fTimebase = av_q2d(*base), nearest_ntsc = floor(fTimebase * 1001. + .5) / 1001.;
 	const double small_interval = 1./120.;
@@ -187,7 +187,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	(*imgHdl)->clutID = -1; // no color lookup table...
 	
 	// 12 is invalid in mov
-	// XXX it might be better to set this based entirely on pix_fmt
+	// FIXME: it might be better to set this based entirely on pix_fmt
 	if ((*imgHdl)->depth == 12 || (*imgHdl)->depth == 0) (*imgHdl)->depth = codec->pix_fmt == PIX_FMT_YUVA420P ? 32 : 24;
 	
 	/* Create the strf image description extension (see AVI's BITMAPINFOHEADER) */
@@ -227,7 +227,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		asbd.mFormatID = 'ms\0\0' + codec->codec_tag; /* the number is stored in the last byte => big endian */
 	
 	/* Ask the AudioToolbox about vbr of the codec */
-	// FIXME this sets vbr even if it was encoded in CBR mode
+	// FIXME: this sets vbr even if it was encoded in CBR mode
 	// which means our mBytesPerPacket is wrong for CBR mp3 (does not really matter)
 	ioSize = sizeof(UInt32);
 	AudioFormatGetProperty(kAudioFormatProperty_FormatIsVBR, sizeof(AudioStreamBasicDescription), &asbd, &ioSize, &map->vbr);
@@ -280,7 +280,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	if (asbd.mFormatID == kAudioFormatLinearPCM)
 		asbd.mFramesPerPacket = 1;
 	else if (asbd.mBytesPerPacket) {
-		/* FIXME. in the MSADPCM codec, we get a wrong mFramesPerPacket entry because
+		/* FIXME: in the MSADPCM codec, we get a wrong mFramesPerPacket entry because
 		 * of the difference in the sample_rate and the time_base denumerator. So we
 		 * recalculate here the mFramesPerPacket entry */
 
@@ -618,7 +618,7 @@ void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW
 }
 
 // Create the 'nclc' atom for video tracks. Guessed entirely from image size following ffdshow.
-// FIXME read H.264 VUI/MPEG2 etc and especially read chroma positioning information.
+// FIXME: read H.264 VUI/MPEG2 etc and especially read chroma positioning information.
 // this needs the parsers working
 // References: http://developer.apple.com/quicktime/icefloe/dispatch019.html
 // http://www.mir.com/DMG/chroma.html
@@ -689,7 +689,7 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 			get_track_dimensions_for_codec(st, &width, &height);
 			track = NewMovieTrack(theMovie, width, height, kNoVolume);
 
-            // XXX Support for 'old' NUV files, that didn't put the codec_tag in the file. 
+            // Support for 'old' NUV files, that didn't put the codec_tag in the file. 
             if( st->codec->codec_id == CODEC_ID_NUV && st->codec->codec_tag == 0 ) {
                 st->codec->codec_tag = MKTAG( 'N', 'U', 'V', '1' );
             }
