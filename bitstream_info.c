@@ -36,6 +36,7 @@
 #include "mpegvideo.h"
 #include "parser.h"
 #include "golomb.h"
+#include "mpeg4video.h"
 #include "mpeg4video_parser.h"
 #include "Codecprintf.h"
 
