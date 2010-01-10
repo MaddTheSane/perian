@@ -67,17 +67,11 @@
 
 - (BOOL)getBoolFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(BOOL)defaultValue
 {
-	CFPropertyListRef value;
-	BOOL ret = defaultValue;
+	Boolean ret, exists = FALSE;
 	
-	value = CFPreferencesCopyAppValue(key, appID);
-	if(value && CFGetTypeID(value) == CFBooleanGetTypeID())
-		ret = CFBooleanGetValue(value);
+	ret = CFPreferencesGetAppBooleanValue(key, appID, &exists);
 	
-	if(value)
-		CFRelease(value);
-	
-	return ret;
+	return exists ? ret : defaultValue;
 }
 
 - (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromBool:(BOOL)value
@@ -109,17 +103,11 @@
 
 - (unsigned int)getUnsignedIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(int)defaultValue
 {
-	CFPropertyListRef value;
-	unsigned int ret = defaultValue;
+	int ret; Boolean exists = FALSE;
 	
-	value = CFPreferencesCopyAppValue(key, appID);
-	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
-		CFNumberGetValue(value, kCFNumberIntType, &ret);
+	ret = CFPreferencesGetAppIntegerValue(key, appID, &exists);
 	
-	if(value)
-		CFRelease(value);
-	
-	return ret;
+	return exists ? ret : defaultValue;
 }
 
 - (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromInt:(int)value
