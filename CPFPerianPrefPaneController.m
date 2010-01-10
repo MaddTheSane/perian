@@ -276,7 +276,7 @@
 	return self;
 }
 
-- (NSDictionary *)myInfoDict;
+- (NSDictionary *)myInfoDict
 {
 	return [NSDictionary dictionaryWithContentsOfFile:[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Info.plist"]];
 }
@@ -446,7 +446,8 @@
 	CFPreferencesAppSynchronize(a52AppID);
 }
 
-- (void) dealloc {
+- (void)dealloc
+{
 	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
 	[perianForumURL release];
 	[perianDonateURL release];
@@ -458,7 +459,7 @@
 	[super dealloc];
 }
 
-- (void) finalize
+- (void)finalize
 {
 	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
 	if(auth != nil)
@@ -1024,9 +1025,7 @@
 
 - (IBAction)launchForum:(id)sender 
 {
-	
-	[[NSWorkspace sharedWorkspace] openURL:perianForumURL];
-	
+	[[NSWorkspace sharedWorkspace] openURL:perianForumURL];	
 }
 
 @end
