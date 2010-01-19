@@ -339,21 +339,32 @@ static FASTCALL void BGR24toRGB24(AVFrame *picture, UInt8 *baseAddr, int rowByte
 	}
 }
 
-//Native-endian XRGB32 to big-endian XRGB32
-static FASTCALL void RGB32toRGB32(AVFrame *picture, UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
+//Little-endian XRGB32 to big-endian XRGB32
+static FASTCALL void RGB32toRGB32Swap(AVFrame *picture, UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
 {
 	UInt8 *srcPtr = picture->data[0];
 	int srcRB = picture->linesize[0];
 	int y;
 
 	for (y = 0; y < height; y++) {
-#ifdef __BIG_ENDIAN__
-		memcpy(baseAddr, srcPtr, width * 4);
-#else
 		UInt32 *oRow = (UInt32 *)baseAddr, *iRow = (UInt32 *)srcPtr;
 		int x;
-		for (x = 0; x < width; x++) {oRow[x] = EndianU32_NtoB(iRow[x]);}
-#endif
+		for (x = 0; x < width; x++) {oRow[x] = EndianU32_LtoB(iRow[x]);}
+		
+		baseAddr += rowBytes;
+		srcPtr += srcRB;
+	}
+}
+
+//Big-endian XRGB32 to big-endian XRGB32
+static FASTCALL void RGB32toRGB32Copy(AVFrame *picture, UInt8 *baseAddr, int rowBytes, unsigned width, unsigned height)
+{
+	UInt8 *srcPtr = picture->data[0];
+	int srcRB = picture->linesize[0];
+	int y;
+	
+	for (y = 0; y < height; y++) {
+		memcpy(baseAddr, srcPtr, width * 4);
 		
 		baseAddr += rowBytes;
 		srcPtr += srcRB;
@@ -516,7 +527,8 @@ OSType ColorConversionDstForPixFmt(enum PixelFormat ffPixFmt)
 			return k24RGBPixelFormat; //FIXME: try k24BGRPixelFormat
 		case PIX_FMT_RGB24:
 			return k24RGBPixelFormat;
-		case PIX_FMT_RGB32: // FIXME: not a specific pixel format, need LE & BE like 16-bit
+		case PIX_FMT_ARGB:
+		case PIX_FMT_BGRA:
 			return k32ARGBPixelFormat;
 		case PIX_FMT_YUV410P:
 			return k2vuyPixelFormat;
@@ -556,9 +568,21 @@ int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFm
 			funcs->clear = ClearRGB24;
 			funcs->convert = BGR24toRGB24;
 			break;
-		case PIX_FMT_RGB32:
+		case PIX_FMT_ARGB:
 			funcs->clear = ClearRGB32;
-			funcs->convert = RGB32toRGB32;
+#ifdef __ppc__
+			funcs->convert = RGB32toRGB32Swap;
+#else
+			funcs->convert = RGB32toRGB32Copy;
+#endif
+			break;
+		case PIX_FMT_BGRA:
+			funcs->clear = ClearRGB32;
+#ifdef __ppc__
+			funcs->convert = RGB32toRGB32Copy;
+#else
+			funcs->convert = RGB32toRGB32Swap;
+#endif
 			break;
 		case PIX_FMT_RGB24:
 			funcs->clear = ClearRGB24;
