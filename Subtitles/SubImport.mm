@@ -323,7 +323,7 @@ static int parse_P(NSString *str, NSArray *subArray)
 static NSString *parse_COLOR(NSString *str)
 {
 	NSString *cvalue;
-	NSMutableString *cname = [NSMutableString stringWithFormat:@"%@", str];
+	NSMutableString *cname = [NSMutableString stringWithString:str];
 
 	if (![str length]) return str;
 	
@@ -393,7 +393,7 @@ static void LoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount)
 	[sc setCharactersToBeSkipped:nil];
 	[sc setCaseSensitive:NO];
 	
-	NSMutableString *cmt = [NSMutableString stringWithFormat:@""];
+	NSMutableString *cmt = [NSMutableString string];
 	NSArray *subLanguage = parse_STYLE(smi);
 
 	int startTime=-1, endTime=-1, syncTime=-1;
