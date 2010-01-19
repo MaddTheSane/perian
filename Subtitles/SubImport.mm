@@ -207,7 +207,7 @@ NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
 static void LoadSRTFromPath(NSString *path, SubSerializer *ss)
 {
 	NSMutableString *srt = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(path));
-	if (!srt) return;
+	if (![srt length]) return;
 		
 	if ([srt characterAtIndex:0] == 0xFEFF) [srt deleteCharactersInRange:NSMakeRange(0,1)];
 	if ([srt characterAtIndex:[srt length]-1] != '\n') [srt appendFormat:@"%c",'\n'];
@@ -325,6 +325,8 @@ static NSString *parse_COLOR(NSString *str)
 	NSString *cvalue;
 	NSMutableString *cname = [NSMutableString stringWithFormat:@"%@", str];
 
+	if (![str length]) return str;
+	
 	if ([cname characterAtIndex:0] == '#' && [cname lengthOfBytesUsingEncoding:NSASCIIStringEncoding] == 7)
 		cvalue = [NSString stringWithFormat:@"{\\1c&H%@%@%@&}", [cname substringWithRange:NSMakeRange(5,2)], [cname substringWithRange:NSMakeRange(3,2)], [cname substringWithRange:NSMakeRange(1,2)]];
 	else {
@@ -1336,7 +1338,8 @@ canOutput:
 -(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e
 {
 	if (self = [super init]) {
-		if ([l characterAtIndex:[l length]-1] != '\n') l = [l stringByAppendingString:@"\n"];
+		int length = [l length];
+		if (!length || [l characterAtIndex:length-1] != '\n') l = [l stringByAppendingString:@"\n"];
 		line = [l retain];
 		begin_time = s;
 		end_time = e;
