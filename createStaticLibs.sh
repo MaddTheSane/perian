@@ -95,7 +95,7 @@ else
     # Intel shlibs
     #######################
     if [ $buildi386 -gt 0 ] ; then
-        BUILDDIR="$BUILT_PRODUCTS_DIR/intel"
+        BUILDDIR="$BUILT_PRODUCTS_DIR/i386"
         mkdir -p "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
@@ -150,7 +150,7 @@ else
 	# lipo/copy shlibs
 	#######################
 	BUILDDIR="$BUILT_PRODUCTS_DIR/Universal"
-	INTEL="$BUILT_PRODUCTS_DIR/intel"
+	INTEL="$BUILT_PRODUCTS_DIR/i386"
 	PPC="$BUILT_PRODUCTS_DIR/ppc"
 	
 	rm -rf "$BUILDDIR"
@@ -159,15 +159,15 @@ else
 	if [ $buildi386 -eq $buildppc ] ; then
 		# lipo them
 		for aa in "$INTEL"/*/*.a ; do
-			echo lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
-			lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
+			echo lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/i386/ppc/'` -output `echo -n $aa | sed 's/i386\/.*\//Universal\//'`
+			lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/i386/ppc/'` -output `echo -n $aa | sed 's/i386\/.*\//Universal\//'`
 		done
 	else
 		if [ $buildppc -gt 0 ] ; then
 			archDir="ppc"
 			BUILDARCHDIR=$PPC
 		else
-			archDir="intel"
+			archDir="i386"
 			BUILDARCHDIR=$INTEL
 		fi
 		# just copy them

@@ -32,6 +32,7 @@
 #include "avcodec.h"
 
 #include "bswap.h"
+#include "libavutil/intmath.h"
 #include "libavutil/internal.h"
 #include "mpegvideo.h"
 #include "parser.h"
