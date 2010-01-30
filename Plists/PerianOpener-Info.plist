@@ -23,6 +23,28 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
+				<string>divx</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>video/x-divx</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>DivX Movie</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>DIVX</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSTypeIsPackage</key>
+			<false/>
+			<key>NSPersistentStoreTypeKey</key>
+			<string>Binary</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
 				<string>mkv</string>
 				<string>mka</string>
 			</array>
