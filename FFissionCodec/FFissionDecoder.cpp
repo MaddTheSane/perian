@@ -129,6 +129,7 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0
 	memcpy(fullChannelMap, initialMap, sizeof(initialMap));
 	
 	avcodec_get_context_defaults2(avContext, CODEC_TYPE_AUDIO);
+	parser = NULL;
 }
 
 FFissionDecoder::~FFissionDecoder()
@@ -387,6 +388,7 @@ void FFissionDecoder::OpenAVCodec()
 				break;
 		}
 	}
+	parser = av_parser_init(codecID);
 }
 
 void FFissionDecoder::CloseAVCodec()
@@ -394,6 +396,10 @@ void FFissionDecoder::CloseAVCodec()
 	if (avCodec) {
 		avcodec_close(avContext);
 		avCodec = NULL;
+	}
+	if (parser) {
+		av_parser_close(parser);
+		parser = NULL;
 	}
 }
 
@@ -611,11 +617,20 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 	
 	// loop until we satisfy the request or run out of input data
 	while (written < ioOutputDataByteSize && inputBuffer.GetNumPackets() > 0) {
-		int packetSize = inputBuffer.GetCurrentPacketSize();
+		int packetSize;
+		if(parser)
+			packetSize = inputBuffer.GetDataAvailable();
+		else
+			packetSize = inputBuffer.GetCurrentPacketSize();
 		uint8_t *packet = inputBuffer.GetData();
 		
 		// decode one packet to our buffer
 		outBufUsed = outBufSize;
+		if(parser)
+		{	
+			int parserLen = av_parser_parse2(parser, avContext, &packet, &packetSize, packet, packetSize, 0, 0, 0);
+			inputBuffer.Zap(parserLen);
+		}
 		int len;
 		if(dtsPassthrough)
 			len = produceDTSPassthroughPackets(outputBuffer, &outBufUsed, packet, packetSize, avContext->channels, mOutputFormat.mFormatFlags & kLinearPCMFormatFlagIsBigEndian);
@@ -630,13 +645,15 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 		
 		if (len < 0) {
 			Codecprintf(NULL, "Error decoding audio frame\n");
-			inputBuffer.Zap(packetSize);
+			if(!parser)
+				inputBuffer.Zap(packetSize);
 			outBufUsed = 0;
 			ioOutputDataByteSize = written;
 			ioNumberPackets = ioOutputDataByteSize / (2 * mOutputFormat.NumberChannels());
 			return kAudioCodecProduceOutputPacketFailure;
 		}
-		inputBuffer.Zap(len);
+		if(!parser)
+			inputBuffer.Zap(len);
 		
 		// copy up to the amount requested
 		int amountToCopy = FFMIN(outBufUsed, ioOutputDataByteSize - written);

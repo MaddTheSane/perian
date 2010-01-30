@@ -118,7 +118,8 @@ void init_FFmpeg()
 		REGISTER_DEMUXER(flv);
 		REGISTER_DEMUXER(tta);
 		REGISTER_DEMUXER(nuv);
-		register_parsers();
+		REGISTER_PARSER(ac3);
+		REGISTER_PARSER(mpegaudio);
 		
 		REGISTER_DECODER(msmpeg4v1);
 		REGISTER_DECODER(msmpeg4v2);

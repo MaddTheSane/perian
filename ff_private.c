@@ -1013,12 +1013,14 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		firstPts[i] = -1;
 	
 	// record stream durations before we add any samples so that we know what to tell InsertMediaIntoTrack later
+	// also, tell ffmpeg that we don't want them parsing because their parsers screw up the position/size data!!!
 	for(i = 0; i < storage->map_count; i++) {
 		ncstream = &storage->stream_map[i];
 		Media media = ncstream->media;
 		
 		if(media && ncstream->duration == -1)
 			ncstream->duration = GetMediaDuration(media);
+		ncstream->str->need_parsing = AVSTREAM_PARSE_NONE;
 	}
 	
 	while((readResult = av_read_frame(formatContext, &packet)) == 0) {		
