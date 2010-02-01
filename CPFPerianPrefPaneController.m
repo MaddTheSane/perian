@@ -123,10 +123,7 @@
 	
 	value = CFPreferencesCopyAppValue(key, appID);
 	if(value && CFGetTypeID(value) == CFStringGetTypeID())
-		ret = [NSString stringWithString:(NSString *)value];
-	
-	if(value)
-		CFRelease(value);
+		ret = [(NSString *)value autorelease];
 	
 	return ret;
 }
@@ -162,7 +159,7 @@
 {
 	if(userInstallation)
 		return NSHomeDirectory();
-	return [NSString stringWithString:@"/"];
+	return @"/";
 }
 
 - (NSString *)quickTimeComponentDir:(BOOL)userInstallation
@@ -974,7 +971,6 @@
 
 - (IBAction)launchDonate:(id)sender 
 {
-	
 	[[NSWorkspace sharedWorkspace] openURL:perianDonateURL];
 } 
 
