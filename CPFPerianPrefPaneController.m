@@ -330,6 +330,8 @@
 		}
 		
 	}
+	
+	[button_install setEnabled:YES];
 }
 
 - (int)upgradeA52Prefs
@@ -349,7 +351,6 @@
 - (void)didSelect
 {
 	/* General */
-	[self checkForInstallation];
 	NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
 	NSString *myVersion = [[self myInfoDict] objectForKey:BundleVersionKey];
 	
@@ -371,6 +372,8 @@
 		
 		[self installUninstall:nil];
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
+	} else {
+		[self checkForInstallation];
 	}
 	
 	NSDate *updateDate = [self getDateFromKey:(CFStringRef)NEXT_RUN_KEY forAppID:perianAppID];

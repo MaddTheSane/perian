@@ -2,17 +2,17 @@
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1050</int>
-		<string key="IBDocument.SystemVersion">10A432</string>
-		<string key="IBDocument.InterfaceBuilderVersion">732</string>
-		<string key="IBDocument.AppKitVersion">1038</string>
-		<string key="IBDocument.HIToolboxVersion">437.00</string>
+		<string key="IBDocument.SystemVersion">10C540</string>
+		<string key="IBDocument.InterfaceBuilderVersion">740</string>
+		<string key="IBDocument.AppKitVersion">1038.25</string>
+		<string key="IBDocument.HIToolboxVersion">458.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.CocoaPlugin</string>
-			<string key="NS.object.0">732</string>
+			<string key="NS.object.0">740</string>
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="28"/>
+			<integer value="32"/>
 			<integer value="245"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
@@ -115,7 +115,7 @@
 												<reference key="NSSuperview" ref="1036548641"/>
 												<bool key="NSEnabled">YES</bool>
 												<object class="NSButtonCell" key="NSCell" id="406287552">
-													<int key="NSCellFlags">67239424</int>
+													<int key="NSCellFlags">604110336</int>
 													<int key="NSCellFlags2">134217728</int>
 													<string key="NSContents">Install Perian</string>
 													<reference key="NSSupport" ref="350303005"/>
@@ -2379,9 +2379,9 @@
 					<boolean value="YES"/>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<boolean value="YES"/>
-					<string>{{0, 485}, {595, 360}}</string>
+					<string>{{0, 484}, {595, 360}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{0, 485}, {595, 360}}</string>
+					<string>{{0, 484}, {595, 360}}</string>
 					<boolean value="YES"/>
 					<boolean value="YES"/>
 					<string>{224.664, 107}</string>
