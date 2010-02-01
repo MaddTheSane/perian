@@ -504,7 +504,7 @@
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
 	
 	char* const arguments[] = { "-c", cmd, NULL };
-	if(AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
+	if(auth && AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
 	{
 		int status;
 		int pid = wait(&status);
@@ -537,7 +537,7 @@
 	setenv("COMP_PATH", [componentPath fileSystemRepresentation], 1);
 	
 	char* const arguments[] = { "-c", cmd, NULL };
-	if(AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
+	if(auth && AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
 	{
 		int status;
 		int pid = wait(&status);
