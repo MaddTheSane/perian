@@ -7,14 +7,22 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>avi</string>
+			</array>
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>video/avi</string>
+			</array>
 			<key>CFBundleTypeName</key>
 			<string>AVI movie</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>AVI </string>
+			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>public.avi</string>
-			</array>
 			<key>LSTypeIsPackage</key>
 			<false/>
 			<key>NSPersistentStoreTypeKey</key>
@@ -388,6 +396,25 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>ogv</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.movie</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>DivX video</string>
+			<key>UTTypeIdentifier</key>
+			<string>org.perian.divx</string>
+			<key>UTTypeReferenceURL</key>
+			<string>http://divx.com/</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>divx</string>
 				</array>
 			</dict>
 		</dict>
