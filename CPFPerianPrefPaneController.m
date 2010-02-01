@@ -20,7 +20,6 @@
 
 #import "CPFPerianPrefPaneController.h"
 #import "UpdateCheckerAppDelegate.h"
-#include <sys/stat.h>
 
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
 #define LastInstalledVersionKey CFSTR("LastInstalledVersion")
@@ -454,45 +453,36 @@
 
 #pragma mark Install/Uninstall
 
-/* Shamelessly ripped from Sparkle */
+/* Shamelessly ripped from Sparkle (and now different) */
 - (BOOL)_extractArchivePath:archivePath toDestination:(NSString *)destination finalPath:(NSString *)finalPath
 {
-	BOOL ret = NO, oldExist = NO;
-	struct stat sb;
+	BOOL ret = NO, oldExist;
+	NSFileManager *defaultFileManager = [NSFileManager defaultManager];
+	char *cmd;
 	
-	if(stat([finalPath fileSystemRepresentation], &sb) == 0)
-		oldExist = YES;
+	oldExist = [defaultFileManager fileExistsAtPath:finalPath];
 	
-	char *buf = NULL;
 	if(oldExist)
-		asprintf(&buf,
-				 "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
-				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
-				 "rm -rf \"$TMP_PATH\"");
+		cmd = "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
+		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
+		"rm -rf \"$TMP_PATH\"";
 	else
-		asprintf(&buf,
-				 "mkdir -p \"$DST_PATH\" && "
-				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"");
-	if(!buf)
-	{
-		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for extraction command\n", @"")];
-		return FALSE;
-	}
+		cmd = "mkdir -p \"$DST_PATH\" && "
+		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"";
 	
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
 	setenv("DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
 	setenv("TMP_PATH", [[finalPath stringByAppendingPathExtension:@"old"] fileSystemRepresentation], 1);
-
-	int status = system(buf);
+	
+	int status = system(cmd);
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		ret = YES;
 	else
 		[errorString appendFormat:NSLocalizedString(@"Extraction for %@ failed\n", @""), archivePath];
-
-	free(buf);
+	
 	unsetenv("SRC_ARCHIVE");
-	unsetenv("$DST_COMPONENT");
+	unsetenv("DST_COMPONENT");
 	unsetenv("TMP_PATH");
 	unsetenv("DST_PATH");
 	return ret;
@@ -500,35 +490,28 @@
 
 - (BOOL)_authenticatedExtractArchivePath:(NSString *)archivePath toDestination:(NSString *)destination finalPath:(NSString *)finalPath
 {
-	BOOL ret = NO, oldExist = NO;
-	struct stat sb;
-	if(stat([finalPath fileSystemRepresentation], &sb) == 0)
-		oldExist = YES;
+	BOOL ret = NO, oldExist;
+	NSFileManager *defaultFileManager = [NSFileManager defaultManager];
+	char *cmd;
 	
-	char *buf = NULL;
+	oldExist = [defaultFileManager fileExistsAtPath:finalPath];
+	
 	if(oldExist)
-		asprintf(&buf,
-				 "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
-				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
-				 "rm -rf \"$TMP_PATH\" && "
-				 "chown -R root:admin \"$DST_COMPONENT\"");
+		cmd = "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
+		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
+		"rm -rf \"$TMP_PATH\" && "
+		"chown -R root:admin \"$DST_COMPONENT\"";
 	else
-		asprintf(&buf,
-				 "mkdir -p \"$DST_PATH\" && "
-				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
-				 "chown -R root:admin \"$DST_COMPONENT\"");
-	if(!buf)
-	{
-		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for extraction command\n", @"")];
-		return FALSE;
-	}
+		cmd = "mkdir -p \"$DST_PATH\" && "
+		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
+		"chown -R root:admin \"$DST_COMPONENT\"";
 	
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
 	setenv("DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
 	setenv("TMP_PATH", [[finalPath stringByAppendingPathExtension:@"old"] fileSystemRepresentation], 1);
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
 	
-	char* arguments[] = { "-c", buf, NULL };
+	char* const arguments[] = { "-c", cmd, NULL };
 	if(AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
 	{
 		int status;
@@ -541,9 +524,8 @@
 	else
 		[errorString appendFormat:NSLocalizedString(@"Authentication failed for extraction for %@\n", @""), archivePath];
 	
-	free(buf);
 	unsetenv("SRC_ARCHIVE");
-	unsetenv("$DST_COMPONENT");
+	unsetenv("DST_COMPONENT");
 	unsetenv("TMP_PATH");
 	unsetenv("DST_PATH");
 	return ret;
@@ -552,23 +534,17 @@
 - (BOOL)_authenticatedRemove:(NSString *)componentPath
 {
 	BOOL ret = NO;
-	struct stat sb;
-	if(stat([componentPath fileSystemRepresentation], &sb) != 0)
-		/* No error, just forget it */
+	NSFileManager *defaultFileManager = [NSFileManager defaultManager];
+	
+	if(![defaultFileManager fileExistsAtPath:componentPath])
+	/* No error, just forget it */
 		return FALSE;
 	
-	char *buf = NULL;
-	asprintf(&buf,
-			 "rm -rf \"$COMP_PATH\"");
-	if(!buf)
-	{
-		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for removal command\n", @"")];
-		return FALSE;
-	}
+	char *cmd = "rm -rf \"$COMP_PATH\"";
 	
 	setenv("COMP_PATH", [componentPath fileSystemRepresentation], 1);
 	
-	char* arguments[] = { "-c", buf, NULL };
+	char* const arguments[] = { "-c", cmd, NULL };
 	if(AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
 	{
 		int status;
@@ -580,11 +556,10 @@
 	}
 	else
 		[errorString appendFormat:NSLocalizedString(@"Authentication failed for removal for %@\n", @""), componentPath];
-	free(buf);
+	
 	unsetenv("COMP_PATH");
 	return ret;
 }
-
 
 - (BOOL)installArchive:(NSString *)archivePath forPiece:(NSString *)component type:(ComponentType)type withMyVersion:(NSString *)myVersion
 {
