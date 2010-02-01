@@ -370,12 +370,7 @@
 		NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
 		NSInteger tag;
 		
-		if([[NSFileManager defaultManager] fileExistsAtPath:tempPrefPane isDirectory:&isDir] && isDir)
-			[[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation 
-														 source:[tempPrefPane stringByDeletingLastPathComponent] 
-													destination:@"" 
-														  files:[NSArray arrayWithObject:[tempPrefPane lastPathComponent]] 
-															tag:&tag];
+		[[NSFileManager defaultManager] removeFileAtPath:tempPrefPane handler:nil];
 		
 		[self installUninstall:nil];
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
