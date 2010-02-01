@@ -422,10 +422,7 @@
 	
 	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
 
-	if([self getBoolFromKey:ExternalSubtitlesKey forAppID:perianAppID withDefault:YES])
-		[button_loadExternalSubtitles setState:1];
-	else
-		[button_loadExternalSubtitles setState:0];
+	[button_loadExternalSubtitles setState:[self getBoolFromKey:ExternalSubtitlesKey forAppID:perianAppID withDefault:YES]];
 }
 
 - (void)didUnselect
