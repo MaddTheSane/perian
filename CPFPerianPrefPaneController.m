@@ -455,9 +455,8 @@
 	oldExist = [defaultFileManager fileExistsAtPath:finalPath];
 	
 	if(oldExist)
-		cmd = "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
-		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
-		"rm -rf \"$TMP_PATH\"";
+		cmd = "rm -rf \"$DST_COMPONENT\" && "
+		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"";
 	else
 		cmd = "mkdir -p \"$DST_PATH\" && "
 		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"";
@@ -465,7 +464,6 @@
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
 	setenv("DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
-	setenv("TMP_PATH", [[finalPath stringByAppendingPathExtension:@"old"] fileSystemRepresentation], 1);
 	
 	int status = system(cmd);
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
@@ -475,7 +473,6 @@
 	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
-	unsetenv("TMP_PATH");
 	unsetenv("DST_PATH");
 	return ret;
 }
@@ -489,9 +486,8 @@
 	oldExist = [defaultFileManager fileExistsAtPath:finalPath];
 	
 	if(oldExist)
-		cmd = "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
+		cmd = "rm -rf \"$DST_COMPONENT\" && "
 		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
-		"rm -rf \"$TMP_PATH\" && "
 		"chown -R root:admin \"$DST_COMPONENT\"";
 	else
 		cmd = "mkdir -p \"$DST_PATH\" && "
@@ -500,7 +496,6 @@
 	
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
 	setenv("DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
-	setenv("TMP_PATH", [[finalPath stringByAppendingPathExtension:@"old"] fileSystemRepresentation], 1);
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
 	
 	char* const arguments[] = { "-c", cmd, NULL };
@@ -518,7 +513,6 @@
 	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
-	unsetenv("TMP_PATH");
 	unsetenv("DST_PATH");
 	return ret;
 }
