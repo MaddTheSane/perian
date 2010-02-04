@@ -79,6 +79,7 @@ else
 	patch -p0 < Patches/ffmpeg-no-h264-warning.diff
 	patch -p0 < Patches/ffmpeg-hardcode-dsputil.diff
 	patch -p0 < Patches/ffmpeg-revert-r20347.diff
+	patch -p0 < Patches/ffmpeg-larger-internal-buffer.diff
 	touch ffmpeg/patched
 
     echo -n "Building "
