@@ -21,6 +21,21 @@
 #import "CPFPerianPrefPaneController.h"
 #import "UpdateCheckerAppDelegate.h"
 
+
+
+
+//Imports for qt component manager
+
+//#include <Security/Security.h>
+
+
+#import "ECQTComponent.h"
+//#import "InfoWindowController.h"
+
+
+//End imports qt component manager
+
+
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
 #define LastInstalledVersionKey CFSTR("LastInstalledVersion")
 #define AC3TwoChannelModeKey CFSTR("twoChannelMode")
@@ -38,6 +53,9 @@
 #define A52_LFE 16
 #define A52_ADJUST_LEVEL 32
 #define A52_USE_DPLII 64
+
+
+
 
 @interface NSString (VersionStringCompare)
 - (BOOL)isVersionStringOlderThan:(NSString *)older;
@@ -975,5 +993,206 @@
 {
 	[[NSWorkspace sharedWorkspace] openURL:perianForumURL];	
 }
+
+
+
+//LET THE WILD RUMPUS BEGIN
+
+
+// Adding in the component manager stuff from QTManager.
+
+
+
+
+NSArray* GetComponentsInFolder(NSString* folder)
+{
+	folder = [folder stringByExpandingTildeInPath];
+	NSFileManager* fm = [NSFileManager defaultManager];
+	NSArray* contents = [fm directoryContentsAtPath:folder];
+	NSMutableArray* newContents = [NSMutableArray array];
+	int x;
+	for (x = 0; x < [contents count]; x++)
+	{
+		NSString* comp = [contents objectAtIndex:x];
+		
+		[newContents addObject:[folder stringByAppendingPathComponent:comp]];
+	}
+	return newContents;
+}
+
+-(void)refresh:(id)sender
+{
+	[self reloadComponents];
+}
+
+-(void)awakeFromNib
+{	
+	
+	
+	// needed for ellipses
+	NSArray *columns = [componentsTable	tableColumns];
+    int tableIndex, count = [columns count];
+    for (tableIndex = 0; tableIndex < count; tableIndex++) 
+	{
+        NSTableColumn *column = [columns objectAtIndex:tableIndex];
+        [[column dataCell] setWraps:YES];
+    }
+	
+	mComps = [[NSMutableArray array] retain];
+	
+	[self reloadComponents];
+	
+//	[table setDoubleAction:@selector(doubleClick:)];
+	[componentsTable setTarget:self];
+	
+	[componentsTable display];
+	
+//	[self updateUI];
+
+}
+
+-(void)reloadComponents
+{
+	[mComps removeAllObjects];
+	[componentsTable reloadData];
+	[componentsTable display];
+	
+
+	
+	
+	
+	NSMutableArray* allComponents = [NSMutableArray array];
+	
+	[allComponents addObjectsFromArray:	GetComponentsInFolder(@"/Library/Components")];
+	[allComponents addObjectsFromArray:	GetComponentsInFolder(@"/Library/QuickTime")];
+	[allComponents addObjectsFromArray:	GetComponentsInFolder(@"~/Library/QuickTime")];
+	[allComponents addObjectsFromArray:	GetComponentsInFolder(@"~/Library/Components")];
+	
+	[allComponents addObjectsFromArray:	GetComponentsInFolder(@"/Library/Components (Disabled)")];
+	[allComponents addObjectsFromArray:	GetComponentsInFolder(@"/Library/QuickTime (Disabled)")];
+	[allComponents addObjectsFromArray:	GetComponentsInFolder(@"~/Library/QuickTime (Disabled)")];
+	[allComponents addObjectsFromArray:	GetComponentsInFolder(@"~/Library/Components (Disabled)")];
+	
+	
+	int x= 0;
+	for (x = 0; x < [allComponents count]; x++)
+	{	
+		NSString* comp = [allComponents objectAtIndex:x];
+		ECQTComponent* compobj = [ECQTComponent componentWithPath:comp];
+		if (compobj && [compobj name])
+			[mComps addObject:compobj];
+	}
+	
+	[componentsTable reloadData];
+}
+
+
+- (BOOL)tableView:(NSTableView *)aTableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex
+{
+
+	return NO;
+}
+
+//- (void)tableView:(NSTableView *)componentsTable setObjectValue:anObject forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)rowIndex
+//{
+////	if ([[tableColumn identifier] isEqualToString:@"componentEnabled"])
+////	{
+////		ECQTComponent* obj = [mComps objectAtIndex:rowIndex];
+////		bool enable = [anObject boolValue];
+////		[obj setEnabled:enable];
+//		[componentsTable reloadData];
+////	}
+//}
+//
+- (id)tableView:(NSTableView *)tableview objectValueForTableColumn:(id)column row:(NSInteger)rowIndex
+{
+    static NSDictionary *sinfo = nil;
+	if (mComps)
+	{
+		ECQTComponent *child = [mComps objectAtIndex:rowIndex];
+		
+//		if ([[column identifier] isEqualToString:@"componentEnabled"])
+//		{
+//			[[column dataCellForRow:row] setEnabled:([child isWhere] != componentIsSystem)];			
+//		}
+		
+		NSString* results = [child valueForKey:[column identifier]];
+		
+		if (results && [results isKindOfClass:[NSString class]])
+		{
+			// needed for ellipses
+			if (!sinfo)
+			{
+				NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+				[style setLineBreakMode:NSLineBreakByTruncatingMiddle];
+				sinfo = [[NSDictionary alloc] initWithObjectsAndKeys:style, NSParagraphStyleAttributeName, nil];
+				[style release];
+			}
+			
+			return [[[NSAttributedString alloc] initWithString:results attributes:sinfo] autorelease];
+			
+		}
+		else
+		{
+			return results;
+		}
+	}
+	return @"";
+}
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)sender
+{
+
+		return [mComps count];
+
+}
+
+
+
+//- (void)tableViewSelectionDidChange:(NSNotification *)notification;
+//{
+//	[self updateUI];
+//
+//}
+
+//-(void)updateUI
+//{
+//	[details setEnabled:([componentsTable numberOfSelectedRows] > 0)];
+//
+//}
+
+//-(void)details:(id)sender
+//{
+//	NSIndexSet* selected = [componentsTable selectedRowIndexes];
+//	unsigned current_index = [selected firstIndex];
+//	while (current_index != NSNotFound)
+//	{
+//		[self detailsForRow:current_index];
+//		
+//		current_index = [selected indexGreaterThanIndex:current_index];
+//	}
+//}
+
+//-(void)doubleClick:(id)sender
+//{
+//	int row = [table clickedRow];
+//	if (row >= 0)
+//	{
+//		[self detailsForRow:row];
+//	}
+//}
+
+//-(void)detailsForRow:(int)row
+//{
+//	NSWindowController* temp = [InfoWindowController alloc];
+//	InfoWindowController* controller = [temp initWithWindowNibName:@"InfoWindow"];
+//	[[controller window] makeKeyAndOrderFront:nil];
+//	[controller setComponent:[mComps objectAtIndex:row]];
+//}
+
+
+
+
+
 
 @end

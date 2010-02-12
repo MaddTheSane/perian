@@ -115,7 +115,21 @@ typedef enum
 	CFStringRef							a52AppID;
 	
 	float								nextDynValue;
+	
+	//Components
+	
+	IBOutlet NSTableView				*componentsTable;
+
+	
+//    IBOutlet id							table, details;
+//    IBOutlet id table, ignoreSystem, infoWindow, info, details;
+	
+	NSMutableArray*						mComps;
+	NSObject								*details;
+	
 }
+
+
 //General Pane
 - (IBAction)installUninstall:(id)sender;
 - (IBAction)updateCheck:(id)sender;
@@ -140,5 +154,13 @@ typedef enum
 - (IBAction)launchWebsite:(id)sender;
 - (IBAction)launchDonate:(id)sender;
 - (IBAction)launchForum:(id)sender;
+
+//Component Manager
+
+//-(void)updateUI;
+-(void)reloadComponents;
+//-(void)detailsForRow:(int)row;
+
+
 
 @end
