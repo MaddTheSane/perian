@@ -122,8 +122,15 @@
 	NSString *ret = nil;
 	
 	value = CFPreferencesCopyAppValue(key, appID);
-	if(value && CFGetTypeID(value) == CFStringGetTypeID())
-		ret = [(NSString *)value autorelease];
+	
+	if(value) {
+		ret = (NSString*)value;
+		CFMakeCollectable(ret);
+		[ret autorelease];
+	}
+	
+	if (CFGetTypeID(value) != CFStringGetTypeID())
+		return nil;
 	
 	return ret;
 }
