@@ -338,6 +338,10 @@
 		
 	}
 	
+	if ([errorString length]) {
+		[textField_installStatus setStringValue:[NSString stringWithFormat:@"Error: %@", errorString]];
+	}
+	
 	[button_install setEnabled:YES];
 }
 
@@ -520,7 +524,7 @@
 	}
 	else
 		[errorString appendFormat:NSLocalizedString(@"Authentication failed for extraction for %@\n", @""), archivePath];
-	
+		
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
 	unsetenv("DST_PATH");
@@ -533,8 +537,7 @@
 	NSFileManager *defaultFileManager = [NSFileManager defaultManager];
 	
 	if(![defaultFileManager fileExistsAtPath:componentPath])
-	/* No error, just forget it */
-		return FALSE;
+		return YES; // No error, just forget it
 	
 	char *cmd = "rm -rf \"$COMP_PATH\"";
 	
@@ -656,7 +659,9 @@
 				archivePath = [frameworkComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
 				break;
 		}
-		[self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey]];
+		if (![self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey]]) {
+			break;
+		}
 	}
 	if(auth != nil)
 	{
