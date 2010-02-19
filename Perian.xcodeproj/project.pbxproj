@@ -2245,6 +2245,7 @@
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
 				PRODUCT_NAME = Perian;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
+				VALID_ARCHS = "i386 ppc ppc7400 ppc970";
 				WARNING_CFLAGS = "-Wimplicit";
 				WRAPPER_EXTENSION = component;
 			};
@@ -2282,6 +2283,7 @@
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
 				PRODUCT_NAME = Perian;
+				VALID_ARCHS = "i386 ppc ppc7400 ppc970";
 				WARNING_CFLAGS = "-Wimplicit";
 				WRAPPER_EXTENSION = component;
 			};
@@ -2428,6 +2430,7 @@
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
 				PRODUCT_NAME = Perian;
+				VALID_ARCHS = "i386 ppc ppc7400 ppc970";
 				WARNING_CFLAGS = "-Wimplicit";
 				WRAPPER_EXTENSION = component;
 			};
@@ -2758,6 +2761,7 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
 			};
