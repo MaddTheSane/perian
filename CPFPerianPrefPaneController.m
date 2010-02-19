@@ -483,7 +483,7 @@
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		ret = YES;
 	else
-		[errorString appendFormat:NSLocalizedString(@"Extraction for %@ failed\n", @""), archivePath];
+		[errorString appendFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]];
 	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
@@ -520,10 +520,10 @@
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			[errorString appendFormat:NSLocalizedString(@"Extraction for %@ failed\n", @""), archivePath];
+			[errorString appendFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]];
 	}
 	else
-		[errorString appendFormat:NSLocalizedString(@"Authentication failed for extraction for %@\n", @""), archivePath];
+		[errorString appendFormat:NSLocalizedString(@"authentication failed while extracting %@\n", @""), [finalPath lastPathComponent]];
 		
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
@@ -551,10 +551,10 @@
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			[errorString appendFormat:NSLocalizedString(@"Removal for %@ failed\n", @""), componentPath];
+			[errorString appendFormat:NSLocalizedString(@"removal of %@ failed\n", @""), [componentPath lastPathComponent]];
 	}
 	else
-		[errorString appendFormat:NSLocalizedString(@"Authentication failed for removal for %@\n", @""), componentPath];
+		[errorString appendFormat:NSLocalizedString(@"authentication failed while removing %@\n", @""), [componentPath lastPathComponent]];
 	
 	unsetenv("COMP_PATH");
 	return ret;
@@ -820,7 +820,7 @@
 		[textField_updateStatus setStringValue:@"Couldn't reach the update server."];
 	} else if ([status isEqualToString:@"NoUpdates"]) {
 		[textField_updateStatus setStringValue:@"There are no updates."];
-	} else if ([status isEqualToString:@"NoUpdates"]) {
+	} else if ([status isEqualToString:@"YesUpdates"]) {
 		[textField_updateStatus setStringValue:@"Updates found!"];
 	}
 }
