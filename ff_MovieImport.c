@@ -156,6 +156,7 @@ void init_FFmpeg()
 		REGISTER_DECODER(zmbv);
 		REGISTER_DECODER(indeo2);
 		REGISTER_DECODER(indeo3);
+		REGISTER_DECODER(indeo5);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}

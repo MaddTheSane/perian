@@ -29,6 +29,7 @@ Codec(kSnowCodecInfoResID, CODEC_ID_SNOW, "Snow", "Decompresses video stored in 
 Codec(kNuvCodecInfoResID, CODEC_ID_NUV, "NuppelVideo", "Decompresses video stored in NuppelVideo format.", 'RJPG', 'NUV1')
 Codec(kIndeo2CodecInfoResID, CODEC_ID_INDEO2, "Indeo 2", "Decompresses video stored in Intel's Indeo 2 format.", 'RT21')
 Codec(kIndeo3CodecInfoResID, CODEC_ID_INDEO3, "Indeo 3", "Decompresses video stored in Intel's Indeo 3 format.", 'IV32', 'iv32', 'IV31', 'iv31')
+Codec(kIndeo5CodecInfoResID, CODEC_ID_INDEO5, "Indeo 5", "Decompresses video stored in Intel's Indeo 5 format.", 'IV50', 'iv50')
 Codec(kTSCCCodecInfoResID, CODEC_ID_TSCC, "Techsmith Screen Capture", "Decompresses video stored in Techsmith Screen Capture format.", 'tscc')
 Codec(kZMBVCodecInfoResID, CODEC_ID_ZMBV, "DosBox Capture", "Decompresses video stored in DosBox Capture format.", 'ZMBV')
 Codec(kVP6ACodecInfoResID, CODEC_ID_VP6A, "On2 VP6A", "Decompresses video stored in On2 VP6A format.", 'VP6A')
