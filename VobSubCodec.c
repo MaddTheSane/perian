@@ -26,6 +26,8 @@
 #include "CommonUtils.h"
 #include <zlib.h>
 #include "avcodec.h"
+#include "libavutil/intmath.h"
+#include "libavutil/internal.h"
 #include "intreadwrite.h"
 
 // Data structures
