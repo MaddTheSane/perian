@@ -252,14 +252,17 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			KaxTrackEntry & track = *static_cast<KaxTrackEntry *>(trackEntries[i]);
 			KaxTrackNumber & number = GetChild<KaxTrackNumber>(track);
 			KaxTrackType & type = GetChild<KaxTrackType>(track);
-			KaxTrackDefaultDuration & defaultDuration = GetChild<KaxTrackDefaultDuration>(track);
+			KaxTrackDefaultDuration * defaultDuration = FindChild<KaxTrackDefaultDuration>(track);
 			KaxTrackFlagDefault & enabled = GetChild<KaxTrackFlagDefault>(track);
 			KaxTrackFlagLacing & lacing = GetChild<KaxTrackFlagLacing>(track);
 			MatroskaTrack mkvTrack;
 			
 			mkvTrack.number = uint16(number);
 			mkvTrack.type = uint8(type);
-			mkvTrack.defaultDuration = uint32(defaultDuration) / float(timecodeScale) + .5;
+			if (defaultDuration)
+				mkvTrack.defaultDuration = uint32(*defaultDuration) / float(timecodeScale) + .5;
+			else
+				mkvTrack.defaultDuration = 0;
 			mkvTrack.isEnabled = uint8(enabled);
 			mkvTrack.usesLacing = uint8(lacing);
 			
