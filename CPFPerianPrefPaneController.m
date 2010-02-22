@@ -815,13 +815,13 @@
 	
 	//FIXME: localize these
 	if ([status isEqualToString:@"Starting"]) {
-		[textField_updateStatus setStringValue:@"Checking..."];
+		[textField_statusMessage setStringValue:@"Checking..."];
 	} else if ([status isEqualToString:@"Error"]) {
-		[textField_updateStatus setStringValue:@"Couldn't reach the update server."];
+		[textField_statusMessage setStringValue:@"Couldn't reach the update server."];
 	} else if ([status isEqualToString:@"NoUpdates"]) {
-		[textField_updateStatus setStringValue:@"There are no updates."];
+		[textField_statusMessage setStringValue:@"There are no updates."];
 	} else if ([status isEqualToString:@"YesUpdates"]) {
-		[textField_updateStatus setStringValue:@"Updates found!"];
+		[textField_statusMessage setStringValue:@"Updates found!"];
 	}
 }
 
