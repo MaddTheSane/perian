@@ -339,8 +339,9 @@
 	}
 	
 	if ([errorString length]) {
-		[textField_installStatus setStringValue:[NSString stringWithFormat:@"Error: %@", errorString]];
-	}
+		[textField_statusMessage setStringValue:[NSString stringWithFormat:@"Error: %@", errorString]];
+	} else
+		[textField_statusMessage setStringValue:@""];
 	
 	[button_install setEnabled:YES];
 }
@@ -579,8 +580,10 @@
 		{
 			//Remove the old one here
 			BOOL result = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
-			if(result == NO)
+			if(result == NO) {
+				[errorString appendFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
 				ret = NO;
+			}
 		}
 		if(currentInstallStatus(pieceStatus) != InstallStatusInstalled)
 		{
@@ -600,6 +603,8 @@
 		else
 		{
 			ret = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
+			if(ret == NO)
+				[errorString appendFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
 		}
 	}
 	return ret;
