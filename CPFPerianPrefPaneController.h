@@ -103,7 +103,7 @@ typedef enum
 	InstallStatus						installStatus; //This is only marked as installed if everything is installed
 	BOOL								userInstalled;
 	AuthorizationRef					auth;
-	NSMutableString						*errorString;
+	NSString							*errorString;
 	
 	NSArray								*componentReplacementInfo;
 	

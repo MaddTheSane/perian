@@ -338,7 +338,7 @@
 		
 	}
 	
-	if ([errorString length]) {
+	if (errorString) {
 		[textField_statusMessage setStringValue:[NSString stringWithFormat:@"Error: %@", errorString]];
 	} else
 		[textField_statusMessage setStringValue:@""];
@@ -484,7 +484,7 @@
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		ret = YES;
 	else
-		[errorString appendFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]];
+		errorString = [[NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]] retain];
 	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
@@ -521,10 +521,10 @@
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			[errorString appendFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]];
+			errorString = [[NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]] retain];
 	}
 	else
-		[errorString appendFormat:NSLocalizedString(@"authentication failed while extracting %@\n", @""), [finalPath lastPathComponent]];
+		errorString = [[NSString stringWithFormat:NSLocalizedString(@"authentication failed while extracting %@\n", @""), [finalPath lastPathComponent]] retain];
 		
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
@@ -552,10 +552,10 @@
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			[errorString appendFormat:NSLocalizedString(@"removal of %@ failed\n", @""), [componentPath lastPathComponent]];
+			errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), [componentPath lastPathComponent]] retain];
 	}
 	else
-		[errorString appendFormat:NSLocalizedString(@"authentication failed while removing %@\n", @""), [componentPath lastPathComponent]];
+		errorString = [[NSString stringWithFormat:NSLocalizedString(@"authentication failed while removing %@\n", @""), [componentPath lastPathComponent]] retain];
 	
 	unsetenv("COMP_PATH");
 	return ret;
@@ -581,7 +581,7 @@
 			//Remove the old one here
 			BOOL result = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
 			if(result == NO) {
-				[errorString appendFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
+				errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component] retain];
 				ret = NO;
 			}
 		}
@@ -604,7 +604,7 @@
 		{
 			ret = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
 			if(ret == NO)
-				[errorString appendFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
+				errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component] retain];
 		}
 	}
 	return ret;
@@ -638,7 +638,7 @@
 	NSString *frameworkComponentPath = [componentPath stringByAppendingPathComponent:@"Frameworks"];
 
 	[errorString release];
-	errorString = [[NSMutableString alloc] init];
+	errorString = nil;
 	/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
 	if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
 		/* Oh well, hope we don't need it */
@@ -689,7 +689,7 @@
 	NSString *componentPath;
 
 	[errorString release];
-	errorString = [[NSMutableString alloc] init];
+	errorString = nil;
 	/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
 	if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
 		/* Oh well, hope we don't need it */
