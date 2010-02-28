@@ -1,3 +1,15 @@
+1.2.1
+- Added Indeo 5 decoding. [r1271]
+Fixes:
+- Fixed several bugs in Matroska support (1.2 regression) [r1240, r1243]
+- Incomplete AVI files were not fully imported (1.2 regression) [r1242]
+- Fixed subtitles crashing in 10.4 [r1240]
+- Fixed a rare crash with .mp4 [r1265]
+- No error was shown if the installer somehow failed [r1270]
+Note that it does not try to correct errors, only report them
+- Fixed crash in SSA support [r1250]
+- Fixed invisible subtitles sometimes appearing over the first frame [r1275]
+
 1.2
 - Matroska cover art is now imported as iTunes cover art [r1149]
 - Video tracks now have their colorspace set based on the size of the video [r1170]
