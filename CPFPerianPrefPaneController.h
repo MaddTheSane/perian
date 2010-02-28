@@ -76,7 +76,7 @@ typedef enum
 	IBOutlet NSTextField				*textField_installStatus;
 	
 	IBOutlet NSTextField				*textField_currentVersion;
-	IBOutlet NSTextField				*textField_updateStatus;
+	IBOutlet NSTextField				*textField_statusMessage;
 	IBOutlet NSButton					*button_updateCheck;
 	IBOutlet NSButton					*button_autoUpdateCheck;
 	
@@ -103,7 +103,7 @@ typedef enum
 	InstallStatus						installStatus; //This is only marked as installed if everything is installed
 	BOOL								userInstalled;
 	AuthorizationRef					auth;
-	NSMutableString						*errorString;
+	NSString							*errorString;
 	
 	NSArray								*componentReplacementInfo;
 	

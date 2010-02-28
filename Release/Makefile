@@ -4,7 +4,7 @@
 # Check the Perian.component target and PerianPane target.
 
 VERSION=1.2
-BETA=FALSE
+BETA=TRUE
 SRC_DIR=..
 BUILD_DIR=build
 COMMAND_BUILD_DIR=CommandLineComponents

@@ -6,7 +6,7 @@ if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 	MACOSX_DEPLOYMENT_TARGET="10.4"
 fi
 
-generalConfigureOptions="--disable-muxers --disable-encoders --disable-stripping --disable-amd3dnow --enable-runtime-cpudetect --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-ffserver"
+generalConfigureOptions="--disable-muxers --disable-encoders --disable-stripping --disable-amd3dnow --enable-runtime-cpudetect --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-ffserver --target-os=darwin"
 cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -w -D__DARWIN_UNIX03=0 -mdynamic-no-pic"
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
@@ -74,13 +74,12 @@ else
 		cd ffmpeg && svn revert -R . && rm patched && cd ..
 	fi
 
-	patch -p0 < Patches/ffmpeg-forceinline.diff
 	patch -p0 < Patches/ffmpeg-no-interlaced.diff
 	patch -p0 < Patches/ffmpeg-faltivec.diff
 	patch -p0 < Patches/ffmpeg-no-h264-warning.diff
 	patch -p0 < Patches/ffmpeg-hardcode-dsputil.diff
-	patch -p0 < Patches/ffmpeg-bgr24-huffyuv.diff
 	patch -p0 < Patches/ffmpeg-revert-r20347.diff
+	patch -p0 < Patches/ffmpeg-larger-internal-buffer.diff
 	touch ffmpeg/patched
 
     echo -n "Building "
@@ -97,7 +96,7 @@ else
     # Intel shlibs
     #######################
     if [ $buildi386 -gt 0 ] ; then
-        BUILDDIR="$BUILT_PRODUCTS_DIR/intel"
+        BUILDDIR="$BUILT_PRODUCTS_DIR/i386"
         mkdir -p "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
@@ -152,7 +151,7 @@ else
 	# lipo/copy shlibs
 	#######################
 	BUILDDIR="$BUILT_PRODUCTS_DIR/Universal"
-	INTEL="$BUILT_PRODUCTS_DIR/intel"
+	INTEL="$BUILT_PRODUCTS_DIR/i386"
 	PPC="$BUILT_PRODUCTS_DIR/ppc"
 	
 	rm -rf "$BUILDDIR"
@@ -161,15 +160,15 @@ else
 	if [ $buildi386 -eq $buildppc ] ; then
 		# lipo them
 		for aa in "$INTEL"/*/*.a ; do
-			echo lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
-			lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/intel/ppc/'` -output `echo -n $aa | sed 's/intel\/.*\//Universal\//'`
+			echo lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/i386/ppc/'` -output `echo -n $aa | sed 's/i386\/.*\//Universal\//'`
+			lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/i386/ppc/'` -output `echo -n $aa | sed 's/i386\/.*\//Universal\//'`
 		done
 	else
 		if [ $buildppc -gt 0 ] ; then
 			archDir="ppc"
 			BUILDARCHDIR=$PPC
 		else
-			archDir="intel"
+			archDir="i386"
 			BUILDARCHDIR=$INTEL
 		fi
 		# just copy them

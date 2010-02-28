@@ -221,7 +221,6 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 	// http://developer.apple.com/quicktime/icefloe/dispatch007.html
     
     // we want ARGB because Quartz can use it easily
-    // Todo: add other possible pixel formats Quartz can handle
     *formats++	= k32RGBAPixelFormat;
 	*formats++	= k32ARGBPixelFormat;
 	

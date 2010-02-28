@@ -62,6 +62,7 @@ private:
 	int outBufUsed;
 	bool dtsPassthrough;
 	int fullChannelMap[6];
+	AVCodecParserContext *parser;
 };
 
 // kAudioCodecPropertyHasVariablePacketByteSizes is queried before our input format is set,

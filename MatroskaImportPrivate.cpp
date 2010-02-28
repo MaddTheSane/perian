@@ -234,11 +234,10 @@ ComponentResult MatroskaImport::ReadSegmentInfo(KaxInfo &segmentInfo)
 
 ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 {
-	Track firstVideoTrack = NULL; short firstVideoTrackLang = 0;
-	Track firstAudioTrack = NULL; short firstAudioTrackLang = 0;
-	Track firstSubtitleTrack = NULL; short firstSubtitleTrackLang = 0;
+	Track firstVideoTrack = NULL; short firstVideoTrackLang = 0; bool videoEnabled = false;
+	Track firstAudioTrack = NULL; short firstAudioTrackLang = 0; bool audioEnabled = false;
+	Track firstSubtitleTrack = NULL; short firstSubtitleTrackLang = 0; bool subtitleEnabled = false;
 	ComponentResult err = noErr;
-	bool foundAnEnabledTrack = false;
 	
 	if (seenTracks)
 		return noErr;
@@ -253,27 +252,33 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			KaxTrackEntry & track = *static_cast<KaxTrackEntry *>(trackEntries[i]);
 			KaxTrackNumber & number = GetChild<KaxTrackNumber>(track);
 			KaxTrackType & type = GetChild<KaxTrackType>(track);
-			KaxTrackDefaultDuration & defaultDuration = GetChild<KaxTrackDefaultDuration>(track);
+			KaxTrackDefaultDuration * defaultDuration = FindChild<KaxTrackDefaultDuration>(track);
 			KaxTrackFlagDefault & enabled = GetChild<KaxTrackFlagDefault>(track);
 			KaxTrackFlagLacing & lacing = GetChild<KaxTrackFlagLacing>(track);
 			MatroskaTrack mkvTrack;
 			
 			mkvTrack.number = uint16(number);
 			mkvTrack.type = uint8(type);
-			mkvTrack.defaultDuration = uint32(defaultDuration) / float(timecodeScale) + .5;
+			if (defaultDuration)
+				mkvTrack.defaultDuration = uint32(*defaultDuration) / float(timecodeScale) + .5;
+			else
+				mkvTrack.defaultDuration = 0;
+			mkvTrack.isEnabled = uint8(enabled);
+			mkvTrack.usesLacing = uint8(lacing);
 			
 			KaxTrackLanguage & trackLang = GetChild<KaxTrackLanguage>(track);
 			KaxTrackName & trackName = GetChild<KaxTrackName>(track);
 			KaxContentEncodings * encodings = FindChild<KaxContentEncodings>(track);
-			
 			short qtLang = ISO639_2ToQTLangCode(string(trackLang).c_str());
-			SetMediaLanguage(mkvTrack.theMedia, qtLang);
 			
 			switch (uint8(type)) {
 				case track_video:
 					if (pass == 2) continue;
 					err = AddVideoTrack(track, mkvTrack);
 					if (err) return err;
+					
+					if (mkvTrack.isEnabled)
+						videoEnabled = true;
 					
 					if (firstVideoTrack && qtLang != firstVideoTrackLang)
 						SetTrackAlternate(firstVideoTrack, mkvTrack.theTrack);
@@ -288,6 +293,9 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					err = AddAudioTrack(track, mkvTrack);
 					if (err) return err;
 					
+					if (mkvTrack.isEnabled)
+						audioEnabled = true;
+					
 					if (firstAudioTrack && qtLang != firstAudioTrackLang)
 						SetTrackAlternate(firstAudioTrack, mkvTrack.theTrack);
 					else {
@@ -301,6 +309,9 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					err = AddSubtitleTrack(track, mkvTrack);
 					if (err) return err;
 					if (mkvTrack.theTrack == NULL) continue;
+					
+					if (mkvTrack.isEnabled)
+						subtitleEnabled = true;
 					
 					if (firstSubtitleTrack && qtLang != firstSubtitleTrackLang)
 						SetTrackAlternate(firstSubtitleTrack, mkvTrack.theTrack);
@@ -319,14 +330,13 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					continue;
 			}
 			
-			mkvTrack.isEnabled = uint8(enabled);
-			mkvTrack.usesLacing = uint8(lacing);
-			
 			if (encodings) {
 				err = ReadContentEncodings(*encodings, mkvTrack);
 				// just ignore the track if there's some problem with this element
 				if (err) continue;
 			}
+			
+			SetMediaLanguage(mkvTrack.theMedia, qtLang);
 			
 			if (!trackName.IsDefaultValue()) {
 				QTMetaDataRef trackMetaData;
@@ -361,20 +371,17 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	
 	for (int i = 0; i < tracks.size(); i++) {
 		SetTrackEnabled(tracks[i].theTrack, tracks[i].isEnabled);
-		if (tracks[i].isEnabled)
-			foundAnEnabledTrack = true;
 	}
 	// ffmpeg used to write a TrackDefault of 0 for all tracks
 	// ensure that at least one track of each media type is enabled, if none were originally
 	// this picks the first track, which may not be the best, but the situation is quite rare anyway
-	if (!foundAnEnabledTrack) {
-		if (firstVideoTrack)
-			SetTrackEnabled(firstVideoTrack, 1);
-		if (firstAudioTrack)
-			SetTrackEnabled(firstAudioTrack, 1);
-		if (firstSubtitleTrack)
-			SetTrackEnabled(firstSubtitleTrack, 1);
-	}
+	// FIXME: properly choose tracks based on forced/default/language flags, and consider turning auto-alternates back on
+	if (!videoEnabled && firstVideoTrack)
+		SetTrackEnabled(firstVideoTrack, 1);
+	if (!audioEnabled && firstAudioTrack)
+		SetTrackEnabled(firstAudioTrack, 1);
+	if (!subtitleEnabled && firstSubtitleTrack)
+		SetTrackEnabled(firstSubtitleTrack, 1);
 	
 	seenTracks = true;
 	return noErr;
@@ -542,7 +549,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3) //see ff_private.c initialize_audio_map
 		asbd.mFramesPerPacket = 1152;
 	
-	// FIXME mChannelLayoutTag == 0 is valid
+	// FIXME: mChannelLayoutTag == 0 is valid
 	// but we don't use channel position lists (yet) so it's safe for now
 	if (acl.mChannelLayoutTag == 0) acl = GetDefaultChannelLayout(&asbd);
 	if (acl.mChannelLayoutTag == 0) {
@@ -629,7 +636,7 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 		
 	} else if ((*imgDesc)->cType == kSubFormatUTF8 || (*imgDesc)->cType == kSubFormatSSA || (*imgDesc)->cType == kSubFormatASS) {
 		if ((*imgDesc)->cType == kSubFormatASS) (*imgDesc)->cType = kSubFormatSSA; // no real reason to treat them differently
-		UInt32 emptyDataRefExtension[2]; // XXX the various uses of this bit of code should be unified
+		UInt32 emptyDataRefExtension[2]; // FIXME: the various uses of this bit of code should be unified
 		mkvTrack.subDataRefHandler = NewHandleClear(sizeof(Handle) + 1);
 		emptyDataRefExtension[0] = EndianU32_NtoB(sizeof(UInt32)*2);
 		emptyDataRefExtension[1] = EndianU32_NtoB(kDataRefExtensionInitializationData);

@@ -20,7 +20,6 @@
 
 #import "CPFPerianPrefPaneController.h"
 #import "UpdateCheckerAppDelegate.h"
-#include <sys/stat.h>
 
 #define AC3DynamicRangeKey CFSTR("dynamicRange")
 #define LastInstalledVersionKey CFSTR("LastInstalledVersion")
@@ -67,17 +66,11 @@
 
 - (BOOL)getBoolFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(BOOL)defaultValue
 {
-	CFPropertyListRef value;
-	BOOL ret = defaultValue;
+	Boolean ret, exists = FALSE;
 	
-	value = CFPreferencesCopyAppValue(key, appID);
-	if(value && CFGetTypeID(value) == CFBooleanGetTypeID())
-		ret = CFBooleanGetValue(value);
+	ret = CFPreferencesGetAppBooleanValue(key, appID, &exists);
 	
-	if(value)
-		CFRelease(value);
-	
-	return ret;
+	return exists ? ret : defaultValue;
 }
 
 - (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromBool:(BOOL)value
@@ -109,17 +102,11 @@
 
 - (unsigned int)getUnsignedIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(int)defaultValue
 {
-	CFPropertyListRef value;
-	unsigned int ret = defaultValue;
+	int ret; Boolean exists = FALSE;
 	
-	value = CFPreferencesCopyAppValue(key, appID);
-	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
-		CFNumberGetValue(value, kCFNumberIntType, &ret);
+	ret = CFPreferencesGetAppIntegerValue(key, appID, &exists);
 	
-	if(value)
-		CFRelease(value);
-	
-	return ret;
+	return exists ? ret : defaultValue;
 }
 
 - (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromInt:(int)value
@@ -135,11 +122,15 @@
 	NSString *ret = nil;
 	
 	value = CFPreferencesCopyAppValue(key, appID);
-	if(value && CFGetTypeID(value) == CFStringGetTypeID())
-		ret = [NSString stringWithString:(NSString *)value];
 	
-	if(value)
-		CFRelease(value);
+	if(value) {
+		ret = (NSString*)value;
+		CFMakeCollectable(ret);
+		[ret autorelease];
+	}
+	
+	if (CFGetTypeID(value) != CFStringGetTypeID())
+		return nil;
 	
 	return ret;
 }
@@ -175,7 +166,7 @@
 {
 	if(userInstallation)
 		return NSHomeDirectory();
-	return [NSString stringWithString:@"/"];
+	return @"/";
 }
 
 - (NSString *)quickTimeComponentDir:(BOOL)userInstallation
@@ -276,7 +267,7 @@
 	return self;
 }
 
-- (NSDictionary *)myInfoDict;
+- (NSDictionary *)myInfoDict
 {
 	return [NSDictionary dictionaryWithContentsOfFile:[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Info.plist"]];
 }
@@ -346,6 +337,13 @@
 		}
 		
 	}
+	
+	if (errorString) {
+		[textField_statusMessage setStringValue:[NSString stringWithFormat:@"Error: %@", errorString]];
+	} else
+		[textField_statusMessage setStringValue:@""];
+	
+	[button_install setEnabled:YES];
 }
 
 - (int)upgradeA52Prefs
@@ -365,7 +363,6 @@
 - (void)didSelect
 {
 	/* General */
-	[self checkForInstallation];
 	NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
 	NSString *myVersion = [[self myInfoDict] objectForKey:BundleVersionKey];
 	
@@ -383,15 +380,12 @@
 		NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
 		NSInteger tag;
 		
-		if([[NSFileManager defaultManager] fileExistsAtPath:tempPrefPane isDirectory:&isDir] && isDir)
-			[[NSWorkspace sharedWorkspace] performFileOperation:NSWorkspaceRecycleOperation 
-														 source:[tempPrefPane stringByDeletingLastPathComponent] 
-													destination:@"" 
-														  files:[NSArray arrayWithObject:[tempPrefPane lastPathComponent]] 
-															tag:&tag];
+		[[NSFileManager defaultManager] removeFileAtPath:tempPrefPane handler:nil];
 		
 		[self installUninstall:nil];
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
+	} else {
+		[self checkForInstallation];
 	}
 	
 	NSDate *updateDate = [self getDateFromKey:(CFStringRef)NEXT_RUN_KEY forAppID:perianAppID];
@@ -434,10 +428,7 @@
 	
 	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
 
-	if([self getBoolFromKey:ExternalSubtitlesKey forAppID:perianAppID withDefault:YES])
-		[button_loadExternalSubtitles setState:1];
-	else
-		[button_loadExternalSubtitles setState:0];
+	[button_loadExternalSubtitles setState:[self getBoolFromKey:ExternalSubtitlesKey forAppID:perianAppID withDefault:YES]];
 }
 
 - (void)didUnselect
@@ -446,7 +437,8 @@
 	CFPreferencesAppSynchronize(a52AppID);
 }
 
-- (void) dealloc {
+- (void)dealloc
+{
 	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
 	[perianForumURL release];
 	[perianDonateURL release];
@@ -458,7 +450,7 @@
 	[super dealloc];
 }
 
-- (void) finalize
+- (void)finalize
 {
 	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
 	if(auth != nil)
@@ -468,97 +460,74 @@
 
 #pragma mark Install/Uninstall
 
-/* Shamelessly ripped from Sparkle */
+/* Shamelessly ripped from Sparkle (and now different) */
 - (BOOL)_extractArchivePath:archivePath toDestination:(NSString *)destination finalPath:(NSString *)finalPath
 {
-	BOOL ret = NO, oldExist = NO;
-	struct stat sb;
+	BOOL ret = NO, oldExist;
+	NSFileManager *defaultFileManager = [NSFileManager defaultManager];
+	char *cmd;
 	
-	if(stat([finalPath fileSystemRepresentation], &sb) == 0)
-		oldExist = YES;
+	oldExist = [defaultFileManager fileExistsAtPath:finalPath];
 	
-	char *buf = NULL;
 	if(oldExist)
-		asprintf(&buf,
-				 "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
-				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
-				 "rm -rf \"$TMP_PATH\"");
+		cmd = "rm -rf \"$DST_COMPONENT\" && "
+		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"";
 	else
-		asprintf(&buf,
-				 "mkdir -p \"$DST_PATH\" && "
-				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"");
-	if(!buf)
-	{
-		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for extraction command\n", @"")];
-		return FALSE;
-	}
+		cmd = "mkdir -p \"$DST_PATH\" && "
+		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\"";
 	
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
 	setenv("DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
-	setenv("TMP_PATH", [[finalPath stringByAppendingPathExtension:@"old"] fileSystemRepresentation], 1);
-
-	int status = system(buf);
+	
+	int status = system(cmd);
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		ret = YES;
 	else
-		[errorString appendFormat:NSLocalizedString(@"Extraction for %@ failed\n", @""), archivePath];
-
-	free(buf);
+		errorString = [[NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]] retain];
+	
 	unsetenv("SRC_ARCHIVE");
-	unsetenv("$DST_COMPONENT");
-	unsetenv("TMP_PATH");
+	unsetenv("DST_COMPONENT");
 	unsetenv("DST_PATH");
 	return ret;
 }
 
 - (BOOL)_authenticatedExtractArchivePath:(NSString *)archivePath toDestination:(NSString *)destination finalPath:(NSString *)finalPath
 {
-	BOOL ret = NO, oldExist = NO;
-	struct stat sb;
-	if(stat([finalPath fileSystemRepresentation], &sb) == 0)
-		oldExist = YES;
+	BOOL ret = NO, oldExist;
+	NSFileManager *defaultFileManager = [NSFileManager defaultManager];
+	char *cmd;
 	
-	char *buf = NULL;
+	oldExist = [defaultFileManager fileExistsAtPath:finalPath];
+	
 	if(oldExist)
-		asprintf(&buf,
-				 "mv -f \"$DST_COMPONENT\" \"$TMP_PATH\" && "
-				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
-				 "rm -rf \"$TMP_PATH\" && "
-				 "chown -R root:admin \"$DST_COMPONENT\"");
+		cmd = "rm -rf \"$DST_COMPONENT\" && "
+		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
+		"chown -R root:admin \"$DST_COMPONENT\"";
 	else
-		asprintf(&buf,
-				 "mkdir -p \"$DST_PATH\" && "
-				 "ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
-				 "chown -R root:admin \"$DST_COMPONENT\"");
-	if(!buf)
-	{
-		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for extraction command\n", @"")];
-		return FALSE;
-	}
+		cmd = "mkdir -p \"$DST_PATH\" && "
+		"ditto -x -k --rsrc \"$SRC_ARCHIVE\" \"$DST_PATH\" && "
+		"chown -R root:admin \"$DST_COMPONENT\"";
 	
 	setenv("SRC_ARCHIVE", [archivePath fileSystemRepresentation], 1);
 	setenv("DST_COMPONENT", [finalPath fileSystemRepresentation], 1);
-	setenv("TMP_PATH", [[finalPath stringByAppendingPathExtension:@"old"] fileSystemRepresentation], 1);
 	setenv("DST_PATH", [destination fileSystemRepresentation], 1);
 	
-	char* arguments[] = { "-c", buf, NULL };
-	if(AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
+	char* const arguments[] = { "-c", cmd, NULL };
+	if(auth && AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
 	{
 		int status;
 		int pid = wait(&status);
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			[errorString appendFormat:NSLocalizedString(@"Extraction for %@ failed\n", @""), archivePath];
+			errorString = [[NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]] retain];
 	}
 	else
-		[errorString appendFormat:NSLocalizedString(@"Authentication failed for extraction for %@\n", @""), archivePath];
-	
-	free(buf);
+		errorString = [[NSString stringWithFormat:NSLocalizedString(@"authentication failed while extracting %@\n", @""), [finalPath lastPathComponent]] retain];
+		
 	unsetenv("SRC_ARCHIVE");
-	unsetenv("$DST_COMPONENT");
-	unsetenv("TMP_PATH");
+	unsetenv("DST_COMPONENT");
 	unsetenv("DST_PATH");
 	return ret;
 }
@@ -566,39 +535,31 @@
 - (BOOL)_authenticatedRemove:(NSString *)componentPath
 {
 	BOOL ret = NO;
-	struct stat sb;
-	if(stat([componentPath fileSystemRepresentation], &sb) != 0)
-		/* No error, just forget it */
-		return FALSE;
+	NSFileManager *defaultFileManager = [NSFileManager defaultManager];
 	
-	char *buf = NULL;
-	asprintf(&buf,
-			 "rm -rf \"$COMP_PATH\"");
-	if(!buf)
-	{
-		[errorString appendFormat:NSLocalizedString(@"Could not allocate memory for removal command\n", @"")];
-		return FALSE;
-	}
+	if(![defaultFileManager fileExistsAtPath:componentPath])
+		return YES; // No error, just forget it
+	
+	char *cmd = "rm -rf \"$COMP_PATH\"";
 	
 	setenv("COMP_PATH", [componentPath fileSystemRepresentation], 1);
 	
-	char* arguments[] = { "-c", buf, NULL };
-	if(AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
+	char* const arguments[] = { "-c", cmd, NULL };
+	if(auth && AuthorizationExecuteWithPrivileges(auth, "/bin/sh", kAuthorizationFlagDefaults, arguments, NULL) == errAuthorizationSuccess)
 	{
 		int status;
 		int pid = wait(&status);
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			[errorString appendFormat:NSLocalizedString(@"Removal for %@ failed\n", @""), componentPath];
+			errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), [componentPath lastPathComponent]] retain];
 	}
 	else
-		[errorString appendFormat:NSLocalizedString(@"Authentication failed for removal for %@\n", @""), componentPath];
-	free(buf);
+		errorString = [[NSString stringWithFormat:NSLocalizedString(@"authentication failed while removing %@\n", @""), [componentPath lastPathComponent]] retain];
+	
 	unsetenv("COMP_PATH");
 	return ret;
 }
-
 
 - (BOOL)installArchive:(NSString *)archivePath forPiece:(NSString *)component type:(ComponentType)type withMyVersion:(NSString *)myVersion
 {
@@ -619,8 +580,10 @@
 		{
 			//Remove the old one here
 			BOOL result = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
-			if(result == NO)
+			if(result == NO) {
+				errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component] retain];
 				ret = NO;
+			}
 		}
 		if(currentInstallStatus(pieceStatus) != InstallStatusInstalled)
 		{
@@ -640,6 +603,8 @@
 		else
 		{
 			ret = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
+			if(ret == NO)
+				errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component] retain];
 		}
 	}
 	return ret;
@@ -673,7 +638,7 @@
 	NSString *frameworkComponentPath = [componentPath stringByAppendingPathComponent:@"Frameworks"];
 
 	[errorString release];
-	errorString = [[NSMutableString alloc] init];
+	errorString = nil;
 	/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
 	if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
 		/* Oh well, hope we don't need it */
@@ -699,7 +664,9 @@
 				archivePath = [frameworkComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
 				break;
 		}
-		[self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey]];
+		if (![self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey]]) {
+			break;
+		}
 	}
 	if(auth != nil)
 	{
@@ -722,7 +689,7 @@
 	NSString *componentPath;
 
 	[errorString release];
-	errorString = [[NSMutableString alloc] init];
+	errorString = nil;
 	/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
 	if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
 		/* Oh well, hope we don't need it */
@@ -851,15 +818,15 @@
 {
 	NSString *status = [notification object];
 	
-	//FIXME localize these
+	//FIXME: localize these
 	if ([status isEqualToString:@"Starting"]) {
-		[textField_updateStatus setStringValue:@"Checking..."];
+		[textField_statusMessage setStringValue:@"Checking..."];
 	} else if ([status isEqualToString:@"Error"]) {
-		[textField_updateStatus setStringValue:@"Couldn't reach the update server."];
+		[textField_statusMessage setStringValue:@"Couldn't reach the update server."];
 	} else if ([status isEqualToString:@"NoUpdates"]) {
-		[textField_updateStatus setStringValue:@"There are no updates."];
-	} else if ([status isEqualToString:@"NoUpdates"]) {
-		[textField_updateStatus setStringValue:@"Updates found!"];
+		[textField_statusMessage setStringValue:@"There are no updates."];
+	} else if ([status isEqualToString:@"YesUpdates"]) {
+		[textField_statusMessage setStringValue:@"Updates found!"];
 	}
 }
 
@@ -1018,15 +985,12 @@
 
 - (IBAction)launchDonate:(id)sender 
 {
-	
 	[[NSWorkspace sharedWorkspace] openURL:perianDonateURL];
 } 
 
 - (IBAction)launchForum:(id)sender 
 {
-	
-	[[NSWorkspace sharedWorkspace] openURL:perianForumURL];
-	
+	[[NSWorkspace sharedWorkspace] openURL:perianForumURL];	
 }
 
 @end

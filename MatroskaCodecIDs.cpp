@@ -503,7 +503,7 @@ static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	size_t esdsLen;
 	
 	// vosLen > 2 means SBR; some of those must be rewritten to avoid QT bugs(?)
-	// FIXME remove when QT works with them
+	// FIXME: remove when QT works with them
 	if (audio && (!vosBuf || vosLen > 2)) {
 		RecreateAACVOS(tr_entry, aacBuf, &vosLen);
 		vosBuf = aacBuf;

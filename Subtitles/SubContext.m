@@ -80,7 +80,7 @@ void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
 
 BOOL ParseFontVerticality(NSString **fontname)
 {
-	if ([*fontname characterAtIndex:0] == '@') {
+	if ([*fontname length] && [*fontname characterAtIndex:0] == '@') {
 		*fontname = [*fontname substringFromIndex:1];
 		return YES;
 	}

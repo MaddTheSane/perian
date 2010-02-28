@@ -105,7 +105,7 @@ NSMutableDictionary*	mCache = 0;
 		}
 	}
 
-	NSString* name = [NSString stringWithString:@"Unknown"];
+	NSString* name = @"Unknown";
 	
 	short saveRes = CurResFile();
 	if (resFile > 0)

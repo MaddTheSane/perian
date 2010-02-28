@@ -118,7 +118,8 @@ void init_FFmpeg()
 		REGISTER_DEMUXER(flv);
 		REGISTER_DEMUXER(tta);
 		REGISTER_DEMUXER(nuv);
-		register_parsers();
+		REGISTER_PARSER(ac3);
+		REGISTER_PARSER(mpegaudio);
 		
 		REGISTER_DECODER(msmpeg4v1);
 		REGISTER_DECODER(msmpeg4v2);
@@ -155,6 +156,7 @@ void init_FFmpeg()
 		REGISTER_DECODER(zmbv);
 		REGISTER_DECODER(indeo2);
 		REGISTER_DECODER(indeo3);
+		REGISTER_DECODER(indeo5);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	}
@@ -479,6 +481,18 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	result = av_open_input_stream(&ic, byteContext, "", storage->format, &params);
 	require_noerr(result,bail);
 	storage->format_context = ic;
+	
+	// AVIs without an index currently add a few entries to the index so it can
+	// determine codec parameters.  Check for index existence here before it
+	// reads any packets.
+	hadIndex = 1;
+	for (j = 0; j < ic->nb_streams; j++) {
+		if (ic->streams[j]->nb_index_entries <= 1)
+		{
+			hadIndex = 0;
+			break;
+		}
+	}
 	
 	/* Get the Stream Infos if not already read */
 	result = av_find_stream_info(ic);
