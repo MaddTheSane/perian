@@ -119,20 +119,18 @@
 - (NSString *)getStringFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
 {
 	CFPropertyListRef value;
-	NSString *ret = nil;
 	
 	value = CFPreferencesCopyAppValue(key, appID);
 	
 	if(value) {
-		ret = (NSString*)value;
-		CFMakeCollectable(ret);
-		[ret autorelease];
+		CFMakeCollectable(value);
+		[(id)value autorelease];
+		
+		if (CFGetTypeID(value) != CFStringGetTypeID())
+			return nil;
 	}
 	
-	if (CFGetTypeID(value) != CFStringGetTypeID())
-		return nil;
-	
-	return ret;
+	return (NSString*)value;
 }
 
 - (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromString:(NSString *)value
