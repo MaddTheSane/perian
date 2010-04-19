@@ -348,6 +348,24 @@ static void SetSkipLoopFilter(FFusionGlobals glob, AVCodecContext *avctx)
 	}
 }
 
+// A list of codec types (mostly official Apple codecs) which always have DTS info.
+// This is the wrong way to do it, instead we should check for a ctts atom directly.
+// This way causes files to play frames out of order if we guess wrong. Doesn't seem
+// possible to do it right, though.
+FFusionPacked DefaultPackedTypeForCodec(OSType codec)
+{
+	switch (codec) {
+		case kMPEG1VisualCodecType:
+		case kMPEG2VisualCodecType:
+		case 'hdv1':
+		case kMPEG4VisualCodecType:
+		case kH264CodecType:
+			return PACKED_QUICKTIME_KNOWS_ORDER;
+		default:
+			return PACKED_ALL_IN_FIRST_FRAME;
+	}
+}
+
 static void swapFrame(AVFrame * *a, AVFrame * *b)
 {
 	AVFrame *t = *a;
@@ -398,7 +416,6 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
         glob->pixelTypes = NewHandleClear((kNumPixelFormatsSupportedFFusion+1) * sizeof(OSType));
         glob->avCodec = 0;
         glob->componentType = descout.componentSubType;
-		glob->packedType = PACKED_ALL_IN_FIRST_FRAME;  //Unless we have reason to believe otherwise.
 		glob->data.frames = NULL;
 		glob->begin.parser = NULL;
 		if (pathToLogFile) {
@@ -616,13 +633,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		OSType componentType = glob->componentType;
 		enum CodecID codecID = getCodecID(componentType);
 		
-		// official Apple/QT/ISO/etc fourccs are likely to have PTS vs DTS defined
-		// FIXME: what this actually checks is whether the file has a 'ctts' atom, can we do that directly?
-		if(componentType == kMPEG4VisualCodecType || componentType == kH264CodecType ||
-		   componentType == kMPEG1VisualCodecType || componentType == kMPEG2VisualCodecType)
-			glob->packedType = PACKED_QUICKTIME_KNOWS_ORDER;
+		glob->packedType = DefaultPackedTypeForCodec(componentType);
 		
-		else if(componentType == 'VP30' || componentType == 'VP31')
+		if(componentType == 'VP30' || componentType == 'VP31')
 			glob->shouldUseReturnedFrame = TRUE;
 
 		if(codecID == CODEC_ID_NONE)
