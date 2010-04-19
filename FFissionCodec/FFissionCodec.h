@@ -25,7 +25,6 @@
 
 #include "ACSimpleCodec.h"
 extern "C" {
-#define CodecType FF_CodecType
 #include "avcodec.h"
 #undef CodecType
 }

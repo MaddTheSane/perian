@@ -50,7 +50,6 @@
 
 extern "C" {
 #include "avutil.h"
-#define CodecType AVCodecType
 #include "ff_private.h"
 #undef CodecType	
 }

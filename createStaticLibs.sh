@@ -156,7 +156,7 @@ else
 	
 	rm -rf "$BUILDDIR"
 	mkdir "$BUILDDIR"
-	echo $buildi386 $buildppc
+
 	if [ $buildi386 -eq $buildppc ] ; then
 		# lipo them
 		for aa in "$INTEL"/*/*.a ; do
