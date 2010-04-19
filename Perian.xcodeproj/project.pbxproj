@@ -622,7 +622,6 @@
 		3D2623160C6A60B700FD1242 /* SubRenderer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubRenderer.h; path = Subtitles/SubRenderer.h; sourceTree = "<group>"; };
 		3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UniversalDetector.xcodeproj; path = UniversalDetector/UniversalDetector.xcodeproj; sourceTree = "<group>"; };
 		3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = UniversalDetector.h; path = UniversalDetector/UniversalDetector.h; sourceTree = "<group>"; };
-		3D4A34870D8B03F700A07563 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
 		3D802EBB1032B8B00034BF4A /* ssa2pdf */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ssa2pdf; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1368,7 +1367,6 @@
 		F53AD5E30B2A4EE100D93AC9 /* File Import */ = {
 			isa = PBXGroup;
 			children = (
-				3D4A34870D8B03F700A07563 /* config.h */,
 				11C85ED30A641E6400DF3D73 /* ff_dataref.c */,
 				8F483BBC0A642B3D002CCA73 /* ff_MovieImportDispatch.h */,
 				11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */,
