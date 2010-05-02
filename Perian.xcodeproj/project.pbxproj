@@ -2305,6 +2305,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ALTIVEC_EXTENSIONS = YES;
@@ -2331,6 +2332,7 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx10.5;
+				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = debugging;
 			};
 			name = Development;
@@ -2339,9 +2341,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -2367,6 +2369,7 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx10.5;
+				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = debugging;
 			};
 			name = Deployment;
@@ -2437,8 +2440,6 @@
 		3D4BBE4A0B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Debug In QuickTime Player";
 			};
 			name = "Deployment+Debug";
@@ -2525,6 +2526,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ALTIVEC_EXTENSIONS = YES;
@@ -2552,6 +2554,7 @@
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx10.5;
+				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = debugging;
 			};
 			name = "Deployment+Debug";
@@ -2817,9 +2820,6 @@
 		F59E0A0C0A670E950019A3F0 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Debug In QuickTime Player";
 			};
 			name = Development;
@@ -2827,8 +2827,6 @@
 		F59E0A0D0A670E950019A3F0 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Debug In QuickTime Player";
 			};
 			name = Deployment;
