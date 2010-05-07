@@ -92,6 +92,8 @@ else
     fi
     
     mkdir -p "$BUILT_PRODUCTS_DIR"
+    mkdir -p "$SYMROOT/Universal"
+	
     #######################
     # Intel shlibs
     #######################
@@ -190,7 +192,6 @@ fi
 if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
     echo "Final static ffmpeg libs are up-to-date ; not copying"
 else
-	mkdir -p "$SYMROOT/Universal"
 	cp "$BUILT_PRODUCTS_DIR/Universal"/* "$SYMROOT/Universal"
 	ranlib "$SYMROOT/Universal"/*.a
 fi
