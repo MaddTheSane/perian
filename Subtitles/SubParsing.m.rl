@@ -19,6 +19,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+/*
+ * Parsing of SSA/ASS subtitle files using Ragel.
+ * At the moment, all subtitle formats supported by Perian
+ * are converted to SSA before reaching here.
+ * Feel free to implement new file formats as Ragel parsers here
+ * if it ends up cleaner than doing it by hand.
+ *
+ * SSA specification (as it exists):
+ * http://google.com/codesearch/p?hl=en#_g4u1OIsR_M/trunk/src/subtitles/STS.cpp&q=package:vsfilter%20%22v4%22&sa=N&cd=7&ct=rc&l=1395
+ * http://moodub.free.fr/video/ass-specs.doc 
+ *
+ * FIXME:
+ * - Files which can't be parsed have no clear error messages.
+ * - Line and section names are case-insensitive in VSFilter, but we
+ *   assume they are capitalized as in Aegisub.
+ * - SSA v4.00++ is not supported.
+ */
+
 #import "SubParsing.h"
 #import "SubUtilities.h"
 #import "SubContext.h"
@@ -151,10 +169,11 @@ void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles,
 	unsigned len = [ssastr length];
 	NSData *ssaData;
 	const unichar *ssa = STUnicodeForString(ssastr, &ssaData);
-	NSMutableDictionary *hd = [NSMutableDictionary dictionary];
+	NSMutableDictionary *headerdict = [NSMutableDictionary dictionary];
 	NSMutableArray *stylearr = [NSMutableArray array], *eventarr = [NSMutableArray array], *cur_array=NULL;
 	NSCharacterSet *wcs = [NSCharacterSet whitespaceCharacterSet];
 	NSString *str=NULL, *styleformat=NULL, *eventformat=NULL;
+	BOOL is_ass = NO;
 	
 	const unichar *p = ssa, *pe = ssa + len, *strbegin = p;
 	int cs=0;
@@ -165,14 +184,21 @@ void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles,
 		alphtype unsigned short;
 		
 		action sstart {strbegin = p;}
-		action setheaderval {[hd setObject:send() forKey:str];}
+		action setheaderval {[headerdict setObject:send() forKey:str];}
 		action savestr {str = send();}
 		action csvlineend {[cur_array addObject:[send() stringByTrimmingCharactersInSet:wcs]];}
+		action setupstyles {
+			cur_array=stylearr;
+			is_ass = IsScriptASS(headerdict);
+			styleformat = is_ass ?
+				@"Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding"
+			   :@"Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding";
+		}
 		action setupevents {
 			cur_array=eventarr;
-			eventformat = IsScriptASS(hd) ?
-				@"Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text":
-				@"Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text";
+			eventformat = is_ass ?
+				@"Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"
+			   :@"Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text";
 		}
 				
 		nl = ("\n" | "\r" | "\r\n");
@@ -180,25 +206,17 @@ void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles,
 		ws = space | 0xa0;
 		bom = 0xfeff;
 		
-		hline = ((";" str) | (([^;] str) >sstart %savestr :> (":" ws* str >sstart %setheaderval)?))? :> nl;
+		keyvalueline = str >sstart %savestr :> (":" ws* %sstart str %setheaderval);
+		headerline = (keyvalueline | str) :> nl;
+		header = "[Script Info]" nl headerline*;
 		
-		header = "[Script Info]" nl hline*;
-				
-		format = "Format:" ws* %sstart str %savestr :> nl;
-				
-		action assformat {styleformat = @"Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding";}
-		action ssaformat {styleformat = @"Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding";}
-
-		stylename = ("[" [Vv] "4 Styles]") %ssaformat | ("[" [Vv] "4+ Styles]") %assformat;
-		
-		sline = (("Style:" ws* %sstart str %csvlineend) | str) :> nl;
-		
-		styles = stylename % {cur_array=stylearr;} nl :> (format %{styleformat=str;})? <: (sline*);
+		styleline = (("Style:" ws* %sstart str %csvlineend) | str) :> nl;
+		styles = ("[" [Vv] "4" "+"? " Styles]") %setupstyles nl styleline*;
 		
 		event_txt = (("Dialogue:" ws* %sstart str %csvlineend %/csvlineend) | str);
 		event = event_txt :> nl;
 			
-		lines = "[Events]" %setupevents nl :> (format %{eventformat=str;})? <: (event*);
+		lines = "[Events]" %setupevents nl event*;
 		
 		main := bom? header styles lines?;
 	}%%
@@ -209,7 +227,7 @@ void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles,
 
 	[ssaData release];
 
-	*headers = hd;
+	*headers = headerdict;
 	if (styles) *styles = SplitByFormat(styleformat, stylearr);
 	if (subs) *subs = SplitByFormat(eventformat, eventarr);
 }
@@ -389,11 +407,11 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"fscx" floatnum %scalex
 							|"fscy" floatnum %scaley
 							|"fsp" floatnum %tracking
-							|("fr" "z"? floatnum %frz)
+							|"fr" "z"? floatnum %frz
 							|"frx" floatnum
 							|"fry" floatnum
 							|"fe" intnum
-							|("1"? "c" color %primaryc)
+							|"1"? "c" color %primaryc
 							|"2c" color %secondaryc
 							|"3c" color %outlinec
 							|"4c" color %shadowc
@@ -404,14 +422,14 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"4a" color %shadowa
 							|"a" intnum %ssaalign
 							|"an" intnum %align
-							|([kK] [fo]? intnum)
+							|[kK] [fo]? intnum
 							|"q" intnum %wrapstyle
 							|"r" string %stylerevert
 							|"pos" pos %position
 							|"move" move %position
 							|"t" parens
 							|"org" parens %origin
-							|("fad" "e"? parens)
+							|"fad" "e"? parens
 							|"i"? "clip" parens
 							|"p" floatnum %drawingmode
 							|"pbo" floatnum

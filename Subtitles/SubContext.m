@@ -222,7 +222,7 @@ static NSString *ColorString(SubRGBAColor *c)
 
 BOOL IsScriptASS(NSDictionary *headers)
 {	
-	return [[[headers objectForKey:@"ScriptType"] lowercaseString] isEqualToString:@"v4.00+"];
+	return [[headers objectForKey:@"ScriptType"] caseInsensitiveCompare:@"v4.00+"] == NSOrderedSame;
 }
 
 -(void)readHeaders
@@ -236,7 +236,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 	if (resXS) resX = [resXS floatValue];
 	if (resYS) resY = [resYS floatValue];
 	
-	// obscure res rules copied from VSFilter
+	// XXX: obscure res rules copied from VSFilter
 	if ((!resXS && !resYS) || (!resX && !resY)) {
 		resX = 384; resY = 288;
 	} else if (!resYS) {
