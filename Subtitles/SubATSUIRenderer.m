@@ -466,7 +466,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			break;
 		case tag_fn:
 			sv();
-			if (![sval length]) break;
+			if (![sval length]) sval = div->styleLine->fontname;
 			oldFont = spanEx->font;
 			spanEx->vertical = ParseFontVerticality(&sval);
 			spanEx->font = GetFontIDForSSAName(sval);
