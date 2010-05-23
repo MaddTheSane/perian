@@ -74,7 +74,7 @@ bool MatroskaImport::OpenFile()
 		EbmlHead *head = static_cast<EbmlHead *>(el_l0);
 		
 		EDocType docType = GetChild<EDocType>(*head);
-		if (string(docType) != "matroska") {
+		if (string(docType) != "matroska" && string(docType) != "webm") {
 			Codecprintf(NULL, "Not a Matroska file\n");
 			valid = false;
 		}

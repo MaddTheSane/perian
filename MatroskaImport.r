@@ -194,6 +194,32 @@ resource 'thga' (kMkvImportResource + 2) {
 	cmpAliasOnlyThisFile
 };
 
+// Component Alias
+resource 'thga' (518) {
+	'eat ',								// Type
+	'WEBM', 							// Subtype - this must be in uppercase. It will match an ".eim" suffix case-insensitively.
+	'vide',								// Manufaturer - for 'eat ' the media type supported by the component
+	kMatroskaImportFlags |				// Component Flags
+	movieImportSubTypeIsFileExtension,	// The subtype is a file name suffix
+	0,									// Component Flags Mask
+	0, 									// Code Type
+	0,									// Code ID
+	'STR ',								// Name Type
+	kMkvImportResource,								// Name ID
+	0,									// Info Type
+	0,									// Info ID 
+	0,									// Icon Type 
+	0,									// Icon ID
+    // TARGET COMPONENT ---------------
+	'eat ',								// Type
+	'MkvF',								// SubType
+	'vide',								// Manufaturer
+	0,									// Component Flags
+	0,									// Component Flags Mask
+	'thnr', kMkvImportResource,						// Component public resource identifier
+	cmpAliasOnlyThisFile
+};
+
 // Import components should include a public component resource holding the same data that
 // MovieImportGetMIMETypeList would return. This public resource's type and ID should be 'mime' and 1,
 // respectively. By including this public resource, QuickTime and applications don't need to open the
@@ -262,7 +288,7 @@ resource 'mcfg' (kMkvImportResource)
 
 		{
 			"Matroska file",				// Media type description for MIME configuration panel and browser
-			"mkv,mka",								// File extension(s), comma delimited if more than one
+			"mkv,mka,webm",								// File extension(s), comma delimited if more than one
 			"QuickTime Player",					// Opening application name for MIME configuration panel and browser
 			"Matroska Movie Importer",	// Missing software description for the missing software dialog
 			"Version 0.1",						// Vendor info string (copyright, version, etc)
@@ -271,7 +297,9 @@ resource 'mcfg' (kMkvImportResource)
 		// Array of one or more MIME types that describe this media type (eg. audio/mpeg, audio/x-mpeg, etc.)
 		{
 			"video/x-matroska",
-			"audio/x-matroska",	
+			"audio/x-matroska",
+            "audio/webm",
+            "video/webm",
 		},
 	}
 };
@@ -291,10 +319,16 @@ resource 'mime' (kMkvImportResource) {
 	{
 		kMimeInfoMimeTypeTag,      1, "video/x-matroska";
 		kMimeInfoMimeTypeTag,      2, "audio/x-matroska";
+        kMimeInfoMimeTypeTag,      3, "audio/webm";
+        kMimeInfoMimeTypeTag,      4, "video/webm";
 		kMimeInfoFileExtensionTag, 1, "mkv";
 		kMimeInfoFileExtensionTag, 2, "mka";
+        kMimeInfoFileExtensionTag, 3, "webm";
+        kMimeInfoFileExtensionTag, 4, "webm";
 		kMimeInfoDescriptionTag,   1, "Matroska";
 		kMimeInfoDescriptionTag,   2, "Matroska";
+        kMimeInfoDescriptionTag,   3, "Matroska/WebM";
+        kMimeInfoDescriptionTag,   4, "Matroska/WebM";
 	};
 };
 
