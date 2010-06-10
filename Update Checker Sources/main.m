@@ -35,7 +35,7 @@ static void deleteLock()
 
 int main(int argc, char *argv[])
 {
-	fp = open(lockPath, O_CREAT | O_EXCL);
+	fp = open(lockPath, O_CREAT | O_EXCL, S_IWUSR | S_IRUSR);
 	if(fp == -1)
 	{
 		struct stat lockfile;
