@@ -719,7 +719,7 @@ static void EnableVerticalForSpan(ATSUTextLayout layout, SubRenderDiv *div, cons
 			if (runAboveBound)
 				MakeRunVertical(layout, runStart, i - runStart);
 			runStart = i;
-			isAboveBound = runAboveBound;
+			runAboveBound = isAboveBound;
 		}
 	}
 	
@@ -1125,7 +1125,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		if (div->positioned || div->alignV == kSubAlignmentMiddle)
 			GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
 		
-		if (div->positioned || div->alignV == kSubAlignmentBottom)
+		if (div->positioned || div->alignV == kSubAlignmentBottom || div->alignV == kSubAlignmentMiddle)
 			ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
 		
 #if 0
