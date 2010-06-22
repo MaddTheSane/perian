@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 			if(lockfile.st_ctimespec.tv_sec + 60*60 > current)  //Only pay attention to lock file if it is no more than an hour old
 			{
 				unlink(lockPath);
-				fp = open(lockPath, O_CREAT | O_EXCL | O_EXLOCK);
+				fp = open(lockPath, O_CREAT | O_EXCL | O_EXLOCK, S_IWUSR | S_IRUSR);
 			}
 		}		
 	}
