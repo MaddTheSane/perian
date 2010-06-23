@@ -753,9 +753,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 			err = paramErr;
         }
 		
-        // this format doesn't have enough information in its headers
-		// we have to decode the first frame
-		if (glob->avContext->pix_fmt == PIX_FMT_NONE && p->bufferSize && p->data)
+        // codec was opened, but didn't give us its pixfmt
+		// we have to decode the first frame to find out one
+		else if (glob->avContext->pix_fmt == PIX_FMT_NONE && p->bufferSize && p->data)
             glob->avContext->pix_fmt = FindPixFmtFromVideo(glob->avCodec, glob->avContext, p->data, p->bufferSize);
     }
     
