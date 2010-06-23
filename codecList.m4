@@ -33,6 +33,7 @@ Codec(kIndeo5CodecInfoResID, CODEC_ID_INDEO5, "Indeo 5", "Decompresses video sto
 Codec(kTSCCCodecInfoResID, CODEC_ID_TSCC, "Techsmith Screen Capture", "Decompresses video stored in Techsmith Screen Capture format.", 'tscc')
 Codec(kZMBVCodecInfoResID, CODEC_ID_ZMBV, "DosBox Capture", "Decompresses video stored in DosBox Capture format.", 'ZMBV')
 Codec(kVP6ACodecInfoResID, CODEC_ID_VP6A, "On2 VP6A", "Decompresses video stored in On2 VP6A format.", 'VP6A')
+Codec(kVP8CodecInfoResID, CODEC_ID_VP8, "On2 VP8", "Decompresses video stored in On2 VP8 format.", 'VP80')
 
 EntryPoint(kVobSubCodecManufacturer, kVobSubCodecVersion, kVobSubCodecResourceID, "VobSubCodecComponentDispatch", <!( codecInfoDoes32 | codecInfoDoes16 | codecInfoDoes8 | codecInfoDoes1 | cmpThreadSafe )!>, <!( codecInfoDepth32 | codecInfoDepth24 | codecInfoDepth16 | codecInfoDepth8 | codecInfoDepth1 )!>)
 Codec(kVobSubCodecResourceID, CODEC_ID_DVD_SUBTITLE,"VobSub", "Decompresses subtitles stored in the VobSub format.", kSubFormatVobSub)
