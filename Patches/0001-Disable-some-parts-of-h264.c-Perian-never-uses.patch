@@ -1,0 +1,34 @@
+From b6334faa464b37053b9cad4b85a41f9a7ab859c9 Mon Sep 17 00:00:00 2001
+From: Alexander Strange <astrange@ithinksw.com>
+Date: Sun, 22 Nov 2009 04:07:00 -0500
+Subject: [PATCH 1/5] Disable some parts of h264.c Perian never uses.
+
+TODO: we can enable MBAFF, but I still see no way to support
+PAFF in QuickTime, and I'm not even sure how it is supposed
+to work in .mp4.
+---
+ libavcodec/h264.h |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/libavcodec/h264.h b/libavcodec/h264.h
+index 7158d97..350e5a8 100644
+--- a/libavcodec/h264.h
++++ b/libavcodec/h264.h
+@@ -58,9 +58,12 @@
+ 
+ /* Compiling in interlaced support reduces the speed
+  * of progressive decoding by about 2%. */
+-#define ALLOW_INTERLACE
++//#define ALLOW_INTERLACE
+ 
+-#define ALLOW_NOCHROMA
++//#define ALLOW_NOCHROMA
++
++#undef CODEC_FLAG2_CHUNKS
++#define CODEC_FLAG2_CHUNKS 0
+ 
+ #define FMO 0
+ 
+-- 
+1.7.1.1
+

@@ -74,12 +74,15 @@ else
 		cd ffmpeg && svn revert -R . && rm patched && cd ..
 	fi
 
-	patch -p0 < Patches/ffmpeg-no-interlaced.diff
-	patch -p0 < Patches/ffmpeg-faltivec.diff
-	patch -p0 < Patches/ffmpeg-no-h264-warning.diff
-	patch -p0 < Patches/ffmpeg-hardcode-dsputil.diff
-	patch -p0 < Patches/ffmpeg-revert-r20347.diff
-	patch -p0 < Patches/ffmpeg-larger-internal-buffer.diff
+	cd ffmpeg
+	patch -p1 < ../Patches/0001-Disable-some-parts-of-h264.c-Perian-never-uses.patch
+	patch -p1 < ../Patches/0002-Use-faltivec-instead-of-maltivec.patch
+	patch -p1 < ../Patches/0003-Remove-the-warning-Cannot-parallelize-deblocking-typ.patch
+	patch -p1 < ../Patches/0004-Hardcode-results-of-runtime-cpu-detection-in-dsputil.patch
+	patch -p1 < ../Patches/0005-Double-INTERNAL_BUFFER_SIZE-to-fix-running-out-of-bu.patch
+	cd ..
+	#ffmpeg-revert-r20347.diff
+
 	touch ffmpeg/patched
 
     echo -n "Building "
