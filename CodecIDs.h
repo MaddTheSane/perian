@@ -53,6 +53,8 @@ enum {
 	
 	// contains a single byte equal to the ContentCompAlgo element in matroska
 	kMKVCompressionExtension = 'MCmp',
+	// contains the compression settings equal to ContentCompSettings in matroska
+	kAC3CompressionSettingsExtension = 'CpSt',
 };
 
 
