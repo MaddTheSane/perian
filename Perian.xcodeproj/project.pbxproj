@@ -179,6 +179,7 @@
 		3DE8D78510444E500007C7E7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
 		3DE8D9C910444E680007C7E7 /* AppleScriptKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */; };
 		3DE8D9D5104451A80007C7E7 /* Perian - Open in QT Player.app in Resources */ = {isa = PBXBuildFile; fileRef = 3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */; };
+		3DEFA3F9120560AD0097FE4C /* libavcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DEFA3F8120560AD0097FE4C /* libavcore.a */; };
 		3DF2958C104F0EF40047B8EC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
 		6116E5510B43C27B0020F1CE /* ACBaseCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */; };
 		6116E5520B43C27B0020F1CE /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E5390B43C27B0020F1CE /* ACCodec.cpp */; };
@@ -645,6 +646,7 @@
 		3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "PerianOpener-Info.plist"; path = "Plists/PerianOpener-Info.plist"; sourceTree = "<group>"; };
 		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = OpenerMainMenu.xib; path = Opener/OpenerMainMenu.xib; sourceTree = "<group>"; };
 		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = /System/Library/Frameworks/AppleScriptKit.framework; sourceTree = "<absolute>"; };
+		3DEFA3F8120560AD0097FE4C /* libavcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcore.a; path = build/Universal/libavcore.a; sourceTree = "<group>"; };
 		6116E5370B43C27B0020F1CE /* ACBaseCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACBaseCodec.cpp; sourceTree = "<group>"; };
 		6116E5380B43C27B0020F1CE /* ACBaseCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ACBaseCodec.h; sourceTree = "<group>"; };
 		6116E5390B43C27B0020F1CE /* ACCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = ACCodec.cpp; sourceTree = "<group>"; };
@@ -853,6 +855,7 @@
 				3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */,
 				3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */,
 				3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */,
+				3DEFA3F9120560AD0097FE4C /* libavcore.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -973,6 +976,7 @@
 				8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */,
 				1156DBD80A3CE9F500963B0E /* libz.dylib */,
 				11D4EFA10A3CE8C10066D45F /* libavcodec.a */,
+				3DEFA3F8120560AD0097FE4C /* libavcore.a */,
 				8F483B540A642644002CCA73 /* libavformat.a */,
 				11D4EFA20A3CE8C10066D45F /* libavutil.a */,
 				11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */,
@@ -2237,6 +2241,10 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Universal\"",
+				);
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -2276,6 +2284,10 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Universal\"",
+				);
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -2426,6 +2438,10 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/build/Universal\"",
+				);
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
