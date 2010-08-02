@@ -138,7 +138,7 @@ bail:
 		return (int)read;
 } /* dataref_read() */
 
-static int dataref_write(URLContext *h, unsigned char *buf, int size)
+static int dataref_write(URLContext *h, const unsigned char *buf, int size)
 {
 	int result;
 	int written = size;
