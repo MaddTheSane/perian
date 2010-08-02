@@ -23,37 +23,18 @@
 #define __SUBIMPORT_H__
 
 #include <QuickTime/QuickTime.h>
-#ifndef __OBJC__
-#include "SubATSUIRenderer.h"
-#endif
 
-#ifndef __OBJC_GC__
-#ifndef __strong
-#define __strong
-#endif
-#endif
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-short GetFilenameLanguage(CFStringRef filename);
-ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType dataRefType, Movie theMovie);
-void SetSubtitleMediaHandlerTransparent(MediaHandler mh);
-Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox);
+__BEGIN_DECLS
 
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
-#import "SubContext.h"
-#import "SubATSUIRenderer.h"
 
 @interface SubLine : NSObject
 {
 	@public
 	NSString *line;
 	unsigned begin_time, end_time;
-	unsigned no; // line number, used only by SubSerializer
+	unsigned num; // line number, used only by SubSerializer
 }
 -(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e;
 @end
@@ -65,7 +46,7 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, Ti
 	BOOL finished;
 	
 	unsigned last_begin_time, last_end_time;
-	unsigned linesInput;
+	unsigned num_lines_input;
 }
 -(void)addLine:(SubLine *)sline;
 -(void)setFinished:(BOOL)finished;
@@ -83,7 +64,6 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, Ti
 - (id)initWithTime:(long)time offset:(long)offset;
 @end
 
-
 @interface VobSubTrack : NSObject
 {
 	@public
@@ -99,12 +79,24 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, Ti
 
 @end
 
-extern NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss);
-	
-#endif
+NSString *SubLoadSSAFromPath(NSString *path, SubSerializer *ss);
+void SubLoadSRTFromPath(NSString *path, SubSerializer *ss);
+void SubLoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount);
+
+#endif // ___OBJC__
+
+short GetFilenameLanguage(CFStringRef filename);
+ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType dataRefType, Movie theMovie);
+void SetSubtitleMediaHandlerTransparent(MediaHandler mh);
+Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox);
+
+__END_DECLS
 
 #ifdef __cplusplus
-}
+
+#ifndef __OBJC_GC__
+#define __strong
+#endif
 
 class CXXSubSerializer
 {
@@ -130,6 +122,7 @@ public:
 	CXXAutoreleasePool();
 	~CXXAutoreleasePool();
 };
-#endif
 
-#endif
+#endif // __cplusplus
+
+#endif // __SUBIMPORT_H__

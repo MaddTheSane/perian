@@ -44,6 +44,7 @@
 #include "MatroskaImport.h"
 #include "MatroskaCodecIDs.h"
 #include "SubImport.h"
+#include "SubRenderer.h"
 #include "CommonUtils.h"
 #include "Codecprintf.h"
 #include "bitstream_info.h"
@@ -955,7 +956,7 @@ void MatroskaImport::PrerollSubtitleTracks()
 			
 			if (err || !subtitleDescriptionExt) continue;
 			
-			SubPrerollFromHeader(*subtitleDescriptionExt, GetHandleSize(subtitleDescriptionExt));
+			SubRendererPrerollFromHeader(*subtitleDescriptionExt, GetHandleSize(subtitleDescriptionExt));
 		}
 	}
 }

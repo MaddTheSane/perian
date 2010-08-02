@@ -28,9 +28,9 @@
     #include <ImageCodec.h>
 #endif
 
-#include "PerianResourceIDs.h"
-#include "SubATSUIRenderer.h"
 #include "CommonUtils.h"
+#include "PerianResourceIDs.h"
+#include "SubRenderer.h"
 
 // Data structures
 typedef struct TextSubGlobalsRecord {
@@ -42,7 +42,7 @@ typedef struct TextSubGlobalsRecord {
 	
 	CGColorSpaceRef         colorSpace;
 
-	SubtitleRendererPtr		ssa;
+	SubRendererPtr		ssa;
 	Boolean					translateSRT;
 } TextSubGlobalsRecord, *TextSubGlobals;
 
@@ -142,7 +142,7 @@ pascal ComponentResult TextSubCodecClose(TextSubGlobals glob, ComponentInstance 
 		if (glob->drawBandUPP) {
 			DisposeImageCodecMPDrawBandUPP(glob->drawBandUPP);
 		}
-		if (glob->ssa) SubDisposeRenderer(glob->ssa);
+		if (glob->ssa) SubRendererDispose(glob->ssa);
 		DisposePtr((Ptr)glob);
 	}
 
@@ -257,11 +257,11 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 				Handle ssaheader;
 				GetImageDescriptionExtension(p->imageDescription,&ssaheader,kSubFormatSSA,1);
 				
-				glob->ssa = SubInitSSA(*ssaheader, GetHandleSize(ssaheader), (**p->imageDescription).width, (**p->imageDescription).height);
+				glob->ssa = SubRendererCreateWithSSA(*ssaheader, GetHandleSize(ssaheader), (**p->imageDescription).width, (**p->imageDescription).height);
 			} 
 		} 
 		
-		if (!glob->ssa) glob->ssa = SubInitNonSSA((**p->imageDescription).width,(**p->imageDescription).height);
+		if (!glob->ssa) glob->ssa = SubRendererCreateWithSRT((**p->imageDescription).width,(**p->imageDescription).height);
 	}
 	
 	return noErr;
@@ -328,7 +328,7 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 		if (!buf) goto leave;
 	}
 	
-	SubRenderPacket(glob->ssa,c,buf,myDrp->width,myDrp->height);
+	SubRendererRenderPacket(glob->ssa,c,buf,myDrp->width,myDrp->height);
 	
 	if (IsTransparentSubtitleHackEnabled())
 		ConvertImageToQDTransparent(drp->baseAddr, myDrp->pixelFormat, drp->rowBytes, myDrp->width, myDrp->height);

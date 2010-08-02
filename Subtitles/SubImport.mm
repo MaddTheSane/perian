@@ -25,6 +25,7 @@
 #include "CodecIDs.h"
 #import "SubImport.h"
 #import "SubParsing.h"
+#import "SubRenderer.h"
 #import "SubUtilities.h"
 
 //#define SS_DEBUG
@@ -176,9 +177,9 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
 	return timeval * sign;
 }
 
-NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
+NSString *SubLoadSSAFromPath(NSString *path, SubSerializer *ss)
 {
-	NSString *ssa = STLoadFileWithUnknownEncoding(path);
+	NSString *ssa = SubLoadFileWithUnknownEncoding(path);
 	
 	if (!ssa) return nil;
 	
@@ -204,9 +205,9 @@ NSString *LoadSSAFromPath(NSString *path, SubSerializer *ss)
 
 #pragma mark SAMI Parsing
 
-static void LoadSRTFromPath(NSString *path, SubSerializer *ss)
+void SubLoadSRTFromPath(NSString *path, SubSerializer *ss)
 {
-	NSMutableString *srt = STStandardizeStringNewlines(STLoadFileWithUnknownEncoding(path));
+	NSMutableString *srt = SubStandardizeStringNewlines(SubLoadFileWithUnknownEncoding(path));
 	if (![srt length]) return;
 		
 	if ([srt characterAtIndex:0] == 0xFEFF) [srt deleteCharactersInRange:NSMakeRange(0,1)];
@@ -383,9 +384,9 @@ static NSMutableString *StandardizeSMIWhitespace(NSString *str)
 	return ms;
 }
 
-static void LoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount)
+void SubLoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount)
 {
-	NSMutableString *smi = StandardizeSMIWhitespace(STLoadFileWithUnknownEncoding(path));
+	NSMutableString *smi = StandardizeSMIWhitespace(SubLoadFileWithUnknownEncoding(path));
 	if (!smi) return;
 		
 	NSScanner *sc = [NSScanner scannerWithString:smi];
@@ -559,7 +560,7 @@ static ComponentResult LoadSingleTextSubtitle(CFURLRef theDirectory, CFStringRef
 		{
 			timeBase = 100;
 			subCodec = kSubFormatSSA;
-			const char *cheader = [LoadSSAFromPath(nsPath, ss) UTF8String];
+			const char *cheader = [SubLoadSSAFromPath(nsPath, ss) UTF8String];
 			int headerLen = strlen(cheader);
 			PtrToHand(cheader, &header, headerLen);
 		}
@@ -567,18 +568,18 @@ static ComponentResult LoadSingleTextSubtitle(CFURLRef theDirectory, CFStringRef
 		case kSubTypeSRT:
 			timeBase = 1000;
 			subCodec = kSubFormatUTF8;
-			LoadSRTFromPath(nsPath, ss);
+			SubLoadSRTFromPath(nsPath, ss);
 			break;
 		case kSubTypeSMI:
 			timeBase = 1000;
 			subCodec = kSubFormatUTF8;
-			LoadSMIFromPath(nsPath, ss, whichTrack);
+			SubLoadSMIFromPath(nsPath, ss, whichTrack);
 			break;
 	}
 	
 	[ss setFinished:YES];
 
-	SubPrerollFromHeader(header ? *header : NULL, header ? GetHandleSize(header) : 0);
+	SubRendererPrerollFromHeader(header ? *header : NULL, header ? GetHandleSize(header) : 0);
 	
 	Handle dataRefHndl = NewHandleClear(sizeof(Handle) + 1);
 	UInt32 emptyDataRefExt[2] = {EndianU32_NtoB(sizeof(UInt32)*2), EndianU32_NtoB(kDataRefExtensionInitializationData)};
@@ -910,7 +911,7 @@ static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef fi
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString *)filename];
-	NSString *idxContent = STLoadFileWithUnknownEncoding(nsPath);
+	NSString *idxContent = SubLoadFileWithUnknownEncoding(nsPath);
 	NSData *privateData = nil;
 	ComponentResult err = noErr;
 	
@@ -1183,7 +1184,7 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 		lines = [[NSMutableArray alloc] init];
 		finished = NO;
 		last_begin_time = last_end_time = 0;
-		linesInput = 0;
+		num_lines_input = 0;
 	}
 	
 	return self;
@@ -1202,8 +1203,8 @@ static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, 
 	if (al->begin_time > bl->begin_time) return kCFCompareGreaterThan;
 	if (al->begin_time < bl->begin_time) return kCFCompareLessThan;
 	
-	if (al->no > bl->no) return kCFCompareGreaterThan;
-	if (al->no < bl->no) return kCFCompareLessThan;
+	if (al->num > bl->num) return kCFCompareGreaterThan;
+	if (al->num < bl->num) return kCFCompareLessThan;
 	return kCFCompareEqualTo;
 }
 
@@ -1224,7 +1225,7 @@ static int cmp_uint(const void *a, const void *b)
 		return;
 	}
 	
-	line->no = linesInput++;
+	line->num = num_lines_input++;
 	
 	int nlines = [lines count];
 	
@@ -1343,7 +1344,7 @@ canOutput:
 		line = [l retain];
 		begin_time = s;
 		end_time = e;
-		no = 0;
+		num = 0;
 	}
 	
 	return self;

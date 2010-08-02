@@ -22,6 +22,8 @@
 #import <Cocoa/Cocoa.h>
 #import "SubRenderer.h"
 
+__BEGIN_DECLS
+
 enum {kSubTypeSSA, kSubTypeASS, kSubTypeSRT, kSubTypeSMI};
 enum {kSubCollisionsNormal, kSubCollisionsReverse};
 enum {kSubLineWrapTopWider = 0, kSubLineWrapSimple, kSubLineWrapNone, kSubLineWrapBottomWider};
@@ -30,9 +32,9 @@ enum {kSubAlignmentBottom, kSubAlignmentMiddle, kSubAlignmentTop};
 enum {kSubBorderStyleNormal = 1, kSubBorderStyleBox = 3};
 enum {kSubPositionNone = INT_MAX};
 
-extern NSString * const kSubDefaultFontName;
-
 typedef ATSURGBAlphaColor SubRGBAColor;
+
+extern NSString * const kSubDefaultFontName;
 
 @interface SubStyle : NSObject {	
 	@public;
@@ -42,9 +44,9 @@ typedef ATSURGBAlphaColor SubRGBAColor;
 	SubRGBAColor primaryColor, secondaryColor, outlineColor, shadowColor;
 	Float32 scaleX, scaleY, tracking, angle;
 	Float32 outlineRadius, shadowDist;
-	unsigned marginL, marginR, marginV;
 	Float32 weight; // 0/1 = not bold/bold, > 1 is a font weight
 	BOOL italic, underline, strikeout, vertical;
+	unsigned marginL, marginR, marginV;
 	UInt8 alignH, alignV, borderStyle;
 	__strong void* ex;
 	Float32 platformSizeScale;
@@ -56,11 +58,12 @@ typedef ATSURGBAlphaColor SubRGBAColor;
 
 @interface SubContext : NSObject {
 	@public;
+	NSDictionary *headers;
+	NSDictionary *styles; SubStyle *defaultStyle;
+
+	UInt8 scriptType, collisions, wrapStyle;
 	
 	float resX, resY;
-	UInt8 scriptType, collisions, wrapStyle;
-	NSDictionary *styles; SubStyle *defaultStyle;
-	NSDictionary *headers;
 }
 
 -(SubContext*)initWithHeaders:(NSDictionary *)headers styles:(NSArray *)styles delegate:(SubRenderer*)delegate;
@@ -68,7 +71,4 @@ typedef ATSURGBAlphaColor SubRGBAColor;
 -(SubStyle*)styleForName:(NSString *)name;
 @end
 
-extern UInt8 SSA2ASSAlignment(UInt8 a);
-extern void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV);
-extern SubRGBAColor ParseSSAColor(unsigned rgb);
-extern BOOL ParseFontVerticality(NSString **fontname);
+__END_DECLS

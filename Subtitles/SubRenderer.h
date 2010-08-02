@@ -19,6 +19,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+__BEGIN_DECLS
+
+#include <ApplicationServices/ApplicationServices.h>
+
+#ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
 
 @class SubStyle, SubContext, SubRenderDiv, SubRenderSpan;
@@ -28,13 +33,7 @@ typedef enum {
 	tag_fn, tag_fs, tag_fscx, tag_fscy, tag_fsp, tag_frx,
 	tag_fry, tag_frz, tag_1c, tag_2c, tag_3c, tag_4c, tag_alpha,
 	tag_1a, tag_2a, tag_3a, tag_4a, tag_r, tag_p
-} SSATagType;
-
-#ifndef __OBJC_GC__
-#ifndef __strong
-#define __strong
-#endif
-#endif
+} SubSSATagName;
 
 // these should be 'id' instead of 'void*' but it makes it easier to use ATSUStyle
 @interface SubRenderer : NSObject
@@ -44,7 +43,24 @@ typedef enum {
 -(void*)spanExtraFromRenderDiv:(SubRenderDiv*)div;
 -(void*)cloneSpanExtra:(SubRenderSpan*)span;
 -(void)releaseSpanExtra:(void*)ex;
--(void)spanChangedTag:(SSATagType)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p;
+-(void)spanChangedTag:(SubSSATagName)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p;
 -(float)aspectRatio;
 -(NSString*)describeSpanEx:(void*)ex;
 @end
+
+typedef id SubRendererPtr;
+
+#else // __OBJC__
+
+typedef void *SubRendererPtr;
+
+#endif
+
+// these are actually implemented in SubATSUIRenderer.m
+SubRendererPtr SubRendererCreateWithSSA(char *header, size_t headerLen, int width, int height);
+SubRendererPtr SubRendererCreateWithSRT(int width, int height);
+void SubRendererPrerollFromHeader(char *header, int headerLen);
+void SubRendererRenderPacket(SubRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight);
+void SubRendererDispose(SubRendererPtr s);
+
+__END_DECLS

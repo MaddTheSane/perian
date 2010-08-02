@@ -176,7 +176,7 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 {
 	if (self = [super init]) {
 		ATSUCreateTextLayout(&layout);
-		breakbuffer = malloc(sizeof(UniCharArrayOffset) * 2);
+		breakBuffer = malloc(sizeof(UniCharArrayOffset) * 2);
 		
 		srgbCSpace = GetSRGBColorSpace();
 		
@@ -195,13 +195,13 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 -(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoWidth:(float)width videoHeight:(float)height;
 {
 	if (self = [super init]) {
-		header = STStandardizeStringNewlines(header);
+		header = SubStandardizeStringNewlines(header);
 		
 		NSDictionary *headers;
 		NSArray *styles;
 		SubParseSSAFile(header, &headers, &styles, NULL);
 		
-		breakbuffer = malloc(sizeof(UniCharArrayOffset) * 2);
+		breakBuffer = malloc(sizeof(UniCharArrayOffset) * 2);
 		
 		videoWidth = width;
 		videoHeight = height;
@@ -221,7 +221,7 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 -(void)dealloc
 {
 	[context release];
-	free(breakbuffer);
+	free(breakBuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
 	ATSUDisposeTextLayout(layout);
 	[super dealloc];
@@ -229,7 +229,7 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 
 -(void)finalize
 {
-	free(breakbuffer);
+	free(breakBuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
 	ATSUDisposeTextLayout(layout);
 	[super finalize];
@@ -289,7 +289,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	
 	ByteCount nlen = [name length];
 	NSData *unameData;
-	const unichar *uname = STUnicodeForString(name, &unameData);
+	const unichar *uname = SubUnicodeForString(name, &unameData);
 	ATSUFontID font;
 	
 	// should be kFontMicrosoftPlatform for the platform code
@@ -417,7 +417,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 	  renderManualShadows = 2, // CG shadows can't change inside a line... probably
 	  renderComplexTransforms = 4}; // can't draw text at all, have to transform each vertex. needed for 3D perspective, or \frz in the middle of a line
 
--(void)spanChangedTag:(SSATagType)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p
+-(void)spanChangedTag:(SubSSATagName)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p
 {
 	SubATSUISpanEx *spanEx = span->ex;
 	BOOL isFirstSpan = [div->spans count] == 0;
@@ -435,7 +435,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 #define fv() fval = *(float*)p;
 #define sv() sval = *(NSString**)p;
 #define fixv() fv(); fixval = FloatToFixed(fval);
-#define colorv() color = MakeCGColorFromRGBA(ParseSSAColor(*(int*)p), srgbCSpace);
+#define colorv() color = MakeCGColorFromRGBA(SubParseSSAColor(*(int*)p), srgbCSpace);
 	
 	switch (tag) {
 		case tag_b:
@@ -468,7 +468,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			sv();
 			if (![sval length]) sval = div->styleLine->fontname;
 			oldFont = spanEx->font;
-			spanEx->vertical = ParseFontVerticality(&sval);
+			spanEx->vertical = SubParseFontVerticality(&sval);
 			spanEx->font = GetFontIDForSSAName(sval);
 			if (oldFont != spanEx->font) spanEx->platformSizeScale = GetWinFontSizeScale(spanEx->font);
 			UpdateFontNameSize(spanEx, screenScaleY);
@@ -488,7 +488,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			CGColorRelease(spanEx->outlineColor);
 			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
 			{
-				SubRGBAColor rgba = ParseSSAColor(*(int*)p);
+				SubRGBAColor rgba = SubParseSSAColor(*(int*)p);
 				spanEx->outlineColor = MakeCGColorFromRGBOpaque(rgba, srgbCSpace);
 				spanEx->outlineAlpha = rgba.alpha;
 			}
@@ -1085,14 +1085,14 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	CGContextSetInterpolationQuality(c, kCGInterpolationLow);
 	CGContextSetShouldSmoothFonts(c, NO); // disables subpixel AA which suddenly appeared in some version of 10.5
 										  // note that it's not documented as doing this, but does the right thing anyway.
-	
+
 	for (i = 0; i < div_count; i++) {
 		SubRenderDiv *div = [divs objectAtIndex:i];
 		unsigned textLen = [div->text length];
 		if (!textLen || ![div->spans count]) continue;
 		BOOL resetPens = NO, resetGState = NO;
 		NSData *ubufferData;
-		const unichar *ubuffer = STUnicodeForString(div->text, &ubufferData);
+		const unichar *ubuffer = SubUnicodeForString(div->text, &ubufferData);
 		
 		if (div->layer != lastLayer || div->shouldResetPens) {
 			resetPens = YES;
@@ -1117,15 +1117,15 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		SetLayoutPositioning(layout, breakingWidth, div->alignH);
 		SetStyleSpanRuns(layout, div, ubuffer);
 		
-		breakbuffer = FindLineBreaks(layout, div, breakLocator, breakbuffer, &breakCount, breakingWidth, ubuffer, textLen);
+		breakBuffer = FindLineBreaks(layout, div, breakLocator, breakBuffer, &breakCount, breakingWidth, ubuffer, textLen);
 
 		ATSUTextMeasurement imageWidth, imageHeight, descent;
-		UniCharArrayOffset *breaks = breakbuffer;
+		UniCharArrayOffset *breaks = breakBuffer;
 		
 		if (div->positioned || div->alignV == kSubAlignmentMiddle)
 			GetTypographicRectangleForLayout(layout, breaks, breakCount, FloatToFixed(div->styleLine->outlineRadius), NULL, NULL, &imageHeight, &imageWidth);
 		
-		if (div->positioned || div->alignV == kSubAlignmentBottom || div->alignV == kSubAlignmentMiddle)
+		if (div->positioned || div->alignV != kSubAlignmentTop)
 			ATSUGetLineControl(layout, kATSUFromTextBeginning, kATSULineDescentTag, sizeof(ATSUTextMeasurement), &descent, NULL);
 		
 #if 0
@@ -1221,43 +1221,43 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	[pool release];
 }
 
-SubtitleRendererPtr SubInitSSA(char *header, size_t headerLen, int width, int height)
+SubRendererPtr SubRendererCreateWithSSA(char *header, size_t headerLen, int width, int height)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO];
 
-	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoWidth:width videoHeight:height];
+	SubRendererPtr s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoWidth:width videoHeight:height];
 	[hdr release];
 	CFRetain(s);
 	[pool release];
 	return s;
 }
 
-SubtitleRendererPtr SubInitNonSSA(int width, int height)
+SubRendererPtr SubRendererCreateWithSRT(int width, int height)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	SubtitleRendererPtr s = [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
+	SubRendererPtr s = [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
 	CFRetain(s);
 	[pool release];
 	return s;
 }
 
-void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
+void SubRendererRenderPacket(SubRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
 {
 	[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
 }
 
-void SubPrerollFromHeader(char *header, int headerLen)
+void SubRendererPrerollFromHeader(char *header, int headerLen)
 {
-	SubtitleRendererPtr s = headerLen ? SubInitSSA(header, headerLen, 640, 480)
-								      : SubInitNonSSA(640, 480);
+	SubRendererPtr s = headerLen ? SubRendererCreateWithSSA(header, headerLen, 640, 480)
+								      : SubRendererCreateWithSRT(640, 480);
 	/*
 	CGColorSpaceRef csp = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	void *buf = malloc(640 * 480 * 4);
 	CGContextRef c = CGBitmapContextCreate(buf,640,480,8,640 * 4,csp,kCGImageAlphaPremultipliedFirst);
 	
 	if (!headerLen) {
-		SubRenderPacket(s, c, (CFStringRef)@"Abcde .", 640, 480);
+		SubRendererRenderPacket(s, c, (CFStringRef)@"Abcde .", 640, 480);
 	} else {
 		NSArray *styles = [s->context->styles allValues];
 		int i, nstyles = [styles count];
@@ -1265,7 +1265,7 @@ void SubPrerollFromHeader(char *header, int headerLen)
 		for (i = 0; i < nstyles; i++) {
 			SubStyle *sty = [styles objectAtIndex:i];
 			NSString *line = [NSString stringWithFormat:@"0,0,%@,,0,0,0,,Abcde .", sty->name];
-			SubRenderPacket(s, c, (CFStringRef)line, 640, 480);
+			SubRendererRenderPacket(s, c, (CFStringRef)line, 640, 480);
 		}
 	}
 	
@@ -1273,10 +1273,10 @@ void SubPrerollFromHeader(char *header, int headerLen)
 	free(buf);
 	CGColorSpaceRelease(csp);
 	*/
-	SubDisposeRenderer(s);
+	SubRendererDispose(s);
 }
 
-void SubDisposeRenderer(SubtitleRendererPtr s)
+void SubRendererDispose(SubRendererPtr s)
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	CFRelease(s);

@@ -19,45 +19,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-#ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
 #import "SubRenderer.h"
 
 @interface SubATSUIRenderer : SubRenderer {
 	SubContext *context;
-	UniCharArrayOffset *breakbuffer;
+	CGColorSpaceRef srgbCSpace;
+
 	ATSUTextLayout layout;
+	UniCharArrayOffset *breakBuffer;
+	TextBreakLocatorRef breakLocator;
+	
 	float screenScaleX, screenScaleY, videoWidth, videoHeight;
 	BOOL drawTextBounds;
-	@public;
-	CGColorSpaceRef srgbCSpace;
-	TextBreakLocatorRef breakLocator;
 }
 -(SubATSUIRenderer*)initWithVideoWidth:(float)width videoHeight:(float)height;
 -(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoWidth:(float)width videoHeight:(float)height;
 -(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(float)cWidth height:(float)cHeight;
 @end
-
-typedef SubATSUIRenderer *SubtitleRendererPtr;
-
-#else
-#include <QuickTime/QuickTime.h>
-
-typedef void *SubtitleRendererPtr;
-
-#endif
-
-extern SubtitleRendererPtr SubInitSSA(char *header, size_t headerLen, int width, int height);
-extern SubtitleRendererPtr SubInitNonSSA(int width, int height);
-extern void SubRenderPacket(SubtitleRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight);
-extern void SubPrerollFromHeader(char *header, int headerLen);
-extern void SubDisposeRenderer(SubtitleRendererPtr s);
-
-#ifdef __cplusplus
-}
-#endif

@@ -137,7 +137,7 @@ NSString *htmlfilter(NSString *s)
 	[s release];
 }
 
--(void)spanChangedTag:(SSATagType)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p
+-(void)spanChangedTag:(SubSSATagName)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p
 {
 	NSMutableString *sty = span->ex;
 	int ip;
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
 
 	//start of lameness
 	//it should only have to call subparsessafile here, or something
-	NSString *header = LoadSSAFromPath([NSString stringWithUTF8String:argv[1]], ss);
+	NSString *header = SubLoadSSAFromPath([NSString stringWithUTF8String:argv[1]], ss);
 	[ss setFinished:YES];
 
 	NSDictionary *headers;

@@ -26,66 +26,6 @@ NSString * const kSubDefaultFontName = @"Helvetica";
 
 @implementation SubStyle
 
-SubRGBAColor ParseSSAColor(unsigned rgb)
-{
-	unsigned char r, g, b, a;
-	
-	a = (rgb >> 24) & 0xff;
-	b = (rgb >> 16) & 0xff;
-	g = (rgb >> 8) & 0xff;
-	r = rgb & 0xff;
-	
-	a = 255-a;
-	
-	return (SubRGBAColor){r/255.,g/255.,b/255.,a/255.};
-}
-
-static SubRGBAColor ParseSSAColorString(NSString *c)
-{
-	const char *c_ = [c UTF8String];
-	unsigned int rgb;
-	
-	if (c_[0] == '&') {
-		rgb = strtoul(&c_[2],NULL,16);
-	} else {
-		rgb = strtol(c_,NULL,0);
-	}
-	
-	return ParseSSAColor(rgb);
-}
-
-UInt8 SSA2ASSAlignment(UInt8 a)
-{
-    int h = 1, v = 0;
-	if (a >= 9 && a <= 11) {v = kSubAlignmentMiddle; h = a-8;}
-	if (a >= 5 && a <= 7)  {v = kSubAlignmentTop;    h = a-4;}
-	if (a >= 1 && a <= 3)  {v = kSubAlignmentBottom; h = a;}
-	return v * 3 + h;
-}
-
-void ParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
-{
-	switch (a) {
-		default: case 1 ... 3: *alignV = kSubAlignmentBottom; break;
-		case 4 ... 6: *alignV = kSubAlignmentMiddle; break;
-		case 7 ... 9: *alignV = kSubAlignmentTop; break;
-	}
-	
-	switch (a) {
-		case 1: case 4: case 7: *alignH = kSubAlignmentLeft; break;
-		default: case 2: case 5: case 8: *alignH = kSubAlignmentCenter; break;
-		case 3: case 6: case 9: *alignH = kSubAlignmentRight; break;
-	}
-}
-
-BOOL ParseFontVerticality(NSString **fontname)
-{
-	if ([*fontname length] && [*fontname characterAtIndex:0] == '@') {
-		*fontname = [*fontname substringFromIndex:1];
-		return YES;
-	}
-	return NO;
-}
 
 +(SubStyle*)defaultStyleWithDelegate:(SubRenderer*)delegate
 {
@@ -124,7 +64,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 #define fv(fn, n) sv = [s objectForKey:@""#n]; fn = sv ? [sv floatValue] : 0.;
 #define iv(fn, n) fn = [[s objectForKey:@""#n] intValue]
 #define bv(fn, n) fn = [[s objectForKey:@""#n] intValue] != 0
-#define cv(fn, n) tmp = [s objectForKey:@""#n]; if (tmp) fn = ParseSSAColorString(tmp);
+#define cv(fn, n) tmp = [s objectForKey:@""#n]; if (tmp) fn = SubParseSSAColorString(tmp);
 		
 		sv(name, Name);
 		sv(fontname, Fontname);
@@ -132,7 +72,7 @@ BOOL ParseFontVerticality(NSString **fontname)
 		cv(primaryColor, PrimaryColour);
 		cv(secondaryColor, SecondaryColour);
 		tmp = [s objectForKey:@"BackColour"];
-		if (tmp) outlineColor = shadowColor = ParseSSAColorString(tmp);
+		if (tmp) outlineColor = shadowColor = SubParseSSAColorString(tmp);
 		cv(outlineColor, OutlineColour);
 		cv(shadowColor, ShadowColour);
 		fv(weight, Bold);
@@ -155,12 +95,12 @@ BOOL ParseFontVerticality(NSString **fontname)
 		if (weight == -1) weight = 1;
 
 		UInt8 align = [[s objectForKey:@"Alignment"] intValue];
-		if (version == kSubTypeSSA) align = SSA2ASSAlignment(align);
+		if (version == kSubTypeSSA) align = SubASSFromSSAAlignment(align);
 		
-		ParseASSAlignment(align, &alignH, &alignV);
+		SubParseASSAlignment(align, &alignH, &alignV);
 		
 		tmp = fontname;
-		vertical = ParseFontVerticality(&tmp);
+		vertical = SubParseFontVerticality(&tmp);
 		if (vertical)
 			fontname = [tmp retain];
 		
@@ -319,7 +259,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 -(void)completedHeaderParsing:(SubContext*)sc {}
 -(void*)spanExtraFromRenderDiv:(SubRenderDiv*)div {return nil;}
 -(void*)cloneSpanExtra:(SubRenderSpan*)span {return span->ex;}
--(void)spanChangedTag:(SSATagType)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p {}
+-(void)spanChangedTag:(SubSSATagName)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p {}
 -(void)releaseStyleExtra:(void*)ex {}
 -(void)releaseSpanExtra:(void*)ex {}
 -(float)aspectRatio {return 4./3.;}

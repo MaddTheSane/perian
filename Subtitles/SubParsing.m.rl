@@ -45,6 +45,67 @@
 %%machine SSAfile;
 %%write data;
 
+SubRGBAColor SubParseSSAColor(unsigned rgb)
+{
+	unsigned char r, g, b, a;
+	
+	a = (rgb >> 24) & 0xff;
+	b = (rgb >> 16) & 0xff;
+	g = (rgb >> 8) & 0xff;
+	r = rgb & 0xff;
+	
+	a = 255-a;
+	
+	return (SubRGBAColor){r/255.,g/255.,b/255.,a/255.};
+}
+
+SubRGBAColor SubParseSSAColorString(NSString *c)
+{
+	const char *c_ = [c UTF8String];
+	unsigned int rgb;
+	
+	if (c_[0] == '&') {
+		rgb = strtoul(&c_[2],NULL,16);
+	} else {
+		rgb = strtol(c_,NULL,0);
+	}
+	
+	return SubParseSSAColor(rgb);
+}
+
+UInt8 SubASSFromSSAAlignment(UInt8 a)
+{
+    int h = 1, v = 0;
+	if (a >= 9 && a <= 11) {v = kSubAlignmentMiddle; h = a-8;}
+	if (a >= 5 && a <= 7)  {v = kSubAlignmentTop;    h = a-4;}
+	if (a >= 1 && a <= 3)  {v = kSubAlignmentBottom; h = a;}
+	return v * 3 + h;
+}
+
+void SubParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
+{
+	switch (a) {
+		default: case 1 ... 3: *alignV = kSubAlignmentBottom; break;
+		case 4 ... 6: *alignV = kSubAlignmentMiddle; break;
+		case 7 ... 9: *alignV = kSubAlignmentTop; break;
+	}
+	
+	switch (a) {
+		case 1: case 4: case 7: *alignH = kSubAlignmentLeft; break;
+		default: case 2: case 5: case 8: *alignH = kSubAlignmentCenter; break;
+		case 3: case 6: case 9: *alignH = kSubAlignmentRight; break;
+	}
+}
+
+BOOL SubParseFontVerticality(NSString **fontname)
+{
+	if ([*fontname length] && [*fontname characterAtIndex:0] == '@') {
+		*fontname = [*fontname substringFromIndex:1];
+		return YES;
+	}
+	return NO;
+}
+
 @implementation SubRenderSpan
 +(SubRenderSpan*)startingSpanForDiv:(SubRenderDiv*)div delegate:(SubRenderer*)delegate
 {
@@ -148,13 +209,13 @@ extern BOOL IsScriptASS(NSDictionary *headers);
 
 static NSArray *SplitByFormat(NSString *format, NSArray *lines)
 {
-	NSArray *formarray = STSplitStringIgnoringWhitespace(format,@",");
+	NSArray *formarray = SubSplitStringIgnoringWhitespace(format,@",");
 	int i, numlines = [lines count], numfields = [formarray count];
 	NSMutableArray *ar = [NSMutableArray arrayWithCapacity:numlines];
 	
 	for (i = 0; i < numlines; i++) {
 		NSString *s = [lines objectAtIndex:i];
-		NSArray *splitline = STSplitStringWithCount(s, @",", numfields);
+		NSArray *splitline = SubSplitStringWithCount(s, @",", numfields);
 		
 		if ([splitline count] != numfields) continue;
 		[ar addObject:[NSDictionary dictionaryWithObjects:splitline
@@ -168,7 +229,7 @@ void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles,
 {
 	unsigned len = [ssastr length];
 	NSData *ssaData;
-	const unichar *ssa = STUnicodeForString(ssastr, &ssaData);
+	const unichar *ssa = SubUnicodeForString(ssastr, &ssaData);
 	NSMutableDictionary *headerdict = [NSMutableDictionary dictionary];
 	NSMutableArray *stylearr = [NSMutableArray array], *eventarr = [NSMutableArray array], *cur_array=NULL;
 	NSCharacterSet *wcs = [NSCharacterSet whitespaceCharacterSet];
@@ -246,7 +307,7 @@ static int compare_layer(const void *a, const void *b)
 
 NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate)
 {
-	packet = STStandardizeStringNewlines(packet);
+	packet = SubStandardizeStringNewlines(packet);
 	NSArray *lines = (context->scriptType == kSubTypeSRT) ? [NSArray arrayWithObject:[packet substringToIndex:[packet length]-1]] : [packet componentsSeparatedByString:@"\n"];
 	size_t line_count = [lines count];
 	NSMutableArray *divs = [NSMutableArray arrayWithCapacity:line_count];
@@ -267,7 +328,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			div->layer = 0;
 			div->wrapStyle = kSubLineWrapTopWider;
 		} else {
-			NSArray *fields = STSplitStringWithCount(inputText, @",", 9);
+			NSArray *fields = SubSplitStringWithCount(inputText, @",", 9);
 			if ([fields count] < 9) continue;
 			div->layer = [[fields objectAtIndex:1] intValue];
 			div->styleLine = [[context styleForName:[fields objectAtIndex:2]] retain];
@@ -295,7 +356,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 		{
 			size_t linelen = [inputText length];
 			NSData *linebufData;
-			const unichar *linebuf = STUnicodeForString(inputText, &linebufData);
+			const unichar *linebuf = SubUnicodeForString(inputText, &linebufData);
 			const unichar *p = linebuf, *pe = linebuf + linelen, *outputbegin = p, *parambegin=p, *last_tag_start=p;
 			const unichar *pb = p;
 			int cs = 0;
@@ -346,7 +407,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					if (!setAlignForDiv) {
 						setAlignForDiv = YES;
 						
-						ParseASSAlignment(SSA2ASSAlignment(intnum), &div->alignH, &div->alignV);
+						SubParseASSAlignment(SubASSFromSSAAlignment(intnum), &div->alignH, &div->alignV);
 					}
 				}
 				
@@ -354,7 +415,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					if (!setAlignForDiv) {
 						setAlignForDiv = YES;
 						
-						ParseASSAlignment(intnum, &div->alignH, &div->alignV);
+						SubParseASSAlignment(intnum, &div->alignH, &div->alignV);
 					}
 				}
 				
@@ -508,6 +569,6 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 		
 	}
 	
-	STSortMutableArrayStably(divs, compare_layer);
+	SubSortMutableArrayStably(divs, compare_layer);
 	return divs;
 }
