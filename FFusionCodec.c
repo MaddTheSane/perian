@@ -1222,7 +1222,8 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	
 	if(!picture || picture->data[0] == 0)
 	{
-		if(glob->shouldUseReturnedFrame && myDrp->buffer->returnedFrame.data[0])
+		if(glob->shouldUseReturnedFrame && myDrp->buffer &&
+		   myDrp->buffer->returnedFrame.data[0])
 			//Some decoders (vp3) keep their internal buffers in an unusable state
 			picture = &myDrp->buffer->returnedFrame;
 		else if(glob->lastDisplayedFrame.data[0] != NULL)
