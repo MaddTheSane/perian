@@ -991,20 +991,20 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 
 static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY, SubATSUISpanEx *firstSpanEx, int textType)
 {
-	int i;
-	BOOL endLayer = NO;
-	SubATSUISpanEx *lastSpanEx = nil;
 	const CGTextDrawingMode textModes[] = {kCGTextFillStroke, kCGTextStroke, kCGTextFill};
-		
+	SubATSUISpanEx *lastSpanEx = nil;
+	BOOL endLayer = NO, multipleParts = !!(div->render_complexity & renderMultipleParts);
+	int i;
+
 	CGContextSetTextDrawingMode(c, textModes[textType]);
 	
-	if (!(div->render_complexity & renderMultipleParts)) endLayer = SetupCGForSpan(c, firstSpanEx, lastSpanEx, div, textType, endLayer);
+	if (!multipleParts) endLayer = SetupCGForSpan(c, firstSpanEx, lastSpanEx, div, textType, endLayer);
 	
 	for (i = breakc.lStart; i != breakc.lEnd; i -= breakc.direction) {
 		UniCharArrayOffset thisBreak = breakc.breaks[i], nextBreak = breakc.breaks[i+1], linelen = nextBreak - thisBreak;
 		float extraHeight = 0;
 		
-		if (!(div->render_complexity & renderMultipleParts)) {
+		if (!multipleParts) {
 			RenderActualLine(layout, thisBreak, linelen, penX, penY, c, div, firstSpanEx, textType);
 			extraHeight = div->styleLine->outlineRadius;
 		} else {
@@ -1054,17 +1054,30 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY)
 {
 	SubATSUISpanEx *firstSpanEx = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
+	BOOL drawShadow, drawOutline;
 	BOOL endLayer = NO;
 	
-	if (div->styleLine->borderStyle == kSubBorderStyleNormal && firstSpanEx->shadowDist) {
+	if (div->render_complexity & renderMultipleParts) {
+		drawShadow = drawOutline = YES;
+	} else {
+		drawShadow = div->styleLine->borderStyle == kSubBorderStyleNormal && firstSpanEx->shadowDist;
+		drawOutline= div->styleLine->borderStyle != kSubBorderStyleNormal || firstSpanEx->outlineRadius;
+	}
+	
+	if (drawShadow) {
 		if (!(div->render_complexity & renderManualShadows)) {
 			endLayer = YES;
 			CGContextSetShadowWithColor(c, CGSizeMake(firstSpanEx->shadowDist + .5, -(firstSpanEx->shadowDist + .5)), 0, firstSpanEx->shadowColor);
 			CGContextBeginTransparencyLayer(c, NULL);
-		} else DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerShadow);
+		} else {
+			DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerShadow);
+		}
 	}
 	
-	DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerOutline);
+	if (drawOutline) {
+		DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerOutline);
+	}
+
 	penY = DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerPrimary);
 	
 	if (endLayer) {
