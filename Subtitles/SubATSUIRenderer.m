@@ -27,6 +27,10 @@
 #import "CommonUtils.h"
 #import <pthread.h>
 
+#if __MAC_OS_X_VERSION_MAX_ALLOWED <= __MAC_OS_X_VERSION_10_5
+extern void CGContextSetShouldSubpixelQuantizeFonts(CGContextRef context, bool shouldSubpixelQuantizeFonts);
+#endif
+
 static float GetWinFontSizeScale(ATSFontRef font);
 static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities);
 static ATSUFontID GetFontIDForSSAName(NSString *name);
@@ -753,12 +757,10 @@ static void SetStyleSpanRuns(ATSUTextLayout layout, SubRenderDiv *div, const uni
 	}
 }
 
-static Fixed RoundFixed(Fixed n) {return IntToFixed(FixedToInt(n));}
-
 static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 align)
 {
 	const ATSUAttributeTag tags[] = {kATSULineFlushFactorTag, kATSULineWidthTag, kATSULineRotationTag};
-	const ByteCount		 sizes[] = {sizeof(Fract), sizeof(ATSUTextMeasurement), sizeof(Fixed)};
+	const ByteCount		  sizes[] = {sizeof(Fract), sizeof(ATSUTextMeasurement), sizeof(Fixed)};
 	Fract alignment;
 	Fixed fixzero = 0;
 	const ATSUAttributeValuePtr vals[] = {&alignment, &lineWidth, &fixzero};
@@ -855,7 +857,7 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 		if (lineWidth > breakingWidth) {
 			ATSLayoutRecord *records;
 			ItemCount numRecords;
-			unsigned idealSplitLines = ceil(fLineWidth / fBreakingWidth);
+			unsigned idealSplitLines = ceilf(fLineWidth / fBreakingWidth);
 			Fixed idealBreakWidth = FloatToFixed(fLineWidth / idealSplitLines);
 			
 			ATSUDirectGetLayoutDataArrayPtrFromTextLayout(layout, thisBreak, kATSUDirectDataLayoutRecordATSLayoutRecordCurrent, (void*)&records, &numRecords);
@@ -978,13 +980,13 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 		
 		ExpandCGRect(&borderRect, spanEx->outlineRadius);
 		
-		borderRect.origin.x = floor(borderRect.origin.x);
-		borderRect.origin.y = floor(borderRect.origin.y);
-		borderRect.size.width = ceil(borderRect.size.width);
-		borderRect.size.height = ceil(borderRect.size.height);
+		borderRect.origin.x = floorf(borderRect.origin.x);
+		borderRect.origin.y = floorf(borderRect.origin.y);
+		borderRect.size.width  = ceilf(borderRect.size.width);
+		borderRect.size.height = ceilf(borderRect.size.height);
 		
 		CGContextFillRect(c, borderRect);
-	} else ATSUDrawText(layout, thisBreak, lineLen, RoundFixed(penX), RoundFixed(penY));
+	} else ATSUDrawText(layout, thisBreak, lineLen, penX, penY);
 }
 
 static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY, SubATSUISpanEx *firstSpanEx, int textType)
@@ -1084,15 +1086,14 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	Fixed bottomPen = 0, topPen = 0, centerPen = 0, *storePen=NULL;
 	
 	CGContextSaveGState(c);
-	
-	if (cWidth != videoWidth || cHeight != videoHeight) CGContextScaleCTM(c, cWidth / videoWidth, cHeight / videoHeight);
-	SetATSULayoutOther(layout, kATSUCGContextTag, sizeof(CGContextRef), &c);
-	
-	CGContextSetLineCap(c, kCGLineCapRound); // these two are needed to avoid spiky outlines on some fonts
+	if (cWidth != videoWidth || cHeight != videoHeight)
+		CGContextScaleCTM(c, cWidth / videoWidth, cHeight / videoHeight);
+	CGContextSetLineCap(c, kCGLineCapRound); // avoid spiky outlines on some fonts
 	CGContextSetLineJoin(c, kCGLineJoinRound);
-	CGContextSetInterpolationQuality(c, kCGInterpolationLow);
-	CGContextSetShouldSmoothFonts(c, NO); // disables subpixel AA which suddenly appeared in some version of 10.5
-										  // note that it's not documented as doing this, but does the right thing anyway.
+	CGContextSetShouldSmoothFonts(c, NO);    // don't do LCD subpixel antialiasing
+	CGContextSetShouldSubpixelQuantizeFonts(c, NO); // draw text stroke and fill in the same place
+
+	SetATSULayoutOther(layout, kATSUCGContextTag, sizeof(CGContextRef), &c);
 
 	for (i = 0; i < div_count; i++) {
 		SubRenderDiv *div = [divs objectAtIndex:i];
@@ -1113,7 +1114,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		
 		marginRect.origin.x *= screenScaleX;
 		marginRect.origin.y *= screenScaleY;
-		marginRect.size.width *= screenScaleX;
+		marginRect.size.width  *= screenScaleX;
 		marginRect.size.height *= screenScaleY;
 
 		Fixed penY, penX, breakingWidth = FloatToFixed(marginRect.size.width);
