@@ -909,7 +909,7 @@ typedef struct {
 	SInt8 direction;
 } BreakContext;
 
-enum {kTextLayerShadow, kTextLayerOutline, kTextLayerPrimary};
+enum {kTextLayerShadow, kTextLayerOutline, kTextLayerPrimary, kTextLayerPrimaryUnstyled};
 
 static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanEx *lastSpanEx, SubRenderDiv *div, int textType, BOOL endLayer)
 {	
@@ -991,7 +991,7 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 
 static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY, SubATSUISpanEx *firstSpanEx, int textType)
 {
-	const CGTextDrawingMode textModes[] = {kCGTextFillStroke, kCGTextStroke, kCGTextFill};
+	const CGTextDrawingMode textModes[] = {kCGTextFillStroke, kCGTextStroke, kCGTextFill, kCGTextFill};
 	SubATSUISpanEx *lastSpanEx = nil;
 	BOOL endLayer = NO, multipleParts = !!(div->render_complexity & renderMultipleParts);
 	int i;
@@ -1054,14 +1054,15 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY)
 {
 	SubATSUISpanEx *firstSpanEx = ((SubRenderSpan*)[div->spans objectAtIndex:0])->ex;
-	BOOL drawShadow, drawOutline;
+	BOOL drawShadow, drawOutline, clearOutlineInnerStroke;
 	BOOL endLayer = NO;
 	
 	if (div->render_complexity & renderMultipleParts) {
-		drawShadow = drawOutline = YES;
+		drawShadow = drawOutline = clearOutlineInnerStroke = YES;
 	} else {
 		drawShadow = div->styleLine->borderStyle == kSubBorderStyleNormal && firstSpanEx->shadowDist;
 		drawOutline= div->styleLine->borderStyle != kSubBorderStyleNormal || firstSpanEx->outlineRadius;
+		clearOutlineInnerStroke = firstSpanEx->primaryAlpha < 1.;
 	}
 	
 	if (drawShadow) {
@@ -1075,7 +1076,16 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	}
 	
 	if (drawOutline) {
+		if (clearOutlineInnerStroke) {
+			CGContextBeginTransparencyLayer(c, NULL);
+		}
 		DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerOutline);
+		if (clearOutlineInnerStroke) {
+			CGContextSetBlendMode(c, kCGBlendModeClear);
+			DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerPrimaryUnstyled);
+			CGContextSetBlendMode(c, kCGBlendModeNormal);
+			CGContextEndTransparencyLayer(c);
+		}
 	}
 
 	penY = DrawTextLines(c, layout, div, breakc, penX, penY, firstSpanEx, kTextLayerPrimary);
