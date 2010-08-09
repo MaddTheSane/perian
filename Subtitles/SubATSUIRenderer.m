@@ -263,23 +263,22 @@ static void CleanupFontIDCache()
 }
 
 // Assumes ATSUFontID = ATSFontRef. This is true.
-static ATSUFontID GetFontIDForSSAName(NSString *name)
+static ATSUFontID _GetFontIDForSSAName(NSString *name, BOOL alreadyLocked)
 {	
 	NSNumber *idN = nil;
-	NSString *lcname = [name lowercaseString];
+	NSString *lcName = [name lowercaseString];
 	
 	if (fontIDCache)
-		idN = [fontIDCache objectForKey:lcname];
+		idN = [fontIDCache objectForKey:lcName];
 	
 	if (idN)
 		return [idN intValue];
 	
-	if (pthread_mutex_trylock(&fontIDMutex)) {
+	if (!alreadyLocked && pthread_mutex_trylock(&fontIDMutex)) {
 		// if another thread is looking a font up, it might be the same font
 		// so restart and check the cache again
 		pthread_mutex_lock(&fontIDMutex);
-		pthread_mutex_unlock(&fontIDMutex);
-		return GetFontIDForSSAName(name);
+		return _GetFontIDForSSAName(name, YES);
 	}
 	
 	if (!fontIDCache)
@@ -292,8 +291,10 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	const unichar *uname = SubUnicodeForString(name, &unameData);
 	ATSUFontID font;
 	
-	// should be kFontMicrosoftPlatform for the platform code
-	// but isn't for bug workarounds in 10.4
+	// XXX: kFontNoPlatformCode should be kFontMicrosoftPlatform for the platform code
+	// but isn't due to bugs in 10.4 we work around
+	// ...if we stop supporting 10.4 this function will be replaced by CoreText anyway
+	// at that point we should be stricter
 	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
 	
 	[unameData release];
@@ -305,21 +306,23 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 			fontIDs = malloc(sizeof(ATSUFontID[fontCount]));
 			ATSUGetFontIDs(fontIDs, fontCount, &fontCount);
 		}
-				
+		
+#define kBufLength 512
 		ByteCount len;
 		ItemCount x, index;
-		const ByteCount kBufLength = 1024/sizeof(unichar);
 		unichar buf[kBufLength];
 	  
 		for (x = 0; x < fontCount && font == kATSUInvalidFontID; x++) {
 			ATSUFindFontName(fontIDs[x], kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, kBufLength, (Ptr)buf, &len, &index);
+			len = MIN(len, kBufLength);
 			NSString *fname = [[NSString alloc] initWithCharactersNoCopy:buf length:len/sizeof(unichar) freeWhenDone:NO];
 
 			if ([name caseInsensitiveCompare:fname] == NSOrderedSame)
 				font = fontIDs[x];
 			
 			[fname release];
-		}		
+		}
+#undef kBufLength
 	}
 	
 	if (font == kATSUInvalidFontID && ![name isEqualToString:kSubDefaultFontName])
@@ -331,11 +334,16 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 		NSLog(@"Font lookup: %@ -> %@", name, fontPSName);
 		[fontPSName autorelease];
 	}*/
-	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:lcname];
+	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:lcName];
 	
 	pthread_mutex_unlock(&fontIDMutex);
 	 
 	return font;
+}
+
+static ATSUFontID GetFontIDForSSAName(NSString *name)
+{
+	return _GetFontIDForSSAName(name, NO);
 }
 
 -(void*)completedStyleParsing:(SubStyle*)s
