@@ -543,6 +543,9 @@ void SubLoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount)
 
 static ComponentResult LoadSingleTextSubtitle(CFURLRef theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack, int subtitleType, int whichTrack)
 {
+	ComponentResult err=noErr;
+
+NS_DURING
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
 	NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString*)filename];
 	
@@ -592,7 +595,6 @@ static ComponentResult LoadSingleTextSubtitle(CFURLRef theDirectory, CFStringRef
 
 	Track theTrack = CreatePlaintextSubTrack(theMovie, textDesc, timeBase, dataRefHndl, HandleDataHandlerSubType, subCodec, header, movieBox);
 	Media theMedia = NULL;
-	ComponentResult err=noErr;
 	TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
 	
 	if (theTrack == NULL) {
@@ -655,6 +657,10 @@ bail:
 	if (textDesc)    DisposeHandle((Handle)textDesc);
 	if (header)      DisposeHandle((Handle)header);
 	if (dataRefHndl) DisposeHandle((Handle)dataRefHndl);
+	
+NS_HANDLER
+	Codecprintf(stderr, "Caught NSException while importing subtitles");
+NS_ENDHANDLER
 	
 	return err;
 }

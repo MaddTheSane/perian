@@ -1092,12 +1092,11 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 
 -(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(float)cWidth height:(float)cHeight
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSArray *divs = SubParsePacket(packet, context, self);
 	unsigned div_count = [divs count], lastLayer = 0;
-	int i;
 	Fixed bottomPen = 0, topPen = 0, centerPen = 0, *storePen=NULL;
-	
+	int i;
+
 	CGContextSaveGState(c);
 	if (cWidth != videoWidth || cHeight != videoHeight)
 		CGContextScaleCTM(c, cWidth / videoWidth, cHeight / videoHeight);
@@ -1240,33 +1239,50 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	}
 	
 	CGContextRestoreGState(c);
-	[pool release];
 }
 
 SubRendererPtr SubRendererCreateWithSSA(char *header, size_t headerLen, int width, int height)
 {
+	SubRendererPtr s = nil;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO];
-
-	SubRendererPtr s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoWidth:width videoHeight:height];
-	[hdr release];
-	CFRetain(s);
+	@try {
+		NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO];
+		s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoWidth:width videoHeight:height];
+		[hdr release];
+		CFRetain(s);
+	}
+	@catch (NSException *e) {
+		NSLog(@"Caught exception while creating SubRenderer - %@", e);
+	}
 	[pool release];
 	return s;
 }
 
 SubRendererPtr SubRendererCreateWithSRT(int width, int height)
 {
+	SubRendererPtr s;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	SubRendererPtr s = [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
-	CFRetain(s);
+	@try {
+		s = [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
+		CFRetain(s);
+	}
+	@catch (NSException *e) {
+		NSLog(@"Caught exception while creating SubRenderer - %@", e);
+	}
 	[pool release];
 	return s;
 }
 
 void SubRendererRenderPacket(SubRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
 {
-	[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	@try {
+		[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
+	}
+	@catch (NSException *e) {
+		NSLog(@"Caught exception during rendering - %@", e);
+	}
+	[pool release];
 }
 
 void SubRendererPrerollFromHeader(char *header, int headerLen)
