@@ -343,6 +343,8 @@ static int decode_nal(const uint8_t *buf, int buf_size, uint8_t *out_buf, int *o
 				/* This is just a simple escape of 0x00 00 03 */
 				continue;
 		}
+		else
+			numNulls = 0;
 		out_buf[outIndex] = buf[i];
 		outIndex++;
 	}
