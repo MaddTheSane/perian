@@ -128,6 +128,7 @@
 		3D211A200B6B1A540051299D /* SubContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SubContext.m */; };
 		3D211A230B6B1A660051299D /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
 		3D211A300B6B1AD80051299D /* SubParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */; };
+		3D2A136F1213D3CC002BFAEA /* KaxDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D2A136E1213D3CC002BFAEA /* KaxDefines.h */; };
 		3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
 		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; settings = {COMPILER_FLAGS = "-O3 -fweb -fno-reorder-blocks -fomit-frame-pointer"; }; };
 		3D5AB53C10BB52B500D1E688 /* CommonUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D517720AE0402E00A671E1 /* CommonUtils.c */; };
@@ -258,7 +259,6 @@
 		61CB11A50ACDF4FF007994BD /* KaxSeekHead.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118B0ACDF4FF007994BD /* KaxSeekHead.h */; };
 		61CB11A60ACDF4FF007994BD /* KaxSegment.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118C0ACDF4FF007994BD /* KaxSegment.h */; };
 		61CB11A70ACDF4FF007994BD /* KaxTag.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118D0ACDF4FF007994BD /* KaxTag.h */; };
-		61CB11A80ACDF4FF007994BD /* KaxTagMulti.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118E0ACDF4FF007994BD /* KaxTagMulti.h */; };
 		61CB11A90ACDF4FF007994BD /* KaxTags.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB118F0ACDF4FF007994BD /* KaxTags.h */; };
 		61CB11AA0ACDF4FF007994BD /* KaxTrackAudio.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11900ACDF4FF007994BD /* KaxTrackAudio.h */; };
 		61CB11AB0ACDF4FF007994BD /* KaxTrackEntryData.h in Headers */ = {isa = PBXBuildFile; fileRef = 61CB11910ACDF4FF007994BD /* KaxTrackEntryData.h */; };
@@ -283,7 +283,6 @@
 		61CB11DA0ACDF50F007994BD /* KaxSeekHead.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C20ACDF50F007994BD /* KaxSeekHead.cpp */; };
 		61CB11DB0ACDF50F007994BD /* KaxSegment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C30ACDF50F007994BD /* KaxSegment.cpp */; };
 		61CB11DC0ACDF50F007994BD /* KaxTag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C40ACDF50F007994BD /* KaxTag.cpp */; };
-		61CB11DD0ACDF50F007994BD /* KaxTagMulti.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C50ACDF50F007994BD /* KaxTagMulti.cpp */; };
 		61CB11DE0ACDF50F007994BD /* KaxTags.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C60ACDF50F007994BD /* KaxTags.cpp */; };
 		61CB11DF0ACDF50F007994BD /* KaxTrackAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C70ACDF50F007994BD /* KaxTrackAudio.cpp */; };
 		61CB11E00ACDF50F007994BD /* KaxTrackEntryData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C80ACDF50F007994BD /* KaxTrackEntryData.cpp */; };
@@ -622,6 +621,7 @@
 		3D211A2E0B6B1AD80051299D /* SubParsing.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubParsing.h; path = Subtitles/SubParsing.h; sourceTree = "<group>"; };
 		3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; name = SubParsing.m.rl; path = Subtitles/SubParsing.m.rl; sourceTree = "<group>"; };
 		3D2623160C6A60B700FD1242 /* SubRenderer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubRenderer.h; path = Subtitles/SubRenderer.h; sourceTree = "<group>"; };
+		3D2A136E1213D3CC002BFAEA /* KaxDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KaxDefines.h; path = libmatroska/matroska/KaxDefines.h; sourceTree = "<group>"; };
 		3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UniversalDetector.xcodeproj; path = UniversalDetector/UniversalDetector.xcodeproj; sourceTree = "<group>"; };
 		3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = UniversalDetector.h; path = UniversalDetector/UniversalDetector.h; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
@@ -1241,6 +1241,7 @@
 		61CB11720ACDF4BB007994BD /* libmatroska */ = {
 			isa = PBXGroup;
 			children = (
+				3D2A136E1213D3CC002BFAEA /* KaxDefines.h */,
 				61CB11B40ACDF50F007994BD /* FileKax.cpp */,
 				61CB11B50ACDF50F007994BD /* KaxAttached.cpp */,
 				61CB11B60ACDF50F007994BD /* KaxAttachments.cpp */,
@@ -1465,7 +1466,6 @@
 				61CB11A50ACDF4FF007994BD /* KaxSeekHead.h in Headers */,
 				61CB11A60ACDF4FF007994BD /* KaxSegment.h in Headers */,
 				61CB11A70ACDF4FF007994BD /* KaxTag.h in Headers */,
-				61CB11A80ACDF4FF007994BD /* KaxTagMulti.h in Headers */,
 				61CB11A90ACDF4FF007994BD /* KaxTags.h in Headers */,
 				61CB11AA0ACDF4FF007994BD /* KaxTrackAudio.h in Headers */,
 				61CB11AB0ACDF4FF007994BD /* KaxTrackEntryData.h in Headers */,
@@ -1473,6 +1473,7 @@
 				61CB11AD0ACDF4FF007994BD /* KaxTrackVideo.h in Headers */,
 				61CB11AE0ACDF4FF007994BD /* KaxTypes.h in Headers */,
 				61CB11AF0ACDF4FF007994BD /* KaxVersion.h in Headers */,
+				3D2A136F1213D3CC002BFAEA /* KaxDefines.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2059,7 +2060,6 @@
 				61CB11DA0ACDF50F007994BD /* KaxSeekHead.cpp in Sources */,
 				61CB11DB0ACDF50F007994BD /* KaxSegment.cpp in Sources */,
 				61CB11DC0ACDF50F007994BD /* KaxTag.cpp in Sources */,
-				61CB11DD0ACDF50F007994BD /* KaxTagMulti.cpp in Sources */,
 				61CB11DE0ACDF50F007994BD /* KaxTags.cpp in Sources */,
 				61CB11DF0ACDF50F007994BD /* KaxTrackAudio.cpp in Sources */,
 				61CB11E00ACDF50F007994BD /* KaxTrackEntryData.cpp in Sources */,
