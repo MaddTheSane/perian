@@ -659,7 +659,7 @@ bail:
 	if (dataRefHndl) DisposeHandle((Handle)dataRefHndl);
 	
 NS_HANDLER
-	Codecprintf(stderr, "Caught NSException while importing subtitles");
+	Codecprintf(stderr, "Exception occurred while importing subtitles");
 NS_ENDHANDLER
 	
 	return err;
@@ -915,11 +915,12 @@ typedef enum {
 
 static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
 {
+	ComponentResult err = noErr;
+NS_DURING
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString *)filename];
 	NSString *idxContent = SubLoadFileWithUnknownEncoding(nsPath);
 	NSData *privateData = nil;
-	ComponentResult err = noErr;
 	
 	VobSubState state = VOB_SUB_STATE_READING_PRIVATE;
 	VobSubTrack *currentTrack = nil;
@@ -1040,6 +1041,9 @@ static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef fi
 	}
 bail:
 	[pool release];
+NS_HANDLER
+	Codecprintf(stderr, "Exception occurred while importing VobSub\n");
+NS_ENDHANDLER
 	
 	return err;
 }
@@ -1438,7 +1442,9 @@ CXXSubSerializer::~CXXSubSerializer()
 
 void CXXSubSerializer::pushLine(const char *line, size_t size, unsigned start, unsigned end)
 {
+NS_DURING
 	NSMutableString *str = [[NSMutableString alloc] initWithBytes:line length:size encoding:NSUTF8StringEncoding];
+	if (!str) return; // in case of invalid UTF-8?
 	[str appendString:@"\n"];
 	
 	SubLine *sl = [[SubLine alloc] initWithLine:str start:start end:end];
@@ -1446,6 +1452,9 @@ void CXXSubSerializer::pushLine(const char *line, size_t size, unsigned start, u
 	[sl autorelease];
 	
 	[(SubSerializer*)priv addLine:sl];
+NS_HANDLER
+	Codecprintf(stderr, "Exception occured while reading Matroska subtitles");
+NS_ENDHANDLER
 }
 
 void CXXSubSerializer::setFinished()
@@ -1455,6 +1464,7 @@ void CXXSubSerializer::setFinished()
 
 const char *CXXSubSerializer::popPacket(size_t *size, unsigned *start, unsigned *end)
 {
+NS_DURING
 	SubLine *sl = [(SubSerializer*)priv getSerializedPacket];
 	if (!sl) return NULL;
 	const char *u = [sl->line UTF8String];
@@ -1464,6 +1474,10 @@ const char *CXXSubSerializer::popPacket(size_t *size, unsigned *start, unsigned 
 	*size = strlen(u);
 	
 	return u;
+NS_HANDLER
+	Codecprintf(stderr, "Exception occured while reading Matroska subtitles");
+NS_ENDHANDLER
+	return NULL;
 }
 
 void CXXSubSerializer::release()
