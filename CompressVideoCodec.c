@@ -179,7 +179,7 @@ ComponentResult CompressCodecPreflight(CompressCodecGlobals glob, CodecDecompres
 		p->bufferSize = oldBufferSize;
 	}
 	
-	return noErr;
+	return err;
 }
 
 ComponentResult CompressCodecBeginBand(CompressCodecGlobals glob, CodecDecompressParams *p, ImageSubCodecDecompressRecord *drp, long flags)
