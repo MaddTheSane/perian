@@ -312,6 +312,10 @@
 		F57676060BE1A18300B2434B /* FrameBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = F57676040BE1A18300B2434B /* FrameBuffer.c */; };
 		F57755F50B51EB1800C7D833 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
 		F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
+		F5BD450B12171C4C0089D5FA /* CompressVideoCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F5BD450A12171C4C0089D5FA /* CompressVideoCodec.c */; };
+		F5BD4764121769B90089D5FA /* CompressCodecUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = F5BD4763121769B90089D5FA /* CompressCodecUtils.c */; };
+		F5BD48FA121786C50089D5FA /* CompressAudioCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BD47DC121771960089D5FA /* CompressAudioCodec.cpp */; };
+		F5BD48FE121786C90089D5FA /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5BD48A4121784320089D5FA /* AudioUnit.framework */; };
 		F5CFD1C10B5000DF00616865 /* GBPerianPanePListGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */; };
 		F5CFD3B20B5013EA00616865 /* A52Codec.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D60B5012A100616865 /* A52Codec.component */; };
 		F5CFD3B70B5013EC00616865 /* AC3MovieImport.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = F5CFD2D80B5012A100616865 /* AC3MovieImport.component */; };
@@ -819,6 +823,13 @@
 		F57676050BE1A18300B2434B /* FrameBuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FrameBuffer.h; sourceTree = "<group>"; };
 		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
 		F59B2AB81007A0D000FAAAD8 /* PerianResources.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianResources.r; sourceTree = "<group>"; };
+		F5BD450112171BDE0089D5FA /* CompressVideoCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompressVideoCodecDispatch.h; sourceTree = "<group>"; };
+		F5BD450A12171C4C0089D5FA /* CompressVideoCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CompressVideoCodec.c; sourceTree = "<group>"; };
+		F5BD4762121769B90089D5FA /* CompressCodecUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompressCodecUtils.h; sourceTree = "<group>"; };
+		F5BD4763121769B90089D5FA /* CompressCodecUtils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = CompressCodecUtils.c; sourceTree = "<group>"; };
+		F5BD47DB121771960089D5FA /* CompressAudioCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompressAudioCodec.h; sourceTree = "<group>"; };
+		F5BD47DC121771960089D5FA /* CompressAudioCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CompressAudioCodec.cpp; sourceTree = "<group>"; };
+		F5BD48A4121784320089D5FA /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		F5C89F8110220B2F0032D02A /* codecList.m4 */ = {isa = PBXFileReference; explicitFileType = sourcecode.c; fileEncoding = 4; path = codecList.m4; sourceTree = "<group>"; };
 		F5C89FC410220C800032D02A /* defines.m4 */ = {isa = PBXFileReference; explicitFileType = sourcecode.c; fileEncoding = 4; path = defines.m4; sourceTree = "<group>"; };
 		F5C89FC510220C800032D02A /* PerianResourceIDs.h.m4 */ = {isa = PBXFileReference; explicitFileType = sourcecode.c; fileEncoding = 4; path = PerianResourceIDs.h.m4; sourceTree = "<group>"; };
@@ -856,6 +867,7 @@
 				3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */,
 				3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */,
 				3DEFA3F9120560AD0097FE4C /* libavcore.a in Frameworks */,
+				F5BD48FE121786C90089D5FA /* AudioUnit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -982,6 +994,7 @@
 				11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */,
 				11D4EED50A3CE7EC0066D45F /* QuickTime.framework */,
 				F53E18E40B4F483C003A0471 /* Security.framework */,
+				F5BD48A4121784320089D5FA /* AudioUnit.framework */,
 			);
 			name = "External Frameworks and Libraries";
 			sourceTree = "<group>";
@@ -1017,6 +1030,7 @@
 		08FB77ADFE841716C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				F5BD44FB12171B8E0089D5FA /* StreamCompression */,
 				116C425C0B50420D00FB0738 /* Update Checker Sources */,
 				3DE8D6ED104444420007C7E7 /* Opener */,
 				83D1D6DF0B4C81E000E09EC9 /* PrefPane */,
@@ -1396,6 +1410,19 @@
 				F57676050BE1A18300B2434B /* FrameBuffer.h */,
 			);
 			name = "Video Codec";
+			sourceTree = "<group>";
+		};
+		F5BD44FB12171B8E0089D5FA /* StreamCompression */ = {
+			isa = PBXGroup;
+			children = (
+				F5BD450112171BDE0089D5FA /* CompressVideoCodecDispatch.h */,
+				F5BD450A12171C4C0089D5FA /* CompressVideoCodec.c */,
+				F5BD4762121769B90089D5FA /* CompressCodecUtils.h */,
+				F5BD4763121769B90089D5FA /* CompressCodecUtils.c */,
+				F5BD47DB121771960089D5FA /* CompressAudioCodec.h */,
+				F5BD47DC121771960089D5FA /* CompressAudioCodec.cpp */,
+			);
+			name = StreamCompression;
 			sourceTree = "<group>";
 		};
 		F5CFD2CA0B5012A100616865 /* Products */ = {
@@ -1963,6 +1990,9 @@
 				3DB2BB290B6C92F000416863 /* SubATSUIRenderer.m in Sources */,
 				6156986F0BCDA87700E17ADE /* ringbuffer.cpp in Sources */,
 				F57676060BE1A18300B2434B /* FrameBuffer.c in Sources */,
+				F5BD450B12171C4C0089D5FA /* CompressVideoCodec.c in Sources */,
+				F5BD4764121769B90089D5FA /* CompressCodecUtils.c in Sources */,
+				F5BD48FA121786C50089D5FA /* CompressAudioCodec.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

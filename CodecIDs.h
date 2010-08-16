@@ -54,7 +54,8 @@ enum {
 	// contains a single byte equal to the ContentCompAlgo element in matroska
 	kMKVCompressionExtension = 'MCmp',
 	// contains the compression settings equal to ContentCompSettings in matroska
-	kAC3CompressionSettingsExtension = 'CpSt',
+	kCompressionSettingsExtension = 'CpSt',
+	kCompressionAlgorithm = 'CpAl',
 };
 
 
@@ -104,6 +105,12 @@ enum {
 	kSubFormatASS                           = 'ASS ',
 	kSubFormatUSF                           = 'USF ',
 	kSubFormatVobSub                        = 'SPU ',
+	
+	kCompressedAVC1							= 'CAVC',
+	kCompressedMP4V							= 'CMP4',
+	kCompressedAC3							= 'CAC3',
+	kCompressedMP3							= 'CMP3',
+	kCompressedDTS							= 'CDTS',
 };
 
 #ifndef REZ

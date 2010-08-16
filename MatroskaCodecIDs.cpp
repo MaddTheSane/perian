@@ -552,51 +552,6 @@ ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, Handle *cookie, DescExtDire
 	return noErr;
 }
 
-ComponentResult DescExt_ac3(KaxTrackEntry *tr_entry, Handle *cookie, DescExtDirection dir)
-{
-	if (!tr_entry || !cookie) return paramErr;
-	
-	if (dir == kToSampleDescription) {
-		uint8_t *compressAtom = NULL;
-		long compressSize = 0;
-		KaxContentEncodings * encodings = FindChild<KaxContentEncodings>(*tr_entry);
-		if(encodings != NULL) {
-			KaxContentEncoding & encoding = GetChild<KaxContentEncoding>(*encodings);
-			int scope = uint32(GetChild<KaxContentEncodingScope>(encoding));
-			int type = uint32(GetChild<KaxContentEncodingType>(encoding));
-			if (scope != 1) {
-				Codecprintf(NULL, "Content encoding scope of %d not expected\n", scope);
-				return noErr;
-			}
-			if (type != 0) {
-				Codecprintf(NULL, "Encrypted track\n");
-				return noErr;
-			}
-			KaxContentCompression & comp = GetChild<KaxContentCompression>(encoding);
-			int algo = uint32(GetChild<KaxContentCompAlgo>(comp));
-			if(algo == 3) {
-				//Header strip
-				KaxContentCompSettings & settings = GetChild<KaxContentCompSettings>(comp);
-				uint8_t *compSettings = (uint8_t *)settings.GetBuffer();
-				int compSize = settings.GetSize();
-				if(compSize > 0) {
-					compressSize = compSize + 8;
-					compressAtom = (uint8_t *)malloc(compressSize);
-					uint8_t *ptr = write_int32(compressAtom, EndianS32_NtoB(compressSize));
-					ptr = write_int32(ptr, EndianS32_NtoB(kAC3CompressionSettingsExtension));
-					ptr = write_data(ptr, compSettings, compSize);
-				}
-			}
-		}
-		if(compressSize != 0) {
-			PtrToHand(compressAtom, cookie, compressSize);
-			free(compressAtom);
-		}
-	}
-	
-	return noErr;
-}
-
 ComponentResult ASBDExt_LPCM(KaxTrackEntry *tr_entry, AudioStreamBasicDescription *asbd)
 {
 	if (!tr_entry || !asbd) return paramErr;
@@ -808,9 +763,6 @@ ComponentResult MkvFinishAudioDescription(KaxTrackEntry *tr_entry, Handle *cooki
 		case kAudioFormatMPEG4AAC:
 		case kMPEG4AudioFormat:
 			DescExt_aac(tr_entry, cookie, kToSampleDescription);
-			break;
-		case kAudioFormatAC3:
-			DescExt_ac3(tr_entry, cookie, kToSampleDescription);
 			break;
 	}
 	

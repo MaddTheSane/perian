@@ -48,6 +48,7 @@
 #include "CommonUtils.h"
 #include "Codecprintf.h"
 #include "bitstream_info.h"
+#include "CompressCodecUtils.h"
 
 extern "C" {
 #include "avutil.h"
@@ -274,7 +275,7 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			switch (uint8(type)) {
 				case track_video:
 					if (pass == 2) continue;
-					err = AddVideoTrack(track, mkvTrack);
+					err = AddVideoTrack(track, mkvTrack, encodings);
 					if (err) return err;
 					
 					if (mkvTrack.isEnabled)
@@ -290,7 +291,7 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					
 				case track_audio:
 					if (pass == 2) continue;
-					err = AddAudioTrack(track, mkvTrack);
+					err = AddAudioTrack(track, mkvTrack, encodings);
 					if (err) return err;
 					
 					if (mkvTrack.isEnabled)
@@ -422,7 +423,7 @@ ComponentResult MatroskaImport::ReadContentEncodings(KaxContentEncodings &encodi
 	return noErr;
 }
 
-ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
+ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings)
 {
 	ComponentResult err = noErr;
 	ImageDescriptionHandle imgDesc;
@@ -495,6 +496,51 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	err = MkvFinishSampleDescription(&kaxTrack, (SampleDescriptionHandle) imgDesc, kToSampleDescription);
 	if (err) return err;
 	
+	if(encodings)
+	{
+		KaxContentEncoding & encoding = GetChild<KaxContentEncoding>(*encodings);
+		int scope = uint32(GetChild<KaxContentEncodingScope>(encoding));
+		int type = uint32(GetChild<KaxContentEncodingType>(encoding));
+		
+		if (scope != 1) {
+			Codecprintf(NULL, "Content encoding scope of %d not expected\n", scope);
+		}
+		if (type != 0) {
+			Codecprintf(NULL, "Encrypted track\n");
+		}
+		
+		if(scope == 1 && type == 0)
+		{
+			KaxContentCompression & comp = GetChild<KaxContentCompression>(encoding);
+			int algo = uint32(GetChild<KaxContentCompAlgo>(comp));
+			
+			if (algo != 3)
+				Codecprintf(NULL, "MKV: warning, track compression algorithm %d not stripped header\n", algo);
+			
+			SampleDescriptionHandle sampleDesc = mkvTrack.desc;
+			OSType compressedType = compressStreamFourCC((*sampleDesc)->dataFormat);
+			if (compressedType == 0)
+				Codecprintf(NULL, "MKV: warning, compressed track %4.4s probably won't work\n", &(*mkvTrack.desc)->dataFormat);
+			else
+			{
+				Handle ext = NewHandle(4);
+				memcpy(*ext, &algo, 4);
+				(*sampleDesc)->dataFormat = compressedType;
+				AddImageDescriptionExtension((ImageDescriptionHandle)mkvTrack.desc, ext, kCompressionAlgorithm);
+				DisposeHandle(ext);
+				KaxContentCompSettings & settings = GetChild<KaxContentCompSettings>(comp);
+				uint8_t *compSettings = (uint8_t *)settings.GetBuffer();
+				int compSize = settings.GetSize();
+				if(compSize > 0) {
+					ext = NewHandle(compSize);
+					memcpy(*ext, compSettings, compSize);
+					AddImageDescriptionExtension((ImageDescriptionHandle)mkvTrack.desc, ext, kCompressionSettingsExtension);
+					DisposeHandle(ext);
+				}	
+			}
+		}
+	}
+	
 	// video tracks can have display offsets, so create a sample table
 	err = QTSampleTableCreateMutable(NULL, GetMovieTimeScale(theMovie), NULL, &mkvTrack.sampleTable);
 	if (err) return err;
@@ -504,7 +550,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	return err;
 }
 
-ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
+ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings)
 {
 	SoundDescriptionHandle sndDesc = NULL;
 	AudioStreamBasicDescription asbd = {0};
@@ -555,6 +601,63 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	if (acl.mChannelLayoutTag == 0) {
 		pacl = NULL;
 		acl_size = 0;
+	}
+	
+	if(encodings)
+	{
+		KaxContentEncoding & encoding = GetChild<KaxContentEncoding>(*encodings);
+		int scope = uint32(GetChild<KaxContentEncodingScope>(encoding));
+		int type = uint32(GetChild<KaxContentEncodingType>(encoding));
+		
+		if (scope != 1) {
+			Codecprintf(NULL, "Content encoding scope of %d not expected\n", scope);
+		}
+		if (type != 0) {
+			Codecprintf(NULL, "Encrypted track\n");
+		}
+		
+		if(scope == 1 && type == 0)
+		{
+			KaxContentCompression & comp = GetChild<KaxContentCompression>(encoding);
+			int algo = uint32(GetChild<KaxContentCompAlgo>(comp));
+			
+			if (algo != 3)
+				Codecprintf(NULL, "MKV: warning, track compression algorithm %d not stripped header\n", algo);
+			
+			OSType compressedType = compressStreamFourCC(asbd.mFormatID);
+			if (compressedType == 0)
+				Codecprintf(NULL, "MKV: warning, compressed track %4.4s probably won't work\n", &(*mkvTrack.desc)->dataFormat);
+			else
+			{
+				asbd.mFormatID = compressedType;
+				uint32_t algoHeader[] = {
+					EndianS32_NtoB(12),
+					EndianS32_NtoB(kCompressionAlgorithm),
+					EndianS32_NtoB(algo)
+				};
+				Handle newCookieHandle;
+				PtrToHand(algoHeader, &newCookieHandle, sizeof(algoHeader));
+				KaxContentCompSettings & settings = GetChild<KaxContentCompSettings>(comp);
+				uint8_t *compSettings = (uint8_t *)settings.GetBuffer();
+				int compSize = settings.GetSize();
+				if(compSize > 0) {
+					uint32_t settingsHeader[] = {
+						EndianS32_NtoB(8 + compSize),
+						EndianS32_NtoB(kCompressionSettingsExtension),
+					};
+					PtrAndHand(settingsHeader, newCookieHandle, sizeof(settingsHeader));
+					PtrAndHand(compSettings, newCookieHandle, compSize);
+				}
+				if(cookieSize)
+				{
+					HandAndHand(cookieH, newCookieHandle);
+					DisposeHandle(cookieH);
+				}
+				cookieH = newCookieHandle;
+				cookie = *cookieH;
+				cookieSize = GetHandleSize(cookieH);
+			}
+		}	
 	}
 	
 	OSStatus err = QTSoundDescriptionCreate(&asbd, pacl, acl_size, cookie, cookieSize, 

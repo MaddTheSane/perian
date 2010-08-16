@@ -240,8 +240,8 @@ private:
 	// These three are called from ReadTracks to set up a track of the specific type, 
 	// modifying the MatroskaTrack structure to reflect the newly create track. 
 	// They return an error if the track couldn't be created or noErr on success.
-	ComponentResult AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack);
-	ComponentResult AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack);
+	ComponentResult AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings);
+	ComponentResult AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings);
 	ComponentResult AddSubtitleTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack);
 	
 	// this is called recursively to add only the leaves on the chapter tree to 

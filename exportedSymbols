@@ -5,3 +5,5 @@ _VobSubCodecComponentDispatch
 _TextSubCodecComponentDispatch
 _FFissionDecoderEntry
 _FFissionVBRDecoderEntry
+_CompressCodecComponentDispatch
+_CompressAudioDecoderEntry

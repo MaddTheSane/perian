@@ -38,6 +38,10 @@ Codec(kVP8CodecInfoResID, CODEC_ID_VP8, "On2 VP8", "Decompresses video stored in
 EntryPoint(kVobSubCodecManufacturer, kVobSubCodecVersion, kVobSubCodecResourceID, "VobSubCodecComponentDispatch", <!( codecInfoDoes32 | codecInfoDoes16 | codecInfoDoes8 | codecInfoDoes1 | cmpThreadSafe )!>, <!( codecInfoDepth32 | codecInfoDepth24 | codecInfoDepth16 | codecInfoDepth8 | codecInfoDepth1 )!>)
 Codec(kVobSubCodecResourceID, CODEC_ID_DVD_SUBTITLE,"VobSub", "Decompresses subtitles stored in the VobSub format.", kSubFormatVobSub)
 
+EntryPoint(kCompressCodecManufacturer, kCompressCodecVersion, kCompressAVC1CodecResourceID, "CompressCodecComponentDispatch", <!( codecInfoDoes32 | codecInfoDoes16 | codecInfoDoes8 | codecInfoDoes1 | cmpThreadSafe )!>, <!( codecInfoDepth32 | codecInfoDepth24 | codecInfoDepth16 | codecInfoDepth8 | codecInfoDepth1 )!>)
+Codec(kCompressAVC1CodecResourceID, CODEC_ID_NONE, "H.264", "Decompresses compressed video stream stored in H.264 format.", kCompressedAVC1)
+Codec(kCompressMP4VCodecResourceID, CODEC_ID_NONE, "MPEG-4", "Decompresses compressed video stream stored in MPEG-4 format.", kCompressedMP4V)
+
 EntryPoint(kTextCodecManufacturer, kTextSubCodecVersion, kTextSubCodecResourceID, "TextSubCodecComponentDispatch", <!( codecInfoDoes32 | cmpThreadSafe | codecInfoDoesStretch | codecInfoDoesShrink )!>, <!( codecInfoDepth32 )!>)
 Codec(kSSASubCodecResourceID, , "SSA Text Subtitle", "Renders subtitles stored in SubStation Alpha format.", kSubFormatSSA)
 Codec(kTextSubCodecResourceID, , "Text Subtitle", "Renders subtitles stored as text.", kSubFormatUTF8)
@@ -61,3 +65,8 @@ Codec(kMPEG1L2CodecResourceID, CODEC_ID_MP2, "MPEG-1 Layer 2", "An AudioCodec th
 Codec(kTrueAudioCodecResourceID, CODEC_ID_TTA, "True Audio", "An AudioCodec that decodes True Audio into linear PCM", kAudioFormatTTA)
 Codec(kDTSCodecResourceID, CODEC_ID_DTS, "DTS Coherent Acoustics", "An AudioCodec that decodes DCA Audio into linear PCM", kAudioFormatDTS)
 Codec(kNellymoserCodecResourceID, CODEC_ID_NELLYMOSER, "Nellymoser ASAO", "An AudioCodec that decodes Nellymoser ASAO into linear PCM", kAudioFormatNellymoser)
+
+EntryPoint(kFFissionCodecManufacturer, kFFissionCodecVersion, kCompressAC3CodecResourceID, "CompressAudioDecoderEntry", cmpThreadSafeOnMac, )
+Codec(kCompressAC3CodecResourceID, CODEC_ID_NONE, "AC3", "Decompresses compressed video stream stored in H.264 format.", kCompressedAC3)
+Codec(kCompressMP3CodecResourceID, CODEC_ID_NONE, "MP3", "Decompresses compressed video stream stored in MPEG-4 format.", kCompressedMP3)
+Codec(kCompressDTSCodecResourceID, CODEC_ID_NONE, "DTS Coherent Acoustics", "An AudioCodec that decodes DCA Audio into linear PCM", kCompressedDTS)
