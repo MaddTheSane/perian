@@ -311,6 +311,7 @@
 		F53E18E50B4F483C003A0471 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F53E18E40B4F483C003A0471 /* Security.framework */; };
 		F57676060BE1A18300B2434B /* FrameBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = F57676040BE1A18300B2434B /* FrameBuffer.c */; };
 		F57755F50B51EB1800C7D833 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
+		F57CF183121ADBF800132DAF /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		F5BD450B12171C4C0089D5FA /* CompressVideoCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F5BD450A12171C4C0089D5FA /* CompressVideoCodec.c */; };
 		F5BD4764121769B90089D5FA /* CompressCodecUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = F5BD4763121769B90089D5FA /* CompressCodecUtils.c */; };
@@ -1800,6 +1801,7 @@
 				1184A3680B50586C00C8452A /* SUUpdateAlert.nib in Resources */,
 				1184A3840B505A8800C8452A /* SUStatus.nib in Resources */,
 				3DAD0AC10FC1365E001E156F /* UpdateCheckerMainMenu.nib in Resources */,
+				F57CF183121ADBF800132DAF /* Perian_icon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
