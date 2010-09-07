@@ -6,14 +6,14 @@ if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 	MACOSX_DEPLOYMENT_TARGET="10.4"
 fi
 
-generalConfigureOptions="--disable-muxers --disable-encoders --disable-stripping --disable-amd3dnow --enable-runtime-cpudetect --enable-pthreads --disable-ffmpeg --disable-network --disable-ffplay --disable-ffserver --target-os=darwin --disable-doc"
-cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -w -D__DARWIN_UNIX03=0 -mdynamic-no-pic"
+generalConfigureOptions="--disable-amd3dnow --disable-doc --disable-encoders --disable-ffprobe --disable-ffserver --disable-muxers --disable-network --disable-swscale --target-os=darwin"
+cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -D__DARWIN_UNIX03=0 -Dattribute_deprecated= -w -mdynamic-no-pic"
 
 if [ "$BUILD_STYLE" = "Development" ] ; then
-    generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-mmx"
+    generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-asm"
 	buildid_ffmpeg="${buildid_ffmpeg}Dev"
 else
-    optcflags="-falign-loops=16 -fweb -fstrict-aliasing -finline-limit=1000 -freorder-blocks"
+    optcflags="-fweb -fstrict-aliasing -finline-limit=1000 -freorder-blocks"
 	buildid_ffmpeg="${buildid_ffmpeg}Dep"
 fi
 
@@ -105,7 +105,7 @@ else
         mkdir -p "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
-        	optcflags="$optcflags -mtune=$x86tune $x86flags -frerun-cse-after-loop" 
+        	optcflags="$optcflags -mtune=$x86tune $x86flags" 
         fi
 
         cd "$BUILDDIR"
@@ -117,12 +117,6 @@ else
             fi
         
             make depend > /dev/null 2>&1 || true
-        fi
-        if [ "$BUILD_STYLE" = "Development" ] ; then
-            cd libavcodec
-            export CFLAGS="-O1 -fomit-frame-pointer -funit-at-a-time"; make h264.o cabac.o h264_parser.o motion_est.o
-            unset CFLAGS;
-            cd ..
         fi
                 
         make -j3
@@ -136,7 +130,7 @@ else
         mkdir -p "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
-       		optcflags="$optcflags -mcpu=G3 -mtune=G5 -funroll-loops -mmultiple"
+       		optcflags="$optcflags -mcpu=G3 -mtune=G5"
        	fi
     
         cd "$BUILDDIR"
