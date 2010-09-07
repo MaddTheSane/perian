@@ -415,10 +415,20 @@ int IsForcedDecodeEnabled()
 
 static int GetSystemMinorVersion()
 {
-	long minorVersion;
-	Gestalt(gestaltSystemVersionMinor, &minorVersion);
+	static long minorVersion = -1;
+	if (minorVersion == -1)
+		minorVersion = Gestalt(gestaltSystemVersionMinor, &minorVersion);
 	
 	return minorVersion;
+}
+
+static int GetSystemMicroVersion()
+{
+	static long microVersion = -1;
+	if (microVersion == -1)
+		microVersion = Gestalt(gestaltSystemVersionBugFix, &microVersion);
+	
+	return microVersion;
 }
 
 int IsTransparentSubtitleHackEnabled()
@@ -466,6 +476,19 @@ int ShouldImportFontFileName(const char *filename)
 	// and completely break ATSUI on different OS versions
 	// FIXME: This font works when in ~/Library/Fonts (!). Check it again with CoreText.
 	return !(GetSystemMinorVersion() >= 6 && fnmatch("DF*.ttc", filename, 0) == 0);
+}
+
+// does the system support HE-AAC with a base frequency over 32khz?
+// 10.6.0-10.6.2 don't. everything else either does, or doesn't do HE-AAC anyway.
+int ShouldPlayHighFreqSBR()
+{
+	int minorVersion = GetSystemMinorVersion();
+	int microVersion = GetSystemMicroVersion();
+	
+	if (minorVersion == 6 && microVersion < 3)
+		return 0;
+	
+	return 1;
 }
 
 

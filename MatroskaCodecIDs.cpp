@@ -351,7 +351,7 @@ static const unsigned kAACFrequencyIndexes[] = {
 static bool ShouldWriteSBRExt(unsigned output_freq_index)
 {
 	if (output_freq_index < 3)
-		return CFPreferencesGetAppBooleanValue(CFSTR("Allow96kSBR"), PERIAN_PREF_DOMAIN, NULL);
+		return ShouldPlayHighFreqSBR();
 	
 	return true;
 }
