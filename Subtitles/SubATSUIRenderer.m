@@ -721,6 +721,8 @@ static void EnableVerticalForSpan(ATSUTextLayout layout, SubRenderDiv *div, cons
 	const unichar tategakiLowerBound = 0x02F1; // copied from http://source.winehq.org/source/dlls/gdi32/freetype.c
 	int runStart, runAboveBound, i;
 	
+	if (!length) return;
+	
 	runStart = spanOffset;
 	runAboveBound = ubuffer[spanOffset] >= tategakiLowerBound;
 	
