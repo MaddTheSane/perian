@@ -235,14 +235,14 @@ private:
 	
 	// Adds a sample description extension if the content is compressed
 	// should only be the case for VobSub data.
-	ComponentResult ReadContentEncodings(KaxContentEncodings &encodings, MatroskaTrack &mkvTrack);
+	ComponentResult ReadVobSubContentEncodings(KaxContentEncodings *encodings, MatroskaTrack &mkvTrack);
 	
 	// These three are called from ReadTracks to set up a track of the specific type, 
 	// modifying the MatroskaTrack structure to reflect the newly create track. 
 	// They return an error if the track couldn't be created or noErr on success.
 	ComponentResult AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings);
 	ComponentResult AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings);
-	ComponentResult AddSubtitleTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack);
+	ComponentResult AddSubtitleTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings);
 	
 	// this is called recursively to add only the leaves on the chapter tree to 
 	// chapter track, since QT doesn't support chapter nesting.
