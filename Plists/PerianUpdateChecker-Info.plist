@@ -8,6 +8,8 @@
 	<string>Perian</string>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleIconFile</key>
+	<string>Perian_icon.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.perian.Perian</string>
 	<key>CFBundleInfoDictionaryVersion</key>
