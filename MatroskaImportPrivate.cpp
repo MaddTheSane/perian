@@ -430,21 +430,23 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	KaxVideoPixelHeight & pxl_height = GetChild<KaxVideoPixelHeight>(videoTrack);
 	
 	// Use the PixelWidth if the DisplayWidth is not set
-	if (disp_width.ValueIsSet() && disp_height.ValueIsSet()) {
+	if (disp_width.ValueIsSet() || disp_height.ValueIsSet()) {
 		// some files ignore the spec and treat display width/height as a ratio, not as pixels
 		// so scale the display size to be at least as large as the pixel size here
 		// but don't let it be bigger in both dimensions
-		float horizRatio = float(uint32(pxl_width)) / uint32(disp_width);
-		float vertRatio = float(uint32(pxl_height)) / uint32(disp_height);
+		uint32 displayWidth = disp_width.ValueIsSet() ? uint32(disp_width) : uint32(pxl_width);
+		uint32 displayHeight = disp_height.ValueIsSet() ? uint32(disp_height) : uint32(pxl_height);
+		float horizRatio = float(uint32(pxl_width)) / displayWidth;
+		float vertRatio = float(uint32(pxl_height)) / displayHeight;
 		
 		if (vertRatio > horizRatio && vertRatio > 1) {
-			width = FloatToFixed(uint32(disp_width) * vertRatio);
-			height = FloatToFixed(uint32(disp_height) * vertRatio);
+			width = FloatToFixed(displayWidth * vertRatio);
+			height = FloatToFixed(displayHeight * vertRatio);
 		} else if (horizRatio > 1) {
-			width = FloatToFixed(uint32(disp_width) * horizRatio);
-			height = FloatToFixed(uint32(disp_height) * horizRatio);
+			width = FloatToFixed(displayWidth * horizRatio);
+			height = FloatToFixed(displayHeight * horizRatio);
 		} else {
-			float dar = uint32(disp_width) / (float)uint32(disp_height);
+			float dar = displayWidth / (float)displayHeight;
 			float p_ratio = uint32(pxl_width) / (float)uint32(pxl_height);
 			
 			if (dar > p_ratio) {
