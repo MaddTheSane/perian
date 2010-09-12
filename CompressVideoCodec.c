@@ -60,6 +60,8 @@ typedef struct {
 #include <QuickTime/ImageCodec.k.h>
 #include <QuickTime/ComponentDispatchHelper.c>
 
+static int componentSkipCount = 0;
+
 ComponentResult CompressCodecOpen(CompressCodecGlobals glob, ComponentInstance self)
 {
 	ComponentResult err;
@@ -84,6 +86,12 @@ ComponentResult CompressCodecOpen(CompressCodecGlobals glob, ComponentInstance s
 		desc.componentType = decompressorComponentType;
 		desc.componentSubType = original;
 		Component component = FindNextComponent(0, &desc);
+		int currentSkip = 0;
+		while(currentSkip != componentSkipCount)
+		{
+			component = FindNextComponent(component, &desc);
+			currentSkip++;
+		}
 		if(component)
 			glob->actualCodec = OpenComponent(component);
 	}
@@ -171,6 +179,10 @@ ComponentResult CompressCodecPreflight(CompressCodecGlobals glob, CodecDecompres
 		p->bufferSize += glob->strippedHeaderSize;
 	}
 	ComponentResult err = ImageCodecPreflight(glob->actualCodec, p);
+	if(err == featureUnsupported)
+		componentSkipCount++;
+	else
+		componentSkipCount=0;
 	(*imageDesc)->cType = myType;
 	if(glob->strippedHeaderSize)
 	{
