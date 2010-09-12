@@ -307,7 +307,7 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					
 				case track_subtitle:
 					if (pass == 1) continue;
-					err = AddSubtitleTrack(track, mkvTrack);
+					err = AddSubtitleTrack(track, mkvTrack, encodings);
 					if (err) return err;
 					if (mkvTrack.theTrack == NULL) continue;
 					
@@ -329,12 +329,6 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					// not likely to be implemented soon
 				default:
 					continue;
-			}
-			
-			if (encodings) {
-				err = ReadContentEncodings(*encodings, mkvTrack);
-				// just ignore the track if there's some problem with this element
-				if (err) continue;
 			}
 			
 			SetMediaLanguage(mkvTrack.theMedia, qtLang);
@@ -388,9 +382,9 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	return noErr;
 }
 
-ComponentResult MatroskaImport::ReadContentEncodings(KaxContentEncodings &encodings, MatroskaTrack &mkvTrack)
+ComponentResult MatroskaImport::ReadVobSubContentEncodings(KaxContentEncodings *encodings, MatroskaTrack &mkvTrack)
 {
-	KaxContentEncoding & encoding = GetChild<KaxContentEncoding>(encodings);
+	KaxContentEncoding & encoding = GetChild<KaxContentEncoding>(*encodings);
 	int scope = uint32(GetChild<KaxContentEncodingScope>(encoding));
 	int type = uint32(GetChild<KaxContentEncodingType>(encoding));
 	
@@ -678,7 +672,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	return err;
 }
 
-ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
+ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings)
 {
 	Fixed trackWidth, trackHeight;
 	Rect movieBox;
@@ -760,7 +754,13 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 	}
 	
 	// this sets up anything else needed in the description for the specific codec.
-	return MkvFinishSampleDescription(&kaxTrack, (SampleDescriptionHandle) imgDesc, kToSampleDescription);
+	ComponentResult result = MkvFinishSampleDescription(&kaxTrack, (SampleDescriptionHandle) imgDesc, kToSampleDescription);
+
+	if(encodings) {
+		ReadVobSubContentEncodings(encodings, mkvTrack);
+	}
+	
+	return result;
 }
 
 ComponentResult MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
