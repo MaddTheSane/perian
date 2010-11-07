@@ -685,21 +685,9 @@ UInt32 FFissionDecoder::GetVersion() const
 	return kFFusionCodecVersion;
 }
 
-// comment from XiphQT (variable frames per packet means FrameSize should be reported 0, 
-// but apparently needs 1 on Intel?):
-/* The following line has been changed according to Apple engineers' suggestion
-   I received via Steve Nicolai (in response to *my* bugreport, I think...).
-   (Why don't they just implement the VBR-VFPP properly? *sigh*) */
-#ifdef TARGET_CPU_X86
-#define SHOULD_BE_ZERO 1
-#else
-#define SHOULD_BE_ZERO 0
-#endif
-
 void FFissionVBRDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData)
 {
 	switch (inPropertyID) {
-		case kAudioCodecPropertyPacketFrameSize:
 		case kAudioCodecPropertyHasVariablePacketByteSizes:
 		case kAudioCodecPropertyRequiresPacketDescription:
 			if (ioPropertyDataSize != sizeof(UInt32))
@@ -708,10 +696,6 @@ void FFissionVBRDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& 
 	}
 	
 	switch (inPropertyID) {
-		case kAudioCodecPropertyPacketFrameSize:
-			*reinterpret_cast<UInt32*>(outPropertyData) = SHOULD_BE_ZERO;
-			break;
-			
 		case kAudioCodecPropertyHasVariablePacketByteSizes:
 		case kAudioCodecPropertyRequiresPacketDescription:
 			*reinterpret_cast<UInt32*>(outPropertyData) = true;
