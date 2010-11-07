@@ -89,9 +89,6 @@ typedef ff_global_context *ff_global_ptr;
 /* Utilities */
 ComponentResult check_system();
 
-/* Library initialization */
-void register_parsers();
-
 /* Public interface of the DataRef interface */
 OSStatus url_open_dataref(ByteIOContext **pb, Handle dataRef, OSType dataRefType, DataHandler *dataHandler, Boolean *wideSupport, int64_t *dataSize);
 

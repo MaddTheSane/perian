@@ -19,11 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-
+#include <AudioToolbox/AudioToolbox.h>
 #include "FFissionDecoder.h"
 #include "ACCodecDispatch.h"
 #include "PerianResourceIDs.h"
 #include "Codecprintf.h"
+#include "FFmpegUtils.h"
 #include "CodecIDs.h"
 #include "dca.h"
 
@@ -55,6 +56,8 @@ static const CodecPair kAllInputFormats[] =
 	{ kAudioFormatTTA, CODEC_ID_TTA},
 	{ 0, CODEC_ID_NONE }
 };
+
+static const UInt32 kIntPCMOutFormatFlag = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
 
 static CodecID GetCodecID(OSType formatID)
 {
@@ -90,7 +93,6 @@ static void ParseWaveFormat(const WaveFormatEx *wEx, AVCodecContext *avContext)
 
 FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0)
 {
-	kIntPCMOutFormatFlag = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
 	magicCookie = NULL;
 	magicCookieSize = 0;
 	
@@ -134,6 +136,8 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0
 
 FFissionDecoder::~FFissionDecoder()
 {
+	CloseAVCodec();
+	
 	if (magicCookie)
 		delete[] magicCookie;
 	
@@ -288,6 +292,11 @@ void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioP
 			if (ioPropertyDataSize != sizeof(UInt32))
 				CODEC_THROW(kAudioCodecBadPropertySizeError);
 			break;
+			
+		case kAudioCodecPropertyFormatInfo:
+			if (ioPropertyDataSize != sizeof(AudioFormatInfo))
+				CODEC_THROW(kAudioCodecBadPropertySizeError);
+			break;
 	}
 	
 	switch (inPropertyID) {
@@ -301,6 +310,31 @@ void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioP
 			
 		case kAudioCodecPropertyUsedInputBufferSize:
 			*reinterpret_cast<UInt32*>(outPropertyData) = inputBuffer.GetDataAvailable();
+			break;
+			
+		case kAudioCodecPropertyFormatInfo:
+		{
+			AudioFormatInfo *info = (AudioFormatInfo*)outPropertyData;
+			FFissionDecoder *dec = new FFissionDecoder();
+			
+			// We need to fake an output format, doesn't matter what it says as long as it inits
+			static const AudioStreamBasicDescription DefaultOutputASBD =
+			{ 44100, kAudioFormatLinearPCM, kIntPCMOutFormatFlag, 4, 1, 4, 2, 16 };
+			
+			try {
+				dec->Initialize(&info->mASBD, &DefaultOutputASBD, info->mMagicCookie, info->mMagicCookieSize);
+				
+				AudioStreamBasicDescription asbd = {};
+				FFAVCodecContextToASBD(dec->avContext, &asbd);
+				
+				CAStreamBasicDescription::FillOutFormat(info->mASBD, asbd);
+			} catch (ComponentResult r) {
+				delete dec;
+				CODEC_THROW(r);
+			}
+			
+			delete dec;
+		}
 			break;
 			
 		default:
@@ -343,17 +377,13 @@ void FFissionDecoder::OpenAVCodec()
 	CodecID codecID = GetCodecID(mInputFormat.mFormatID);
 	avCodec = avcodec_find_decoder(codecID);
 	
-	avContext->sample_rate = mInputFormat.mSampleRate;
-	avContext->channels = mInputFormat.mChannelsPerFrame;
-	avContext->block_align = mInputFormat.mBytesPerPacket;
-	avContext->frame_size = mInputFormat.mFramesPerPacket;
-	avContext->bits_per_coded_sample = mInputFormat.mBitsPerChannel;
+	FFASBDToAVCodecContext(&mInputFormat, avContext);
 	avContext->codec_id = codecID;
-	
+
 	if (avContext->sample_rate == 0) {
 		Codecprintf(NULL, "Invalid sample rate %d\n", avContext->sample_rate);
 		avCodec = NULL;
-		return;
+		CODEC_THROW(kAudioCodecUnsupportedFormatError);
 	}
 	
 	if (magicCookie)

@@ -52,7 +52,6 @@ private:
 	void OpenAVCodec();
 	void CloseAVCodec();
 	
-	UInt32 kIntPCMOutFormatFlag;
 	Byte *magicCookie;
 	UInt32 magicCookieSize;
 	

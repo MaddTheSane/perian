@@ -19,16 +19,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+/*
+ * TODO:
+ * This file is pointless as long as we don't have any encoders.
+ * It should be merged into FFissionDecoder unless we get some.
+ */
+
 extern "C" {
 #include "avcodec.h"
 }
+#include <AudioToolbox/AudioToolbox.h>
 #include "FFissionCodec.h"
-
-extern "C" void init_FFmpeg();
+#include "FFmpegUtils.h"
 
 FFissionCodec::FFissionCodec(UInt32 inInputBufferByteSize) : ACSimpleCodec(inInputBufferByteSize)
 {
-	init_FFmpeg();
+	FFInitFFmpeg();
 	
 	avContext = avcodec_alloc_context();
 	avCodec = NULL;
@@ -86,6 +92,11 @@ void FFissionCodec::GetPropertyInfo(AudioCodecPropertyID inPropertyID, UInt32& o
 			
 		case kAudioCodecPropertyPacketFrameSize:
 			outPropertyDataSize = sizeof(UInt32);
+			outWritable = false;
+			break;
+			
+		case kAudioCodecPropertyFormatInfo:
+			outPropertyDataSize = sizeof(AudioFormatInfo);
 			outWritable = false;
 			break;
 			

@@ -32,6 +32,7 @@
 #include <QuickTime/QuickTime.h>
 #include <Accelerate/Accelerate.h>
 #include <sys/sysctl.h>
+#include <pthread.h>
 
 #include "PerianResourceIDs.h"
 #include "avcodec.h"
@@ -40,8 +41,8 @@
 #include "bitstream_info.h"
 #include "FrameBuffer.h"
 #include "CommonUtils.h"
-#include "pthread.h"
 #include "CodecIDs.h"
+#include "FFmpegUtils.h"
 
 //---------------------------------------------------------------------------
 // Types
@@ -158,7 +159,6 @@ pascal OSStatus HandlePPDialogWindowEvent(EventHandlerCallRef  nextHandler, Even
 pascal OSStatus HandlePPDialogControlEvent(EventHandlerCallRef  nextHandler, EventRef theEvent, void* userData);
 void ChangeHintText(int value, ControlRef staticTextField);
 
-extern void init_FFmpeg();
 extern CFMutableStringRef CopyHomeDirectory();
 
 #define FFusionDebugPrint(x...) if (glob->fileLog) Codecprintf(glob->fileLog, x);
@@ -627,7 +627,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 	
     if (!glob->avCodec)
     {
-		init_FFmpeg();
+		FFInitFFmpeg();
 		initFFusionParsers();
 
 		OSType componentType = glob->componentType;

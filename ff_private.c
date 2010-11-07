@@ -36,33 +36,6 @@
 #include "bitstream_info.h"
 #include "MatroskaCodecIDs.h"
 
-/* This routine checks if the system requirements are fullfilled */
-ComponentResult check_system()
-{
-	ComponentResult result;
-	long systemVersion;
-	
-	result = Gestalt(gestaltSystemVersion, &systemVersion);
-	require_noerr(result,bail);
-	
-	/* Make sure we have at least 10.4 installed...*/
-	if(systemVersion < 0x00001040)
-		result = -1;
-	
-bail:
-		return result;
-} /* check_system() */
-
-/* This routine does register the ffmpeg parsers which would normally
- * be registred through the normal initialization process */
-void register_parsers()
-{
-	/* Do we need more parsers here? */
-//    av_register_codec_parser(&mpegaudio_parser);
-//	av_register_codec_parser(&ac3_parser);
-} /* register_parsers() */
-
-
 /* This function prepares the target Track to receivve the movie data,
  * it is called if QT has asked an import operation which should just
  * load this track. After success, *outmap points to a valid stream maping

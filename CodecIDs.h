@@ -114,6 +114,7 @@ enum {
 };
 
 #ifndef REZ
+
 struct WaveFormatEx {
 	uint16_t wFormatTag;
 	uint16_t nChannels;

@@ -150,6 +150,7 @@
 		3D802F8610336EE90034BF4A /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D802F8510336EE90034BF4A /* ApplicationServices.framework */; };
 		3D95B9010E208965007C8F51 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D95B9000E208965007C8F51 /* libbz2.dylib */; };
 		3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D95B9000E208965007C8F51 /* libbz2.dylib */; };
+		3DA6322512865F5400AC1962 /* FFmpegUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DA6322412865F5400AC1962 /* FFmpegUtils.c */; };
 		3DAD08250FBF7DA9001E156F /* ssa2html.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAD08240FBF7DA9001E156F /* ssa2html.m */; };
 		3DAD08580FBF80D8001E156F /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD08570FBF80D8001E156F /* libobjc.dylib */; };
 		3DAD08590FBF80DF001E156F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
@@ -635,6 +636,8 @@
 		3D802EC21032B9B50034BF4A /* ssa2pdf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ssa2pdf.m; path = Subtitles/ssa2pdf.m; sourceTree = "<group>"; };
 		3D802F8510336EE90034BF4A /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		3D95B9000E208965007C8F51 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = /usr/lib/libbz2.dylib; sourceTree = "<absolute>"; };
+		3DA6322312865F5400AC1962 /* FFmpegUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFmpegUtils.h; sourceTree = "<group>"; };
+		3DA6322412865F5400AC1962 /* FFmpegUtils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFmpegUtils.c; sourceTree = "<group>"; };
 		3DAD08080FBF7C6F001E156F /* ssa2html */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ssa2html; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DAD08240FBF7DA9001E156F /* ssa2html.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ssa2html.m; path = Subtitles/ssa2html.m; sourceTree = "<group>"; };
 		3DAD08570FBF80D8001E156F /* libobjc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.dylib; path = /usr/lib/libobjc.dylib; sourceTree = "<absolute>"; };
@@ -1381,6 +1384,8 @@
 				6116E54B0B43C27B0020F1CE /* Audio Codec */,
 				F53AD5E70B2A4EFA00D93AC9 /* Video Codec */,
 				F53AD5E30B2A4EE100D93AC9 /* File Import */,
+				3DA6322312865F5400AC1962 /* FFmpegUtils.h */,
+				3DA6322412865F5400AC1962 /* FFmpegUtils.c */,
 			);
 			name = FFMPEG;
 			sourceTree = "<group>";
@@ -1995,6 +2000,7 @@
 				F5BD450B12171C4C0089D5FA /* CompressVideoCodec.c in Sources */,
 				F5BD4764121769B90089D5FA /* CompressCodecUtils.c in Sources */,
 				F5BD48FA121786C50089D5FA /* CompressAudioCodec.cpp in Sources */,
+				3DA6322512865F5400AC1962 /* FFmpegUtils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

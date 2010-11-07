@@ -587,8 +587,10 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	
 	// get more info about the codec
 	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
-	if(asbd.mChannelsPerFrame == 0)
+	if(asbd.mChannelsPerFrame == 0) {
+		Codecprintf(NULL, "Audio channels not set in MKV\n");
 		goto err; // better to fail than import with the wrong number of channels...
+	}
 
 	// see ff_private.c initialize_audio_map
 	if (!asbd.mFramesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3)

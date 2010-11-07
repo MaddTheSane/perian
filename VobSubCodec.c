@@ -29,6 +29,7 @@
 #include "libavutil/intmath.h"
 #include "libavutil/internal.h"
 #include "intreadwrite.h"
+#include "FFmpegUtils.h"
 
 // Data structures
 typedef struct	{
@@ -84,8 +85,6 @@ typedef struct {
 // dest must be at least as large as src
 int ExtractVobSubPacket(UInt8 *dest, UInt8 *framedSrc, int srcSize, int *usedSrcBytes, int index);
 static ComponentResult ReadPacketControls(UInt8 *packet, UInt32 palette[16], PacketControlData *controlDataOut);
-extern void initLib();
-extern void init_FFmpeg();
 
 ComponentResult VobSubCodecOpen(VobSubCodecGlobals glob, ComponentInstance self)
 {
@@ -237,7 +236,7 @@ ComponentResult VobSubCodecPreflight(VobSubCodecGlobals glob, CodecDecompressPar
 		glob->compressed = 1;
 	
 	if (!glob->avCodec) {
-		init_FFmpeg();
+		FFInitFFmpeg();
 		
 		glob->avCodec = avcodec_find_decoder(CODEC_ID_DVD_SUBTITLE);
 		glob->avContext = avcodec_alloc_context();
