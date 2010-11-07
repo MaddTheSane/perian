@@ -2,21 +2,6 @@
 PATH=/usr/local/bin:/sw/bin:/opt/local/bin:/usr/bin:$PWD/Binaries:$PATH
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
-if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
-	MACOSX_DEPLOYMENT_TARGET="10.4"
-fi
-
-generalConfigureOptions="--disable-amd3dnow --disable-doc --disable-encoders --disable-ffprobe --disable-ffserver --disable-muxers --disable-network --disable-swscale --target-os=darwin"
-cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -D__DARWIN_UNIX03=0 -Dattribute_deprecated= -w -mdynamic-no-pic"
-
-if [ "$BUILD_STYLE" = "Development" ] ; then
-    generalConfigureOptions="$generalConfigureOptions --disable-optimizations --disable-asm"
-	buildid_ffmpeg="${buildid_ffmpeg}Dev"
-else
-    optcflags="-fweb -fstrict-aliasing -finline-limit=1000 -freorder-blocks"
-	buildid_ffmpeg="${buildid_ffmpeg}Dep"
-fi
-
 if what /usr/bin/ld | grep -q ld64-77; then
     echo "Xcode 3.1 is required to build Perian";
     exit 1
@@ -29,6 +14,25 @@ if [ -e /usr/bin/gcc-4.2 ]; then
 	CC="gcc-4.2"
 	x86tune="core2"
 	x86flags="--param max-completely-peel-times=2"
+fi
+
+if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
+	MACOSX_DEPLOYMENT_TARGET="10.4"
+fi
+
+configureflags="--cc=$CC --disable-amd3dnow --disable-doc --disable-encoders \
+     --disable-ffprobe --disable-ffserver --disable-muxers --disable-network \
+     --disable-swscale --disable-avfilter --target-os=darwin"
+
+cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET \
+        -D__DARWIN_UNIX03=0 -Dattribute_deprecated= -w"
+
+if [ "$BUILD_STYLE" = "Development" ] ; then
+    configureflags="$configureflags --disable-optimizations --disable-asm"
+	buildid_ffmpeg="${buildid_ffmpeg}Dev"
+else
+    optcflags="-fweb -fstrict-aliasing -finline-limit=1000 -freorder-blocks"
+	buildid_ffmpeg="${buildid_ffmpeg}Dep"
 fi
 
 BUILD_ID_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
@@ -82,7 +86,6 @@ else
 	patch -p1 < ../Patches/0005-Double-INTERNAL_BUFFER_SIZE-to-fix-running-out-of-bu.patch
 	patch -p1 < ../Patches/0006-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
 	cd ..
-	#ffmpeg-revert-r20347.diff
 
 	touch ffmpeg/patched
 
@@ -97,6 +100,8 @@ else
     
     mkdir -p "$BUILT_PRODUCTS_DIR"
     mkdir -p "$SYMROOT/Universal"
+
+    arch=`arch`
 	
     #######################
     # Intel shlibs
@@ -106,15 +111,19 @@ else
         mkdir -p "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
-        	optcflags="$optcflags -mtune=$x86tune $x86flags" 
+        	optcflags_i386="$optcflags -mdynamic-no-pic -mtune=$x86tune $x86flags" 
         fi
 
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
-            if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --cc=$CC --enable-cross-compile --arch=i386 --extra-ldflags="$cflags -arch i386" --extra-cflags="-arch i386 $cflags $optcflags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m 
+            if [ "$arch" = ppc ] ; then
+                "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=i386 \
+                --cpu=pentium-m --extra-ldflags="$cflags -arch i386" \
+                --extra-cflags="-arch i386 $cflags $optcflags_i386" $configureflags 
             else
-                "$SRCROOT/ffmpeg/configure" --cc=$CC --extra-ldflags="$cflags -arch i386" --extra-cflags="-arch i386 $cflags $optcflags" $extraConfigureOptions $generalConfigureOptions --cpu=pentium-m
+                "$SRCROOT/ffmpeg/configure" --extra-ldflags="$cflags -arch i386" \
+                --cpu=pentium-m --extra-cflags="-arch i386 $cflags $optcflags_i386" \
+                $configureflags
             fi
         
             make depend > /dev/null 2>&1 || true
@@ -131,15 +140,18 @@ else
         mkdir -p "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
-       		optcflags="$optcflags -mcpu=G3 -mtune=G5"
+       		optcflags_ppc="$optcflags -mdynamic-no-pic -mcpu=G3 -mtune=G5"
        	fi
     
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
-            if [ `arch` = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --cc=$CC --extra-cflags="-faltivec $cflags $optcflags" $extraConfigureOptions $generalConfigureOptions
+            if [ "$arch" = ppc ] ; then
+                "$SRCROOT/ffmpeg/configure" --extra-cflags="-faltivec $cflags \
+                $optcflags_ppc" $configureflags
             else
-                "$SRCROOT/ffmpeg/configure" --cc=$CC --enable-cross-compile --arch=ppc  --extra-ldflags="$cflags -arch ppc" --extra-cflags="-faltivec -arch ppc $cflags $optcflags" $extraConfigureOptions $generalConfigureOptions
+                "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=ppc \
+                --extra-ldflags="$cflags -arch ppc" --extra-cflags="-faltivec \
+                -arch ppc $cflags $optcflags_ppc" $configureflags
             fi
         
             make depend > /dev/null 2>&1 || true
@@ -160,8 +172,10 @@ else
 	if [ $buildi386 -eq $buildppc ] ; then
 		# lipo them
 		for aa in "$INTEL"/*/*.a ; do
-			echo lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/i386/ppc/'` -output `echo -n $aa | sed 's/i386\/.*\//Universal\//'`
-			lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/i386/ppc/'` -output `echo -n $aa | sed 's/i386\/.*\//Universal\//'`
+			echo lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/i386/ppc/'` \
+			-output `echo -n $aa | sed 's/i386\/.*\//Universal\//'`
+			lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/i386/ppc/'` \
+			-output `echo -n $aa | sed 's/i386\/.*\//Universal\//'`
 		done
 	else
 		if [ $buildppc -gt 0 ] ; then
