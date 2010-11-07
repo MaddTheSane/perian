@@ -187,11 +187,11 @@ void FFissionDecoder::SetMagicCookie(const void* inMagicCookieData, UInt32 inMag
 	avContext->extradata = NULL;
 }
 
-void FFissionDecoder::SetupExtradata(OSType formatID)
+void FFissionDecoder::SetupExtradata()
 {
 	if (!magicCookie) return;
 		
-	switch (formatID) {
+	switch (mInputFormat.mFormatID) {
 		case kAudioFormatWMA1MS:
 		case kAudioFormatWMA2MS:
 		case kAudioFormatTTA:
@@ -356,9 +356,8 @@ void FFissionDecoder::OpenAVCodec()
 		return;
 	}
 	
-	if (magicCookie) {
-		SetupExtradata(mInputFormat.mFormatID);
-	}
+	if (magicCookie)
+		SetupExtradata();
 	
 	if (avcodec_open(avContext, avCodec)) {
 		Codecprintf(NULL, "error opening audio avcodec\n");

@@ -47,7 +47,7 @@ public:
 	virtual UInt32 ProduceOutputPackets(void* outOutputData, UInt32& ioOutputDataByteSize, UInt32& ioNumberPackets, AudioStreamPacketDescription* outPacketDescription);
 	
 private:
-	void SetupExtradata(OSType formatID);
+	void SetupExtradata();
 	int ConvertXiphVorbisCookie();
 	void OpenAVCodec();
 	void CloseAVCodec();
