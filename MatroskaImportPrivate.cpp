@@ -588,8 +588,10 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
 	if(asbd.mChannelsPerFrame == 0)
 		asbd.mChannelsPerFrame = 1;		// avoid a div by zero
-	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3) //see ff_private.c initialize_audio_map
-		asbd.mFramesPerPacket = 1152;
+
+	// see ff_private.c initialize_audio_map
+	if (!asbd.mFramesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3)
+		asbd.mFramesPerPacket = asbd.mSampleRate > 24000 ? 1152 : 576;
 	
 	// FIXME: mChannelLayoutTag == 0 is valid
 	// but we don't use channel position lists (yet) so it's safe for now
