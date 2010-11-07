@@ -557,6 +557,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	ByteCount cookieSize = 0;
 	Handle cookieH = NULL;
 	Ptr cookie = NULL;
+	OSErr err = noErr;
 	
 	mkvTrack.theTrack = NewMovieTrack(theMovie, 0, 0, kFullVolume);
 	if (mkvTrack.theTrack == NULL)
@@ -573,7 +574,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	KaxAudioChannels & numChannels = GetChild<KaxAudioChannels>(audioTrack);
 	KaxAudioBitDepth & bitDepth = GetChild<KaxAudioBitDepth>(audioTrack);
 	
-	if (bitDepth.ValueIsSet()) asbd.mBitsPerChannel = uint32(bitDepth);
+	asbd.mBitsPerChannel = uint32(bitDepth);
 	asbd.mFormatID = MkvGetFourCC(&kaxTrack);
 	asbd.mSampleRate = Float64(sampleFreq);
 	asbd.mChannelsPerFrame = uint32(numChannels);
@@ -587,7 +588,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	// get more info about the codec
 	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
 	if(asbd.mChannelsPerFrame == 0)
-		asbd.mChannelsPerFrame = 1;		// avoid a div by zero
+		goto err; // better to fail than import with the wrong number of channels...
 
 	// see ff_private.c initialize_audio_map
 	if (!asbd.mFramesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3)
@@ -658,9 +659,8 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 		}	
 	}
 	
-	OSStatus err = QTSoundDescriptionCreate(&asbd, pacl, acl_size, cookie, cookieSize, 
+	err = QTSoundDescriptionCreate(&asbd, pacl, acl_size, cookie, cookieSize, 
 											kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndDesc);
-	DisposeHandle(cookieH);
 	if (err) {
 		Codecprintf(NULL, "Borked audio track entry, hoping we can parse the track for asbd\n");
 		DisposeHandle((Handle)sndDesc);
@@ -670,9 +670,14 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	mkvTrack.desc = (SampleDescriptionHandle) sndDesc;
 	
 	err = QTSampleTableCreateMutable(NULL, GetMovieTimeScale(theMovie), NULL, &mkvTrack.sampleTable);
-	if (err) return err;
+	if (err) goto err;
 	
 	err = QTSampleTableAddSampleDescription(mkvTrack.sampleTable, mkvTrack.desc, 0, &mkvTrack.qtSampleDesc);
+	
+err:
+	if (cookieH)
+		DisposeHandle(cookieH);
+	
 	return err;
 }
 
