@@ -374,9 +374,7 @@
 	if((lastInstVersion == nil || [lastInstVersion isVersionStringOlderThan:myVersion]) && installStatus != InstallStatusInstalled)
 	{
 		/*Check for temp after an update */
-		BOOL isDir = NO;
 		NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
-		NSInteger tag;
 		
 		[[NSFileManager defaultManager] removeFileAtPath:tempPrefPane handler:nil];
 		
