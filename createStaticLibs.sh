@@ -80,7 +80,7 @@ else
 	patch -p1 < ../Patches/0003-Remove-the-warning-Cannot-parallelize-deblocking-typ.patch
 	patch -p1 < ../Patches/0004-Hardcode-results-of-runtime-cpu-detection-in-dsputil.patch
 	patch -p1 < ../Patches/0005-Double-INTERNAL_BUFFER_SIZE-to-fix-running-out-of-bu.patch
-	patch -p1 < ../Patches/0006-Fix-AVI-Timebase-Scale.patch
+	patch -p1 < ../Patches/0006-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
 	cd ..
 	#ffmpeg-revert-r20347.diff
 

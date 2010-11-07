@@ -1,7 +1,7 @@
-From b69ec57d1c06d842e56ab14a58c6de58e9e312a9 Mon Sep 17 00:00:00 2001
+From 08b27429dbd5b2c23813471c38ebe6ec5380ebb8 Mon Sep 17 00:00:00 2001
 From: Alexander Strange <astrange@ithinksw.com>
 Date: Tue, 13 Jul 2010 16:07:20 -0700
-Subject: [PATCH 5/5] Double INTERNAL_BUFFER_SIZE to fix running out of buffers when QT retains 32 of them
+Subject: [PATCH 5/6] Double INTERNAL_BUFFER_SIZE to fix running out of buffers when QT retains 32 of them
 
 Fixes a crash in some mp4.
 ---
@@ -23,10 +23,10 @@ index 8cd20b7..29f1ae2 100644
  #define ME_MAP_SIZE 64
  #define ME_MAP_SHIFT 3
 diff --git a/libavcodec/utils.c b/libavcodec/utils.c
-index f21e9ed..92302e8 100644
+index 3691877..51486e1 100644
 --- a/libavcodec/utils.c
 +++ b/libavcodec/utils.c
-@@ -115,7 +115,7 @@ typedef struct InternalBuffer{
+@@ -117,7 +117,7 @@ typedef struct InternalBuffer{
      enum PixelFormat pix_fmt;
  }InternalBuffer;
  
@@ -36,5 +36,5 @@ index f21e9ed..92302e8 100644
  void avcodec_align_dimensions2(AVCodecContext *s, int *width, int *height, int linesize_align[4]){
      int w_align= 1;
 -- 
-1.7.1.1
+1.7.3.1
 

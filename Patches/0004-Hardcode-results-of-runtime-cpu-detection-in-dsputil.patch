@@ -1,7 +1,7 @@
-From 4421a7b3f874d0a9220aca311a5e1bfa72ed9ab0 Mon Sep 17 00:00:00 2001
+From 56f2391493c0651e94fab53abdf39d349d19a284 Mon Sep 17 00:00:00 2001
 From: Alexander Strange <astrange@ithinksw.com>
 Date: Sun, 22 Nov 2009 16:33:58 -0500
-Subject: [PATCH 4/5] Hardcode results of runtime cpu-detection in dsputil for SSE2/3DNOW.
+Subject: [PATCH 4/6] Hardcode results of runtime cpu-detection in dsputil for SSE2/3DNOW.
 
 This isn't the same as fixing --disable-runtimecpudetection in mainline,
 since we still need to run it to detect features newer than SSE2.
@@ -18,10 +18,10 @@ TODO:
  1 files changed, 19 insertions(+), 0 deletions(-)
 
 diff --git a/libavcodec/x86/dsputil_mmx.c b/libavcodec/x86/dsputil_mmx.c
-index c4202d5..db388cb 100644
+index db1e6e3..08a1e80 100644
 --- a/libavcodec/x86/dsputil_mmx.c
 +++ b/libavcodec/x86/dsputil_mmx.c
-@@ -2497,6 +2497,25 @@ static void float_to_int16_interleave_3dn2(int16_t *dst, const float **src, long
+@@ -2524,6 +2524,25 @@ static void float_to_int16_interleave_3dn2(int16_t *dst, const float **src, long
  
  float ff_scalarproduct_float_sse(const float *v1, const float *v2, int order);
  
@@ -46,7 +46,7 @@ index c4202d5..db388cb 100644
 +
  void dsputil_init_mmx(DSPContext* c, AVCodecContext *avctx)
  {
-     mm_flags = mm_support();
+     int mm_flags = av_get_cpu_flags();
 -- 
-1.7.1.1
+1.7.3.1
 

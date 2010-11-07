@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
-		11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */ = {
+		11BA39A80A61E450008AF206 /* FFmpeg Static Libraries */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = 11BA39B00A61E453008AF206 /* Build configuration list for PBXAggregateTarget "ffmpeg Static Libraries" */;
+			buildConfigurationList = 11BA39B00A61E453008AF206 /* Build configuration list for PBXAggregateTarget "FFmpeg Static Libraries" */;
 			buildPhases = (
 				11BA39A70A61E450008AF206 /* ShellScript */,
 			);
 			dependencies = (
 			);
-			name = "ffmpeg Static Libraries";
+			name = "FFmpeg Static Libraries";
 			productName = "Version Macros and Static Libraries";
 		};
 		F5121EB70EB3A54A0048EF67 /* Make SVN Rev */ = {
@@ -29,9 +29,9 @@
 			name = "Make SVN Rev";
 			productName = "Make SVN Rev";
 		};
-		F59E09EA0A670E3D0019A3F0 /* Debug In QuickTime Player */ = {
+		F59E09EA0A670E3D0019A3F0 /* Debug in QuickTime Player */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = F59E0A0B0A670E950019A3F0 /* Build configuration list for PBXAggregateTarget "Debug In QuickTime Player" */;
+			buildConfigurationList = F59E0A0B0A670E950019A3F0 /* Build configuration list for PBXAggregateTarget "Debug in QuickTime Player" */;
 			buildPhases = (
 				F59E09E90A670E3D0019A3F0 /* CopyFiles */,
 			);
@@ -39,7 +39,7 @@
 			dependencies = (
 				F59E09EC0A670E420019A3F0 /* PBXTargetDependency */,
 			);
-			name = "Debug In QuickTime Player";
+			name = "Debug in QuickTime Player";
 			productName = "Debug In QuickTime Player";
 		};
 		F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */ = {
@@ -1729,8 +1729,8 @@
 			projectRoot = "";
 			targets = (
 				11A70AC00A3D0105002058D4 /* Perian */,
-				11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */,
-				F59E09EA0A670E3D0019A3F0 /* Debug In QuickTime Player */,
+				11BA39A80A61E450008AF206 /* FFmpeg Static Libraries */,
+				F59E09EA0A670E3D0019A3F0 /* Debug in QuickTime Player */,
 				61CB10FE0ACDF350007994BD /* ebml */,
 				61CB11760ACDF4D8007994BD /* matroska */,
 				83D1D6C70B4C794700E09EC9 /* PerianPane */,
@@ -2122,7 +2122,7 @@
 /* Begin PBXTargetDependency section */
 		11BA3DB00A61EE90008AF206 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 11BA39A80A61E450008AF206 /* ffmpeg Static Libraries */;
+			target = 11BA39A80A61E450008AF206 /* FFmpeg Static Libraries */;
 			targetProxy = 11BA3DAF0A61EE90008AF206 /* PBXContainerItemProxy */;
 		};
 		3D802EA71032B8B00034BF4A /* PBXTargetDependency */ = {
@@ -2227,8 +2227,6 @@
 		116C42560B5041BF00FB0738 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;
@@ -2239,7 +2237,6 @@
 		116C42570B5041BF00FB0738 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;
@@ -2250,17 +2247,14 @@
 		11A70AC90A3D0111002058D4 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_FORCE_CPU_SUBTYPE_ALL = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = NO;
-				GCC_WARN_UNUSED_VALUE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(BUILT_PRODUCTS_DIR)\"/$(arch)",
 					libmatroska,
@@ -2280,13 +2274,11 @@
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
-					"-force_cpusubtype_ALL",
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
 				PRODUCT_NAME = Perian;
 				REZ_PREPROCESSOR_DEFINITIONS = "";
-				VALID_ARCHS = "i386 ppc ppc7400 ppc970";
-				WARNING_CFLAGS = "-Wimplicit";
+				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = component;
 			};
 			name = Development;
@@ -2294,16 +2286,14 @@
 		11A70ACA0A3D0111002058D4 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_FORCE_CPU_SUBTYPE_ALL = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_VALUE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(BUILT_PRODUCTS_DIR)\"/$(arch)",
 					libmatroska,
@@ -2323,12 +2313,10 @@
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
-					"-force_cpusubtype_ALL",
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
 				PRODUCT_NAME = Perian;
-				VALID_ARCHS = "i386 ppc ppc7400 ppc970";
-				WARNING_CFLAGS = "-Wimplicit";
+				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = component;
 			};
 			name = Deployment;
@@ -2336,35 +2324,39 @@
 		11BA39B10A61E453008AF206 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "Version Macros and Static Libraries";
+				PRODUCT_NAME = "FFmpeg Static Libraries";
 			};
 			name = Development;
 		};
 		11BA39B20A61E453008AF206 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "Version Macros and Static Libraries";
+				PRODUCT_NAME = "FFmpeg Static Libraries";
 			};
 			name = Deployment;
 		};
 		11D4ED480A3CE59A0066D45F /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_FORCE_CPU_SUBTYPE_ALL = YES;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
-				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG_BUILD;
 				GCC_STRICT_ALIASING = YES;
-				GCC_VERSION = 4.2;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VALUE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					libmatroska,
 					libebml,
@@ -2380,26 +2372,31 @@
 				SDKROOT = macosx10.5;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = debugging;
+				WARNING_CFLAGS = "-Wimplicit";
 			};
 			name = Development;
 		};
 		11D4ED490A3CE59A0066D45F /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_FORCE_CPU_SUBTYPE_ALL = YES;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
-				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_STRICT_ALIASING = YES;
-				GCC_VERSION = 4.2;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VALUE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					libmatroska,
 					libebml,
@@ -2410,25 +2407,27 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
 				OTHER_CFLAGS_i386 = "-march=pentium-m -frerun-cse-after-loop $(OTHER_CFLAGS)";
-				OTHER_CFLAGS_ppc = "-mcpu=G3 -mtune=G5 -funroll-loops -mmultiple $(OTHER_CFLAGS)";
+				OTHER_CFLAGS_ppc = "-mcpu=G3 -mmultiple $(OTHER_CFLAGS)";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx10.5;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = debugging;
+				WARNING_CFLAGS = "-Wimplicit";
 			};
 			name = Deployment;
 		};
 		3D4BBE460B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "Version Macros and Static Libraries";
+				PRODUCT_NAME = "FFmpeg Static Libraries";
 			};
 			name = "Deployment+Debug";
 		};
 		3D4BBE470B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = ebml;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
@@ -2438,6 +2437,7 @@
 		3D4BBE480B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = matroska;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
@@ -2447,16 +2447,14 @@
 		3D4BBE490B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_FORCE_CPU_SUBTYPE_ALL = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				GCC_WARN_UNUSED_VALUE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(BUILT_PRODUCTS_DIR)\"/$(arch)",
 					libmatroska,
@@ -2476,12 +2474,10 @@
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
-					"-force_cpusubtype_ALL",
 				);
 				OTHER_REZFLAGS = "-rd -d ppc_$(ppc) -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
 				PRODUCT_NAME = Perian;
-				VALID_ARCHS = "i386 ppc ppc7400 ppc970";
-				WARNING_CFLAGS = "-Wimplicit";
+				VALID_ARCHS = "i386 ppc";
 				WRAPPER_EXTENSION = component;
 			};
 			name = "Deployment+Debug";
@@ -2489,15 +2485,13 @@
 		3D4BBE4A0B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "Debug In QuickTime Player";
+				PRODUCT_NAME = "Debug in QuickTime Player";
 			};
 			name = "Deployment+Debug";
 		};
 		3D4BBE4B0B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Setup Build Directories";
 			};
 			name = "Deployment+Debug";
@@ -2505,8 +2499,6 @@
 		3D4BBE4C0B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = A52Codec;
 			};
 			name = "Deployment+Debug";
@@ -2514,14 +2506,10 @@
 		3D4BBE4D0B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = "";
-				ONLY_ACTIVE_ARCH = NO;
-				PREBINDING = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
 				SDKROOT = "";
 			};
@@ -2530,8 +2518,6 @@
 		3D4BBE4E0B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = CreatePrefPanePlist;
 			};
 			name = "Deployment+Debug";
@@ -2539,17 +2525,7 @@
 		3D4BBE4F0B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					x86_64,
-					ppc,
-					i386,
-				);
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_GC = supported;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
-				GCC_WARN_SHADOW = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
@@ -2563,7 +2539,6 @@
 		3D4BBE500B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;
@@ -2574,21 +2549,25 @@
 		3D4BBE510B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_FORCE_CPU_SUBTYPE_ALL = YES;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
-				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = DEBUG_BUILD;
 				GCC_STRICT_ALIASING = YES;
-				GCC_VERSION = 4.2;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VALUE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					libmatroska,
 					libebml,
@@ -2599,12 +2578,13 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
 				OTHER_CFLAGS_i386 = "-march=pentium-m -frerun-cse-after-loop $(OTHER_CFLAGS)";
-				OTHER_CFLAGS_ppc = "-mcpu=G3 -mtune=G5 -funroll-loops -mmultiple $(OTHER_CFLAGS)";
+				OTHER_CFLAGS_ppc = "-mcpu=G3 -mmultiple $(OTHER_CFLAGS)";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx10.5;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = debugging;
+				WARNING_CFLAGS = "-Wimplicit";
 			};
 			name = "Deployment+Debug";
 		};
@@ -2612,7 +2592,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2pdf;
 				SDKROOT = "";
@@ -2644,7 +2623,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = ssa2html;
@@ -2678,7 +2656,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INSTALL_PATH = /usr/local/bin;
@@ -2715,9 +2692,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
@@ -2730,8 +2704,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
@@ -2744,7 +2716,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
@@ -2756,7 +2727,7 @@
 		61CB11040ACDF37C007994BD /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = ebml;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
@@ -2766,6 +2737,7 @@
 		61CB11050ACDF37C007994BD /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = ebml;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
@@ -2775,7 +2747,7 @@
 		61CB11B10ACDF4FF007994BD /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = matroska;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
@@ -2785,6 +2757,7 @@
 		61CB11B20ACDF4FF007994BD /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = matroska;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
@@ -2794,18 +2767,7 @@
 		83D1D6CB0B4C794900E09EC9 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					x86_64,
-					ppc,
-					i386,
-				);
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_GC = supported;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
-				GCC_WARN_SHADOW = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
@@ -2820,17 +2782,7 @@
 		83D1D6CC0B4C794900E09EC9 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					x86_64,
-					ppc,
-					i386,
-				);
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_GC = supported;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_CHECK_SWITCH_STATEMENTS = YES;
-				GCC_WARN_SHADOW = YES;
-				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
@@ -2844,8 +2796,6 @@
 		F5121EB80EB3A54A0048EF67 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Make SVN Rev";
 			};
 			name = Development;
@@ -2853,8 +2803,6 @@
 		F5121EB90EB3A54A0048EF67 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				PRODUCT_NAME = "Make SVN Rev";
 			};
 			name = Deployment;
@@ -2869,29 +2817,25 @@
 		F59E0A0C0A670E950019A3F0 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "Debug In QuickTime Player";
+				PRODUCT_NAME = "Debug in QuickTime Player";
 			};
 			name = Development;
 		};
 		F59E0A0D0A670E950019A3F0 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "Debug In QuickTime Player";
+				PRODUCT_NAME = "Debug in QuickTime Player";
 			};
 			name = Deployment;
 		};
 		F5CFD1B90B5000AF00616865 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = "";
-				ONLY_ACTIVE_ARCH = NO;
-				PREBINDING = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
 				SDKROOT = "";
 			};
@@ -2900,14 +2844,10 @@
 		F5CFD1BA0B5000AF00616865 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = "";
-				ONLY_ACTIVE_ARCH = NO;
-				PREBINDING = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
 				SDKROOT = "";
 			};
@@ -2916,9 +2856,6 @@
 		F5CFD2660B500B9D00616865 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = CreatePrefPanePlist;
 			};
 			name = Development;
@@ -2926,8 +2863,6 @@
 		F5CFD2670B500B9D00616865 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = CreatePrefPanePlist;
 			};
 			name = Deployment;
@@ -2935,9 +2870,6 @@
 		F5CFD2EB0B5012E800616865 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = A52Codec;
 			};
 			name = Development;
@@ -2945,8 +2877,6 @@
 		F5CFD2EC0B5012E800616865 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = A52Codec;
 			};
 			name = Deployment;
@@ -2954,9 +2884,6 @@
 		F5CFD3C20B50144E00616865 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Setup Build Directories";
 			};
 			name = Development;
@@ -2964,8 +2891,6 @@
 		F5CFD3C30B50144E00616865 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Setup Build Directories";
 			};
 			name = Deployment;
@@ -2993,7 +2918,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Deployment+Debug";
 		};
-		11BA39B00A61E453008AF206 /* Build configuration list for PBXAggregateTarget "ffmpeg Static Libraries" */ = {
+		11BA39B00A61E453008AF206 /* Build configuration list for PBXAggregateTarget "FFmpeg Static Libraries" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				11BA39B10A61E453008AF206 /* Development */,
@@ -3093,7 +3018,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Deployment+Debug";
 		};
-		F59E0A0B0A670E950019A3F0 /* Build configuration list for PBXAggregateTarget "Debug In QuickTime Player" */ = {
+		F59E0A0B0A670E950019A3F0 /* Build configuration list for PBXAggregateTarget "Debug in QuickTime Player" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F59E0A0C0A670E950019A3F0 /* Development */,

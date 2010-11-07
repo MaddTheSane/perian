@@ -1,7 +1,7 @@
-From dacac4310e538491fe1838d0c9b9c2454646873c Mon Sep 17 00:00:00 2001
+From 45f0d8b066ce382be30b257939fcb922dd2b88f4 Mon Sep 17 00:00:00 2001
 From: Alexander Strange <astrange@ithinksw.com>
 Date: Sun, 22 Nov 2009 04:08:15 -0500
-Subject: [PATCH 2/5] Use -faltivec instead of -maltivec.
+Subject: [PATCH 2/6] Use -faltivec instead of -maltivec.
 
 TODO: check if we need this and why mainline works without it.
 ---
@@ -9,10 +9,10 @@ TODO: check if we need this and why mainline works without it.
  1 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/configure b/configure
-index 2a1d520..561f6c1 100755
+index 7dcb50f..83283cb 100755
 --- a/configure
 +++ b/configure
-@@ -2451,9 +2451,9 @@ elif enabled ppc; then
+@@ -2547,9 +2547,9 @@ elif enabled ppc; then
      # AltiVec flags: The FSF version of GCC differs from the Apple version
      if enabled altivec; then
          nogas=warn
@@ -25,5 +25,5 @@ index 2a1d520..561f6c1 100755
          # check if our compiler supports Motorola AltiVec C API
          check_cc <<EOF || disable altivec
 -- 
-1.7.1.1
+1.7.3.1
 
