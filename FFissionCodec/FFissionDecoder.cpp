@@ -42,6 +42,16 @@ struct CodecPair {
 	CodecID codecID;
 };
 
+struct WaveFormatEx {
+	uint16_t wFormatTag;
+	uint16_t nChannels;
+	uint32_t nSamplesPerSec;
+	uint32_t nAvgBytesPerSec;
+	uint16_t nBlockAlign;
+	uint16_t wBitsPerSample;
+	uint16_t cbSize;
+} __attribute__((packed));
+
 static const CodecPair kAllInputFormats[] = 
 {
 	{ kAudioFormatWMA1MS, CODEC_ID_WMAV1 },
