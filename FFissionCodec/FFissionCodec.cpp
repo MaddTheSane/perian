@@ -118,7 +118,7 @@ void FFissionCodec::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPro
 			break;
 			
 		case kAudioCodecPropertyMaximumPacketByteSize:
-			if (avContext)
+			if (avContext && avContext->block_align)
 				*reinterpret_cast<UInt32*>(outPropertyData) = avContext->block_align;
 			else
 				*reinterpret_cast<UInt32*>(outPropertyData) = mInputFormat.mBytesPerPacket;
