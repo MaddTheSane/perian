@@ -223,23 +223,24 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	
 	memset(&asbd,0,sizeof(asbd));
 	map_avi_to_mov_tag(codec->codec_id, &asbd, map, codec->channels);
-	if(asbd.mFormatID == 0) /* no know codec, use the ms tag */
+	if(asbd.mFormatID == 0) /* no known codec, use the ms tag */
 		asbd.mFormatID = 'ms\0\0' + codec->codec_tag; /* the number is stored in the last byte => big endian */
 	
 	/* Ask the AudioToolbox about vbr of the codec */
-	// FIXME: this sets vbr even if it was encoded in CBR mode
-	// which means our mBytesPerPacket is wrong for CBR mp3 (does not really matter)
 	ioSize = sizeof(UInt32);
 	AudioFormatGetProperty(kAudioFormatProperty_FormatIsVBR, sizeof(AudioStreamBasicDescription), &asbd, &ioSize, &map->vbr);
 	
 	cookie = create_cookie(codec, &cookieSize, asbd.mFormatID, map->vbr);
-	
-	/* Set some fields of the AudioStreamBasicDescription. Then ask the AudioToolbox
-		* to fill as much as possible before creating the SoundDescriptionHandle */
-	asbd.mSampleRate = codec->sample_rate;
+	/* Set as much of the AudioStreamBasicDescription as possible.
+	 * Then ask the codec to correct it by calling FormatInfo before creating the SoundDescriptionHandle.
+	 * FormatInfo is poorly documented and doesn't set much of an example for 3rd party codecs but we can hope
+	 * they'll overwrite bad values here.
+	 */
+	asbd.mSampleRate       = codec->sample_rate;
+	asbd.mBytesPerPacket   = codec->block_align;
+	asbd.mFramesPerPacket  = codec->frame_size;
 	asbd.mChannelsPerFrame = codec->channels;
-	if(!map->vbr && !asbd.mBytesPerPacket) /* This works for all the tested codecs. but is there any better way? */
-		asbd.mBytesPerPacket = codec->block_align; /* this is tested for alaw/mulaw/msadpcm */
+	asbd.mBitsPerChannel   = codec->bits_per_coded_sample;
 	
 	/* ask the toolbox about more information */
 	ioSize = sizeof(AudioStreamBasicDescription);
@@ -249,18 +250,10 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		goto bail;
 	}
 	
-	/*
-	 FIXME: 
-	 - at least ffmp3 does not set these values without parsing+the decoder being enabled
-	   (so we avoid overwriting them from above for now)
-	 - this possibly should be 0 for formats with variable framesPerPacket like Vorbis
-	 - lavc frame_size is in samples, mFramesPerPacket is in frames (maybe)
-	 */
-	if (!asbd.mFramesPerPacket)
-		asbd.mFramesPerPacket = codec->frame_size;
-	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3) //MP3 Decode is broken on some versions of Tiger and the AppleTV
-		asbd.mFramesPerPacket = 1152;
-	asbd.mBitsPerChannel = codec->bits_per_coded_sample;
+	// This needs to be set for playback to work, but 10.4 (+ AppleTV) didn't set it in FormatInfo.
+	// FIXME anything non-zero (like 1) might work here
+	if (!asbd.mFramesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3)
+		asbd.mFramesPerPacket = asbd.mSampleRate > 24000 ? 1152 : 576;
 	
 	// if we don't have mBytesPerPacket, we can't import as CBR. Probably should be VBR, and the codec
 	// either lied about kAudioFormatProperty_FormatIsVBR or isn't present
@@ -270,10 +263,11 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	/* If we have vbr audio, the media scale most likely has to be set to the time_base denumerator */
 	if(map->vbr) {
 		/* if we have mFramesPerPacket, set mBytesPerPacket to 0 as this can cause
-		* errors if set incorrectly. But in vbr, we just need the mFramesPerPacket
-		* value */
+		 * errors if set incorrectly. But in vbr, we just need the mFramesPerPacket
+		 * value */
 		if(asbd.mFramesPerPacket)
 			asbd.mBytesPerPacket = 0;
+		
 		SetMediaTimeScale(media, map->str->time_base.den);
 	}
 	
