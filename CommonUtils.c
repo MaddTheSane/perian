@@ -628,7 +628,7 @@ void ConvertImageToQDTransparent(Ptr baseAddr, OSType pixelFormat, int rowBytes,
 			UInt32 px = *p32;
 			
 			// if px is black, and opaque (alpha == 255)
-			if (!(px & ~alphaMask) && (px & alphaMask == alphaMask)) {
+			if (!(px & ~alphaMask) && ((px & alphaMask) == alphaMask)) {
 				// then set it to not-quite-black so it'll show up
 				*p32 = replacement;
 			}
