@@ -1237,6 +1237,11 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 		duration = durationForPTS.find(lastFrames[0].pts);
 		if (duration != durationForPTS.end()) {
 			lastFrames[0].duration = duration->second;
+			if (lastFrames[0].duration == 0) {
+				// try to correct duplicate timestamps
+				// not that we can be sure what the real duration is...
+				lastFrames[0].duration = MAX(defaultDuration, 1);
+			}
 			AddFrame(lastFrames[0]);
 			lastFrames.erase(lastFrames.begin());
 			durationForPTS.erase(duration);
