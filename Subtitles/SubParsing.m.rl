@@ -264,20 +264,21 @@ void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles,
 				
 		nl = ("\n" | "\r" | "\r\n");
 		str = any*;
+		comment = ";" :> str;
 		ws = space | 0xa0;
 		bom = 0xfeff;
 		
 		keyvalueline = str >sstart %savestr :> (":" ws* %sstart str %setheaderval);
-		headerline = (keyvalueline | str) :> nl;
-		header = "[Script Info]" nl headerline*;
+		headerline = (keyvalueline | comment | str) :> nl;
+		header = "[" [Ss] "cript " [Ii] "nfo]" ws* nl headerline*;
 		
 		styleline = (("Style:" ws* %sstart str %csvlineend) | str) :> nl;
-		styles = ("[" [Vv] "4" "+"? " Styles]") %setupstyles nl styleline*;
+		styles = ("[" [Vv] "4" "+"? " " [Ss] "tyles]") %setupstyles ws* nl styleline*;
 		
 		event_txt = (("Dialogue:" ws* %sstart str %csvlineend %/csvlineend) | str);
 		event = event_txt :> nl;
 			
-		lines = "[Events]" %setupevents nl event*;
+		lines = "[" [Ee] "vents]" %setupevents ws* nl event*;
 		
 		main := bom? header styles lines?;
 	}%%
