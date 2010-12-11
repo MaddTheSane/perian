@@ -479,16 +479,10 @@ int ShouldImportFontFileName(const char *filename)
 }
 
 // does the system support HE-AAC with a base frequency over 32khz?
-// 10.6.0-10.6.2 don't. everything else either does, or doesn't do HE-AAC anyway.
+// 10.6.3 does, nothing else does. this may be conflated with some encoder bugs.
 int ShouldPlayHighFreqSBR()
 {
-	int minorVersion = GetSystemMinorVersion();
-	int microVersion = GetSystemMicroVersion();
-	
-	if (minorVersion == 6 && microVersion < 3)
-		return 0;
-	
-	return 1;
+	return 0;
 }
 
 
