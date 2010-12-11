@@ -19,6 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#ifndef __COLORCONVERSIONS_H__
+#define __COLORCONVERSIONS_H__
 
 #include <Carbon/Carbon.h>
 #include "libavcodec/avcodec.h"
@@ -29,9 +31,10 @@
 #define FASTCALL
 #endif
 
-typedef void ColorConversionFunc(AVPicture *inPicture, UInt8 *outBaseAddr, int outRowBytes, unsigned outWidth, unsigned outHeight) FASTCALL;
+typedef void ColorConversionFunc(AVPicture *inPicture, UInt8 *outBaseAddr, int outRowBytes, int outWidth, int outHeight) FASTCALL;
+typedef void ColorClearFunc(UInt8 *outBaseAddr, int outRowBytes, int outWidth, int outHeight) FASTCALL;
+
 typedef ColorConversionFunc *ColorConversionFuncPtr;
-typedef void ColorClearFunc(UInt8 *outBaseAddr, int outRowBytes, unsigned outWidth, unsigned outHeight) FASTCALL;
 typedef ColorClearFunc *ColorClearFuncPtr;
 
 typedef struct ColorConversionFuncs {
@@ -41,3 +44,5 @@ typedef struct ColorConversionFuncs {
 
 extern OSType ColorConversionDstForPixFmt(enum PixelFormat ffPixFmt);
 extern int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFmt, AVPicture *ffPicture, OSType qtPixFmt);
+
+#endif
