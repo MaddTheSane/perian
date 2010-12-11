@@ -10,9 +10,11 @@ ffmpeg_rev=`svnversion -n ./ffmpeg/`
 REV=`svnversion -n ./`
 echo $REV
 
-cat > $SCRIPT_OUTPUT_FILE_0 <<EOF
+cat > $SCRIPT_OUTPUT_FILE_0.tmp <<EOF
 #define SVNREVISION $REV
 #define SVNREVISION_C_STRING "$REV"
 #define FFMPEGREVISION $ffmpeg_rev
 #define FFMPEGREVISION_C_STRING "$ffmpeg_rev"
 EOF
+
+cmp -s $SCRIPT_OUTPUT_FILE_0 $SCRIPT_OUTPUT_FILE_0.tmp || mv $SCRIPT_OUTPUT_FILE_0.tmp $SCRIPT_OUTPUT_FILE_0
