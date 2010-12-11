@@ -102,6 +102,8 @@ else
     mkdir -p "$SYMROOT/Universal"
 
     arch=`arch`
+    # files we'd like to keep frame pointers in for in-the-wild debugging
+    fptargets="libavformat/libavformat.a libavutil/libavutil.a libavcodec/utils.o"
 	
     #######################
     # Intel shlibs
@@ -119,17 +121,20 @@ else
             if [ "$arch" = ppc ] ; then
                 "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=i386 \
                 --cpu=pentium-m --extra-ldflags="$cflags -arch i386" \
-                --extra-cflags="-arch i386 $cflags $optcflags_i386" $configureflags 
+                --extra-cflags="-arch i386 $cflags $optcflags_i386" $configureflags || exit 1
             else
                 "$SRCROOT/ffmpeg/configure" --extra-ldflags="$cflags -arch i386" \
                 --cpu=pentium-m --extra-cflags="-arch i386 $cflags $optcflags_i386" \
-                $configureflags
+                $configureflags || exit 1
             fi
         
             make depend > /dev/null 2>&1 || true
         fi
-                
-        make -j3
+        
+        fpcflags=`grep -m 1 CFLAGS= "$BUILDDIR"/config.mak | sed -e s/CFLAGS=// -e s/-fomit-frame-pointer//` 
+
+        make -j3 CFLAGS="$fpcflags" $fptargets
+        make -j3 || exit 1
     fi
     
     #######################
@@ -147,16 +152,20 @@ else
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             if [ "$arch" = ppc ] ; then
                 "$SRCROOT/ffmpeg/configure" --extra-cflags="-faltivec $cflags \
-                $optcflags_ppc" $configureflags
+                $optcflags_ppc" $configureflags || exit 1
             else
                 "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=ppc \
                 --extra-ldflags="$cflags -arch ppc" --extra-cflags="-faltivec \
-                -arch ppc $cflags $optcflags_ppc" $configureflags
+                -arch ppc $cflags $optcflags_ppc" $configureflags || exit 1
             fi
         
             make depend > /dev/null 2>&1 || true
         fi
-        make -j3
+        
+        fpcflags=`grep -m 1 CFLAGS= "$BUILDDIR"/config.mak | sed -e s/CFLAGS=// -e s/-fomit-frame-pointer//` 
+
+        make -j3 CFLAGS="$fpcflags" $fptargets
+        make -j3 || exit 1
     fi
 
 	#######################
