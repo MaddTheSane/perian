@@ -1087,20 +1087,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	{
 		myDrp->buffer = retainBuffer(glob, glob->decode.futureBuffer);
 		myDrp->decoded = true;
-#if 0	/* Need to make sure this frame's data is not eradicated during the decompress */
-		FrameData *nextFrame = myDrp->frameData->nextFrame;
-		if(nextFrame != NULL)
-		{
-			FFusionDecompress(glob, glob->avContext, nextFrame->buffer, NULL, myDrp->width, myDrp->height, &tempFrame, nextFrame->dataSize);
-			if(tempFrame.data[0] != NULL)
-			{
-				glob->decode.futureBuffer = (FFusionBuffer *)tempFrame.opaque;
-				nextFrame->decoded = TRUE;
-			}
-		}
-		else
-#endif
-			glob->decode.futureBuffer = NULL;
+		glob->decode.futureBuffer = NULL;
 		FFusionDataMarkRead(myDrp->frameData);
 		glob->decode.lastFrame = myDrp->frameNumber;
 		return err;
