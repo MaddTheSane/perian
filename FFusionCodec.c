@@ -57,9 +57,9 @@ typedef struct
 {
 	AVFrame		*frame;
 	AVPicture	picture;
-	short		retainCount;
-	short		ffmpegUsing;
-	long		frameNumber;
+	int		retainCount;
+	int		ffmpegUsing;
+	int		frameNumber;
 } FFusionBuffer;
 
 typedef enum
@@ -75,26 +75,26 @@ typedef enum
 struct begin_glob
 {
 	FFusionParserContext	*parser;
-	long			lastFrame;
-	long			lastIFrame;
-	int				lastFrameType;
-	int				futureType;
-	FrameData		*lastPFrameData;
+	int			lastFrame;
+	int			lastIFrame;
+	int			lastFrameType;
+	int			futureType;
+	FrameData	*lastPFrameData;
 };
 
 /* globs used by the DecodeBand routine */
 struct decode_glob
 {
-	long			lastFrame;
+	int				lastFrame;
 	FFusionBuffer	*futureBuffer;
 };
 
 struct per_frame_decode_stats
 {
-	unsigned		begin_calls;
-	unsigned		decode_calls;
-	unsigned		draw_calls;
-	unsigned		end_calls;
+	int		begin_calls;
+	int		decode_calls;
+	int		draw_calls;
+	int		end_calls;
 };
 
 struct decode_stats
@@ -129,14 +129,14 @@ typedef struct
 
 typedef struct
 {
-    long			width;
-    long			height;
-    long			depth;
-    OSType			pixelFormat;
-	int				decoded;
-	long			frameNumber;
-	long			GOPStartFrameNumber;
-	long			bufferSize;
+    int			width;
+    int			height;
+    int			depth;
+    OSType		pixelFormat;
+	int			decoded;
+	int			frameNumber;
+	int			GOPStartFrameNumber;
+	int			bufferSize;
 	FFusionBuffer	*buffer;
 	FrameData		*frameData;
 } FFusionDecompressRecord;
@@ -146,7 +146,7 @@ typedef struct
 // Prototypes of private subroutines
 //---------------------------------------------------------------------------
 
-static OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, long width, long height, AVFrame *picture, long length);
+static OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, int width, int height, AVFrame *picture, int length);
 static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic);
 static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
 static FFusionBuffer *retainBuffer(FFusionGlobals glob, FFusionBuffer *buf);
@@ -239,7 +239,7 @@ err:
 static void RecomputeMaxCounts(FFusionGlobals glob)
 {
 	int i;
-	unsigned begun = 0, decoded = 0, ended = 0, drawn = 0;
+	int begun = 0, decoded = 0, ended = 0, drawn = 0;
 	
 	for (i = 0; i < 4; i++) {
 		struct per_frame_decode_stats *f = &glob->stats.type[i];
@@ -606,7 +606,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     OSType *pos;
     int index;
     CodecCapabilities *capabilities = p->capabilities;
-	long count = 0;
+	int count = 0;
 	Handle imgDescExt;
 	OSErr err = noErr;
 	
@@ -1042,7 +1042,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
     return noErr;
 }
 
-static OSErr PrereqDecompress(FFusionGlobals glob, FrameData *prereq, AVCodecContext *context, long width, long height, AVFrame *picture)
+static OSErr PrereqDecompress(FFusionGlobals glob, FrameData *prereq, AVCodecContext *context, int width, int height, AVFrame *picture)
 {
 	FFusionDebugPrint("%p prereq-decompressing frame #%d.\n", glob, prereq->frameNumber);
 	
@@ -1363,7 +1363,7 @@ static void releaseBuffer(AVCodecContext *s, AVFrame *pic)
 // This function calls libavcodec to decompress one frame.
 //-----------------------------------------------------------------
 
-OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, long width, long height, AVFrame *picture, long length)
+OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, int width, int height, AVFrame *picture, int length)
 {
     OSErr err = noErr;
     int got_picture = false;
