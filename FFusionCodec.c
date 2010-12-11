@@ -574,9 +574,9 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 	{
 		cap->subCodecIsMultiBufferAware = true;
 		cap->subCodecSupportsOutOfOrderDisplayTimes = true;
-		cap->baseCodecShouldCallDecodeBandForAllFrames = true;
-		cap->subCodecSupportsScheduledBackwardsPlaybackWithDifferenceFrames = !doExperimentalFlags;
-		cap->subCodecSupportsDrawInDecodeOrder = doExperimentalFlags; 
+		cap->baseCodecShouldCallDecodeBandForAllFrames = !doExperimentalFlags;
+		cap->subCodecSupportsScheduledBackwardsPlaybackWithDifferenceFrames = true;
+		cap->subCodecSupportsDrawInDecodeOrder = doExperimentalFlags;
 		cap->subCodecSupportsDecodeSmoothing = true; 
 	}
 	
