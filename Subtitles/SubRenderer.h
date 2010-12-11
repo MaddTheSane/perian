@@ -57,8 +57,7 @@ typedef void *SubRendererPtr;
 #endif
 
 // these are actually implemented in SubATSUIRenderer.m
-SubRendererPtr SubRendererCreateWithSSA(char *header, size_t headerLen, int width, int height);
-SubRendererPtr SubRendererCreateWithSRT(int width, int height);
+SubRendererPtr SubRendererCreate(int isSSA, char *header, size_t headerLen, int width, int height);
 void SubRendererPrerollFromHeader(char *header, int headerLen);
 void SubRendererRenderPacket(SubRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight);
 void SubRendererDispose(SubRendererPtr s);

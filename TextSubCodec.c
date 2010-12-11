@@ -44,7 +44,7 @@ typedef struct TextSubGlobalsRecord {
 	
 	CGColorSpaceRef         colorSpace;
 
-	SubRendererPtr		ssa;
+	SubRendererPtr			ssa;
 	Boolean					translateSRT;
 } TextSubGlobalsRecord, *TextSubGlobals;
 
@@ -239,6 +239,9 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 	capabilities->flags2 |= codecDrawsHigherQualityScaled;    
 	
 	if (!glob->ssa) {
+		Ptr ssaheader = NULL;
+		size_t ssaheadersize = 0;
+		
 		if (!glob->colorSpace)
 			glob->colorSpace = GetSRGBColorSpace();
 		
@@ -248,14 +251,16 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 			
 			CountImageDescriptionExtensionType(p->imageDescription,kSubFormatSSA,&count);
 			if (count == 1) {
-				Handle ssaheader;
-				GetImageDescriptionExtension(p->imageDescription,&ssaheader,kSubFormatSSA,1);
+				Handle ssahand;
+				GetImageDescriptionExtension(p->imageDescription,&ssahand,kSubFormatSSA,1);
 				
-				glob->ssa = SubRendererCreateWithSSA(*ssaheader, GetHandleSize(ssaheader), (**p->imageDescription).width, (**p->imageDescription).height);
+				ssaheader = *ssahand;
+				ssaheadersize = GetHandleSize(ssahand);				
 			} 
 		} 
 		
-		if (!glob->ssa) glob->ssa = SubRendererCreateWithSRT((**p->imageDescription).width,(**p->imageDescription).height);
+		glob->ssa = SubRendererCreate((**p->imageDescription).cType == kSubFormatSSA, ssaheader,
+									  ssaheadersize, (**p->imageDescription).width,(**p->imageDescription).height);
 	}
 	
 	return noErr;

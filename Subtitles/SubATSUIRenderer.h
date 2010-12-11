@@ -33,7 +33,6 @@
 	float screenScaleX, screenScaleY, videoWidth, videoHeight;
 	BOOL drawTextBounds;
 }
--(SubATSUIRenderer*)initWithVideoWidth:(float)width videoHeight:(float)height;
--(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoWidth:(float)width videoHeight:(float)height;
+-(SubATSUIRenderer*)initWithScriptType:(int)type header:(NSString*)header videoWidth:(float)width videoHeight:(float)height;
 -(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(float)cWidth height:(float)cHeight;
 @end

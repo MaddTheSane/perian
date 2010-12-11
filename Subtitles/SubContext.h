@@ -66,8 +66,7 @@ extern NSString * const kSubDefaultFontName;
 	float resX, resY;
 }
 
--(SubContext*)initWithHeaders:(NSDictionary *)headers styles:(NSArray *)styles delegate:(SubRenderer*)delegate;
--(SubContext*)initWithNonSSAType:(UInt8)type delegate:(SubRenderer*)delegate;
+-(SubContext*)initWithScriptType:(int)type headers:(NSDictionary *)headers styles:(NSArray *)styles delegate:(SubRenderer*)delegate;
 -(SubStyle*)styleForName:(NSString *)name;
 @end
 

@@ -176,46 +176,26 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 
 @implementation SubATSUIRenderer
 
--(SubATSUIRenderer*)initWithVideoWidth:(float)width videoHeight:(float)height;
+-(SubATSUIRenderer*)initWithScriptType:(int)type header:(NSString*)header videoWidth:(float)width videoHeight:(float)height
 {
 	if (self = [super init]) {
-		ATSUCreateTextLayout(&layout);
-		breakBuffer = malloc(sizeof(UniCharArrayOffset) * 2);
-		
-		srgbCSpace = GetSRGBColorSpace();
+		NSDictionary *headers = nil;
+		NSArray *styles = nil;
 		
 		videoWidth = width;
 		videoHeight = height;
 		
-		UCCreateTextBreakLocator(NULL, 0, kUCTextBreakLineMask, &breakLocator);
-		context = [[SubContext alloc] initWithNonSSAType:kSubTypeSRT delegate:self];
-		
-		drawTextBounds = CFPreferencesGetAppBooleanValue(CFSTR("DrawSubTextBounds"), PERIAN_PREF_DOMAIN, NULL);
-	}
-	
-	return self;
-}
+		if (header) {
+			header = SubStandardizeStringNewlines(header);
+			SubParseSSAFile(header, &headers, &styles, NULL);
+		}
 
--(SubATSUIRenderer*)initWithSSAHeader:(NSString*)header videoWidth:(float)width videoHeight:(float)height;
-{
-	if (self = [super init]) {
-		header = SubStandardizeStringNewlines(header);
-		
-		NSDictionary *headers;
-		NSArray *styles;
-		SubParseSSAFile(header, &headers, &styles, NULL);
-		
+		context = [[SubContext alloc] initWithScriptType:type headers:headers styles:styles delegate:self];
+
 		breakBuffer = malloc(sizeof(UniCharArrayOffset) * 2);
-		
-		videoWidth = width;
-		videoHeight = height;
-		
 		ATSUCreateTextLayout(&layout);
 		srgbCSpace = GetSRGBColorSpace();
-		
 		UCCreateTextBreakLocator(NULL, 0, kUCTextBreakLineMask, &breakLocator);
-		context = [[SubContext alloc] initWithHeaders:headers styles:styles delegate:self];
-		
 		drawTextBounds = CFPreferencesGetAppBooleanValue(CFSTR("DrawSubTextBounds"), PERIAN_PREF_DOMAIN, NULL);
 	}
 	
@@ -1253,29 +1233,15 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	CGContextRestoreGState(c);
 }
 
-SubRendererPtr SubRendererCreateWithSSA(char *header, size_t headerLen, int width, int height)
+SubRendererPtr SubRendererCreate(int isSSA, char *header, size_t headerLen, int width, int height)
 {
 	SubRendererPtr s = nil;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	@try {
-		NSString *hdr = [[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO];
-		s = [[SubATSUIRenderer alloc] initWithSSAHeader:hdr videoWidth:width videoHeight:height];
-		[hdr release];
-		CFRetain(s);
-	}
-	@catch (NSException *e) {
-		NSLog(@"Caught exception while creating SubRenderer - %@", e);
-	}
-	[pool release];
-	return s;
-}
-
-SubRendererPtr SubRendererCreateWithSRT(int width, int height)
-{
-	SubRendererPtr s;
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	@try {
-		s = [[SubATSUIRenderer alloc] initWithVideoWidth:width videoHeight:height];
+		NSString *hdr = nil;
+		if (header) 
+			hdr = [[[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO] autorelease];
+		s = [[SubATSUIRenderer alloc] initWithScriptType:isSSA ? kSubTypeSSA : kSubTypeSRT header:hdr videoWidth:width videoHeight:height];
 		CFRetain(s);
 	}
 	@catch (NSException *e) {
@@ -1299,8 +1265,8 @@ void SubRendererRenderPacket(SubRendererPtr s, CGContextRef c, CFStringRef str, 
 
 void SubRendererPrerollFromHeader(char *header, int headerLen)
 {
-	SubRendererPtr s = headerLen ? SubRendererCreateWithSSA(header, headerLen, 640, 480)
-								      : SubRendererCreateWithSRT(640, 480);
+	SubRendererPtr s = SubRendererCreate(header!=NULL, header, headerLen, 640, 480);
+	
 	/*
 	CGColorSpaceRef csp = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
 	void *buf = malloc(640 * 480 * 4);

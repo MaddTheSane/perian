@@ -26,12 +26,11 @@ NSString * const kSubDefaultFontName = @"Helvetica";
 
 @implementation SubStyle
 
-
 +(SubStyle*)defaultStyleWithDelegate:(SubRenderer*)delegate
 {
 	SubStyle *sty = [[[SubStyle alloc] init] autorelease];
 	
-	sty->name = @"*Default";
+	sty->name = @"Default";
 	sty->fontname = kSubDefaultFontName;
 	sty->platformSizeScale = 1;
 	sty->size = 32 * sqrt([delegate aspectRatio] / (4./3.));
@@ -57,9 +56,10 @@ NSString * const kSubDefaultFontName = @"Helvetica";
 {
 	if (self = [super init]) {
 		NSString *tmp;
-		delegate = delegate_;
 		NSString *sv;
-				
+		
+		delegate = delegate_;
+		
 #define sv(fn, n) fn = [[s objectForKey: @""#n] retain]
 #define fv(fn, n) sv = [s objectForKey:@""#n]; fn = sv ? [sv floatValue] : 0.;
 #define iv(fn, n) fn = [[s objectForKey:@""#n] intValue]
@@ -165,11 +165,14 @@ BOOL IsScriptASS(NSDictionary *headers)
 	return [[headers objectForKey:@"ScriptType"] caseInsensitiveCompare:@"v4.00+"] == NSOrderedSame;
 }
 
--(void)readHeaders
+-(void)readSSAHeaders
 {
+	NSString *sv;
 	scriptType = IsScriptASS(headers) ? kSubTypeASS : kSubTypeSSA;
 	collisions = [[headers objectForKey:@"Collisions"] isEqualToString:@"Reverse"] ? kSubCollisionsReverse : kSubCollisionsNormal;
-	wrapStyle = [[headers objectForKey:@"WrapStyle"] intValue];
+	sv = [headers objectForKey:@"WrapStyle"];
+	if (sv)
+		wrapStyle = [sv intValue];
 	
 	NSString *resXS = [headers objectForKey:@"PlayResX"], *resYS = [headers objectForKey:@"PlayResY"];
 	
@@ -186,54 +189,46 @@ BOOL IsScriptASS(NSDictionary *headers)
 	}
 }
 
--(SubContext*)initWithHeaders:(NSDictionary *)headers_ styles:(NSArray *)styles_ delegate:(SubRenderer*)delegate
-{
-	if (self = [super init]) {
-		SubStyle *firstStyle = nil;
-		headers = [headers_ retain];
-		[self readHeaders];
-		
-		[delegate completedHeaderParsing:self];
-		
-		styles = nil;
-		if (styles_) {
-			int i, nstyles = [styles_ count];
-			NSMutableDictionary *sdict = [[NSMutableDictionary alloc] initWithCapacity:nstyles];
-			
-			for (i=0; i < nstyles; i++) {
-				NSDictionary *style = [styles_ objectAtIndex:i];
-				SubStyle *sstyle = [[[SubStyle alloc] initWithDictionary:style scriptVersion:scriptType delegate:delegate] autorelease];
-				
-				if (!i) firstStyle = sstyle;
-				
-				[sdict setObject:sstyle forKey:[style objectForKey:@"Name"]];
-			}
-			
-			styles = sdict;
-		}
-		
-		defaultStyle = [styles objectForKey:@"Default"];
-		if (!defaultStyle) defaultStyle = firstStyle;
-		if (!defaultStyle) defaultStyle = [SubStyle defaultStyleWithDelegate:delegate];
-		[defaultStyle retain];
-		
-	}
-
-	return self;
-}
-
--(SubContext*)initWithNonSSAType:(UInt8)type delegate:(SubRenderer*)delegate
+-(SubContext*)initWithScriptType:(int)type headers:(NSDictionary *)headers_ styles:(NSArray *)stylesArray delegate:(SubRenderer*)delegate
 {
 	if (self = [super init]) {
 		resX = 640;
 		resY = 480;
 		scriptType = type;
-		collisions = kSubCollisionsNormal;
 		wrapStyle = kSubLineWrapBottomWider;
-		styles = headers = nil;
+		
+		headers = headers_;
+		if (headers) {
+			[headers retain];
+			[self readSSAHeaders];
+		}
+		
 		[delegate completedHeaderParsing:self];
-
-		defaultStyle = [[SubStyle defaultStyleWithDelegate:delegate] retain];		
+		
+		styles = nil;
+		if (stylesArray) {
+			int i, nstyles = [stylesArray count];
+			styles = [[NSMutableDictionary alloc] initWithCapacity:nstyles];
+			
+			for (i=0; i < nstyles; i++) {
+				NSDictionary *style = [stylesArray objectAtIndex:i];
+				NSString *name = [style objectForKey:@"Name"];
+				SubStyle *sstyle = [[[SubStyle alloc] initWithDictionary:style scriptVersion:scriptType delegate:delegate] autorelease];
+				
+				// VSFilter bug: styles with * in the name have the first character dropped
+				if ([name length] && [name characterAtIndex:0]=='*')
+					name = [name substringFromIndex:1];
+				
+				[(NSMutableDictionary*)styles setObject:sstyle forKey:name];
+			}
+			
+			defaultStyle = [styles objectForKey:@"Default"];
+		}
+		
+		if (!defaultStyle)
+			defaultStyle = [SubStyle defaultStyleWithDelegate:delegate];
+		
+		[defaultStyle retain];
 	}
 
 	return self;
