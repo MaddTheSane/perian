@@ -2254,10 +2254,7 @@
 		11A70AC90A3D0111002058D4 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = i386;
 				EXPORTED_SYMBOLS_FILE = "$(SOURCE_ROOT)/exportedSymbols";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -2280,6 +2277,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/build/Universal\"",
 				);
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -2335,7 +2333,10 @@
 		11BA39B10A61E453008AF206 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = i386;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "FFmpeg Static Libraries";
+				SDKROOT = macosx10.5;
 			};
 			name = Development;
 		};
@@ -2736,12 +2737,10 @@
 		61CB11040ACDF37C007994BD /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = i386;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = ebml;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
 				VALID_ARCHS = "ppc i386";
@@ -2766,12 +2765,10 @@
 		61CB11B10ACDF4FF007994BD /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = i386;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = matroska;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
 				VALID_ARCHS = "ppc i386";
