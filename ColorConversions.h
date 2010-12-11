@@ -29,7 +29,7 @@
 #define FASTCALL
 #endif
 
-typedef void ColorConversionFunc(AVFrame *inPicture, UInt8 *outBaseAddr, int outRowBytes, unsigned outWidth, unsigned outHeight) FASTCALL;
+typedef void ColorConversionFunc(AVPicture *inPicture, UInt8 *outBaseAddr, int outRowBytes, unsigned outWidth, unsigned outHeight) FASTCALL;
 typedef ColorConversionFunc *ColorConversionFuncPtr;
 typedef void ColorClearFunc(UInt8 *outBaseAddr, int outRowBytes, unsigned outWidth, unsigned outHeight) FASTCALL;
 typedef ColorClearFunc *ColorClearFuncPtr;
@@ -40,4 +40,4 @@ typedef struct ColorConversionFuncs {
 } ColorConversionFuncs;
 
 extern OSType ColorConversionDstForPixFmt(enum PixelFormat ffPixFmt);
-extern int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFmt, AVFrame *ffPicture, OSType qtPixFmt);
+extern int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFmt, AVPicture *ffPicture, OSType qtPixFmt);

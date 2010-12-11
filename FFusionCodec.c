@@ -56,6 +56,7 @@
 typedef struct
 {
 	AVFrame		*frame;
+	AVPicture	picture;
 	short		retainCount;
 	short		ffmpegUsing;
 	long		frameNumber;
@@ -114,7 +115,7 @@ typedef struct
     AVCodecContext	*avContext;
     OSType			componentType;
 	FILE			*fileLog;
-	AVFrame			lastDisplayedFrame;
+	AVPicture		*lastDisplayedPicture;
 	FFusionPacked	packedType;
 	FFusionBuffer	buffers[FFUSION_MAX_BUFFERS];	// the buffers which the codec has retained
 	int				lastAllocatedBuffer;		// the index of the buffer which was last allocated 
@@ -362,13 +363,6 @@ FFusionPacked DefaultPackedTypeForCodec(OSType codec)
 		default:
 			return PACKED_ALL_IN_FIRST_FRAME;
 	}
-}
-
-static void swapFrame(AVFrame * *a, AVFrame * *b)
-{
-	AVFrame *t = *a;
-	*a = *b;
-	*b = t;
 }
 
 //---------------------------------------------------------------------------
@@ -1193,7 +1187,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 {
     OSErr err = noErr;
     FFusionDecompressRecord *myDrp = (FFusionDecompressRecord *)drp->userDecompressRecord;
-	AVFrame *picture;
+	AVPicture *picture = NULL;
 	
 	glob->stats.type[drp->frameType].draw_calls++;
 	RecomputeMaxCounts(glob);
@@ -1205,41 +1199,28 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 		if (err) goto err;
 	}
 	
-	if (myDrp->buffer)
-	{
-		picture = myDrp->buffer->frame;
-	}
-	else
-		picture = &glob->lastDisplayedFrame;
-	
-	if(!picture || picture->data[0] == 0)
-	{
-		if(glob->lastDisplayedFrame.data[0] != NULL)
-			//Display last frame
-			picture = &glob->lastDisplayedFrame;
-		else {
-			//Display black (no frame decoded yet)
-
-			if (!glob->colorConv.clear) {
-				err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, NULL, myDrp->pixelFormat);
-				if (err) goto err;
-			}
-			
-			glob->colorConv.clear((UInt8*)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height);
-			return noErr;
+	if (myDrp->buffer && myDrp->buffer->picture.data[0]) {
+		picture = &myDrp->buffer->picture;
+		glob->lastDisplayedPicture = picture;
+	} else if (glob->lastDisplayedPicture && glob->lastDisplayedPicture->data[0]) {
+		picture = glob->lastDisplayedPicture;
+	} else {
+		//Display black (no frame decoded yet)
+		
+		if (!glob->colorConv.clear) {
+			err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, NULL, myDrp->pixelFormat);
+			if (err) goto err;
 		}
-	}
-	else
-	{
-		if (myDrp->buffer)
-			glob->lastDisplayedFrame = *picture;
+		
+		glob->colorConv.clear((UInt8*)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height);
+		return noErr;
 	}
 	
 	if (!glob->colorConv.convert) {
 		err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, picture, myDrp->pixelFormat);
 		if (err) goto err;
 	}
-	
+
 	glob->colorConv.convert(picture, (UInt8*)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height);
 	
 err:
@@ -1331,6 +1312,7 @@ static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic)
 //				FFusionDebugPrint("%p Starting Buffer %p.\n", glob, &glob->buffers[i]);
 				pic->opaque = &glob->buffers[i];
 				glob->buffers[i].frame = pic;
+				memcpy(&glob->buffers[i].picture, pic, sizeof(AVPicture));
 				glob->buffers[i].retainCount = 1;
 				glob->buffers[i].ffmpegUsing = 1;
 				glob->lastAllocatedBuffer = i;
@@ -1371,6 +1353,7 @@ static void releaseBuffer(AVCodecContext *s, AVFrame *pic)
 	if(!buf->retainCount && !buf->ffmpegUsing)
 	{
 		avcodec_default_release_buffer(s, pic);
+		buf->picture.data[0] = NULL;
 	}
 }
 
