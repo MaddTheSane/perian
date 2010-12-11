@@ -59,7 +59,6 @@ typedef struct
 	short		retainCount;
 	short		ffmpegUsing;
 	long		frameNumber;
-	AVFrame		returnedFrame;
 } FFusionBuffer;
 
 typedef enum
@@ -120,7 +119,6 @@ typedef struct
 	FFusionBuffer	buffers[FFUSION_MAX_BUFFERS];	// the buffers which the codec has retained
 	int				lastAllocatedBuffer;		// the index of the buffer which was last allocated 
 												// by the codec (and is the latest in decode order)	
-	int				shouldUseReturnedFrame;
 	struct begin_glob	begin;
 	FFusionData		data;
 	struct decode_glob	decode;
@@ -423,7 +421,6 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 			CFRelease(pathToLogFile);
 			glob->fileLog = fopen(path, "a");
 		}
-		glob->shouldUseReturnedFrame = 0;
 		
         // Open and target an instance of the base decompressor as we delegate
         // most of our calls to the base decompressor instance
@@ -634,9 +631,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		enum CodecID codecID = getCodecID(componentType);
 		
 		glob->packedType = DefaultPackedTypeForCodec(componentType);
-		
-		if(componentType == 'VP30' || componentType == 'VP31')
-			glob->shouldUseReturnedFrame = TRUE;
 
 		if(codecID == CODEC_ID_NONE)
 		{
@@ -1153,7 +1147,6 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 		myDrp->buffer = &glob->buffers[glob->lastAllocatedBuffer];
 		myDrp->buffer->frameNumber = myDrp->frameNumber;
 		retainBuffer(glob, myDrp->buffer);
-		myDrp->buffer->returnedFrame = tempFrame;
 		myDrp->decoded = true;
 		glob->decode.lastFrame = myDrp->frameNumber;
 		return err;
@@ -1168,7 +1161,6 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 		glob->decode.futureBuffer = NULL;
 	glob->decode.lastFrame = myDrp->frameNumber;
 	myDrp->decoded = true;
-	if (myDrp->buffer) myDrp->buffer->returnedFrame = tempFrame;
 	
 	FFusionDataMarkRead(frameData);
 	
@@ -1222,11 +1214,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	
 	if(!picture || picture->data[0] == 0)
 	{
-		if(glob->shouldUseReturnedFrame && myDrp->buffer &&
-		   myDrp->buffer->returnedFrame.data[0])
-			//Some decoders (vp3) keep their internal buffers in an unusable state
-			picture = &myDrp->buffer->returnedFrame;
-		else if(glob->lastDisplayedFrame.data[0] != NULL)
+		if(glob->lastDisplayedFrame.data[0] != NULL)
 			//Display last frame
 			picture = &glob->lastDisplayedFrame;
 		else {
@@ -1380,7 +1368,6 @@ static void releaseBuffer(AVCodecContext *s, FFusionBuffer *buf)
 //	FFusionDebugPrint("%p Released Buffer %p #%d to %d.\n", glob, buf, buf->frameNumber, buf->retainCount);
 	if(!buf->retainCount && !buf->ffmpegUsing)
 	{
-		buf->returnedFrame.data[0] = NULL;
 		avcodec_default_release_buffer(s, buf->frame);
 	}
 }
