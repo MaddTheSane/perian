@@ -148,8 +148,8 @@ typedef struct
 static OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, long width, long height, AVFrame *picture, long length);
 static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic);
 static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
-static void releaseBuffer(AVCodecContext *s, FFusionBuffer *buf);
 static FFusionBuffer *retainBuffer(FFusionGlobals glob, FFusionBuffer *buf);
+static void releaseBuffer(AVCodecContext *s, AVFrame *pic);
 
 int GetPPUserPreference();
 void SetPPUserPreference(int value);
@@ -1272,7 +1272,7 @@ pascal ComponentResult FFusionCodecEndBand(FFusionGlobals glob, ImageSubCodecDec
 	glob->stats.type[drp->frameType].end_calls++;
 	FFusionBuffer *buf = myDrp->buffer;
 	if(buf && buf->frame)
-		releaseBuffer(glob->avContext, buf);
+		releaseBuffer(glob->avContext, buf->frame);
 	
 	FFusionDebugPrint("%p EndBand #%d.\n", glob, myDrp->frameNumber);
 	
@@ -1350,7 +1350,7 @@ static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic)
 	if(buf->ffmpegUsing)
 	{
 		buf->ffmpegUsing = 0;
-		releaseBuffer(s, buf);
+		releaseBuffer(s, pic);
 	}
 }
 
@@ -1361,14 +1361,16 @@ static FFusionBuffer *retainBuffer(FFusionGlobals glob, FFusionBuffer *buf)
 	return buf;
 }
 
-static void releaseBuffer(AVCodecContext *s, FFusionBuffer *buf)
+static void releaseBuffer(AVCodecContext *s, AVFrame *pic)
 {
+	FFusionBuffer *buf = pic->opaque;
+
 	buf->retainCount--;
 //	FFusionGlobals glob = (FFusionGlobals)s->opaque;
 //	FFusionDebugPrint("%p Released Buffer %p #%d to %d.\n", glob, buf, buf->frameNumber, buf->retainCount);
 	if(!buf->retainCount && !buf->ffmpegUsing)
 	{
-		avcodec_default_release_buffer(s, buf->frame);
+		avcodec_default_release_buffer(s, pic);
 	}
 }
 
