@@ -85,8 +85,11 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, Handle *cookie, Desc
 		privateBuf = (unsigned char *) codecPrivate->GetBuffer();
 		numPackets = privateBuf[0] + 1;
 		
-		int packetSizes[numPackets];
-		memset(packetSizes, 0, sizeof(packetSizes));
+		if (numPackets != 3) {
+			return invalidAtomErr;
+		}
+		
+		int packetSizes[3] = {0};
 		
 		// get the sizes of the packets
 		packetSizes[numPackets - 1] = privateSize - 1;
@@ -210,8 +213,11 @@ ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHan
 		privateBuf = (unsigned char *) codecPrivate->GetBuffer();
 		numPackets = privateBuf[0] + 1;
 		
-		int packetSizes[numPackets];
-		memset(packetSizes, 0, sizeof(packetSizes));
+		if (numPackets != 3) {
+			return invalidAtomErr;
+		}
+		
+		int packetSizes[3] = {0};
 		
 		// get the sizes of the packets
 		packetSizes[numPackets - 1] = privateSize - 1;
@@ -232,7 +238,8 @@ ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHan
 		
 		// first packet
 		uint32_t serial_header_atoms[3+2] = { EndianU32_NtoB(3*4), 
-			EndianU32_NtoB(kCookieTypeOggSerialNo), EndianU32_NtoB(uid),
+			EndianU32_NtoB(kCookieTypeOggSerialNo),
+			EndianU32_NtoB(uid),
 			EndianU32_NtoB(packetSizes[0] + 2*4), 
 			EndianU32_NtoB(kCookieTypeTheoraHeader) };
 		
@@ -250,11 +257,7 @@ ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHan
 			EndianU32_NtoB(kCookieTypeTheoraCodebooks) };
 		PtrAndHand(atomhead3, imgDescExt, sizeof(atomhead3));
 		PtrAndHand(&privateBuf[offset + packetSizes[1] + packetSizes[0]], imgDescExt, packetSizes[2]);
-		
-		// add the extension
-		uint32_t endAtom[2] = { EndianU32_NtoB(sizeof(endAtom)), EndianU32_NtoB(kAudioTerminatorAtomType) };
-		PtrAndHand(endAtom, imgDescExt, sizeof(endAtom));
-		
+
 		AddImageDescriptionExtension(imgDesc, imgDescExt, kTheoraDescExtension);
 		
 		DisposeHandle(imgDescExt);
