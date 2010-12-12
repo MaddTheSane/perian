@@ -282,7 +282,6 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	}
 	if(useDefault && asbd.mChannelsPerFrame > 2)
 	{
-		asbd.mFramesPerPacket = 0;
 		acl = GetDefaultChannelLayout(&asbd);
 		aclSize = sizeof(AudioChannelLayout);
 	}
