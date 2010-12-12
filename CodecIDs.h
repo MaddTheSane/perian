@@ -87,6 +87,7 @@ enum {
 	kVideoFormatIndeo2                      = 'RT21',
 	kVideoFormatIndeo3                      = 'IV32',
 	kVideoFormatVP8                         = 'VP80',
+	kVideoFormatTheora                      = 'PeTh',
 	
 	kAudioFormatFlashADPCM                  = 'FlAd',
 	kAudioFormatDTS                         = 'DTS ', 

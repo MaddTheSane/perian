@@ -689,6 +689,19 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				
 				DisposeHandle(imgDescExt);
 			}
+		} else if (glob->componentType == kVideoFormatTheora) {
+			count = isImageDescriptionExtensionPresent(p->imageDescription, kVideoFormatTheora);
+			
+			if (count >= 1) {
+				imgDescExt = NewHandle(0);
+				GetImageDescriptionExtension(p->imageDescription, &imgDescExt, kVideoFormatTheora, 1);
+				
+				glob->avContext->extradata = calloc(1, GetHandleSize(imgDescExt) + FF_INPUT_BUFFER_PADDING_SIZE);
+				memcpy(glob->avContext->extradata, *imgDescExt, GetHandleSize(imgDescExt));
+				glob->avContext->extradata_size = GetHandleSize(imgDescExt);
+				
+				DisposeHandle(imgDescExt);
+			}
 		} else {
 			count = isImageDescriptionExtensionPresent(p->imageDescription, 'strf');
 			

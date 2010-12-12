@@ -36,7 +36,12 @@
 using namespace std;
 using namespace libmatroska;
 
-ComponentResult DescExt_H264(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
+/*
+ * Used for codecs whose extradata can be copied straight into a sample description extension.
+ * fallbackType is for formats with lots of invalid files (avi-style H264 or MPEG4) which we have
+ * an extradataless-equivalent fourcc for.
+ */
+ComponentResult DescExt_Default(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir, OSType extType, OSType fallbackType)
 {
 	if (!tr_entry || !desc) return paramErr;
 	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
@@ -44,15 +49,19 @@ ComponentResult DescExt_H264(KaxTrackEntry *tr_entry, SampleDescriptionHandle de
 	if (dir == kToSampleDescription) {
 		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
 		if (codecPrivate == NULL) {
-			// technically invalid file, assume that the h.264 is in VfW format (no pts, etc).
-			(*desc)->dataFormat = 'H264';
-			return noErr;
+			if (fallbackType) {
+				(*desc)->dataFormat = fallbackType;
+				return noErr;
+			} else {
+				Codecprintf(NULL, "Missing extradata in track\n");
+				return invalidAtomErr;
+			}
 		}
 		
 		Handle imgDescExt;
 		PtrToHand(codecPrivate->GetBuffer(), &imgDescExt, codecPrivate->GetSize());
 		
-		AddImageDescriptionExtension(imgDesc, imgDescExt, 'avcC');
+		AddImageDescriptionExtension(imgDesc, imgDescExt, extType);
 		
 		DisposeHandle(imgDescExt);
 	}
@@ -184,144 +193,6 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, Handle *cookie, DescEx
 		}
 		
 		*cookie = sndDescExt;	
-	}
-	return noErr;
-}
-
-ComponentResult DescExt_XiphTheora(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
-{
-	if (!tr_entry || !desc) return paramErr;
-	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
-	
-	if (dir == kToSampleDescription) {
-		Handle imgDescExt;
-		unsigned char *privateBuf;
-		size_t privateSize;
-		uint8_t numPackets;
-		int offset = 1, i;
-		UInt32 uid = 0;
-		
-		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		if (codecPrivate == NULL)
-			return invalidAtomErr;
-		
-		KaxTrackUID *trackUID = FindChild<KaxTrackUID>(*tr_entry);
-		if (trackUID != NULL)
-			uid = uint32(*trackUID);
-		
-		privateSize = codecPrivate->GetSize();
-		privateBuf = (unsigned char *) codecPrivate->GetBuffer();
-		numPackets = privateBuf[0] + 1;
-		
-		if (numPackets != 3) {
-			return invalidAtomErr;
-		}
-		
-		int packetSizes[3] = {0};
-		
-		// get the sizes of the packets
-		packetSizes[numPackets - 1] = privateSize - 1;
-		int packetNum = 0;
-		for (i = 1; packetNum < numPackets - 1; i++) {
-			packetSizes[packetNum] += privateBuf[i];
-			if (privateBuf[i] < 255) {
-				packetSizes[numPackets - 1] -= packetSizes[packetNum];
-				packetNum++;
-			}
-			offset++;
-		}
-		packetSizes[numPackets - 1] -= offset - 1;
-		
-		if (offset+packetSizes[0]+packetSizes[1]+packetSizes[2] > privateSize) {
-			return invalidAtomErr;
-		}
-		
-		// first packet
-		uint32_t serial_header_atoms[3+2] = { EndianU32_NtoB(3*4), 
-			EndianU32_NtoB(kCookieTypeOggSerialNo),
-			EndianU32_NtoB(uid),
-			EndianU32_NtoB(packetSizes[0] + 2*4), 
-			EndianU32_NtoB(kCookieTypeTheoraHeader) };
-		
-		PtrToHand(serial_header_atoms, &imgDescExt, sizeof(serial_header_atoms));
-		PtrAndHand(&privateBuf[offset], imgDescExt, packetSizes[0]);
-		
-		// second packet
-		uint32_t atomhead2[2] = { EndianU32_NtoB(packetSizes[1] + sizeof(atomhead2)), 
-			EndianU32_NtoB(kCookieTypeTheoraComments) };
-		PtrAndHand(atomhead2, imgDescExt, sizeof(atomhead2));
-		PtrAndHand(&privateBuf[offset + packetSizes[0]], imgDescExt, packetSizes[1]);
-		
-		// third packet
-		uint32_t atomhead3[2] = { EndianU32_NtoB(packetSizes[2] + sizeof(atomhead3)), 
-			EndianU32_NtoB(kCookieTypeTheoraCodebooks) };
-		PtrAndHand(atomhead3, imgDescExt, sizeof(atomhead3));
-		PtrAndHand(&privateBuf[offset + packetSizes[1] + packetSizes[0]], imgDescExt, packetSizes[2]);
-
-		AddImageDescriptionExtension(imgDesc, imgDescExt, kTheoraDescExtension);
-		
-		DisposeHandle(imgDescExt);
-	}
-	return noErr;
-}
-
-// VobSub stores the .idx file in the codec private, pass it as an .IDX extension
-ComponentResult DescExt_VobSub(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
-{
-	if (!tr_entry || !desc) return paramErr;
-	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
-	
-	if (dir == kToSampleDescription) {
-		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		if (codecPrivate == NULL)
-			return invalidAtomErr;
-		
-		Handle imgDescExt;
-		PtrToHand(codecPrivate->GetBuffer(), &imgDescExt, codecPrivate->GetSize());
-		
-		AddImageDescriptionExtension(imgDesc, imgDescExt, kVobSubIdxExtension);
-		
-		DisposeHandle(imgDescExt);
-	}
-	return noErr;
-}
-
-ComponentResult DescExt_SSA(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
-{
-	if (!tr_entry || !desc) return paramErr;
-	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
-	
-	if (dir == kToSampleDescription) {
-		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		if (codecPrivate == NULL)
-			return invalidAtomErr;
-		
-		Handle imgDescExt;
-		PtrToHand(codecPrivate->GetBuffer(), &imgDescExt, codecPrivate->GetSize());
-
-		AddImageDescriptionExtension(imgDesc, imgDescExt, kSubFormatSSA);
-		
-		DisposeHandle(imgDescExt);
-	}
-	return noErr;
-}
-
-ComponentResult DescExt_Real(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
-{
-	if (!tr_entry || !desc) return paramErr;
-	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
-	
-	if (dir == kToSampleDescription) {
-		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		if (codecPrivate == NULL)
-			return invalidAtomErr;
-		
-		Handle imgDescExt;
-		PtrToHand(codecPrivate->GetBuffer(), &imgDescExt, codecPrivate->GetSize());
-
-		AddImageDescriptionExtension(imgDesc, imgDescExt, kRealVideoExtension);
-		
-		DisposeHandle(imgDescExt);
 	}
 	return noErr;
 }
@@ -523,27 +394,6 @@ static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	return esdsExt;
 }
 
-ComponentResult DescExt_mp4v(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
-{
-	if (!tr_entry || !desc) return paramErr;
-	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) desc;
-	
-	if (dir == kToSampleDescription) {
-		Handle imgDescExt = CreateEsdsExt(tr_entry, false);
-		
-		if (imgDescExt == NULL) {
-			// missing extradata -> probably missing pts too, so force VfW mode
-			(*desc)->dataFormat = 'XVID';
-			return noErr;
-		}
-		
-		AddImageDescriptionExtension(imgDesc, imgDescExt, 'esds');
-		
-		DisposeHandle((Handle) imgDescExt);
-	}
-	return noErr;
-}
-
 ComponentResult DescExt_aac(KaxTrackEntry *tr_entry, Handle *cookie, DescExtDirection dir)
 {
 	if (!tr_entry || !cookie) return paramErr;
@@ -587,6 +437,8 @@ ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, Handle cookie, AudioStreamB
 	
 	return err;
 }
+
+
 
 ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir)
 {
@@ -640,28 +492,37 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 		(*imgDesc)->clutID = EndianS16_BtoN((*imgDesc)->clutID);
 
 	} else {
+		OSType extType = 0, fallbackType = 0;
 		switch ((*desc)->dataFormat) {
 			case kH264CodecType:
-				return DescExt_H264(tr_entry, desc, dir);
-								
-			case kVideoFormatXiphTheora:
-				return DescExt_XiphTheora(tr_entry, desc, dir);
-				
+				extType = 'avcC';
+				fallbackType = 'H264';
+				break;
+
 			case kSubFormatVobSub:
-				return DescExt_VobSub(tr_entry, desc, dir);
+				// VobSub stores the .idx file in the codec private, pass it as an .IDX extension
+				extType = kVobSubIdxExtension;
+				break;
 				
 			case kVideoFormatReal5:
 			case kVideoFormatRealG2:
 			case kVideoFormatReal8:
 			case kVideoFormatReal9:
-				return DescExt_Real(tr_entry, desc, dir);
+				extType = kRealVideoExtension;
+				break;
 				
 			case kMPEG4VisualCodecType:
-				return DescExt_mp4v(tr_entry, desc, dir);
+				extType = 'esds';
+				fallbackType = 'XVID';
+				break;
 				
+			case kVideoFormatTheora:
 			case kSubFormatSSA:
-				return DescExt_SSA(tr_entry, desc, dir);
+				extType = (*desc)->dataFormat;
 		}
+		
+		if (extType)
+			return DescExt_Default(tr_entry, desc, dir, extType, fallbackType);
 	}
 	return noErr;
 }
@@ -815,7 +676,7 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kVideoFormatRealG2, "V_REAL/RV20" },
 	{ kVideoFormatReal8, "V_REAL/RV30" },
 	{ kVideoFormatReal9, "V_REAL/RV40" },
-	{ kVideoFormatXiphTheora, "V_THEORA" },
+	{ kVideoFormatTheora, "V_THEORA" },
 	{ kVideoFormatSnow, "V_SNOW" },
 	{ kVideoFormatVP8, "V_VP8" },
 	
