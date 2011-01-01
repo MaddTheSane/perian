@@ -1303,6 +1303,7 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 			frame.duration = end - start;
 		} else return;
 	} else if (sampleTable) {
+		if(frame.duration) {
 		SInt64 sampleNum;
 		
 		err = QTSampleTableAddSampleReferences(sampleTable, frame.offset, frame.size, frame.duration, 
@@ -1315,6 +1316,8 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 		if (firstSample == -1)
 			firstSample = sampleNum;
 		numSamples++;
+			
+		}
 	} else {
 		SampleReference64Record sample;
 		sample.dataOffset = SInt64ToWide(frame.offset);
