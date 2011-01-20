@@ -574,7 +574,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	KaxAudioChannels & numChannels = GetChild<KaxAudioChannels>(audioTrack);
 	KaxAudioBitDepth & bitDepth = GetChild<KaxAudioBitDepth>(audioTrack);
 	
-	asbd.mBitsPerChannel = uint32(bitDepth);
+	if (bitDepth.ValueIsSet()) asbd.mBitsPerChannel = uint32(bitDepth);
 	asbd.mFormatID = MkvGetFourCC(&kaxTrack);
 	asbd.mSampleRate = Float64(sampleFreq);
 	asbd.mChannelsPerFrame = uint32(numChannels);
@@ -586,7 +586,9 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	}
 	
 	// get more info about the codec
-	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
+	err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
+	
+	if (err) goto err;
 	if(asbd.mChannelsPerFrame == 0) {
 		Codecprintf(NULL, "Audio channels not set in MKV\n");
 		goto err; // better to fail than import with the wrong number of channels...
@@ -1237,11 +1239,6 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 		duration = durationForPTS.find(lastFrames[0].pts);
 		if (duration != durationForPTS.end()) {
 			lastFrames[0].duration = duration->second;
-			if (lastFrames[0].duration == 0) {
-				// try to correct duplicate timestamps
-				// not that we can be sure what the real duration is...
-				lastFrames[0].duration = MAX(defaultDuration, 1);
-			}
 			AddFrame(lastFrames[0]);
 			lastFrames.erase(lastFrames.begin());
 			durationForPTS.erase(duration);
@@ -1282,6 +1279,15 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	TimeValue64 displayOffset = frame.pts - frame.dts;
 	
 	if (desc == NULL) return;
+	
+	if (frame.duration == 0) {
+		// try to correct duplicate timestamps
+		// not that we can be sure what the real duration is...
+		frame.duration = MAX(defaultDuration, 1);
+	}
+	
+	if (type != track_video)
+		frame.flags &= ~mediaSampleDroppable;
 	
 	if (type == track_subtitle && !is_vobsub) {
 		const char *packet=NULL; size_t size=0; unsigned start=0, end=0;
