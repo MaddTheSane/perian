@@ -1004,6 +1004,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		
 		if(IS_NUV(storage->componentType) && codecContext->codec_id == CODEC_ID_MP3) trustPacketDuration = false;
 		if(IS_FLV(storage->componentType) && codecContext->codec_id == CODEC_ID_H264) trustPacketDuration = false;
+		if(IS_FLV(storage->componentType) && codecContext->codec_type == CODEC_TYPE_AUDIO) trustPacketDuration = false;
 		
 		memset(&sampleRec, 0, sizeof(sampleRec));
 		sampleRec.dataOffset.hi = packet.pos >> 32;
