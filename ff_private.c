@@ -25,6 +25,7 @@
 #include "Codecprintf.h"
 #include "CommonUtils.h"
 #include "CodecIDs.h"
+#include "FFmpegUtils.h"
 
 #undef malloc
 #undef free
@@ -333,56 +334,28 @@ OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
 /* maps the codec_id tag of libavformat to a constant the AudioToolbox can work with */
 void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map, int channels)
 {
+	OSType fourcc = FFCodecIDToFourCC(codec_id);
+	
+	if (fourcc)
+		asbd->mFormatID = fourcc;
+	
 	switch(codec_id) {
-		case CODEC_ID_MP2:
-			asbd->mFormatID = kAudioFormatMPEGLayer2;
-			break;
-		case CODEC_ID_MP3:
-			asbd->mFormatID = kAudioFormatMPEGLayer3;
-			break;
 		case CODEC_ID_AC3:
-			asbd->mFormatID = kAudioFormatAC3MS;
 			map->vbr = 1;
 			break;
 		case CODEC_ID_PCM_S16LE:
-			asbd->mFormatID = kAudioFormatLinearPCM;
 			asbd->mFormatFlags = kLinearPCMFormatFlagIsSignedInteger;
 			asbd->mBytesPerPacket = 2 * channels;
 			break;
 		case CODEC_ID_PCM_U8:
-			asbd->mFormatID = kAudioFormatLinearPCM;
 			asbd->mFormatFlags = kLinearPCMFormatFlagIsBigEndian;
 			asbd->mBytesPerPacket = channels;
-			break;
-		case CODEC_ID_PCM_ALAW:
-			asbd->mFormatID = kAudioFormatALaw;
-			break;
-		case CODEC_ID_PCM_MULAW:
-			asbd->mFormatID = kAudioFormatULaw;
-			break;
-		case CODEC_ID_ADPCM_MS:
-			asbd->mFormatID = kMicrosoftADPCMFormat;
-			break;
-		case CODEC_ID_AAC:
-			asbd->mFormatID = kAudioFormatMPEG4AAC;
 			break;
 		case CODEC_ID_VORBIS:
 			asbd->mFormatID = 'OggV';
 			break;
 		case CODEC_ID_DTS:
-			asbd->mFormatID = kAudioFormatDTS;
 			map->vbr = 1;
-			break;
-		case CODEC_ID_ADPCM_SWF:
-			asbd->mFormatID = kAudioFormatFlashADPCM;
-			break;
-		case CODEC_ID_TTA:
-			asbd->mFormatID = kAudioFormatTTA;
-			break;
-		case CODEC_ID_NELLYMOSER:
-			asbd->mFormatID = kAudioFormatNellymoser;
-			break;
-		default:
 			break;
 	}
 } /* map_avi_to_mov_tag() */

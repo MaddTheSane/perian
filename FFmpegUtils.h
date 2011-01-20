@@ -39,6 +39,10 @@ void FFASBDToAVCodecContext(AudioStreamBasicDescription *asbd, AVCodecContext *a
 
 void FFInitFFmpeg();
 
+enum CodecID FFFourCCToCodecID(OSType formatID);
+
+OSType FFCodecIDToFourCC(enum CodecID codecID);
+
 __END_DECLS
 
 #endif

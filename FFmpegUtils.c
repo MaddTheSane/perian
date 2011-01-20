@@ -26,6 +26,7 @@
 #include "FFmpegUtils.h"
 #include "CommonUtils.h"
 #include "Codecprintf.h"
+#include "CodecIDs.h"
 #include <pthread.h>
 #include "avformat.h"
 
@@ -165,4 +166,53 @@ void FFInitFFmpeg()
 	}
 	
 	PerianInitExit(unlock);
+}
+
+// List of codec IDs we know about and that map to audio fourccs
+// XXX this is probably a duplicate of something inside libavformat
+static const struct {
+	OSType mFormatID;
+	enum CodecID codecID;
+} kAudioCodecMap[] =
+{
+	{ kAudioFormatWMA1MS, CODEC_ID_WMAV1 },
+	{ kAudioFormatWMA2MS, CODEC_ID_WMAV2 },
+	{ kAudioFormatFlashADPCM, CODEC_ID_ADPCM_SWF },
+	{ kAudioFormatXiphVorbis, CODEC_ID_VORBIS },
+	{ kAudioFormatMPEGLayer1, CODEC_ID_MP1 },
+	{ kAudioFormatMPEGLayer2, CODEC_ID_MP2 },
+	{ kAudioFormatMPEGLayer3, CODEC_ID_MP3 },
+	{ 'ms\0\0' + 0x50, CODEC_ID_MP2 },
+	{ kAudioFormatDTS, CODEC_ID_DTS },
+	{ kAudioFormatNellymoser, CODEC_ID_NELLYMOSER },
+	{ kAudioFormatTTA, CODEC_ID_TTA },
+	
+	{ kAudioFormatAC3MS, CODEC_ID_AC3 },
+	{ kAudioFormatLinearPCM, CODEC_ID_PCM_S16LE },
+	{ kAudioFormatLinearPCM, CODEC_ID_PCM_U8 },
+	{ kAudioFormatALaw, CODEC_ID_PCM_ALAW },
+	{ kAudioFormatULaw, CODEC_ID_PCM_MULAW },
+	{ kMicrosoftADPCMFormat, CODEC_ID_ADPCM_MS },
+	{ kAudioFormatMPEG4AAC, CODEC_ID_AAC },
+	{ kAudioFormatDTS, CODEC_ID_DTS },
+	{ kAudioFormatFlashADPCM, CODEC_ID_ADPCM_SWF },
+	{ 0, CODEC_ID_NONE }
+};
+
+enum CodecID FFFourCCToCodecID(OSType formatID)
+{
+	for (int i = 0; kAudioCodecMap[i].codecID != CODEC_ID_NONE; i++) {
+		if (kAudioCodecMap[i].mFormatID == formatID)
+			return kAudioCodecMap[i].codecID;
+	}
+	return CODEC_ID_NONE;
+}
+
+OSType FFCodecIDToFourCC(enum CodecID codecID)
+{
+	for (int i = 0; kAudioCodecMap[i].codecID != CODEC_ID_NONE; i++) {
+		if (kAudioCodecMap[i].codecID == codecID)
+			return kAudioCodecMap[i].mFormatID;
+	}
+	return CODEC_ID_NONE;
 }

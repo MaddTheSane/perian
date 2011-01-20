@@ -37,11 +37,6 @@ typedef struct CookieAtomHeader {
     unsigned char  data[1];
 } CookieAtomHeader;
 
-struct CodecPair {
-	OSType mFormatID;
-	CodecID codecID;
-};
-
 struct WaveFormatEx {
 	uint16_t wFormatTag;
 	uint16_t nChannels;
@@ -52,31 +47,21 @@ struct WaveFormatEx {
 	uint16_t cbSize;
 } __attribute__((packed));
 
-static const CodecPair kAllInputFormats[] = 
-{
-	{ kAudioFormatWMA1MS, CODEC_ID_WMAV1 },
-	{ kAudioFormatWMA2MS, CODEC_ID_WMAV2 },
-	{ kAudioFormatFlashADPCM, CODEC_ID_ADPCM_SWF },
-	{ kAudioFormatXiphVorbis, CODEC_ID_VORBIS },
-	{ kAudioFormatMPEGLayer2, CODEC_ID_MP2 },
-	{ kAudioFormatMPEGLayer1, CODEC_ID_MP1 },
-	{ 'ms\0\0' + 0x50, CODEC_ID_MP2 },
-	{ kAudioFormatDTS, CODEC_ID_DTS },
-	{ kAudioFormatNellymoser, CODEC_ID_NELLYMOSER },
-	{ kAudioFormatTTA, CODEC_ID_TTA},
-	{ 0, CODEC_ID_NONE }
+static OSType kAllInputFormats[] = {
+	kAudioFormatWMA1MS,
+	kAudioFormatWMA2MS,
+	kAudioFormatFlashADPCM,
+	kAudioFormatXiphVorbis,
+	kAudioFormatMPEGLayer1,
+	kAudioFormatMPEGLayer2,
+	'ms\0\0' + 0x50,
+	kAudioFormatDTS,
+	kAudioFormatNellymoser,
+	kAudioFormatTTA,
+	0
 };
 
 static const UInt32 kIntPCMOutFormatFlag = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
-
-static CodecID GetCodecID(OSType formatID)
-{
-	for (int i = 0; kAllInputFormats[i].codecID != CODEC_ID_NONE; i++) {
-		if (kAllInputFormats[i].mFormatID == formatID)
-			return kAllInputFormats[i].codecID;
-	}
-	return CODEC_ID_NONE;
-}
 
 //CA tends to not set the magic cookie immediately, but we need it to open most codecs
 //so check this to not open the codec until it's possible
@@ -106,8 +91,8 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0
 	magicCookie = NULL;
 	magicCookieSize = 0;
 	
-	for (int i = 0; kAllInputFormats[i].codecID != CODEC_ID_NONE; i++) {
-		CAStreamBasicDescription theInputFormat(kAudioStreamAnyRate, kAllInputFormats[i].mFormatID, 0, 1, 0, 0, 0, 0);
+	for (int i = 0; kAllInputFormats[i] != 0; i++) {
+		CAStreamBasicDescription theInputFormat(kAudioStreamAnyRate, kAllInputFormats[i], 0, 1, 0, 0, 0, 0);
 		AddInputFormat(theInputFormat);
 	}
 	
@@ -360,7 +345,7 @@ void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& i
 	
 	CloseAVCodec();
 
-	CodecID codecID = GetCodecID(inInputFormat.mFormatID);
+	CodecID codecID = FFFourCCToCodecID(inInputFormat.mFormatID);
 	
 	// check to make sure the input format is legal
 	if (avcodec_find_decoder(codecID) == NULL) {
@@ -384,7 +369,7 @@ void FFissionDecoder::OpenAVCodec()
 	
 	CloseAVCodec();
 	
-	CodecID codecID = GetCodecID(mInputFormat.mFormatID);
+	CodecID codecID = FFFourCCToCodecID(mInputFormat.mFormatID);
 	avCodec = avcodec_find_decoder(codecID);
 	
 	FFASBDToAVCodecContext(&mInputFormat, avContext);
