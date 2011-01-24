@@ -10,6 +10,7 @@ Fixes:
 - Fixed audio sync in many FLV videos [r1383] (1.2 regression) (#543)
 - Fixed several possible crashes due to parsing errors. [r1327, r1331, r1376] (#515)
 - Fixed a possible freeze with subtitle tracks. [r1339] (#521)
+- Worked around Apple's incorrect channel layout in .MP4 containers
 SSA:
 - Several subtitle parser fixes [r1307, r1308, r1365]
 - Much better-looking rendering of semitransparent text [r1328]
