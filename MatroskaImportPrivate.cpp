@@ -557,7 +557,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	ByteCount cookieSize = 0;
 	Handle cookieH = NULL;
 	Ptr cookie = NULL;
-	OSErr err = noErr;
+	OSStatus err = noErr;
 	
 	mkvTrack.theTrack = NewMovieTrack(theMovie, 0, 0, kFullVolume);
 	if (mkvTrack.theTrack == NULL)
@@ -588,10 +588,14 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	// get more info about the codec
 	err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
 	
-	if (err) goto err;
-	if(asbd.mChannelsPerFrame == 0) {
-		Codecprintf(NULL, "Audio channels not set in MKV\n");
+	if(asbd.mChannelsPerFrame == 0 || asbd.mFormatID == 0) {
+		Codecprintf(NULL, "Audio channels or format not set in MKV\n");
 		goto err; // better to fail than import with the wrong number of channels...
+	}
+	
+	if (err) {
+		Codecprintf(NULL, "AudioFormatGetProperty failed (error %lx / format %lx)\n", err, asbd.mFormatID);
+		err = noErr;
 	}
 
 	// see ff_private.c initialize_audio_map

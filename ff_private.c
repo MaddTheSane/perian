@@ -219,9 +219,17 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	/* ask the toolbox about more information */
 	ioSize = sizeof(AudioStreamBasicDescription);
 	err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
-	if (err || !asbd.mFormatID) {
-		fprintf(stderr, "AudioFormatGetProperty dislikes the magic cookie (error %ld / format id %lx)\n", err, asbd.mFormatID);
+	
+	// We can't recover from this (FormatInfo resets mFormatID for bad MPEG-4 AOTs)
+	if (!asbd.mFormatID || !asbd.mChannelsPerFrame) {
+		Codecprintf(NULL, "Audio channels or format not set\n");
 		goto bail;
+	}
+	
+	// We might be able to recover from this (at least try to import the packets)
+	if (err) {
+		Codecprintf(NULL, "AudioFormatGetProperty failed (error %ld / format %lx)\n", err, asbd.mFormatID);
+		err = noErr;
 	}
 	
 	// This needs to be set for playback to work, but 10.4 (+ AppleTV) didn't set it in FormatInfo.
@@ -302,7 +310,7 @@ bail:
 	if(cookie)
 		av_free(cookie);
 	
-	return noErr;
+	return err;
 } /* initialize_audio_map() */
 
 OSType map_video_codec_to_mov_tag(enum CodecID codec_id)

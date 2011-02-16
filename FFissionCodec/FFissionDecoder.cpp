@@ -314,7 +314,7 @@ void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioP
 			
 			// We need to fake an output format, doesn't matter what it says as long as it inits
 			static const AudioStreamBasicDescription DefaultOutputASBD =
-			{ 44100, kAudioFormatLinearPCM, kIntPCMOutFormatFlag, 4, 1, 4, 2, 16 };
+			{ info->mASBD.mSampleRate, kAudioFormatLinearPCM, kIntPCMOutFormatFlag, 4, 1, 4, info->mASBD.mChannelsPerFrame, 16 };
 			
 			try {
 				dec->Initialize(&info->mASBD, &DefaultOutputASBD, info->mMagicCookie, info->mMagicCookieSize);
