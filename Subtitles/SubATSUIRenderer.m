@@ -27,10 +27,6 @@
 #import "CommonUtils.h"
 #import <pthread.h>
 
-#if __MAC_OS_X_VERSION_MAX_ALLOWED <= __MAC_OS_X_VERSION_10_5
-extern void CGContextSetShouldSubpixelQuantizeFonts(CGContextRef context, bool shouldSubpixelQuantizeFonts);
-#endif
-
 static float GetWinFontSizeScale(ATSFontRef font);
 static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities);
 static ATSUFontID GetFontIDForSSAName(NSString *name);
@@ -943,6 +939,8 @@ static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanEx *spanEx, SubATSUISpanE
 	return endLayer;
 }
 
+static Fixed RoundFixed(Fixed n) {return IntToFixed(FixedToInt(n));}
+
 static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak, UniCharArrayOffset lineLen, Fixed penX, Fixed penY, CGContextRef c, SubRenderDiv *div, SubATSUISpanEx *spanEx, int textType)
 {
 	//ATS bug(?) with some fonts:
@@ -968,7 +966,7 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 		borderRect.size.height = ceilf(borderRect.size.height);
 		
 		CGContextFillRect(c, borderRect);
-	} else ATSUDrawText(layout, thisBreak, lineLen, penX, penY);
+	} else ATSUDrawText(layout, thisBreak, lineLen, RoundFixed(penX), RoundFixed(penY));
 }
 
 static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY, SubATSUISpanEx *firstSpanEx, int textType)
@@ -1095,8 +1093,10 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	CGContextSetLineCap(c, kCGLineCapRound); // avoid spiky outlines on some fonts
 	CGContextSetLineJoin(c, kCGLineJoinRound);
 	CGContextSetShouldSmoothFonts(c, NO);    // don't do LCD subpixel antialiasing
+#if __MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4
 	CGContextSetShouldSubpixelQuantizeFonts(c, NO); // draw text stroke and fill in the same place
-
+#endif
+	
 	SetATSULayoutOther(layout, kATSUCGContextTag, sizeof(CGContextRef), &c);
 
 	for (i = 0; i < div_count; i++) {
