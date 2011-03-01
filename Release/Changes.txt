@@ -6,14 +6,15 @@
 - The readme and license files are now included in the component bundle. [r1309]
 Fixes:
 - Fixed MKV files with video glitches due to zero-length frame durations. [r1364] (#502)
-- Fixed a possible crash in MKV reading. [r1332] (#223)
-- Fixed audio sync in many FLV videos [r1383] (1.2 regression) (#543)
-- Fixed several possible crashes due to parsing errors. [r1327, r1331, r1376] (#515)
-- Fixed a possible freeze with subtitle tracks. [r1339] (#521)
-- Worked around Apple's incorrect channel layout in .MP4 containers
+- Fixed audio sync in many FLV videos. [r1383] (1.2 regression) (#543)
+- Fixed possible crashes in MKV reading. [r1332, r1392] (#223)
+- Fixed several possible crashes/hangs in subtitle parsing. [r1327, r1331, r1339, r1376] (#515, #521)
+- Worked around Apple's incorrect channel layout in .MP4 containers. [A52Codec r84]
 SSA:
-- Several subtitle parser fixes [r1307, r1308, r1365]
-- Much better-looking rendering of semitransparent text [r1328]
+- Fixed several correctness errors. [r1307, r1308, r1365]
+- Improved rendering of semitransparent text styles. [r1328]
+Notes:
+- The next planned version will remove support for PowerPC and Mac OS X versions prior to 10.6. Maintenance updates may be provided if necessary.
 
 1.2.1
 - Added Indeo 5 decoding. [r1271]
