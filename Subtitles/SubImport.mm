@@ -1449,6 +1449,7 @@ NS_DURING
 	
 	SubLine *sl = [[SubLine alloc] initWithLine:str start:start end:end];
 	
+	[str autorelease];
 	[sl autorelease];
 	
 	[(SubSerializer*)priv addLine:sl];
