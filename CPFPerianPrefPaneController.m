@@ -380,6 +380,7 @@
 		
 		[self installUninstall:nil];
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
+		[self updateCheck:nil];
 	} else {
 		[self checkForInstallation];
 	}
