@@ -28,6 +28,7 @@
 #include <matroska/KaxSegment.h>
 #include <matroska/KaxCluster.h>
 #include <matroska/KaxBlock.h>
+#include <ebml/StdIOCallback.h>
 
 #include "PerianResourceIDs.h"
 #include "MatroskaImport.h"
@@ -336,9 +337,11 @@ ComponentResult MatroskaImport::Idle(long inFlags, long *outFlags)
 	TimeValue maxLoadedTime;
 	GetMaxLoadedTime(&maxLoadedTime);
 	TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
+	ComponentResult err = noErr;
 	
 	idlesSinceLastAdd++;
 	
+	try {
 	if (EbmlId(*el_l1) == KaxCluster::ClassInfos.GlobalId) {
 		int upperLevel = 0;
 		EbmlElement *dummyElt = NULL;
@@ -359,18 +362,29 @@ ComponentResult MatroskaImport::Idle(long inFlags, long *outFlags)
 			ImportCluster(cluster, false);
 	}
 	
-	if (!NextLevel1Element()) {
-		if (baseTrack)
-			DisposeMovieTrack(baseTrack);
-		*outFlags |= movieImportResultComplete;
-		loadState = kMovieLoadStateComplete;
-		
-		for (int i = 0; i < tracks.size(); i++)
-			tracks[i].FinishTrack();
+	if (!NextLevel1Element())
+		goto finish;
+	} catch (CRTError &cerr) {
+		err = cerr.getError();
+		Codecprintf(NULL, "MKV: caught an error (%d): %s\n", err, cerr.what());
+		goto finish;
 	}
 	
 	lastIdleTime = currentIdleTime;
 	return noErr;
+	
+finish:	
+	lastIdleTime = currentIdleTime;
+
+	if (baseTrack)
+		DisposeMovieTrack(baseTrack);
+	*outFlags |= movieImportResultComplete;
+	loadState = kMovieLoadStateComplete;
+	
+	for (int i = 0; i < tracks.size(); i++)
+		tracks[i].FinishTrack();
+	
+	return err;
 }
 
 ComponentResult MatroskaImport::SetIdleManager(IdleManager im)

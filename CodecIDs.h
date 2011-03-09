@@ -53,6 +53,9 @@ enum {
 	
 	// contains a single byte equal to the ContentCompAlgo element in matroska
 	kMKVCompressionExtension = 'MCmp',
+	// contains the compression settings equal to ContentCompSettings in matroska
+	kCompressionSettingsExtension = 'CpSt',
+	kCompressionAlgorithm = 'CpAl',
 };
 
 
@@ -83,6 +86,8 @@ enum {
 	kVideoFormatSnow                        = 'SNOW',
 	kVideoFormatIndeo2                      = 'RT21',
 	kVideoFormatIndeo3                      = 'IV32',
+	kVideoFormatVP8                         = 'VP80',
+	kVideoFormatTheora                      = 'PeTh',
 	
 	kAudioFormatFlashADPCM                  = 'FlAd',
 	kAudioFormatDTS                         = 'DTS ', 
@@ -101,21 +106,15 @@ enum {
 	kSubFormatASS                           = 'ASS ',
 	kSubFormatUSF                           = 'USF ',
 	kSubFormatVobSub                        = 'SPU ',
+	
+	kCompressedAVC1							= 'CAVC',
+	kCompressedMP4V							= 'CMP4',
+	kCompressedAC3							= 'CAC3',
+	kCompressedMP3							= 'CMP3',
+	kCompressedDTS							= 'CDTS',
 };
 
 #ifndef REZ
-struct WaveFormatEx {
-	uint16_t wFormatTag;
-	uint16_t nChannels;
-	uint32_t nSamplesPerSec;
-	uint32_t nAvgBytesPerSec;
-	uint16_t nBlockAlign;
-	uint16_t wBitsPerSample;
-	uint16_t cbSize;
-} __attribute__((packed));
-
-typedef struct WaveFormatEx WaveFormatEx;
-
 int getCodecID(OSType componentType);
 pascal ComponentResult getPerianCodecInfo(ComponentInstance self, OSType componentType, void *info);
 #endif

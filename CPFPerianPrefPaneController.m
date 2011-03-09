@@ -374,14 +374,13 @@
 	if((lastInstVersion == nil || [lastInstVersion isVersionStringOlderThan:myVersion]) && installStatus != InstallStatusInstalled)
 	{
 		/*Check for temp after an update */
-		BOOL isDir = NO;
 		NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
-		NSInteger tag;
 		
 		[[NSFileManager defaultManager] removeFileAtPath:tempPrefPane handler:nil];
 		
 		[self installUninstall:nil];
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
+		[self updateCheck:nil];
 	} else {
 		[self checkForInstallation];
 	}

@@ -19,11 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-
+#include <AudioToolbox/AudioToolbox.h>
 #include "FFissionDecoder.h"
 #include "ACCodecDispatch.h"
 #include "PerianResourceIDs.h"
 #include "Codecprintf.h"
+#include "FFmpegUtils.h"
 #include "CodecIDs.h"
 #include "dca.h"
 
@@ -36,34 +37,31 @@ typedef struct CookieAtomHeader {
     unsigned char  data[1];
 } CookieAtomHeader;
 
-struct CodecPair {
-	OSType mFormatID;
-	CodecID codecID;
+struct WaveFormatEx {
+	uint16_t wFormatTag;
+	uint16_t nChannels;
+	uint32_t nSamplesPerSec;
+	uint32_t nAvgBytesPerSec;
+	uint16_t nBlockAlign;
+	uint16_t wBitsPerSample;
+	uint16_t cbSize;
+} __attribute__((packed));
+
+static OSType kAllInputFormats[] = {
+	kAudioFormatWMA1MS,
+	kAudioFormatWMA2MS,
+	kAudioFormatFlashADPCM,
+	kAudioFormatXiphVorbis,
+	kAudioFormatMPEGLayer1,
+	kAudioFormatMPEGLayer2,
+	'ms\0\0' + 0x50,
+	kAudioFormatDTS,
+	kAudioFormatNellymoser,
+	kAudioFormatTTA,
+	0
 };
 
-static const CodecPair kAllInputFormats[] = 
-{
-	{ kAudioFormatWMA1MS, CODEC_ID_WMAV1 },
-	{ kAudioFormatWMA2MS, CODEC_ID_WMAV2 },
-	{ kAudioFormatFlashADPCM, CODEC_ID_ADPCM_SWF },
-	{ kAudioFormatXiphVorbis, CODEC_ID_VORBIS },
-	{ kAudioFormatMPEGLayer2, CODEC_ID_MP2 },
-	{ kAudioFormatMPEGLayer1, CODEC_ID_MP1 },
-	{ 'ms\0\0' + 0x50, CODEC_ID_MP2 },
-	{ kAudioFormatDTS, CODEC_ID_DTS },
-	{ kAudioFormatNellymoser, CODEC_ID_NELLYMOSER },
-	{ kAudioFormatTTA, CODEC_ID_TTA},
-	{ 0, CODEC_ID_NONE }
-};
-
-static CodecID GetCodecID(OSType formatID)
-{
-	for (int i = 0; kAllInputFormats[i].codecID != CODEC_ID_NONE; i++) {
-		if (kAllInputFormats[i].mFormatID == formatID)
-			return kAllInputFormats[i].codecID;
-	}
-	return CODEC_ID_NONE;
-}
+static const UInt32 kIntPCMOutFormatFlag = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
 
 //CA tends to not set the magic cookie immediately, but we need it to open most codecs
 //so check this to not open the codec until it's possible
@@ -90,12 +88,11 @@ static void ParseWaveFormat(const WaveFormatEx *wEx, AVCodecContext *avContext)
 
 FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0)
 {
-	kIntPCMOutFormatFlag = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
 	magicCookie = NULL;
 	magicCookieSize = 0;
 	
-	for (int i = 0; kAllInputFormats[i].codecID != CODEC_ID_NONE; i++) {
-		CAStreamBasicDescription theInputFormat(kAudioStreamAnyRate, kAllInputFormats[i].mFormatID, 0, 1, 0, 0, 0, 0);
+	for (int i = 0; kAllInputFormats[i] != 0; i++) {
+		CAStreamBasicDescription theInputFormat(kAudioStreamAnyRate, kAllInputFormats[i], 0, 1, 0, 0, 0, 0);
 		AddInputFormat(theInputFormat);
 	}
 	
@@ -134,6 +131,8 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0
 
 FFissionDecoder::~FFissionDecoder()
 {
+	CloseAVCodec();
+	
 	if (magicCookie)
 		delete[] magicCookie;
 	
@@ -187,11 +186,11 @@ void FFissionDecoder::SetMagicCookie(const void* inMagicCookieData, UInt32 inMag
 	avContext->extradata = NULL;
 }
 
-void FFissionDecoder::SetupExtradata(OSType formatID)
+void FFissionDecoder::SetupExtradata()
 {
 	if (!magicCookie) return;
 		
-	switch (formatID) {
+	switch (mInputFormat.mFormatID) {
 		case kAudioFormatWMA1MS:
 		case kAudioFormatWMA2MS:
 		case kAudioFormatTTA:
@@ -288,6 +287,11 @@ void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioP
 			if (ioPropertyDataSize != sizeof(UInt32))
 				CODEC_THROW(kAudioCodecBadPropertySizeError);
 			break;
+			
+		case kAudioCodecPropertyFormatInfo:
+			if (ioPropertyDataSize != sizeof(AudioFormatInfo))
+				CODEC_THROW(kAudioCodecBadPropertySizeError);
+			break;
 	}
 	
 	switch (inPropertyID) {
@@ -303,6 +307,31 @@ void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioP
 			*reinterpret_cast<UInt32*>(outPropertyData) = inputBuffer.GetDataAvailable();
 			break;
 			
+		case kAudioCodecPropertyFormatInfo:
+		{
+			AudioFormatInfo *info = (AudioFormatInfo*)outPropertyData;
+			FFissionDecoder *dec = new FFissionDecoder();
+			
+			// We need to fake an output format, doesn't matter what it says as long as it inits
+			static const AudioStreamBasicDescription DefaultOutputASBD =
+			{ info->mASBD.mSampleRate, kAudioFormatLinearPCM, kIntPCMOutFormatFlag, 4, 1, 4, info->mASBD.mChannelsPerFrame, 16 };
+			
+			try {
+				dec->Initialize(&info->mASBD, &DefaultOutputASBD, info->mMagicCookie, info->mMagicCookieSize);
+				
+				AudioStreamBasicDescription asbd = {};
+				FFAVCodecContextToASBD(dec->avContext, &asbd);
+				
+				CAStreamBasicDescription::FillOutFormat(info->mASBD, asbd);
+			} catch (ComponentResult r) {
+				delete dec;
+				CODEC_THROW(r);
+			}
+			
+			delete dec;
+		}
+			break;
+			
 		default:
 			FFissionCodec::GetProperty(inPropertyID, ioPropertyDataSize, outPropertyData);
 	}
@@ -316,7 +345,7 @@ void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& i
 	
 	CloseAVCodec();
 
-	CodecID codecID = GetCodecID(inInputFormat.mFormatID);
+	CodecID codecID = FFFourCCToCodecID(inInputFormat.mFormatID);
 	
 	// check to make sure the input format is legal
 	if (avcodec_find_decoder(codecID) == NULL) {
@@ -340,25 +369,20 @@ void FFissionDecoder::OpenAVCodec()
 	
 	CloseAVCodec();
 	
-	CodecID codecID = GetCodecID(mInputFormat.mFormatID);
+	CodecID codecID = FFFourCCToCodecID(mInputFormat.mFormatID);
 	avCodec = avcodec_find_decoder(codecID);
 	
-	avContext->sample_rate = mInputFormat.mSampleRate;
-	avContext->channels = mInputFormat.mChannelsPerFrame;
-	avContext->block_align = mInputFormat.mBytesPerPacket;
-	avContext->frame_size = mInputFormat.mFramesPerPacket;
-	avContext->bits_per_coded_sample = mInputFormat.mBitsPerChannel;
+	FFASBDToAVCodecContext(&mInputFormat, avContext);
 	avContext->codec_id = codecID;
-	
+
 	if (avContext->sample_rate == 0) {
 		Codecprintf(NULL, "Invalid sample rate %d\n", avContext->sample_rate);
 		avCodec = NULL;
-		return;
+		CODEC_THROW(kAudioCodecUnsupportedFormatError);
 	}
 	
-	if (magicCookie) {
-		SetupExtradata(mInputFormat.mFormatID);
-	}
+	if (magicCookie)
+		SetupExtradata();
 	
 	if (avcodec_open(avContext, avCodec)) {
 		Codecprintf(NULL, "error opening audio avcodec\n");
@@ -685,21 +709,9 @@ UInt32 FFissionDecoder::GetVersion() const
 	return kFFusionCodecVersion;
 }
 
-// comment from XiphQT (variable frames per packet means FrameSize should be reported 0, 
-// but apparently needs 1 on Intel?):
-/* The following line has been changed according to Apple engineers' suggestion
-   I received via Steve Nicolai (in response to *my* bugreport, I think...).
-   (Why don't they just implement the VBR-VFPP properly? *sigh*) */
-#ifdef TARGET_CPU_X86
-#define SHOULD_BE_ZERO 1
-#else
-#define SHOULD_BE_ZERO 0
-#endif
-
 void FFissionVBRDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData)
 {
 	switch (inPropertyID) {
-		case kAudioCodecPropertyPacketFrameSize:
 		case kAudioCodecPropertyHasVariablePacketByteSizes:
 		case kAudioCodecPropertyRequiresPacketDescription:
 			if (ioPropertyDataSize != sizeof(UInt32))
@@ -708,10 +720,6 @@ void FFissionVBRDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& 
 	}
 	
 	switch (inPropertyID) {
-		case kAudioCodecPropertyPacketFrameSize:
-			*reinterpret_cast<UInt32*>(outPropertyData) = SHOULD_BE_ZERO;
-			break;
-			
 		case kAudioCodecPropertyHasVariablePacketByteSizes:
 		case kAudioCodecPropertyRequiresPacketDescription:
 			*reinterpret_cast<UInt32*>(outPropertyData) = true;

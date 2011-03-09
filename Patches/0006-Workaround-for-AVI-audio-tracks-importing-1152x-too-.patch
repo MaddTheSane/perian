@@ -1,0 +1,25 @@
+From 564d6e792cf23c599807bd41dd466a8d7f7db4a3 Mon Sep 17 00:00:00 2001
+From: Alexander Strange <astrange@ithinksw.com>
+Date: Sat, 6 Nov 2010 05:24:09 -0400
+Subject: [PATCH 6/6] Workaround for AVI audio tracks importing 1152x too long
+
+---
+ libavformat/avidec.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/libavformat/avidec.c b/libavformat/avidec.c
+index 2d38191..3994a5a 100644
+--- a/libavformat/avidec.c
++++ b/libavformat/avidec.c
+@@ -97,7 +97,7 @@ static void print_tag(const char *str, unsigned int tag, int size)
+ 
+ static inline int get_duration(AVIStream *ast, int len){
+     if(ast->sample_size){
+-        return len;
++        return len / ast->sample_size;
+     }else if (ast->dshow_block_align){
+         return (len + ast->dshow_block_align - 1)/ast->dshow_block_align;
+     }else
+-- 
+1.7.3.1
+

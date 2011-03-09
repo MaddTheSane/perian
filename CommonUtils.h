@@ -64,6 +64,9 @@ int IsAltivecSupported();
 // is this font name known to be incompatible with ATSUI?
 int ShouldImportFontFileName(const char *filename);
 	
+// can we safely create an HE-AAC track with a frequency of more than 48khz?
+int ShouldPlayHighFreqSBR();
+	
 // CFPreferencesCopyAppValue() wrapper which checks the type of the value returned
 CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type);
 

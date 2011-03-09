@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	int i = 0;
 
 	//loading copied from ssa2html, still duplicated
-	NSString *header = LoadSSAFromPath(inFile, ss);
+	NSString *header = SubLoadSSAFromPath(inFile, ss);
 	[ss setFinished:YES];
 	
 	NSDictionary *headers;
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	sc = [[SubContext alloc] initWithHeaders:headers styles:styles delegate:NULL];
 	int width = sc->resX, height = sc->resY;
 	CGRect rect = CGRectMake(0, 0, width, height);
-	SubtitleRendererPtr s = SubInitSSA((char*)[header UTF8String], [header length], width, height);
+	SubRendererPtr s = SubRendererCreateWithSSA((char*)[header UTF8String], [header length], width, height);
 
 	while (![ss isEmpty]) {
 		NSAutoreleasePool *inner_pool = [[NSAutoreleasePool alloc] init];
@@ -57,14 +57,14 @@ int main(int argc, char *argv[])
 			NSString *pdf = [outDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d.pdf", i]];
 			CGContextRef pdfC = CGPDFContextCreateWithURL((CFURLRef)[NSURL fileURLWithPath:pdf], &rect, NULL);
 			CGContextBeginPage(pdfC, NULL);
-			SubRenderPacket(s, pdfC, (CFStringRef)sl->line, width, height);
+			SubRendererRenderPacket(s, pdfC, (CFStringRef)sl->line, width, height);
 			CGContextEndPage(pdfC);
 			CGContextRelease(pdfC);
 			
 			NSString *ps = [outDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d.eps", i]];
 			CGContextRef psC = CGPSContextCreateWithURL((CFURLRef)[NSURL fileURLWithPath:ps], &rect, NULL);
 			CGContextBeginPage(psC, NULL);
-			SubRenderPacket(s, psC, (CFStringRef)sl->line, width, height);
+			SubRendererRenderPacket(s, psC, (CFStringRef)sl->line, width, height);
 			CGContextEndPage(psC);
 			CGContextRelease(psC);
 

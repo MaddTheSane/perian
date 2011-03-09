@@ -8,6 +8,8 @@
 	<string>Perian</string>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleIconFile</key>
+	<string>Perian_icon.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.perian.Perian</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -17,7 +19,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.2.1</string>
+	<string>1.2.2</string>
 	<key>NSMainNibFile</key>
 	<string>UpdateCheckerMainMenu</string>
 	<key>NSPrincipalClass</key>

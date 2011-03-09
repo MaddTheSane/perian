@@ -44,13 +44,14 @@
 #include "MatroskaImport.h"
 #include "MatroskaCodecIDs.h"
 #include "SubImport.h"
+#include "SubRenderer.h"
 #include "CommonUtils.h"
 #include "Codecprintf.h"
 #include "bitstream_info.h"
+#include "CompressCodecUtils.h"
 
 extern "C" {
 #include "avutil.h"
-#define CodecType AVCodecType
 #include "ff_private.h"
 #undef CodecType	
 }
@@ -75,7 +76,7 @@ bool MatroskaImport::OpenFile()
 		EbmlHead *head = static_cast<EbmlHead *>(el_l0);
 		
 		EDocType docType = GetChild<EDocType>(*head);
-		if (string(docType) != "matroska") {
+		if (string(docType) != "matroska" && string(docType) != "webm") {
 			Codecprintf(NULL, "Not a Matroska file\n");
 			valid = false;
 		}
@@ -274,7 +275,7 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 			switch (uint8(type)) {
 				case track_video:
 					if (pass == 2) continue;
-					err = AddVideoTrack(track, mkvTrack);
+					err = AddVideoTrack(track, mkvTrack, encodings);
 					if (err) return err;
 					
 					if (mkvTrack.isEnabled)
@@ -290,7 +291,7 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					
 				case track_audio:
 					if (pass == 2) continue;
-					err = AddAudioTrack(track, mkvTrack);
+					err = AddAudioTrack(track, mkvTrack, encodings);
 					if (err) return err;
 					
 					if (mkvTrack.isEnabled)
@@ -306,7 +307,7 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					
 				case track_subtitle:
 					if (pass == 1) continue;
-					err = AddSubtitleTrack(track, mkvTrack);
+					err = AddSubtitleTrack(track, mkvTrack, encodings);
 					if (err) return err;
 					if (mkvTrack.theTrack == NULL) continue;
 					
@@ -328,12 +329,6 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 					// not likely to be implemented soon
 				default:
 					continue;
-			}
-			
-			if (encodings) {
-				err = ReadContentEncodings(*encodings, mkvTrack);
-				// just ignore the track if there's some problem with this element
-				if (err) continue;
 			}
 			
 			SetMediaLanguage(mkvTrack.theMedia, qtLang);
@@ -387,9 +382,9 @@ ComponentResult MatroskaImport::ReadTracks(KaxTracks &trackEntries)
 	return noErr;
 }
 
-ComponentResult MatroskaImport::ReadContentEncodings(KaxContentEncodings &encodings, MatroskaTrack &mkvTrack)
+ComponentResult MatroskaImport::ReadVobSubContentEncodings(KaxContentEncodings *encodings, MatroskaTrack &mkvTrack)
 {
-	KaxContentEncoding & encoding = GetChild<KaxContentEncoding>(encodings);
+	KaxContentEncoding & encoding = GetChild<KaxContentEncoding>(*encodings);
 	int scope = uint32(GetChild<KaxContentEncodingScope>(encoding));
 	int type = uint32(GetChild<KaxContentEncodingType>(encoding));
 	
@@ -422,7 +417,7 @@ ComponentResult MatroskaImport::ReadContentEncodings(KaxContentEncodings &encodi
 	return noErr;
 }
 
-ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
+ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings)
 {
 	ComponentResult err = noErr;
 	ImageDescriptionHandle imgDesc;
@@ -435,21 +430,23 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	KaxVideoPixelHeight & pxl_height = GetChild<KaxVideoPixelHeight>(videoTrack);
 	
 	// Use the PixelWidth if the DisplayWidth is not set
-	if (disp_width.ValueIsSet() && disp_height.ValueIsSet()) {
+	if (disp_width.ValueIsSet() || disp_height.ValueIsSet()) {
 		// some files ignore the spec and treat display width/height as a ratio, not as pixels
 		// so scale the display size to be at least as large as the pixel size here
 		// but don't let it be bigger in both dimensions
-		float horizRatio = float(uint32(pxl_width)) / uint32(disp_width);
-		float vertRatio = float(uint32(pxl_height)) / uint32(disp_height);
+		uint32 displayWidth = disp_width.ValueIsSet() ? uint32(disp_width) : uint32(pxl_width);
+		uint32 displayHeight = disp_height.ValueIsSet() ? uint32(disp_height) : uint32(pxl_height);
+		float horizRatio = float(uint32(pxl_width)) / displayWidth;
+		float vertRatio = float(uint32(pxl_height)) / displayHeight;
 		
 		if (vertRatio > horizRatio && vertRatio > 1) {
-			width = FloatToFixed(uint32(disp_width) * vertRatio);
-			height = FloatToFixed(uint32(disp_height) * vertRatio);
+			width = FloatToFixed(displayWidth * vertRatio);
+			height = FloatToFixed(displayHeight * vertRatio);
 		} else if (horizRatio > 1) {
-			width = FloatToFixed(uint32(disp_width) * horizRatio);
-			height = FloatToFixed(uint32(disp_height) * horizRatio);
+			width = FloatToFixed(displayWidth * horizRatio);
+			height = FloatToFixed(displayHeight * horizRatio);
 		} else {
-			float dar = uint32(disp_width) / (float)uint32(disp_height);
+			float dar = displayWidth / (float)displayHeight;
 			float p_ratio = uint32(pxl_width) / (float)uint32(pxl_height);
 			
 			if (dar > p_ratio) {
@@ -495,6 +492,51 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	err = MkvFinishSampleDescription(&kaxTrack, (SampleDescriptionHandle) imgDesc, kToSampleDescription);
 	if (err) return err;
 	
+	if(encodings)
+	{
+		KaxContentEncoding & encoding = GetChild<KaxContentEncoding>(*encodings);
+		int scope = uint32(GetChild<KaxContentEncodingScope>(encoding));
+		int type = uint32(GetChild<KaxContentEncodingType>(encoding));
+		
+		if (scope != 1) {
+			Codecprintf(NULL, "Content encoding scope of %d not expected\n", scope);
+		}
+		if (type != 0) {
+			Codecprintf(NULL, "Encrypted track\n");
+		}
+		
+		if(scope == 1 && type == 0)
+		{
+			KaxContentCompression & comp = GetChild<KaxContentCompression>(encoding);
+			int algo = uint32(GetChild<KaxContentCompAlgo>(comp));
+			
+			if (algo != 3)
+				Codecprintf(NULL, "MKV: warning, track compression algorithm %d not stripped header\n", algo);
+			
+			SampleDescriptionHandle sampleDesc = mkvTrack.desc;
+			OSType compressedType = compressStreamFourCC((*sampleDesc)->dataFormat);
+			if (compressedType == 0)
+				Codecprintf(NULL, "MKV: warning, compressed track %4.4s probably won't work\n", &(*mkvTrack.desc)->dataFormat);
+			else
+			{
+				Handle ext = NewHandle(4);
+				memcpy(*ext, &algo, 4);
+				(*sampleDesc)->dataFormat = compressedType;
+				AddImageDescriptionExtension((ImageDescriptionHandle)mkvTrack.desc, ext, kCompressionAlgorithm);
+				DisposeHandle(ext);
+				KaxContentCompSettings & settings = GetChild<KaxContentCompSettings>(comp);
+				uint8_t *compSettings = (uint8_t *)settings.GetBuffer();
+				int compSize = settings.GetSize();
+				if(compSize > 0) {
+					ext = NewHandle(compSize);
+					memcpy(*ext, compSettings, compSize);
+					AddImageDescriptionExtension((ImageDescriptionHandle)mkvTrack.desc, ext, kCompressionSettingsExtension);
+					DisposeHandle(ext);
+				}	
+			}
+		}
+	}
+	
 	// video tracks can have display offsets, so create a sample table
 	err = QTSampleTableCreateMutable(NULL, GetMovieTimeScale(theMovie), NULL, &mkvTrack.sampleTable);
 	if (err) return err;
@@ -504,7 +546,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	return err;
 }
 
-ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
+ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings)
 {
 	SoundDescriptionHandle sndDesc = NULL;
 	AudioStreamBasicDescription asbd = {0};
@@ -515,6 +557,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	ByteCount cookieSize = 0;
 	Handle cookieH = NULL;
 	Ptr cookie = NULL;
+	OSStatus err = noErr;
 	
 	mkvTrack.theTrack = NewMovieTrack(theMovie, 0, 0, kFullVolume);
 	if (mkvTrack.theTrack == NULL)
@@ -543,11 +586,21 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	}
 	
 	// get more info about the codec
-	AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
-	if(asbd.mChannelsPerFrame == 0)
-		asbd.mChannelsPerFrame = 1;		// avoid a div by zero
-	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3) //see ff_private.c initialize_audio_map
-		asbd.mFramesPerPacket = 1152;
+	err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
+	
+	if(asbd.mChannelsPerFrame == 0 || asbd.mFormatID == 0) {
+		Codecprintf(NULL, "Audio channels or format not set in MKV\n");
+		goto err; // better to fail than import with the wrong number of channels...
+	}
+	
+	if (err) {
+		Codecprintf(NULL, "AudioFormatGetProperty failed (error %lx / format %lx)\n", err, asbd.mFormatID);
+		err = noErr;
+	}
+
+	// see ff_private.c initialize_audio_map
+	if (!asbd.mFramesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3)
+		asbd.mFramesPerPacket = asbd.mSampleRate > 24000 ? 1152 : 576;
 	
 	// FIXME: mChannelLayoutTag == 0 is valid
 	// but we don't use channel position lists (yet) so it's safe for now
@@ -557,9 +610,65 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 		acl_size = 0;
 	}
 	
-	OSStatus err = QTSoundDescriptionCreate(&asbd, pacl, acl_size, cookie, cookieSize, 
+	if(encodings)
+	{
+		KaxContentEncoding & encoding = GetChild<KaxContentEncoding>(*encodings);
+		int scope = uint32(GetChild<KaxContentEncodingScope>(encoding));
+		int type = uint32(GetChild<KaxContentEncodingType>(encoding));
+		
+		if (scope != 1) {
+			Codecprintf(NULL, "Content encoding scope of %d not expected\n", scope);
+		}
+		if (type != 0) {
+			Codecprintf(NULL, "Encrypted track\n");
+		}
+		
+		if(scope == 1 && type == 0)
+		{
+			KaxContentCompression & comp = GetChild<KaxContentCompression>(encoding);
+			int algo = uint32(GetChild<KaxContentCompAlgo>(comp));
+			
+			if (algo != 3)
+				Codecprintf(NULL, "MKV: warning, track compression algorithm %d not stripped header\n", algo);
+			
+			OSType compressedType = compressStreamFourCC(asbd.mFormatID);
+			if (compressedType == 0)
+				Codecprintf(NULL, "MKV: warning, compressed track %4.4s probably won't work\n", &(*mkvTrack.desc)->dataFormat);
+			else
+			{
+				asbd.mFormatID = compressedType;
+				uint32_t algoHeader[] = {
+					EndianS32_NtoB(12),
+					EndianS32_NtoB(kCompressionAlgorithm),
+					EndianS32_NtoB(algo)
+				};
+				Handle newCookieHandle;
+				PtrToHand(algoHeader, &newCookieHandle, sizeof(algoHeader));
+				KaxContentCompSettings & settings = GetChild<KaxContentCompSettings>(comp);
+				uint8_t *compSettings = (uint8_t *)settings.GetBuffer();
+				int compSize = settings.GetSize();
+				if(compSize > 0) {
+					uint32_t settingsHeader[] = {
+						EndianS32_NtoB(8 + compSize),
+						EndianS32_NtoB(kCompressionSettingsExtension),
+					};
+					PtrAndHand(settingsHeader, newCookieHandle, sizeof(settingsHeader));
+					PtrAndHand(compSettings, newCookieHandle, compSize);
+				}
+				if(cookieSize)
+				{
+					HandAndHand(cookieH, newCookieHandle);
+					DisposeHandle(cookieH);
+				}
+				cookieH = newCookieHandle;
+				cookie = *cookieH;
+				cookieSize = GetHandleSize(cookieH);
+			}
+		}	
+	}
+	
+	err = QTSoundDescriptionCreate(&asbd, pacl, acl_size, cookie, cookieSize, 
 											kQTSoundDescriptionKind_Movie_LowestPossibleVersion, &sndDesc);
-	DisposeHandle(cookieH);
 	if (err) {
 		Codecprintf(NULL, "Borked audio track entry, hoping we can parse the track for asbd\n");
 		DisposeHandle((Handle)sndDesc);
@@ -569,13 +678,18 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	mkvTrack.desc = (SampleDescriptionHandle) sndDesc;
 	
 	err = QTSampleTableCreateMutable(NULL, GetMovieTimeScale(theMovie), NULL, &mkvTrack.sampleTable);
-	if (err) return err;
+	if (err) goto err;
 	
 	err = QTSampleTableAddSampleDescription(mkvTrack.sampleTable, mkvTrack.desc, 0, &mkvTrack.qtSampleDesc);
+	
+err:
+	if (cookieH)
+		DisposeHandle(cookieH);
+	
 	return err;
 }
 
-ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack)
+ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, MatroskaTrack &mkvTrack, KaxContentEncodings *encodings)
 {
 	Fixed trackWidth, trackHeight;
 	Rect movieBox;
@@ -657,7 +771,13 @@ ComponentResult MatroskaImport::AddSubtitleTrack(KaxTrackEntry &kaxTrack, Matros
 	}
 	
 	// this sets up anything else needed in the description for the specific codec.
-	return MkvFinishSampleDescription(&kaxTrack, (SampleDescriptionHandle) imgDesc, kToSampleDescription);
+	ComponentResult result = MkvFinishSampleDescription(&kaxTrack, (SampleDescriptionHandle) imgDesc, kToSampleDescription);
+
+	if(encodings) {
+		ReadVobSubContentEncodings(encodings, mkvTrack);
+	}
+	
+	return result;
 }
 
 ComponentResult MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
@@ -956,7 +1076,7 @@ void MatroskaImport::PrerollSubtitleTracks()
 			
 			if (err || !subtitleDescriptionExt) continue;
 			
-			SubPrerollFromHeader(*subtitleDescriptionExt, GetHandleSize(subtitleDescriptionExt));
+			SubRendererPrerollFromHeader(*subtitleDescriptionExt, GetHandleSize(subtitleDescriptionExt));
 		}
 	}
 }
@@ -1164,6 +1284,15 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	
 	if (desc == NULL) return;
 	
+	if (frame.duration == 0) {
+		// try to correct duplicate timestamps
+		// not that we can be sure what the real duration is...
+		frame.duration = MAX(defaultDuration, 1);
+	}
+	
+	if (type != track_video)
+		frame.flags &= ~mediaSampleDroppable;
+	
 	if (type == track_subtitle && !is_vobsub) {
 		const char *packet=NULL; size_t size=0; unsigned start=0, end=0;
 		
@@ -1184,6 +1313,7 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 			frame.duration = end - start;
 		} else return;
 	} else if (sampleTable) {
+		if(frame.duration) {
 		SInt64 sampleNum;
 		
 		err = QTSampleTableAddSampleReferences(sampleTable, frame.offset, frame.size, frame.duration, 
@@ -1196,6 +1326,8 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 		if (firstSample == -1)
 			firstSample = sampleNum;
 		numSamples++;
+			
+		}
 	} else {
 		SampleReference64Record sample;
 		sample.dataOffset = SInt64ToWide(frame.offset);

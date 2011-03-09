@@ -25,6 +25,7 @@
 #include "Codecprintf.h"
 #include "CommonUtils.h"
 #include "CodecIDs.h"
+#include "FFmpegUtils.h"
 
 #undef malloc
 #undef free
@@ -35,33 +36,6 @@
 
 #include "bitstream_info.h"
 #include "MatroskaCodecIDs.h"
-
-/* This routine checks if the system requirements are fullfilled */
-ComponentResult check_system()
-{
-	ComponentResult result;
-	long systemVersion;
-	
-	result = Gestalt(gestaltSystemVersion, &systemVersion);
-	require_noerr(result,bail);
-	
-	/* Make sure we have at least 10.4 installed...*/
-	if(systemVersion < 0x00001040)
-		result = -1;
-	
-bail:
-		return result;
-} /* check_system() */
-
-/* This routine does register the ffmpeg parsers which would normally
- * be registred through the normal initialization process */
-void register_parsers()
-{
-	/* Do we need more parsers here? */
-//    av_register_codec_parser(&mpegaudio_parser);
-//	av_register_codec_parser(&ac3_parser);
-} /* register_parsers() */
-
 
 /* This function prepares the target Track to receivve the movie data,
  * it is called if QT has asked an import operation which should just
@@ -223,44 +197,45 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	
 	memset(&asbd,0,sizeof(asbd));
 	map_avi_to_mov_tag(codec->codec_id, &asbd, map, codec->channels);
-	if(asbd.mFormatID == 0) /* no know codec, use the ms tag */
+	if(asbd.mFormatID == 0) /* no known codec, use the ms tag */
 		asbd.mFormatID = 'ms\0\0' + codec->codec_tag; /* the number is stored in the last byte => big endian */
 	
 	/* Ask the AudioToolbox about vbr of the codec */
-	// FIXME: this sets vbr even if it was encoded in CBR mode
-	// which means our mBytesPerPacket is wrong for CBR mp3 (does not really matter)
 	ioSize = sizeof(UInt32);
 	AudioFormatGetProperty(kAudioFormatProperty_FormatIsVBR, sizeof(AudioStreamBasicDescription), &asbd, &ioSize, &map->vbr);
 	
 	cookie = create_cookie(codec, &cookieSize, asbd.mFormatID, map->vbr);
-	
-	/* Set some fields of the AudioStreamBasicDescription. Then ask the AudioToolbox
-		* to fill as much as possible before creating the SoundDescriptionHandle */
-	asbd.mSampleRate = codec->sample_rate;
+	/* Set as much of the AudioStreamBasicDescription as possible.
+	 * Then ask the codec to correct it by calling FormatInfo before creating the SoundDescriptionHandle.
+	 * FormatInfo is poorly documented and doesn't set much of an example for 3rd party codecs but we can hope
+	 * they'll overwrite bad values here.
+	 */
+	asbd.mSampleRate       = codec->sample_rate;
+	asbd.mBytesPerPacket   = codec->block_align;
+	asbd.mFramesPerPacket  = codec->frame_size;
 	asbd.mChannelsPerFrame = codec->channels;
-	if(!map->vbr && !asbd.mBytesPerPacket) /* This works for all the tested codecs. but is there any better way? */
-		asbd.mBytesPerPacket = codec->block_align; /* this is tested for alaw/mulaw/msadpcm */
+	asbd.mBitsPerChannel   = codec->bits_per_coded_sample;
 	
 	/* ask the toolbox about more information */
 	ioSize = sizeof(AudioStreamBasicDescription);
 	err = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, cookieSize, cookie, &ioSize, &asbd);
-	if (err || !asbd.mFormatID) {
-		fprintf(stderr, "AudioFormatGetProperty dislikes the magic cookie (error %ld / format id %lx)\n", err, asbd.mFormatID);
+	
+	// We can't recover from this (FormatInfo resets mFormatID for bad MPEG-4 AOTs)
+	if (!asbd.mFormatID || !asbd.mChannelsPerFrame) {
+		Codecprintf(NULL, "Audio channels or format not set\n");
 		goto bail;
 	}
 	
-	/*
-	 FIXME: 
-	 - at least ffmp3 does not set these values without parsing+the decoder being enabled
-	   (so we avoid overwriting them from above for now)
-	 - this possibly should be 0 for formats with variable framesPerPacket like Vorbis
-	 - lavc frame_size is in samples, mFramesPerPacket is in frames (maybe)
-	 */
-	if (!asbd.mFramesPerPacket)
-		asbd.mFramesPerPacket = codec->frame_size;
-	if (!asbd.mFramesPerPacket && !asbd.mBytesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3) //MP3 Decode is broken on some versions of Tiger and the AppleTV
-		asbd.mFramesPerPacket = 1152;
-	asbd.mBitsPerChannel = codec->bits_per_coded_sample;
+	// We might be able to recover from this (at least try to import the packets)
+	if (err) {
+		Codecprintf(NULL, "AudioFormatGetProperty failed (error %ld / format %lx)\n", err, asbd.mFormatID);
+		err = noErr;
+	}
+	
+	// This needs to be set for playback to work, but 10.4 (+ AppleTV) didn't set it in FormatInfo.
+	// FIXME anything non-zero (like 1) might work here
+	if (!asbd.mFramesPerPacket && asbd.mFormatID == kAudioFormatMPEGLayer3)
+		asbd.mFramesPerPacket = asbd.mSampleRate > 24000 ? 1152 : 576;
 	
 	// if we don't have mBytesPerPacket, we can't import as CBR. Probably should be VBR, and the codec
 	// either lied about kAudioFormatProperty_FormatIsVBR or isn't present
@@ -270,10 +245,11 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	/* If we have vbr audio, the media scale most likely has to be set to the time_base denumerator */
 	if(map->vbr) {
 		/* if we have mFramesPerPacket, set mBytesPerPacket to 0 as this can cause
-		* errors if set incorrectly. But in vbr, we just need the mFramesPerPacket
-		* value */
+		 * errors if set incorrectly. But in vbr, we just need the mFramesPerPacket
+		 * value */
 		if(asbd.mFramesPerPacket)
 			asbd.mBytesPerPacket = 0;
+		
 		SetMediaTimeScale(media, map->str->time_base.den);
 	}
 	
@@ -315,7 +291,6 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	}
 	if(useDefault && asbd.mChannelsPerFrame > 2)
 	{
-		asbd.mFramesPerPacket = 0;
 		acl = GetDefaultChannelLayout(&asbd);
 		aclSize = sizeof(AudioChannelLayout);
 	}
@@ -335,7 +310,7 @@ bail:
 	if(cookie)
 		av_free(cookie);
 	
-	return noErr;
+	return err;
 } /* initialize_audio_map() */
 
 OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
@@ -367,56 +342,28 @@ OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
 /* maps the codec_id tag of libavformat to a constant the AudioToolbox can work with */
 void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map, int channels)
 {
+	OSType fourcc = FFCodecIDToFourCC(codec_id);
+	
+	if (fourcc)
+		asbd->mFormatID = fourcc;
+	
 	switch(codec_id) {
-		case CODEC_ID_MP2:
-			asbd->mFormatID = kAudioFormatMPEGLayer2;
-			break;
-		case CODEC_ID_MP3:
-			asbd->mFormatID = kAudioFormatMPEGLayer3;
-			break;
 		case CODEC_ID_AC3:
-			asbd->mFormatID = kAudioFormatAC3MS;
 			map->vbr = 1;
 			break;
 		case CODEC_ID_PCM_S16LE:
-			asbd->mFormatID = kAudioFormatLinearPCM;
 			asbd->mFormatFlags = kLinearPCMFormatFlagIsSignedInteger;
 			asbd->mBytesPerPacket = 2 * channels;
 			break;
 		case CODEC_ID_PCM_U8:
-			asbd->mFormatID = kAudioFormatLinearPCM;
 			asbd->mFormatFlags = kLinearPCMFormatFlagIsBigEndian;
 			asbd->mBytesPerPacket = channels;
-			break;
-		case CODEC_ID_PCM_ALAW:
-			asbd->mFormatID = kAudioFormatALaw;
-			break;
-		case CODEC_ID_PCM_MULAW:
-			asbd->mFormatID = kAudioFormatULaw;
-			break;
-		case CODEC_ID_ADPCM_MS:
-			asbd->mFormatID = kMicrosoftADPCMFormat;
-			break;
-		case CODEC_ID_AAC:
-			asbd->mFormatID = kAudioFormatMPEG4AAC;
 			break;
 		case CODEC_ID_VORBIS:
 			asbd->mFormatID = 'OggV';
 			break;
 		case CODEC_ID_DTS:
-			asbd->mFormatID = kAudioFormatDTS;
 			map->vbr = 1;
-			break;
-		case CODEC_ID_ADPCM_SWF:
-			asbd->mFormatID = kAudioFormatFlashADPCM;
-			break;
-		case CODEC_ID_TTA:
-			asbd->mFormatID = kAudioFormatTTA;
-			break;
-		case CODEC_ID_NELLYMOSER:
-			asbd->mFormatID = kAudioFormatNellymoser;
-			break;
-		default:
 			break;
 	}
 } /* map_avi_to_mov_tag() */
@@ -1038,6 +985,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		
 		if(IS_NUV(storage->componentType) && codecContext->codec_id == CODEC_ID_MP3) trustPacketDuration = false;
 		if(IS_FLV(storage->componentType) && codecContext->codec_id == CODEC_ID_H264) trustPacketDuration = false;
+		if(IS_FLV(storage->componentType) && codecContext->codec_type == CODEC_TYPE_AUDIO) trustPacketDuration = false;
 		
 		memset(&sampleRec, 0, sizeof(sampleRec));
 		sampleRec.dataOffset.hi = packet.pos >> 32;

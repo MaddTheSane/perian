@@ -23,7 +23,7 @@
 #import "UniversalDetector.h"
 #import "Codecprintf.h"
 
-NSArray *STSplitStringIgnoringWhitespace(NSString *str, NSString *split)
+NSArray *SubSplitStringIgnoringWhitespace(NSString *str, NSString *split)
 {
 	NSArray *tmp = [str componentsSeparatedByString:split];
 	NSCharacterSet *wcs = [NSCharacterSet whitespaceCharacterSet];
@@ -36,7 +36,7 @@ NSArray *STSplitStringIgnoringWhitespace(NSString *str, NSString *split)
 	return [NSArray arrayWithObjects:values count:num];
 }
 
-NSArray *STSplitStringWithCount(NSString *str, NSString *split, size_t count)
+NSArray *SubSplitStringWithCount(NSString *str, NSString *split, size_t count)
 {
 	NSMutableArray *ar = [NSMutableArray arrayWithCapacity:count];
 	NSScanner *sc = [NSScanner scannerWithString:str];
@@ -61,7 +61,7 @@ NSArray *STSplitStringWithCount(NSString *str, NSString *split, size_t count)
 	return ar;
 }
 
-NSMutableString *STStandardizeStringNewlines(NSString *str)
+NSMutableString *SubStandardizeStringNewlines(NSString *str)
 {
 	if(str == nil)
 		return nil;
@@ -71,7 +71,7 @@ NSMutableString *STStandardizeStringNewlines(NSString *str)
 	return ms;
 }
 
-void STSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *, const void *))
+void SubSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *, const void *))
 {
 	int count = [array count];
 	id  objs[count];
@@ -99,7 +99,7 @@ static const short frequencies[] = {
 	-1912, 4259, 2573, 8866, 55, 0, 0, -2247, -831, -3788, -3043, 0, 0, 3412, 2921, 1251, 
 	0, 0, 1377, 520, 1344, 0, -1123, 0, 0, -1213, 2208, -458, -794, 2636, 3824, 0};
 
-BOOL STDifferentiateLatin12(const unsigned char *data, int length)
+BOOL SubDifferentiateLatin12(const unsigned char *data, int length)
 {
 	// generated from french/german (latin1) and hungarian/romanian (latin2)
 	
@@ -112,7 +112,7 @@ BOOL STDifferentiateLatin12(const unsigned char *data, int length)
 	return frcount <= 0;
 }
 
-NSString *STLoadFileWithUnknownEncoding(NSString *path)
+NSString *SubLoadFileWithUnknownEncoding(NSString *path)
 {
 	NSData *data = [NSData dataWithContentsOfMappedFile:path];
 	UniversalDetector *ud = [[UniversalDetector alloc] init];
@@ -130,7 +130,7 @@ NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	latin2 = enc == NSWindowsCP1250StringEncoding;
 	
 	if (latin2) {
-		if (STDifferentiateLatin12([data bytes], [data length])) { // seems to actually be latin1
+		if (SubDifferentiateLatin12([data bytes], [data length])) { // seems to actually be latin1
 			enc = NSWindowsCP1252StringEncoding;
 			enc_str = @"windows-1252";
 		}
@@ -155,7 +155,7 @@ NSString *STLoadFileWithUnknownEncoding(NSString *path)
 	return res;
 }
 
-const unichar *STUnicodeForString(NSString *str, NSData **datap)
+const unichar *SubUnicodeForString(NSString *str, NSData **datap)
 {
 	const unichar *p = CFStringGetCharactersPtr((CFStringRef)str);
 	

@@ -28,9 +28,11 @@
     #include <ImageCodec.h>
 #endif
 
-#include "PerianResourceIDs.h"
-#include "SubATSUIRenderer.h"
 #include "CommonUtils.h"
+#include "PerianResourceIDs.h"
+#include "SubRenderer.h"
+
+static const int kMaxSubPacketSize = 1*1024*1024; // 1MB
 
 // Data structures
 typedef struct TextSubGlobalsRecord {
@@ -42,7 +44,7 @@ typedef struct TextSubGlobalsRecord {
 	
 	CGColorSpaceRef         colorSpace;
 
-	SubtitleRendererPtr		ssa;
+	SubRendererPtr			ssa;
 	Boolean					translateSRT;
 } TextSubGlobalsRecord, *TextSubGlobals;
 
@@ -80,14 +82,6 @@ typedef struct {
 #endif
 
 #define kNumPixelFormatsSupportedTextSub 2
-
-static CFMutableStringRef CFStringCreateMutableWithBytes(CFAllocatorRef alloc, char *cStr, size_t size, CFStringEncoding encoding) {
-	CFStringRef                s1 = CFStringCreateWithBytes(alloc,(UInt8*)cStr,size,encoding,false);
-	if (!s1) return NULL;
-	CFMutableStringRef s2 = CFStringCreateMutableCopy(alloc,0,s1);
-	CFRelease(s1);
-	return s2;
-}
 
 /* -- This Image Decompressor Uses the Base Image Decompressor Component --
 	The base image decompressor is an Apple-supplied component
@@ -142,7 +136,7 @@ pascal ComponentResult TextSubCodecClose(TextSubGlobals glob, ComponentInstance 
 		if (glob->drawBandUPP) {
 			DisposeImageCodecMPDrawBandUPP(glob->drawBandUPP);
 		}
-		if (glob->ssa) SubDisposeRenderer(glob->ssa);
+		if (glob->ssa) SubRendererDispose(glob->ssa);
 		DisposePtr((Ptr)glob);
 	}
 
@@ -245,6 +239,9 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 	capabilities->flags2 |= codecDrawsHigherQualityScaled;    
 	
 	if (!glob->ssa) {
+		Ptr ssaheader = NULL;
+		size_t ssaheadersize = 0;
+		
 		if (!glob->colorSpace)
 			glob->colorSpace = GetSRGBColorSpace();
 		
@@ -254,14 +251,16 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 			
 			CountImageDescriptionExtensionType(p->imageDescription,kSubFormatSSA,&count);
 			if (count == 1) {
-				Handle ssaheader;
-				GetImageDescriptionExtension(p->imageDescription,&ssaheader,kSubFormatSSA,1);
+				Handle ssahand;
+				GetImageDescriptionExtension(p->imageDescription,&ssahand,kSubFormatSSA,1);
 				
-				glob->ssa = SubInitSSA(*ssaheader, GetHandleSize(ssaheader), (**p->imageDescription).width, (**p->imageDescription).height);
+				ssaheader = *ssahand;
+				ssaheadersize = GetHandleSize(ssahand);				
 			} 
 		} 
 		
-		if (!glob->ssa) glob->ssa = SubInitNonSSA((**p->imageDescription).width,(**p->imageDescription).height);
+		glob->ssa = SubRendererCreate((**p->imageDescription).cType == kSubFormatSSA, ssaheader,
+									  ssaheadersize, (**p->imageDescription).width,(**p->imageDescription).height);
 	}
 	
 	return noErr;
@@ -315,20 +314,23 @@ pascal ComponentResult TextSubCodecDrawBand(TextSubGlobals glob, ImageSubCodecDe
 	CFMutableStringRef buf;
 	
 	if (drp->codecData[0] == '\n' && myDrp->dataSize == 1) goto leave; // skip empty packets
+	if (myDrp->dataSize > kMaxSubPacketSize) goto leave; // skip very large packets, they probably cause stack overflows
+	
+	buf = (CFMutableStringRef)CFStringCreateWithBytesNoCopy(NULL, (UInt8*)drp->codecData, myDrp->dataSize, kCFStringEncodingUTF8, false, kCFAllocatorNull);
+	if (!buf) goto leave;
 	
 	if (glob->translateSRT) {
-		buf = CFStringCreateMutableWithBytes(NULL, drp->codecData, myDrp->dataSize, kCFStringEncodingUTF8);
+		CFStringRef origBuf = buf;
+		buf = CFStringCreateMutableCopy(NULL, 0, buf);
+		CFRelease(origBuf);
 		if (!buf) goto leave;
 		CFStringFindAndReplace(buf, CFSTR("<i>"),  CFSTR("{\\i1}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
 		CFStringFindAndReplace(buf, CFSTR("</i>"), CFSTR("{\\i0}"), CFRangeMake(0,CFStringGetLength(buf)), 0);
 		CFStringFindAndReplace(buf, CFSTR("<"),    CFSTR("{"),      CFRangeMake(0,CFStringGetLength(buf)), 0);
 		CFStringFindAndReplace(buf, CFSTR(">"),    CFSTR("}"),      CFRangeMake(0,CFStringGetLength(buf)), 0);
-	} else {
-		buf = (CFMutableStringRef)CFStringCreateWithBytes(NULL, (UInt8*)drp->codecData, myDrp->dataSize, kCFStringEncodingUTF8, false);
-		if (!buf) goto leave;
 	}
 	
-	SubRenderPacket(glob->ssa,c,buf,myDrp->width,myDrp->height);
+	SubRendererRenderPacket(glob->ssa, c, buf, myDrp->width, myDrp->height);
 	
 	if (IsTransparentSubtitleHackEnabled())
 		ConvertImageToQDTransparent(drp->baseAddr, myDrp->pixelFormat, drp->rowBytes, myDrp->width, myDrp->height);
@@ -357,7 +359,7 @@ pascal ComponentResult TextSubCodecEndBand(TextSubGlobals glob, ImageSubCodecDec
 }
 
 // ImageCodecGetSourceDataGammaLevel
-// Returns 1.8, the gamma for sRGB.
+// Returns 2.2, the gamma for sRGB.
 pascal ComponentResult TextSubCodecGetSourceDataGammaLevel(TextSubGlobals glob, Fixed *sourceDataGammaLevel)
 {
 	*sourceDataGammaLevel = FloatToFixed(2.2);

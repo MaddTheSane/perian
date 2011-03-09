@@ -1,6 +1,6 @@
 /*
- * SubUtilities.h
- * Created by Alexander Strange on 7/28/07.
+ * FFmpegUtils.h
+ * Created by Alexander Strange on 11/7/10.
  *
  * This file is part of Perian.
  *
@@ -19,16 +19,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <Cocoa/Cocoa.h>
+/*
+ * FFmpeg API interfaces and data structure conversion
+ */
+
+#ifndef __FFMPEGUTILS__
+#define __FFMPEGUTILS__
+
+#include <QuickTime/QuickTime.h>
+#include <CoreAudio/CoreAudio.h>
 
 __BEGIN_DECLS
-	
-NSArray *SubSplitStringIgnoringWhitespace(NSString *str, NSString *split);
-NSArray *SubSplitStringWithCount(NSString *str, NSString *split, size_t count);
-NSMutableString *SubStandardizeStringNewlines(NSString *str);
-NSString *SubLoadFileWithUnknownEncoding(NSString *path);
-void SubSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *, const void *));
-BOOL SubDifferentiateLatin12(const unsigned char *data, int length);
-const unichar *SubUnicodeForString(NSString *str, NSData **datap);
+
+#include "avcodec.h"
+
+void FFAVCodecContextToASBD(AVCodecContext *avctx, AudioStreamBasicDescription *asbd);
+
+void FFASBDToAVCodecContext(AudioStreamBasicDescription *asbd, AVCodecContext *avctx);
+
+void FFInitFFmpeg();
+
+enum CodecID FFFourCCToCodecID(OSType formatID);
+
+OSType FFCodecIDToFourCC(enum CodecID codecID);
 
 __END_DECLS
+
+#endif

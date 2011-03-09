@@ -22,10 +22,7 @@
 #import <Cocoa/Cocoa.h>
 #import "SubContext.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+__BEGIN_DECLS
 
 @class SubSerializer, SubRenderer;
 
@@ -33,14 +30,12 @@ extern "C"
 	@public;
 	NSMutableString *text;
 	SubStyle *styleLine;
-	unsigned marginL, marginR, marginV;
 	NSMutableArray *spans;
-	
+
 	float posX, posY;
+	unsigned marginL, marginR, marginV, layer;
 	UInt8 alignH, alignV, wrapStyle, render_complexity;
-	BOOL positioned, shouldResetPens;
-	
-	unsigned layer;
+	BOOL positioned, shouldResetPens;	
 }
 -(SubRenderDiv*)nextDivWithDelegate:(SubRenderer*)delegate;
 @end
@@ -55,9 +50,13 @@ extern "C"
 -(SubRenderSpan*)cloneWithDelegate:(SubRenderer*)delegate;
 @end
 
-extern void SubParseSSAFile(NSString *ssa, NSDictionary **headers, NSArray **styles, NSArray **subs);
-extern NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate);
+SubRGBAColor SubParseSSAColor(unsigned rgb);
+SubRGBAColor SubParseSSAColorString(NSString *c);
+UInt8 SubASSFromSSAAlignment(UInt8 a);
+void SubParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV);
+BOOL SubParseFontVerticality(NSString **fontname);
+	
+void SubParseSSAFile(NSString *ssa, NSDictionary **headers, NSArray **styles, NSArray **subs);
+NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate);
 
-#ifdef __cplusplus
-}
-#endif
+__END_DECLS

@@ -55,11 +55,14 @@
 			<array>
 				<string>mkv</string>
 				<string>mka</string>
+				<string>webm</string>
 			</array>
 			<key>CFBundleTypeMIMETypes</key>
 			<array>
 				<string>video/x-matroska</string>
 				<string>audio/x-matroska</string>
+				<string>video/webm</string>
+				<string>audio/webm</string>
 			</array>
 			<key>CFBundleTypeName</key>
 			<string>Matroska video</string>
@@ -67,6 +70,7 @@
 			<array>
 				<string>MKV </string>
 				<string>MKA </string>
+				<string>WEBM</string>
 			</array>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
@@ -232,7 +236,7 @@
 	<key>CFBundleSignature</key>
 	<string>PerO</string>
 	<key>CFBundleVersion</key>
-	<string>1.2.1</string>
+	<string>1.2.2</string>
 	<key>NSAppleScriptEnabled</key>
 	<string>YES</string>
 	<key>NSMainNibFile</key>
@@ -258,6 +262,7 @@
 				<array>
 					<string>mkv</string>
 					<string>mka</string>
+					<string>webm</string>
 				</array>
 			</dict>
 		</dict>

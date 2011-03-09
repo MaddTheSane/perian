@@ -1,6 +1,6 @@
 /*
- * SubUtilities.h
- * Created by Alexander Strange on 7/28/07.
+ * CompressCodecUtils.h
+ * Created by Graham Booker on 8/14/10.
  *
  * This file is part of Perian.
  *
@@ -19,16 +19,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <Cocoa/Cocoa.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-__BEGIN_DECLS
-	
-NSArray *SubSplitStringIgnoringWhitespace(NSString *str, NSString *split);
-NSArray *SubSplitStringWithCount(NSString *str, NSString *split, size_t count);
-NSMutableString *SubStandardizeStringNewlines(NSString *str);
-NSString *SubLoadFileWithUnknownEncoding(NSString *path);
-void SubSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *, const void *));
-BOOL SubDifferentiateLatin12(const unsigned char *data, int length);
-const unichar *SubUnicodeForString(NSString *str, NSData **datap);
+OSType compressStreamFourCC(OSType original);
+OSType originalStreamFourCC(OSType compress);
 
-__END_DECLS
+#ifdef __cplusplus
+}
+#endif

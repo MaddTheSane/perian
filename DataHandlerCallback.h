@@ -37,20 +37,6 @@ using namespace libebml;
 
 #define READ_SIZE 32*1024
 
-class CRTError:public std::runtime_error
-{
-    // Variables...
-private:
-	int Error;
-    
-    // Methods...
-public:
-	CRTError(int Error, const std::string &Description);
-	CRTError(const std::string &Description, int Error=errno);
-    
-	int getError() const throw() {return Error;}
-};
-
 class DataHBuffer {
 private:
 	uint8_t *buffer;

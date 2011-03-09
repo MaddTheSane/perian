@@ -138,7 +138,7 @@ bail:
 		return (int)read;
 } /* dataref_read() */
 
-static int dataref_write(URLContext *h, unsigned char *buf, int size)
+static int dataref_write(URLContext *h, const unsigned char *buf, int size)
 {
 	int result;
 	int written = size;
@@ -228,6 +228,7 @@ OSStatus url_open_dataref(ByteIOContext **pb, Handle dataRef, OSType dataRefType
 	
 	up = &dataref_protocol;
 	
+	//FIXME use url_alloc() with better fake protocol
 	uc = av_mallocz(sizeof(URLContext));
 	if(!uc) {
 		err = -ENOMEM;
@@ -239,6 +240,7 @@ OSStatus url_open_dataref(ByteIOContext **pb, Handle dataRef, OSType dataRefType
 	uc->is_streamed = 0; // not streamed...
 	uc->max_packet_size = 0; // stream file
 	uc->priv_data = private;
+	uc->is_connected = 1;
 	
 	err = up->url_open(uc, uc->filename, URL_RDONLY);
 		

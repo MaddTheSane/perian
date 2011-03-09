@@ -158,6 +158,7 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	asbd->mSampleRate = sample_rate >> shift;
 	asbd->mFormatID = kAudioFormatAC3MS;
 	asbd->mChannelsPerFrame = nfchans_tbl[acmod] + lfe;
+	asbd->mFramesPerPacket = 1536;
 	
 	memset(acl, 0, sizeof(AudioChannelLayout));
 	if(lfe)
@@ -343,6 +344,8 @@ static int decode_nal(const uint8_t *buf, int buf_size, uint8_t *out_buf, int *o
 				/* This is just a simple escape of 0x00 00 03 */
 				continue;
 		}
+		else
+			numNulls = 0;
 		out_buf[outIndex] = buf[i];
 		outIndex++;
 	}
