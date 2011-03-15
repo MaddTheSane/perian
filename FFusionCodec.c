@@ -365,6 +365,16 @@ FFusionPacked DefaultPackedTypeForCodec(OSType codec)
 	}
 }
 
+void setFutureFrame(FFusionGlobals glob, FFusionBuffer *newFuture)
+{
+	FFusionBuffer *temp = glob->decode.futureBuffer;
+	if(newFuture != NULL)
+		retainBuffer(glob, newFuture);
+	glob->decode.futureBuffer = newFuture;
+	if(temp != NULL)
+		releaseBuffer(glob->avContext, temp->frame);
+}
+
 //---------------------------------------------------------------------------
 // Component Routines
 //---------------------------------------------------------------------------
@@ -484,6 +494,7 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
         
 		if(glob->fileLog)
 			fclose(glob->fileLog);
+		setFutureFrame(glob, NULL);
 		
         memset(glob, 0, sizeof(FFusionGlobalsRecord));
         DisposePtr((Ptr)glob);
@@ -1100,7 +1111,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	{
 		myDrp->buffer = retainBuffer(glob, glob->decode.futureBuffer);
 		myDrp->decoded = true;
-		glob->decode.futureBuffer = NULL;
+		setFutureFrame(glob, NULL);
 		FFusionDataMarkRead(myDrp->frameData);
 		glob->decode.lastFrame = myDrp->frameNumber;
 		return err;
@@ -1120,7 +1131,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 			PrereqDecompress(glob, prereq, glob->avContext, myDrp->width, myDrp->height, &tempFrame);
 			if(tempFrame.data[0] != NULL)
 			{
-				glob->decode.futureBuffer = (FFusionBuffer *)tempFrame.opaque;
+				setFutureFrame(glob, (FFusionBuffer *)tempFrame.opaque);
 				prereq->decoded = TRUE;
 			}
 		}
@@ -1152,7 +1163,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	
 	if(tempFrame.pict_type == FF_I_TYPE)
 		/* Wipe memory of past P frames */
-		glob->decode.futureBuffer = NULL;
+		setFutureFrame(glob, NULL);
 	glob->decode.lastFrame = myDrp->frameNumber;
 	myDrp->decoded = true;
 	
@@ -1256,7 +1267,7 @@ pascal ComponentResult FFusionCodecEndBand(FFusionGlobals glob, ImageSubCodecDec
 		releaseBuffer(glob->avContext, buf->frame);
 	
 	FFusionDebugPrint("%p EndBand #%d.\n", glob, myDrp->frameNumber);
-	
+
     return noErr;
 }
 
@@ -1349,7 +1360,7 @@ static void releaseBuffer(AVCodecContext *s, AVFrame *pic)
 
 	buf->retainCount--;
 //	FFusionGlobals glob = (FFusionGlobals)s->opaque;
-//	FFusionDebugPrint("%p Released Buffer %p #%d to %d.\n", glob, buf, buf->frameNumber, buf->retainCount);
+//	FFusionDebugPrint("%p Released Buffer %p #%d to %d(%d).\n", glob, buf, buf->frameNumber, buf->retainCount, buf->ffmpegUsing);
 	if(!buf->retainCount && !buf->ffmpegUsing)
 	{
 		avcodec_default_release_buffer(s, pic);
