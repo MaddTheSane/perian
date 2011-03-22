@@ -1412,6 +1412,15 @@ void MatroskaTrack::FinishTrack()
 		 } while (!subtitleSerializer->empty());
 		 EndMediaEdits(theMedia);
 	} else {
+		if (lastFrames.size()) {
+			if (lastFrames.size() > 1) {
+				Codecprintf(NULL, "MKV: more than one queued frame at the end - some frames lost\n");
+				// FIXME unimplemented, and it's probably possible to reach here
+			} else {
+				AddFrame(lastFrames[0]);
+				lastFrames.erase(lastFrames.begin());
+			}
+		}
 		AddSamplesToTrack();
 	}
 }
