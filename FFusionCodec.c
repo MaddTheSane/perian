@@ -471,6 +471,8 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
             DisposeImageCodecMPDrawBandUPP(glob->drawBandUPP);
         }
 				
+		FFusionDataFree(&(glob->data));
+        
         if (glob->avContext)
         {
 			if (glob->avContext->extradata)
@@ -490,8 +492,6 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
 			DisposeHandle(glob->pixelTypes);
 		}
 		
-		FFusionDataFree(&(glob->data));
-        
 		if(glob->fileLog)
 			fclose(glob->fileLog);
 		setFutureFrame(glob, NULL);
