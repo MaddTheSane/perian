@@ -168,7 +168,8 @@ static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSig
 		time++;
 	}
 	
-	if (sscanf(time,"%u:%u:%u%[,.:]%u",&hour,&minute,&second,&separator,&subsecond) < 5)
+	if (sscanf(time,"%u:%u:%u%c%u",&hour,&minute,&second,&separator,&subsecond) < 5 ||
+	   (separator != ',' && separator != '.' && separator != ':'))
 		return 0;
 	
 	timeval = hour * 60 * 60 + minute * 60 + second;
