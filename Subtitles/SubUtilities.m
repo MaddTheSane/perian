@@ -136,7 +136,7 @@ NSString *SubLoadFileWithUnknownEncoding(NSString *path)
 		}
 	}
 	
-	if (conf < .6 || latin2) {
+	if ((conf < .6 || latin2) && enc != NSASCIIStringEncoding) {
 		Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[enc_str UTF8String],[path UTF8String],conf*100.);
 	}
 	
