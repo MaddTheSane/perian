@@ -10,7 +10,7 @@ Fixes:
 - Fixed some Matroska files losing frames at the end of the file. [r1399, r1407] (#224, #558)
 - Fixed audio sync in many FLV videos. [r1383] (1.2 regression) (#543)
 - Fixed several possible crashes/hangs in subtitle parsing. [r1327, r1331, r1339, r1376] (#515, #521)
-- Worked around Apple's incorrect channel layout in .mp4 filesc. [A52Codec r84]
+- Worked around Apple's incorrect channel layout in .mp4 files. [A52Codec r84]
 SSA:
 - Fixed several correctness errors. [r1307, r1308, r1365]
 - Improved rendering of semitransparent text styles. [r1328]
