@@ -1412,6 +1412,20 @@ void MatroskaTrack::FinishTrack()
 		 } while (!subtitleSerializer->empty());
 		 EndMediaEdits(theMedia);
 	} else {
+		if (lastFrames.size()) {
+			ptsReorder.sort();
+			list<TimeValue64>::iterator ptsi = ptsReorder.begin();
+			for (int i = 0; i < lastFrames.size()-1; i++) {
+				MatroskaFrame &curr = lastFrames[i];
+				TimeValue64 curpts = *ptsi++;
+				TimeValue64 nextpts = *ptsi;
+				curr.duration = nextpts - curpts;
+			}
+			for (int i = 0; i < lastFrames.size(); i++)
+				AddFrame(lastFrames[i]);
+			ptsReorder.resize(0);
+			lastFrames.resize(0);
+		}
 		AddSamplesToTrack();
 	}
 }
