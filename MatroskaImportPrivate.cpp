@@ -1413,13 +1413,18 @@ void MatroskaTrack::FinishTrack()
 		 EndMediaEdits(theMedia);
 	} else {
 		if (lastFrames.size()) {
-			if (lastFrames.size() > 1) {
-				Codecprintf(NULL, "MKV: more than one queued frame at the end - some frames lost\n");
-				// FIXME unimplemented, and it's probably possible to reach here
-			} else {
-				AddFrame(lastFrames[0]);
-				lastFrames.erase(lastFrames.begin());
+			ptsReorder.sort();
+			list<TimeValue64>::iterator ptsi = ptsReorder.begin();
+			for (int i = 0; i < lastFrames.size()-1; i++) {
+				MatroskaFrame &curr = lastFrames[i];
+				TimeValue64 curpts = *ptsi++;
+				TimeValue64 nextpts = *ptsi;
+				curr.duration = nextpts - curpts;
 			}
+			for (int i = 0; i < lastFrames.size(); i++)
+				AddFrame(lastFrames[i]);
+			ptsReorder.resize(0);
+			lastFrames.resize(0);
 		}
 		AddSamplesToTrack();
 	}

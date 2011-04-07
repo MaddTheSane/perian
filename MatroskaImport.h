@@ -135,7 +135,7 @@ private:
 	// from one block group until the next block group is found to set the duration of the
 	// previous ones to be the difference in timestamps.
 	vector<MatroskaFrame>	lastFrames;
-	int currentFrame;						// the frame we're currently determining the dts for
+	int currentFrame;		// the frame we're currently determining the dts for
 	
 	// insert pts values, sort, then smallest value is current dts if size > decode delay
 	list<TimeValue64>		ptsReorder;
