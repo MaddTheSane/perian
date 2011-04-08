@@ -428,6 +428,20 @@
 			remoteGlobalIDString = 3DBF4F560BCD396800DA401A;
 			remoteInfo = universaldetector;
 		};
+		3DDA62C7134FCAE500E11438 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			remoteInfo = "Make SVN Rev";
+		};
+		3DDA62CE134FCB2C00E11438 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			remoteInfo = "Make SVN Rev";
+		};
 		3DE8D9CD1044501E0007C7E7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
@@ -1621,6 +1635,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				3DDA62C8134FCAE500E11438 /* PBXTargetDependency */,
 			);
 			name = PerianOpener;
 			productName = "Perian Opener";
@@ -1678,6 +1693,7 @@
 				F5CFD25E0B500B9400616865 /* PBXTargetDependency */,
 				F5EB82360BA72208001064E5 /* PBXTargetDependency */,
 				3DE8D9CE1044501E0007C7E7 /* PBXTargetDependency */,
+				3DDA62CF134FCB2C00E11438 /* PBXTargetDependency */,
 			);
 			name = PerianPane;
 			productName = PerianPane;
@@ -2151,6 +2167,16 @@
 			isa = PBXTargetDependency;
 			name = universaldetector;
 			targetProxy = 3DB3517E0BCF004B009357B8 /* PBXContainerItemProxy */;
+		};
+		3DDA62C8134FCAE500E11438 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			targetProxy = 3DDA62C7134FCAE500E11438 /* PBXContainerItemProxy */;
+		};
+		3DDA62CF134FCB2C00E11438 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			targetProxy = 3DDA62CE134FCB2C00E11438 /* PBXContainerItemProxy */;
 		};
 		3DE8D9CE1044501E0007C7E7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
