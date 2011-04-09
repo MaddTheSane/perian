@@ -624,7 +624,7 @@ NS_DURING
 		
 		if (err) {
 			err = GetMoviesError();
-			Codecprintf(stderr,"error %d adding line from %d to %d in external subtitles",err,sl->begin_time,sl->end_time);
+			Codecprintf(NULL,"SSA: error %d adding line from %d to %d",(int)err,sl->begin_time,sl->end_time);
 		} else {
 			ConvertTimeScale(&startTime, movieTimeScale);
 			InsertMediaIntoTrack(theTrack, startTime.value.lo, sampleTime, sl->end_time - sl->begin_time, movieRate);
