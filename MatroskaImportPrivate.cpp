@@ -1405,25 +1405,26 @@ void MatroskaTrack::FinishTrack()
 	
 	if (type == track_subtitle && !is_vobsub)
 	{
-		 subtitleSerializer->setFinished();
-		 do {
-			 MatroskaFrame fr = {0};
-			 AddFrame(fr); // add empty frames to flush the subtitle packet queue
-		 } while (!subtitleSerializer->empty());
-		 EndMediaEdits(theMedia);
+		subtitleSerializer->setFinished();
+		do {
+			MatroskaFrame fr = {0};
+			AddFrame(fr); // add empty frames to flush the subtitle packet queue
+		} while (!subtitleSerializer->empty());
+		EndMediaEdits(theMedia);
 	} else {
 		if (lastFrames.size()) {
-			ptsReorder.sort();
-			list<TimeValue64>::iterator ptsi = ptsReorder.begin();
+#if 0
+			// the values produced by this seem to be worse than before
+			// also, the dts in lastFrames seems to be out of order?
 			for (int i = 0; i < lastFrames.size()-1; i++) {
-				MatroskaFrame &curr = lastFrames[i];
-				TimeValue64 curpts = *ptsi++;
-				TimeValue64 nextpts = *ptsi;
-				curr.duration = nextpts - curpts;
+				MatroskaFrame &curr = lastFrames[i], &next = lastFrames[i+1];
+				printf("cur: pts %lld dts %lld dur %d, next: pts %lld dts %lld dur %d\n", curr.pts, curr.dts, (int)curr.duration, next.pts, next.dts, (int)next.duration);
+				curr.duration = next.dts - curr.dts;
+				//assert(curr.duration < 65536 && curr.duration > 0);
 			}
+#endif
 			for (int i = 0; i < lastFrames.size(); i++)
 				AddFrame(lastFrames[i]);
-			ptsReorder.resize(0);
 			lastFrames.resize(0);
 		}
 		AddSamplesToTrack();
