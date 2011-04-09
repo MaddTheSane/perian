@@ -366,7 +366,7 @@ ComponentResult MatroskaImport::Idle(long inFlags, long *outFlags)
 		goto finish;
 	} catch (CRTError &cerr) {
 		err = cerr.getError();
-		Codecprintf(NULL, "MKV: caught an error (%d): %s\n", err, cerr.what());
+		Codecprintf(NULL, "MKV: caught an error (%d): %s\n", (int)err, cerr.what());
 		goto finish;
 	}
 	

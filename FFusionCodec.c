@@ -890,7 +890,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	myDrp->frameData = NULL;
 	myDrp->buffer = NULL;
 	
-	FFusionDebugPrint("%p BeginBand #%d. (%sdecoded, packed %d)\n", glob, p->frameNumber, not(myDrp->decoded), glob->packedType);
+	FFusionDebugPrint("%p BeginBand #%ld. (%sdecoded, packed %d)\n", glob, p->frameNumber, not(myDrp->decoded), glob->packedType);
 	
 	if (!glob->avContext) {
 		Codecprintf(glob->fileLog, "Perian: QT tried to call BeginBand without preflighting!\n");
@@ -898,7 +898,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	}
 	
 	if (p->frameNumber == 0 && myDrp->pixelFormat != ColorConversionDstForPixFmt(glob->avContext->pix_fmt)) {
-		Codecprintf(glob->fileLog, "QT gave us unwanted pixelFormat %s (%08x), this will not work\n", FourCCString(myDrp->pixelFormat), myDrp->pixelFormat);
+		Codecprintf(glob->fileLog, "QT gave us unwanted pixelFormat %s (%08x), this will not work\n", FourCCString(myDrp->pixelFormat), (unsigned)myDrp->pixelFormat);
 	}
 	
 	if(myDrp->decoded)
@@ -966,7 +966,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 			}
 			else
 			{
-				Codecprintf(glob->fileLog, "parse failed frame %d with size %d\n", p->frameNumber, bufferSize);
+				Codecprintf(glob->fileLog, "parse failed frame %ld with size %d\n", p->frameNumber, bufferSize);
 				if(glob->data.unparsedFrames.dataSize != 0)
 					Codecprintf(glob->fileLog, ", parser had extra data\n");				
 			}
@@ -1068,7 +1068,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 
 static OSErr PrereqDecompress(FFusionGlobals glob, FrameData *prereq, AVCodecContext *context, int width, int height, AVFrame *picture)
 {
-	FFusionDebugPrint("%p prereq-decompressing frame #%d.\n", glob, prereq->frameNumber);
+	FFusionDebugPrint("%p prereq-decompressing frame #%ld.\n", glob, prereq->frameNumber);
 	
 	FrameData *preprereq = FrameDataCheckPrereq(prereq);
 	if(preprereq)

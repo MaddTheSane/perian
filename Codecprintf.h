@@ -28,7 +28,8 @@
 extern "C" {
 #endif
 
-int Codecprintf(FILE *, const char *format, ...);
+#undef printf
+int Codecprintf(FILE *, const char *format, ...) __attribute__((format (printf, 2, 3)));
 void FourCCprintf(const char *string, FourCharCode a);
 const char *FourCCString(FourCharCode c);
 

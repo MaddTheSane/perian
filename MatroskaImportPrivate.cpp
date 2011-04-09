@@ -404,7 +404,7 @@ ComponentResult MatroskaImport::ReadVobSubContentEncodings(KaxContentEncodings *
 		Codecprintf(NULL, "MKV: warning, track compression algorithm %d not zlib\n", algo);
 	
 	if ((*mkvTrack.desc)->dataFormat != kSubFormatVobSub)
-		Codecprintf(NULL, "MKV: warning, compressed track %4.4s probably won't work (not VobSub)\n", &(*mkvTrack.desc)->dataFormat);
+		Codecprintf(NULL, "MKV: warning, compressed track %s probably won't work (not VobSub)\n", FourCCString((*mkvTrack.desc)->dataFormat));
 	
 	Handle ext = NewHandle(1);
 	**ext = algo;
@@ -516,7 +516,7 @@ ComponentResult MatroskaImport::AddVideoTrack(KaxTrackEntry &kaxTrack, MatroskaT
 			SampleDescriptionHandle sampleDesc = mkvTrack.desc;
 			OSType compressedType = compressStreamFourCC((*sampleDesc)->dataFormat);
 			if (compressedType == 0)
-				Codecprintf(NULL, "MKV: warning, compressed track %4.4s probably won't work\n", &(*mkvTrack.desc)->dataFormat);
+				Codecprintf(NULL, "MKV: warning, compressed track %s probably won't work\n", FourCCString((*mkvTrack.desc)->dataFormat));
 			else
 			{
 				Handle ext = NewHandle(4);
@@ -633,7 +633,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 			
 			OSType compressedType = compressStreamFourCC(asbd.mFormatID);
 			if (compressedType == 0)
-				Codecprintf(NULL, "MKV: warning, compressed track %4.4s probably won't work\n", &(*mkvTrack.desc)->dataFormat);
+				Codecprintf(NULL, "MKV: warning, compressed track %s probably won't work\n", FourCCString((*mkvTrack.desc)->dataFormat));
 			else
 			{
 				asbd.mFormatID = compressedType;
@@ -935,7 +935,7 @@ ComponentResult MatroskaImport::ReadAttachments(KaxAttachments &attachments)
 							  fileData.GetSize(), 
 							  isJPEG ? kQTMetaDataTypeJPEGImage : kQTMetaDataTypePNGImage, NULL);
 			if (err)
-				Codecprintf(NULL, "MKV: Error adding cover art %d\n", err);
+				Codecprintf(NULL, "MKV: Error adding cover art %d\n", (int)err);
 			
 			QTMetaDataRelease(movieMetaData);
 		}
@@ -1268,8 +1268,10 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 		}
 		else {
 			lastFrames.push_back(newFrame);
-			if (!usesLacing && type == track_video)
+			if (!usesLacing && type == track_video) {
+				//Codecprintf(NULL, "push_back pts %lld dts %lld\n", newFrame.pts, newFrame.dts);
 				ptsReorder.push_back(newFrame.pts);
+			}
 		}
 		
 		newFrame.buffer = NULL;
@@ -1305,7 +1307,7 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 			PtrToHand(packet, &sampleH, size);
 			err = AddMediaSample(theMedia, sampleH, 0, size, end - start, desc, 1, 0, &sampleTime);
 			if (err) {
-				Codecprintf(NULL, "MKV: error adding subtitle sample %d\n", err);
+				Codecprintf(NULL, "MKV: error adding subtitle sample %d\n", (int)err);
 				return;
 			}
 			DisposeHandle(sampleH);
@@ -1315,11 +1317,14 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	} else if (sampleTable) {
 		if(frame.duration) {
 		SInt64 sampleNum;
+			
+		//assert(displayOffset >= 0);
+		//Codecprintf(NULL, "Add frame offset %lld, size %lld, duration %ld, offset %lld\n", frame.offset, frame.size, frame.duration, displayOffset);
 		
 		err = QTSampleTableAddSampleReferences(sampleTable, frame.offset, frame.size, frame.duration, 
 											   displayOffset, 1, frame.flags, qtSampleDesc, &sampleNum);
 		if (err) {
-			Codecprintf(NULL, "MKV: error adding sample reference to table %d\n", err);
+			Codecprintf(NULL, "MKV: error adding sample reference to table %d\n", (int)err);
 			return;
 		}
 		
@@ -1338,7 +1343,7 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 		
 		err = AddMediaSampleReferences64(theMedia, desc, 1, &sample, &sampleTime);
 		if (err) {
-			Codecprintf(NULL, "MKV: error adding sample reference to media %d\n", err);
+			Codecprintf(NULL, "MKV: error adding sample reference to media %d\n", (int)err);
 			return;
 		}
 	}
@@ -1347,7 +1352,7 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	if (type == track_subtitle) {
 		err = InsertMediaIntoTrack(theTrack, frame.pts, sampleTime, frame.duration, fixed1);
 		if (err) {
-			Codecprintf(NULL, "MKV: error adding subtitle media into track %d\n", err);
+			Codecprintf(NULL, "MKV: error adding subtitle media into track %d\n", (int)err);
 			return;
 		}
 	} else {
@@ -1376,18 +1381,21 @@ void MatroskaTrack::AddSamplesToTrack()
 			return;		// nothing to add
 		
 		err = AddSampleTableToMedia(theMedia, sampleTable, firstSample, numSamples, NULL);
-		firstSample = -1;
-		numSamples = 0;
+
 		if (err) {
-			Codecprintf(NULL, "MKV: error adding sample table to the media %d\n", err);
+			Codecprintf(NULL, "MKV: error adding sample table to the media %d\n", (int)err);
 			durationToAdd = 0;
+			firstSample = -1;
+			numSamples = 0;
 			return;
 		}
+		firstSample = -1;
+		numSamples = 0;
 	}
 	
 	err = InsertMediaIntoTrack(theTrack, -1, maxLoadedTime, durationToAdd, fixed1);
 	if (err)
-		Codecprintf(NULL, "MKV: error inserting media into track %d\n", err);
+		Codecprintf(NULL, "MKV: error inserting media into track %d\n", (int)err);
 	
 	if (!err) {
 		if (!maxLoadedTime && lowestPTS)
