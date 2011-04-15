@@ -415,18 +415,18 @@ int IsForcedDecodeEnabled()
 
 static int GetSystemMinorVersion()
 {
-	static long minorVersion = -1;
+	static SInt32 minorVersion = -1;
 	if (minorVersion == -1)
-		minorVersion = Gestalt(gestaltSystemVersionMinor, &minorVersion);
+		Gestalt(gestaltSystemVersionMinor, &minorVersion);
 	
 	return minorVersion;
 }
 
 static int GetSystemMicroVersion()
 {
-	static long microVersion = -1;
+	static SInt32 microVersion = -1;
 	if (microVersion == -1)
-		microVersion = Gestalt(gestaltSystemVersionBugFix, &microVersion);
+		Gestalt(gestaltSystemVersionBugFix, &microVersion);
 	
 	return microVersion;
 }
@@ -438,7 +438,7 @@ int IsTransparentSubtitleHackEnabled()
 	if(forced == -1)
 	{
 		int minorVersion = GetSystemMinorVersion();
-		
+				
 		if (minorVersion == 5)
 			forced = isApplicationNameInList(CFSTR("TransparentModeSubtitleAppList"),
 											 defaultTransparentSubtitleList_10_5,
@@ -450,7 +450,7 @@ int IsTransparentSubtitleHackEnabled()
 		else
 			forced = 0;
 	}
-
+	
 	return forced;
 }
 
