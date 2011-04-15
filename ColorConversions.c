@@ -536,6 +536,7 @@ OSType ColorConversionDstForPixFmt(enum PixelFormat ffPixFmt)
 int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFmt, AVPicture *ffPicture, OSType qtPixFmt)
 {
 	switch (ffPixFmt) {
+		case PIX_FMT_YUVJ420P:
 		case PIX_FMT_YUV420P:
 			funcs->clear = ClearY422;
 			
