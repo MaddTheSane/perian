@@ -15,7 +15,7 @@
 
 #ifdef AudioComponentType
 
-resource 'thga' (kCodecInfoResID) {
+resource 'thga' (kCodecInfoResID, kCodecName) {
 	decompressorComponentType,		// Type
 	kCodecSubType,					// SubType
 	kCodecManufacturer,				// Manufacturer
@@ -38,7 +38,7 @@ resource 'thga' (kCodecInfoResID) {
 
 #else  //!AudioComponentType
 
-resource 'cdci' (kCodecInfoResID) {
+resource 'cdci' (kCodecInfoResID, kCodecName) {
 	kCodecName,						// Type
 	1,								// Version
 	1,								// Revision level
@@ -61,17 +61,21 @@ resource 'cdci' (kCodecInfoResID) {
 
 #endif  //AudioComponentType
 
-resource 'strn' (kCodecInfoResID) {
+resource 'strn' (kCodecInfoResID, kCodecName) {
 	kCodecName " (Perian)"
 };
 
-resource 'stri' (kCodecInfoResID) {
+resource 'stri' (kCodecInfoResID, kCodecName) {
 	kCodecDescription
 };
 
 #endif
 
-resource 'thng' (kCurrentTHNGResID) {
+#ifndef kCodecName
+#define kCodecName ""
+#endif
+
+resource 'thng' (kCurrentTHNGResID, kCodecName) {
 	decompressorComponentType,		// Type			
 	kCodecSubType,					// SubType
 	kCodecManufacturer,				// Manufacturer

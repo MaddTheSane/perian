@@ -35,25 +35,30 @@
 #define kAVIthngResID 512
 #define kFLVthngResID 515
 #define kTTAthngResID 517
-#define kNuvthngResID 518
+#define kNUVthngResID 518
+
+#define kAVIName "Perian AVI Movie Importer"
+#define kFLVName "Perian Flash Video Importer"
+#define kTTAName "Perian True Audio Importer"
+#define kNUVName "Perian NuppelVideo Importer"
 
 #define kFFAvi_MovieImportFlags \
 ( canMovieImportFiles | canMovieImportInPlace | canMovieImportDataReferences | canMovieImportValidateFile \
 		| canMovieImportValidateDataReferences | canMovieImportWithIdle | hasMovieImportMIMEList \
-		| movieImportMustGetDestinationMediaType | cmpThreadSafe )
+		| movieImportMustGetDestinationMediaType | canMovieImportAvoidBlocking | cmpThreadSafe )
 
 /* Component Manager Things - 
 	AVI */
-resource 'thng' (kAVIthngResID) {
+resource 'thng' (kAVIthngResID, kAVIName) {
 	'eat ',					// Type
 	'VfW ',					// SubType
-	kPerianManufacturer,	// Manufacturer
+	'vide',                 // Manufacturer
 	0,
 	0,
 	0,
 	0,
 	'STR ',						// Name Type
-	kAVIthngResID,						// Name ID
+	kAVIthngResID,				// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -65,26 +70,26 @@ resource 'thng' (kAVIthngResID) {
 {
 	kFFAvi_MovieImportFlags,
 	'dlle',					// Code Resource type
-	512,
+	kAVIthngResID,
 	platformIA32NativeEntryPoint,		// IA32
 	kFFAvi_MovieImportFlags,
 	'dlle',
-	512,
+	kAVIthngResID,
 	platformPowerPCNativeEntryPoint,	// PowerPC
 },
-'thnr', kAVIthngResID
+    'thnr', kAVIthngResID
 };
 
-resource 'thga' (513) {
+resource 'thga' (kAVIthngResID + 1, kAVIName) {
 	'eat ',					// Type
 	'VFW ',					// SubType
-	kPerianManufacturer,	// Manufacturer
+	'vide',                 // Manufacturer
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
 	0,
 	'STR ',						// Name Type
-	kAVIthngResID,						// Name ID
+	kAVIthngResID,				// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -92,23 +97,23 @@ resource 'thga' (513) {
 								// TARGET COMPONENT ---------------
 	'eat ',						// Type
 	'VfW ',						// SubType
-	kPerianManufacturer,		// Manufaturer
+	'vide',                     // Manufacturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
-	'thnr', kAVIthngResID,				// Component public resource identifier
+	'thnr', kAVIthngResID,		// Component public resource identifier
 	cmpAliasOnlyThisFile
 };
 
-resource 'thga' (514) {
+resource 'thga' (kAVIthngResID + 2, kAVIName) {
 	'eat ',					// Type
 	'AVI ',					// SubType
-	kPerianManufacturer,	// Manufacturer
+	'vide',                 // Manufacturer
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
 	0,
 	'STR ',						// Name Type
-	kAVIthngResID,						// Name ID
+	kAVIthngResID,				// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -116,23 +121,23 @@ resource 'thga' (514) {
 								// TARGET COMPONENT ---------------
 	'eat ',						// Type
 	'VfW ',						// SubType
-	kPerianManufacturer,		// Manufaturer
+	'vide',                     // Manufacturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
-	'thnr', kAVIthngResID,				// Component public resource identifier
+	'thnr', kAVIthngResID,		// Component public resource identifier
 	cmpAliasOnlyThisFile
 };
 
-resource 'thga' (515) {
+resource 'thga' (kAVIthngResID + 3, kAVIName) {
 	'eat ',					// Type
 	'DIVX',					// SubType
-	kPerianManufacturer,	// Manufacturer
+	'vide',                 // Manufacturer
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
 	0,
 	'STR ',						// Name Type
-	kAVIthngResID,						// Name ID
+	kAVIthngResID,				// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -140,23 +145,23 @@ resource 'thga' (515) {
 								// TARGET COMPONENT ---------------
 	'eat ',						// Type
 	'VfW ',						// SubType
-	kPerianManufacturer,		// Manufaturer
+	'vide',                     // Manufacturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
-	'thnr', kAVIthngResID,				// Component public resource identifier
+	'thnr', kAVIthngResID,		// Component public resource identifier
 	cmpAliasOnlyThisFile
 };
 
-resource 'thga' (516) {
+resource 'thga' (kAVIthngResID + 4, kAVIName) {
 	'eat ',					// Type
 	'GVI ',					// SubType
-	kPerianManufacturer,	// Manufacturer
+	'vide',                 // Manufacturer
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
 	0,
 	'STR ',						// Name Type
-	kAVIthngResID,						// Name ID
+	kAVIthngResID,				// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -164,23 +169,23 @@ resource 'thga' (516) {
 								// TARGET COMPONENT ---------------
 	'eat ',						// Type
 	'VfW ',						// SubType
-	kPerianManufacturer,		// Manufaturer
+	'vide',                     // Manufacturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
-	'thnr', kAVIthngResID,				// Component public resource identifier
+	'thnr', kAVIthngResID,		// Component public resource identifier
 	cmpAliasOnlyThisFile
 };
 
-resource 'thga' (517) {
+resource 'thga' (kAVIthngResID + 5, kAVIName) {
 	'eat ',					// Type
 	'VP6 ',					// SubType
-	kPerianManufacturer,	// Manufacturer
+	'vide',                 // Manufacturer
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	0,
 	0,
 	0,
 	'STR ',						// Name Type
-	kAVIthngResID,						// Name ID
+	kAVIthngResID,				// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -188,43 +193,87 @@ resource 'thga' (517) {
 								// TARGET COMPONENT ---------------
 	'eat ',						// Type
 	'VfW ',						// SubType
-	kPerianManufacturer,		// Manufaturer
+	'vide',                     // Manufacturer
 	0,							// Component Flags
 	0,							// Component Flags Mask
-	'thnr', kAVIthngResID,				// Component public resource identifier
+	'thnr', kAVIthngResID,		// Component public resource identifier
 	cmpAliasOnlyThisFile
 };
 
-/* Perhaps in a later version, we have to use "QuickTime Media Configuration Resources" */
-resource 'thnr' (kAVIthngResID) {
+resource 'thnr' (kAVIthngResID, kAVIName) {
 {
-	'mime', 1, 0,
-	'mime', kAVIthngResID, 0,
+	'mime', 1, 0, 'mime', kAVIthngResID, 0,
+    'mcfg', 1, 0, 'mcfg', kAVIthngResID, 0,
 }
 };
 
-resource 'mime' (kAVIthngResID) {
+resource 'mime' (kAVIthngResID, kAVIName) {
 {
-	kMimeInfoMimeTypeTag,		1,	"video/x-msvideo";
-	kMimeInfoMimeTypeTag,		2,	"video/msvideo";
-	kMimeInfoMimeTypeTag,		3,	"video/avi";
+	kMimeInfoMimeTypeTag,		1, "video/x-msvideo";
+	kMimeInfoMimeTypeTag,		2, "video/msvideo";
+	kMimeInfoMimeTypeTag,		3, "video/avi";
+    kMimeInfoMimeTypeTag,		4, "video/avi";
+	kMimeInfoMimeTypeTag,		5, "video/avi";
+	kMimeInfoMimeTypeTag,		6, "video/avi";
 	kMimeInfoFileExtensionTag,	1, "avi";
 	kMimeInfoFileExtensionTag,	2, "avi";
 	kMimeInfoFileExtensionTag,	3, "avi";
-	kMimeInfoDescriptionTag,	1, "XviD Avi Import";
-	kMimeInfoDescriptionTag,	2, "XviD Avi Import";
-	kMimeInfoDescriptionTag,	3, "XviD Avi Import";
+    kMimeInfoFileExtensionTag,	4, "gvi";
+	kMimeInfoFileExtensionTag,	5, "divx";
+	kMimeInfoFileExtensionTag,	6, "vp6";
+	kMimeInfoDescriptionTag,	1, "AVI Movie File";
+	kMimeInfoDescriptionTag,	2, "AVI Movie File";
+	kMimeInfoDescriptionTag,	3, "AVI Movie File";
+    kMimeInfoDescriptionTag,	4, "AVI Movie File";
+	kMimeInfoDescriptionTag,	5, "AVI Movie File";
+	kMimeInfoDescriptionTag,	6, "AVI Movie File";
 };
 };
 
-resource 'STR ' (kAVIthngResID) {
-	"FFAvi Movie Importer"
+resource 'mcfg' (kAVIthngResID, kAVIName) {
+    kVersionDoesntMatter,
+    {
+        kQTMediaConfigVideoGroupID,
+        kQTMediaConfigUsePluginByDefault | kQTMediaConfigCanUseApp |
+        kQTMediaConfigCanUsePlugin | kQTMediaConfigBinaryFile |
+        kQTMediaConfigTakeFileAssociationByDefault,
+        'VfW ',
+        'TVOD',
+        'eat ',
+        'VfW ',
+        'vide',
+        0, 0,
+        
+        'AVI ',
+        kQTMediaInfoWinGroup,
+        
+        {
+        },
+        
+        {
+            "AVI file",
+            "vfw,avi,gvi,divx,vp6",
+            "QuickTime Player",
+            "Perian AVI Movie Importer",
+            "",
+        },
+        
+        {
+            "video/x-msvideo",
+            "video/msvideo",
+            "video/avi",
+        },
+    }
+};
+
+resource 'STR ' (kAVIthngResID, kAVIName) {
+	kAVIName
 };
 
 
 /* Component Manager Things - 
 	FLV */
-resource 'thng' (kFLVthngResID) {
+resource 'thng' (kFLVthngResID, kFLVName) {
 	'eat ',					// Type
 	'FLV ',					// SubType
 	'vide',					// Manufacturer
@@ -233,7 +282,7 @@ resource 'thng' (kFLVthngResID) {
 	0,
 	0,
 	'STR ',						// Name Type
-	kFLVthngResID,						// Name ID
+	kFLVthngResID,				// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -244,25 +293,25 @@ resource 'thng' (kFLVthngResID) {
 	0,							// Resource ID of Icon Family
 {
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
-	'dlle',					// Code Resource type
-	512,
+	'dlle',                     // Code Resource type
+	kAVIthngResID,
 	platformIA32NativeEntryPoint,		// IA32
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	'dlle',
-	512,
+	kAVIthngResID,
 	platformPowerPCNativeEntryPoint,	// PowerPC
 },
 'thnr', kFLVthngResID
 };
 
-resource 'thnr' (kFLVthngResID) {
+resource 'thnr' (kFLVthngResID, kFLVName) {
 {
-	'mime', 1, 0,
-	'mime', kFLVthngResID, 0,
+	'mime', 1, 0, 'mime', kFLVthngResID, 0,
+    'mcfg', 1, 0, 'mcfg', kFLVthngResID, 0,
 }
 };
 
-resource 'mime' (kFLVthngResID) {
+resource 'mime' (kFLVthngResID, kFLVName) {
 {
 	kMimeInfoMimeTypeTag,		1, "video/x-flv";
 	kMimeInfoFileExtensionTag,	1, "flv";
@@ -270,13 +319,47 @@ resource 'mime' (kFLVthngResID) {
 };
 };
 
-resource 'STR ' (kFLVthngResID) {
-	"Flash Video Importer"
+resource 'mcfg' (kFLVthngResID, kFLVName) {
+    kVersionDoesntMatter,
+    {
+        kQTMediaConfigVideoGroupID,
+        kQTMediaConfigUsePluginByDefault | kQTMediaConfigCanUseApp |
+        kQTMediaConfigCanUsePlugin | kQTMediaConfigBinaryFile |
+        kQTMediaConfigTakeFileAssociationByDefault,
+        'FLV ',
+        'TVOD',
+        'eat ',
+        'FLV ',
+        'vide',
+        0, 0,
+        
+        'FLV ',
+        kQTMediaInfoNetGroup,
+        
+        {
+        },
+        
+        {
+            "Flash Video",
+            "flv",
+            "QuickTime Player",
+            kFLVName,
+            "",
+        },
+        
+        {
+            "video/x-flv",
+        },
+    }
+};
+
+resource 'STR ' (kFLVthngResID, kFLVName) {
+	kFLVName
 };
 
 /* Component Manager Things - 
 	TTA */
-resource 'thng' (kTTAthngResID) {
+resource 'thng' (kTTAthngResID, kTTAName) {
 	'eat ',					// Type
 	'TTA ',					// SubType
 	'soun',					// Manufacturer
@@ -285,7 +368,7 @@ resource 'thng' (kTTAthngResID) {
 	0,
 	0,
 	'STR ',						// Name Type
-	kTTAthngResID,						// Name ID
+	kTTAthngResID,				// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -296,25 +379,25 @@ resource 'thng' (kTTAthngResID) {
 	0,							// Resource ID of Icon Family
 {
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
-	'dlle',					// Code Resource type
-	512,
+	'dlle',                     // Code Resource type
+	kAVIthngResID,
 	platformIA32NativeEntryPoint,		// IA32
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	'dlle',
-	512,
+	kAVIthngResID,
 	platformPowerPCNativeEntryPoint,	// PowerPC
 },
 'thnr', kTTAthngResID
 };
 
-resource 'thnr' (kTTAthngResID) {
+resource 'thnr' (kTTAthngResID, kTTAName) {
 {
-	'mime', 1, 0,
-	'mime', kTTAthngResID, 0,
+	'mime', 1, 0, 'mime', kTTAthngResID, 0,
+    'mcfg', 1, 0, 'mcfg', kTTAthngResID, 0,
 }
 };
 
-resource 'mime' (kTTAthngResID) {
+resource 'mime' (kTTAthngResID, kTTAName) {
 {
 	kMimeInfoMimeTypeTag,		1, "audio/x-tta";
 	kMimeInfoFileExtensionTag,	1, "tta";
@@ -322,25 +405,56 @@ resource 'mime' (kTTAthngResID) {
 };
 };
 
-resource 'STR ' (kTTAthngResID) {
-	"True Audio Importer"
+resource 'mcfg' (kTTAthngResID, kTTAName) {
+    kVersionDoesntMatter,
+    {
+        kQTMediaConfigAudioGroupID,
+        kQTMediaConfigUsePluginByDefault | kQTMediaConfigCanUseApp |
+        kQTMediaConfigCanUsePlugin | kQTMediaConfigBinaryFile |
+        kQTMediaConfigTakeFileAssociationByDefault,
+        'TTA ',
+        'TVOD',
+        'eat ',
+        'TTA ',
+        'soun',
+        0, 0,
+        
+        'TTA ',
+        kQTMediaInfoNetGroup,
+        
+        {
+        },
+        
+        {
+            "True Audio",
+            "tta",
+            "QuickTime Player",
+            "Perian True Audio Importer",
+            "",
+        },
+        
+        {
+            "audio/x-tta",
+        },
+    }
 };
 
-
-
+resource 'STR ' (kTTAthngResID, kTTAName) {
+	kTTAName
+};
 
 /* Component Manager Things - 
 	Nuv */
-resource 'thng' (kNuvthngResID) {
+resource 'thng' (kNUVthngResID, kNUVName) {
 	'eat ',					// Type
 	'NUV ',					// SubType
-	'Myth',					// Manufacturer
+	'vide',					// Manufacturer
 	0,
 	0,
 	0,
 	0,
 	'STR ',						// Name Type
-	kNuvthngResID,						// Name ID
+	kNUVthngResID,				// Name ID
 	0,							// Info Type
 	0,							// Info ID
 	0,							// Icon Type
@@ -351,39 +465,70 @@ resource 'thng' (kNuvthngResID) {
 	0,							// Resource ID of Icon Family
 {
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
-	'dlle',					// Code Resource type
-	512,
+	'dlle',                     // Code Resource type
+	kAVIthngResID,
 	platformIA32NativeEntryPoint,		// IA32
 	kFFAvi_MovieImportFlags | movieImportSubTypeIsFileExtension,
 	'dlle',
-	512,
+	kAVIthngResID,
 	platformPowerPCNativeEntryPoint,	// PowerPC
 },
-'thnr', kNuvthngResID
+'thnr', kNUVthngResID
 };
 
-resource 'thnr' (kNuvthngResID) {
-{
-	'mime', 1, 0,
-	'mime', kNuvthngResID, 0,
-}
+resource 'thnr' (kNUVthngResID, kNUVName) {
+    {
+        'mime', 1, 0, 'mime', kNUVthngResID, 0,
+        'mcfg', 1, 0, 'mcfg', kNUVthngResID, 0,
+    }
 };
 
-resource 'mime' (kNuvthngResID) {
+resource 'mime' (kNUVthngResID, kNUVName) {
 {
-	kMimeInfoMimeTypeTag,		1, "audio/x-nuv";
+	kMimeInfoMimeTypeTag,		1, "video/x-nuv";
 	kMimeInfoFileExtensionTag,	1, "nuv";
 	kMimeInfoDescriptionTag,	1, "NuppelVideo";
 };
 };
 
-resource 'STR ' (kNuvthngResID) {
-	"NuppelVideo"
+resource 'mcfg' (kNUVthngResID, kNUVName) {
+    kVersionDoesntMatter,
+    {
+        kQTMediaConfigVideoGroupID,
+        kQTMediaConfigUsePluginByDefault | kQTMediaConfigCanUseApp |
+        kQTMediaConfigCanUsePlugin | kQTMediaConfigBinaryFile |
+        kQTMediaConfigTakeFileAssociationByDefault,
+        'NUV ',
+        'TVOD',
+        'eat ',
+        'NUV ',
+        'vide',
+        0, 0,
+        
+        'NUV ',
+        kQTMediaInfoNetGroup,
+        
+        {
+        },
+        
+        {
+            "NuppelVideo",
+            "nuv",
+            "QuickTime Player",
+            kNUVName,
+            "",
+        },
+        
+        {
+            "video/x-nuv",
+        },
+    }
 };
 
+resource 'STR ' (kNUVthngResID, kNUVName) {
+	kNUVName
+};
 
-
-
-resource 'dlle' (512) {
+resource 'dlle' (kAVIthngResID, kAVIName) {
 	"FFAvi_MovieImportComponentDispatch"
 };

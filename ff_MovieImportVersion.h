@@ -28,6 +28,6 @@
 #define kAVIthngResID 512
 #define kFLVthngResID 515
 #define kTTAthngResID 517
-#define kNuvthngResID 518
+#define kNUVthngResID 518
 
 #endif

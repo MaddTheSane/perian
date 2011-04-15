@@ -37,48 +37,13 @@
 */
 #define cfrg_RezTemplateVersion 1
 
-
-#if TARGET_REZ_CARBON_MACHO
-    #if defined(ppc_YES)
-        // PPC architecture
-        #define TARGET_REZ_MAC_PPC 1
-    #else
-        #define TARGET_REZ_MAC_PPC 0
-    #endif
-
-    #if defined(i386_YES)
-        // x86 architecture
-        #define TARGET_REZ_MAC_X86 1
-    #else
-        #define TARGET_REZ_MAC_X86 0
-    #endif
-
-    #define TARGET_REZ_WIN32 0
-#else
-    // Must be building on Windows
-    #define TARGET_REZ_WIN32 1
-#endif
-
-
-#if TARGET_REZ_CARBON_MACHO
-    #include <Carbon/Carbon.r>
-    #include <QuickTime/QuickTime.r>
-	#undef __CARBON_R__
-	#undef __CORESERVICES_R__
-	#undef __CARBONCORE_R__
-	#undef __COMPONENTS_R__
-#else
-    #include "ConditionalMacros.r"
-    #include "MacTypes.r"
-    #include "Components.r"
-    #include "QuickTimeComponents.r"
-    #include "CodeFragments.r"
-	#undef __COMPONENTS_R__
-#endif
+#include <Carbon/Carbon.r>
+#include <QuickTime/QuickTime.r>
 
 #include "PerianResourceIDs.h"
 
 #define kMkvImportResource	510
+#define kMkvImportName "Perian Matroska Importer"
 
 // These flags specify information about the capabilities of the component
 // Can import from files
@@ -87,10 +52,10 @@
 #define kMatroskaImportFlags \
 		(canMovieImportFiles | canMovieImportInPlace | canMovieImportDataReferences | \
 		 canMovieImportValidateFile | canMovieImportValidateDataReferences | canMovieImportWithIdle | \
-		 hasMovieImportMIMEList | cmpThreadSafe)
+		 hasMovieImportMIMEList | canMovieImportAvoidBlocking | cmpThreadSafe)
 
 // Component Manager Thing
-resource 'thng' (kMkvImportResource) {
+resource 'thng' (kMkvImportResource, kMkvImportName) {
 	'eat ',									// Type
 	'MkvF',									// SubType
 	'vide',									// Manufacturer
@@ -101,7 +66,7 @@ resource 'thng' (kMkvImportResource) {
 	0,										// not used Code Type
 	0,										// not used Code ID
 	'STR ',									// Name Type
-	kMkvImportResource,									// Name ID
+	kMkvImportResource,						// Name ID
 	0,										// Info Type
 	0,										// Info ID
 	0,										// Icon Type
@@ -111,49 +76,30 @@ resource 'thng' (kMkvImportResource) {
 	componentDoAutoVersion,
 	0,										// Resource ID of Icon Family
 	{
-#if TARGET_OS_MAC							// COMPONENT PLATFORM INFORMATION ----------------------
-	#if TARGET_REZ_CARBON_MACHO
-        #if !(TARGET_REZ_MAC_PPC || TARGET_REZ_MAC_X86)
-        	#error "Platform architecture not defined, TARGET_REZ_MAC_PPC and/or TARGET_REZ_MAC_X86 must be defined!"
-        #endif
-        #if TARGET_REZ_MAC_PPC
-            kMatroskaImportFlags, 
-            'dlle',								// Code Resource type - Entry point found by symbol name 'dlle' resource
-            kMkvImportResource,								// ID of 'dlle' resource
-            platformPowerPCNativeEntryPoint,	// PPC
-        #endif
-        #if TARGET_REZ_MAC_X86
-			kMatroskaImportFlags,
-			'dlle',
-            kMkvImportResource,
-            platformIA32NativeEntryPoint,		// INTEL
-        #endif
-	#else
-		#error "Only Mach-O is support for Mac OS (everything else is obsolete)."
-	#endif
-#endif
-#if TARGET_OS_WIN32
-	kMatroskaImportFlags, 
-	'dlle',
-	kMkvImportResource,
-	platformWin32,
-#endif
+        kMatroskaImportFlags, 
+        'dlle',								// Code Resource type - Entry point found by symbol name 'dlle' resource
+        kMkvImportResource,					// ID of 'dlle' resource
+        platformPowerPCNativeEntryPoint,	// PPC
+        kMatroskaImportFlags,
+        'dlle',
+        kMkvImportResource,
+        platformIA32NativeEntryPoint,		// INTEL
 	},
-	'thnr', kMkvImportResource							// Component public resource identifier
+	'thnr', kMkvImportResource				// Component public resource identifier
 };
 
 // Component Alias
-resource 'thga' (kMkvImportResource + 1) {
+resource 'thga' (kMkvImportResource + 1, kMkvImportName) {
 	'eat ',								// Type
 	'MKV ', 							// Subtype - this must be in uppercase. It will match an ".eim" suffix case-insensitively.
-	'vide',								// Manufaturer - for 'eat ' the media type supported by the component
+	'vide',								// Manufacturer - for 'eat ' the media type supported by the component
 	kMatroskaImportFlags |				// Component Flags
 	movieImportSubTypeIsFileExtension,	// The subtype is a file name suffix
 	0,									// Component Flags Mask
 	0, 									// Code Type
 	0,									// Code ID
 	'STR ',								// Name Type
-	kMkvImportResource,								// Name ID
+	kMkvImportResource,					// Name ID
 	0,									// Info Type
 	0,									// Info ID 
 	0,									// Icon Type 
@@ -161,25 +107,25 @@ resource 'thga' (kMkvImportResource + 1) {
 										// TARGET COMPONENT ---------------
 	'eat ',								// Type
 	'MkvF',								// SubType
-	'vide',								// Manufaturer
+	'vide',								// Manufacturer
 	0,									// Component Flags
 	0,									// Component Flags Mask
-	'thnr', kMkvImportResource,						// Component public resource identifier
+	'thnr', kMkvImportResource,			// Component public resource identifier
 	cmpAliasOnlyThisFile
 };
 
 // Component Alias
-resource 'thga' (kMkvImportResource + 2) {
+resource 'thga' (kMkvImportResource + 2, kMkvImportName) {
 	'eat ',								// Type
 	'MKA ', 							// Subtype - this must be in uppercase. It will match an ".eim" suffix case-insensitively.
-	'soun',								// Manufaturer - for 'eat ' the media type supported by the component
+	'soun',								// Manufacturer - for 'eat ' the media type supported by the component
 	kMatroskaImportFlags |				// Component Flags
 	movieImportSubTypeIsFileExtension,	// The subtype is a file name suffix
 	0,									// Component Flags Mask
 	0, 									// Code Type
 	0,									// Code ID
 	'STR ',								// Name Type
-	kMkvImportResource,								// Name ID
+	kMkvImportResource,					// Name ID
 	0,									// Info Type
 	0,									// Info ID 
 	0,									// Icon Type 
@@ -187,25 +133,25 @@ resource 'thga' (kMkvImportResource + 2) {
 										// TARGET COMPONENT ---------------
 	'eat ',								// Type
 	'MkvF',								// SubType
-	'vide',								// Manufaturer
+	'vide',								// Manufacturer
 	0,									// Component Flags
 	0,									// Component Flags Mask
-	'thnr', kMkvImportResource,						// Component public resource identifier
+	'thnr', kMkvImportResource,			// Component public resource identifier
 	cmpAliasOnlyThisFile
 };
 
 // Component Alias
-resource 'thga' (518) {
+resource 'thga' (518, kMkvImportName) {
 	'eat ',								// Type
 	'WEBM', 							// Subtype - this must be in uppercase. It will match an ".eim" suffix case-insensitively.
-	'vide',								// Manufaturer - for 'eat ' the media type supported by the component
+	'vide',								// Manufacturer - for 'eat ' the media type supported by the component
 	kMatroskaImportFlags |				// Component Flags
 	movieImportSubTypeIsFileExtension,	// The subtype is a file name suffix
 	0,									// Component Flags Mask
 	0, 									// Code Type
 	0,									// Code ID
 	'STR ',								// Name Type
-	kMkvImportResource,								// Name ID
+	kMkvImportResource,					// Name ID
 	0,									// Info Type
 	0,									// Info ID 
 	0,									// Icon Type 
@@ -213,10 +159,10 @@ resource 'thga' (518) {
     // TARGET COMPONENT ---------------
 	'eat ',								// Type
 	'MkvF',								// SubType
-	'vide',								// Manufaturer
+	'vide',								// Manufacturer
 	0,									// Component Flags
 	0,									// Component Flags Mask
-	'thnr', kMkvImportResource,						// Component public resource identifier
+	'thnr', kMkvImportResource,			// Component public resource identifier
 	cmpAliasOnlyThisFile
 };
 
@@ -227,7 +173,7 @@ resource 'thga' (518) {
 // In the absence of this resource, QuickTime and applications will use MovieImportGetMIMETypeList  
 //
 // Component public resource
-resource 'thnr' (kMkvImportResource) {
+resource 'thnr' (kMkvImportResource, kMkvImportName) {
 	{
 		'mime', 1, 0, 
 		'mime', kMkvImportResource, 0,
@@ -254,7 +200,7 @@ resource 'thnr' (kMkvImportResource) {
 // QuickTime plug-in with all browsers on both platforms.
 //
 // Added in QuickTime 6
-resource 'mcfg' (kMkvImportResource)
+resource 'mcfg' (kMkvImportResource, kMkvImportName)
 {
 	kVersionDoesntMatter,					// Version of the component this applies to
 	
@@ -264,10 +210,11 @@ resource 'mcfg' (kMkvImportResource)
 		kQTMediaConfigVideoGroupID,
 		
 		// MIME config flags (unsigned long, one or more of kQTMediaConfigCanUseApp, etc.)
-		kQTMediaConfigUseAppByDefault		// By default, associate with application specified below instead of the QuickTime plug-in
+		kQTMediaConfigUsePluginByDefault	// By default, associate with application specified below instead of the QuickTime plug-in
 			| kQTMediaConfigCanUseApp		// This type can be associated with an application
 			| kQTMediaConfigCanUsePlugin	// This type can be associated with the QuickTime plug-in
-			| kQTMediaConfigBinaryFile,		// The file is binary, not just text
+			| kQTMediaConfigBinaryFile      // The file is binary, not just text
+            | kQTMediaConfigTakeFileAssociationByDefault,		
 
 		'MkvF',								// MacOS file type when saved (OSType)
 		'TVOD',								// MacOS file creator when saved (OSType)
@@ -276,7 +223,7 @@ resource 'mcfg' (kMkvImportResource)
 		'eat ',								// Component type (OSType)
 		'MkvF',								// Component subtype (OSType)
 		'vide',								// Component manufacturer (OSType)
-		kMatroskaImportFlags,				// Component flags
+		0,                                  // Component flags
 		0, 									// Flags mask
 
 		'MKV ',								// Default file extension (OSType) - this must be in uppercase. It will match an ".eim" suffix case-insensitively.
@@ -287,11 +234,11 @@ resource 'mcfg' (kMkvImportResource)
 		},
 
 		{
-			"Matroska file",				// Media type description for MIME configuration panel and browser
-			"mkv,mka,webm",								// File extension(s), comma delimited if more than one
-			"QuickTime Player",					// Opening application name for MIME configuration panel and browser
-			"Matroska Movie Importer",	// Missing software description for the missing software dialog
-			"Version 0.1",						// Vendor info string (copyright, version, etc)
+			"Matroska/WebM file",			// Media type description for MIME configuration panel and browser
+			"mkv,mka,webm",					// File extension(s), comma delimited if more than one
+			"QuickTime Player",				// Opening application name for MIME configuration panel and browser
+			"Perian Matroska Importer",	    // Missing software description for the missing software dialog
+			"",                             // Vendor info string (copyright, version, etc)
 		},
 		
 		// Array of one or more MIME types that describe this media type (eg. audio/mpeg, audio/x-mpeg, etc.)
@@ -305,8 +252,8 @@ resource 'mcfg' (kMkvImportResource)
 };
 
 // Component Name
-resource 'STR ' (kMkvImportResource) {
-	"Matroska Movie Importer"
+resource 'STR ' (kMkvImportResource, kMkvImportName) {
+	"Perian Matroska Importer"
 };
 
 /* 
@@ -315,26 +262,24 @@ resource 'STR ' (kMkvImportResource) {
 	  Please note that atoms of the same type MUST be grouped together within an atom container.
 	  (Also note that "video/electric-image" may not have been registered with the IETF.)
 */
-resource 'mime' (kMkvImportResource) {
+resource 'mime' (kMkvImportResource, kMkvImportName) {
 	{
 		kMimeInfoMimeTypeTag,      1, "video/x-matroska";
 		kMimeInfoMimeTypeTag,      2, "audio/x-matroska";
-        kMimeInfoMimeTypeTag,      3, "audio/webm";
-        kMimeInfoMimeTypeTag,      4, "video/webm";
+        kMimeInfoMimeTypeTag,      3, "video/webm";
+        kMimeInfoMimeTypeTag,      4, "audio/webm";
 		kMimeInfoFileExtensionTag, 1, "mkv";
 		kMimeInfoFileExtensionTag, 2, "mka";
         kMimeInfoFileExtensionTag, 3, "webm";
         kMimeInfoFileExtensionTag, 4, "webm";
 		kMimeInfoDescriptionTag,   1, "Matroska";
-		kMimeInfoDescriptionTag,   2, "Matroska";
-        kMimeInfoDescriptionTag,   3, "Matroska/WebM";
-        kMimeInfoDescriptionTag,   4, "Matroska/WebM";
+		kMimeInfoDescriptionTag,   2, "Matroska audio";
+        kMimeInfoDescriptionTag,   3, "WebM";
+        kMimeInfoDescriptionTag,   4, "WebM audio";
 	};
 };
 
-#if	TARGET_REZ_CARBON_MACHO || TARGET_REZ_WIN32
 // Code Entry Point for Mach-O and Windows
-	resource 'dlle' (kMkvImportResource) {
+resource 'dlle' (kMkvImportResource, kMkvImportName) {
 		"MatroskaImportComponentDispatch"
-	};
-#endif
+};

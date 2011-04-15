@@ -129,7 +129,7 @@ ComponentResult FFAvi_MovieImportGetMIMETypeList(ff_global_ptr storage, QTAtomCo
 			err = GetComponentResource((Component)storage->ci, 'mime', kTTAthngResID, (Handle*)mimeInfo);
 			break;
 		case 'NUV ':
-			err = GetComponentResource((Component)storage->ci, 'mime', kNuvthngResID, (Handle*)mimeInfo);
+			err = GetComponentResource((Component)storage->ci, 'mime', kNUVthngResID, (Handle*)mimeInfo);
 			break;
 		default:
 			err = GetComponentResource((Component)storage->ci, 'mime', kAVIthngResID, (Handle*)mimeInfo);
