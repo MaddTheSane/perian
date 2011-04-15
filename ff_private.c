@@ -720,7 +720,9 @@ int determine_header_offset(ff_global_ptr storage) {
 			}
 			else
 				av_free_packet(&packet);
-			formatContext->iformat->read_packet(formatContext, &packet);
+			int status = formatContext->iformat->read_packet(formatContext, &packet);
+			if(status < 0)
+				break;
 		}
 		
 		// seek back to the beginning, otherwise av_read_frame-based decoding will skip a few packets.
