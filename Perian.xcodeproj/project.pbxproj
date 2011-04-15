@@ -432,14 +432,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			remoteGlobalIDString = F5121EB70EB3A54A0048EF67;
 			remoteInfo = "Make SVN Rev";
 		};
 		3DDA62CE134FCB2C00E11438 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			remoteGlobalIDString = F5121EB70EB3A54A0048EF67;
 			remoteInfo = "Make SVN Rev";
 		};
 		3DE8D9CD1044501E0007C7E7 /* PBXContainerItemProxy */ = {
@@ -2363,6 +2363,7 @@
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "FFmpeg Static Libraries";
 				SDKROOT = macosx10.5;
+				VALID_ARCHS = "ppc i386";
 			};
 			name = Development;
 		};
@@ -2370,13 +2371,18 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "FFmpeg Static Libraries";
+				VALID_ARCHS = "ppc i386";
 			};
 			name = Deployment;
 		};
 		11D4ED480A3CE59A0066D45F /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = (
+					ppc,
+					i386,
+					x86_64,
+				);
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
@@ -2418,7 +2424,11 @@
 		11D4ED490A3CE59A0066D45F /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = (
+					ppc,
+					i386,
+					x86_64,
+				);
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -2461,6 +2471,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "FFmpeg Static Libraries";
+				VALID_ARCHS = "ppc i386";
 			};
 			name = "Deployment+Debug";
 		};
@@ -2605,7 +2616,11 @@
 		3D4BBE510B59EE0A000EDE04 /* Deployment+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ARCHS = (
+					ppc,
+					i386,
+					x86_64,
+				);
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
