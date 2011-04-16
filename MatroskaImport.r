@@ -52,7 +52,7 @@
 #define kMatroskaImportFlags \
 		(canMovieImportFiles | canMovieImportInPlace | canMovieImportDataReferences | \
 		 canMovieImportValidateFile | canMovieImportValidateDataReferences | canMovieImportWithIdle | \
-		 hasMovieImportMIMEList | canMovieImportAvoidBlocking | cmpThreadSafe)
+		 hasMovieImportMIMEList | canMovieImportAvoidBlocking | cmpThreadSafe | canMovieImportPartial)
 
 // Component Manager Thing
 resource 'thng' (kMkvImportResource, kMkvImportName) {

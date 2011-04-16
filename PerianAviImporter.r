@@ -45,7 +45,7 @@
 #define kFFAvi_MovieImportFlags \
 ( canMovieImportFiles | canMovieImportInPlace | canMovieImportDataReferences | canMovieImportValidateFile \
 		| canMovieImportValidateDataReferences | canMovieImportWithIdle | hasMovieImportMIMEList \
-		| movieImportMustGetDestinationMediaType | canMovieImportAvoidBlocking | cmpThreadSafe )
+		| movieImportMustGetDestinationMediaType | canMovieImportAvoidBlocking | cmpThreadSafe | canMovieImportPartial )
 
 /* Component Manager Things - 
 	AVI */
