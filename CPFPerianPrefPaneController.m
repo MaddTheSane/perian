@@ -270,7 +270,7 @@
 	return [NSDictionary dictionaryWithContentsOfFile:[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Info.plist"]];
 }
 
-- (void)checkForInstallation
+- (void)checkForInstallation:(BOOL)freshInstall
 {
 	NSDictionary *infoDict = [self myInfoDict];
 	NSString *myVersion = [infoDict objectForKey:BundleVersionKey];
@@ -279,12 +279,12 @@
 	installStatus = [self installStatusForComponent:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:myVersion];
 	if(currentInstallStatus(installStatus) == InstallStatusNotInstalled)
 	{
-		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is not Installed", @"")];
+		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is not installed", @"")];
 		[button_install setTitle:NSLocalizedString(@"Install Perian", @"")];
 	}
 	else if(currentInstallStatus(installStatus) == InstallStatusOutdated)
 	{
-		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed, but Outdated", @"")];
+		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed, but outdated", @"")];
 		[button_install setTitle:NSLocalizedString(@"Update Perian", @"")];
 	}
 	else
@@ -305,32 +305,35 @@
 			{
 				case InstallStatusInstalledInWrongLocation:
 				case InstallStatusNotInstalled:
-					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed, but parts are Not Installed", @"")];
+					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed, but parts are not installed", @"")];
 					[button_install setTitle:NSLocalizedString(@"Install Perian", @"")];
 					break;
 				case InstallStatusOutdatedWithAnotherInWrongLocation:
 				case InstallStatusOutdated:
-					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed, but parts are Outdated", @"")];
+					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed, but parts are outdated", @"")];
 					[button_install setTitle:NSLocalizedString(@"Update Perian", @"")];
 					break;
 				case InstallStatusInstalledInBothLocations:
-					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed Twice", @"")];
+					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed twice", @"")];
 					[button_install setTitle:NSLocalizedString(@"Correct Installation", @"")];
 					break;
 				case InstallStatusInstalled:
-					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed", @"")];
+					if(freshInstall)
+						[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed; please restart your applications that use Perian", @"")];
+					else
+						[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed", @"")];
 					[button_install setTitle:NSLocalizedString(@"Remove Perian", @"")];
 					break;
 			}
 		}
 		else if(isWrongLocationInstalled(installStatus))
 		{
-			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed Twice", @"")];
+			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed twice", @"")];
 			[button_install setTitle:NSLocalizedString(@"Correct Installation", @"")];
 		}
 		else
 		{
-			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is Installed", @"")];
+			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed", @"")];
 			[button_install setTitle:NSLocalizedString(@"Remove Perian", @"")];
 		}
 		
@@ -382,7 +385,7 @@
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
 		[self updateCheck:nil];
 	} else {
-		[self checkForInstallation];
+		[self checkForInstallation:NO];
 	}
 	
 	NSDate *updateDate = [self getDateFromKey:(CFStringRef)NEXT_RUN_KEY forAppID:perianAppID];
@@ -730,7 +733,7 @@
 
 - (void)installComplete:(id)sender
 {
-	[self checkForInstallation];
+	[self checkForInstallation:YES];
 }
 
 #pragma mark Component Version List
