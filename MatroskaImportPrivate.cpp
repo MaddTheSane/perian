@@ -633,7 +633,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 			
 			OSType compressedType = compressStreamFourCC(asbd.mFormatID);
 			if (compressedType == 0)
-				Codecprintf(NULL, "MKV: warning, compressed track %s probably won't work\n", FourCCString((*mkvTrack.desc)->dataFormat));
+				Codecprintf(NULL, "MKV: warning, compressed track %s probably won't work\n", FourCCString(asbd.mFormatID));
 			else
 			{
 				asbd.mFormatID = compressedType;
