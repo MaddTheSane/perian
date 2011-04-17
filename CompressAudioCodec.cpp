@@ -26,6 +26,8 @@
 static const OSType kAllInputFormats[] = 
 {
 	kCompressedAC3,
+	kCompressedMP1,
+	kCompressedMP2,
 	kCompressedMP3,
 	kCompressedDTS,
 	0,

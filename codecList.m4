@@ -70,5 +70,7 @@ Codec(kNellymoserCodecResourceID, CODEC_ID_NELLYMOSER, "Nellymoser ASAO", "An Au
 
 EntryPoint(kFFissionCodecManufacturer, kFFissionCodecVersion, kCompressAC3CodecResourceID, "CompressAudioDecoderEntry", cmpThreadSafeOnMac, )
 Codec(kCompressAC3CodecResourceID, CODEC_ID_NONE, "AC3", "Decompresses compressed video stream stored in H.264 format.", kCompressedAC3)
+Codec(kCompressMP1CodecResourceID, CODEC_ID_NONE, "MPEG-1 Layer 1", "An AudioCodec that decodes MPEG-1 layer 1 audio into linear PCM", kCompressedMP1)
+Codec(kCompressMP2CodecResourceID, CODEC_ID_NONE, "MPEG-1 Layer 2", "An AudioCodec that decodes MPEG-1 layer 2 audio into linear PCM", kCompressedMP2)
 Codec(kCompressMP3CodecResourceID, CODEC_ID_NONE, "MP3", "Decompresses compressed video stream stored in MPEG-4 format.", kCompressedMP3)
 Codec(kCompressDTSCodecResourceID, CODEC_ID_NONE, "DTS Coherent Acoustics", "An AudioCodec that decodes DCA Audio into linear PCM", kCompressedDTS)

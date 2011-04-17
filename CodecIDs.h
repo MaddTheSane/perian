@@ -110,6 +110,8 @@ enum {
 	kCompressedAVC1							= 'CAVC',
 	kCompressedMP4V							= 'CMP4',
 	kCompressedAC3							= 'CAC3',
+	kCompressedMP1							= 'CMP1',
+	kCompressedMP2							= 'CMP2',
 	kCompressedMP3							= 'CMP3',
 	kCompressedDTS							= 'CDTS',
 };
