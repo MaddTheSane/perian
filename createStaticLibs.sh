@@ -11,7 +11,7 @@ x86tune="generic"
 x86flags=""
 
 if [ -e /usr/bin/gcc-4.2 ]; then
-	CC="gcc-4.2"
+	CC="${DEVELOPER_BIN_DIR}/gcc-4.2"
 	x86tune="core2"
 	x86flags="--param max-completely-peel-times=2"
 fi
