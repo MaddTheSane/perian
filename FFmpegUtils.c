@@ -153,6 +153,7 @@ void FFInitFFmpeg()
 		REGISTER_DECODER(tta);
 		REGISTER_DECODER(dca);
 		REGISTER_DECODER(nellymoser);
+		REGISTER_DECODER(aac);
 		
 		REGISTER_DECODER(dvdsub);
 		REGISTER_DECODER(tscc);
