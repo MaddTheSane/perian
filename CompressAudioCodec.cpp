@@ -112,6 +112,9 @@ void CompressAudioCodec::ParseCookie(const uint8_t* inMagicCookie, UInt32 inMagi
 
 void CompressAudioCodec::Initialize(const AudioStreamBasicDescription* inInputFormat, const AudioStreamBasicDescription* inOutputFormat, const void* inMagicCookie, UInt32 inMagicCookieByteSize)
 {
+	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
+	if(inMagicCookie)
+		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
 	if(inInputFormat)
 	{
 		OSType original = originalStreamFourCC(inInputFormat->mFormatID);
@@ -122,18 +125,17 @@ void CompressAudioCodec::Initialize(const AudioStreamBasicDescription* inInputFo
 		memset(&desc, 0, sizeof(ComponentDescription));
 		desc.componentType = kAudioDecoderComponentType;
 		desc.componentSubType = original;
-		Component component = FindNextComponent(NULL, &desc);
-		if(component != NULL)
+		Component component = NULL;
+		while((component = FindNextComponent(component, &desc)) != NULL)
 		{
 			ComponentResult err = OpenAComponent(component, &actualUnit);
 			AudioStreamBasicDescription input = *inInputFormat;
 			input.mFormatID = original;
 			err = AudioCodecInitialize(actualUnit, &input, inOutputFormat, innerCookie, innerCookieSize);
+			if(err == noErr)
+				break;
 		}
 	}
-	if(inMagicCookie)
-		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
-	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
 }
 
 void CompressAudioCodec::Uninitialize()
