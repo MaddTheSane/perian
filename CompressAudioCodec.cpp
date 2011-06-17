@@ -115,9 +115,9 @@ void CompressAudioCodec::Initialize(const AudioStreamBasicDescription* inInputFo
 	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
 	if(inMagicCookie)
 		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
-	if(inInputFormat)
+	if(mInputFormat.mFormatID != 0 && actualUnit == NULL)
 	{
-		OSType original = originalStreamFourCC(inInputFormat->mFormatID);
+		OSType original = originalStreamFourCC(mInputFormat.mFormatID);
 		if(original == 0)
 			CODEC_THROW(kAudioCodecUnsupportedFormatError);
 		
@@ -129,12 +129,19 @@ void CompressAudioCodec::Initialize(const AudioStreamBasicDescription* inInputFo
 		while((component = FindNextComponent(component, &desc)) != NULL)
 		{
 			ComponentResult err = OpenAComponent(component, &actualUnit);
-			AudioStreamBasicDescription input = *inInputFormat;
+			AudioStreamBasicDescription input = mInputFormat ;
 			input.mFormatID = original;
 			err = AudioCodecInitialize(actualUnit, &input, inOutputFormat, innerCookie, innerCookieSize);
 			if(err == noErr)
 				break;
 		}
+	}
+	else if(actualUnit != NULL)
+	{
+		OSType original = originalStreamFourCC(mInputFormat.mFormatID);
+		AudioStreamBasicDescription input = mInputFormat ;
+		input.mFormatID = original;
+		AudioCodecInitialize(actualUnit, &input, inOutputFormat, innerCookie, innerCookieSize);
 	}
 }
 
