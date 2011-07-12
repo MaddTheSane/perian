@@ -149,7 +149,7 @@ static NSString *MatroskaPacketizeLine(NSDictionary *sub, int n)
 		n+1,
 		[[sub objectForKey:@"Layer"] intValue],
 		[sub objectForKey:@"Style"],
-		[sub objectForKey:@"Name"],
+		name,
 		[sub objectForKey:@"MarginL"],
 		[sub objectForKey:@"MarginR"],
 		[sub objectForKey:@"MarginV"],
@@ -260,7 +260,7 @@ static int parse_SYNC(NSString *str)
 {
 	NSScanner *sc = [NSScanner scannerWithString:str];
 
-	int res;
+	int res=0;
 
 	if ([sc scanString:@"START=" intoString:nil])
 		[sc scanInt:&res];
@@ -1063,6 +1063,7 @@ static ComponentResult LoadExternalSubtitles(CFURLRef theFileURL, Movie theMovie
 	ComponentResult err = noErr;
 	Track firstSubTrack = NULL;
 	CFStringRef cfFilename = NULL;
+	CFStringRef cfFoundFilename;
 	FSRef parentDir;
 	FSIterator dirItr = NULL;
 	CFRange baseFilenameRange;
@@ -1092,7 +1093,6 @@ static ComponentResult LoadExternalSubtitles(CFURLRef theFileURL, Movie theMovie
 	do {
 		FSRef foundFileRef;
 		HFSUniStr255 hfsFoundFilename;
-		CFStringRef cfFoundFilename = NULL;
 		CFComparisonResult cmpRes;
 		
 		err = FSGetCatalogInfoBulk(dirItr, 1, &filesFound, &containerChanged, kFSCatInfoNone, 
@@ -1147,10 +1147,14 @@ static ComponentResult LoadExternalSubtitles(CFURLRef theFileURL, Movie theMovie
 		}
 		
 		CFRelease(cfFoundFilename);
+		cfFoundFilename = NULL;
 	} while (filesFound && !containerChanged);
 	
 bail:	
-		if (err == errFSNoMoreItems)
+	if (cfFoundFilename)
+		CFRelease(cfFoundFilename);
+	
+	if (err == errFSNoMoreItems)
 			err = noErr;
 	
 	if (dirItr)
