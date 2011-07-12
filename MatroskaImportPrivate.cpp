@@ -73,12 +73,20 @@ bool MatroskaImport::OpenFile()
 		EbmlElement *dummyElt = NULL;
 		
 		el_l0->Read(*aStream, EbmlHead::ClassInfos.Context, upperLevel, dummyElt, true);
-		EbmlHead *head = static_cast<EbmlHead *>(el_l0);
-		
-		EDocType docType = GetChild<EDocType>(*head);
-		if (string(docType) != "matroska" && string(docType) != "webm") {
+
+		if (EbmlId(*el_l0) != EBML_ID(EbmlHead)) {
 			Codecprintf(NULL, "Not a Matroska file\n");
 			valid = false;
+			goto exit;
+		}
+
+		EbmlHead *head = static_cast<EbmlHead *>(el_l0);
+
+		EDocType docType = GetChild<EDocType>(*head);
+		if (string(docType) != "matroska" && string(docType) != "webm") {
+			Codecprintf(NULL, "Unknown Matroska doctype\n");
+			valid = false;
+			goto exit;
 		}
 		
 		EDocTypeReadVersion readVersion = GetChild<EDocTypeReadVersion>(*head);
@@ -90,6 +98,8 @@ bool MatroskaImport::OpenFile()
 		Codecprintf(NULL, "Matroska file missing EBML Head\n");
 		valid = false;
 	}
+	
+exit:
 	
 	delete el_l0;
 	el_l0 = NULL;
