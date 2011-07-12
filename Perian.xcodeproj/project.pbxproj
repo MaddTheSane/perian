@@ -132,6 +132,8 @@
 		3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
 		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; settings = {COMPILER_FLAGS = "-O3"; }; };
 		3D5AB53C10BB52B500D1E688 /* CommonUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D517720AE0402E00A671E1 /* CommonUtils.c */; };
+		3D70B04B13CC187900711D41 /* KaxSemantic.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D70B04A13CC187900711D41 /* KaxSemantic.h */; };
+		3D70B04D13CC188300711D41 /* KaxSemantic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D70B04C13CC188300711D41 /* KaxSemantic.cpp */; };
 		3D717EB011A7C1640084F048 /* Read Me.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */; };
 		3D802EAB1032B8B00034BF4A /* SubContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SubContext.m */; };
 		3D802EAC1032B8B00034BF4A /* SubImport.mm in Sources */ = {isa = PBXBuildFile; fileRef = 61D514DD0ADF3DBA00A671E1 /* SubImport.mm */; };
@@ -646,6 +648,8 @@
 		3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = UniversalDetector.h; path = UniversalDetector/UniversalDetector.h; sourceTree = "<group>"; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
+		3D70B04A13CC187900711D41 /* KaxSemantic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KaxSemantic.h; path = libmatroska/matroska/KaxSemantic.h; sourceTree = "<group>"; };
+		3D70B04C13CC188300711D41 /* KaxSemantic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = KaxSemantic.cpp; path = libmatroska/src/KaxSemantic.cpp; sourceTree = "<group>"; };
 		3D802EBB1032B8B00034BF4A /* ssa2pdf */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ssa2pdf; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D802EC21032B9B50034BF4A /* ssa2pdf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ssa2pdf.m; path = Subtitles/ssa2pdf.m; sourceTree = "<group>"; };
 		3D802F8510336EE90034BF4A /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
@@ -766,7 +770,6 @@
 		61CB118B0ACDF4FF007994BD /* KaxSeekHead.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxSeekHead.h; path = libmatroska/matroska/KaxSeekHead.h; sourceTree = "<group>"; };
 		61CB118C0ACDF4FF007994BD /* KaxSegment.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxSegment.h; path = libmatroska/matroska/KaxSegment.h; sourceTree = "<group>"; };
 		61CB118D0ACDF4FF007994BD /* KaxTag.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTag.h; path = libmatroska/matroska/KaxTag.h; sourceTree = "<group>"; };
-		61CB118E0ACDF4FF007994BD /* KaxTagMulti.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTagMulti.h; path = libmatroska/matroska/KaxTagMulti.h; sourceTree = "<group>"; };
 		61CB118F0ACDF4FF007994BD /* KaxTags.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTags.h; path = libmatroska/matroska/KaxTags.h; sourceTree = "<group>"; };
 		61CB11900ACDF4FF007994BD /* KaxTrackAudio.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTrackAudio.h; path = libmatroska/matroska/KaxTrackAudio.h; sourceTree = "<group>"; };
 		61CB11910ACDF4FF007994BD /* KaxTrackEntryData.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = KaxTrackEntryData.h; path = libmatroska/matroska/KaxTrackEntryData.h; sourceTree = "<group>"; };
@@ -791,7 +794,6 @@
 		61CB11C20ACDF50F007994BD /* KaxSeekHead.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxSeekHead.cpp; path = libmatroska/src/KaxSeekHead.cpp; sourceTree = "<group>"; };
 		61CB11C30ACDF50F007994BD /* KaxSegment.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxSegment.cpp; path = libmatroska/src/KaxSegment.cpp; sourceTree = "<group>"; };
 		61CB11C40ACDF50F007994BD /* KaxTag.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTag.cpp; path = libmatroska/src/KaxTag.cpp; sourceTree = "<group>"; };
-		61CB11C50ACDF50F007994BD /* KaxTagMulti.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTagMulti.cpp; path = libmatroska/src/KaxTagMulti.cpp; sourceTree = "<group>"; };
 		61CB11C60ACDF50F007994BD /* KaxTags.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTags.cpp; path = libmatroska/src/KaxTags.cpp; sourceTree = "<group>"; };
 		61CB11C70ACDF50F007994BD /* KaxTrackAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTrackAudio.cpp; path = libmatroska/src/KaxTrackAudio.cpp; sourceTree = "<group>"; };
 		61CB11C80ACDF50F007994BD /* KaxTrackEntryData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTrackEntryData.cpp; path = libmatroska/src/KaxTrackEntryData.cpp; sourceTree = "<group>"; };
@@ -1290,8 +1292,8 @@
 				61CB11C10ACDF50F007994BD /* KaxInfoData.cpp */,
 				61CB11C20ACDF50F007994BD /* KaxSeekHead.cpp */,
 				61CB11C30ACDF50F007994BD /* KaxSegment.cpp */,
+				3D70B04C13CC188300711D41 /* KaxSemantic.cpp */,
 				61CB11C40ACDF50F007994BD /* KaxTag.cpp */,
-				61CB11C50ACDF50F007994BD /* KaxTagMulti.cpp */,
 				61CB11C60ACDF50F007994BD /* KaxTags.cpp */,
 				61CB11C70ACDF50F007994BD /* KaxTrackAudio.cpp */,
 				61CB11C80ACDF50F007994BD /* KaxTrackEntryData.cpp */,
@@ -1315,8 +1317,8 @@
 				61CB118A0ACDF4FF007994BD /* KaxInfoData.h */,
 				61CB118B0ACDF4FF007994BD /* KaxSeekHead.h */,
 				61CB118C0ACDF4FF007994BD /* KaxSegment.h */,
+				3D70B04A13CC187900711D41 /* KaxSemantic.h */,
 				61CB118D0ACDF4FF007994BD /* KaxTag.h */,
-				61CB118E0ACDF4FF007994BD /* KaxTagMulti.h */,
 				61CB118F0ACDF4FF007994BD /* KaxTags.h */,
 				61CB11900ACDF4FF007994BD /* KaxTrackAudio.h */,
 				61CB11910ACDF4FF007994BD /* KaxTrackEntryData.h */,
@@ -1521,6 +1523,7 @@
 				61CB11AE0ACDF4FF007994BD /* KaxTypes.h in Headers */,
 				61CB11AF0ACDF4FF007994BD /* KaxVersion.h in Headers */,
 				3D2A136F1213D3CC002BFAEA /* KaxDefines.h in Headers */,
+				3D70B04B13CC187900711D41 /* KaxSemantic.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2121,6 +2124,7 @@
 				61CB11E10ACDF50F007994BD /* KaxTracks.cpp in Sources */,
 				61CB11E20ACDF50F007994BD /* KaxTrackVideo.cpp in Sources */,
 				61CB11E30ACDF50F007994BD /* KaxVersion.cpp in Sources */,
+				3D70B04D13CC188300711D41 /* KaxSemantic.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
