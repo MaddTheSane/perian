@@ -1063,7 +1063,7 @@ static ComponentResult LoadExternalSubtitles(CFURLRef theFileURL, Movie theMovie
 	ComponentResult err = noErr;
 	Track firstSubTrack = NULL;
 	CFStringRef cfFilename = NULL;
-	CFStringRef cfFoundFilename;
+	CFStringRef cfFoundFilename = NULL;
 	FSRef parentDir;
 	FSIterator dirItr = NULL;
 	CFRange baseFilenameRange;
