@@ -627,6 +627,15 @@
 	}
 }
 
+- (void)deletePluginCache
+{
+	// delete the QuickTime web plugin's component cache
+	// unfortunately there is no way for this to work for "all users" installs
+	
+	NSString *path = [@"~/Library/Preferences/com.apple.quicktime.plugin.preferences.plist" stringByExpandingTildeInPath];
+	[[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+}
+
 - (void)install:(id)sender
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -675,6 +684,7 @@
 	}
 	
 	[self lsRegisterApps];
+	[self deletePluginCache];
 	
 	[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
 	[pool release];
