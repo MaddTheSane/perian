@@ -31,6 +31,10 @@ OSType compressStreamFourCC(OSType original)
 			return kCompressedMP4V;
 		case kAudioFormatMPEGLayer3:
 			return kCompressedMP3;
+		case kAudioFormatMPEGLayer2:
+			return kCompressedMP2;
+		case kAudioFormatMPEGLayer1:
+			return kCompressedMP1;
 		case kAudioFormatAC3:
 			return kCompressedAC3;
 		case kAudioFormatDTS:
@@ -49,6 +53,10 @@ OSType originalStreamFourCC(OSType compress)
 			return kH264CodecType;
 		case kCompressedMP4V:
 			return kMPEG4VisualCodecType;
+		case kCompressedMP1:
+			return kAudioFormatMPEGLayer1;
+		case kCompressedMP2:
+			return kAudioFormatMPEGLayer2;
 		case kCompressedMP3:
 			return kAudioFormatMPEGLayer3;
 		case kCompressedAC3:

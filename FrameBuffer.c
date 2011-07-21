@@ -204,6 +204,7 @@ void FFusionDataMarkRead(FrameData *toData)
 	{
 		//If there's previous data, free it since we are now done with it
 		FFusionDataFree(data->previousData);
+		free(data->previousData);
 		data->previousData = NULL;
 	}
 }

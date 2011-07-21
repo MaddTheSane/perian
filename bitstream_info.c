@@ -158,7 +158,7 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	asbd->mSampleRate = sample_rate >> shift;
 	asbd->mFormatID = kAudioFormatAC3MS;
 	asbd->mChannelsPerFrame = nfchans_tbl[acmod] + lfe;
-	asbd->mFramesPerPacket = 1536;
+	asbd->mFramesPerPacket = framesize;
 	
 	memset(acl, 0, sizeof(AudioChannelLayout));
 	if(lfe)

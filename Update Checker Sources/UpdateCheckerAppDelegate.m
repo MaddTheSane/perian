@@ -256,15 +256,17 @@ extern char **environ;
 		}
 	}
 	
-	char *buf = NULL;
-	asprintf(&buf, "open \"$PREFPANE_LOCATION\"; rm -rf \"$TEMP_FOLDER\"");
+	const char *buf = "open \"$PREFPANE_LOCATION\"; rm -rf \"$TEMP_FOLDER\"";
 	if(!buf)
 	{
 		[self updateFailed];
 		[self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Create Extraction Script",@"")];
 	}
-		
-	char *args[] = {"/bin/sh", "-c", buf, NULL};
+	
+	NSAppleScript *quitSysPrefsScript = [[NSAppleScript alloc] initWithSource:@"tell application \"System Preferences\" to quit"];
+	[quitSysPrefsScript executeAndReturnError:nil];
+	
+	const char *args[] = {"/bin/sh", "-c", buf, NULL};
 	setenv("PREFPANE_LOCATION", [prefpanelocation fileSystemRepresentation], 1);
 	setenv("TEMP_FOLDER", [[downloadPath stringByDeletingLastPathComponent] fileSystemRepresentation], 1);
     int forkVal = fork();

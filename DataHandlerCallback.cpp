@@ -169,6 +169,9 @@ uint32 DataHandlerCallback::read(void *buffer, size_t size)
 	uint64_t oldPos = mCurrentPosition;
 	uint8_t *internalBuffer, *myBuffer = (uint8_t *)buffer;
 	
+	if (mCurrentPosition + size > filesize)
+		getFileSize();
+	
     if (size < 1 || mCurrentPosition > filesize)
         return 0;
 	
@@ -186,16 +189,18 @@ uint32 DataHandlerCallback::read(void *buffer, size_t size)
 		if (size <= 0)
 			break;
 		
-		internalBuffer = dataBuffer.GetBuffer(mCurrentPosition, READ_SIZE);
+		size_t readSize = MIN(READ_SIZE, filesize - mCurrentPosition);
+		
+		internalBuffer = dataBuffer.GetBuffer(mCurrentPosition, readSize);
 		
 		if (supportsWideOffsets) {
 			wide wideOffset = SInt64ToWide(mCurrentPosition);
 			
 			err = DataHScheduleData64(dataHandler, (Ptr)internalBuffer, &wideOffset, 
-									  READ_SIZE, 0, NULL, NULL);
+									  readSize, 0, NULL, NULL);
 		} else {
 			err = DataHScheduleData(dataHandler, (Ptr)internalBuffer, mCurrentPosition, 
-									READ_SIZE, 0, NULL, NULL);
+									readSize, 0, NULL, NULL);
 		}
 	
 		if (err) {
@@ -264,9 +269,6 @@ SInt64 DataHandlerCallback::getFileSize()
 {
 	ComponentResult err = noErr;
 	wide wideFilesize;
-	
-	if (filesize > 0) 
-		return filesize;
 	
 	err = DataHGetFileSize64(dataHandler, &wideFilesize);
 	if (err == noErr) {

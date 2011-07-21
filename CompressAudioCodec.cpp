@@ -26,6 +26,8 @@
 static const OSType kAllInputFormats[] = 
 {
 	kCompressedAC3,
+	kCompressedMP1,
+	kCompressedMP2,
 	kCompressedMP3,
 	kCompressedDTS,
 	0,
@@ -110,9 +112,12 @@ void CompressAudioCodec::ParseCookie(const uint8_t* inMagicCookie, UInt32 inMagi
 
 void CompressAudioCodec::Initialize(const AudioStreamBasicDescription* inInputFormat, const AudioStreamBasicDescription* inOutputFormat, const void* inMagicCookie, UInt32 inMagicCookieByteSize)
 {
-	if(inInputFormat)
+	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
+	if(inMagicCookie)
+		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
+	if(mInputFormat.mFormatID != 0 && actualUnit == NULL)
 	{
-		OSType original = originalStreamFourCC(inInputFormat->mFormatID);
+		OSType original = originalStreamFourCC(mInputFormat.mFormatID);
 		if(original == 0)
 			CODEC_THROW(kAudioCodecUnsupportedFormatError);
 		
@@ -120,18 +125,24 @@ void CompressAudioCodec::Initialize(const AudioStreamBasicDescription* inInputFo
 		memset(&desc, 0, sizeof(ComponentDescription));
 		desc.componentType = kAudioDecoderComponentType;
 		desc.componentSubType = original;
-		Component component = FindNextComponent(NULL, &desc);
-		if(component != NULL)
+		Component component = NULL;
+		while((component = FindNextComponent(component, &desc)) != NULL)
 		{
 			ComponentResult err = OpenAComponent(component, &actualUnit);
-			AudioStreamBasicDescription input = *inInputFormat;
+			AudioStreamBasicDescription input = mInputFormat ;
 			input.mFormatID = original;
 			err = AudioCodecInitialize(actualUnit, &input, inOutputFormat, innerCookie, innerCookieSize);
+			if(err == noErr)
+				break;
 		}
 	}
-	if(inMagicCookie)
-		SetMagicCookie(inMagicCookie, inMagicCookieByteSize);
-	FFissionCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
+	else if(actualUnit != NULL)
+	{
+		OSType original = originalStreamFourCC(mInputFormat.mFormatID);
+		AudioStreamBasicDescription input = mInputFormat ;
+		input.mFormatID = original;
+		AudioCodecInitialize(actualUnit, &input, inOutputFormat, innerCookie, innerCookieSize);
+	}
 }
 
 void CompressAudioCodec::Uninitialize()
