@@ -19,9 +19,9 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.2.2</string>
+	<string>1.2.3</string>
 	<key>CFBundleGetInfoString</key>
-	<string>1.2.2 (SVNREVISION ffmpeg: FFMPEGREVISION), copyright 2011 the Perian team</string>
+	<string>1.2.3 (SVNREVISION ffmpeg: FFMPEGREVISION), copyright 2011 the Perian team</string>
 	<key>CFBundleName</key>
 	<string>Perian</string>
 	<key>NSMainNibFile</key>
