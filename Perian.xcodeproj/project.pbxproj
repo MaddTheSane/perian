@@ -2415,7 +2415,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = "-fstack-protector";
 				OTHER_CPLUSPLUSFLAGS = (
 					"-D_GLIBCXX_DEBUG",
 					"$(OTHER_CFLAGS)",
@@ -2465,7 +2464,6 @@
 				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
-				OTHER_CFLAGS = "-fstack-protector";
 				OTHER_CFLAGS_i386 = "-march=pentium-m -frerun-cse-after-loop $(OTHER_CFLAGS)";
 				OTHER_CFLAGS_ppc = "-mcpu=G3 -mmultiple $(OTHER_CFLAGS)";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
@@ -2650,7 +2648,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.5;
-				OTHER_CFLAGS = "-fstack-protector";
 				OTHER_CFLAGS_i386 = "-march=pentium-m -frerun-cse-after-loop $(OTHER_CFLAGS)";
 				OTHER_CFLAGS_ppc = "-mcpu=G3 -mmultiple $(OTHER_CFLAGS)";
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;

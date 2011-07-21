@@ -633,7 +633,7 @@
 	// unfortunately there is no way for this to work for "all users" installs
 	
 	NSString *path = [@"~/Library/Preferences/com.apple.quicktime.plugin.preferences.plist" stringByExpandingTildeInPath];
-	[[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+	[[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
 }
 
 - (void)install:(id)sender
