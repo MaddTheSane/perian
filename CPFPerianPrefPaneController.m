@@ -752,9 +752,8 @@
 	NSString *path = [self basePathForType:ComponentTypeQuickTime user:user];
 	NSArray *installedComponents = [[NSFileManager defaultManager] directoryContentsAtPath:path];
 	NSMutableArray *retArray = [[NSMutableArray alloc] initWithCapacity:[installedComponents count]]; 
-	NSEnumerator *componentEnum = [installedComponents objectEnumerator];
 	NSString *component;
-	while ((component = [componentEnum nextObject])) {
+	for (component in installedComponents) {
 		if ([[component pathExtension] isEqualToString:@"component"])
 			[retArray addObject:component];
 	}
@@ -799,11 +798,10 @@
 	NSMutableArray *components = [[NSMutableArray alloc] initWithCapacity:numComponents];
 	NSEnumerator *compEnum = [userComponents objectEnumerator];
 	NSString *compName;
-	while ((compName = [compEnum nextObject]))
+	for (compName in userComponents)
 		[components addObject:[self componentInfoForComponent:compName userInstalled:YES]];
 	
-	compEnum = [systemComponents objectEnumerator];
-	while ((compName = [compEnum nextObject]))
+	for (compName in systemComponents)
 		[components addObject:[self componentInfoForComponent:compName userInstalled:NO]];
 	return [components autorelease];
 }
@@ -811,9 +809,8 @@
 - (NSString *)checkComponentStatusByBundleIdentifier:(NSString *)bundleID
 {
 	NSString *status = @"OK";
-	NSEnumerator *infoEnum = [componentReplacementInfo objectEnumerator];
 	NSDictionary *infoDict;
-	while ((infoDict = [infoEnum nextObject])) {
+	for (infoDict in componentReplacementInfo) {
 		NSEnumerator *stringsEnum = [[infoDict objectForKey:ObsoletesKey] objectEnumerator];
 		NSString *obsoletedID;
 		while ((obsoletedID = [stringsEnum nextObject]))
