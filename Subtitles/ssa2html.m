@@ -191,7 +191,9 @@ NSString *htmlfilter(NSString *s)
 
 -(void)htmlifyDivArray:(NSArray*)divs
 {
-	for (SubRenderDiv *div in divs) {
+	int div_count = [divs count], i;
+	for (i = 0; i < div_count; i++) {
+		SubRenderDiv *div = [divs objectAtIndex:i];
 		int j, spancount = [div->spans count], spans = 1, close_div = 0;
 		
 		if (div->positioned) {
@@ -222,10 +224,12 @@ NSString *htmlfilter(NSString *s)
 	NSArray *divs = SubParsePacket(sl->line, sc, self);
 	free(ubuf);
 	NSMutableArray *top = [NSMutableArray array], *bot = [NSMutableArray array], *abs = [NSMutableArray array];
+	int div_count = [divs count], i;
 	
 	[html appendString:@"<div class=\"screen\">\n"];
 
-	for (SubRenderDiv *div in divs) {
+	for (i = 0; i < div_count; i++) {
+		SubRenderDiv *div = [divs objectAtIndex:i];
 		
 		if (div->positioned) [abs addObject:div]; else if (div->alignV == kSubAlignmentTop) [top addObject:div]; else [bot insertObject:div atIndex:0];
 	}
