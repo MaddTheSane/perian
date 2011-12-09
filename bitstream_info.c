@@ -131,24 +131,9 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 	uint8_t lfe = (buffer[offset + 6] >> shift) & 0x01;
 	
 	/* This is a valid frame!!! */
-	uint16_t bitrate = ac3_bitratetab[frmsizecod >> 1];
 	uint8_t half = ac3_halfrate[bsid];
 	int sample_rate = ac3_freqs[fscod] >> half;
-	int framesize = 0;
-	switch (fscod) {
-		case 0:
-			framesize = 4 * bitrate;
-			break;
-		case 1:
-			framesize = (320 * bitrate / 147 + (frmsizecod & 1 ? 1 : 0)) * 2;
-			break;
-		case 2:
-			framesize = 6 * bitrate;
-			break;
-		default:
-			break;
-	}
-	
+
 	shift = 0;
 	if(bsid > 8)
 		shift = bsid - 8;
