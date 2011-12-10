@@ -1,7 +1,7 @@
 1.2.3
 Fixes several problems reported with 1.2.2.
 - Some Fraps videos only displayed black. [r1424] (#566)
-- Workaround checks for Front Row stopped being effective. [r1426] (#566)
+- Workaround checks for Front Row stopped being effective. [r1426] (#564)
 - Fixed compatibility with web video playback. [r1427, r1429, r1450] (#572)
 - Worked around System Preferences crashing during an update on 10.6. [r1449] (#591)
 This change will take effect after this update.
