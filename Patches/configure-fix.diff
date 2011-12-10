@@ -1,0 +1,23 @@
+Index: ffmpeg/configure
+===================================================================
+--- ffmpeg/configure	(revision 1451)
++++ ffmpeg/configure	(working copy)
+@@ -2588,17 +2588,7 @@
+ 
+     enable local_aligned_8 local_aligned_16
+ 
+-    # check whether EBP is available on x86
+-    # As 'i' is stored on the stack, this program will crash
+-    # if the base pointer is used to access it because the
+-    # base pointer is cleared in the inline assembly code.
+-    check_exec_crash <<EOF && enable ebp_available
+-    volatile int i=0;
+-    __asm__ volatile (
+-        "xorl %%ebp, %%ebp"
+-    ::: "%ebp");
+-    return i;
+-EOF
++    disabled asm && enable ebp_available
+ 
+     # check whether EBX is available on x86
+     check_asm ebx_available '""::"b"(0)' &&

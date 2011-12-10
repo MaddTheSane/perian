@@ -630,8 +630,8 @@
 		11C85ED70A641E6400DF3D73 /* ff_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_private.h; sourceTree = "<group>"; };
 		11D4EED50A3CE7EC0066D45F /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
 		11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
-		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = ../Universal/libavcodec.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = ../Universal/libavutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = Universal/libavcodec.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = Universal/libavutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		11F28DAB0B52EB75000AF78C /* SUUpdateAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUUpdateAlert.h; sourceTree = "<group>"; };
 		11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUUpdateAlert.m; sourceTree = "<group>"; };
 		3D0A039710068CAF0087E580 /* Prefix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prefix.h; sourceTree = "<group>"; };
@@ -687,7 +687,7 @@
 		3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "PerianOpener-Info.plist"; path = "Plists/PerianOpener-Info.plist"; sourceTree = "<group>"; };
 		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = OpenerMainMenu.xib; path = Opener/OpenerMainMenu.xib; sourceTree = "<group>"; };
 		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = /System/Library/Frameworks/AppleScriptKit.framework; sourceTree = "<absolute>"; };
-		3DEFA3F8120560AD0097FE4C /* libavcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcore.a; path = ../Universal/libavcore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		3DEFA3F8120560AD0097FE4C /* libavcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcore.a; path = Universal/libavcore.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionCodec.cpp; sourceTree = "<group>"; };
 		6116E54D0B43C27B0020F1CE /* FFissionCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = FFissionCodec.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionDecoder.cpp; sourceTree = "<group>"; };
@@ -822,7 +822,7 @@
 		83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CPFPerianPrefPaneController.h; sourceTree = "<group>"; };
 		83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CPFPerianPrefPaneController.m; sourceTree = "<group>"; };
 		83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = Perian_icon.icns; path = Resources/Perian_icon.icns; sourceTree = "<group>"; };
-		8F483B540A642644002CCA73 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = ../Universal/libavformat.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F483B540A642644002CCA73 /* libavformat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavformat.a; path = Universal/libavformat.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		8F483B8B0A642886002CCA73 /* PerianAviImporter.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianAviImporter.r; sourceTree = "<group>"; };
 		8F483BBC0A642B3D002CCA73 /* ff_MovieImportDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_MovieImportDispatch.h; sourceTree = "<group>"; };
@@ -2322,10 +2322,6 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(BUILD_DIR)/Universal\"",
-				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
@@ -2333,7 +2329,6 @@
 				);
 				OTHER_REZFLAGS = "-rd -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
 				PRODUCT_NAME = Perian;
-				REZ_PREPROCESSOR_DEFINITIONS = "";
 				WRAPPER_EXTENSION = component;
 			};
 			name = Development;
@@ -2366,10 +2361,6 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(BUILD_DIR)/Universal\"",
-				);
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -2412,7 +2403,10 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
-				GCC_PREPROCESSOR_DEFINITIONS = DEBUG_BUILD;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					DEBUG,
+					DEBUG_BUILD,
+				);
 				GCC_STRICT_ALIASING = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
@@ -2424,7 +2418,7 @@
 					"ffmpeg/**",
 					"\"$(BUILT_PRODUCTS_DIR)\"",
 				);
-				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
+				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
@@ -2463,7 +2457,7 @@
 					"ffmpeg/**",
 					"\"$(BUILT_PRODUCTS_DIR)\"",
 				);
-				LIBRARY_SEARCH_PATHS = $SYMROOT/Universal;
+				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
@@ -2532,10 +2526,6 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(BUILD_DIR)/Universal\"",
-				);
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -2631,6 +2621,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;

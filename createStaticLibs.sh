@@ -1,37 +1,24 @@
 #!/bin/sh -v
-PATH=/usr/local/bin:/sw/bin:/opt/local/bin:/usr/bin:$PWD/Binaries:$PATH
+PATH=$PWD/Binaries:$PATH
 buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
 
-if what /usr/bin/ld | grep -q ld64-77; then
-    echo "Xcode 3.1 is required to build Perian";
-    exit 1
-fi 
-
-x86tune="generic"
-x86flags=""
-
-if [ -e /usr/bin/gcc-4.2 ]; then
-	CC="${DEVELOPER_BIN_DIR}/gcc-4.2"
-	x86tune="core2"
-	x86flags="--param max-completely-peel-times=2"
-fi
-
 if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
-	MACOSX_DEPLOYMENT_TARGET="10.4"
+	MACOSX_DEPLOYMENT_TARGET="10.6"
 fi
+
+CC=`xcrun -find clang`
 
 configureflags="--cc=$CC --disable-amd3dnow --disable-doc --disable-encoders \
      --disable-ffprobe --disable-ffserver --disable-muxers --disable-network \
      --disable-swscale --disable-avfilter --target-os=darwin"
 
-cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET \
-        -D__DARWIN_UNIX03=0 -Dattribute_deprecated= -w"
+cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -w"
 
-if [ "$BUILD_STYLE" = "Development" ] ; then
+if [ "$BUILD_STYLE" = "Development" -o "$CONFIGURATION" = "Development" ] ; then
     configureflags="$configureflags --disable-optimizations --disable-asm"
 	buildid_ffmpeg="${buildid_ffmpeg}Dev"
 else
-    optcflags="-fweb -fstrict-aliasing -finline-limit=1000 -freorder-blocks"
+    optcflags="-fstrict-aliasing"
 	buildid_ffmpeg="${buildid_ffmpeg}Dep"
 fi
 
@@ -56,14 +43,7 @@ fi
 
 if [ `echo $ARCHS | grep -c i386` -gt 0 ] ; then
    buildi386=1
-   if [ `echo $ARCHS | grep -c ppc` -gt 0 ] ; then
-       buildppc=1
-   else
-       buildppc=0
-   fi
-elif [ `echo $ARCHS | grep -c ppc` -gt 0 ] ; then
-   buildi386=0
-   buildppc=1
+   buildppc=0
 else
     echo "No architectures"
     exit 0
@@ -84,21 +64,14 @@ else
 	patch -p1 < ../Patches/0004-Hardcode-results-of-runtime-cpu-detection-in-dsputil.patch
 	patch -p1 < ../Patches/0005-Double-INTERNAL_BUFFER_SIZE-to-fix-running-out-of-bu.patch
 	patch -p1 < ../Patches/0006-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
+	patch -p1 < ../Patches/configure-fix.diff
 	cd ..
 
 	touch ffmpeg/patched
 
-    echo -n "Building "
-    if [ $buildi386 -eq $buildppc ] ; then
-        echo "Universal"
-    elif [ $buildi386 -gt 0 ] ; then
-        echo "Intel-only"
-    else
-        echo "PPC-only"
-    fi
+    echo "Building i386"
     
     mkdir -p "$BUILT_PRODUCTS_DIR"
-    mkdir -p "$SYMROOT/Universal"
 
     arch=`arch`
     # files we'd like to keep frame pointers in for in-the-wild debugging
@@ -117,54 +90,17 @@ else
 
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
-            if [ "$arch" = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=i386 \
-                --cpu=pentium-m --extra-ldflags="$cflags -arch i386" \
-                --extra-cflags="-arch i386 $cflags $optcflags_i386" $configureflags || exit 1
-            else
-                "$SRCROOT/ffmpeg/configure" --extra-ldflags="$cflags -arch i386" \
-                --cpu=pentium-m --extra-cflags="-arch i386 $cflags $optcflags_i386" \
-                $configureflags || exit 1
-            fi
+            "$SRCROOT/ffmpeg/configure" --extra-ldflags="$cflags -arch i386" \
+            --cpu=core2 --extra-cflags="-arch i386 $cflags $optcflags_i386" \
+            $configureflags || exit 1
         
             make depend > /dev/null 2>&1 || true
         fi
         
         fpcflags=`grep -m 1 CFLAGS= "$BUILDDIR"/config.mak | sed -e s/CFLAGS=// -e s/-fomit-frame-pointer//` 
 
-        make -j3 CFLAGS="$fpcflags" $fptargets
-        make -j3 || exit 1
-    fi
-    
-    #######################
-    # PPC shlibs
-    #######################
-    if [ $buildppc -gt 0 ] ; then
-        BUILDDIR="$BUILT_PRODUCTS_DIR/ppc"
-        mkdir -p "$BUILDDIR"
-
-		if [ "$BUILD_STYLE" != "Development" ] ; then
-       		optcflags_ppc="$optcflags -mdynamic-no-pic -mcpu=G3 -mtune=G5"
-       	fi
-    
-        cd "$BUILDDIR"
-        if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
-            if [ "$arch" = ppc ] ; then
-                "$SRCROOT/ffmpeg/configure" --extra-cflags="-faltivec $cflags \
-                $optcflags_ppc" $configureflags || exit 1
-            else
-                "$SRCROOT/ffmpeg/configure" --enable-cross-compile --arch=ppc \
-                --extra-ldflags="$cflags -arch ppc" --extra-cflags="-faltivec \
-                -arch ppc $cflags $optcflags_ppc" $configureflags || exit 1
-            fi
-        
-            make depend > /dev/null 2>&1 || true
-        fi
-        
-        fpcflags=`grep -m 1 CFLAGS= "$BUILDDIR"/config.mak | sed -e s/CFLAGS=// -e s/-fomit-frame-pointer//` 
-
-        make -j3 CFLAGS="$fpcflags" $fptargets
-        make -j3 || exit 1
+        make -j3 CFLAGS="$fpcflags" V=1 $fptargets || exit 1
+        make -j3 V=1 || exit 1
     fi
 
 	#######################
@@ -180,9 +116,9 @@ else
 	if [ $buildi386 -eq $buildppc ] ; then
 		# lipo them
 		for aa in "$INTEL"/*/*.a ; do
-			echo lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/i386/ppc/'` \
+			echo lipo -create -arch i386 $aa -arch ppc `/bin/echo -n $aa | sed 's/i386/ppc/'` \
 			-output `echo -n $aa | sed 's/i386\/.*\//Universal\//'`
-			lipo -create -arch i386 $aa -arch ppc `echo -n $aa | sed 's/i386/ppc/'` \
+			lipo -create -arch i386 $aa -arch ppc `/bin/echo -n $aa | sed 's/i386/ppc/'` \
 			-output `echo -n $aa | sed 's/i386\/.*\//Universal\//'`
 		done
 	else
@@ -195,23 +131,16 @@ else
 		fi
 		# just copy them
 		for aa in "$BUILDARCHDIR"/*/*.a ; do
-			echo cp "$aa" `echo -n $aa | sed 's/'$archDir'\/.*\//Universal\//'`
-			cp "$aa" `echo -n $aa | sed 's/'$archDir'\/.*\//Universal\//'`
+			echo cp "$aa" `/bin/echo -n $aa | sed 's/'$archDir'\/.*\//Universal\//'`
+			cp "$aa" `/bin/echo -n $aa | sed 's/'$archDir'\/.*\//Universal\//'`
 		done
 	fi
-	echo -n "$buildid_ffmpeg" > $BUILD_ID_FILE
+	/bin/echo -n "$buildid_ffmpeg" > $BUILD_ID_FILE
 fi
 
-FINAL_BUILD_ID_FILE="$SYMROOT/Universal/buildid"
+FINAL_BUILD_ID_FILE="$BUILT_PRODUCTS_DIR/Universal/buildid"
 if [[ -e "$FINAL_BUILD_ID_FILE" ]] ; then
     oldbuildid_ffmpeg=`cat "$FINAL_BUILD_ID_FILE"`
 else
     oldbuildid_ffmpeg="buildme"
-fi
-
-if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
-    echo "Final static ffmpeg libs are up-to-date ; not copying"
-else
-	cp "$BUILT_PRODUCTS_DIR/Universal"/* "$SYMROOT/Universal"
-	ranlib "$SYMROOT/Universal"/*.a
 fi
