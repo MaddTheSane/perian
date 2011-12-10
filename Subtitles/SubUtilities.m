@@ -147,7 +147,7 @@ NSString *SubLoadFileWithUnknownEncoding(NSString *path)
 			Codecprintf(NULL,"Encoding %s failed, retrying.\n",[enc_str UTF8String]);
 			enc = (enc == NSWindowsCP1252StringEncoding) ? NSWindowsCP1250StringEncoding : NSWindowsCP1252StringEncoding;
 			res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
-			if (!res) Codecprintf(NULL,"Both of latin1/2 failed.\n",[enc_str UTF8String]);
+			if (!res) Codecprintf(NULL,"Both of latin1/2 failed.\n");
 		} else Codecprintf(NULL,"Failed to load file as guessed encoding %s.\n",[enc_str UTF8String]);
 	}
 	[ud release];

@@ -19,7 +19,6 @@
  */
 
 #include "CompressAudioCodec.h"
-#include "ACCodecDispatch.h"
 #include "CodecIDs.h"
 #include "CompressCodecUtils.h"
 
@@ -35,7 +34,7 @@ static const OSType kAllInputFormats[] =
 
 static const UInt32 kIntPCMOutFormatFlag = kLinearPCMFormatFlagIsSignedInteger | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
 
-CompressAudioCodec::CompressAudioCodec(UInt32 inInputBufferByteSize) : FFissionCodec(0)
+CompressAudioCodec::CompressAudioCodec(AudioComponentInstance inInstance) : FFissionCodec(inInstance)
 {
 	for (int i = 0; kAllInputFormats[i] != CODEC_ID_NONE; i++) {
 		CAStreamBasicDescription theInputFormat(kAudioStreamAnyRate, kAllInputFormats[i], 0, 1, 0, 0, 0, 0);
@@ -245,8 +244,8 @@ UInt32 CompressAudioCodec::ProduceOutputPackets(void* outOutputData, UInt32& ioO
 	return status;
 }
 
-extern "C"
-ComponentResult	CompressAudioDecoderEntry(ComponentParameters* inParameters, CompressAudioCodec* inThis)
-{
-	return ACCodecDispatch(inParameters, inThis);
-}
+#include "ACPlugInDispatch.h"
+
+#define CompressAudioCodecEntry CompressAudioDecoderEntry
+
+AUDIOCOMPONENT_ENTRY(AudioCodecFactory, CompressAudioCodec)

@@ -19,10 +19,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "Codecprintf.h"
 #include <stdio.h>
 #include <stdarg.h>
-#include "log.h"
+#include <libavutil/log.h>
+
+#include "Codecprintf.h"
 
 #define CODEC_HEADER			"Perian: "
 

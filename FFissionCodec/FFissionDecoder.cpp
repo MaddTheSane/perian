@@ -20,13 +20,14 @@
  */
 
 #include <AudioToolbox/AudioToolbox.h>
+#include <libavcodec/dca.h>
+
+#include "ComponentBase.h"
 #include "FFissionDecoder.h"
-#include "ACCodecDispatch.h"
 #include "PerianResourceIDs.h"
 #include "Codecprintf.h"
 #include "FFmpegUtils.h"
 #include "CodecIDs.h"
-#include "dca.h"
 
 #define MY_APP_DOMAIN CFSTR("org.perian.Perian")
 #define PASSTHROUGH_KEY CFSTR("attemptDTSPassthrough")
@@ -86,7 +87,7 @@ static void ParseWaveFormat(const WaveFormatEx *wEx, AVCodecContext *avContext)
 	avContext->bit_rate = EndianU32_LtoN(wEx->nAvgBytesPerSec) * 8;
 }
 
-FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0)
+FFissionDecoder::FFissionDecoder(AudioComponentInstance inInstance) : FFissionCodec(inInstance)
 {
 	magicCookie = NULL;
 	magicCookieSize = 0;
@@ -100,7 +101,7 @@ FFissionDecoder::FFissionDecoder(UInt32 inInputBufferByteSize) : FFissionCodec(0
 	CAStreamBasicDescription theOutputFormat(kAudioStreamAnyRate, kAudioFormatLinearPCM, 0, 1, 0, 0, 16, kIntPCMOutFormatFlag);
 	AddOutputFormat(theOutputFormat);
 	
-	inputBuffer.Initialize(inInputBufferByteSize);
+	inputBuffer.Initialize(4096); /* allocation hint, it will resize */
 	outBufUsed = 0;
 	outBufSize = AVCODEC_MAX_AUDIO_FRAME_SIZE;
 	outputBuffer = new Byte[outBufSize];
@@ -297,20 +298,12 @@ void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioP
 	switch (inPropertyID) {
 		case kAudioCodecPropertyNameCFString:
 			*(CFStringRef*)outPropertyData = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian FFmpeg audio decoder"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
-			break; 
-			
-		case kAudioCodecPropertyInputBufferSize:
-			*reinterpret_cast<UInt32*>(outPropertyData) = inputBuffer.GetBufferByteSize();
-			break;
-			
-		case kAudioCodecPropertyUsedInputBufferSize:
-			*reinterpret_cast<UInt32*>(outPropertyData) = inputBuffer.GetDataAvailable();
 			break;
 			
 		case kAudioCodecPropertyFormatInfo:
 		{
 			AudioFormatInfo *info = (AudioFormatInfo*)outPropertyData;
-			FFissionDecoder *dec = new FFissionDecoder();
+			FFissionDecoder *dec = new FFissionDecoder(mComponentInstance); // XXX
 			
 			// We need to fake an output format, doesn't matter what it says as long as it inits
 			static const AudioStreamBasicDescription DefaultOutputASBD =
@@ -335,6 +328,22 @@ void FFissionDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioP
 		default:
 			FFissionCodec::GetProperty(inPropertyID, ioPropertyDataSize, outPropertyData);
 	}
+}
+
+void FFissionDecoder::ReallocateInputBuffer(UInt32 inInputBufferByteSize)
+{
+	inputBuffer.Reset();
+	inputBuffer.Reallocate(inInputBufferByteSize);
+}
+
+UInt32 FFissionDecoder::GetInputBufferByteSize() const
+{
+	return inputBuffer.GetBufferByteSize();
+}
+
+UInt32 FFissionDecoder::GetUsedInputBufferByteSize() const
+{
+	return inputBuffer.GetDataAvailable();
 }
 
 void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& inInputFormat)
@@ -725,20 +734,14 @@ void FFissionVBRDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& 
 			*reinterpret_cast<UInt32*>(outPropertyData) = true;
 			break;
 			
+		// FIXME implement priming
+
 		default:
 			FFissionDecoder::GetProperty(inPropertyID, ioPropertyDataSize, outPropertyData);
 	}
 }
 
+#include "ACPlugInDispatch.h"
 
-extern "C"
-ComponentResult	FFissionDecoderEntry(ComponentParameters* inParameters, FFissionDecoder* inThis)
-{
-	return ACCodecDispatch(inParameters, inThis);
-}
-
-extern "C"
-ComponentResult	FFissionVBRDecoderEntry(ComponentParameters* inParameters, FFissionVBRDecoder* inThis)
-{
-	return ACCodecDispatch(inParameters, inThis);
-}
+AUDIOCOMPONENT_ENTRY(AudioCodecFactory, FFissionDecoder)
+AUDIOCOMPONENT_ENTRY(AudioCodecFactory, FFissionVBRDecoder)

@@ -20,9 +20,8 @@
 *
 ****************************************************************************/
 
-#include "avformat.h"
-
 #include <QuickTime/QuickTime.h>
+#include <libavformat/avformat.h>
 
 struct _dataref_private {
 	Handle dataRef;

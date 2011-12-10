@@ -20,6 +20,7 @@
  */
 
 #include <QuickTime/QuickTime.h>
+
 #include "CommonUtils.h"
 #include "Codecprintf.h"
 #include "CodecIDs.h"
@@ -70,10 +71,7 @@ short GetFilenameLanguage(CFStringRef filename)
 }
 
 static void AppendSRGBProfile(ImageDescriptionHandle imgDesc)
-{
-	if (!(*CGColorSpaceCopyICCProfile))
-		return; //10.4 weak symbol check
-	
+{	
 	CGColorSpaceRef cSpace = GetSRGBColorSpace();
 	CFDataRef cSpaceICC = CGColorSpaceCopyICCProfile(cSpace);
 	
@@ -89,7 +87,9 @@ void SetSubtitleMediaHandlerTransparent(MediaHandler mh)
 {
 	if (IsTransparentSubtitleHackEnabled()) {
 		RGBColor blendColor = {0x0000, 0x0000, 0x0000};
-		MediaSetGraphicsMode(mh, transparent, &blendColor);
+		
+		long transparentMode = 36; // formerly in QuickdrawTypes.h
+		MediaSetGraphicsMode(mh, transparentMode, &blendColor);
 	}
 	else
 		MediaSetGraphicsMode(mh, graphicsModePreBlackAlpha, NULL);

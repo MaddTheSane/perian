@@ -20,22 +20,21 @@
 *
 ****************************************************************************/
 
-#include "ff_private.h"
-#include "avcodec.h"
-#include "Codecprintf.h"
-#include "CommonUtils.h"
-#include "CodecIDs.h"
-#include "FFmpegUtils.h"
-
-#undef malloc
-#undef free
-
+#include <libavcodec/avcodec.h>
 #include <CoreServices/CoreServices.h>
 #include <AudioToolbox/AudioToolbox.h>
 #include <QuickTime/QuickTime.h>
 
+#include "ff_private.h"
+#include "Codecprintf.h"
+#include "CommonUtils.h"
+#include "CodecIDs.h"
+#include "FFmpegUtils.h"
 #include "bitstream_info.h"
 #include "MatroskaCodecIDs.h"
+
+#undef malloc
+#undef free
 
 /* This function prepares the target Track to receivve the movie data,
  * it is called if QT has asked an import operation which should just

@@ -23,30 +23,31 @@
 #ifndef __FFISSIONCODEC_H__
 #define __FFISSIONCODEC_H__
 
-#include "ACSimpleCodec.h"
+#include <AudioUnit/AudioComponent.h>
+#include <ACBaseCodec.h>
 extern "C" {
-#include "avcodec.h"
+#include <libavcodec/avcodec.h>
 #undef CodecType
 }
 
 //=============================================================================
-//	ACffAudioCodec
+//	FFissionCodec
 //
 //	This class encapsulates the common implementation of an audio codec using ffmpeg.
 //=============================================================================
 
-class FFissionCodec : public ACSimpleCodec {
+class FFissionCodec : public ACBaseCodec {
 	
 	//	Construction/Destruction
 public:
-	FFissionCodec(UInt32 inInputBufferByteSize);
+	FFissionCodec(AudioComponentInstance inInstance);
 	virtual ~FFissionCodec();
 	
 	//	Data Handling
 	virtual void Initialize(const AudioStreamBasicDescription* inInputFormat, const AudioStreamBasicDescription* inOutputFormat, const void* inMagicCookie, UInt32 inMagicCookieByteSize);
 	
 	virtual void GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData);
-	virtual void GetPropertyInfo(AudioCodecPropertyID inPropertyID, UInt32& outPropertyDataSize, bool& outWritable);
+	virtual void GetPropertyInfo(AudioCodecPropertyID inPropertyID, UInt32& outPropertyDataSize, Boolean& outWritable);
 	
 protected:
 	AVCodec         *avCodec;

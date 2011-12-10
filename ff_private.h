@@ -23,8 +23,8 @@
 #ifndef __FF_PRIVATE__
 #define __FF_PRIVATE__
 
-#include "avformat.h"
 #include <QuickTime/Movies.h>
+#include <libavformat/avformat.h>
 
 /* Data structres needed for import */
 struct _NCStream {

@@ -38,22 +38,72 @@
 			STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
 			POSSIBILITY OF SUCH DAMAGE.
 */
-#include "GetCodecBundle.h"
-#include "CommonUtils.h"
+#if !defined __ACCOMPATIBILITY_H__
+#define __ACCOMPATIBILITY_H__
 
-const CFStringRef kCodecBundleID = PERIAN_PREF_DOMAIN; // must match CFBundleIdentifier in plist file
+#if TARGET_OS_MAC
 
-CFBundleRef GetCodecBundle()
+#include <AvailabilityMacros.h>
+
+#if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
+#include <CoreAudio/CoreAudioTypes.h>
+#include <AudioUnit/AudioCodec.h>
+#else
+#include "CoreAudioTypes.h"
+#include "AudioCodec.h"
+#endif
+
+/* Redefine the following symbols only for Tiger */
+#if COREAUDIOTYPES_VERSION < 1050// && !defined(MAC_OS_X_VERSION_10_5)
+
+struct AudioFormatInfo
 {
-	static CFBundleRef sAudioCodecBundle = 0;
-	if (!sAudioCodecBundle) 
-	{
-		sAudioCodecBundle = CFBundleGetBundleWithIdentifier(kCodecBundleID);
-		if (sAudioCodecBundle)
-		{
-			CFRetain(sAudioCodecBundle);
-		}
-	}
-	return sAudioCodecBundle;
-}
+	AudioStreamBasicDescription		mASBD;
+	const void*						mMagicCookie;
+	UInt32							mMagicCookieSize;
+};
+typedef struct AudioFormatInfo AudioFormatInfo;
 
+struct AudioFormatListItem
+{
+	AudioStreamBasicDescription		mASBD;
+	AudioChannelLayoutTag			mChannelLayoutTag;
+};
+typedef struct AudioFormatListItem AudioFormatListItem;
+
+struct AudioCodecMagicCookieInfo 
+{
+	UInt32			mMagicCookieSize;
+	const void*		mMagicCookie;
+};
+typedef struct AudioCodecMagicCookieInfo	AudioCodecMagicCookieInfo;
+typedef struct AudioCodecMagicCookieInfo	MagicCookieInfo;
+
+
+enum
+{
+	/* Renamed properties */
+	kAudioCodecPropertyCurrentInputChannelLayout	= kAudioCodecPropertyInputChannelLayout,
+	kAudioCodecPropertyCurrentOutputChannelLayout	= kAudioCodecPropertyOutputChannelLayout,
+	kAudioCodecPropertyAvailableInputChannelLayoutTags	= kAudioCodecPropertyAvailableInputChannelLayouts,
+	kAudioCodecPropertyAvailableOutputChannelLayoutTags	= kAudioCodecPropertyAvailableOutputChannelLayouts,
+	kAudioCodecPropertyBitRateControlMode			= kAudioCodecBitRateFormat,
+	kAudioCodecPropertyPaddedZeros					= kAudioCodecPropertyZeroFramesPadded,
+	kAudioCodecPropertyInputFormatsForOutputFormat	= kAudioCodecInputFormatsForOutputFormat,
+	kAudioCodecPropertyOutputFormatsForInputFormat	= kAudioCodecOutputFormatsForInputFormat,
+	kAudioCodecPropertyDoesSampleRateConversion		= kAudioCodecDoesSampleRateConversion
+};
+#else
+#if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
+#include <AudioToolbox/AudioFormat.h>
+#else
+#include "AudioFormat.h"
+#endif
+
+#endif	// #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+
+#else
+	#include "AudioFormat.h"
+#endif	// #if TARGET_OS_MAC
+
+#endif	// #if !defined __ACCOMPATIBILITY_H__

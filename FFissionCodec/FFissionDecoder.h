@@ -28,7 +28,7 @@
 class FFissionDecoder : public FFissionCodec
 {
 public:
-	FFissionDecoder(UInt32 inInputBufferByteSize = 76800);
+	FFissionDecoder(AudioComponentInstance inInstance);
 	virtual ~FFissionDecoder();
 	
 	virtual void Initialize(const AudioStreamBasicDescription* inInputFormat, const AudioStreamBasicDescription* inOutputFormat, const void* inMagicCookie, UInt32 inMagicCookieByteSize);
@@ -46,6 +46,10 @@ public:
 	virtual UInt32 InterleaveSamples(void *outputDataUntyped, Byte *inputDataUntyped, int amountToCopy);
 	virtual UInt32 ProduceOutputPackets(void* outOutputData, UInt32& ioOutputDataByteSize, UInt32& ioNumberPackets, AudioStreamPacketDescription* outPacketDescription);
 	
+	virtual void ReallocateInputBuffer(UInt32 inInputBufferByteSize);
+	virtual UInt32 GetInputBufferByteSize() const;
+	virtual UInt32 GetUsedInputBufferByteSize() const;
+
 private:
 	void SetupExtradata();
 	int ConvertXiphVorbisCookie();
@@ -69,7 +73,7 @@ private:
 class FFissionVBRDecoder : public FFissionDecoder
 {
 public:
-	FFissionVBRDecoder() : FFissionDecoder() { }
+	FFissionVBRDecoder(AudioComponentInstance inInstance) : FFissionDecoder(inInstance) { }
 	virtual void GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData);
 };
 

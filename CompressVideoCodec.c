@@ -22,10 +22,11 @@
 
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
+#include <libavutil/avutil.h>
+
 #include "PerianResourceIDs.h"
 #include "Codecprintf.h"
 #include "CommonUtils.h"
-#include "avcodec.h"
 #include "CompressCodecUtils.h"
 
 typedef struct {

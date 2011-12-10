@@ -19,28 +19,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "bitstream_info.h"
-
 #include <AudioToolbox/AudioToolbox.h>
 #include <QuickTime/QuickTime.h>
 
-#import "ac3tab.h"
-#import "CommonUtils.h"
 //ffmpeg's struct Picture conflicts with QuickDraw's
 #define Picture MPEGPICTURE
 
-#include "avcodec.h"
+#include <libavcodec/avcodec.h>
+#include <libavcodec/ac3tab.h>
+#include <libavutil/bswap.h>
+#include <libavutil/intmath.h>
+#include <libavutil/internal.h>
+#include <libavcodec/mpegvideo.h>
+#include <libavcodec/parser.h>
+#include <libavcodec/golomb.h>
+#include <libavcodec/mpeg4video.h>
+#include <libavcodec/mpeg4video_parser.h>
 
-#include "bswap.h"
-#include "libavutil/intmath.h"
-#include "libavutil/internal.h"
-#include "mpegvideo.h"
-#include "parser.h"
-#include "golomb.h"
-#include "mpeg4video.h"
-#include "mpeg4video_parser.h"
+#include "CommonUtils.h"
+#include "bitstream_info.h"
 #include "Codecprintf.h"
-
 #include "CodecIDs.h"
 
 #undef malloc

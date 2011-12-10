@@ -31,7 +31,7 @@
 
 __BEGIN_DECLS
 
-#include "avcodec.h"
+#include <libavcodec/avcodec.h>
 
 void FFAVCodecContextToASBD(AVCodecContext *avctx, AudioStreamBasicDescription *asbd);
 

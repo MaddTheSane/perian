@@ -20,10 +20,11 @@
 *
 ****************************************************************************/
 
+#include <libavformat/riff.h>
+
 #include "ff_MovieImportVersion.h"
 #include "ff_private.h"
 #include "Codecprintf.h"
-#include "riff.h"
 #include "SubImport.h"
 #include "CommonUtils.h"
 #include "FFmpegUtils.h"

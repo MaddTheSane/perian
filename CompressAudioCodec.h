@@ -26,13 +26,13 @@
 class CompressAudioCodec : public FFissionCodec
 {
 public:
-	CompressAudioCodec(UInt32 inInputBufferByteSize = 76800);
+	CompressAudioCodec(AudioComponentInstance inInstance);
 	virtual ~CompressAudioCodec();
 	
 	virtual void Initialize(const AudioStreamBasicDescription* inInputFormat, const AudioStreamBasicDescription* inOutputFormat, const void* inMagicCookie, UInt32 inMagicCookieByteSize);
 	virtual void Uninitialize();
 	virtual void Reset();
-	
+
 	virtual void GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPropertyDataSize, void* outPropertyData);
 	virtual void SetMagicCookie(const void* inMagicCookieData, UInt32 inMagicCookieDataByteSize);
 	
@@ -41,7 +41,11 @@ public:
 	
 	virtual void AppendInputData(const void* inInputData, UInt32& ioInputDataByteSize, UInt32& ioNumberPackets, const AudioStreamPacketDescription* inPacketDescription);
 	virtual UInt32 ProduceOutputPackets(void* outOutputData, UInt32& ioOutputDataByteSize, UInt32& ioNumberPackets, AudioStreamPacketDescription* outPacketDescription);
-	
+
+	virtual void ReallocateInputBuffer(UInt32 inInputBufferByteSize) {}
+	virtual UInt32 GetInputBufferByteSize() const {return 0;}
+	virtual UInt32 GetUsedInputBufferByteSize() const {return 0;}
+
 private:
 	UInt32 ParseCookieAtom(const uint8_t* inAtom, UInt32 inAtomMaxSize);
 	void ParseCookie(const uint8_t* inMagicCookie, UInt32 inMagicCookieByteSize);

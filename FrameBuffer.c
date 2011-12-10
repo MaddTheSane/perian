@@ -19,10 +19,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "FrameBuffer.h"
-#include "avcodec.h"
-#include "CommonUtils.h"
+#include <libavcodec/avcodec.h>
 #include <sys/param.h>
+
+#include "FrameBuffer.h"
+#include "CommonUtils.h"
 
 void FFusionDataSetup(FFusionData *data, int dataSize, int bufferSize)
 {

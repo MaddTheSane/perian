@@ -25,14 +25,14 @@
  * It should be merged into FFissionDecoder unless we get some.
  */
 
-extern "C" {
-#include "avcodec.h"
-}
 #include <AudioToolbox/AudioToolbox.h>
+extern "C" {
+#include <libavcodec/avcodec.h>
+}
 #include "FFissionCodec.h"
 #include "FFmpegUtils.h"
 
-FFissionCodec::FFissionCodec(UInt32 inInputBufferByteSize) : ACSimpleCodec(inInputBufferByteSize)
+FFissionCodec::FFissionCodec(AudioComponentInstance inInstance) : ACBaseCodec(inInstance)
 {
 	FFInitFFmpeg();
 	
@@ -74,10 +74,10 @@ void FFissionCodec::Initialize(const AudioStreamBasicDescription* inInputFormat,
 		CODEC_THROW(kAudioCodecUnsupportedFormatError);
 	}
 	
-	ACSimpleCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
+	ACBaseCodec::Initialize(inInputFormat, inOutputFormat, inMagicCookie, inMagicCookieByteSize);
 }
 
-void FFissionCodec::GetPropertyInfo(AudioCodecPropertyID inPropertyID, UInt32& outPropertyDataSize, bool& outWritable) {
+void FFissionCodec::GetPropertyInfo(AudioCodecPropertyID inPropertyID, UInt32& outPropertyDataSize, Boolean& outWritable) {
 	switch(inPropertyID)
 	{
 		case kAudioCodecPropertyMaximumPacketByteSize:
@@ -101,7 +101,7 @@ void FFissionCodec::GetPropertyInfo(AudioCodecPropertyID inPropertyID, UInt32& o
 			break;
 			
 		default:
-			ACSimpleCodec::GetPropertyInfo(inPropertyID, outPropertyDataSize, outWritable);
+			ACBaseCodec::GetPropertyInfo(inPropertyID, outPropertyDataSize, outWritable);
 			break;
 	}
 }
@@ -125,9 +125,15 @@ void FFissionCodec::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPro
 	
 	switch (inPropertyID) {
 		case kAudioCodecPropertyManufacturerCFString:
-			*(CFStringRef*)outPropertyData = CFCopyLocalizedStringFromTableInBundle(CFSTR("Perian Project"), CFSTR("CodecNames"), GetCodecBundle(), CFSTR(""));
+			*(CFStringRef*)outPropertyData = CFSTR("Perian");
 			break;
 			
+		case kAudioCodecPropertyNameCFString:
+		case kAudioCodecPropertyFormatCFString:
+			// FIXME read our Rez strings here
+			CODEC_THROW(kAudioCodecUnknownPropertyError);
+			break;
+
 		case kAudioCodecPropertyMaximumPacketByteSize:
 			if (avContext && avContext->block_align)
 				*reinterpret_cast<UInt32*>(outPropertyData) = avContext->block_align;
@@ -153,6 +159,6 @@ void FFissionCodec::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& ioPro
 			break;
 			
 		default:
-			ACSimpleCodec::GetProperty(inPropertyID, ioPropertyDataSize, outPropertyData);
+			ACBaseCodec::GetProperty(inPropertyID, ioPropertyDataSize, outPropertyData);
 	}
 }

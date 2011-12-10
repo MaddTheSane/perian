@@ -10,9 +10,10 @@ define(<!Codec!>, <!printCaseStatement($2, shift(shift(shift(shift($@)))))!>)dnl
 dnl
 define(<!EntryPoint!>, <!!>)dnl
 define(<!ResourceOnly!>, <!!>)dnl
-#include "avcodec.h"
-#include "CodecIDs.h"
 #include <QuickTime/QuickTime.h>
+#include <libavcodec/avcodec.h>
+
+#include "CodecIDs.h"
 #include "PerianResourceIDs.h"
 
 int getCodecID(OSType componentType)

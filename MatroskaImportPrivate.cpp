@@ -51,7 +51,7 @@
 #include "CompressCodecUtils.h"
 
 extern "C" {
-#include "avutil.h"
+#include <libavutil/avutil.h>
 #include "ff_private.h"
 #undef CodecType	
 }

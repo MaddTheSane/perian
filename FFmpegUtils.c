@@ -23,12 +23,13 @@
  * FFmpeg API interfaces and such
  */
 
+#include <pthread.h>
+#include <libavformat/avformat.h>
+
 #include "FFmpegUtils.h"
 #include "CommonUtils.h"
 #include "Codecprintf.h"
 #include "CodecIDs.h"
-#include <pthread.h>
-#include "avformat.h"
 
 void FFAVCodecContextToASBD(AVCodecContext *avctx, AudioStreamBasicDescription *asbd)
 {

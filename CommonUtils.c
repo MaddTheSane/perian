@@ -19,12 +19,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "avcodec.h"
+
+#include <Carbon/Carbon.h>
+#include <pthread.h>
+#include <dlfcn.h>
+#include <fnmatch.h>
+
+#include <libavcodec/avcodec.h>
 #include "CommonUtils.h"
-#import <Carbon/Carbon.h>
-#import <pthread.h>
-#import <dlfcn.h>
-#import <fnmatch.h>
+
 
 typedef struct LanguageTriplet {
 	char twoChar[3];

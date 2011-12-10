@@ -18,17 +18,18 @@
  * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
+
+#include <zlib.h>
+#include <libavutil/avutil.h>
+#include <libavutil/intmath.h>
+#include <libavutil/internal.h>
+#include <libavutil/intreadwrite.h>
+
 #include "PerianResourceIDs.h"
 #include "Codecprintf.h"
 #include "CommonUtils.h"
-#include <zlib.h>
-#include "avcodec.h"
-#include "libavutil/intmath.h"
-#include "libavutil/internal.h"
-#include "intreadwrite.h"
 #include "FFmpegUtils.h"
 
 // Data structures
