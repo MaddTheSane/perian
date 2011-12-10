@@ -1035,13 +1035,3 @@ FFusionDecodeAbilities ffusionIsParsedVideoDecodable(FFusionParserContext *parse
 	
 	return FFUSION_PREFER_DECODE;
 }
-#ifdef DEBUG_BUILD
-//FFMPEG doesn't configure properly (their fault), so define their idoticly undefined symbols.
-int ff_epzs_motion_search(MpegEncContext * s, int *mx_ptr, int *my_ptr, int P[10][2], int src_index, int ref_index, int16_t (*last_mv)[2], int ref_mv_scale, int size, int h){return 0;}
-int ff_get_mb_score(MpegEncContext * s, int mx, int my, int src_index,int ref_index, int size, int h, int add_rate){return 0;}
-int ff_init_me(MpegEncContext *s){return 0;}
-int ff_rate_control_init(struct MpegEncContext *s){return 0;}
-float ff_rate_estimate_qscale(struct MpegEncContext *s, int dry_run){return 0;}
-void ff_write_pass1_stats(struct MpegEncContext *s){}
-void h263_encode_init(MpegEncContext *s){}
-#endif
