@@ -297,15 +297,6 @@ void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles,
 %%machine SSAtag;
 %%write data;
 
-static int compare_layer(const void *a, const void *b)
-{
-	const SubRenderDiv *divA = *(id*)a, *divB = *(id*)b;
-
-	if (divA->layer < divB->layer) return -1;
-	else if (divA->layer > divB->layer) return 1;
-	return 0;
-}
-
 NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate)
 {
 	packet = SubStandardizeStringNewlines(packet);
@@ -569,7 +560,13 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 		}
 		
 	}
-	
-	SubSortMutableArrayStably(divs, compare_layer);
+
+	[divs sortWithOptions:NSSortStable|NSSortConcurrent usingComparator:^(id a, id b){
+		const SubRenderDiv *divA = a, *divB = b;
+
+		if (divA->layer < divB->layer) return NSOrderedAscending;
+		else if (divA->layer > divB->layer) return NSOrderedDescending;
+		return NSOrderedSame;
+	}];
 	return divs;
 }

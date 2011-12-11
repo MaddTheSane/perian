@@ -23,12 +23,14 @@
 
 __BEGIN_DECLS
 	
-NSArray *SubSplitStringIgnoringWhitespace(NSString *str, NSString *split);
-NSArray *SubSplitStringWithCount(NSString *str, NSString *split, size_t count);
-NSMutableString *SubStandardizeStringNewlines(NSString *str);
+NSArray  *SubSplitStringIgnoringWhitespace(NSString *str, NSString *split);
+NSArray  *SubSplitStringWithCount(NSString *str, NSString *split, size_t count);
 NSString *SubLoadFileWithUnknownEncoding(NSString *path);
-void SubSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *, const void *));
+
+NSMutableString *SubStandardizeStringNewlines(NSString *str);
+
 BOOL SubDifferentiateLatin12(const unsigned char *data, int length);
+
 const unichar *SubUnicodeForString(NSString *str, NSData **datap);
 
 __END_DECLS

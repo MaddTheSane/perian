@@ -71,16 +71,6 @@ NSMutableString *SubStandardizeStringNewlines(NSString *str)
 	return ms;
 }
 
-void SubSortMutableArrayStably(NSMutableArray *array, int (*compare)(const void *, const void *))
-{
-	int count = [array count];
-	id  objs[count];
-	
-	[array getObjects:objs];
-	mergesort(objs, count, sizeof(id), compare);
-	[array setArray:[NSArray arrayWithObjects:objs count:count]];
-}
-
 static const short frequencies[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
