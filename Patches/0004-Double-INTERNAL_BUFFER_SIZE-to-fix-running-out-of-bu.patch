@@ -1,0 +1,41 @@
+From 400dd05b52729ab35449444393a690141d1d5cfb Mon Sep 17 00:00:00 2001
+From: Alexander Strange <astrange@ithinksw.com>
+Date: Tue, 13 Jul 2010 16:07:20 -0700
+Subject: [PATCH 4/6] Double INTERNAL_BUFFER_SIZE to fix running out of
+ buffers when QT retains 32 of them
+
+Fixes a crash in some mp4.
+---
+ libavcodec/mpegvideo.h |    2 +-
+ libavcodec/utils.c     |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libavcodec/mpegvideo.h b/libavcodec/mpegvideo.h
+index 46ad5d8..7d68aa7 100644
+--- a/libavcodec/mpegvideo.h
++++ b/libavcodec/mpegvideo.h
+@@ -57,7 +57,7 @@ enum OutputFormat {
+ 
+ #define MAX_THREADS 16
+ 
+-#define MAX_PICTURE_COUNT 32
++#define MAX_PICTURE_COUNT 64
+ 
+ #define ME_MAP_SIZE 64
+ #define ME_MAP_SHIFT 3
+diff --git a/libavcodec/utils.c b/libavcodec/utils.c
+index 04909cf..8da3fcb 100644
+--- a/libavcodec/utils.c
++++ b/libavcodec/utils.c
+@@ -125,7 +125,7 @@ void avcodec_set_dimensions(AVCodecContext *s, int width, int height){
+     s->height= -((-height)>>s->lowres);
+ }
+ 
+-#define INTERNAL_BUFFER_SIZE (32+1)
++#define INTERNAL_BUFFER_SIZE (63+1)
+ 
+ void avcodec_align_dimensions2(AVCodecContext *s, int *width, int *height,
+                                int linesize_align[AV_NUM_DATA_POINTERS])
+-- 
+1.7.8
+

@@ -91,7 +91,7 @@ ComponentResult FFAvi_MovieImportClose(ff_global_ptr storage, ComponentInstance 
 		av_close_input_file(storage->format_context);
 	
 	int i;
-	for(i=0; i<MAX_STREAMS; i++)
+	for(i=0; i<16; i++)
 	{
 		if(storage->firstFrames[i].data != NULL)
 			av_free_packet(storage->firstFrames + i);
@@ -365,6 +365,9 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	require_noerr(result,bail);
 	storage->format_context = ic;
 	
+	if (ic->nb_streams >= 16)
+		goto bail;
+
 	// AVIs without an index currently add a few entries to the index so it can
 	// determine codec parameters.  Check for index existence here before it
 	// reads any packets.

@@ -81,7 +81,7 @@ struct _ff_global_context {
 	int map_count;
 	int64_t header_offset;
 	
-	AVPacket firstFrames[MAX_STREAMS];
+	AVPacket firstFrames[16];
 };
 typedef struct _ff_global_context ff_global_context;
 typedef ff_global_context *ff_global_ptr;

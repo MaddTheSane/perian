@@ -255,20 +255,20 @@ static int parse_mpeg12_stream(FFusionParserContext *ffparser, const uint8_t *bu
 	return 1;
 }
 
-extern AVCodecParser mpeg4video_parser;
+extern AVCodecParser ff_mpeg4video_parser;
 
 static FFusionParser ffusionMpeg4VideoParser = {
-	&mpeg4video_parser,
+	&ff_mpeg4video_parser,
 	0,
 	NULL,
 	parse_mpeg4_extra,
 	parse_mpeg4_stream,
 };
 
-extern AVCodecParser mpegvideo_parser;
+extern AVCodecParser ff_mpegvideo_parser;
 
 static FFusionParser ffusionMpeg12VideoParser = {
-	&mpegvideo_parser,
+	&ff_mpegvideo_parser,
 	0,
 	NULL,
 	NULL,
@@ -859,10 +859,10 @@ static int parse_extra_data_h264(FFusionParserContext *parser, const uint8_t *bu
 	return 1;
 }
 
-extern AVCodecParser h264_parser;
+extern AVCodecParser ff_h264_parser;
 
 static FFusionParser ffusionH264Parser = {
-	&h264_parser,
+	&ff_h264_parser,
 	sizeof(H264ParserContext),
 	init_h264_parser,
 	parse_extra_data_h264,

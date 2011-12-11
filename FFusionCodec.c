@@ -281,7 +281,7 @@ static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avct
     int got_picture;
     enum PixelFormat pix_fmt;
     
-    avcodec_get_context_defaults2(&tmpContext, CODEC_TYPE_VIDEO);
+    avcodec_get_context_defaults3(&tmpContext, codec);
 	avcodec_get_frame_defaults(&tmpFrame);
     tmpContext.width = avctx->width;
     tmpContext.height = avctx->height;
@@ -316,7 +316,8 @@ static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID)
 	if (sysctlbyname("hw.activecpu", &nthreads, &len, NULL, 0) == -1) nthreads = 1;
 	else nthreads = FFMIN(nthreads, 2);
 	
-	avcodec_thread_init(s, nthreads);
+	s->thread_count = nthreads;
+	s->thread_type  = FF_THREAD_SLICE;
 }
 
 static void SetSkipLoopFilter(FFusionGlobals glob, AVCodecContext *avctx)
@@ -652,8 +653,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		
         // we do the same for the AVCodecContext since all context values are
         // correctly initialized when calling the alloc function
-        
-        glob->avContext = avcodec_alloc_context2(CODEC_TYPE_VIDEO);
+        glob->avContext = avcodec_alloc_context3(glob->avCodec);
 		
 		// Use low delay
 		glob->avContext->flags |= CODEC_FLAG_LOW_DELAY;

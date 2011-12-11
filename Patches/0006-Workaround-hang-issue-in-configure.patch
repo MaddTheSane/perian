@@ -1,8 +1,17 @@
-Index: ffmpeg/configure
-===================================================================
---- ffmpeg/configure	(revision 1451)
-+++ ffmpeg/configure	(working copy)
-@@ -2588,17 +2588,7 @@
+From 8f5e873c4e3c677876eacc6649740c2a8b971b0f Mon Sep 17 00:00:00 2001
+From: Alexander Strange <astrange@ithinksw.com>
+Date: Sat, 10 Dec 2011 02:40:36 -0500
+Subject: [PATCH 6/6] Workaround hang issue in configure
+
+---
+ configure |   12 +-----------
+ 1 files changed, 1 insertions(+), 11 deletions(-)
+
+diff --git a/configure b/configure
+index a0dc6e0..42bd02f 100755
+--- a/configure
++++ b/configure
+@@ -2718,17 +2718,7 @@ elif enabled x86; then
  
      enable local_aligned_8 local_aligned_16
  
@@ -17,7 +26,10 @@ Index: ffmpeg/configure
 -    ::: "%ebp");
 -    return i;
 -EOF
-+    disabled asm && enable ebp_available
++    disabled asm || enable ebp_available
  
      # check whether EBX is available on x86
      check_asm ebx_available '""::"b"(0)' &&
+-- 
+1.7.8
+

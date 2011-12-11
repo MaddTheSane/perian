@@ -126,7 +126,8 @@ FFissionDecoder::FFissionDecoder(AudioComponentInstance inInstance) : FFissionCo
 	int initialMap[6] = {0, 1, 2, 3, 4, 5};
 	memcpy(fullChannelMap, initialMap, sizeof(initialMap));
 	
-	avcodec_get_context_defaults2(avContext, CODEC_TYPE_AUDIO);
+	// FIXME avcodec_get_context_defaults3
+	avcodec_get_context_defaults2(avContext, AVMEDIA_TYPE_AUDIO);
 	parser = NULL;
 }
 

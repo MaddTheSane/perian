@@ -1,7 +1,8 @@
-From 56f2391493c0651e94fab53abdf39d349d19a284 Mon Sep 17 00:00:00 2001
+From afc905bbe111ea1da1ca80c129a5ddd1d9f5610d Mon Sep 17 00:00:00 2001
 From: Alexander Strange <astrange@ithinksw.com>
 Date: Sun, 22 Nov 2009 16:33:58 -0500
-Subject: [PATCH 4/6] Hardcode results of runtime cpu-detection in dsputil for SSE2/3DNOW.
+Subject: [PATCH 3/6] Hardcode results of runtime cpu-detection in dsputil for
+ SSE2/3DNOW.
 
 This isn't the same as fixing --disable-runtimecpudetection in mainline,
 since we still need to run it to detect features newer than SSE2.
@@ -9,7 +10,7 @@ since we still need to run it to detect features newer than SSE2.
 There are still unused mmx2 and c DSP functions in the binary,
 presumably due to missed optimizations.
 
-Results in ~400KB Perian smaller binary.
+Results in ~400KB smaller Perian binary.
 
 TODO:
 - fix --disable-3dnow to actually disable this in mainline.
@@ -18,12 +19,12 @@ TODO:
  1 files changed, 19 insertions(+), 0 deletions(-)
 
 diff --git a/libavcodec/x86/dsputil_mmx.c b/libavcodec/x86/dsputil_mmx.c
-index db1e6e3..08a1e80 100644
+index 104bd75..3578665 100644
 --- a/libavcodec/x86/dsputil_mmx.c
 +++ b/libavcodec/x86/dsputil_mmx.c
-@@ -2524,6 +2524,25 @@ static void float_to_int16_interleave_3dn2(int16_t *dst, const float **src, long
- 
- float ff_scalarproduct_float_sse(const float *v1, const float *v2, int order);
+@@ -2429,6 +2429,25 @@ extern void ff_butterflies_float_interleave_sse(float *dst, const float *src0,
+ extern void ff_butterflies_float_interleave_avx(float *dst, const float *src0,
+                                                 const float *src1, int len);
  
 +#undef FF_MM_MMX
 +#undef FF_MM_MMX2
@@ -48,5 +49,5 @@ index db1e6e3..08a1e80 100644
  {
      int mm_flags = av_get_cpu_flags();
 -- 
-1.7.3.1
+1.7.8
 

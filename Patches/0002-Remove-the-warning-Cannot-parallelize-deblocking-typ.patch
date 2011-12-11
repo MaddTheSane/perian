@@ -1,17 +1,18 @@
-From 397756a8d6b6b7725e4844c612be85db6e082ed3 Mon Sep 17 00:00:00 2001
+From d917df594b2585dbb86fe273eb3e59f18e3567b9 Mon Sep 17 00:00:00 2001
 From: Alexander Strange <astrange@ithinksw.com>
 Date: Sun, 22 Nov 2009 04:09:09 -0500
-Subject: [PATCH 3/6] Remove the warning "Cannot parallelize deblocking type 1".
+Subject: [PATCH 2/6] Remove the warning "Cannot parallelize deblocking type
+ 1".
 
 ---
  libavcodec/h264.c |    5 +----
  1 files changed, 1 insertions(+), 4 deletions(-)
 
 diff --git a/libavcodec/h264.c b/libavcodec/h264.c
-index f99f7ea..5f548f4 100644
+index acd7179..7d27caa 100644
 --- a/libavcodec/h264.c
 +++ b/libavcodec/h264.c
-@@ -2155,10 +2155,7 @@ static int decode_slice_header(H264Context *h, H264Context *h0){
+@@ -3144,10 +3144,7 @@ static int decode_slice_header(H264Context *h, H264Context *h0){
              h->deblocking_filter = 2;
          } else {
              h0->max_contexts = 1;
@@ -20,9 +21,9 @@ index f99f7ea..5f548f4 100644
 -                h0->single_decode_warning = 1;
 -            }
 +
-             if(h != h0)
-                 return 1; // deblocking switched inside frame
-         }
+             if (h != h0) {
+                 av_log(h->s.avctx, AV_LOG_ERROR, "Deblocking switched inside frame.\n");
+                 return 1;
 -- 
-1.7.3.1
+1.7.8
 

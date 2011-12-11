@@ -189,7 +189,6 @@
 		3DE8D78510444E500007C7E7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
 		3DE8D9C910444E680007C7E7 /* AppleScriptKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */; };
 		3DE8D9D5104451A80007C7E7 /* Perian - Open in QT Player.app in Resources */ = {isa = PBXBuildFile; fileRef = 3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */; };
-		3DEFA3F9120560AD0097FE4C /* libavcore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DEFA3F8120560AD0097FE4C /* libavcore.a */; };
 		3DF2958C104F0EF40047B8EC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
 		6116E5580B43C27B0020F1CE /* FFissionCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */; };
 		6116E55A0B43C27B0020F1CE /* FFissionDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */; };
@@ -640,7 +639,7 @@
 		3D211A210B6B1A660051299D /* SubUtilities.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubUtilities.h; path = Subtitles/SubUtilities.h; sourceTree = "<group>"; };
 		3D211A220B6B1A660051299D /* SubUtilities.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; name = SubUtilities.m; path = Subtitles/SubUtilities.m; sourceTree = "<group>"; };
 		3D211A2E0B6B1AD80051299D /* SubParsing.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubParsing.h; path = Subtitles/SubParsing.h; sourceTree = "<group>"; };
-		3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; name = SubParsing.m.rl; path = Subtitles/SubParsing.m.rl; sourceTree = "<group>"; };
+		3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = SubParsing.m.rl; path = Subtitles/SubParsing.m.rl; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		3D2623160C6A60B700FD1242 /* SubRenderer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SubRenderer.h; path = Subtitles/SubRenderer.h; sourceTree = "<group>"; };
 		3D2A136E1213D3CC002BFAEA /* KaxDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KaxDefines.h; path = libmatroska/matroska/KaxDefines.h; sourceTree = "<group>"; };
 		3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UniversalDetector.xcodeproj; path = UniversalDetector/UniversalDetector.xcodeproj; sourceTree = "<group>"; };
@@ -687,7 +686,6 @@
 		3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "PerianOpener-Info.plist"; path = "Plists/PerianOpener-Info.plist"; sourceTree = "<group>"; };
 		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = OpenerMainMenu.xib; path = Opener/OpenerMainMenu.xib; sourceTree = "<group>"; };
 		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = /System/Library/Frameworks/AppleScriptKit.framework; sourceTree = "<absolute>"; };
-		3DEFA3F8120560AD0097FE4C /* libavcore.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcore.a; path = Universal/libavcore.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionCodec.cpp; sourceTree = "<group>"; };
 		6116E54D0B43C27B0020F1CE /* FFissionCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = FFissionCodec.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionDecoder.cpp; sourceTree = "<group>"; };
@@ -882,7 +880,6 @@
 				3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */,
 				3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */,
 				3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */,
-				3DEFA3F9120560AD0097FE4C /* libavcore.a in Frameworks */,
 				F5BD48FE121786C90089D5FA /* AudioUnit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1005,7 +1002,6 @@
 				8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */,
 				1156DBD80A3CE9F500963B0E /* libz.dylib */,
 				11D4EFA10A3CE8C10066D45F /* libavcodec.a */,
-				3DEFA3F8120560AD0097FE4C /* libavcore.a */,
 				8F483B540A642644002CCA73 /* libavformat.a */,
 				11D4EFA20A3CE8C10066D45F /* libavutil.a */,
 				11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */,

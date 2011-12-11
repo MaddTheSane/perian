@@ -9,8 +9,8 @@ fi
 CC=`xcrun -find clang`
 
 configureflags="--cc=$CC --disable-amd3dnow --disable-doc --disable-encoders \
-     --disable-ffprobe --disable-ffserver --disable-muxers --disable-network \
-     --disable-swscale --disable-avfilter --target-os=darwin"
+     --disable-avprobe --disable-avserver --disable-muxers --disable-network \
+     --disable-avfilter --disable-ffmpeg --disable-avconv --target-os=darwin"
 
 cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -w"
 
@@ -55,16 +55,16 @@ else
     echo "Static ffmpeg libs are out-of-date ; rebuilding"
     
     if [ -e ffmpeg/patched ] ; then
-		cd ffmpeg && svn revert -R . && rm patched && cd ..
+		cd ffmpeg && git reset --hard && rm patched && cd ..
 	fi
 
 	cd ffmpeg
 	patch -p1 < ../Patches/0001-Disable-some-parts-of-h264.c-Perian-never-uses.patch
-	patch -p1 < ../Patches/0003-Remove-the-warning-Cannot-parallelize-deblocking-typ.patch
-	patch -p1 < ../Patches/0004-Hardcode-results-of-runtime-cpu-detection-in-dsputil.patch
-	patch -p1 < ../Patches/0005-Double-INTERNAL_BUFFER_SIZE-to-fix-running-out-of-bu.patch
-	patch -p1 < ../Patches/0006-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
-	patch -p1 < ../Patches/configure-fix.diff
+	patch -p1 < ../Patches/0002-Remove-the-warning-Cannot-parallelize-deblocking-typ.patch
+	patch -p1 < ../Patches/0003-Hardcode-results-of-runtime-cpu-detection-in-dsputil.patch
+	patch -p1 < ../Patches/0004-Double-INTERNAL_BUFFER_SIZE-to-fix-running-out-of-bu.patch
+	patch -p1 < ../Patches/0005-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
+	patch -p1 < ../Patches/0006-Workaround-hang-issue-in-configure.patch
 	cd ..
 
 	touch ffmpeg/patched

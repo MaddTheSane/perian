@@ -59,13 +59,13 @@ int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSTy
 	/* Search the AVFormatContext for a video stream */
 	for(j = 0; j < ic->nb_streams && !outstr; j++) {
 		st = ic->streams[j];
-		if(st->codec->codec_type == CODEC_TYPE_VIDEO)
+		if(st->codec->codec_type == AVMEDIA_TYPE_VIDEO)
 			outstr = st;
 	}
 	/* Search the AVFormatContext for an audio stream (no video stream exists) */
 	for(j = 0; j < ic->nb_streams && !outstr; j++) {
 		st = ic->streams[j];
-		if(st->codec->codec_type == CODEC_TYPE_AUDIO)
+		if(st->codec->codec_type == AVMEDIA_TYPE_AUDIO)
 			outstr = st;
 	}
 	/* Still no stream, then err */
@@ -76,9 +76,9 @@ int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSTy
 	map->index = st->index;
 	map->str = outstr;
 	
-	if(st->codec->codec_type == CODEC_TYPE_VIDEO)
+	if(st->codec->codec_type == AVMEDIA_TYPE_VIDEO)
 		initialize_video_map(map, targetTrack, dataRef, dataRefType, storage->firstFrames + st->index);
-	else if(st->codec->codec_type == CODEC_TYPE_AUDIO)
+	else if(st->codec->codec_type == AVMEDIA_TYPE_AUDIO)
 		initialize_audio_map(map, targetTrack, dataRef, dataRefType, storage->firstFrames + st->index);
 	
 	map->valid = map->media && map->sampleHdl;
@@ -450,8 +450,8 @@ Handle create_strf_ext(AVCodecContext *codec)
 	long size;
 	
 	/* initialize the extension
-		* 40 bytes			for the BITMAPINFOHEADER stucture, see avienc.c in the ffmpeg project
-		* extradata_size	for the data still stored in the AVCodecContext structure */
+	 * 40 bytes			for the BITMAPINFOHEADER stucture, see avienc.c in the ffmpeg project
+	 * extradata_size	for the data still stored in the AVCodecContext structure */
 	size = 40 + codec->extradata_size;
 	result = NewHandle(size);
 	if (result == NULL)
@@ -489,41 +489,31 @@ bail:
 static void add_metadata(AVFormatContext *ic, Movie theMovie)
 {
     QTMetaDataRef movie_metadata;
-    OSType key, err;
+    OSType err;
     
     err = QTCopyMovieMetaData(theMovie, &movie_metadata);
-    if (err) return;
-    
-	if (strlen(ic->title)) {
-		key = kQTMetaDataCommonKeyDisplayName;
-		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->title, strlen(ic->title), kQTMetaDataTypeUTF8, NULL);
-	}
-	if (strlen(ic->author)) {
-		key = kQTMetaDataCommonKeyAuthor;
-		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->author, strlen(ic->author), kQTMetaDataTypeUTF8, NULL);
-	}
-	if (strlen(ic->copyright)) {
-		key = kQTMetaDataCommonKeyCopyright;
-		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->copyright, strlen(ic->copyright), kQTMetaDataTypeUTF8, NULL);
-	}
-	if (strlen(ic->comment)) {
-		key = kQTMetaDataCommonKeyComment;
-		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->comment, strlen(ic->comment), kQTMetaDataTypeUTF8, NULL);
-	}
-	if (strlen(ic->album)) {
-		key = kQTMetaDataCommonKeyComment;
-		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->album, strlen(ic->album), kQTMetaDataTypeUTF8, NULL);
-	}
-	if (strlen(ic->genre)) {
-		key = kQTMetaDataCommonKeyGenre;
-		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon, 
-		                  (UInt8 *)&key, sizeof(key), (UInt8 *)ic->genre, strlen(ic->genre), kQTMetaDataTypeUTF8, NULL);
-	}
+	if (err) return;
+
+	void (^AddMetaDataItem)(const char *, OSType) = ^(const char *ff_name, OSType qt_name) {
+		AVDictionaryEntry *e = av_dict_get(ic->metadata, ff_name, NULL, 0);
+		if (!e) return;
+		
+		QTMetaDataAddItem(movie_metadata, kQTMetaDataStorageFormatQuickTime, kQTMetaDataKeyFormatCommon,
+						  (UInt8*)&qt_name, sizeof(qt_name), (UInt8*)e->value, strlen(e->value), kQTMetaDataTypeUTF8,
+						  NULL);
+	};
+
+	AddMetaDataItem("title",     kQTMetaDataCommonKeyDisplayName);
+	AddMetaDataItem("author",    kQTMetaDataCommonKeyAuthor);
+	AddMetaDataItem("artist",    kQTMetaDataCommonKeyArtist);
+	AddMetaDataItem("copyright", kQTMetaDataCommonKeyCopyright);
+	AddMetaDataItem("comment",   kQTMetaDataCommonKeyComment);
+	AddMetaDataItem("album",     kQTMetaDataCommonKeyAlbum);
+	AddMetaDataItem("genre",     kQTMetaDataCommonKeyGenre);
+	AddMetaDataItem("composer",  kQTMetaDataCommonKeyComposer);
+	AddMetaDataItem("encoder",   kQTMetaDataCommonKeySoftware);
+	// TODO iTunes track number, disc number, ...
+
     QTMetaDataRelease(movie_metadata);
 }
 
@@ -629,7 +619,7 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 		map[j].str = st;
 		map[j].duration = -1;
 		
-		if(st->codec->codec_type == CODEC_TYPE_VIDEO) {
+		if(st->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
 			Fixed width, height;
 			
 			get_track_dimensions_for_codec(st, &width, &height);
@@ -643,7 +633,7 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 			initialize_video_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
 			set_track_clean_aperture_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height, IntToFixed(st->codec->width), IntToFixed(st->codec->height));
 			set_track_colorspace_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height);
-		} else if (st->codec->codec_type == CODEC_TYPE_AUDIO) {
+		} else if (st->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
 			if (st->codec->sample_rate > 0) {
 				track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
 				err = initialize_audio_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
@@ -804,7 +794,7 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 			}
 			
 			/* switch for the remaining fields */
-			if(codec->codec_type == CODEC_TYPE_VIDEO) {
+			if(codec->codec_type == AVMEDIA_TYPE_VIDEO) {
 				
 				/* Calculate the frame duration */
 				duration = 1;
@@ -817,7 +807,7 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 				sampleRec->durationPerSample = map->base.num * duration;
 				sampleRec->numberOfSamples = 1;
 			}
-			else if(codec->codec_type == CODEC_TYPE_AUDIO) {
+			else if(codec->codec_type == AVMEDIA_TYPE_AUDIO) {
 				
 				/* FIXME: check if that's really the right thing to do here */
 				if(ncstr->vbr) {
@@ -981,12 +971,12 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		if (!ncstream->valid)
 			continue;
 		
-		if((packet.flags & PKT_FLAG_KEY) == 0)
+		if((packet.flags & AV_PKT_FLAG_KEY) == 0)
 			flags |= mediaSampleNotSync;
 		
 		if(IS_NUV(storage->componentType) && codecContext->codec_id == CODEC_ID_MP3) trustPacketDuration = false;
 		if(IS_FLV(storage->componentType) && codecContext->codec_id == CODEC_ID_H264) trustPacketDuration = false;
-		if(IS_FLV(storage->componentType) && codecContext->codec_type == CODEC_TYPE_AUDIO) trustPacketDuration = false;
+		if(IS_FLV(storage->componentType) && codecContext->codec_type == AVMEDIA_TYPE_AUDIO) trustPacketDuration = false;
 		
 		memset(&sampleRec, 0, sizeof(sampleRec));
 		sampleRec.dataOffset.hi = packet.pos >> 32;
@@ -1003,7 +993,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		if(sampleRec.dataSize <= 0)
 			continue;
 		
-		if(codecContext->codec_type == CODEC_TYPE_AUDIO && !ncstream->vbr)
+		if(codecContext->codec_type == AVMEDIA_TYPE_AUDIO && !ncstream->vbr)
 			sampleRec.numberOfSamples = (packet.size * ncstream->asbd.mFramesPerPacket) / ncstream->asbd.mBytesPerPacket;
 		else
 			sampleRec.numberOfSamples = 1; //packet.duration;
@@ -1030,7 +1020,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		} else {
 			ncstream->lastSample.numberOfSamples = 0;
 			
-			if(codecContext->codec_type == CODEC_TYPE_AUDIO && !ncstream->vbr)
+			if(codecContext->codec_type == AVMEDIA_TYPE_AUDIO && !ncstream->vbr)
 				sampleRec.durationPerSample = 1;
 			else
 				sampleRec.durationPerSample = ncstream->base.num * packet.duration;
