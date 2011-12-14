@@ -62,7 +62,7 @@ static int dataref_open(URLContext *h, const char *filename, int flags)
 	dataref_private *private;
 	long access = 0;
 	
-	if(flags & URL_RDWR) {
+	if((flags & URL_RDWR) == URL_RDWR) {
 		access = kDataHCanRead | kDataHCanWrite;
 	} else if(flags & URL_WRONLY) {
 		access = kDataHCanWrite;
