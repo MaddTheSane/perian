@@ -26,9 +26,9 @@
 
 @interface SubATSUIRenderer : SubRenderer {
 	SubContext *context;
-	CGColorSpaceRef srgbCSpace;
 
 	ATSUTextLayout layout;
+	CGColorSpaceRef srgbCSpace;
 	UniCharArrayOffset *breakBuffer;
 	TextBreakLocatorRef breakLocator;
 	

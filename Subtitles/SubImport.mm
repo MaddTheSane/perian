@@ -76,8 +76,9 @@ short GetFilenameLanguage(CFStringRef filename)
 
 static void AppendSRGBProfile(ImageDescriptionHandle imgDesc)
 {	
-	CGColorSpaceRef cSpace = GetSRGBColorSpace();
+	CGColorSpaceRef cSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
 	CFDataRef cSpaceICC = CGColorSpaceCopyICCProfile(cSpace);
+	CGColorSpaceRelease(cSpace);
 	
 	if (!cSpaceICC)
 		return;

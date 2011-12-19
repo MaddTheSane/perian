@@ -137,6 +137,7 @@ pascal ComponentResult TextSubCodecClose(TextSubGlobals glob, ComponentInstance 
 			DisposeImageCodecMPDrawBandUPP(glob->drawBandUPP);
 		}
 		if (glob->ssa) SubRendererDispose(glob->ssa);
+		if (glob->colorSpace) CGColorSpaceRelease(glob->colorSpace);
 		DisposePtr((Ptr)glob);
 	}
 
@@ -243,7 +244,7 @@ pascal ComponentResult TextSubCodecPreflight(TextSubGlobals glob, CodecDecompres
 		size_t ssaheadersize = 0;
 		
 		if (!glob->colorSpace)
-			glob->colorSpace = GetSRGBColorSpace();
+			glob->colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
 		
 		if ((**p->imageDescription).cType == kSubFormatSSA) {
 			long count;

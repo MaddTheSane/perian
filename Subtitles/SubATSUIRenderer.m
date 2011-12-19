@@ -219,7 +219,7 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 
 		breakBuffer = malloc(sizeof(UniCharArrayOffset) * 2);
 		ATSUCreateTextLayout(&layout);
-		srgbCSpace = GetSRGBColorSpace();
+		srgbCSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
 		UCCreateTextBreakLocator(NULL, 0, kUCTextBreakLineMask, &breakLocator);
 		drawTextBounds = CFPreferencesGetAppBooleanValue(CFSTR("DrawSubTextBounds"), PERIAN_PREF_DOMAIN, NULL);
 	}
@@ -931,8 +931,6 @@ static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanExtra *spanEx, SubATSUISp
 	return endLayer;
 }
 
-static Fixed RoundFixed(Fixed n) {return IntToFixed(FixedToInt(n));}
-
 static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak, UniCharArrayOffset lineLen, Fixed penX, Fixed penY, CGContextRef c, SubRenderDiv *div, SubATSUISpanExtra *spanEx, int textType)
 {
 	//ATS bug(?) with some fonts:
@@ -958,7 +956,7 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 		borderRect.size.height = ceilf(borderRect.size.height);
 		
 		CGContextFillRect(c, borderRect);
-	} else ATSUDrawText(layout, thisBreak, lineLen, RoundFixed(penX), RoundFixed(penY));
+	} else ATSUDrawText(layout, thisBreak, lineLen, penX, penY);
 }
 
 static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY, SubATSUISpanExtra *firstSpanEx, int textType)
@@ -1086,9 +1084,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	CGContextSetLineCap(c, kCGLineCapRound); // avoid spiky outlines on some fonts
 	CGContextSetLineJoin(c, kCGLineJoinRound);
 	CGContextSetShouldSmoothFonts(c, NO);    // don't do LCD subpixel antialiasing
-#if __MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4
 	CGContextSetShouldSubpixelQuantizeFonts(c, NO); // draw text stroke and fill in the same place
-#endif
 	
 	SetATSULayoutOther(layout, kATSUCGContextTag, sizeof(CGContextRef), &c);
 
@@ -1232,6 +1228,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	[context release];
 	free(breakBuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
+	CGColorSpaceRelease(srgbCSpace);
 	ATSUDisposeTextLayout(layout);
 	[super dealloc];
 }
@@ -1240,6 +1237,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 {
 	free(breakBuffer);
 	UCDisposeTextBreakLocator(&breakLocator);
+	CGColorSpaceRelease(srgbCSpace);
 	ATSUDisposeTextLayout(layout);
 	[super finalize];
 }

@@ -77,9 +77,6 @@ void PerianInitExit(int unlock);
 
 void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_size);
 
-// return an sRGB colorspace. safe to use on 10.4.
-CGColorSpaceRef GetSRGBColorSpace();
-
 // postprocess RGBA+8-bit to not look terrible when displayed with 'transparent' blend mode
 void ConvertImageToQDTransparent(Ptr baseAddr, OSType pixelFormat, int rowBytes, int width, int height);
 	
