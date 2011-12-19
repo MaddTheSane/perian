@@ -605,7 +605,6 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 	
 	if (err) {
 		Codecprintf(NULL, "AudioFormatGetProperty failed (error %lx / format %lx)\n", err, asbd.mFormatID);
-		err = noErr;
 	}
 
 	// see ff_private.c initialize_audio_map
@@ -846,7 +845,7 @@ ComponentResult MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 	
 	KaxChapterAtom *chapterAtom = FindChild<KaxChapterAtom>(edition);
 	while (chapterAtom && chapterAtom->GetSize() > 0) {
-		AddChapterAtom(chapterAtom, chapterTrack);
+		AddChapterAtom(chapterAtom);
 		chapterAtom = &GetNextChild<KaxChapterAtom>(edition, *chapterAtom);
 	}
 	
@@ -856,7 +855,7 @@ ComponentResult MatroskaImport::ReadChapters(KaxChapters &chapterEntries)
 	return noErr;
 }
 
-void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
+void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom)
 {
 	KaxChapterAtom *subChapter = FindChild<KaxChapterAtom>(*atom);
 	bool addThisChapter = true;
@@ -867,7 +866,7 @@ void MatroskaImport::AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack)
 			KaxChapterFlagHidden &hideChapter = GetChild<KaxChapterFlagHidden>(*subChapter);
 			
 			if (!uint8_t(hideChapter)) {
-				AddChapterAtom(subChapter, chapterTrack);
+				AddChapterAtom(subChapter);
 				addThisChapter = false;
 			}
 			subChapter = &GetNextChild(*atom, *subChapter);
@@ -936,8 +935,9 @@ ComponentResult MatroskaImport::ReadAttachments(KaxAttachments &attachments)
 			KaxFileData & fileData = GetChild<KaxFileData>(*attachedFile);
 			FourCharCode key = 'covr'; //iTunes cover art tag
 			QTMetaDataRef movieMetaData;
-			OSStatus err = QTCopyMovieMetaData(theMovie, &movieMetaData);
-
+			QTCopyMovieMetaData(theMovie, &movieMetaData);
+			OSErr err;
+			
 			err = QTMetaDataAddItem(movieMetaData, 
 							  kQTMetaDataStorageFormatiTunes, kQTMetaDataKeyFormatiTunesShortForm, 
 							  (UInt8 *)&key, sizeof(key),
@@ -1040,9 +1040,9 @@ void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
 		if (block) {
 			block->SetParent(cluster);
 			
-			for (int i = 0; i < tracks.size(); i++) {
-				if (tracks[i].number == block->TrackNum()) {
-					tracks[i].AddBlock(*block, duration, flags);
+			for (int j = 0; j < tracks.size(); j++) {
+				if (tracks[j].number == block->TrackNum()) {
+					tracks[j].AddBlock(*block, duration, flags);
 					break;
 				}
 			}
@@ -1198,12 +1198,12 @@ void MatroskaTrack::ParseFirstBlock(KaxInternalBlock &block)
 		if (err == noErr) {
 			DisposeHandle((Handle) desc);
 			desc = (SampleDescriptionHandle) sndDesc;
-			err = QTSampleTableAddSampleDescription(sampleTable, desc, 0, &qtSampleDesc);
+			QTSampleTableAddSampleDescription(sampleTable, desc, 0, &qtSampleDesc);
 		}
 	}
 }
 
-void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short flags)
+void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 frameDuration, short flags)
 {
 	if (!seenFirstBlock) {
 		ParseFirstBlock(block);
@@ -1264,8 +1264,8 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 		MatroskaFrame newFrame;
 		newFrame.pts = block.GlobalTimecode() / timecodeScale;
 		newFrame.dts = newFrame.pts;
-		if (duration > 0)
-			newFrame.duration = duration;
+		if (frameDuration > 0)
+			newFrame.duration = frameDuration;
 		else
 			newFrame.duration = defaultDuration;
 		newFrame.offset = block.GetDataPosition(i);
@@ -1291,7 +1291,7 @@ void MatroskaTrack::AddBlock(KaxInternalBlock &block, uint32 duration, short fla
 void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 {
 	ComponentResult err = noErr;
-	TimeValue sampleTime;
+	TimeValue sampleTime = 0;
 	TimeValue64 displayOffset = frame.pts - frame.dts;
 	
 	if (desc == NULL) return;

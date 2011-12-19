@@ -66,21 +66,21 @@ static ATSUFontID GetFontIDForSSAName(NSString *name);
 	[super finalize];
 }
 
-static CGColorRef MakeCGColorFromRGBA(SubRGBAColor c, CGColorSpaceRef cspace)
+static CGColorRef CreateCGColorFromRGBA(SubRGBAColor c, CGColorSpaceRef cspace)
 {
 	const float components[] = {c.red, c.green, c.blue, c.alpha};
 	
 	return CGColorCreate(cspace, components);
 }
 
-static CGColorRef MakeCGColorFromRGBOpaque(SubRGBAColor c, CGColorSpaceRef cspace)
+static CGColorRef CreateCGColorFromRGBOpaque(SubRGBAColor c, CGColorSpaceRef cspace)
 {
 	SubRGBAColor c2 = c;
 	c2.alpha = 1;
-	return MakeCGColorFromRGBA(c2, cspace);
+	return CreateCGColorFromRGBA(c2, cspace);
 }
 
-static CGColorRef CloneCGColorWithAlpha(CGColorRef c, float alpha)
+static CGColorRef CopyCGColorWithAlpha(CGColorRef c, float alpha)
 {
 	CGColorRef new = CGColorCreateCopyWithAlpha(c, alpha);
 	CGColorRelease(c);
@@ -92,11 +92,11 @@ static CGColorRef CloneCGColorWithAlpha(CGColorRef c, float alpha)
 	if (self = [super init]) {
 		ATSUCreateAndCopyStyle(style_, &style);
 		
-		primaryColor = MakeCGColorFromRGBOpaque(sstyle->primaryColor, cs);
+		primaryColor = CreateCGColorFromRGBOpaque(sstyle->primaryColor, cs);
 		primaryAlpha = sstyle->primaryColor.alpha;
-		outlineColor = MakeCGColorFromRGBOpaque(sstyle->outlineColor, cs);
+		outlineColor = CreateCGColorFromRGBOpaque(sstyle->outlineColor, cs);
 		outlineAlpha = sstyle->outlineColor.alpha;
-		shadowColor  = MakeCGColorFromRGBA(sstyle->shadowColor,  cs);
+		shadowColor  = CreateCGColorFromRGBA(sstyle->shadowColor,  cs);
 		outlineRadius = sstyle->outlineRadius;
 		shadowDist = sstyle->shadowDist;
 		scaleX = sstyle->scaleX / 100.;
@@ -423,7 +423,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 #define fv() fval = *(float*)p;
 #define sv() sval = *(NSString**)p;
 #define fixv() fv(); fixval = FloatToFixed(fval);
-#define colorv() color = MakeCGColorFromRGBA(SubParseSSAColor(*(int*)p), srgbCSpace);
+#define colorv() color = CreateCGColorFromRGBA(SubParseSSAColor(*(int*)p), srgbCSpace);
 	
 	switch (tag) {
 		case tag_b:
@@ -477,7 +477,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			if (!isFirstSpan) div->render_complexity |= renderMultipleParts;
 			{
 				SubRGBAColor rgba = SubParseSSAColor(*(int*)p);
-				spanEx->outlineColor = MakeCGColorFromRGBOpaque(rgba, srgbCSpace);
+				spanEx->outlineColor = CreateCGColorFromRGBOpaque(rgba, srgbCSpace);
 				spanEx->outlineAlpha = rgba.alpha;
 			}
 			break;
@@ -521,14 +521,14 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 		case tag_4a:
 			iv();
 			if (!isFirstSpan) div->render_complexity |= renderMultipleParts | renderManualShadows;
-			spanEx->shadowColor = CloneCGColorWithAlpha(spanEx->shadowColor, (255-ival)/255.);
+			spanEx->shadowColor = CopyCGColorWithAlpha(spanEx->shadowColor, (255-ival)/255.);
 			break;
 		case tag_alpha:
 			iv();
 			fval = (255-ival)/255.;
 			if (!isFirstSpan) div->render_complexity |= renderMultipleParts | renderManualShadows;
 			spanEx->primaryAlpha = spanEx->outlineAlpha = fval;
-			spanEx->shadowColor = CloneCGColorWithAlpha(spanEx->shadowColor, fval);
+			spanEx->shadowColor = CopyCGColorWithAlpha(spanEx->shadowColor, fval);
 			break;
 		case tag_r:
 			sv();

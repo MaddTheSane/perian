@@ -394,7 +394,7 @@ void FFissionDecoder::OpenAVCodec()
 	if (magicCookie)
 		SetupExtradata();
 	
-	if (avcodec_open(avContext, avCodec)) {
+	if (avcodec_open2(avContext, avCodec, NULL)) {
 		Codecprintf(NULL, "error opening audio avcodec\n");
 		avCodec = NULL;
 		CODEC_THROW(kAudioCodecUnsupportedFormatError);
@@ -500,18 +500,15 @@ int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *p
 	uint32_t mrk = AV_RB16(packet) << 16 | AV_RB16(packet + 2);
 	unsigned int frameSize = 0;
 	unsigned int blockCount = 0;
-	bool repackage = 0;
 
 	switch (mrk) {
 		case DCA_MARKER_RAW_BE:
 			blockCount = (AV_RB16(packet + 4) >> 2) & 0x7f;
-			frameSize = (AV_RB16(packet + 4) & 0x3) << 12 | (AV_RB16(packet + 6) >> 4) & 0xfff;
-			repackage = 1;
+			frameSize = (AV_RB16(packet + 4) & 0x3) << 12 | ((AV_RB16(packet + 6) >> 4) & 0xfff);
 			break;
 		case DCA_MARKER_RAW_LE:
 			blockCount = (AV_RL16(packet + 4) >> 2) & 0x7f;
-			frameSize = (AV_RL16(packet + 4) & 0x3) << 12 | (AV_RL16(packet + 6) >> 4) & 0xfff;
-			repackage = 1;
+			frameSize = (AV_RL16(packet + 4) & 0x3) << 12 | ((AV_RL16(packet + 6) >> 4) & 0xfff);
 			break;
 		case DCA_MARKER_14B_BE:
 		case DCA_MARKER_14B_LE:
@@ -674,6 +671,7 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 			av_init_packet(&pkt);
 			pkt.data = packet;
 			pkt.size = packetSize;
+			// FIXME avcodec_decode_audio4
 			len = avcodec_decode_audio3(avContext, (int16_t *)outputBuffer, &outBufUsed, &pkt);
 		}
 		

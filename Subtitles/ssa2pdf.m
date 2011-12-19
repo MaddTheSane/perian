@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
 	//loading copied from ssa2html, still duplicated
 	NSString *header = SubLoadSSAFromPath(inFile, ss);
-	[ss setFinished:YES];
+	ss.finished = YES;
 	
 	NSDictionary *headers;
 	NSArray *styles;

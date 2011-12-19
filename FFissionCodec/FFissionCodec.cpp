@@ -36,7 +36,8 @@ FFissionCodec::FFissionCodec(AudioComponentInstance inInstance) : ACBaseCodec(in
 {
 	FFInitFFmpeg();
 	
-	avContext = avcodec_alloc_context();
+	// FIXME avcodec_alloc_context3
+	avContext = avcodec_alloc_context2(AVMEDIA_TYPE_AUDIO);
 	avCodec = NULL;
 }
 

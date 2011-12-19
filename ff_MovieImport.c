@@ -448,8 +448,6 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	if(usedTrack && count == 1 && media)
 		*usedTrack = GetMediaTrack(media);
 	
-	result = noErr;
-
 	*addedDuration = 0;
 	
 	//attempt to import using indexes.
@@ -509,7 +507,7 @@ ComponentResult FFAvi_MovieImportIdle(ff_global_ptr storage, long inFlags, long 
 	
 	storage->idlesSinceLastAdd++;
 	
-	if (currentIdleTime == storage->lastIdleTime && storage->idlesSinceLastAdd > 5 || 
+	if ((currentIdleTime == storage->lastIdleTime && storage->idlesSinceLastAdd > 5) || 
 		storage->loadedTime < currentIdleTime + 5*movieTimeScale)
 	{
 		storage->idlesSinceLastAdd = 0;

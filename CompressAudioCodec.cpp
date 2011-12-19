@@ -128,17 +128,21 @@ void CompressAudioCodec::Initialize(const AudioStreamBasicDescription* inInputFo
 		while((component = FindNextComponent(component, &desc)) != NULL)
 		{
 			ComponentResult err = OpenAComponent(component, &actualUnit);
-			AudioStreamBasicDescription input = mInputFormat ;
+			if (err)
+				continue;
+			AudioStreamBasicDescription input = mInputFormat;
 			input.mFormatID = original;
 			err = AudioCodecInitialize(actualUnit, &input, inOutputFormat, innerCookie, innerCookieSize);
 			if(err == noErr)
 				break;
 		}
+		if (!actualUnit)
+			CODEC_THROW(kAudioCodecUnsupportedFormatError);
 	}
 	else if(actualUnit != NULL)
 	{
 		OSType original = originalStreamFourCC(mInputFormat.mFormatID);
-		AudioStreamBasicDescription input = mInputFormat ;
+		AudioStreamBasicDescription input = mInputFormat;
 		input.mFormatID = original;
 		AudioCodecInitialize(actualUnit, &input, inOutputFormat, innerCookie, innerCookieSize);
 	}

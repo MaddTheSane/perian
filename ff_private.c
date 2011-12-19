@@ -279,7 +279,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 		{
 			const char *prop = "Surround";
 			OSType key = 'name';
-			error = QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL);
+			QTMetaDataAddItem(trackMetaData, kQTMetaDataStorageFormatUserData, kQTMetaDataKeyFormatUserData, (UInt8 *)&key, sizeof(key), (UInt8 *)prop, strlen(prop), kQTMetaDataTypeUTF8, NULL);
 			QTMetaDataRelease(trackMetaData);
 		}
 		if(parse_ac3_bitstream(&asbd, &acl, firstFrame->data, firstFrame->size))
@@ -323,8 +323,9 @@ OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
 			return 'FSV1';
 		case CODEC_ID_VP6A:
 			return 'VP6A';
+		default:
+			return 0;
 	}
-	return 0;
 }
 
 OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
@@ -334,8 +335,9 @@ OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
 			return 'H264';
 		case CODEC_ID_MPEG4:
 			return 'MP4S';
+		default:
+			return 0;
 	}
-	return 0;
 }
 
 /* maps the codec_id tag of libavformat to a constant the AudioToolbox can work with */
@@ -364,6 +366,8 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 		case CODEC_ID_DTS:
 			map->vbr = 1;
 			break;
+		default:
+			;
 	}
 } /* map_avi_to_mov_tag() */
 
@@ -906,7 +910,6 @@ bail:
  */
 ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames, bool addSamples) {
 	SampleReference64Record sampleRec;
-	DataHandler dataHandler;
 	AVFormatContext *formatContext;
 	AVCodecContext *codecContext;
 	AVStream *stream;
@@ -922,13 +925,10 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 	int firstPts[storage->map_count];
 	short flags;
 	
-	dataHandler = storage->dataHandler;
 	formatContext = storage->format_context;
-	dataResult = noErr;
 	result = noErr;
 	minLoadedTime = -1;
 	availableSize = 0;
-	margin = 0;
 	idling = (inFlags & movieImportWithIdle);
 	framesProcessed = 0;
 		
@@ -1174,6 +1174,6 @@ void send_movie_changed_notification(Movie movie) {
 		if(err == noErr)
 			MovieExecuteWiredActions(movie, 0, container);
 		
-		err = QTDisposeAtomContainer(container);
+		QTDisposeAtomContainer(container);
 	}	
 }

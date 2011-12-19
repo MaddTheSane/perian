@@ -430,7 +430,7 @@ void SubLoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount)
 					endTime = syncTime;
 					if (subCount == 2 && cc == 2)
 						[cmt insertString:@"{\\an8}" atIndex:0];
-					if (subCount == 1 && cc == 1 || subCount == 2 && cc == 2) {
+					if ((subCount == 1 && cc == 1) || (subCount == 2 && cc == 2)) {
 						SubLine *sl = [[SubLine alloc] initWithLine:cmt start:startTime end:endTime];
 						[ss addLine:[sl autorelease]];
 					}
@@ -581,8 +581,7 @@ NS_DURING
 			break;
 	}
 	
-	[ss setFinished:YES];
-
+	ss.finished = YES;
 	SubRendererPrerollFromHeader(header ? *header : NULL, header ? GetHandleSize(header) : 0);
 	
 	Handle dataRefHndl = NewHandleClear(sizeof(Handle) + 1);
@@ -930,8 +929,11 @@ NS_DURING
 
 	NSString *subFileName = [[nsPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sub"];
 
-	if([[NSFileManager defaultManager] fileExistsAtPath:subFileName] && [idxContent length]) {
-	int subFileSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:subFileName traverseLink:NO] objectForKey:NSFileSize] intValue];
+	if([idxContent length]) {
+		NSError *nsErr;
+		NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:subFileName error:&nsErr];
+		if (!attr) goto bail;
+		int subFileSize = [[attr objectForKey:NSFileSize] intValue];
 	
 	NSArray *lines = [idxContent componentsSeparatedByString:@"\n"];
 	NSMutableArray *privateLines = [NSMutableArray array];
@@ -1257,7 +1259,7 @@ static int cmp_uint(const void *a, const void *b)
 	
 }
 
--(SubLine*)getNextRealSerializedPacket
+-(SubLine*)copyNextRealSerializedPacket
 {
 	int nlines = [lines count];
 	SubLine *first = [lines objectAtIndex:0];
@@ -1323,7 +1325,7 @@ canOutput:
 	if (nextline->begin_time > last_end_time) {
 		ret = [[SubLine alloc] initWithLine:@"\n" start:last_end_time end:nextline->begin_time];
 	} else {
-		ret = [self getNextRealSerializedPacket];
+		ret = [self copyNextRealSerializedPacket];
 	}
 	
 	if (!ret) return nil;
@@ -1334,10 +1336,7 @@ canOutput:
 	return [ret autorelease];
 }
 
--(void)setFinished:(BOOL)_finished
-{
-	finished = _finished;
-}
+@synthesize finished;
 
 -(BOOL)isEmpty
 {
@@ -1465,7 +1464,7 @@ NS_ENDHANDLER
 
 void CXXSubSerializer::setFinished()
 {
-	[(SubSerializer*)priv setFinished:YES];
+	((SubSerializer*)priv).finished = YES;
 }
 
 const char *CXXSubSerializer::popPacket(size_t *size, unsigned *start, unsigned *end)

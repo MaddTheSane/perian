@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
 	//start of lameness
 	//it should only have to call subparsessafile here, or something
 	NSString *header = SubLoadSSAFromPath([NSString stringWithUTF8String:argv[1]], ss);
-	[ss setFinished:YES];
+	ss.finished = YES;
 
 	NSDictionary *headers;
 	NSArray *styles;

@@ -292,7 +292,7 @@ static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avct
 	tmpContext.extradata = avctx->extradata;
 	tmpContext.extradata_size = avctx->extradata_size;
 	
-    avcodec_open(&tmpContext, codec);
+    avcodec_open2(&tmpContext, codec, NULL);
 	AVPacket pkt;
 	av_init_packet(&pkt);
 	pkt.data = (UInt8*)data;
@@ -403,7 +403,7 @@ pascal ComponentResult FFusionCodecOpen(FFusionGlobals glob, ComponentInstance s
 	
     glob = (FFusionGlobals)NewPtrClear(sizeof(FFusionGlobalsRecord));
     
-    if (err = MemError())
+    if ((err = MemError()))
     {
         Codecprintf(NULL, "Unable to allocate globals! Exiting.\n");            
     }
@@ -758,7 +758,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		
         // Finally we open the avcodec 
         
-        if (avcodec_open(glob->avContext, glob->avCodec))
+        if (avcodec_open2(glob->avContext, glob->avCodec, NULL))
         {
             Codecprintf(glob->fileLog, "Error opening avcodec!\n");
             

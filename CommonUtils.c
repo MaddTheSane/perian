@@ -257,6 +257,8 @@ ComponentResult ReadESDSDescExt(Handle descExt, UInt8 **buffer, int *size)
 	UInt8 *esds = (UInt8 *) *descExt;
 	int tag, len;
 	
+	// FIXME use safe bytestream reading here
+	
 	*size = 0;
 	
 	esds += 4;		// version + flags
@@ -343,7 +345,7 @@ static int findNameInList(CFStringRef loadingApp, const CFStringRef *names, int 
 	return 0;
 }
 
-static CFDictionaryRef getMyProcessInformation()
+static CFDictionaryRef copyMyProcessInformation()
 {
 	ProcessSerialNumber myProcess;
 	GetCurrentProcess(&myProcess);
@@ -353,7 +355,7 @@ static CFDictionaryRef getMyProcessInformation()
 	return processInformation;
 }
 
-static CFStringRef getProcessName(CFDictionaryRef processInformation)
+static CFStringRef copyProcessName(CFDictionaryRef processInformation)
 {
 	CFStringRef path = CFDictionaryGetValue(processInformation, kCFBundleExecutableKey);
 	CFRange entireRange = CFRangeMake(0, CFStringGetLength(path)), basename;
@@ -369,13 +371,13 @@ static CFStringRef getProcessName(CFDictionaryRef processInformation)
 
 static int isApplicationNameInList(CFStringRef prefOverride, const CFStringRef *defaultList, unsigned int defaultListCount)
 {
-	CFDictionaryRef processInformation = getMyProcessInformation();
+	CFDictionaryRef processInformation = copyMyProcessInformation();
 	
 	if (!processInformation)
 		return FALSE;
 	
 	CFArrayRef list = CopyPreferencesValueTyped(prefOverride, CFArrayGetTypeID());
-	CFStringRef myProcessName = getProcessName(processInformation);
+	CFStringRef myProcessName = copyProcessName(processInformation);
 	int ret;
 	
 	if (list) {

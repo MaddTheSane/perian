@@ -48,8 +48,10 @@ __BEGIN_DECLS
 	unsigned last_begin_time, last_end_time;
 	unsigned num_lines_input;
 }
+
+@property (assign) BOOL finished;
+
 -(void)addLine:(SubLine *)sline;
--(void)setFinished:(BOOL)finished;
 -(SubLine*)getSerializedPacket;
 -(BOOL)isEmpty;
 @end

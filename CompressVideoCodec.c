@@ -68,7 +68,7 @@ ComponentResult CompressCodecOpen(CompressCodecGlobals glob, ComponentInstance s
 	ComponentResult err;
 	
 	glob = (CompressCodecGlobals)NewPtrClear(sizeof(CompressCodecGlobalRecord));
-	if(err = MemError()) goto bail;
+	if((err = MemError())) goto bail;
 	
 	SetComponentInstanceStorage(self, (Handle)glob);
 	glob->self = self;

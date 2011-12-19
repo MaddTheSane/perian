@@ -95,7 +95,7 @@ public:
 	
 	// adds the all the frames in the block group to the sample table if it exists, 
 	// the media otherwise. If this track type is subtitle, also inserts it into the track.
-	void AddBlock(KaxInternalBlock &block, uint32 duration, short flags);
+	void AddBlock(KaxInternalBlock &block, uint32 frameDuration, short flags);
 	
 	// this adds all the samples added through AddBlock() to the track that aren't already
 	// added, e.g. from a previous call to AddSamplesToTrack()
@@ -246,7 +246,7 @@ private:
 	
 	// this is called recursively to add only the leaves on the chapter tree to 
 	// chapter track, since QT doesn't support chapter nesting.
-	void AddChapterAtom(KaxChapterAtom *atom, Track chapterTrack);
+	void AddChapterAtom(KaxChapterAtom *atom);
 	
 	// assumes cluster has been read already, and cycles through the contained blocks and
 	// adds the frames to the media/sample table, and to the track if addToTrack is true

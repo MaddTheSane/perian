@@ -302,6 +302,8 @@ typedef struct H264ParserContext_s
 	int chroma_format_idc;
 	
 	int gaps_in_frame_num_value_allowed_flag;
+	
+	int bottom_field_flag;
 }H264ParserContext;
 
 static int decode_nal(const uint8_t *buf, int buf_size, uint8_t *out_buf, int *out_buf_size, int *type, int *nal_ref_idc)
@@ -521,7 +523,6 @@ static int inline decode_slice_header(H264ParserContext *context, const uint8_t 
 	GetBitContext getbit, *gb = &getbit;
 	int slice_type;
 	int field_pic_flag = 0;
-	int bottom_field_flag = 0;
 	int frame_number;
 //	static const uint8_t slice_type_map[5] = {FF_P_TYPE, FF_B_TYPE, FF_I_TYPE, FF_SP_TYPE, FF_SI_TYPE};
 	static const uint8_t slice_type_map[5] = {FF_P_TYPE, FF_P_TYPE, FF_I_TYPE, FF_SP_TYPE, FF_SI_TYPE};
@@ -547,7 +548,7 @@ static int inline decode_slice_header(H264ParserContext *context, const uint8_t 
 		field_pic_flag = get_bits1(gb);
 		if(field_pic_flag)
 		{
-			bottom_field_flag = get_bits1(gb);
+			context->bottom_field_flag = get_bits1(gb);
 		}
 	}
 	if(nal_type == 5)
@@ -950,8 +951,10 @@ found:
     s->fetch_timestamp=1;
 	s->flags |= PARSER_FLAG_COMPLETE_FRAMES;
 	
+	AVCodec *c = avcodec_find_decoder(codec_id);
+	
 	FFusionParserContext *parserContext = malloc(sizeof(FFusionParserContext));
-	parserContext->avctx = avcodec_alloc_context();
+	parserContext->avctx = avcodec_alloc_context3(c);
 	parserContext->pc = s;
 	parserContext->parserStructure = ffParser;
 	if(ffParser->internalContextSize)

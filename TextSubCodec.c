@@ -98,14 +98,14 @@ pascal ComponentResult TextSubCodecOpen(TextSubGlobals glob, ComponentInstance s
 
 	// Allocate memory for our globals, set them up and inform the component manager that we've done so
 	glob = (TextSubGlobals)NewPtrClear(sizeof(TextSubGlobalsRecord));
-	if (err = MemError()) goto bail;
+	if ((err = MemError())) goto bail;
 
 	SetComponentInstanceStorage(self, (Handle)glob);
 
 	glob->self = self;
 	glob->target = self;
 	glob->wantedDestinationPixelTypeH = (OSType **)NewHandleClear((kNumPixelFormatsSupportedTextSub+1) * sizeof(OSType));
-	if (err = MemError()) goto bail;
+	if ((err = MemError())) goto bail;
 	glob->drawBandUPP = NULL;
 	glob->ssa = NULL;
 	glob->colorSpace = NULL;

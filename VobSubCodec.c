@@ -92,14 +92,14 @@ ComponentResult VobSubCodecOpen(VobSubCodecGlobals glob, ComponentInstance self)
 	ComponentResult err;
 	// Allocate memory for our globals, set them up and inform the component manager that we've done so
 	glob = (VobSubCodecGlobals)NewPtrClear(sizeof(VobSubCodecGlobalsRecord));
-	if (err = MemError()) goto bail;
+	if ((err = MemError())) goto bail;
 
 	SetComponentInstanceStorage(self, (Handle)glob);
 
 	glob->self = self;
 	glob->target = self;
 	glob->wantedDestinationPixelTypeH = (OSType **)NewHandleClear((kNumPixelFormatsSupportedVobSub+1) * sizeof(OSType));
-	if (err = MemError()) goto bail;
+	if ((err = MemError())) goto bail;
 	glob->drawBandUPP = NULL;
 	
 	// Open and target an instance of the base decompressor as we delegate
@@ -240,9 +240,9 @@ ComponentResult VobSubCodecPreflight(VobSubCodecGlobals glob, CodecDecompressPar
 		FFInitFFmpeg();
 		
 		glob->avCodec = avcodec_find_decoder(CODEC_ID_DVD_SUBTITLE);
-		glob->avContext = avcodec_alloc_context();
+		glob->avContext = avcodec_alloc_context3(glob->avCodec);
 		
-		if (avcodec_open(glob->avContext, glob->avCodec)) {
+		if (avcodec_open2(glob->avContext, glob->avCodec, NULL)) {
 			Codecprintf(NULL, "Error opening DVD subtitle decoder\n");
 			return codecErr;
 		}

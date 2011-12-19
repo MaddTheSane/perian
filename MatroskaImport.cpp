@@ -352,7 +352,7 @@ ComponentResult MatroskaImport::Idle(long inFlags, long *outFlags)
 		// Only add samples every 20 idles when paused
 		// or if we're playing and only have 5 seconds away from the end of 
 		// what's already been added
-		if (currentIdleTime == lastIdleTime && idlesSinceLastAdd > 20 || 
+		if ((currentIdleTime == lastIdleTime && idlesSinceLastAdd > 20) || 
 			maxLoadedTime < currentIdleTime + 5*movieTimeScale)
 		{
 			idlesSinceLastAdd = 0;

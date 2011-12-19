@@ -2423,7 +2423,7 @@
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = debugging;
-				WARNING_CFLAGS = "-Wimplicit";
+				WARNING_CFLAGS = "-Werror=implicit";
 			};
 			name = Development;
 		};
@@ -2462,7 +2462,7 @@
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = YES;
 				STRIP_STYLE = debugging;
-				WARNING_CFLAGS = "-Wimplicit";
+				WARNING_CFLAGS = "-Werror=implicit";
 			};
 			name = Deployment;
 		};
@@ -2627,7 +2627,7 @@
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = debugging;
-				WARNING_CFLAGS = "-Wimplicit";
+				WARNING_CFLAGS = "-Werror=implicit";
 			};
 			name = "Deployment+Debug";
 		};
