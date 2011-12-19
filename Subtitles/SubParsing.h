@@ -28,35 +28,33 @@ __BEGIN_DECLS
 
 @interface SubRenderDiv : NSObject {
 	@public;
-	NSMutableString *text;
+	NSString *text;
 	SubStyle *styleLine;
-	NSMutableArray *spans;
+	NSArray  *spans;
 
 	float posX, posY;
 	unsigned marginL, marginR, marginV, layer;
 	UInt8 alignH, alignV, wrapStyle, render_complexity;
 	BOOL positioned, shouldResetPens;	
 }
--(SubRenderDiv*)nextDivWithDelegate:(SubRenderer*)delegate;
 @end
 
-@interface SubRenderSpan : NSObject {
+@interface SubRenderSpan : NSObject <NSCopying> {
+	id extra;
 	@public;
 	UniCharArrayOffset offset;
-	id ex;
-	SubRenderer *delegate;
 }
-+(SubRenderSpan*)startingSpanForDiv:(SubRenderDiv*)div delegate:(SubRenderer*)delegate;
--(SubRenderSpan*)cloneWithDelegate:(SubRenderer*)delegate;
+@property (retain) id extra;
 @end
 
 SubRGBAColor SubParseSSAColor(unsigned rgb);
 SubRGBAColor SubParseSSAColorString(NSString *c);
+
 UInt8 SubASSFromSSAAlignment(UInt8 a);
-void SubParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV);
-BOOL SubParseFontVerticality(NSString **fontname);
+void  SubParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV);
+BOOL  SubParseFontVerticality(NSString **fontname);
 	
-void SubParseSSAFile(NSString *ssa, NSDictionary **headers, NSArray **styles, NSArray **subs);
+void     SubParseSSAFile(NSString *ssa, NSDictionary **headers, NSArray **styles, NSArray **subs);
 NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate);
 
 __END_DECLS

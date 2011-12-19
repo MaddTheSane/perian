@@ -23,17 +23,46 @@
 
 #import "SubImport.h"
 #import "SubParsing.h"
+#import "SubRenderer.h"
 
 @interface SubHTMLExporter : SubRenderer
 {
 	SubContext *sc;
-	@public;
 	NSMutableString *html;
 }
+@property (readonly) NSMutableString *html;
+@end
 
+@interface SubHTMLSpanExtra : NSObject
+{
+	@public;
+	NSMutableString *str;
+}
+@end
+
+@implementation SubHTMLSpanExtra
+-(SubHTMLSpanExtra*)init
+{
+	self = [super init];
+	str = [[NSMutableString alloc] init];
+	return self;
+}
+
+-(SubHTMLSpanExtra*)copyWithZone:(NSZone*)zone
+{
+	return [SubHTMLSpanExtra new];
+}
+
+-(void)dealloc
+{
+	[str release];
+	[super dealloc];
+}
 @end
 
 @implementation SubHTMLExporter
+@synthesize html;
+
 -(SubHTMLExporter*)init
 {
 	if (self = [super init])
@@ -55,9 +84,9 @@
 	[super dealloc];
 }
 
--(void)completedHeaderParsing:(SubContext*)sc_
+-(void)didCompleteHeaderParsing:(SubContext*)sc_
 {
-	sc = sc_;
+	sc = [sc_ retain];
 	[html appendFormat:@"<title>%@</title>\n",[sc->headers objectForKey:@"Title"]];
 	[html appendString:@"<style type=\"text/css\">\n"];
 	[html appendFormat:@".screen {width: %fpx; height: %fpx; background-color: gray; position: relative; display: table}\n.bottom {bottom: 20px; position: absolute} .top {top: 20px; position: absolute}\n",sc->resX,sc->resY];
@@ -80,10 +109,11 @@ static NSString *FontWeightStringForWeight(Float32 weight)
 
 static NSString *EscapeCSSIdentifier(NSString *s)
 {
+	if (![s rangeOfString:@" "].length) return s;
 	return [s stringByReplacingOccurrencesOfString:@" " withString:@"_"];
 }
 
--(void*)completedStyleParsing:(SubStyle*)s
+-(void)didCompleteStyleParsing:(SubStyle*)s
 {
 	[html appendFormat:@".%@ {display: table-cell; clear: none;\n",EscapeCSSIdentifier(s->name)];
 	[html appendFormat:@"font-family: \"%@\"; ",s->fontname];
@@ -101,8 +131,6 @@ static NSString *EscapeCSSIdentifier(NSString *s)
 	[html appendFormat:@"text-align: %@;\n", haligns[s->alignH]];
 	[html appendFormat:@"vertical-align: %@;\n", valigns[s->alignV]];
 	[html appendString:@"}\n"];
-	
-	return nil;
 }
 
 -(void)endOfHead
@@ -121,34 +149,23 @@ NSString *htmlfilter(NSString *s)
 	return ms;
 }
 
--(void*)spanExtraFromRenderDiv:(SubRenderDiv*)div
+-(void)didCreateStartingSpan:(SubRenderSpan *)span forDiv:(SubRenderDiv *)div
 {
-	return [[NSMutableString string] retain];
-}
-
--(void*)cloneSpanExtra:(SubRenderSpan*)span
-{
-	return [[NSMutableString string] retain];
-}
-
--(void)releaseSpanExtra:(void*)ex
-{
-	NSMutableString *s = (NSMutableString*)ex;
-	[s release];
+	span.extra = [[SubHTMLSpanExtra new] autorelease];
 }
 
 -(void)spanChangedTag:(SubSSATagName)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p
 {
-	NSMutableString *sty = span->ex;
+	SubHTMLSpanExtra *ex = span.extra;
+	NSMutableString *sty = ex->str;
 	int ip;
 	NSString *sp;
 	float fp;
 	
-		
 #define iv() ip = *(int*)p; 
 #define sv() sp = *(NSString**)p;
 #define fv() fp = *(float*)p;
-#define cv() ip = *(int*)p; ip = EndianU32_BtoL(ip); ip = ip & 0xFFFFFF;
+#define cv() ip = *(int*)p; ip = EndianU32_NtoL(ip) & 0xFFFFFF;
 	
 	switch (tag) {
 		case tag_b:
@@ -203,10 +220,10 @@ NSString *htmlfilter(NSString *s)
 		
 		for (j = 0; j < spancount; j++) {
 			SubRenderSpan *span = [div->spans objectAtIndex:j];
-			NSMutableString *ex = span->ex;
-			int exl = [ex length];
+			SubHTMLSpanExtra *ex = span.extra;
+			NSMutableString *str = ex->str;
 			
-			if (exl) {[html appendFormat:@"<span style=\"%@\">",ex]; spans++;}
+			if ([str length]) {[html appendFormat:@"<span style=\"%@\">",str]; spans++;}
 			[html appendString:htmlfilter([div->text substringWithRange:NSMakeRange(span->offset, ((j == (spancount-1)) ? [div->text length] : ((SubRenderSpan*)[div->spans objectAtIndex:j+1])->offset) - span->offset)])];
 		}
 		
@@ -227,7 +244,12 @@ NSString *htmlfilter(NSString *s)
 
 	for (SubRenderDiv *div in divs) {
 		
-		if (div->positioned) [abs addObject:div]; else if (div->alignV == kSubAlignmentTop) [top addObject:div]; else [bot insertObject:div atIndex:0];
+		if (div->positioned)
+			[abs addObject:div];
+		else if (div->alignV == kSubAlignmentTop)
+			[top addObject:div];
+		else
+			[bot insertObject:div atIndex:0];
 	}
 	
 	if ([top count]) {
@@ -263,7 +285,6 @@ int main(int argc, char *argv[])
 	NSAutoreleasePool *outer_pool = [[NSAutoreleasePool alloc] init];
 	SubContext *sc; SubSerializer *ss = [[SubSerializer alloc] init];
 	SubHTMLExporter *htm = [[SubHTMLExporter alloc] init];
-	NSAutoreleasePool *inner_pool = [[NSAutoreleasePool alloc] init];
 
 	//start of lameness
 	//it should only have to call subparsessafile here, or something
@@ -273,12 +294,11 @@ int main(int argc, char *argv[])
 	NSDictionary *headers;
 	NSArray *styles;
 	SubParseSSAFile(header, &headers, &styles, NULL);
-	sc = [[SubContext alloc] initWithHeaders:headers styles:styles delegate:htm];
+	sc = [[SubContext alloc] initWithScriptType:kSubTypeSSA headers:headers styles:styles delegate:htm];
 	//end(?) of lameness
-	//other part of lameness: some sub objects are autoreleased instead of manually released
-	//fix this so inner_pool can be deleted
 	
 	[htm endOfHead];
+	[sc release];
 	
 	while (![ss isEmpty]) {
 		SubLine *sl = [ss getSerializedPacket];
@@ -289,8 +309,7 @@ int main(int argc, char *argv[])
 	
 	[htm endOfFile];
 	
-	puts([htm->html UTF8String]);
-	[inner_pool release];
+	puts([htm.html UTF8String]);
 	[ss release];
 	[htm release];
 	[outer_pool release];

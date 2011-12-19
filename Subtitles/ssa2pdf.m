@@ -22,9 +22,8 @@
 #import <ApplicationServices/ApplicationServices.h>
 #import "SubImport.h"
 #import "SubParsing.h"
+#import "SubRenderer.h"
 
-// vv These are Apple private API! Don't use them just because this does!
-// I have a good reason for it, I promise!
 extern CGContextRef CGPSContextCreateWithURL(CFURLRef url, const CGRect *mediaBox, CFDictionaryRef auxiliaryInfo);
 extern void CGPSContextClose(CGContextRef c);
 
@@ -45,11 +44,12 @@ int main(int argc, char *argv[])
 	NSDictionary *headers;
 	NSArray *styles;
 	SubParseSSAFile(header, &headers, &styles, NULL);
-	sc = [[SubContext alloc] initWithHeaders:headers styles:styles delegate:NULL];
+	sc = [[SubContext alloc] initWithScriptType:kSubTypeSSA headers:headers styles:styles delegate:NULL];
 	int width = sc->resX, height = sc->resY;
+	[sc release];
 	CGRect rect = CGRectMake(0, 0, width, height);
-	SubRendererPtr s = SubRendererCreateWithSSA((char*)[header UTF8String], [header length], width, height);
-
+	SubRendererPtr s = SubRendererCreate(YES, (char*)[header UTF8String], [header length], width, height);
+	
 	while (![ss isEmpty]) {
 		NSAutoreleasePool *inner_pool = [[NSAutoreleasePool alloc] init];
 		SubLine *sl = [ss getSerializedPacket];

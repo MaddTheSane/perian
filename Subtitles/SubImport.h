@@ -87,10 +87,14 @@ void SubLoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount);
 
 #endif // ___OBJC__
 
+#if !__LP64__
+
 short GetFilenameLanguage(CFStringRef filename);
 ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType dataRefType, Movie theMovie);
 void SetSubtitleMediaHandlerTransparent(MediaHandler mh);
 Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox);
+
+#endif
 
 __END_DECLS
 

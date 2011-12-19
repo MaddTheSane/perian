@@ -38,6 +38,7 @@
  */
 
 #import "SubParsing.h"
+#import "SubRenderer.h"
 #import "SubUtilities.h"
 #import "SubContext.h"
 #import "Codecprintf.h"
@@ -107,39 +108,25 @@ BOOL SubParseFontVerticality(NSString **fontname)
 }
 
 @implementation SubRenderSpan
-+(SubRenderSpan*)startingSpanForDiv:(SubRenderDiv*)div delegate:(SubRenderer*)delegate
-{
-	SubRenderSpan *span = [[SubRenderSpan alloc] init];
-	span->offset = 0;
-	span->ex = [delegate spanExtraFromRenderDiv:div];
-	span->delegate = delegate;
-	return [span autorelease];
-}
-
--(SubRenderSpan*)cloneWithDelegate:(SubRenderer*)delegate_
+-(SubRenderSpan*)copyWithZone:(NSZone*)zone
 {
 	SubRenderSpan *span = [[SubRenderSpan alloc] init];
 	span->offset = offset;
-	span->ex = [delegate_ cloneSpanExtra:self];
-	span->delegate = delegate_;
-	return [span autorelease];
+	span->extra  = [extra copy];
+	return span;
 }
+
+@synthesize extra;
 
 -(void)dealloc
 {
-	[delegate releaseSpanExtra:ex];
+	[extra release];
 	[super dealloc];
-}
-
--(void)finalize
-{
-	[delegate releaseSpanExtra:ex];
-	[super finalize];
 }
 
 -(NSString*)description
 {
-	return [NSString stringWithFormat:@"Span at %d: %@", offset, [delegate describeSpanEx:ex]];
+	return [NSString stringWithFormat:@"Span at %d: %@", offset, extra];
 }
 @end
 
@@ -156,12 +143,12 @@ BOOL SubParseFontVerticality(NSString **fontname)
 -(SubRenderDiv*)init
 {
 	if (self = [super init]) {
-		text = nil;
+		text      = nil;
 		styleLine = nil;
-		marginL = marginR = marginV = layer = 0;
-		spans = nil;
+		marginL   = marginR = marginV = layer = 0;
+		spans     = nil;
 		
-		posX = posY = 0;
+		posX   = posY = 0;
 		alignH = kSubAlignmentMiddle; alignV = kSubAlignmentBottom;
 		
 		positioned = NO;
@@ -169,31 +156,6 @@ BOOL SubParseFontVerticality(NSString **fontname)
 	}
 	
 	return self;
-}
-
--(SubRenderDiv*)nextDivWithDelegate:(SubRenderer*)delegate
-{
-	SubRenderDiv *div = [[[SubRenderDiv alloc] init] autorelease];
-	
-	div->text    = [[NSMutableString string] retain];
-  div->styleLine = [styleLine retain];
-	div->marginL = marginL;
-	div->marginR = marginR;
-	div->marginV = marginV;
-	div->layer   = layer;
-	
-	div->spans   = [[NSMutableArray arrayWithObject:[[spans objectAtIndex:[spans count]-1] cloneWithDelegate:delegate]] retain];
-	
-	div->posX    = posX;
-	div->posY    = posY;
-	div->alignH  = alignH;
-	div->alignV  = alignV;
-  div->wrapStyle = wrapStyle;
-  
-	div->positioned = positioned;
-	div->render_complexity = render_complexity;
-	
-	return div;
 }
 
 -(void)dealloc
@@ -308,9 +270,11 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 	for (i = 0; i < line_count; i++) {
 		NSString *inputText = [lines objectAtIndex:(context->collisions == kSubCollisionsReverse) ? (line_count - i - 1) : i];
 		SubRenderDiv *div = [[[SubRenderDiv alloc] init] autorelease];
+		NSMutableString *text = [[NSMutableString alloc] init];
+		NSMutableArray *spans = [[NSMutableArray alloc] init];
 		
-		div->text = [[NSMutableString string] retain];
-		div->spans = [[NSMutableArray array] retain];
+		div->text  = text;
+		div->spans = spans;
 		
 		if (context->scriptType == kSubTypeSRT) {
 			div->styleLine = [context->defaultStyle retain];
@@ -352,12 +316,14 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			const unichar *p = linebuf, *pe = linebuf + linelen, *outputbegin = p, *parambegin=p, *last_tag_start=p;
 			const unichar *pb = p;
 			int cs = 0;
-			SubRenderSpan *current_span = [SubRenderSpan startingSpanForDiv:div delegate:delegate];
+			SubRenderSpan *current_span = [SubRenderSpan new];
 			unsigned chars_deleted = 0; float floatnum = 0;
 			NSString *strval=NULL;
 			float curX, curY;
 			int intnum = 0;
 			BOOL reachedEnd = NO, setWrapStyle = NO, setPosition = NO, setAlignForDiv = NO, dropThisSpan = NO;
+			
+			[delegate didCreateStartingSpan:current_span forDiv:div];
 			
 			%%{
 				action bold {tag(b, intnum);}
@@ -496,7 +462,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 
 				action backslash_handler {
 					p--;
-					[div->text appendString:send()];
+					[text appendString:send()];
 					unichar c = *(p+1), o=c;
 					
 					if (c) {
@@ -509,7 +475,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 								break;
 						}
 						
-						[div->text appendFormat:@"%C",o];
+						[text appendFormat:@"%C",o];
 					}
 					
 					chars_deleted++;
@@ -520,13 +486,13 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				
 				action enter_tag {
 					if (dropThisSpan) chars_deleted += p - outputbegin;
-					else if (p > outputbegin) [div->text appendString:send()];
+					else if (p > outputbegin) [text appendString:send()];
 					if (p == pe) reachedEnd = YES;
 					
 					if (p != pb) {
-						[div->spans addObject:current_span];
+						[spans addObject:current_span];
 						
-						if (!reachedEnd) current_span = [current_span cloneWithDelegate:delegate];
+						if (!reachedEnd) current_span = [current_span copy];
 					}
 					
 					last_tag_start = p;
@@ -554,14 +520,14 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			%%write eof;
 
 			if (!reachedEnd) Codecprintf(NULL, "parse error: %s\n", [inputText UTF8String]);
-			if (linebuf[linelen-1] == '\\') [div->text appendString:@"\\"];
+			if (linebuf[linelen-1] == '\\') [text appendString:@"\\"];
 			[linebufData release];
 			[divs addObject:div];
 		}
 		
 	}
 
-	[divs sortWithOptions:NSSortStable|NSSortConcurrent usingComparator:^(id a, id b){
+	[divs sortWithOptions:NSSortStable|NSSortConcurrent usingComparator:^NSComparisonResult(id a, id b){
 		const SubRenderDiv *divA = a, *divB = b;
 
 		if (divA->layer < divB->layer) return NSOrderedAscending;

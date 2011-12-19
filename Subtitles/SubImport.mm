@@ -31,10 +31,12 @@
 
 //#define SS_DEBUG
 
+#if !__LP64__
 extern "C" {
 	int ExtractVobSubPacket(UInt8 *dest, const UInt8 *framedSrc, int srcSize, int *usedSrcBytes, int index);
 	void set_track_colorspace_ext(ImageDescriptionHandle imgDescHandle, Fixed displayW, Fixed displayH);
 }
+#endif
 
 #pragma mark C
 
@@ -69,6 +71,8 @@ short GetFilenameLanguage(CFStringRef filename)
 	CFRelease(baseName);
 	return lang;
 }
+
+#if !__LP64__
 
 static void AppendSRGBProfile(ImageDescriptionHandle imgDesc)
 {	
@@ -140,6 +144,8 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc,
 	return theTrack;
 }
 
+#endif
+
 static NSString *MatroskaPacketizeLine(NSDictionary *sub, int n)
 {
 	NSString *name = [sub objectForKey:@"Name"];
@@ -208,7 +214,8 @@ NSString *SubLoadSSAFromPath(NSString *path, SubSerializer *ss)
 
 void SubLoadSRTFromPath(NSString *path, SubSerializer *ss)
 {
-	NSMutableString *srt = SubStandardizeStringNewlines(SubLoadFileWithUnknownEncoding(path));
+	NSMutableString *srt = [[SubStandardizeStringNewlines(SubLoadFileWithUnknownEncoding(path)) mutableCopy]
+																							    autorelease];
 	if (![srt length]) return;
 		
 	if ([srt characterAtIndex:0] == 0xFEFF) [srt deleteCharactersInRange:NSMakeRange(0,1)];
@@ -541,6 +548,8 @@ void SubLoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount)
 		}
 	} while (![sc isAtEnd]);
 }
+
+#if !__LP64__
 
 static ComponentResult LoadSingleTextSubtitle(CFURLRef theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack, int subtitleType, int whichTrack)
 {
@@ -1191,6 +1200,8 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 	
 	return err;
 }
+
+#endif
 
 #pragma mark Obj-C Classes
 

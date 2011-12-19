@@ -61,14 +61,13 @@ NSArray *SubSplitStringWithCount(NSString *str, NSString *split, size_t count)
 	return ar;
 }
 
-NSMutableString *SubStandardizeStringNewlines(NSString *str)
+NSString *SubStandardizeStringNewlines(NSString *str)
 {
 	if(str == nil)
 		return nil;
-	NSMutableString *ms = [NSMutableString stringWithString:str];
-	[ms replaceOccurrencesOfString:@"\r\n" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
-	[ms replaceOccurrencesOfString:@"\r" withString:@"\n" options:0 range:NSMakeRange(0,[ms length])];
-	return ms;
+	str = [str stringByReplacingOccurrencesOfString:@"\r\n" withString:@"\n"];
+	str = [str stringByReplacingOccurrencesOfString:@"\r" withString:@"\n"];
+	return str;
 }
 
 static const short frequencies[] = {

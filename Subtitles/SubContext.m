@@ -21,6 +21,7 @@
 
 #import "SubContext.h"
 #import "SubParsing.h"
+#import "SubRenderer.h"
 
 NSString * const kSubDefaultFontName = @"Helvetica";
 
@@ -47,10 +48,13 @@ NSString * const kSubDefaultFontName = @"Helvetica";
 	sty->alignH = kSubAlignmentCenter;
 	sty->alignV = kSubAlignmentBottom;
 	sty->borderStyle = kSubBorderStyleNormal;
-	sty->ex = [delegate completedStyleParsing:sty];
 	sty->delegate = delegate;
+	
+	[delegate didCompleteStyleParsing:sty];
 	return sty;
 }
+
+@synthesize extra;
 
 -(SubStyle*)initWithDictionary:(NSDictionary *)s scriptVersion:(UInt8)version delegate:(SubRenderer*)delegate_
 {
@@ -105,7 +109,7 @@ NSString * const kSubDefaultFontName = @"Helvetica";
 			fontname = [tmp retain];
 		
 		platformSizeScale = 0;
-		ex = [delegate completedStyleParsing:self];
+		[delegate didCompleteStyleParsing:self];
 	}
 	
 	return self;
@@ -147,14 +151,7 @@ static NSString *ColorString(SubRGBAColor *c)
 {
 	[name release];
 	[fontname release];
-	[delegate releaseStyleExtra:ex];
 	[super dealloc];
-}
-
--(void)finalize
-{
-	[delegate releaseStyleExtra:ex];
-	[super finalize];
 }
 @end
 
@@ -203,7 +200,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 			[self readSSAHeaders];
 		}
 		
-		[delegate completedHeaderParsing:self];
+		[delegate didCompleteHeaderParsing:self];
 		
 		styles = nil;
 		if (stylesArray) {
@@ -250,13 +247,9 @@ BOOL IsScriptASS(NSDictionary *headers)
 @end
 
 @implementation SubRenderer
--(void*)completedStyleParsing:(SubStyle*)s {return nil;}
--(void)completedHeaderParsing:(SubContext*)sc {}
--(void*)spanExtraFromRenderDiv:(SubRenderDiv*)div {return nil;}
--(void*)cloneSpanExtra:(SubRenderSpan*)span {return span->ex;}
--(void)spanChangedTag:(SubSSATagName)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p {}
--(void)releaseStyleExtra:(void*)ex {}
--(void)releaseSpanExtra:(void*)ex {}
+-(void)didCompleteStyleParsing:(SubStyle*)s {assert(0);}
+-(void)didCompleteHeaderParsing:(SubContext*)sc {assert(0);}
+-(void)didCreateStartingSpan:(SubRenderSpan *)span forDiv:(SubRenderDiv *)div {assert(0);}
+-(void)spanChangedTag:(SubSSATagName)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p {assert(0);}
 -(float)aspectRatio {return 4./3.;}
--(NSString*)describeSpanEx:(void*)ex {return @"";}
 @end

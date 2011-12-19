@@ -27,7 +27,7 @@ NSArray  *SubSplitStringIgnoringWhitespace(NSString *str, NSString *split);
 NSArray  *SubSplitStringWithCount(NSString *str, NSString *split, size_t count);
 NSString *SubLoadFileWithUnknownEncoding(NSString *path);
 
-NSMutableString *SubStandardizeStringNewlines(NSString *str);
+NSString *SubStandardizeStringNewlines(NSString *str);
 
 BOOL SubDifferentiateLatin12(const unsigned char *data, int length);
 

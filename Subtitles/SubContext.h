@@ -20,7 +20,6 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "SubRenderer.h"
 
 __BEGIN_DECLS
 
@@ -36,10 +35,16 @@ typedef ATSURGBAlphaColor SubRGBAColor;
 
 extern NSString * const kSubDefaultFontName;
 
-@interface SubStyle : NSObject {	
+@class SubRenderer;
+
+@interface SubStyle : NSObject {
+	id extra;
+
 	@public;
 	NSString *name;
 	NSString *fontname;
+	SubRenderer *delegate;
+	
 	Float32 size;
 	SubRGBAColor primaryColor, secondaryColor, outlineColor, shadowColor;
 	Float32 scaleX, scaleY, tracking, angle;
@@ -48,12 +53,13 @@ extern NSString * const kSubDefaultFontName;
 	BOOL italic, underline, strikeout, vertical;
 	unsigned marginL, marginR, marginV;
 	UInt8 alignH, alignV, borderStyle;
-	__strong void* ex;
 	Float32 platformSizeScale;
-	SubRenderer *delegate;
 }
+
+@property (retain) id extra;
+
 +(SubStyle*)defaultStyleWithDelegate:(SubRenderer*)delegate;
--(SubStyle*)initWithDictionary:(NSDictionary *)s scriptVersion:(UInt8)version delegate:(SubRenderer *)renderer;
+-(SubStyle*)initWithDictionary:(NSDictionary *)ssaDict scriptVersion:(UInt8)version delegate:(SubRenderer *)renderer;
 @end
 
 @interface SubContext : NSObject {

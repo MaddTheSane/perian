@@ -22,6 +22,8 @@
 #import <Cocoa/Cocoa.h>
 #import "SubRenderer.h"
 
+@class SubRenderer, SubContext;
+
 @interface SubATSUIRenderer : SubRenderer {
 	SubContext *context;
 	CGColorSpaceRef srgbCSpace;
