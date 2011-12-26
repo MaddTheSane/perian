@@ -55,7 +55,7 @@ else
     echo "Static ffmpeg libs are out-of-date ; rebuilding"
     
     if [ -e ffmpeg/patched ] ; then
-		cd ffmpeg && git reset --hard && rm patched && cd ..
+		cd ffmpeg && svn revert -R . && rm patched && cd ..
 	fi
 
 	cd ffmpeg
