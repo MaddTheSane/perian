@@ -167,11 +167,9 @@ const unichar *SubUnicodeForString(NSString *str, NSData **datap)
 }
 
 CFMutableStringRef CopyHomeDirectory()
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSString *home = NSHomeDirectory();
-	CFMutableStringRef mhome = CFStringCreateMutableCopy(NULL, 0, (CFStringRef)home);
-	[pool release];
-	
-	return mhome;
+{	
+	@autoreleasepool {
+		NSString *home = NSHomeDirectory();
+		return CFStringCreateMutableCopy(NULL, 0, (CFStringRef)home);
+	}
 }

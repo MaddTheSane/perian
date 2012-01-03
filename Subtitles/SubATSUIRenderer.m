@@ -74,6 +74,12 @@ static ATSUFontID GetFontIDForSSAName(NSString *name);
 	ATSUDisposeStyle(style);
 	[super dealloc];
 }
+
+-(void)finalize
+{
+	ATSUDisposeStyle(style);
+	[super finalize];
+}
 @end
 
 @implementation SubATSUISpanExtra
@@ -246,12 +252,12 @@ static pthread_mutex_t fontIDMutex = PTHREAD_MUTEX_INITIALIZER;
 static void CleanupFontIDCache() __attribute__((destructor));
 static void CleanupFontIDCache()
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	if (fontIDCache) [fontIDCache release];
-	if (fontIDs) free(fontIDs);
-	fontIDCache = nil;
-	fontIDs = NULL;
-	[pool release];
+	@autoreleasepool {
+		if (fontIDCache) [fontIDCache release];
+		if (fontIDs) free(fontIDs);
+		fontIDCache = nil;
+		fontIDs = NULL;
+	}
 }
 
 // Assumes ATSUFontID = ATSFontRef. This is true.
@@ -1245,32 +1251,32 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 
 SubRendererPtr SubRendererCreate(int isSSA, char *header, size_t headerLen, int width, int height)
 {
-	SubRendererPtr s = nil;
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	@try {
-		NSString *hdr = nil;
-		if (header) 
-			hdr = [[[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO] autorelease];
-		s = [[SubATSUIRenderer alloc] initWithScriptType:isSSA ? kSubTypeSSA : kSubTypeSRT header:hdr videoWidth:width videoHeight:height];
-		CFRetain(s);
+	@autoreleasepool {
+		SubRendererPtr s = nil;
+		@try {
+			NSString *hdr = nil;
+			if (header) 
+				hdr = [[[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO] autorelease];
+			s = [[SubATSUIRenderer alloc] initWithScriptType:isSSA ? kSubTypeSSA : kSubTypeSRT header:hdr videoWidth:width videoHeight:height];
+			CFRetain(s);
+		}
+		@catch (NSException *e) {
+			NSLog(@"Caught exception while creating SubRenderer - %@", e);
+		}
+		return s;
 	}
-	@catch (NSException *e) {
-		NSLog(@"Caught exception while creating SubRenderer - %@", e);
-	}
-	[pool release];
-	return s;
 }
 
 void SubRendererRenderPacket(SubRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	@try {
-		[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
+	@autoreleasepool {
+		@try {
+			[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
+		}
+		@catch (NSException *e) {
+			NSLog(@"Caught exception during rendering - %@", e);
+		}
 	}
-	@catch (NSException *e) {
-		NSLog(@"Caught exception during rendering - %@", e);
-	}
-	[pool release];
 }
 
 void SubRendererPrerollFromHeader(char *header, int headerLen)
@@ -1304,10 +1310,10 @@ void SubRendererPrerollFromHeader(char *header, int headerLen)
 
 void SubRendererDispose(SubRendererPtr s)
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	CFRelease(s);
-	[s release];
-	[pool release];
+	@autoreleasepool {
+		CFRelease(s);
+		[s release];
+	}
 }
 
 #pragma options align=mac68k

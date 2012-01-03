@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	if (argc != 3)
 		return 1;
 
-	NSAutoreleasePool *outer_pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
 	SubContext *sc; SubSerializer *ss = [[SubSerializer alloc] init];
 	NSString *inFile = [NSString stringWithUTF8String:argv[1]], *outDir = [NSString stringWithUTF8String:argv[2]];
 	int i = 0;
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	SubRendererPtr s = SubRendererCreate(YES, (char*)[header UTF8String], [header length], width, height);
 	
 	while (![ss isEmpty]) {
-		NSAutoreleasePool *inner_pool = [[NSAutoreleasePool alloc] init];
+		@autoreleasepool {
 		SubLine *sl = [ss getSerializedPacket];
 		if ([sl->line length] > 1) {
 			NSString *pdf = [outDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%d.pdf", i]];
@@ -67,14 +67,15 @@ int main(int argc, char *argv[])
 			SubRendererRenderPacket(s, psC, (CFStringRef)sl->line, width, height);
 			CGContextEndPage(psC);
 			CGContextRelease(psC);
-
 			i++;
 		}
-		[inner_pool release];
+		}
 	}
 	
 	[ss release];
-	[outer_pool release];
+	}
 
+	//while (1) sleep(60);
+	
 	return 0;
 }

@@ -112,7 +112,7 @@ BOOL SubParseFontVerticality(NSString **fontname)
 {
 	SubRenderSpan *span = [[SubRenderSpan alloc] init];
 	span->offset = offset;
-	span->extra  = [extra copy];
+	span.extra   = [[extra copy] autorelease];
 	return span;
 }
 
@@ -316,7 +316,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			const unichar *p = linebuf, *pe = linebuf + linelen, *outputbegin = p, *parambegin=p, *last_tag_start=p;
 			const unichar *pb = p;
 			int cs = 0;
-			SubRenderSpan *current_span = [SubRenderSpan new];
+			SubRenderSpan *current_span = [[SubRenderSpan new] autorelease];
 			int chars_deleted = 0; float floatnum = 0;
 			NSString *strval=NULL;
 			float curX, curY;
@@ -492,7 +492,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 					if (p != pb) {
 						[spans addObject:current_span];
 						
-						if (!reachedEnd) current_span = [current_span copy];
+						if (!reachedEnd) current_span = [[current_span copy] autorelease];
 					}
 					
 					last_tag_start = p;
@@ -527,7 +527,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 	}
 
 	[divs sortWithOptions:NSSortStable|NSSortConcurrent usingComparator:^NSComparisonResult(id a, id b){
-		const SubRenderDiv *divA = a, *divB = b;
+		SubRenderDiv *divA = a, *divB = b;
 
 		if (divA->layer < divB->layer) return NSOrderedAscending;
 		else if (divA->layer > divB->layer) return NSOrderedDescending;

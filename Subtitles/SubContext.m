@@ -149,6 +149,7 @@ static NSString *ColorString(SubRGBAColor *c)
 
 -(void)dealloc
 {
+	[extra release];
 	[name release];
 	[fontname release];
 	[super dealloc];

@@ -1009,7 +1009,6 @@ void MatroskaImport::ImportCluster(KaxCluster &cluster, bool addToTrack)
 {
 	KaxSegment & segment = *static_cast<KaxSegment *>(el_l0);
 	KaxClusterTimecode & clusterTime = GetChild<KaxClusterTimecode>(cluster);
-	CXXAutoreleasePool pool;
 				
 	cluster.SetParent(segment);
 	cluster.InitTimecode(uint64(clusterTime), timecodeScale);
@@ -1418,9 +1417,7 @@ void MatroskaTrack::AddSamplesToTrack()
 }
 
 void MatroskaTrack::FinishTrack()
-{
-	CXXAutoreleasePool pool;
-	
+{	
 	if (type == track_subtitle && !is_vobsub)
 	{
 		subtitleSerializer->setFinished();

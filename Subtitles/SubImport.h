@@ -121,14 +121,6 @@ public:
 	bool empty();
 };
 
-class CXXAutoreleasePool
-{
-	__strong void *pool;
-public:
-	CXXAutoreleasePool();
-	~CXXAutoreleasePool();
-};
-
 #endif // __cplusplus
 
 #endif // __SUBIMPORT_H__

@@ -555,12 +555,11 @@ void SubLoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount)
 static ComponentResult LoadSingleTextSubtitle(CFURLRef theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack, int subtitleType, int whichTrack)
 {
 	ComponentResult err=noErr;
-
+@autoreleasepool {
 NS_DURING
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];	
 	NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString*)filename];
 	
-	SubSerializer *ss = [[SubSerializer alloc] init];
+	SubSerializer *ss = [[[SubSerializer alloc] init] autorelease];
 	
 	FourCharCode subCodec;
 	Handle header = NULL;
@@ -652,10 +651,7 @@ NS_DURING
 	
 	SetMediaLanguage(theMedia, GetFilenameLanguage(filename));
 	
-bail:
-	[ss release];
-	[pool release];
-	
+bail:	
 	if (err) {
 		if (theMedia)
 			DisposeTrackMedia(theMedia);
@@ -670,9 +666,9 @@ bail:
 	
 NS_HANDLER
 	Codecprintf(stderr, "Exception occurred while importing subtitles");
-NS_ENDHANDLER
-	
+NS_ENDHANDLER	
 	return err;
+}
 }
 
 #pragma mark IDX Parsing
@@ -926,8 +922,8 @@ typedef enum {
 static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
 {
 	ComponentResult err = noErr;
+@autoreleasepool {
 NS_DURING
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString *)filename];
 	NSString *idxContent = SubLoadFileWithUnknownEncoding(nsPath);
 	NSData *privateData = nil;
@@ -1053,12 +1049,12 @@ NS_DURING
 	}
 	}
 bail:
-	[pool release];
+	;
 NS_HANDLER
 	Codecprintf(stderr, "Exception occurred while importing VobSub\n");
-NS_ENDHANDLER
-	
+NS_ENDHANDLER	
 	return err;
+}
 }
 
 static Boolean ShouldLoadExternalSubtitles()
@@ -1225,27 +1221,6 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 	[super dealloc];
 }
 
-static CFComparisonResult CompareLinesByBeginTime(const void *a, const void *b, void *unused)
-{
-	SubLine *al = (SubLine*)a, *bl = (SubLine*)b;
-	
-	if (al->begin_time > bl->begin_time) return kCFCompareGreaterThan;
-	if (al->begin_time < bl->begin_time) return kCFCompareLessThan;
-	
-	if (al->num > bl->num) return kCFCompareGreaterThan;
-	if (al->num < bl->num) return kCFCompareLessThan;
-	return kCFCompareEqualTo;
-}
-
-static int cmp_uint(const void *a, const void *b)
-{
-	unsigned av = *(unsigned*)a, bv = *(unsigned*)b;
-	
-	if (av > bv) return 1;
-	if (av < bv) return -1;
-	return 0;
-}
-
 -(void)addLine:(SubLine *)line
 {
 	if (line->begin_time >= line->end_time) {
@@ -1256,19 +1231,20 @@ static int cmp_uint(const void *a, const void *b)
 	
 	line->num = num_lines_input++;
 	
-	int nlines = [lines count];
+	int i = [lines indexOfObject:line inSortedRange:NSMakeRange(0, [lines count])
+				   options:NSBinarySearchingInsertionIndex|NSBinarySearchingLastEqual
+				   usingComparator:^NSComparisonResult(id a, id b){
+		SubLine *al = a, *bl = b;
+					   
+		if (al->begin_time > bl->begin_time) return NSOrderedDescending;
+		if (al->begin_time < bl->begin_time) return NSOrderedAscending;
+					   
+		if (al->num > bl->num) return NSOrderedDescending;
+		if (al->num < bl->num) return NSOrderedAscending;
+		return NSOrderedSame;
+	}];
 	
-	if (!nlines || line->begin_time > ((SubLine*)[lines objectAtIndex:nlines-1])->begin_time) {
-		[lines addObject:line];
-	} else {
-		CFIndex i = CFArrayBSearchValues((CFArrayRef)lines, CFRangeMake(0, nlines), line, CompareLinesByBeginTime, NULL);
-		
-		if (i >= nlines)
-			[lines addObject:line];
-		else
-			[lines insertObject:line atIndex:i];
-	}
-	
+	[lines insertObject:line atIndex:i];
 }
 
 -(SubLine*)copyNextRealSerializedPacket
@@ -1444,20 +1420,28 @@ canOutput:
 
 #pragma mark C++ Wrappers
 
-CXXSubSerializer::CXXSubSerializer()
+CXXSubSerializer::CXXSubSerializer() : retainCount(1)
 {
-	priv = [[SubSerializer alloc] init];
-    CFRetain(priv);
-	retainCount = 1;
+	@autoreleasepool {
+		priv = [[SubSerializer alloc] init];
+		CFRetain(priv);
+	}
 }
 
 CXXSubSerializer::~CXXSubSerializer()
 {
-	if (priv) {CFRelease(priv); [(SubSerializer*)priv release]; priv = NULL;}
+	@autoreleasepool {
+		if (priv) {
+			CFRelease(priv);
+			[(SubSerializer*)priv release];
+			priv = NULL;
+		}
+	}
 }
 
 void CXXSubSerializer::pushLine(const char *line, size_t size, unsigned start, unsigned end)
 {
+@autoreleasepool {
 NS_DURING
 	NSMutableString *str = [[NSMutableString alloc] initWithBytes:line length:size encoding:NSUTF8StringEncoding];
 	if (!str) return; // in case of invalid UTF-8?
@@ -1473,14 +1457,18 @@ NS_HANDLER
 	Codecprintf(stderr, "Exception occured while reading Matroska subtitles");
 NS_ENDHANDLER
 }
+}
 
 void CXXSubSerializer::setFinished()
 {
+@autoreleasepool {
 	((SubSerializer*)priv).finished = YES;
+}
 }
 
 const char *CXXSubSerializer::popPacket(size_t *size, unsigned *start, unsigned *end)
 {
+@autoreleasepool {
 NS_DURING
 	SubLine *sl = [(SubSerializer*)priv getSerializedPacket];
 	if (!sl) return NULL;
@@ -1495,6 +1483,7 @@ NS_HANDLER
 	Codecprintf(stderr, "Exception occured while reading Matroska subtitles");
 NS_ENDHANDLER
 	return NULL;
+}
 }
 
 void CXXSubSerializer::release()
@@ -1512,15 +1501,7 @@ void CXXSubSerializer::retain()
 
 bool CXXSubSerializer::empty()
 {
-	return [(SubSerializer*)priv isEmpty];
-}
-
-CXXAutoreleasePool::CXXAutoreleasePool()
-{
-	pool = [[NSAutoreleasePool alloc] init];
-}
-
-CXXAutoreleasePool::~CXXAutoreleasePool()
-{
-	[(NSAutoreleasePool*)pool release];
+	@autoreleasepool {
+		return [(SubSerializer*)priv isEmpty];
+	}
 }
