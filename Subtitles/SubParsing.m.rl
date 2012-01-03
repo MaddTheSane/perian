@@ -520,7 +520,6 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			%%write eof;
 
 			if (!reachedEnd) Codecprintf(NULL, "parse error: %s\n", [inputText UTF8String]);
-			if (linebuf[linelen-1] == '\\') [text appendString:@"\\"];
 			[linebufData release];
 			[divs addObject:div];
 		}
