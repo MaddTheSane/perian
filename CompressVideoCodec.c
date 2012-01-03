@@ -160,6 +160,8 @@ ComponentResult CompressCodecPreflight(CompressCodecGlobals glob, CodecDecompres
 		if(size > 0)
 		{
 			glob->strippedHeaderSize = size;
+			if (glob->strippedHeader)
+				av_freep(&glob->strippedHeader);
 			glob->strippedHeader = malloc(size);
 			memcpy(glob->strippedHeader, *header, size);
 		}
