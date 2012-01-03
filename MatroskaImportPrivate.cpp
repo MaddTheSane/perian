@@ -1295,7 +1295,7 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	
 	if (desc == NULL) return;
 	
-	if (frame.duration == 0) {
+	if (frame.duration == 0 && type != track_subtitle) {
 		// try to correct duplicate timestamps
 		// not that we can be sure what the real duration is...
 		frame.duration = MAX(defaultDuration, 1);
@@ -1307,7 +1307,7 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 	if (type == track_subtitle && !is_vobsub) {
 		const char *packet=NULL; size_t size=0; unsigned start=0, end=0;
 		
-		if (frame.size > 0)
+		if (frame.size > 0 && frame.duration > 0)
 			subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.pts, frame.pts + frame.duration);
 
 		packet = subtitleSerializer->popPacket(&size, &start, &end);
