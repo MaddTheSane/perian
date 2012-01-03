@@ -51,7 +51,7 @@ extern NSString * const kSubDefaultFontName;
 	Float32 outlineRadius, shadowDist;
 	Float32 weight; // 0/1 = not bold/bold, > 1 is a font weight
 	BOOL italic, underline, strikeout, vertical;
-	unsigned marginL, marginR, marginV;
+	int marginL, marginR, marginV;
 	UInt8 alignH, alignV, borderStyle;
 	Float32 platformSizeScale;
 }

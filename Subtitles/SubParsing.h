@@ -33,7 +33,7 @@ __BEGIN_DECLS
 	NSArray  *spans;
 
 	float posX, posY;
-	unsigned marginL, marginR, marginV, layer;
+	int marginL, marginR, marginV, layer;
 	UInt8 alignH, alignV, wrapStyle, render_complexity;
 	BOOL positioned, shouldResetPens;	
 }

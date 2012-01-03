@@ -189,7 +189,7 @@ static NSArray *SplitByFormat(NSString *format, NSArray *lines)
 
 void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles, NSArray **subs)
 {
-	unsigned len = [ssastr length];
+	int len = [ssastr length];
 	NSData *ssaData;
 	const unichar *ssa = SubUnicodeForString(ssastr, &ssaData);
 	NSMutableDictionary *headerdict = [NSMutableDictionary dictionary];
@@ -317,7 +317,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			const unichar *pb = p;
 			int cs = 0;
 			SubRenderSpan *current_span = [SubRenderSpan new];
-			unsigned chars_deleted = 0; float floatnum = 0;
+			int chars_deleted = 0; float floatnum = 0;
 			NSString *strval=NULL;
 			float curX, curY;
 			int intnum = 0;

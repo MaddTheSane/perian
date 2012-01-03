@@ -29,10 +29,10 @@
 #import <pthread.h>
 
 static float GetWinFontSizeScale(ATSFontRef font);
-static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities);
+static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, uint8_t *breakOpportunities);
 static ATSUFontID GetFontIDForSSAName(NSString *name);
 
-#define declare_bitfield(name, bits) unsigned char name[bits / 8 + 1]; bzero(name, sizeof(name));
+#define declare_bitfield(name, bits) uint8_t name[bits / 8 + 1]; bzero(name, sizeof(name));
 #define bitfield_set(name, bit) name[(bit) / 8] |= 1 << ((bit) % 8);
 #define bitfield_test(name, bit) ((name[(bit) / 8] & (1 << ((bit) % 8))) != 0)
 
@@ -334,7 +334,7 @@ static ATSUFontID _GetFontIDForSSAName(NSString *name, BOOL alreadyLocked)
 }
 
 static ATSUFontID GetFontIDForSSAName(NSString *name)
-{
+{	
 	return _GetFontIDForSSAName(name, NO);
 }
 
@@ -343,13 +343,12 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	const ATSUAttributeTag tags[] = {kATSUStyleRenderingOptionsTag, kATSUSizeTag, kATSUQDBoldfaceTag, kATSUQDItalicTag, kATSUQDUnderlineTag, kATSUStyleStrikeThroughTag, kATSUFontTag};
 	const ByteCount		 sizes[] = {sizeof(ATSStyleRenderingOptions), sizeof(Fixed), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(Boolean), sizeof(ATSUFontID)};
 	
-	NSString *fn = s->fontname;
-	ATSUFontID font = GetFontIDForSSAName(fn);
-	ATSFontRef fontRef = font;
-	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
-	Fixed size;
 	Boolean b = s->weight > 0, i = s->italic, u = s->underline, st = s->strikeout;
+	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
+	ATSUFontID font = GetFontIDForSSAName(s->fontname);
+	ATSFontRef fontRef = font;
 	ATSUStyle style;
+	Fixed size;
 		
 	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font};
 	
@@ -401,15 +400,15 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 	SubATSUISpanExtra *spanEx = span.extra;
 	ATSUStyle style = spanEx->style->style;
 	BOOL isFirstSpan = [div->spans count] == 0;
-	Boolean bval;
-	int ival;
-	float fval;
-	NSString *sval;
-	Fixed fixval;
 	CGColorRef color;
 	CGAffineTransform mat;
 	ATSFontRef oldFont;
-	
+	Boolean bval;
+	Fixed fixval;
+	NSString *sval;
+	float fval;
+	int ival;
+
 #define bv() bval = *(int*)p;
 #define iv() ival = *(int*)p;
 #define fv() fval = *(float*)p;
@@ -710,7 +709,7 @@ static void EnableVerticalForSpan(ATSUTextLayout layout, SubRenderDiv *div, cons
 
 static void SetStyleSpanRuns(ATSUTextLayout layout, SubRenderDiv *div, const unichar *ubuffer)
 {
-	unsigned span_count = [div->spans count];
+	int span_count = [div->spans count];
 	int i;
 	
 	for (i = 0; i < span_count; i++) {
@@ -750,14 +749,14 @@ static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 a
 	ATSUSetLayoutControls(layout,sizeof(vals) / sizeof(ATSUAttributeValuePtr),tags,sizes,vals);
 }
 
-static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *div, unsigned char *breakOpportunities,
-										   ATSLayoutRecord *records, ItemCount lineLen, Fixed idealLineWidth, Fixed originalLineWidth, Fixed maximumLineWidth, unsigned numBreaks, unsigned lastHardBreak)
+static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *div, uint8_t *breakOpportunities,
+										   ATSLayoutRecord *records, ItemCount lineLen, Fixed idealLineWidth, Fixed originalLineWidth, Fixed maximumLineWidth, int numBreaks, int lastHardBreak)
 {		
-	int recOffset = 0;
-	Fixed widthOffset = 0;
-	BOOL foundABreak;
 	UniCharArrayOffset lastBreakOffset = 0;
-	
+	Fixed widthOffset = 0;
+	int recOffset = 0;
+	BOOL foundABreak;
+
 	do {
 		int j, lastIndex = 0;
 		ATSUTextMeasurement error = 0;
@@ -765,8 +764,8 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 				
 		for (j = recOffset; j < lineLen; j++) {
 			ATSLayoutRecord *rec = &records[j];
-			Fixed recPos = rec->realPos - widthOffset;
 			UniCharArrayOffset charOffset = rec->originalOffset/2 + lastHardBreak;
+			Fixed recPos = rec->realPos - widthOffset;
 
 			if (bitfield_test(breakOpportunities, charOffset)) {
 				if (recPos >= idealLineWidth) {
@@ -803,7 +802,7 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 	return (numBreaks == 0) ? 0 : lastBreakOffset;
 }
 
-static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, Fixed breakingWidth, const unichar *utext, unsigned textLen, ItemCount numHardBreaks)
+static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, Fixed breakingWidth, const unichar *utext, int textLen, ItemCount numHardBreaks)
 {
 	UniCharArrayOffset hardBreaks[numHardBreaks+2];
 	declare_bitfield(breakOpportunities, textLen);
@@ -827,7 +826,7 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 		if (lineWidth > breakingWidth) {
 			ATSLayoutRecord *records;
 			ItemCount numRecords;
-			unsigned idealSplitLines = ceilf(fLineWidth / fBreakingWidth);
+			int idealSplitLines = ceilf(fLineWidth / fBreakingWidth);
 			Fixed idealBreakWidth = FloatToFixed(fLineWidth / idealSplitLines);
 			
 			ATSUDirectGetLayoutDataArrayPtrFromTextLayout(layout, thisBreak, kATSUDirectDataLayoutRecordATSLayoutRecordCurrent, (void*)&records, &numRecords);
@@ -841,7 +840,7 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 	}
 }
 
-static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, UniCharArrayOffset *breaks, ItemCount *nbreaks, Fixed breakingWidth, const unichar *utext, unsigned textLen)
+static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, UniCharArrayOffset *breaks, ItemCount *nbreaks, Fixed breakingWidth, const unichar *utext, int textLen)
 {
 	ItemCount breakCount=0;
 	
@@ -1000,9 +999,9 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 					drawLen = MIN(spanLen, nextBreak - span->offset);
 				}
 				
-				if (spanLen == 0 || drawLen == 0) continue;
+				if (spanLen == 0 || drawLen == 0)         continue;
 				if ((span->offset + spanLen) < thisBreak) continue; // too early
-				if (span->offset >= nextBreak) break; // too far ahead
+				if (span->offset >= nextBreak)            break; // too far ahead
 
 				endLayer = SetupCGForSpan(c, spanEx, lastSpanEx, div, textType, endLayer);
 				RenderActualLine(layout, drawStart, drawLen, (textType == kTextLayerShadow) ? (penX + FloatToFixed(spanEx->shadowDist)) : penX, 
@@ -1073,9 +1072,9 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 
 -(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(float)cWidth height:(float)cHeight
 {
-	NSArray *divs = SubParsePacket(packet, context, self);
-	unsigned div_count = [divs count], lastLayer = 0;
 	Fixed bottomPen = 0, topPen = 0, centerPen = 0, *storePen=NULL;
+	NSArray *divs = SubParsePacket(packet, context, self);
+	int div_count = [divs count], lastLayer = 0;
 	int i;
 
 	CGContextSaveGState(c);
@@ -1090,8 +1089,9 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 
 	for (i = 0; i < div_count; i++) {
 		SubRenderDiv *div = [divs objectAtIndex:i];
-		unsigned textLen = [div->text length];
+		int textLen = [div->text length];
 		if (!textLen || ![div->spans count]) continue;
+		
 		BOOL resetPens = NO, resetGState = NO;
 		NSData *ubufferData;
 		const unichar *ubuffer = SubUnicodeForString(div->text, &ubufferData);
@@ -1422,7 +1422,7 @@ static float GetWinFontSizeScale(ATSFontRef font)
 	return (winSize && unitsPerEM) ? ((float)unitsPerEM / (float)winSize) : 1;
 }
 
-static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, unsigned char *breakOpportunities)
+static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, uint8_t *breakOpportunities)
 {
 	UniCharArrayOffset lastBreak = 0;
 	

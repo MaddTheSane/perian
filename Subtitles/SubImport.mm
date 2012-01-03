@@ -164,7 +164,7 @@ static NSString *MatroskaPacketizeLine(NSDictionary *sub, int n)
 		[sub objectForKey:@"Text"]];
 }
 
-static unsigned ParseSubTime(const char *time, unsigned secondScale, BOOL hasSign)
+static int ParseSubTime(const char *time, int secondScale, BOOL hasSign)
 {
 	unsigned hour, minute, second, subsecond, timeval;
 	char separator;
@@ -226,7 +226,7 @@ void SubLoadSRTFromPath(NSString *path, SubSerializer *ss)
 	NSString *res=nil;
 	[sc setCharactersToBeSkipped:nil];
 	
-	unsigned startTime=0, endTime=0;
+	int startTime=0, endTime=0;
 	
 	enum {
 		INITIAL,
@@ -625,7 +625,7 @@ NS_DURING
 		TimeRecord startTime = {SInt64ToWide(sl->begin_time), timeBase, 0};
 		TimeValue sampleTime;
 		const char *str = [sl->line UTF8String];
-		unsigned sampleLen = strlen(str);
+		int sampleLen = strlen(str);
 		Handle sampleHndl;
 		
 		PtrToHand(str, &sampleHndl, sampleLen);

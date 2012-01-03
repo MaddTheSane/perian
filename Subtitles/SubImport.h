@@ -34,7 +34,7 @@ __BEGIN_DECLS
 	@public
 	NSString *line;
 	unsigned begin_time, end_time;
-	unsigned num; // line number, used only by SubSerializer
+	int num; // line number, used only by SubSerializer
 }
 -(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e;
 @end
@@ -46,7 +46,7 @@ __BEGIN_DECLS
 	BOOL finished;
 	
 	unsigned last_begin_time, last_end_time;
-	unsigned num_lines_input;
+	int num_lines_input;
 }
 
 @property (assign) BOOL finished;
