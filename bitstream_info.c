@@ -880,18 +880,13 @@ void registerFFusionParsers(FFusionParser *parser)
 
 void initFFusionParsers()
 {
-	static Boolean inited = FALSE;
-	int unlock = PerianInitEnter(&inited);
+	static dispatch_once_t once;
 	
-	if(!inited)
-	{
-		inited = TRUE;
+	dispatch_once(&once, ^{
 		registerFFusionParsers(&ffusionMpeg4VideoParser);
 		registerFFusionParsers(&ffusionH264Parser);
 		registerFFusionParsers(&ffusionMpeg12VideoParser);
-	}
-	
-	PerianInitExit(unlock);
+	});
 }
 
 void ffusionParserFree(FFusionParserContext *parser)

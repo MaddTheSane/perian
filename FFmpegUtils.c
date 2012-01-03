@@ -89,16 +89,9 @@ static int PerianLockMgrCallback(void **mutex, enum AVLockOp op)
 
 void FFInitFFmpeg()
 {
-	/* This one is used because Global variables are initialized ONE time
-	* until the application quits. Thus, we have to make sure we're initialize
-	* the libavformat only once or we get an endlos loop when registering the same
-	* element twice!! */
-	static Boolean inited = FALSE;
-	int unlock = PerianInitEnter(&inited);
+	static dispatch_once_t once;
 	
-	/* Register the Parser of ffmpeg, needed because we do no proper setup of the libraries */
-	if(!inited) {
-		inited = TRUE;
+	dispatch_once(&once, ^{
 		av_lockmgr_register(PerianLockMgrCallback);
 
 		REGISTER_DEMUXER(avi);
@@ -150,9 +143,7 @@ void FFInitFFmpeg()
 		REGISTER_DECODER(indeo5);
 		
 		av_log_set_callback(FFMpegCodecprintf);
-	}
-	
-	PerianInitExit(unlock);
+	});
 }
 
 // List of codec IDs we know about and that map to audio fourccs

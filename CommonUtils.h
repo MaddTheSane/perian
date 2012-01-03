@@ -70,11 +70,6 @@ int ShouldPlayHighFreqSBR();
 // CFPreferencesCopyAppValue() wrapper which checks the type of the value returned
 CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type);
 
-// critical region for initializing stuff
-// component/ffmpeg initialization should be the only thing that really needs a mutex
-int PerianInitEnter(volatile Boolean *inited);
-void PerianInitExit(int unlock);
-
 void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_size);
 
 // postprocess RGBA+8-bit to not look terrible when displayed with 'transparent' blend mode

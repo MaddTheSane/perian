@@ -490,7 +490,6 @@ int ShouldPlayHighFreqSBR()
 	return 0;
 }
 
-
 CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type)
 {
 	CFPropertyListRef val = CFPreferencesCopyAppValue(key, PERIAN_PREF_DOMAIN);
@@ -501,23 +500,6 @@ CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type)
 	}
 	
 	return val;
-}
-
-static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-int PerianInitEnter(volatile Boolean *inited)
-{
-	if (*inited)
-		return FALSE;
-	
-	pthread_mutex_lock(&init_mutex);
-	return TRUE;
-}
-
-void PerianInitExit(int unlock)
-{
-	if (unlock)
-		pthread_mutex_unlock(&init_mutex);
 }
 
 void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_size)
