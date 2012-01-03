@@ -152,12 +152,6 @@ static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
 static FFusionBuffer *retainBuffer(FFusionGlobals glob, FFusionBuffer *buf);
 static void releaseBuffer(AVCodecContext *s, AVFrame *pic);
 
-int GetPPUserPreference();
-void SetPPUserPreference(int value);
-pascal OSStatus HandlePPDialogWindowEvent(EventHandlerCallRef  nextHandler, EventRef theEvent, void* userData);
-pascal OSStatus HandlePPDialogControlEvent(EventHandlerCallRef  nextHandler, EventRef theEvent, void* userData);
-void ChangeHintText(int value, ControlRef staticTextField);
-
 extern CFMutableStringRef CopyHomeDirectory();
 
 #define FFusionDebugPrint(x...) if (glob->fileLog) Codecprintf(glob->fileLog, x);
@@ -560,9 +554,7 @@ pascal ComponentResult FFusionCodecGetMPWorkFunction(FFusionGlobals glob, Compon
 //-----------------------------------------------------------------
 
 pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodecDecompressCapabilities *cap)
-{
-	Boolean doExperimentalFlags = CFPreferencesGetAppBooleanValue(CFSTR("ExperimentalQTFlags"), PERIAN_PREF_DOMAIN, NULL);
-	
+{	
     // Secifies the size of the ImageSubCodecDecompressRecord structure
     // and say we can support asyncronous decompression
     // With the help of the base image decompressor, any image decompressor
@@ -577,9 +569,9 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
 	{
 		cap->subCodecIsMultiBufferAware = true;
 		cap->subCodecSupportsOutOfOrderDisplayTimes = true;
-		cap->baseCodecShouldCallDecodeBandForAllFrames = !doExperimentalFlags;
+		cap->baseCodecShouldCallDecodeBandForAllFrames = false;
 		cap->subCodecSupportsScheduledBackwardsPlaybackWithDifferenceFrames = true;
-		cap->subCodecSupportsDrawInDecodeOrder = doExperimentalFlags;
+		cap->subCodecSupportsDrawInDecodeOrder = true;
 		cap->subCodecSupportsDecodeSmoothing = true; 
 	}
 	
@@ -868,19 +860,6 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	int type = 0;
 	int skippable = 0;
 	
-    //////
-  /*  IBNibRef 		nibRef;
-    WindowRef 		window;
-    OSStatus		err;
-    CFBundleRef		bundleRef;
-    EventHandlerUPP  	handlerUPP, handlerUPP2;
-    EventTypeSpec    	eventType;
-    ControlID		controlID;
-    ControlRef		theControl;
-    KeyMap		currentKeyMap;
-    int			userPreference; */
-    ///////
-
     myDrp->width = (**p->imageDescription).width;
     myDrp->height = (**p->imageDescription).height;
     myDrp->depth = (**p->imageDescription).depth;
