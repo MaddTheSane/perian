@@ -1305,21 +1305,19 @@ void MatroskaTrack::AddFrame(MatroskaFrame &frame)
 		frame.flags &= ~mediaSampleDroppable;
 	
 	if (type == track_subtitle && !is_vobsub) {
-		const char *packet=NULL; size_t size=0; unsigned start=0, end=0;
+		Handle packet=NULL; unsigned start=0, end=0;
 		
 		if (frame.size > 0 && frame.duration > 0)
 			subtitleSerializer->pushLine((const char*)frame.buffer->Buffer(), frame.buffer->Size(), frame.pts, frame.pts + frame.duration);
 
-		packet = subtitleSerializer->popPacket(&size, &start, &end);
+		packet = subtitleSerializer->popPacket(&start, &end);
 		if (packet) {
-			Handle sampleH;
-			PtrToHand(packet, &sampleH, size);
-			err = AddMediaSample(theMedia, sampleH, 0, size, end - start, desc, 1, 0, &sampleTime);
+			err = AddMediaSample(theMedia, packet, 0, GetHandleSize(packet), end - start, desc, 1, 0, &sampleTime);
 			if (err) {
 				Codecprintf(NULL, "MKV: error adding subtitle sample %d\n", (int)err);
 				return;
 			}
-			DisposeHandle(sampleH);
+			DisposeHandle(packet);
 			frame.pts = start;
 			frame.duration = end - start;
 		} else return;

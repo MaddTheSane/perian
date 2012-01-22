@@ -115,7 +115,7 @@ public:
 	
 	void pushLine(const char *line, size_t size, unsigned start, unsigned end);
 	void setFinished();
-	const char *popPacket(size_t *size, unsigned *start, unsigned *end);
+	Handle popPacket(unsigned *start, unsigned *end);
 	void release();
 	void retain();
 	bool empty();

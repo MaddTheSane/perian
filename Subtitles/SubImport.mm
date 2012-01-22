@@ -20,6 +20,7 @@
  */
 
 #include <QuickTime/QuickTime.h>
+#include <string.h>
 
 #include "CommonUtils.h"
 #include "Codecprintf.h"
@@ -1466,7 +1467,7 @@ void CXXSubSerializer::setFinished()
 }
 }
 
-const char *CXXSubSerializer::popPacket(size_t *size, unsigned *start, unsigned *end)
+Handle CXXSubSerializer::popPacket(unsigned *start, unsigned *end)
 {
 @autoreleasepool {
 NS_DURING
@@ -1476,9 +1477,11 @@ NS_DURING
 	*start = sl->begin_time;
 	*end   = sl->end_time;
 	
-	*size = strlen(u);
+	Handle h;
 	
-	return u;
+	PtrToHand(u, &h, strlen(u));
+		
+	return h;
 NS_HANDLER
 	Codecprintf(stderr, "Exception occured while reading Matroska subtitles");
 NS_ENDHANDLER
