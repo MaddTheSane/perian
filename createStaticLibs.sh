@@ -54,6 +54,7 @@ if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
 else
     echo "Static ffmpeg libs are out-of-date ; rebuilding"
     
+    if [ -e ffmpeg/.svn ]; then
     if [ -e ffmpeg/patched ] ; then
 		cd ffmpeg && svn revert -R . && rm patched && cd ..
 	fi
@@ -68,6 +69,7 @@ else
 	cd ..
 
 	touch ffmpeg/patched
+	fi
 
     echo "Building i386"
     
