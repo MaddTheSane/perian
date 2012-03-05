@@ -740,6 +740,8 @@ void FFissionVBRDecoder::GetProperty(AudioCodecPropertyID inPropertyID, UInt32& 
 	}
 }
 
+#pragma GCC visibility push(default)
+
 #include "ACPlugInDispatch.h"
 
 AUDIOCOMPONENT_ENTRY(AudioCodecFactory, FFissionDecoder)

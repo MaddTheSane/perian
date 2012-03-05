@@ -71,15 +71,11 @@ typedef struct {
 
 #define	GET_DELEGATE_COMPONENT()	(storage->delegateComponent)
 
-#if __MACH__
-	#include <CoreServices/Components.k.h>
-	#include <QuickTime/ImageCodec.k.h>
-	#include <QuickTime/ComponentDispatchHelper.c>
-#else
-	#include <Components.k.h>
-	#include <ImageCodec.k.h>
-	#include <ComponentDispatchHelper.c>
-#endif
+#include <CoreServices/Components.k.h>
+#include <QuickTime/ImageCodec.k.h>
+#pragma GCC visibility push(default)
+#include <QuickTime/ComponentDispatchHelper.c>
+#pragma GCC visibility pop
 
 #define kNumPixelFormatsSupportedTextSub 2
 

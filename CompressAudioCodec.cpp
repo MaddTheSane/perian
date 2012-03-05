@@ -248,6 +248,8 @@ UInt32 CompressAudioCodec::ProduceOutputPackets(void* outOutputData, UInt32& ioO
 	return status;
 }
 
+#pragma GCC visibility push(default)
+
 #include "ACPlugInDispatch.h"
 
 #define CompressAudioCodecEntry CompressAudioDecoderEntry

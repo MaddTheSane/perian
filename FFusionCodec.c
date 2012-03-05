@@ -174,7 +174,10 @@ extern CFMutableStringRef CopyHomeDirectory();
 #define	GET_DELEGATE_COMPONENT()	(storage->delegateComponent)
 
 #include <QuickTime/ImageCodec.k.h>
+
+#pragma GCC visibility push(default)
 #include <QuickTime/ComponentDispatchHelper.c>
+#pragma GCC visibility pop
 
 static void *launchUpdateChecker(void *args)
 {

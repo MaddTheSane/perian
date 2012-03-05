@@ -79,7 +79,9 @@ typedef struct {
 
 #include <CoreServices/Components.k.h>
 #include <QuickTime/ImageCodec.k.h>
+#pragma GCC visibility push(default)
 #include <QuickTime/ComponentDispatchHelper.c>
+#pragma GCC visibility pop
 
 #define kNumPixelFormatsSupportedVobSub 1
 

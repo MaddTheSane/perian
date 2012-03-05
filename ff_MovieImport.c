@@ -47,7 +47,9 @@
 
 #include <CoreServices/Components.k.h>
 #include <QuickTime/QuickTimeComponents.k.h>
+#pragma GCC visibility push(default)
 #include <QuickTime/ComponentDispatchHelper.c>
+#pragma GCC visibility pop
 
 #pragma mark -
 

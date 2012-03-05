@@ -76,7 +76,8 @@ void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_
 void ConvertImageToQDTransparent(Ptr baseAddr, OSType pixelFormat, int rowBytes, int width, int height);
 	
 #define PERIAN_PREF_DOMAIN CFSTR("org.perian.Perian")
-
+#define PERIAN_EXPORTED __attribute__((visibility("default")))
+	
 #ifdef __cplusplus
 }
 #endif

@@ -54,15 +54,11 @@ using namespace libmatroska;
 #define COMPONENT_UPP_SELECT_ROOT()	MovieImport
 
 extern "C" {
-#if __MACH__
-	#include <CoreServices/Components.k.h>
-	#include <QuickTime/QuickTimeComponents.k.h>
-	#include <QuickTime/ComponentDispatchHelper.c>
-#else
-	#include <Components.k.h>
-	#include <QuickTimeComponents.k.h>
-	#include <ComponentDispatchHelper.c>
-#endif
+#include <CoreServices/Components.k.h>
+#include <QuickTime/QuickTimeComponents.k.h>
+#pragma GCC visibility push(default)
+#include <QuickTime/ComponentDispatchHelper.c>
+#pragma GCC visibility pop
 }
 
 #pragma mark-

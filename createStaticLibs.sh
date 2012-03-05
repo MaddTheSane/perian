@@ -12,7 +12,7 @@ configureflags="--cc=$CC --disable-amd3dnow --disable-doc --disable-encoders \
      --disable-avprobe --disable-avserver --disable-muxers --disable-network \
      --disable-avfilter --disable-ffmpeg --disable-avconv --target-os=darwin"
 
-cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -w"
+cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -fvisibility=hidden -w"
 
 if [ "$BUILD_STYLE" = "Development" -o "$CONFIGURATION" = "Development" ] ; then
     configureflags="$configureflags --disable-optimizations --disable-asm"
@@ -87,7 +87,7 @@ else
         mkdir -p "$BUILDDIR"
 
 		if [ "$BUILD_STYLE" != "Development" ] ; then
-        	optcflags_i386="$optcflags -mdynamic-no-pic -mtune=$x86tune $x86flags" 
+        	optcflags_i386="$optcflags -mdynamic-no-pic $x86flags"
         fi
 
         cd "$BUILDDIR"

@@ -21,6 +21,7 @@
 #import <Cocoa/Cocoa.h>
 #import <PreferencePanes/NSPreferencePane.h>
 #import <Security/Security.h>
+#import "CommonUtils.h"
 
 #define ComponentInfoPlist @"ComponentInfo.plist"
 #define ObsoletesKey @"obsoletes"
@@ -69,6 +70,7 @@ typedef enum
 	ComponentTypeFramework
 } ComponentType;
 
+PERIAN_EXPORTED
 @interface CPFPerianPrefPaneController : NSPreferencePane
 {
 	//General Pane
