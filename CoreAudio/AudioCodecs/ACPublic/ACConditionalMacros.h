@@ -1,4 +1,4 @@
-/*	Copyright � 2007 Apple Inc. All Rights Reserved.
+/*	Copyright © 2007 Apple Inc. All Rights Reserved.
 	
 	Disclaimer: IMPORTANT:  This Apple software is supplied to you by 
 			Apple Inc. ("Apple") in consideration of your agreement to the
@@ -38,22 +38,30 @@
 			STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
 			POSSIBILITY OF SUCH DAMAGE.
 */
-#include "GetCodecBundle.h"
-#include "CommonUtils.h"
+#if !defined(__ACConditionalMacros_h__)
+#define __ACConditionalMacros_h__
 
-const CFStringRef kCodecBundleID = PERIAN_PREF_DOMAIN; // must match CFBundleIdentifier in plist file
+//=============================================================================
+//	This file exists to make figuring out how to include system headers
+//	easier. We throw in an include of the standard ConditionalMacros too.
+//=============================================================================
 
-CFBundleRef GetCodecBundle()
-{
-	static CFBundleRef sAudioCodecBundle = 0;
-	if (!sAudioCodecBundle) 
-	{
-		sAudioCodecBundle = CFBundleGetBundleWithIdentifier(kCodecBundleID);
-		if (sAudioCodecBundle)
-		{
-			CFRetain(sAudioCodecBundle);
-		}
-	}
-	return sAudioCodecBundle;
-}
+//	TargetConditionals.h defines the bare minimum we need
+#include "TargetConditionals.h"
 
+//	Determine whether or not to use framework style includes for system headers
+#if !defined(AC_Use_Framework_Includes)
+	#if	TARGET_OS_MAC && TARGET_RT_MAC_MACHO
+		#define	AC_Use_Framework_Includes	1
+	#else
+		#define	AC_Use_Framework_Includes	0
+	#endif
+#endif
+
+#if	AC_Use_Framework_Includes
+	#include <CoreServices/../Frameworks/CarbonCore.framework/Headers/ConditionalMacros.h>
+#else
+	#include "ConditionalMacros.h"
+#endif
+
+#endif

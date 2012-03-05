@@ -1,4 +1,4 @@
-/*	Copyright � 2007 Apple Inc. All Rights Reserved.
+/*	Copyright © 2007 Apple Inc. All Rights Reserved.
 	
 	Disclaimer: IMPORTANT:  This Apple software is supplied to you by 
 			Apple Inc. ("Apple") in consideration of your agreement to the
@@ -38,72 +38,41 @@
 			STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
 			POSSIBILITY OF SUCH DAMAGE.
 */
-#if !defined __ACCOMPATIBILITY_H__
-#define __ACCOMPATIBILITY_H__
+#include "CABundleLocker.h"
+#include <pthread.h>
 
-#if TARGET_OS_MAC
+/*
+some bundle operations are not thread safe, notably CFCopyLocalizedStringFromTableInBundle
+*/
 
-#include <AvailabilityMacros.h>
+static pthread_mutex_t sCABundleLocker = PTHREAD_MUTEX_INITIALIZER;
 
-#if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
-#include <CoreAudio/CoreAudioTypes.h>
-#include <AudioUnit/AudioCodec.h>
-#else
-#include "CoreAudioTypes.h"
-#include "AudioCodec.h"
+#define RECURSIVE_LOCK 0
+
+#if RECURSIVE_LOCK
+static pthread_once_t sOnce = PTHREAD_ONCE_INIT;
+
+static void InitCABundleLocker()
+{
+	// have to do this because OS X lacks PTHREAD_MUTEX_RECURSIVE_INITIALIZER_NP
+	pthread_mutexattr_t attr;
+	pthread_mutexattr_init(&attr);
+	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&sCABundleLocker, &attr);
+	pthread_mutexattr_destroy(&attr);
+}
 #endif
 
-/* Redefine the following symbols only for Tiger */
-#if COREAUDIOTYPES_VERSION < 1050// && !defined(MAC_OS_X_VERSION_10_5)
-
-struct AudioFormatInfo
+CABundleLocker::CABundleLocker()
 {
-	AudioStreamBasicDescription		mASBD;
-	const void*						mMagicCookie;
-	UInt32							mMagicCookieSize;
-};
-typedef struct AudioFormatInfo AudioFormatInfo;
-
-struct AudioFormatListItem
-{
-	AudioStreamBasicDescription		mASBD;
-	AudioChannelLayoutTag			mChannelLayoutTag;
-};
-typedef struct AudioFormatListItem AudioFormatListItem;
-
-struct AudioCodecMagicCookieInfo 
-{
-	UInt32			mMagicCookieSize;
-	const void*		mMagicCookie;
-};
-typedef struct AudioCodecMagicCookieInfo	AudioCodecMagicCookieInfo;
-typedef struct AudioCodecMagicCookieInfo	MagicCookieInfo;
-
-
-enum
-{
-	/* Renamed properties */
-	kAudioCodecPropertyCurrentInputChannelLayout	= kAudioCodecPropertyInputChannelLayout,
-	kAudioCodecPropertyCurrentOutputChannelLayout	= kAudioCodecPropertyOutputChannelLayout,
-	kAudioCodecPropertyAvailableInputChannelLayoutTags	= kAudioCodecPropertyAvailableInputChannelLayouts,
-	kAudioCodecPropertyAvailableOutputChannelLayoutTags	= kAudioCodecPropertyAvailableOutputChannelLayouts,
-	kAudioCodecPropertyBitRateControlMode			= kAudioCodecBitRateFormat,
-	kAudioCodecPropertyPaddedZeros					= kAudioCodecPropertyZeroFramesPadded,
-	kAudioCodecPropertyInputFormatsForOutputFormat	= kAudioCodecInputFormatsForOutputFormat,
-	kAudioCodecPropertyOutputFormatsForInputFormat	= kAudioCodecOutputFormatsForInputFormat,
-	kAudioCodecPropertyDoesSampleRateConversion		= kAudioCodecDoesSampleRateConversion
-};
-#else
-#if !defined(__COREAUDIO_USE_FLAT_INCLUDES__)
-#include <AudioToolbox/AudioFormat.h>
-#else
-#include "AudioFormat.h"
+#if RECURSIVE_LOCK
+	pthread_once(&sOnce, InitCABundleLocker);
 #endif
+	pthread_mutex_lock(&sCABundleLocker);
+}
 
-#endif	// #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+CABundleLocker::~CABundleLocker()
+{
+	pthread_mutex_unlock(&sCABundleLocker);
+}
 
-#else
-	#include "AudioFormat.h"
-#endif	// #if TARGET_OS_MAC
-
-#endif	// #if !defined __ACCOMPATIBILITY_H__

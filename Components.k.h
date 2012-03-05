@@ -6,7 +6,7 @@
      Version:    Technology: QuickTime 5.0
                  Release:    Universal Interfaces 3.4
  
-     Copyright:  © 1991-2001 by Apple Computer, Inc., all rights reserved.
+     Copyright:  Â© 1991-2001 by Apple Computer, Inc., all rights reserved.
  
      Bugs?:      For bug reports, consult the following page on
                  the World Wide Web:
