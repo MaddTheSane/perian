@@ -36,6 +36,7 @@ Codec(kVP6ACodecInfoResID, CODEC_ID_VP6A, "On2 VP6A", "Decompresses video stored
 Codec(kVP8CodecInfoResID, CODEC_ID_VP8, "On2 VP8", "Decompresses video stored in On2 VP8 format.", 'VP80')
 Codec(kFFv1CodecInfoResID, CODEC_ID_FFV1, "FFv1", "Decompresses video stored in FFv1 format.", 'FFV1')
 Codec(kTheoraCodecInfoResID, CODEC_ID_THEORA, "Xiph Theora", "Decompresses video stored in Xiph Theora (MKV) format.", 'PeTh')
+Codec(kDxtoryCodecInfoResID, CODEC_ID_DXTORY, "Dxtory", "Decompresses video stored in Dxtory (xtor) format.", 'xtor')
 
 EntryPoint(kVobSubCodecManufacturer, kVobSubCodecVersion, kVobSubCodecResourceID, "VobSubCodecComponentDispatch", <!( codecInfoDoes32 | codecInfoDoes16 | codecInfoDoes8 | codecInfoDoes1 | cmpThreadSafe )!>, <!( codecInfoDepth32 | codecInfoDepth24 | codecInfoDepth16 | codecInfoDepth8 | codecInfoDepth1 )!>)
 Codec(kVobSubCodecResourceID, CODEC_ID_DVD_SUBTITLE,"VobSub", "Decompresses subtitles stored in the VobSub format.", kSubFormatVobSub)

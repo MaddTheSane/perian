@@ -141,6 +141,7 @@ void FFInitFFmpeg()
 		REGISTER_DECODER(indeo2);
 		REGISTER_DECODER(indeo3);
 		REGISTER_DECODER(indeo5);
+		REGISTER_DECODER(dxtory);
 		
 		av_log_set_callback(FFMpegCodecprintf);
 	});
