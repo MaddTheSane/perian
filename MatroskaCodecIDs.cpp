@@ -632,6 +632,7 @@ ComponentResult MkvFinishAudioDescription(KaxTrackEntry *tr_entry, Handle *cooki
 	
 	switch (asbd->mFormatID) {
 		case kAudioFormatMPEG4AAC:
+			if (!cookie) return paramErr;
 			ASBDExt_AAC(tr_entry, *cookie, asbd, acl);
 			break;
 			

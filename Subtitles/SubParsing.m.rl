@@ -126,7 +126,7 @@ BOOL SubParseFontVerticality(NSString **fontname)
 
 -(NSString*)description
 {
-	return [NSString stringWithFormat:@"Span at %d: %@", offset, extra];
+	return [NSString stringWithFormat:@"Span at %ld: %@", offset, extra];
 }
 @end
 
@@ -135,7 +135,7 @@ BOOL SubParseFontVerticality(NSString **fontname)
 {
 	int i, sc = [spans count];
 	NSMutableString *tmp = [NSMutableString stringWithFormat:@"div \"%@\" with %d spans:", text, sc];
-	for (i = 0; i < sc; i++) {[tmp appendFormat:@" %d",((SubRenderSpan*)[spans objectAtIndex:i])->offset];}
+	for (i = 0; i < sc; i++) {[tmp appendFormat:@" %ld",((SubRenderSpan*)[spans objectAtIndex:i])->offset];}
 	[tmp appendFormat:@" %d", [text length]];
 	return tmp;
 }
