@@ -21,6 +21,7 @@
 
 #include <QuickTime/QuickTime.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "CommonUtils.h"
 #include "Codecprintf.h"
@@ -1067,6 +1068,15 @@ static Boolean ShouldLoadExternalSubtitles()
 	return isSet ? value : YES;
 }
 
+static Boolean CheckForSubtitleSandboxDenial(CFURLRef theURL)
+{
+	UInt8 path[PATH_MAX];
+	
+	if (!CFURLGetFileSystemRepresentation(theURL, YES, path, PATH_MAX)) return NO;
+	
+	return access((char*)path, R_OK) == 0;
+}
+
 static ComponentResult LoadExternalSubtitles(CFURLRef theFileURL, Movie theMovie)
 {
 	ComponentResult err = noErr;
@@ -1094,8 +1104,9 @@ static ComponentResult LoadExternalSubtitles(CFURLRef theFileURL, Movie theMovie
 	}
 	
 	parentURL = CFURLCreateCopyDeletingLastPathComponent(NULL, theFileURL);
-	CFURLGetFSRef(parentURL, &parentDir);
+	if (!CheckForSubtitleSandboxDenial(parentURL)) goto bail;
 	
+	CFURLGetFSRef(parentURL, &parentDir);
 	err = FSOpenIterator(&parentDir, kFSIterateFlat, &dirItr);
 	if (err) goto bail;
 	
@@ -1181,7 +1192,7 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 {
 	if (dataRefType != AliasDataHandlerSubType) return noErr;
 	if (!ShouldLoadExternalSubtitles()) return noErr;
-
+	
 	CFStringRef cfPath = NULL;
 	
 	OSErr err = QTGetDataReferenceFullPathCFString(dataRef, dataRefType, kQTPOSIXPathStyle, &cfPath);
