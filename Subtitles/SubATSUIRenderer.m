@@ -247,53 +247,47 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 static NSMutableDictionary *fontIDCache = nil;
 static ItemCount fontCount;
 static ATSUFontID *fontIDs = NULL;
-static pthread_mutex_t fontIDMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void CleanupFontIDCache() __attribute__((destructor));
 static void CleanupFontIDCache()
 {
 	@autoreleasepool {
-		if (fontIDCache) [fontIDCache release];
-		if (fontIDs) free(fontIDs);
-		fontIDCache = nil;
-		fontIDs = NULL;
+		if (fontIDCache) {
+			[fontIDCache release];
+			fontIDCache = nil;
+		}
+		if (fontIDs) {
+			free(fontIDs);
+			fontIDs = NULL;
+		}
 	}
 }
 
 // Assumes ATSUFontID = ATSFontRef. This is true.
-static ATSUFontID _GetFontIDForSSAName(NSString *name, BOOL alreadyLocked)
+static ATSUFontID GetFontIDForSSAName(NSString *name)
 {	
 	NSNumber *idN = nil;
 	NSString *lcName = [name lowercaseString];
 	
-	if (fontIDCache)
-		idN = [fontIDCache objectForKey:lcName];
-	
-	if (idN)
-		return [idN intValue];
-	
-	if (!alreadyLocked && pthread_mutex_trylock(&fontIDMutex)) {
-		// if another thread is looking a font up, it might be the same font
-		// so restart and check the cache again
-		pthread_mutex_lock(&fontIDMutex);
-		return _GetFontIDForSSAName(name, YES);
-	}
-	
-	if (!fontIDCache)
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
 		fontIDCache = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
 					   [NSNumber numberWithInt:ATSFontFindFromName((CFStringRef)kSubDefaultFontName, kATSOptionFlagsDefault)],
 					   kSubDefaultFontName, nil];
+	});
 	
+@synchronized(fontIDCache) {
+	idN = [fontIDCache objectForKey:lcName];
+
+	if (idN)
+		return [idN intValue];
+
 	ByteCount nlen = [name length];
 	NSData *unameData;
 	const unichar *uname = SubUnicodeForString(name, &unameData);
 	ATSUFontID font;
 	
-	// XXX: kFontNoPlatformCode should be kFontMicrosoftPlatform for the platform code
-	// but isn't due to bugs in 10.4 we work around
-	// ...if we stop supporting 10.4 this function will be replaced by CoreText anyway
-	// at that point we should be stricter
-	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontNoPlatformCode, kFontNoScript, kFontNoLanguage, &font);
+	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, &font);
 	
 	[unameData release];
 	
@@ -323,7 +317,7 @@ static ATSUFontID _GetFontIDForSSAName(NSString *name, BOOL alreadyLocked)
 #undef kBufLength
 	}
 	
-	if (font == kATSUInvalidFontID && ![name isEqualToString:kSubDefaultFontName])
+	if (font == kATSUInvalidFontID)
 		font = [[fontIDCache objectForKey:kSubDefaultFontName] intValue]; // final fallback
 	
 	/*{
@@ -333,15 +327,9 @@ static ATSUFontID _GetFontIDForSSAName(NSString *name, BOOL alreadyLocked)
 		[fontPSName autorelease];
 	}*/
 	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:lcName];
-	
-	pthread_mutex_unlock(&fontIDMutex);
-	 
+		 
 	return font;
 }
-
-static ATSUFontID GetFontIDForSSAName(NSString *name)
-{	
-	return _GetFontIDForSSAName(name, NO);
 }
 
 -(void)didCompleteStyleParsing:(SubStyle*)s
