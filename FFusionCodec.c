@@ -289,7 +289,9 @@ static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avct
 	tmpContext.extradata = avctx->extradata;
 	tmpContext.extradata_size = avctx->extradata_size;
 	
-    avcodec_open2(&tmpContext, codec, NULL);
+    if (avcodec_open2(&tmpContext, codec, NULL)) {
+		return PIX_FMT_NONE;
+	}
 	AVPacket pkt;
 	av_init_packet(&pkt);
 	pkt.data = (UInt8*)data;
@@ -762,8 +764,13 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		
         // codec was opened, but didn't give us its pixfmt
 		// we have to decode the first frame to find out one
-		else if (glob->avContext->pix_fmt == PIX_FMT_NONE && p->bufferSize && p->data)
+		else if (glob->avContext->pix_fmt == PIX_FMT_NONE && p->bufferSize && p->data) {
             glob->avContext->pix_fmt = FindPixFmtFromVideo(glob->avCodec, glob->avContext, p->data, p->bufferSize);
+			
+			// first frame is invalid so we still have no pixfmt
+			if (glob->avContext->pix_fmt == PIX_FMT_NONE)
+				err = paramErr;
+		}
     }
     
     // Specify the minimum image band height supported by the component
