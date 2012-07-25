@@ -180,6 +180,7 @@ EbmlElement * MatroskaImport::NextLevel1Element()
 	if (el_l1) {
 		el_l1->SkipData(*aStream, el_l1->Generic().Context);
 		delete el_l1;
+		el_l1 = NULL;
 	}
 	
 	el_l1 = aStream->FindNextElement(el_l0->Generic().Context, upperLevel, 0xFFFFFFFFL, true);
