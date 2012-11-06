@@ -1,14 +1,14 @@
-From 05d311486ffbd12d3afa9af6d1b4eeff98deffaa Mon Sep 17 00:00:00 2001
+From 7580892bd9cfe66ad4058eac564e4342ef408ea0 Mon Sep 17 00:00:00 2001
 From: Alexander Strange <astrange@ithinksw.com>
 Date: Sat, 6 Nov 2010 05:24:09 -0400
-Subject: [PATCH 5/6] Workaround for AVI audio tracks importing 1152x too long
+Subject: [PATCH 2/2] Workaround for AVI audio tracks importing 1152x too long
 
 ---
- libavformat/avidec.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ libavformat/avidec.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libavformat/avidec.c b/libavformat/avidec.c
-index ad35995..8ab97b0 100644
+index af6ee8e..7f170e3 100644
 --- a/libavformat/avidec.c
 +++ b/libavformat/avidec.c
 @@ -98,7 +98,7 @@ static int guess_ni_flag(AVFormatContext *s);
@@ -21,5 +21,5 @@ index ad35995..8ab97b0 100644
          return (len + ast->dshow_block_align - 1)/ast->dshow_block_align;
      }else
 -- 
-1.7.8
+1.8.0
 

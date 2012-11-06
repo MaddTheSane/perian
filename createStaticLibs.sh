@@ -60,12 +60,8 @@ else
 	fi
 
 	cd ffmpeg
-	#patch -p1 < ../Patches/0001-Disable-some-parts-of-h264.c-Perian-never-uses.patch
-	#patch -p1 < ../Patches/0002-Remove-the-warning-Cannot-parallelize-deblocking-typ.patch
-	#patch -p1 < ../Patches/0003-Hardcode-results-of-runtime-cpu-detection-in-dsputil.patch
-	#patch -p1 < ../Patches/0004-Double-INTERNAL_BUFFER_SIZE-to-fix-running-out-of-bu.patch
-	#patch -p1 < ../Patches/0005-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
-	#patch -p1 < ../Patches/0006-Workaround-hang-issue-in-configure.patch
+	patch -p1 < ../Patches/0001-Double-INTERNAL_BUFFER_SIZE-to-fix-running-out-of-bu.patch
+	patch -p1 < ../Patches/0002-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
 	cd ..
 
 	touch ffmpeg/patched

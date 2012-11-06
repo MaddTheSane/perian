@@ -1,17 +1,17 @@
-From 400dd05b52729ab35449444393a690141d1d5cfb Mon Sep 17 00:00:00 2001
+From f222e497b412718008021b01b7b0ad0069348b88 Mon Sep 17 00:00:00 2001
 From: Alexander Strange <astrange@ithinksw.com>
 Date: Tue, 13 Jul 2010 16:07:20 -0700
-Subject: [PATCH 4/6] Double INTERNAL_BUFFER_SIZE to fix running out of
+Subject: [PATCH 1/2] Double INTERNAL_BUFFER_SIZE to fix running out of
  buffers when QT retains 32 of them
 
 Fixes a crash in some mp4.
 ---
- libavcodec/mpegvideo.h |    2 +-
- libavcodec/utils.c     |    2 +-
+ libavcodec/mpegvideo.h | 2 +-
+ libavcodec/utils.c     | 2 +-
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/libavcodec/mpegvideo.h b/libavcodec/mpegvideo.h
-index 46ad5d8..7d68aa7 100644
+index 06be735..5675265 100644
 --- a/libavcodec/mpegvideo.h
 +++ b/libavcodec/mpegvideo.h
 @@ -57,7 +57,7 @@ enum OutputFormat {
@@ -24,10 +24,10 @@ index 46ad5d8..7d68aa7 100644
  #define ME_MAP_SIZE 64
  #define ME_MAP_SHIFT 3
 diff --git a/libavcodec/utils.c b/libavcodec/utils.c
-index 04909cf..8da3fcb 100644
+index f64bff8..166b6de 100644
 --- a/libavcodec/utils.c
 +++ b/libavcodec/utils.c
-@@ -125,7 +125,7 @@ void avcodec_set_dimensions(AVCodecContext *s, int width, int height){
+@@ -137,7 +137,7 @@ void avcodec_set_dimensions(AVCodecContext *s, int width, int height){
      s->height= -((-height)>>s->lowres);
  }
  
@@ -37,5 +37,5 @@ index 04909cf..8da3fcb 100644
  void avcodec_align_dimensions2(AVCodecContext *s, int *width, int *height,
                                 int linesize_align[AV_NUM_DATA_POINTERS])
 -- 
-1.7.8
+1.8.0
 
