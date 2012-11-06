@@ -1028,10 +1028,6 @@ FFusionDecodeAbilities ffusionIsParsedVideoDecodable(FFusionParserContext *parse
 		if(!h264parser->frame_mbs_only_flag)
 			ret = FFUSION_CANNOT_DECODE;
 		
-		//4:2:2 chroma
-		if(h264parser->chroma_format_idc > 1)
-			ret = FFUSION_CANNOT_DECODE;
-		
 		return ret;
 	}
 	
