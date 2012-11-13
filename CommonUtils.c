@@ -26,8 +26,8 @@
 #include <fnmatch.h>
 
 #include <libavcodec/avcodec.h>
+#include <libavcodec/bytestream.h>
 #include "CommonUtils.h"
-
 
 typedef struct LanguageTriplet {
 	char twoChar[3];
@@ -204,39 +204,18 @@ short ISO639_2ToQTLangCode(const char *lang)
 	return langUnspecified;
 }
 
-/* write the int32_t data to target & then return a pointer which points after that data */
-uint8_t *write_int32(uint8_t *target, int32_t data)
-{
-	return write_data(target, (uint8_t*)&data, sizeof(data));
-} /* write_int32() */
-
-/* write the int16_t data to target & then return a pointer which points after that data */
-uint8_t *write_int16(uint8_t *target, int16_t data)
-{
-	return write_data(target, (uint8_t*)&data, sizeof(data));
-} /* write_int16() */
-
-/* write the data to the target adress & then return a pointer which points after the written data */
-uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size)
-{
-	if(data_size > 0)
-		memcpy(target, data, data_size);
-	return (target + data_size);
-} /* write_data() */
-
-
 
 #define MP4ESDescrTag                   0x03
 #define MP4DecConfigDescrTag            0x04
 #define MP4DecSpecificDescrTag          0x05
 
 // based off of mov_mp4_read_descr_len from mov.c in ffmpeg's libavformat
-static int readDescrLen(UInt8 **buffer)
+static unsigned readDescrLen(GetByteContext *g)
 {
-	int len = 0;
+	unsigned len = 0;
 	int count = 4;
 	while (count--) {
-		int c = *(*buffer)++;
+		uint8_t c = bytestream2_get_byte(g);
 		len = (len << 7) | (c & 0x7f);
 		if (!(c & 0x80))
 			break;
@@ -245,41 +224,46 @@ static int readDescrLen(UInt8 **buffer)
 }
 
 // based off of mov_mp4_read_descr from mov.c in ffmpeg's libavformat
-static int readDescr(UInt8 **buffer, int *tag)
+static unsigned readDescr(GetByteContext *g, int *tag)
 {
-	*tag = *(*buffer)++;
-	return readDescrLen(buffer);
+	*tag = bytestream2_get_byte(g);
+	return readDescrLen(g);
 }
 
 // based off of mov_read_esds from mov.c in ffmpeg's libavformat
 ComponentResult ReadESDSDescExt(Handle descExt, UInt8 **buffer, int *size)
 {
-	UInt8 *esds = (UInt8 *) *descExt;
+	UInt8 *esds = (UInt8 *)*descExt;
+	UInt8 *extradata;
 	int tag, len;
+
+	GetByteContext g;
+	bytestream2_init(&g, esds, GetHandleSize(descExt));
 	
-	// FIXME use safe bytestream reading here
-	
-	*size = 0;
-	
-	esds += 4;		// version + flags
-	len = readDescr(&esds, &tag);
-	esds += 2;		// ID
+	bytestream2_skip(&g, 4); // version + flags
+	readDescr(&g, &tag);
+	bytestream2_skip(&g, 2); // ID
 	if (tag == MP4ESDescrTag)
-		esds++;		// priority
+		bytestream2_skip(&g, 1); // priority
 	
-	len = readDescr(&esds, &tag);
+	readDescr(&g, &tag);
 	if (tag == MP4DecConfigDescrTag) {
-		esds++;		// object type id
-		esds++;		// stream type
-		esds += 3;	// buffer size db
-		esds += 4;	// max bitrate
-		esds += 4;	// average bitrate
+		bytestream2_skip(&g, 1);	// object type id
+		bytestream2_skip(&g, 1);	// stream type
+		bytestream2_skip(&g, 3);	// buffer size db
+		bytestream2_skip(&g, 4);	// max bitrate
+		bytestream2_skip(&g, 4);	// average bitrate
 		
-		len = readDescr(&esds, &tag);
+		len = readDescr(&g, &tag);
 		if (tag == MP4DecSpecificDescrTag) {
-			*buffer = calloc(1, len + FF_INPUT_BUFFER_PADDING_SIZE);
-			if (*buffer) {
-				memcpy(*buffer, esds, len);
+			extradata = av_mallocz(len + FF_INPUT_BUFFER_PADDING_SIZE);
+			if (extradata) {
+				if (bytestream2_get_buffer(&g, extradata, len) != len) {
+					av_free(extradata);
+					return paramErr;
+				}
+				
+				*buffer = extradata;
 				*size = len;
 			}
 		}
@@ -288,20 +272,28 @@ ComponentResult ReadESDSDescExt(Handle descExt, UInt8 **buffer, int *size)
 	return noErr;
 }
 
-int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, long type)
+int isImageDescriptionExtensionPresent(ImageDescriptionHandle desc, FourCharCode type)
 {
 	ImageDescriptionPtr d = *desc;
-	int offset = sizeof(ImageDescription);
 	uint8_t *p = (uint8_t *)d;
 	
+	GetByteContext g;
+	bytestream2_init(&g, p, GetHandleSize((Handle)desc));
+	bytestream2_skip(&g, sizeof(ImageDescription));
+	
 	//read next description, need 8 bytes for size and type
-	while(offset < d->idSize - 8)
+	while(bytestream2_get_bytes_left(&g))
 	{
-		long len = *(p+offset) << 24 | *(p+offset+1) << 16 | *(p+offset+2) << 8 | *(p+offset+3);
-		long rtype = *(p+offset + 4) << 24 | *(p+offset+5) << 16 | *(p+offset+6) << 8 | *(p+offset+7);
-		if(rtype == type && offset + len <= d->idSize)
+		unsigned len;
+		FourCharCode rtype;
+		
+		len   = bytestream2_get_be32(&g);
+		rtype = bytestream2_get_be32(&g);
+		
+		if(rtype == type && (len - 8) <= bytestream2_get_bytes_left(&g))
 			return 1;
-		offset += len;
+		
+		bytestream2_skip(&g, len - 8);
 	}
 	return 0;
 }

@@ -33,6 +33,10 @@
 #include "Codecprintf.h"
 #include "MatroskaCodecIDs.h"
 
+extern "C" {
+#include <libavcodec/bytestream.h>
+}
+
 using namespace std;
 using namespace libmatroska;
 
@@ -92,19 +96,26 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, Handle *cookie, Desc
 		
 		privateSize = codecPrivate->GetSize();
 		privateBuf = (unsigned char *) codecPrivate->GetBuffer();
-		numPackets = privateBuf[0] + 1;
+		
+		if (!privateBuf)
+			return invalidAtomErr;
+		
+		GetByteContext g;
+		bytestream2_init(&g, privateBuf, privateSize);
+		
+		numPackets = bytestream2_get_byte(&g) + 1;
 		
 		if (numPackets != 3) {
 			return invalidAtomErr;
 		}
 		
-		int packetSizes[3] = {0};
+		int packetSizes[3] = {};
 		
 		// get the sizes of the packets
 		packetSizes[numPackets - 1] = privateSize - 1;
 		int packetNum = 0;
 		for (i = 1; packetNum < numPackets - 1; i++) {
-			packetSizes[packetNum] += privateBuf[i];
+			packetSizes[packetNum] += bytestream2_get_byte(&g);
 			if (privateBuf[i] < 255) {
 				packetSizes[numPackets - 1] -= packetSizes[packetNum];
 				packetNum++;
@@ -113,7 +124,9 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, Handle *cookie, Desc
 		}
 		packetSizes[numPackets - 1] -= offset - 1;
 		
-		if (offset+packetSizes[0]+packetSizes[1]+packetSizes[2] > privateSize) {
+		unsigned packetSize = offset+packetSizes[0]+packetSizes[1]+packetSizes[2];
+		
+		if (packetSize > privateSize || packetSizes[0] < 0 || packetSizes[1] < 0 || packetSizes[2] < 0) {
 			return invalidAtomErr;
 		}
 
@@ -142,6 +155,9 @@ ComponentResult DescExt_XiphVorbis(KaxTrackEntry *tr_entry, Handle *cookie, Desc
 		*cookie = sndDescExt;
 	}
 	return noErr;
+	
+bail:
+	return invalidAtomErr;
 }
 
 // xiph-qt expects these this sound extension to have been created in this way
@@ -163,7 +179,7 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, Handle *cookie, DescEx
 			uid = uint32(*trackUID);
 		
 		size_t privateSize = codecPrivate->GetSize();
-		UInt8 *privateBuf = (unsigned char *) codecPrivate->GetBuffer(), *privateEnd = privateBuf + privateSize;
+		UInt8 *privateBuf = (unsigned char *) codecPrivate->GetBuffer();
 		
 		unsigned long serialnoatom[3] = { EndianU32_NtoB(sizeof(serialnoatom)), 
 			EndianU32_NtoB(kCookieTypeOggSerialNo), 
@@ -171,25 +187,31 @@ ComponentResult DescExt_XiphFLAC(KaxTrackEntry *tr_entry, Handle *cookie, DescEx
 		
 		PtrToHand(serialnoatom, (Handle*)&sndDescExt, sizeof(serialnoatom));
 		
-		privateBuf += 4; // skip 'fLaC'
+		GetByteContext g;
+		bytestream2_init(&g, privateBuf, privateSize);
 		
-		while ((privateEnd - privateBuf) > 4) {
-			uint32_t packetHeader = EndianU32_BtoN(*(uint32_t*)privateBuf);
-			int lastPacket = packetHeader >> 31, blockType = (packetHeader >> 24) & 0x7F;
+		bytestream2_skip(&g, 4);
+		
+		bool lastPacket = false;
+		
+		while (!lastPacket) {
+			uint32_t packetHeader = bytestream2_peek_be32(&g);
+			lastPacket = packetHeader >> 31;
+			int blockType = (packetHeader >> 24) & 0x7F;
 			uint32_t packetSize = (packetHeader & 0xFFFFFF) + 4;
 			uint32_t xiphHeader[2] = {EndianU32_NtoB(packetSize + sizeof(xiphHeader)),
 				EndianU32_NtoB(blockType ? kCookieTypeFLACMetadata : kCookieTypeFLACStreaminfo)};
-						
-			if ((privateEnd - privateBuf) < packetSize)
+			
+			//Codecprintf(NULL, "FLAC packet type '%s' bt %d size %d, offset %d, %d left\n", FourCCString(xiphHeader[1]), blockType,
+			//			packetSize, bytestream2_tell(&g), bytestream2_get_bytes_left(&g));
+			
+			if (packetSize > bytestream2_get_bytes_left(&g))
 				break;
 			
 			PtrAndHand(xiphHeader, sndDescExt, sizeof(xiphHeader));
-			PtrAndHand(privateBuf, sndDescExt, packetSize);
+			PtrAndHand(g.buffer, sndDescExt, packetSize);
 			
-			privateBuf += packetSize;
-			
-			if (lastPacket)
-				break;
+			bytestream2_skip(&g, packetSize);
 		}
 		
 		*cookie = sndDescExt;	
@@ -258,6 +280,8 @@ static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vos
 		if (codecString == prof->name) {profile = prof->profile; break;}
 	}
 	
+	// FIXME use a bitstream writer
+	
 	*vosBuf++ = (profile << 3) | (freq_index >> 1);
 	*vosBuf++ = (freq_index << 7) | (channels << 3);
 	
@@ -281,18 +305,18 @@ static void RecreateAACVOS(KaxTrackEntry *tr_entry, uint8_t *vosBuf, size_t *vos
 static unsigned int descrLength(unsigned int len)
 {
     int i;
-    for(i=1; len>>(7*i); i++);
+    for(i=1; len>>(7*i); i++)
+		;
     return len + 1 + i;
 }
 
-static uint8_t* putDescr(uint8_t *buffer, int tag, unsigned int size)
+static void putDescr(PutByteContext *p, int tag, unsigned int size)
 {
     int i= descrLength(size) - size - 2;
-    *buffer++ = tag;
+	bytestream2_put_byte(p, tag);
     for(; i>0; i--)
-       *buffer++ = (size>>(7*i)) | 0x80;
-    *buffer++ = size & 0x7F;
-	return buffer;
+		bytestream2_put_byte(p, size>>(7*i) | 0x80);
+	bytestream2_put_byte(p, size & 0x7F);
 }
 
 // ESDS layout:
@@ -315,54 +339,53 @@ uint8_t *CreateEsdsFromSetupData(uint8_t *codecPrivate, size_t vosLen, size_t *e
 {
 	int decoderSpecificInfoLen = vosLen ? descrLength(vosLen) : 0;
 	int versionLen = write_version ? 4 : 0;
+	size_t _esdsLen = versionLen + descrLength(3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
 	
-	*esdsLen = versionLen + descrLength(3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
-	uint8_t *esds = (uint8_t*)malloc(*esdsLen);
-	UInt8 *pos = (UInt8 *) esds;
+	uint8_t *esds = (uint8_t*)av_malloc(_esdsLen);
+	if (!esds)
+		return NULL;
+	
+	PutByteContext p;
+	bytestream2_init_writer(&p, esds, _esdsLen);
 	
 	// esds atom version (only needed for ImageDescription extension)
 	if (write_version)
-		pos = write_int32(pos, 0);
+		bytestream2_put_be32(&p, 0);
 	
 	// ES Descriptor
-	pos = putDescr(pos, 0x03, 3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
-	pos = write_int16(pos, EndianS16_NtoB(trackID));
-	*pos++ = 0;		// no flags
+	putDescr(&p, 0x03, 3 + descrLength(13 + decoderSpecificInfoLen) + descrLength(1));
+	bytestream2_put_be16(&p, trackID);
+	bytestream2_put_byte(&p, 0); // no flags
 	
 	// DecoderConfig descriptor
-	pos = putDescr(pos, 0x04, 13 + decoderSpecificInfoLen);
+	putDescr(&p, 0x04, 13 + decoderSpecificInfoLen);
 	
 	// Object type indication, see http://gpac.sourceforge.net/tutorial/mediatypes.htm
-	if (audio)
-		*pos++ = 0x40;		// aac
-	else
-		*pos++ = 0x20;		// mpeg4 part 2
+	bytestream2_put_byte(&p, audio ? 0x40 : 0x20);
 	
 	// streamtype
-	if (audio)
-		*pos++ = 0x15;
-	else
-		*pos++ = 0x11;
+	bytestream2_put_byte(&p, audio ? 0x15 : 0x11);
 	
 	// 3 bytes: buffersize DB (not sure how to get easily)
-	*pos++ = 0;
-	pos = write_int16(pos, 0);
+	bytestream2_put_byte(&p, 0);
+	bytestream2_put_be16(&p, 0);
 	
 	// max bitrate, not sure how to get easily
-	pos = write_int32(pos, 0);
+	bytestream2_put_be32(&p, 0);
 	
 	// vbr
-	pos = write_int32(pos, 0);
+	bytestream2_put_be32(&p, 0);
 	
 	if (vosLen) {
-		pos = putDescr(pos, 0x05, vosLen);
-		pos = write_data(pos, codecPrivate, vosLen);
+		putDescr(&p, 0x05, vosLen);
+		bytestream2_put_buffer(&p, codecPrivate, vosLen);
 	}
 	
 	// SL descriptor
-	pos = putDescr(pos, 0x06, 1);
-	*pos++ = 0x02;
+	putDescr(&p, 0x06, 1);
+	bytestream2_put_byte(&p, 0x02);
 	
+	*esdsLen = _esdsLen;
 	return esds;
 }
 
@@ -375,7 +398,7 @@ static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 	int trackID = trackNum ? uint16(*trackNum) : 1;
 	uint8_t aacBuf[5] = {0};
 	uint8_t *vosBuf = codecPrivate ? codecPrivate->GetBuffer() : NULL;
-	size_t esdsLen;
+	size_t esdsLen = 0;
 	
 	// vosLen > 2 means SBR; some of those must be rewritten to avoid QT bugs(?)
 	// FIXME: remove when QT works with them
@@ -386,6 +409,9 @@ static Handle CreateEsdsExt(KaxTrackEntry *tr_entry, bool audio)
 		return NULL;
 	
 	uint8_t *esds = CreateEsdsFromSetupData(vosBuf, vosLen, &esdsLen, trackID, audio, !audio);
+	
+	if (!esds)
+		return NULL;
 	
 	Handle esdsExt;
 	PtrToHand(esds, &esdsExt, esdsLen);
@@ -632,7 +658,7 @@ ComponentResult MkvFinishAudioDescription(KaxTrackEntry *tr_entry, Handle *cooki
 	
 	switch (asbd->mFormatID) {
 		case kAudioFormatMPEG4AAC:
-			if (!cookie) return paramErr;
+			if (!cookie || !*cookie) return paramErr;
 			ASBDExt_AAC(tr_entry, *cookie, asbd, acl);
 			break;
 			
@@ -740,7 +766,7 @@ FourCharCode MkvGetFourCC(KaxTrackEntry *tr_entry)
 	if (codecString == MKV_V_MS) {
 		// avi compatibility mode, 4cc is in private info
 		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		if (codecPrivate == NULL)
+		if (codecPrivate == NULL || codecPrivate->GetSize() <= (16+3))
 			return 0;
 		
 		// offset to biCompression in BITMAPINFO
@@ -750,7 +776,7 @@ FourCharCode MkvGetFourCC(KaxTrackEntry *tr_entry)
 	} else if (codecString == MKV_A_MS) {
 		// acm compatibility mode, twocc is in private info
 		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		if (codecPrivate == NULL)
+		if (codecPrivate == NULL || codecPrivate->GetSize() <= 2)
 			return 0;
 		
 		unsigned char *p = (unsigned char *) codecPrivate->GetBuffer();
@@ -765,7 +791,7 @@ FourCharCode MkvGetFourCC(KaxTrackEntry *tr_entry)
 	} else if (codecString == MKV_V_QT) {
 		// QT compatibility mode, private info is the ImageDescription structure, big endian
 		KaxCodecPrivate *codecPrivate = FindChild<KaxCodecPrivate>(*tr_entry);
-		if (codecPrivate == NULL)
+		if (codecPrivate == NULL || codecPrivate->GetSize() <= 4)
 			return 0;
 		
 		// starts at the 4CC

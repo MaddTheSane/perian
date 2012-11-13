@@ -21,6 +21,7 @@
 
 #include <AudioToolbox/AudioToolbox.h>
 #include <libavcodec/dca.h>
+#include <libavcodec/bytestream.h>
 
 #include "ComponentBase.h"
 #include "FFissionDecoder.h"
@@ -31,12 +32,6 @@
 
 #define MY_APP_DOMAIN CFSTR("org.perian.Perian")
 #define PASSTHROUGH_KEY CFSTR("attemptDTSPassthrough")
-
-typedef struct CookieAtomHeader {
-    long           size;
-    long           type;
-    unsigned char  data[1];
-} CookieAtomHeader;
 
 struct WaveFormatEx {
 	uint16_t wFormatTag;
@@ -220,52 +215,57 @@ void FFissionDecoder::SetupExtradata()
 
 int FFissionDecoder::ConvertXiphVorbisCookie()
 {
-	Byte *ptr = magicCookie;
-	Byte *cend = magicCookie + magicCookieSize;
-	Byte *headerData[3] = {NULL};
-	int headerSize[3] = {0};
+	GetByteContext g;
 	
-	while (ptr < cend) {
-		CookieAtomHeader *aheader = reinterpret_cast<CookieAtomHeader *>(ptr);
-		int size = EndianU32_BtoN(aheader->size);
-		ptr += size;
-		if (ptr > cend || size <= 0)
-			break;
+	bytestream2_init(&g, magicCookie, magicCookieSize);
+	int headerOffset[3] = {};
+	int headerSize[3] = {};
+
+	while (bytestream2_get_bytes_left(&g)) {
+		unsigned size, type;
+		size = bytestream2_get_be32(&g);
+		type = bytestream2_get_be32(&g);
 		
-		switch(EndianS32_BtoN(aheader->type)) {
+		unsigned dataSize = size - 8;
+		
+		switch(type) {
 			case kCookieTypeVorbisHeader:
-				headerData[0] = aheader->data;
-				headerSize[0] = size - 8;
+				headerOffset[0] = bytestream2_tell(&g);
+				headerSize[0] = dataSize;
 				break;
 				
 			case kCookieTypeVorbisComments:
-				headerData[1] = aheader->data;
-				headerSize[1] = size - 8;
+				headerOffset[1] = bytestream2_tell(&g);
+				headerSize[1] = dataSize;
 				break;
 				
 			case kCookieTypeVorbisCodebooks:
-				headerData[2] = aheader->data;
-				headerSize[2] = size - 8;
+				headerOffset[2] = bytestream2_tell(&g);
+				headerSize[2] = dataSize;
 				break;
 		}
+		
+		bytestream2_skip(&g, dataSize);
 	}
 	
-    if (headerSize[0] <= 0 || headerSize[1] <= 0 || headerSize[2] <= 0) {
+	int len = headerSize[0] + headerSize[1] + headerSize[2];
+
+    if (headerSize[0] <= 0 || headerSize[1] <= 0 || headerSize[2] <= 0 || len >= magicCookieSize) {
 		Codecprintf(NULL, "Invalid Vorbis extradata\n");
 		return 0;
 	}
 	
-	int len = headerSize[0] + headerSize[1] + headerSize[2];
-	Byte *newCookie = new Byte[len + len/255 + 64 + FF_INPUT_BUFFER_PADDING_SIZE];
-	ptr = newCookie;
+	Size newCookieSize = len + len/255 + 64 + FF_INPUT_BUFFER_PADDING_SIZE;
+	Byte *newCookie = new Byte[newCookieSize];
+	Byte *ptr = newCookie;
 	
-	ptr[0] = 2;		// number of packets minus 1
+	ptr[0] = 2;	// number of packets minus 1
 	int offset = 1;
 	offset += av_xiphlacing(&ptr[offset], headerSize[0]);
 	offset += av_xiphlacing(&ptr[offset], headerSize[1]);
 	for (int i = 0; i < 3; i++) {
-		memcpy(&ptr[offset], headerData[i], headerSize[i]);
-		offset += headerSize[i];
+		bytestream2_seek(&g, headerOffset[i], SEEK_SET);
+		offset += bytestream2_get_buffer(&g, &ptr[offset], headerSize[i]);
 	}
 	
 	delete[] magicCookie;
@@ -484,9 +484,6 @@ void FFissionDecoder::AppendInputData(const void* inInputData, UInt32& ioInputDa
 	}
 }
 
-#define AV_RL16(x) EndianU16_LtoN(*(uint16_t *)(x))
-#define AV_RB16(x) EndianU16_BtoN(*(uint16_t *)(x))
-
 int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *packet, int packetSize, int channelCount, int bigEndian)
 {
 	if(packetSize < 96)
@@ -494,19 +491,29 @@ int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *p
 	
 	static const uint8_t p_sync_le[6] = { 0x72, 0xF8, 0x1F, 0x4E, 0x00, 0x00 };
 	static const uint8_t p_sync_be[6] = { 0xF8, 0x72, 0x4E, 0x1F, 0x00, 0x00 };
+	GetByteContext g;
 	
-	uint32_t mrk = AV_RB16(packet) << 16 | AV_RB16(packet + 2);
+	bytestream2_init(&g, packet, packetSize);
+	uint32_t mrk;
 	unsigned int frameSize = 0;
 	unsigned int blockCount = 0;
+	uint16_t s1, s2;
 
+	mrk  = bytestream2_get_be16(&g) << 16;
+	mrk |= bytestream2_get_be16(&g);
+	
 	switch (mrk) {
 		case DCA_MARKER_RAW_BE:
-			blockCount = (AV_RB16(packet + 4) >> 2) & 0x7f;
-			frameSize = (AV_RB16(packet + 4) & 0x3) << 12 | ((AV_RB16(packet + 6) >> 4) & 0xfff);
+			s1 = bytestream2_get_be16(&g);
+			s2 = bytestream2_get_be16(&g);
+			blockCount = (s1 >> 2) & 0x7f;
+			frameSize = (s1 & 0x3) << 12 | ((s2 >> 4) & 0xfff);
 			break;
 		case DCA_MARKER_RAW_LE:
-			blockCount = (AV_RL16(packet + 4) >> 2) & 0x7f;
-			frameSize = (AV_RL16(packet + 4) & 0x3) << 12 | ((AV_RL16(packet + 6) >> 4) & 0xfff);
+			s1 = bytestream2_get_le16(&g);
+			s2 = bytestream2_get_le16(&g);
+			blockCount = (s1 >> 2) & 0x7f;
+			frameSize = (s1 & 0x3) << 12 | ((s2 >> 4) & 0xfff);
 			break;
 		case DCA_MARKER_14B_BE:
 		case DCA_MARKER_14B_LE:

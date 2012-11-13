@@ -728,8 +728,10 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		
 		FFusionDebugPrint("%p preflighted for %dx%d '%s'. (%d bytes of extradata)\n", glob, (**p->imageDescription).width, (**p->imageDescription).height, FourCCString(glob->componentType), glob->avContext->extradata_size);
         
-		if(glob->avContext->extradata_size != 0 && glob->begin.parser != NULL)
-			ffusionParseExtraData(glob->begin.parser, glob->avContext->extradata, glob->avContext->extradata_size);
+		if(glob->avContext->extradata_size != 0 && glob->begin.parser != NULL) {
+			if (!ffusionParseExtraData(glob->begin.parser, glob->avContext->extradata, glob->avContext->extradata_size))
+				err = featureUnsupported;
+		}
 		
 		if (glob->fileLog)
 			ffusionLogDebugInfo(glob->begin.parser, glob->fileLog);

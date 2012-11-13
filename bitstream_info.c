@@ -35,6 +35,7 @@
 #include <libavcodec/golomb.h>
 #include <libavcodec/mpeg4video.h>
 #include <libavcodec/mpeg4video_parser.h>
+#include <libavcodec/bytestream.h>
 
 #include "CommonUtils.h"
 #include "bitstream_info.h"
@@ -311,6 +312,9 @@ static int decode_nal(const uint8_t *buf, int buf_size, uint8_t *out_buf, int *o
 	int i;
 	int outIndex = 0;
 	int numNulls = 0;
+	
+	if (buf_size<1)
+		return 0;
 		
 	for(i=1; i<buf_size; i++)
 	{
@@ -338,6 +342,7 @@ static int decode_nal(const uint8_t *buf, int buf_size, uint8_t *out_buf, int *o
 	if(outIndex <= 0)
 		return 0;
 	
+	// FIXME use bitstream reader (better safe than encouraging manual reads)
 	*type = buf[0] & 0x1f;
 	*nal_ref_idc = (buf[0] >> 5) & 0x03;
 	*out_buf_size = outIndex;
@@ -635,7 +640,7 @@ static int inline decode_nals(H264ParserContext *context, const uint8_t *buf, in
 	{
 		if(context->is_avc)
 		{
-			if(buf_index >= buf_size)
+			if((buf_index + context->nal_length_size) > buf_size)
 				break;
 			nalsize = 0;
 			switch (context->nal_length_size) {
@@ -827,39 +832,48 @@ static int init_h264_parser(FFusionParserContext *parser)
 static int parse_extra_data_h264(FFusionParserContext *parser, const uint8_t *buf, int buf_size)
 {
 	H264ParserContext *context = parser->internalContext;
-	const uint8_t *cur = buf;
+	GetByteContext g;
 	int count, i, type, ref;
+		
+	bytestream2_init(&g, buf, buf_size);
+	bytestream2_skip(&g, 5);
 	
+	if (buf_size <= 6) return 0;
+
 	context->is_avc = 1;
-	count = *(cur+5) & 0x1f;
-	cur += 6;
+		
+	count = bytestream2_get_byte(&g) & 0x1f;
 	for (i=0; i<count; i++)
 	{
-		int size = AV_RB16(cur);
+		int size = bytestream2_get_be16(&g);
 		int out_size = 0;
+		if(size <= 0 || size > bytestream2_get_bytes_left(&g))
+			return 0;
 		uint8_t *decoded = av_mallocz(size+FF_INPUT_BUFFER_PADDING_SIZE);
 		if(!decoded)
 			return 0;
-		if(decode_nal(cur + 2, size, decoded, &out_size, &type, &ref))
+		if(decode_nal(g.buffer, size, decoded, &out_size, &type, &ref))
 			decode_sps(context, decoded, out_size);
-		cur += size + 2;
-		free(decoded);
+		bytestream2_skip(&g, size);
+		av_free(decoded);
 	}
-	count = *(cur++);
+	count = bytestream2_get_byte(&g);
 	for (i=0; i<count; i++)
 	{
-		int size = AV_RB16(cur);
+		int size = bytestream2_get_be16(&g);
 		int out_size = 0;
+		if(size <= 0 || size > bytestream2_get_bytes_left(&g))
+			return 0;
 		uint8_t *decoded = av_mallocz(size+FF_INPUT_BUFFER_PADDING_SIZE);
 		if(!decoded)
 			return 0;
-		if(decode_nal(cur + 2, size, decoded, &out_size, &type, &ref))
+		if(decode_nal(g.buffer, size, decoded, &out_size, &type, &ref))
 			decode_pps(context, decoded, out_size);
-		cur += size + 2;
-		free(decoded);
+		bytestream2_skip(&g, size);
+		av_free(decoded);
 	}
 	
-	context->nal_length_size = ((*(buf+4)) & 0x03) + 1;
+	context->nal_length_size = (buf[4] & 0x03) + 1;
 	
 	return 1;
 }
@@ -971,7 +985,7 @@ found:
  * @param buf_size Size of the input buffer
  * @return 1 if successful, 0 otherwise
  */
- int ffusionParseExtraData(FFusionParserContext *parser, const uint8_t *buf, int buf_size)
+int ffusionParseExtraData(FFusionParserContext *parser, const uint8_t *buf, int buf_size)
 {
 	 if(parser->parserStructure->extra_data)
 		 return (parser->parserStructure->extra_data)(parser, buf, buf_size);

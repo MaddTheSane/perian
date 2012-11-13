@@ -21,6 +21,7 @@
 ****************************************************************************/
 
 #include <libavcodec/avcodec.h>
+#include <libavcodec/bytestream.h>
 #include <CoreServices/CoreServices.h>
 #include <AudioToolbox/AudioToolbox.h>
 #include <QuickTime/QuickTime.h>
@@ -143,25 +144,26 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	
 	/* Create the Image Description Handle */
 	imgHdl = (ImageDescriptionHandle)NewHandleClear(sizeof(ImageDescription));
-	(*imgHdl)->idSize = sizeof(ImageDescription);
+	ImageDescriptionPtr imgPtr = *imgHdl;
+	imgPtr->idSize = sizeof(ImageDescription);
 	
-	if (!((*imgHdl)->cType = map_video_codec_to_mov_tag(codec->codec_id)))
-		if(!((*imgHdl)->cType = BSWAP(codec->codec_tag)))
-			(*imgHdl)->cType = forced_map_video_codec_to_mov_tag(codec->codec_id);
+	if (!(imgPtr->cType = map_video_codec_to_mov_tag(codec->codec_id)))
+		if(!(imgPtr->cType = BSWAP(codec->codec_tag)))
+			imgPtr->cType = forced_map_video_codec_to_mov_tag(codec->codec_id);
 //	FourCCprintf("fourcc: ", (*imgHdl)->cType);
 	
-	(*imgHdl)->temporalQuality = codecMaxQuality;
-	(*imgHdl)->spatialQuality = codecMaxQuality;
-	(*imgHdl)->width = codec->width;
-	(*imgHdl)->height = codec->height;
-	(*imgHdl)->hRes = 72 << 16;
-	(*imgHdl)->vRes = 72 << 16;
-	(*imgHdl)->depth = codec->bits_per_coded_sample;
-	(*imgHdl)->clutID = -1; // no color lookup table...
+	imgPtr->temporalQuality = codecMaxQuality;
+	imgPtr->spatialQuality = codecMaxQuality;
+	imgPtr->width = codec->width;
+	imgPtr->height = codec->height;
+	imgPtr->hRes = 72 << 16;
+	imgPtr->vRes = 72 << 16;
+	imgPtr->depth = codec->bits_per_coded_sample;
+	imgPtr->clutID = -1; // no color lookup table...
 	
 	// 12 is invalid in mov
 	// FIXME: it might be better to set this based entirely on pix_fmt
-	if ((*imgHdl)->depth == 12 || (*imgHdl)->depth == 0) (*imgHdl)->depth = codec->pix_fmt == PIX_FMT_YUVA420P ? 32 : 24;
+	if (imgPtr->depth == 12 || imgPtr->depth == 0) imgPtr->depth = codec->pix_fmt == PIX_FMT_YUVA420P ? 32 : 24;
 	
 	/* Create the strf image description extension (see AVI's BITMAPINFOHEADER) */
 	imgDescExt = create_strf_ext(codec);
@@ -376,14 +378,10 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
  * in cookieSize, the size of the magic cookie is returned to the caller */
 uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID, int vbr)
 {
-	uint8_t *result = NULL;
-	uint8_t *ptr;
-	AudioFormatAtom formatAtom;
-	AudioTerminatorAtom termAtom;
-	long waveSize;
 	uint8_t *waveAtom = NULL;
-	int size = 0;
-	
+	PutByteContext p;
+	int waveSize;
+
 	if (formatID == kAudioFormatMPEG4AAC) {
 		return CreateEsdsFromSetupData(codec->extradata, codec->extradata_size, cookieSize, 1, true, false);
 	}
@@ -396,51 +394,29 @@ uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatI
 		* extradata_size	for the data still stored in the AVCodecContext structure */
 	waveSize = 18 + codec->extradata_size + 8;
 	waveAtom = av_malloc(waveSize);
+	if (!waveAtom)
+		goto bail;
+	
+	bytestream2_init_writer(&p, waveAtom, waveSize);
 	
 	/* now construct the wave atom */
 	/* QT Atoms are big endian, I think but the WAVE data should be little endian */
-	ptr = write_int32(waveAtom, EndianS32_NtoB(waveSize));
-	ptr = write_int32(ptr, EndianS32_NtoB(formatID));
-	ptr = write_int16(ptr, EndianS16_NtoL(codec->codec_tag));
-	ptr = write_int16(ptr, EndianS16_NtoL(codec->channels));
-	ptr = write_int32(ptr, EndianS32_NtoL(codec->sample_rate));
-	if(vbr)
-		ptr = write_int32(ptr, 0);
-	else
-		ptr = write_int32(ptr, EndianS32_NtoL(codec->bit_rate / 8));
-	ptr = write_int16(ptr, EndianS16_NtoL(codec->block_align));
-	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_coded_sample));
-	ptr = write_int16(ptr, EndianS16_NtoL(codec->extradata_size));
+	bytestream2_put_be32(&p, waveSize);
+	bytestream2_put_be32(&p, formatID);
+	bytestream2_put_le32(&p, codec->codec_tag);
+	bytestream2_put_le32(&p, codec->channels);
+	bytestream2_put_le32(&p, codec->sample_rate);
+	bytestream2_put_le32(&p, vbr ? 0 : codec->bit_rate / 8);
+	bytestream2_put_le16(&p, codec->block_align);
+	bytestream2_put_le16(&p, codec->bits_per_coded_sample);
+	bytestream2_put_le16(&p, codec->extradata_size);
+
 	/* now the remaining stuff */
-	ptr = write_data(ptr, codec->extradata, codec->extradata_size);
-	
-	/* Calculate the size of the cookie */
-	size  = sizeof(formatAtom) + sizeof(termAtom) + waveSize;
-	
-	/* Audio Format Atom */
-	formatAtom.size = EndianS32_NtoB(sizeof(AudioFormatAtom));
-	formatAtom.atomType = EndianS32_NtoB(kAudioFormatAtomType);
-	formatAtom.format = EndianS32_NtoB(formatID);
-	
-	/* Terminator Atom */
-	termAtom.atomType = EndianS32_NtoB(kAudioTerminatorAtomType);
-	termAtom.size = EndianS32_NtoB(sizeof(AudioTerminatorAtom));
-	
-	result = av_malloc(size);
-	
-	/* use ptr to write to the result */
-	ptr = result;
-	
-	/* format atom */
-	ptr = write_data(ptr, (uint8_t*)&formatAtom, sizeof(formatAtom));
-	ptr = write_data(ptr, waveAtom, waveSize);
-	ptr = write_data(ptr, (uint8_t*)&termAtom, sizeof(termAtom));
+	bytestream2_put_buffer(&p, codec->extradata, codec->extradata_size);
 	
 bail:
-		*cookieSize = size;
-	if(waveAtom)
-		av_free(waveAtom);
-	return result;
+	*cookieSize = waveSize;
+	return waveAtom;
 } /* create_cookie() */
 
 /* This function creates an image description extension that some codecs need to be able 
@@ -450,8 +426,8 @@ bail:
 Handle create_strf_ext(AVCodecContext *codec)
 {
 	Handle result = NULL;
-	uint8_t *ptr;
-	long size;
+	PutByteContext p;
+	int size;
 	
 	/* initialize the extension
 	 * 40 bytes			for the BITMAPINFOHEADER stucture, see avienc.c in the ffmpeg project
@@ -461,28 +437,29 @@ Handle create_strf_ext(AVCodecContext *codec)
 	if (result == NULL)
 		goto bail;
 	
+	bytestream2_init_writer(&p, (uint8_t*)*result, size);
+	
 	/* construct the BITMAPINFOHEADER structure */
 	/* QT Atoms are big endian, but the STRF atom should be little endian */
-	ptr = write_int32((uint8_t *)*result, EndianS32_NtoL(size)); /* size */
-	ptr = write_int32(ptr, EndianS32_NtoL(codec->width));
-	ptr = write_int32(ptr, EndianS32_NtoL(codec->height));
-	ptr = write_int16(ptr, EndianS16_NtoL(1)); /* planes */
-	
-	ptr = write_int16(ptr, EndianS16_NtoL(codec->bits_per_coded_sample ? codec->bits_per_coded_sample : 24)); /* depth */
+	bytestream2_put_be32(&p, size);
+	bytestream2_put_le32(&p, codec->width);
+	bytestream2_put_le32(&p, codec->width);
+	bytestream2_put_le16(&p, 1); // planes
+	bytestream2_put_le16(&p, codec->bits_per_coded_sample ?: 24);
+
 	/* compression type */
-	ptr = write_int32(ptr, EndianS32_NtoL(codec->codec_tag));
-	ptr = write_int32(ptr, EndianS32_NtoL(codec->width * codec->height * 3));
-	ptr = write_int32(ptr, EndianS32_NtoL(0));
-	ptr = write_int32(ptr, EndianS32_NtoL(0));
-	ptr = write_int32(ptr, EndianS32_NtoL(0));
-	ptr = write_int32(ptr, EndianS32_NtoL(0));
+	bytestream2_put_le32(&p, codec->codec_tag);
+	bytestream2_put_le32(&p, codec->width * codec->height * 3);
+	bytestream2_put_le32(&p, 0);
+	bytestream2_put_le32(&p, 0);
+	bytestream2_put_le32(&p, 0);
+	bytestream2_put_le32(&p, 0);
 	
 	/* now the remaining stuff */
-	ptr = write_data(ptr, codec->extradata, codec->extradata_size);
+	bytestream2_put_buffer(&p, codec->extradata, codec->extradata_size);
 	
 	if (codec->extradata_size & 1) {
-		uint8_t zero = 0;
-		ptr = write_data(ptr, &zero, 1);
+		bytestream2_put_byte(&p, 0);
 	}
 	
 bail:
