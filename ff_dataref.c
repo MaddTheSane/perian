@@ -22,6 +22,7 @@
 
 #include <QuickTime/QuickTime.h>
 #include <libavformat/avformat.h>
+#include <libavformat/avio_internal.h>
 
 struct _dataref_private {
 	Handle dataRef;
@@ -214,7 +215,7 @@ URLProtocol dataref_protocol = {
 };
 
 /* This is the public function to open bytecontext withs datarefs */
-OSStatus url_open_dataref(ByteIOContext **pb, Handle dataRef, OSType dataRefType, DataHandler *dataHandler, Boolean *wideSupport, int64_t *dataSize)
+OSStatus url_open_dataref(AVIOContext **pb, Handle dataRef, OSType dataRefType, DataHandler *dataHandler, Boolean *wideSupport, int64_t *dataSize)
 {
 	URLContext *uc;
 	URLProtocol *up;
@@ -227,7 +228,7 @@ OSStatus url_open_dataref(ByteIOContext **pb, Handle dataRef, OSType dataRefType
 	
 	up = &dataref_protocol;
 	
-	//FIXME use url_alloc() with better fake protocol
+	//FIXME use url_alloc() with better fake protocol, and avoid using avio_internal
 	uc = av_mallocz(sizeof(URLContext));
 	if(!uc) {
 		err = -ENOMEM;
@@ -247,9 +248,9 @@ OSStatus url_open_dataref(ByteIOContext **pb, Handle dataRef, OSType dataRefType
 		av_free(uc);
 		return err;
 	}
-	err = url_fdopen(pb, uc);
+	err = ffio_fdopen(pb, uc);
 	if(err < 0) {
-		url_close(uc);
+		ffurl_close(uc);
 		return err;
 	}
 	

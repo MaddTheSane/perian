@@ -126,8 +126,6 @@ FFissionDecoder::FFissionDecoder(AudioComponentInstance inInstance) : FFissionCo
 	int initialMap[6] = {0, 1, 2, 3, 4, 5};
 	memcpy(fullChannelMap, initialMap, sizeof(initialMap));
 	
-	// FIXME avcodec_get_context_defaults3
-	avcodec_get_context_defaults2(avContext, AVMEDIA_TYPE_AUDIO);
 	parser = NULL;
 }
 
@@ -382,8 +380,8 @@ void FFissionDecoder::OpenAVCodec()
 	CodecID codecID = FFFourCCToCodecID(mInputFormat.mFormatID);
 	avCodec = avcodec_find_decoder(codecID);
 	
+	avcodec_get_context_defaults3(avContext, avCodec);
 	FFASBDToAVCodecContext(&mInputFormat, avContext);
-	avContext->codec_id = codecID;
 
 	if (avContext->sample_rate == 0) {
 		Codecprintf(NULL, "Invalid sample rate %d\n", avContext->sample_rate);

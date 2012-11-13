@@ -90,7 +90,7 @@ typedef ff_global_context *ff_global_ptr;
 ComponentResult check_system();
 
 /* Public interface of the DataRef interface */
-OSStatus url_open_dataref(ByteIOContext **pb, Handle dataRef, OSType dataRefType, DataHandler *dataHandler, Boolean *wideSupport, int64_t *dataSize);
+OSStatus url_open_dataref(AVIOContext **pb, Handle dataRef, OSType dataRefType, DataHandler *dataHandler, Boolean *wideSupport, int64_t *dataSize);
 
 /* Import routines */
 int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSType dataRefType);

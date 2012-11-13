@@ -89,8 +89,11 @@ ComponentResult FFAvi_MovieImportClose(ff_global_ptr storage, ComponentInstance 
 	if(storage->stream_map)
 		av_free(storage->stream_map);
 	
-	if(storage->format_context)
-		av_close_input_file(storage->format_context);
+	if(storage->format_context) {
+		if (storage->format_context->pb)
+			avio_close(storage->format_context->pb);
+		avformat_close_input(&storage->format_context);
+	}
 	
 	int i;
 	for(i=0; i<16; i++)
@@ -215,44 +218,44 @@ bail:
 // this function is a small avi parser to get the video track's fourcc as
 // fast as possible, so we can decide whether we can handle the necessary 
 // image description extensions for the format in ValidateDataRef() quickly
-OSType get_avi_strf_fourcc(ByteIOContext *pb)
+OSType get_avi_strf_fourcc(AVIOContext *pb)
 {
 	OSType tag, subtag;
 	unsigned int size;
 	
-	if (get_be32(pb) != 'RIFF')
+	if (avio_rb32(pb) != 'RIFF')
 		return 0;
 	
 	// file size
-	get_le32(pb);
+	avio_rl32(pb);
 	
-	if (get_be32(pb) != 'AVI ')
+	if (avio_rb32(pb) != 'AVI ')
 		return 0;
 	
-	while (!url_feof(pb)) {
-		tag = get_be32(pb);
-		size = get_le32(pb);
+	while (!pb->eof_reached) {
+		tag  = avio_rb32(pb);
+		size = avio_rl32(pb);
 		
 		if (tag == 'LIST') {
-			subtag = get_be32(pb);
+			subtag = avio_rb32(pb);
 			
 			// only lists we care about: hdrl & strl, so skip the rest
 			if (subtag != 'hdrl' && subtag != 'strl')
-				url_fskip(pb, size - 4 + (size & 1));
+				avio_skip(pb, size - 4 + (size & 1));
 			
 		} else if (tag == 'strf') {
 			// 16-byte offset to the fourcc
-			url_fskip(pb, 16);
-			return get_be32(pb);
+			avio_skip(pb, 16);
+			return avio_rb32(pb);
 		} else if (tag == 'strh'){
 			// 4-byte offset to the fourcc
-			OSType tag1 = get_be32(pb);
+			OSType tag1 = avio_rb32(pb);
 			if(tag1 == 'iavs' || tag1 == 'ivas')
-				return get_be32(pb);
+				return avio_rb32(pb);
 			else
-				url_fskip(pb, size + (size & 1) - 4);
+				avio_skip(pb, size + (size & 1) - 4);
 		} else
-			url_fskip(pb, size + (size & 1));
+			avio_skip(pb, size + (size & 1));
 	}
 	return 0;
 }
@@ -263,7 +266,7 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	DataHandler dataHandler = NULL;
 	uint8_t buf[PROBE_BUF_SIZE + FF_INPUT_BUFFER_PADDING_SIZE] = {0};
 	AVProbeData pd;
-	ByteIOContext *byteContext;
+	AVIOContext *byteContext;
 
 	/* default */
 	*valid = 0;
@@ -297,7 +300,7 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 			if (id == CODEC_ID_MJPEG || id == CODEC_ID_DVVIDEO || id == CODEC_ID_RAWVIDEO || id == CODEC_ID_MSVIDEO1 || id == CODEC_ID_MSRLE)
 				*valid = 0;
 			
-			url_fclose(byteContext);
+			avio_close(byteContext);
 		}
 	}
 		
@@ -340,9 +343,8 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 										 Track *usedTrack, TimeValue atTime, TimeValue *addedDuration, long inFlags, long *outFlags)
 {
 	ComponentResult result = noErr;
-	ByteIOContext *byteContext;
+	AVIOContext *byteContext;
 	AVFormatContext *ic = NULL;
-	AVFormatParameters params;
 	OSType mediaType;
 	Media media;
 	int count, hadIndex, j;
@@ -362,20 +364,25 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	require_noerr(result, bail);
 	
 	/* Open the Format Context */
-	memset(&params, 0, sizeof(params));
-	result = av_open_input_stream(&ic, byteContext, "", storage->format, &params);
+	ic = avformat_alloc_context();
+	ic->flags |= AVFMT_FLAG_CUSTOM_IO;
+	ic->pb = byteContext;
+	result = avformat_open_input(&ic, "", storage->format, NULL);
 	require_noerr(result,bail);
 	storage->format_context = ic;
+	ic = NULL;
 	
-	if (ic->nb_streams >= 16)
+	int nb_streams = storage->format_context->nb_streams;
+	
+	if (nb_streams >= 16)
 		goto bail;
 
 	// AVIs without an index currently add a few entries to the index so it can
 	// determine codec parameters.  Check for index existence here before it
 	// reads any packets.
 	hadIndex = 1;
-	for (j = 0; j < ic->nb_streams; j++) {
-		if (ic->streams[j]->nb_index_entries <= 1)
+	for (j = 0; j < nb_streams; j++) {
+		if (storage->format_context->streams[j]->nb_index_entries <= 1)
 		{
 			hadIndex = 0;
 			break;
@@ -383,7 +390,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	}
 	
 	/* Get the Stream Infos if not already read */
-	result = av_find_stream_info(ic);
+	result = avformat_find_stream_info(storage->format_context, NULL);
 	
 	// -1 means it couldn't understand at least one stream
 	// which might just mean we don't have its video decoder enabled
@@ -391,7 +398,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		goto bail;
 	
 	// we couldn't find any streams, bail with an error.
-	if(ic->nb_streams == 0) {
+	if(nb_streams == 0) {
 		result = -1; //is there a more appropriate error code?
 		goto bail;
 	}
@@ -407,7 +414,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		storage->map_count = 1;
 		prepare_track(storage, targetTrack, dataRef, dataRefType);
 	} else {
-		storage->map_count = ic->nb_streams;
+		storage->map_count = nb_streams;
 		result = prepare_movie(storage, theMovie, dataRef, dataRefType);
 		if (result != 0)
 			goto bail;
@@ -461,9 +468,10 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		*outFlags |= movieImportResultComplete;
 		
 	} else if(inFlags & movieImportWithIdle) {
-		if(addedDuration && ic->duration > 0) {
+		int64_t duration = storage->format_context->duration;
+		if(addedDuration && duration > 0) {
 			TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
-			*addedDuration = movieTimeScale * ic->duration / AV_TIME_BASE;
+			*addedDuration = movieTimeScale * duration / AV_TIME_BASE;
 			
 			//create a placeholder track so that progress displays correctly.
 			create_placeholder_track(storage->movie, &storage->placeholderTrack, *addedDuration, dataRef, dataRefType);
@@ -472,7 +480,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 			//suggest a speed that's faster than the bare minimum.
 			//if there's an error, the data handler probably doesn't support
 			//this, so we can just ignore.
-			DataHPlaybackHints(storage->dataHandler, 0, 0, -1, (storage->dataSize * 1.15) / ((double)ic->duration / AV_TIME_BASE));
+			DataHPlaybackHints(storage->dataHandler, 0, 0, -1, (storage->dataSize * 1.15) / ((double)duration / AV_TIME_BASE));
 		}
 			
 		//import with idle. Decode a little bit of data now.
@@ -492,6 +500,9 @@ bail:
 		
 	if (result == -1)
 		result = invalidMovie; // a bit better error message
+	
+	if (ic)
+		avformat_free_context(ic);
 	
 	return result;
 } /* FFAvi_MovieImportDataRef */
