@@ -834,6 +834,7 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 		}
 	}
 	
+	return;
 err:
 	Codecprintf(NULL, "ATSU error %ld accessing text layout\n", err);
 }
