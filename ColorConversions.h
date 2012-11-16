@@ -40,6 +40,7 @@ typedef struct CCConverterContext {
 	short height;
 	
 	enum PixelFormat  inPixFmt;
+	enum AVColorSpace inColorSpace;
 	enum AVColorRange inColorRange;
 	enum AVChromaLocation inChromaLocation;
 	

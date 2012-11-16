@@ -24,6 +24,9 @@
 #include "Codecprintf.h"
 #include "CommonUtils.h"
 
+#include <libswscale/swscale.h>
+#include <libavutil/opt.h>
+
 /*
  Converts (without resampling) from ffmpeg pixel formats to the ones QT accepts
  
@@ -32,6 +35,8 @@
  - add a version with bilinear resampling
  - handle YUV 4:2:0 with odd width
  */
+
+//#define ENABLE_SWSCALE
 
 #ifdef __GNUC__
 #define unlikely(x) __builtin_expect(x, 0)
@@ -44,6 +49,8 @@
 #define impossible(x)
 #define always_inline inline
 #endif
+
+#pragma mark Simple conversion functions
 
 static always_inline void Y420toY422_lastrow(UInt8 * __restrict o, UInt8 * __restrict yc, UInt8 * __restrict uc, UInt8 * __restrict vc, int halfwidth)
 {
@@ -458,6 +465,8 @@ static FASTCALL void Y410toY422(const CCConverterContext *ctx, const AVPicture *
 	}
 }
 
+#pragma mark Picture clearing functions
+
 static void ClearRGB(const CCConverterContext *ctx, UInt8 * __restrict baseAddr, int bytesPerPixel)
 {
 	short width = ctx->width, height = ctx->height;
@@ -527,13 +536,7 @@ static FASTCALL void ClearY422(const CCConverterContext *ctx, UInt8 * __restrict
 	}
 }
 
-enum CCConverterType {
-	kCCConverterSimple,
-	kCCConverterSwscale,
-	kCCConverterOpenCL
-};
-
-static const enum CCConverterType kConverterType = kCCConverterSimple;
+#pragma mark Simple converter
 
 static enum PixelFormat CCSimplePixFmtForInput(enum PixelFormat inPixFmt)
 {
@@ -699,12 +702,116 @@ static void CCOpenSimpleConverter(CCConverterContext *ctx)
 	ctx->convert = Block_copy(convertBlock);
 }
 
+#pragma mark SWS converter
+
+static void CCOpenSwscaleConverter(CCConverterContext *ctx)
+{
+	struct SwsContext *sws;
+	int swsRange  = ctx->inColorRange == AVCOL_RANGE_JPEG ? 1 : 0;
+	int swsCoeffCode;
+	
+	float hShift=0, vShift=0;
+	
+	const int *swsCoeff;
+	
+	switch (ctx->inColorSpace) {
+		case AVCOL_SPC_SMPTE170M:
+		case AVCOL_SPC_SMPTE240M:
+		default:
+			swsCoeffCode = SWS_CS_ITU601;
+			break;
+		case AVCOL_SPC_BT709:
+			swsCoeffCode = SWS_CS_ITU709;
+			break;
+		case AVCOL_SPC_UNSPECIFIED:
+			swsCoeffCode = ctx->height > 576 ? SWS_CS_ITU709 : SWS_CS_ITU601;
+			break;
+	}
+	
+	// TODO: should left be shifted .5, or should center be shifted -.5?
+	switch (ctx->inChromaLocation) {
+		case AVCHROMA_LOC_LEFT:
+			hShift = .5;
+			break;
+		case AVCHROMA_LOC_UNSPECIFIED:
+		case AVCHROMA_LOC_CENTER:
+		default:
+			break;
+		case AVCHROMA_LOC_TOPLEFT:
+			hShift = .5; vShift = .5;
+			break;
+		case AVCHROMA_LOC_TOP:
+			vShift = .5;
+			break;
+		case AVCHROMA_LOC_BOTTOMLEFT:
+			hShift = .5; vShift = -.5;
+			break;
+		case AVCHROMA_LOC_BOTTOM:
+			vShift = -.5;
+	}
+	
+	Codecprintf(NULL, "Color space %d/%d, chroma loc %d (%f %f)\n", ctx->inColorSpace, swsCoeffCode, ctx->inChromaLocation, hShift, vShift);
+		
+	swsCoeff = sws_getCoefficients(swsCoeffCode);
+	
+	sws = sws_alloc_context();
+	av_opt_set_int(sws, "srcw", ctx->width, 0);
+	av_opt_set_int(sws, "srch", ctx->height, 0);
+	av_opt_set_int(sws, "dstw", ctx->width, 0);
+	av_opt_set_int(sws, "dsth", ctx->height, 0);
+	
+	av_opt_set_int(sws, "src_format", ctx->inPixFmt, 0);
+	av_opt_set_int(sws, "dst_format", ctx->outPixFmt, 0);
+	av_opt_set_int(sws, "src_range", swsRange, 0);
+	av_opt_set(sws, "sws_flags", "bicubic+full_chroma_int", 0);
+	
+	sws_setColorspaceDetails(sws, swsCoeff, swsRange, swsCoeff, 0, 0, 1<<16, 1<<16);
+	
+	SwsFilter *srcFilter = sws_getDefaultFilter(0, .5, 0, 0, hShift, vShift, 0);
+	SwsFilter *dstFilter = sws_getDefaultFilter(0, 0, 0, 0, 0, 0, 0);
+	
+	int err = sws_init_context(sws, srcFilter, dstFilter);
+	
+	ctx->opaque = sws;
+	
+	ctx->convert = Block_copy(^(AVPicture *inPicture, uint8_t *outPicture) FASTCALL {
+		uint8_t * const outdata[4] = {outPicture};
+		int outlinesize[4] = {ctx->outLineSize};
+		sws_scale(ctx->opaque,
+				  (const uint8_t*const*)inPicture->data,
+				  inPicture->linesize,
+				  0, ctx->height,
+				  outdata, outlinesize);
+	});
+}
+
+static void CCCloseSwscaleConverter(CCConverterContext *ctx)
+{
+	sws_freeContext(ctx->opaque);
+}
+
+#pragma mark Color converter API
+
+enum CCConverterType {
+	kCCConverterSimple,
+	kCCConverterSwscale,
+	kCCConverterOpenCL
+};
+
+#ifdef ENABLE_SWSCALE
+static const enum CCConverterType kConverterType = kCCConverterSwscale;
+#else
+static const enum CCConverterType kConverterType = kCCConverterSimple;
+#endif
+
 enum PixelFormat CCOutputPixFmtForInput(enum PixelFormat inPixFmt)
 {
 	switch (kConverterType) {
 		case kCCConverterSimple:
 		default:
 			return CCSimplePixFmtForInput(inPixFmt);
+		case kCCConverterSwscale:
+			return PIX_FMT_RGB24;
 	}
 }
 
@@ -718,7 +825,7 @@ void CCOpenConverter(CCConverterContext *ctx)
 {
 	if (CCIsInvalidImage(ctx)) return;
 	
-	ctx->type = kCCConverterSimple;
+	ctx->type = kConverterType;
 	
 	switch (ctx->type) {
 		case kCCConverterSimple:
@@ -726,9 +833,12 @@ void CCOpenConverter(CCConverterContext *ctx)
 			if (ctx->outPixFmt == -1) return;
 			CCOpenSimpleConverter(ctx);
 			break;
+#ifdef ENABLE_SWSCALE
 		case kCCConverterSwscale:
-			//CCOpenSwscaleConverter(ctx);
+			ctx->outPixFmt = PIX_FMT_RGB24;
+			CCOpenSwscaleConverter(ctx);
 			break;
+#endif
 		case kCCConverterOpenCL:
 			//CCOpenCLConverter(ctx);
 			break;
@@ -742,8 +852,12 @@ void CCCloseConverter(CCConverterContext *ctx)
 			if (!ctx->convert) return;
 			Block_release(ctx->convert);
 			break;
+#ifdef ENABLE_SWSCALE
 		case kCCConverterSwscale:
+			CCCloseSwscaleConverter(ctx);
+			Block_release(ctx->convert);
 			break;
+#endif
 		case kCCConverterOpenCL:
 			break;
 	}

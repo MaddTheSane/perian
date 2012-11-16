@@ -865,8 +865,8 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 		return internalComponentErr;
 	}
 	
-	if (p->frameNumber == 0 && p->dstPixMap.pixelFormat != **glob->pixelTypes) {
-		Codecprintf(glob->fileLog, "QT gave us unwanted pixelFormat %s (%08x), this will not work\n", FourCCString(p->dstPixMap.pixelFormat), (unsigned)p->dstPixMap.pixelFormat);
+	if (p->frameNumber <= 1 && p->dstPixMap.pixelFormat != **(OSType**)glob->pixelTypes) {
+		Codecprintf(NULL, "QT gave us unwanted pixelFormat %s (%08x), this will not work\n", FourCCString(p->dstPixMap.pixelFormat), (unsigned)p->dstPixMap.pixelFormat);
 	}
 	
 	if(myDrp->decoded)
@@ -1203,6 +1203,7 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	}
 	
 	if (!colorConv->convert) {
+		colorConv->inColorSpace     = glob->avContext->colorspace;
 		colorConv->inColorRange     = glob->avContext->color_range;
 		colorConv->inChromaLocation = glob->avContext->chroma_sample_location;
 		memcpy(colorConv->inLineSizes, picture->linesize, sizeof(picture->linesize));

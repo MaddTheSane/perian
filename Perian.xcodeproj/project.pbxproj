@@ -136,7 +136,7 @@
 		3D211A300B6B1AD80051299D /* SubParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */; };
 		3D2A136F1213D3CC002BFAEA /* KaxDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D2A136E1213D3CC002BFAEA /* KaxDefines.h */; };
 		3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
-		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; settings = {COMPILER_FLAGS = "-O3"; }; };
+		3D4A7A990B5533BC004C5D6A /* ColorConversions.c in Sources */ = {isa = PBXBuildFile; fileRef = 3D4A7A980B5533BC004C5D6A /* ColorConversions.c */; };
 		3D5AB53C10BB52B500D1E688 /* CommonUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 61D517720AE0402E00A671E1 /* CommonUtils.c */; };
 		3D70B04B13CC187900711D41 /* KaxSemantic.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D70B04A13CC187900711D41 /* KaxSemantic.h */; };
 		3D70B04D13CC188300711D41 /* KaxSemantic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D70B04C13CC188300711D41 /* KaxSemantic.cpp */; };
@@ -668,6 +668,7 @@
 		3D802EC21032B9B50034BF4A /* ssa2pdf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ssa2pdf.m; path = Subtitles/ssa2pdf.m; sourceTree = "<group>"; };
 		3D802F8510336EE90034BF4A /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		3D95B9000E208965007C8F51 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = /usr/lib/libbz2.dylib; sourceTree = "<absolute>"; };
+		3D9D088016563BEE0016C817 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = "DerivedData/Perian/Build/Products/Deployment+Debug/Universal/libswscale.a"; sourceTree = "<group>"; };
 		3DA6322312865F5400AC1962 /* FFmpegUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = FFmpegUtils.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		3DA6322412865F5400AC1962 /* FFmpegUtils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFmpegUtils.c; sourceTree = "<group>"; };
 		3DAD08080FBF7C6F001E156F /* ssa2html */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ssa2html; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1014,6 +1015,7 @@
 				11D4EFA10A3CE8C10066D45F /* libavcodec.a */,
 				8F483B540A642644002CCA73 /* libavformat.a */,
 				11D4EFA20A3CE8C10066D45F /* libavutil.a */,
+				3D9D088016563BEE0016C817 /* libswscale.a */,
 				11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */,
 				11D4EED50A3CE7EC0066D45F /* QuickTime.framework */,
 				F53E18E40B4F483C003A0471 /* Security.framework */,
@@ -2358,6 +2360,10 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/DerivedData/Perian/Build/Products/Deployment+Debug/Universal\"",
+				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
@@ -2397,6 +2403,10 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/DerivedData/Perian/Build/Products/Deployment+Debug/Universal\"",
+				);
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -2563,6 +2573,10 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/DerivedData/Perian/Build/Products/Deployment+Debug/Universal\"",
+				);
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
