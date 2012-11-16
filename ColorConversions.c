@@ -20,7 +20,6 @@
  */
 
 #include <QuickTime/QuickTime.h>
-#include <Accelerate/Accelerate.h>
 #include "ColorConversions.h"
 #include "Codecprintf.h"
 #include "CommonUtils.h"
@@ -34,8 +33,15 @@
  - handle YUV 4:2:0 with odd width
  */
 
+#ifdef __GNUC__
 #define unlikely(x) __builtin_expect(x, 0)
 #define likely(x) __builtin_expect(x, 1)
+#define impossible(x) if (x) __builtin_unreachable()
+#else
+#define unlikely(x) x
+#define likely(x)   x
+#define impossible(x)
+#endif
 
 //Handles the last row for Y420 videos with an odd number of luma rows
 //FIXME: odd number of luma columns is not handled and they will be lost
@@ -60,11 +66,13 @@ static void Y420toY422_lastrow(UInt8 *o, UInt8 *yc, UInt8 *uc, UInt8 *vc, int ha
 #include <emmintrin.h>
 
 static FASTCALL void Y420toY422_sse2(AVPicture *picture, UInt8 *o, int outRB, int width, int height)
-{
+{	
 	UInt8	*yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
 	int		rY = picture->linesize[0], rUV = picture->linesize[1];
 	int		y, x, halfwidth = width >> 1, halfheight = height >> 1;
 	int		vWidth = width >> 5;
+	
+	impossible(width <= 1 || height <= 1 || outRB <= 0 || rY <= 0 || rUV <= 0);
 	
 	for (y = 0; y < halfheight; y++) {
 		UInt8   *o2 = o + outRB,   *yc2 = yc + rY;
@@ -168,6 +176,8 @@ static FASTCALL void Y420toY422_x86_scalar(AVPicture *picture, UInt8 *o, int out
 	int		halfheight = height >> 1, halfwidth = width >> 1;
 	int		y, x;
 	
+	impossible(width <= 1 || height <= 1 || outRB <= 0 || rY <= 0 || rUV <= 0);
+
 	for (y = 0; y < halfheight; y ++) {
 		UInt8 *o2 = o + outRB, *yc2 = yc + rY;
 		
@@ -186,7 +196,7 @@ static FASTCALL void Y420toY422_x86_scalar(AVPicture *picture, UInt8 *o, int out
 		u  += rUV;
 		v  += rUV;
 	}
-
+	
 	HandleLastRow(o, yc, u, v, halfwidth, height);
 }
 
@@ -197,6 +207,8 @@ static FASTCALL void YA420toV408(AVPicture *picture, UInt8 *o, int outRB, int wi
 	UInt8	*yc = picture->data[0], *u = picture->data[1], *v = picture->data[2], *a = picture->data[3];
 	int		rYA = picture->linesize[0], rUV = picture->linesize[1];
 	int y, x;
+	
+	impossible(width <= 0 || height <= 0 || outRB <= 0 || rYA <= 0 || rUV <= 0);
 	
 	for (y = 0; y < height; y++) {
 		for (x = 0; x < width; x++) {
@@ -221,6 +233,8 @@ static FASTCALL void BGR24toRGB24(AVPicture *picture, UInt8 *baseAddr, int rowBy
 	UInt8 *srcPtr = picture->data[0];
 	int srcRB = picture->linesize[0];
 	int x, y;
+	
+	impossible(width <= 0 || height <= 0 || srcRB <= 0 || rowBytes <= 0);
 	
 	for (y = 0; y < height; y++)
 	{
@@ -303,6 +317,8 @@ static FASTCALL void Y422toY422(AVPicture *picture, UInt8 *o, int outRB, int wid
 	int		rY = picture->linesize[0], rUV = picture->linesize[1];
 	int		x, y, halfwidth = width >> 1;
 	
+	impossible(width <= 0 || height <= 1 || outRB <= 0 || rY <= 0 || rUV <= 0);
+
 	for (y = 0; y < height; y++) {
 		for (x = 0; x < halfwidth; x++) {
 			int x2 = x * 2, x4 = x * 4;
@@ -404,95 +420,185 @@ static FASTCALL void ClearY422(UInt8 *baseAddr, int rowBytes, int width, int hei
 	}
 }
 
-OSType ColorConversionDstForPixFmt(enum PixelFormat ffPixFmt)
+enum CCConverterType {
+	kCCConverterSimple,
+	kCCConverterSwscale,
+	kCCConverterOpenCL
+};
+
+static const enum CCConverterType kConverterType = kCCConverterSimple;
+
+static enum PixelFormat CCSimplePixFmtForInput(enum PixelFormat inPixFmt)
 {
-	switch (ffPixFmt) {
+	enum PixelFormat outPixFmt;
+	
+	switch (inPixFmt) {
 		case PIX_FMT_RGB555LE:
 		case PIX_FMT_RGB555BE:
-			return k16BE555PixelFormat;
+			outPixFmt = PIX_FMT_RGB555BE;
+			break;
 		case PIX_FMT_BGR24:
-			return k24RGBPixelFormat; //FIXME: try k24BGRPixelFormat
 		case PIX_FMT_RGB24:
-			return k24RGBPixelFormat;
+			outPixFmt = PIX_FMT_RGB24;
+			break;
 		case PIX_FMT_ARGB:
 		case PIX_FMT_BGRA:
-			return k32ARGBPixelFormat;
+			outPixFmt = PIX_FMT_ARGB;
+			break;
 		case PIX_FMT_YUV410P:
-			return k2vuyPixelFormat;
 		case PIX_FMT_YUVJ420P:
 		case PIX_FMT_YUV420P:
-			return k2vuyPixelFormat; //disables "fast YUV" path
 		case PIX_FMT_YUV422P:
-			return k2vuyPixelFormat;
+			outPixFmt = PIX_FMT_YUV422P;
+			break;
 		case PIX_FMT_YUVA420P:
-			return k4444YpCbCrA8PixelFormat;
+			outPixFmt = PIX_FMT_YUV444P; // not quite...
+			break;
+		case PIX_FMT_YUV420P10LE:
+			// k422YpCbCr10CodecType? k2vuyPixelFormat? straight to RGB?
+			// same for full range 8-bit
 		default:
-			return 0; // error
+			Codecprintf(NULL, "Unknown input pix fmt %d\n", inPixFmt);
+			outPixFmt = -1;
+	}
+	
+	return outPixFmt;
+}
+
+// Let's just not decode 1x1 images, saves time
+static bool CCIsInvalidImage(CCConverterContext *ctx)
+{	
+	switch (ctx->inPixFmt) {
+		case PIX_FMT_YUVJ420P:
+		case PIX_FMT_YUV420P:
+		case PIX_FMT_YUVA420P:
+			if (ctx->width < 2 || ctx->height < 2) return true;
+		case PIX_FMT_YUV422P:
+			if (ctx->height < 2) return true;
+		default:
+			;
+	}
+	
+	return false;
+}
+
+static void CCOpenSimpleConverter(CCConverterContext *ctx)
+{
+	void (*convert)(AVPicture *inPicture, UInt8 *outBaseAddr, int outRowBytes, int outWidth, int outHeight) FASTCALL;
+	void (*clear)(UInt8 *outBaseAddr, int outRowBytes, int outWidth, int outHeight) FASTCALL;
+	
+	void (^convertBlock)(AVPicture*, uint8_t*) FASTCALL = nil;
+	void (^clearBlock)(uint8_t*) FASTCALL = nil;
+	
+	switch (ctx->inPixFmt) {
+		case PIX_FMT_YUVJ420P:
+		case PIX_FMT_YUV420P:
+			clear = ClearY422;
+			convert = Y420toY422_sse2;
+			break;
+		case PIX_FMT_BGR24:
+			clear = ClearRGB24;
+			convert = BGR24toRGB24;
+			break;
+		case PIX_FMT_ARGB:
+			clear = ClearRGB32;
+#ifdef __BIG_ENDIAN__
+			convert = RGB32toRGB32Swap;
+#else
+			convert = RGB32toRGB32Copy;
+#endif
+			break;
+		case PIX_FMT_BGRA:
+			clear = ClearRGB32;
+#ifdef __BIG_ENDIAN__
+			convert = RGB32toRGB32Copy;
+#else
+			convert = RGB32toRGB32Swap;
+#endif
+			break;
+		case PIX_FMT_RGB24:
+			clear = ClearRGB24;
+			convert = RGB24toRGB24;
+			break;
+		case PIX_FMT_RGB555LE:
+			clear = ClearRGB16;
+			convert = RGB16toRGB16Swap;
+			break;
+		case PIX_FMT_RGB555BE:
+			clear = ClearRGB16;
+			convert = RGB16toRGB16;
+			break;
+		case PIX_FMT_YUV410P:
+			clear = ClearY422;
+			convert = Y410toY422;
+			break;
+		case PIX_FMT_YUV422P:
+			clear = ClearY422;
+			convert = Y422toY422;
+			break;
+		case PIX_FMT_YUVA420P:
+			clear = ClearV408;
+			convert = YA420toV408;
+			break;
+		default:
+			;
+	}
+	
+	if (!convertBlock)
+		convertBlock = ^(AVPicture *inPicture, UInt8 *outPicture) FASTCALL {
+			convert(inPicture, outPicture, ctx->outLineSize, ctx->width, ctx->height);
+		};
+	
+	if (!clearBlock)
+		clearBlock = ^(uint8_t *outPicture) FASTCALL {
+			clear(outPicture, ctx->outLineSize, ctx->width, ctx->height);
+		};
+	
+	ctx->convert = Block_copy(convertBlock);
+	ctx->clear   = Block_copy(clearBlock);
+}
+
+enum PixelFormat CCOutputPixFmtForInput(enum PixelFormat inPixFmt)
+{
+	switch (kConverterType) {
+		case kCCConverterSimple:
+		default:
+			return CCSimplePixFmtForInput(inPixFmt);
 	}
 }
 
-int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFmt, AVPicture *ffPicture, OSType qtPixFmt)
+void CCOpenConverter(CCConverterContext *ctx)
 {
-	switch (ffPixFmt) {
-		case PIX_FMT_YUVJ420P:
-		case PIX_FMT_YUV420P:
-			funcs->clear = ClearY422;
-			
-			//can't set this without the first real frame
-			if (ffPicture) {
-				if (ffPicture->linesize[0] & 15)
-					funcs->convert = Y420toY422_x86_scalar;
-				else
-					funcs->convert = Y420toY422_sse2;
-			}
-			break;
-		case PIX_FMT_BGR24:
-			funcs->clear = ClearRGB24;
-			funcs->convert = BGR24toRGB24;
-			break;
-		case PIX_FMT_ARGB:
-			funcs->clear = ClearRGB32;
-#ifdef __BIG_ENDIAN__
-			funcs->convert = RGB32toRGB32Swap;
-#else
-			funcs->convert = RGB32toRGB32Copy;
-#endif
-			break;
-		case PIX_FMT_BGRA:
-			funcs->clear = ClearRGB32;
-#ifdef __BIG_ENDIAN__
-			funcs->convert = RGB32toRGB32Copy;
-#else
-			funcs->convert = RGB32toRGB32Swap;
-#endif
-			break;
-		case PIX_FMT_RGB24:
-			funcs->clear = ClearRGB24;
-			funcs->convert = RGB24toRGB24;
-			break;
-		case PIX_FMT_RGB555LE:
-			funcs->clear = ClearRGB16;
-			funcs->convert = RGB16toRGB16Swap;
-			break;
-		case PIX_FMT_RGB555BE:
-			funcs->clear = ClearRGB16;
-			funcs->convert = RGB16toRGB16;
-			break;
-		case PIX_FMT_YUV410P:
-			funcs->clear = ClearY422;
-			funcs->convert = Y410toY422;
-			break;
-		case PIX_FMT_YUV422P:
-			funcs->clear = ClearY422;
-			funcs->convert = Y422toY422;
-			break;
-		case PIX_FMT_YUVA420P:
-			funcs->clear = ClearV408;
-			funcs->convert = YA420toV408;
-			break;
-		default:
-			return paramErr;
-	}
+	if (CCIsInvalidImage(ctx)) return;
 	
-	return noErr;
+	ctx->type = kCCConverterSimple;
+	
+	switch (ctx->type) {
+		case kCCConverterSimple:
+			ctx->outPixFmt = CCSimplePixFmtForInput(ctx->inPixFmt);
+			if (ctx->outPixFmt == -1) return;
+			CCOpenSimpleConverter(ctx);
+			break;
+		case kCCConverterSwscale:
+			//CCOpenSwscaleConverter(ctx);
+			break;
+		case kCCConverterOpenCL:
+			//CCOpenCLConverter(ctx);
+			break;
+	}
+}
+
+void CCCloseConverter(CCConverterContext *ctx)
+{
+	switch (ctx->type) {
+		case kCCConverterSimple:
+			if (!ctx->convert) return;
+			Block_release(ctx->convert);
+			Block_release(ctx->clear);
+			break;
+		case kCCConverterSwscale:
+			break;
+		case kCCConverterOpenCL:
+			break;
+	}
 }

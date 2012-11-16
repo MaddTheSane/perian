@@ -124,7 +124,7 @@ typedef struct
 	FFusionData		data;
 	struct decode_glob	decode;
 	struct decode_stats stats;
-	ColorConversionFuncs colorConv;
+	CCConverterContext colorConv;
 } FFusionGlobalsRecord, *FFusionGlobals;
 
 typedef struct
@@ -476,6 +476,8 @@ pascal ComponentResult FFusionCodecClose(FFusionGlobals glob, ComponentInstance 
 			DisposeHandle(glob->pixelTypes);
 		}
 		
+		CCCloseConverter(&glob->colorConv);
+		
 		FFusionDataFree(&(glob->data));
         
 		if(glob->fileLog)
@@ -789,7 +791,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
     index = 0;
 	
 	if (!err) {
-		OSType qtPixFmt = ColorConversionDstForPixFmt(glob->avContext->pix_fmt);
+		OSType qtPixFmt = FFPixFmtToFourCC(CCOutputPixFmtForInput(glob->avContext->pix_fmt));
 		
 		/*
 		 an error here means either
@@ -872,8 +874,8 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 		return internalComponentErr;
 	}
 	
-	if (p->frameNumber == 0 && myDrp->pixelFormat != ColorConversionDstForPixFmt(glob->avContext->pix_fmt)) {
-		Codecprintf(glob->fileLog, "QT gave us unwanted pixelFormat %s (%08x), this will not work\n", FourCCString(myDrp->pixelFormat), (unsigned)myDrp->pixelFormat);
+	if (p->frameNumber == 0 && p->dstPixMap.pixelFormat != **glob->pixelTypes) {
+		Codecprintf(glob->fileLog, "QT gave us unwanted pixelFormat %s (%08x), this will not work\n", FourCCString(p->dstPixMap.pixelFormat), (unsigned)p->dstPixMap.pixelFormat);
 	}
 	
 	if(myDrp->decoded)
@@ -1185,29 +1187,38 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 		if (err) goto err;
 	}
 	
-	if (myDrp->buffer && myDrp->buffer->picture.data[0]) {
-		picture = &myDrp->buffer->picture;
-		glob->lastDisplayedPicture = picture;
-	} else if (glob->lastDisplayedPicture && glob->lastDisplayedPicture->data[0]) {
-		picture = glob->lastDisplayedPicture;
-	} else {
-		//Display black (no frame decoded yet)
-		
-		if (!glob->colorConv.clear) {
-			err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, NULL, myDrp->pixelFormat);
-			if (err) goto err;
-		}
-		
-		glob->colorConv.clear((UInt8*)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height);
-		return noErr;
+	int hasBuffer = myDrp->buffer && myDrp->buffer->picture.data[0];
+	int hasLastPicture = glob->lastDisplayedPicture && glob->lastDisplayedPicture->data[0];
+	
+	CCConverterContext *colorConv = &glob->colorConv;
+
+	// TODO not sure we can safely init the converter this early (without picture set)
+	// color range, input line size may not be known
+
+	if (!colorConv->convert) {
+		colorConv->inPixFmt = glob->avContext->pix_fmt;
+		colorConv->width    = myDrp->width;
+		colorConv->height   = myDrp->height;
+		colorConv->inColorRange     = glob->avContext->color_range;
+		colorConv->inChromaLocation = glob->avContext->chroma_sample_location;
+		colorConv->outLineSize = drp->rowBytes;
+
+		CCOpenConverter(colorConv);
 	}
 	
-	if (!glob->colorConv.convert) {
-		err = ColorConversionFindFor(&glob->colorConv, glob->avContext->pix_fmt, picture, myDrp->pixelFormat);
-		if (err) goto err;
+	if (!hasBuffer && !hasLastPicture) {
+		//Display black (no frame decoded yet)
+		
+		colorConv->clear((UInt8*)drp->baseAddr);
+		return noErr;
+	} else if (!hasBuffer && hasLastPicture) {
+		picture = glob->lastDisplayedPicture;
+	} else {
+		picture = &myDrp->buffer->picture;
+		glob->lastDisplayedPicture = picture;
 	}
-
-	glob->colorConv.convert(picture, (UInt8*)drp->baseAddr, drp->rowBytes, myDrp->width, myDrp->height);
+	
+	colorConv->convert(picture, (UInt8*)drp->baseAddr);
 	
 err:
     return err;

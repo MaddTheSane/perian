@@ -43,6 +43,8 @@ enum CodecID FFFourCCToCodecID(OSType formatID);
 
 OSType FFCodecIDToFourCC(enum CodecID codecID);
 
+OSType FFPixFmtToFourCC(enum PixelFormat inPixFmt);
+
 __END_DECLS
 
 #endif

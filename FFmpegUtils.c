@@ -195,3 +195,30 @@ OSType FFCodecIDToFourCC(enum CodecID codecID)
 	}
 	return CODEC_ID_NONE;
 }
+
+OSType FFPixFmtToFourCC(enum PixelFormat inPixFmt)
+{
+	OSType qtPixFmt;
+
+	switch (inPixFmt) {
+		case PIX_FMT_RGB555BE:
+			qtPixFmt = k16BE555PixelFormat;
+			break;
+		case PIX_FMT_RGB24:
+			qtPixFmt = k24RGBPixelFormat;
+			break;
+		case PIX_FMT_ARGB:
+			qtPixFmt = k32ARGBPixelFormat;
+			break;
+		case PIX_FMT_YUV422P:
+			qtPixFmt = k2vuyPixelFormat;
+			break;
+		case PIX_FMT_YUV444P:
+			qtPixFmt = k4444YpCbCrA8PixelFormat;
+			break;
+		default:
+			return 0;
+	}
+	
+	return qtPixFmt;
+}

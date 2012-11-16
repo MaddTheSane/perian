@@ -25,24 +25,39 @@
 #include <Carbon/Carbon.h>
 #include "libavcodec/avcodec.h"
 
-#if defined(__i386__) && !defined(__llvm__)
+#if defined(__i386__)
 #define FASTCALL __attribute__((fastcall))
 #else
 #define FASTCALL
 #endif
 
-typedef void ColorConversionFunc(AVPicture *inPicture, UInt8 *outBaseAddr, int outRowBytes, int outWidth, int outHeight) FASTCALL;
-typedef void ColorClearFunc(UInt8 *outBaseAddr, int outRowBytes, int outWidth, int outHeight) FASTCALL;
+// Converts libavcodec pixel formats to QT displayable pixel formats
+// All parameters except buffer pointers are fixed for each frame
+typedef struct CCConverterContext {
+	// Input picture
+	int inLineSizes[4];
+	short width;
+	short height;
+	
+	enum PixelFormat  inPixFmt;
+	enum AVColorRange inColorRange;
+	enum AVChromaLocation inChromaLocation;
+	
+	// Output picture
+	int outLineSize;
+	
+	// Parameters end here
+	enum PixelFormat outPixFmt;
+	
+	void (^convert)(AVPicture *inPicture, uint8_t *outPicture) FASTCALL;
+	void (^clear)(uint8_t *picture) FASTCALL;
+	
+	// Private
+	int  type;
+	void *opaque;
+} CCConverterContext;
 
-typedef ColorConversionFunc *ColorConversionFuncPtr;
-typedef ColorClearFunc *ColorClearFuncPtr;
-
-typedef struct ColorConversionFuncs {
-	ColorConversionFuncPtr convert;
-	ColorClearFuncPtr      clear;
-} ColorConversionFuncs;
-
-extern OSType ColorConversionDstForPixFmt(enum PixelFormat ffPixFmt);
-extern int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFmt, AVPicture *ffPicture, OSType qtPixFmt);
-
+enum PixelFormat CCOutputPixFmtForInput(enum PixelFormat inPixFmt);
+void CCOpenConverter(CCConverterContext *ctx);
+void CCCloseConverter(CCConverterContext *ctx);
 #endif
