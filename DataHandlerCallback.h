@@ -41,7 +41,7 @@ class DataHBuffer {
 private:
 	uint8_t *buffer;
 	size_t allocatedSize;
-	int64_t fileOffset;
+	uint64_t fileOffset;
 	size_t dataSize;
 	
 	// this clears the buffer
@@ -72,7 +72,7 @@ private:
 	bool closeHandler;
 	bool supportsWideOffsets;
 	open_mode aMode;
-	SInt64 filesize;
+	UInt64 filesize;
 	DataHBuffer dataBuffer;
 	
 	void Initialize(const open_mode aMode);

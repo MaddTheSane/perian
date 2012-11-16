@@ -276,7 +276,7 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	if(asbd.mFormatID == kAudioFormatAC3 || asbd.mFormatID == 'ms \0')
 	{
 		QTMetaDataRef trackMetaData;
-		OSErr error = QTCopyTrackMetaData(targetTrack, &trackMetaData);
+		OSStatus error = QTCopyTrackMetaData(targetTrack, &trackMetaData);
 		if(error == noErr)
 		{
 			const char *prop = "Surround";

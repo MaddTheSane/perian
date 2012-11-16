@@ -471,7 +471,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		int64_t duration = storage->format_context->duration;
 		if(addedDuration && duration > 0) {
 			TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
-			*addedDuration = movieTimeScale * duration / AV_TIME_BASE;
+			*addedDuration = (movieTimeScale * duration) / AV_TIME_BASE;
 			
 			//create a placeholder track so that progress displays correctly.
 			create_placeholder_track(storage->movie, &storage->placeholderTrack, *addedDuration, dataRef, dataRefType);
@@ -480,7 +480,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 			//suggest a speed that's faster than the bare minimum.
 			//if there's an error, the data handler probably doesn't support
 			//this, so we can just ignore.
-			DataHPlaybackHints(storage->dataHandler, 0, 0, -1, (storage->dataSize * 1.15) / ((double)duration / AV_TIME_BASE));
+			DataHPlaybackHints(storage->dataHandler, 0, 0, -1, (storage->dataSize * 1.15) / (duration / (double)AV_TIME_BASE));
 		}
 			
 		//import with idle. Decode a little bit of data now.

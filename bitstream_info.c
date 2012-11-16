@@ -847,7 +847,7 @@ static int parse_extra_data_h264(FFusionParserContext *parser, const uint8_t *bu
 	{
 		int size = bytestream2_get_be16(&g);
 		int out_size = 0;
-		if(size <= 0 || size > bytestream2_get_bytes_left(&g))
+		if(size <= 0 || size > (int)bytestream2_get_bytes_left(&g))
 			return 0;
 		uint8_t *decoded = av_mallocz(size+FF_INPUT_BUFFER_PADDING_SIZE);
 		if(!decoded)
@@ -862,7 +862,7 @@ static int parse_extra_data_h264(FFusionParserContext *parser, const uint8_t *bu
 	{
 		int size = bytestream2_get_be16(&g);
 		int out_size = 0;
-		if(size <= 0 || size > bytestream2_get_bytes_left(&g))
+		if(size <= 0 || size > (int)bytestream2_get_bytes_left(&g))
 			return 0;
 		uint8_t *decoded = av_mallocz(size+FF_INPUT_BUFFER_PADDING_SIZE);
 		if(!decoded)

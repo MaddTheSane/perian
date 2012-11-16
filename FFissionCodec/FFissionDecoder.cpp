@@ -250,7 +250,7 @@ int FFissionDecoder::ConvertXiphVorbisCookie()
 	
 	int len = headerSize[0] + headerSize[1] + headerSize[2];
 
-    if (headerSize[0] <= 0 || headerSize[1] <= 0 || headerSize[2] <= 0 || len >= magicCookieSize) {
+    if (headerSize[0] <= 0 || headerSize[1] <= 0 || headerSize[2] <= 0 || len >= (int)magicCookieSize) {
 		Codecprintf(NULL, "Invalid Vorbis extradata\n");
 		return 0;
 	}
