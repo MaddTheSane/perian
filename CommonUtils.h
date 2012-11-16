@@ -50,8 +50,6 @@ int IsForcedDecodeEnabled();
 // does the current process break if we use graphicsModePreBlackAlpha?
 int IsTransparentSubtitleHackEnabled();
 
-int IsAltivecSupported();
-
 // is this font name known to be incompatible with ATSUI?
 int ShouldImportFontFileName(const char *filename);
 	

@@ -57,107 +57,6 @@ static void Y420toY422_lastrow(UInt8 *o, UInt8 *yc, UInt8 *uc, UInt8 *vc, int ha
 
 //Y420 Planar to Y422 Packed
 //The only one anyone cares about, so implemented with SIMD
-
-#ifdef __ppc__
-//hand-unrolled code is a bad idea on modern CPUs. luckily, this does not run on modern CPUs, only G3s.
-
-static FASTCALL void Y420toY422_ppc_scalar(AVPicture *picture, UInt8 *baseAddr, int outRB, int width, int height)
-{
-	int	y = height >> 1, halfWidth = width >> 1, halfHalfWidth = width >> 2;
-	UInt8 *inY = picture->data[0], *inU = picture->data[1], *inV = picture->data[2];
-	int	rB = picture->linesize[0], rbUV = picture->linesize[1];
-	 
-	 while (y--) {
-		 UInt32         *ldst = (UInt32 *) baseAddr, *ldstr2 = (UInt32 *) (baseAddr + outRB);
-		 UInt32         *lsrc = (UInt32 *) inY, *lsrcr2 = (UInt32 *) (inY + rB);
-		 UInt16         *sU = (UInt16 *) inU, *sV = (UInt16 *) inV;
-		 ptrdiff_t		off;
-		 
-		 for (off = 0; off < halfHalfWidth; off++) {
-			 UInt16          chrU = sU[off], chrV = sV[off];
-			 UInt32          row1luma = lsrc[off], row2luma = lsrcr2[off];
-			 UInt32          chromas1 = (chrU & 0xff00) << 16 | (chrV & 0xff00), chromas2 = (chrU & 0xff) << 24 | (chrV & 0xff) << 8;
-			 int             off2 = off * 2;
-			 
-			 ldst[off2] = chromas1 | (row1luma & 0xff000000) >> 8 | (row1luma & 0xff0000) >> 16;
-			 ldstr2[off2] = chromas1 | (row2luma & 0xff000000) >> 8 | (row2luma & 0xff0000) >> 16;
-			 off2++;
-			 ldst[off2] = chromas2 | (row1luma & 0xff00) << 8 | row1luma & 0xff;
-			 ldstr2[off2] = chromas2 | (row2luma & 0xff00) << 8 | row2luma & 0xff;
-		 }
-		 
-		 if (halfWidth & 3) {
-			 UInt16         *ssrc = (UInt16 *) inY, *ssrcr2 = (UInt16 *) (inY + rB);
-			 
-			 ptrdiff_t       off = halfWidth - 2;
-			 UInt32          chromas = inV[off] << 8 | (inU[off] << 24);
-			 UInt16          row1luma = ssrc[off], row2luma = ssrcr2[off];
-			 
-			 ldst[off] = chromas | row1luma & 0xff | (row1luma & 0xff00) << 8;
-			 ldstr2[off] = chromas | row2luma & 0xff | (row2luma & 0xff00) << 8;
-		 }
-		 
-		 inY += rB * 2;
-		 inU += rbUV;
-		 inV += rbUV;
-		 baseAddr += outRB * 2;
-	 }
-	
-	HandleLastRow(baseAddr, inY, inU, inV, halfWidth, height);
-}
-
-static FASTCALL void Y420toY422_ppc_altivec(AVPicture *picture, UInt8 *o, int outRB, int width, int height)
-{
-	UInt8	*yc = picture->data[0], *uc = picture->data[1], *vc = picture->data[2];
-	int		rY = picture->linesize[0], rUV = picture->linesize[1];
-	int		y, x, x2, x4, vWidth = width >> 5, halfheight = height >> 1;
-	
-	for (y = 0; y < halfheight; y ++) {
-		vUInt8 *ov = (vUInt8 *)o, *ov2 = (vUInt8 *)(o + outRB), *yv2 = (vUInt8 *)(yc + rY);
-		vUInt8 *uv  = (vUInt8 *)uc, *vv = (vUInt8 *)vc, *yv = (vUInt8 *)yc;
-		
-		for (x = 0; x < vWidth; x++) {
-			x2 = x*2; x4 = x*4;
-			// ldl/stl = mark data as least recently used in cache so they will be flushed out
-			__builtin_prefetch(&yv[x+1], 0, 0); __builtin_prefetch(&yv2[x+1], 0, 0);
-			__builtin_prefetch(&uv[x+1], 0, 0); __builtin_prefetch(&vv[x+1], 0, 0);
-			vUInt8 tmp_u = vec_ldl(0, &uv[x]), tmp_v = vec_ldl(0, &vv[x]), chroma = vec_mergeh(tmp_u, tmp_v),
-					tmp_y = vec_ldl(0, &yv[x2]), tmp_y2 = vec_ldl(0, &yv2[x2]),
-					tmp_y3 = vec_ldl(16, &yv[x2]), tmp_y4 = vec_ldl(16, &yv2[x2]), chromal = vec_mergel(tmp_u, tmp_v);
-			
-			vec_stl(vec_mergeh(chroma, tmp_y), 0, &ov[x4]);
-			vec_stl(vec_mergel(chroma, tmp_y), 16, &ov[x4]);
-			vec_stl(vec_mergeh(chromal, tmp_y3), 32, &ov[x4]);
-			vec_stl(vec_mergel(chromal, tmp_y3), 48, &ov[x4]);
-			
-			vec_stl(vec_mergeh(chroma, tmp_y2), 0, &ov2[x4]);
-			vec_stl(vec_mergel(chroma, tmp_y2), 16, &ov2[x4]);
-			vec_stl(vec_mergeh(chromal, tmp_y4), 32, &ov2[x4]);
-			vec_stl(vec_mergel(chromal, tmp_y4), 48, &ov2[x4]);
-		}
-		
-		if (width & 31) { //spill to scalar for the end if the row isn't a multiple of 32
-			UInt8 *o2 = o + outRB, *yc2 = yc + rY;
-			for (x = vWidth * 32, x2 = x*2; x < width; x += 2, x2 += 4) {
-				int hx = x >> 1;
-				o2[x2]     = o[x2] = uc[hx];
-				o [x2 + 1] = yc[x];
-				o2[x2 + 1] = yc2[x];
-				o2[x2 + 2] = o[x2 + 2] = vc[hx];
-				o [x2 + 3] = yc[x + 1];
-				o2[x2 + 3] = yc2[x + 1];
-			}			
-		}
-		
-		o  += outRB * 2;
-		yc += rY * 2;
-		uc += rUV;
-		vc += rUV;
-	}
-	
-	HandleLastRow(o, yc, uc, vc, width >> 1, height);
-}
-#else
 #include <emmintrin.h>
 
 static FASTCALL void Y420toY422_sse2(AVPicture *picture, UInt8 *o, int outRB, int width, int height)
@@ -290,7 +189,6 @@ static FASTCALL void Y420toY422_x86_scalar(AVPicture *picture, UInt8 *o, int out
 
 	HandleLastRow(o, yc, u, v, halfwidth, height);
 }
-#endif
 
 //Y420+Alpha Planar to V408 (YUV 4:4:4+Alpha 32-bit packed)
 //Could be fully unrolled to avoid x/2
@@ -540,12 +438,6 @@ int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFm
 		case PIX_FMT_YUV420P:
 			funcs->clear = ClearY422;
 			
-#ifdef __ppc__
-			if (IsAltivecSupported())
-				funcs->convert = Y420toY422_ppc_altivec;
-			else
-				funcs->convert = Y420toY422_ppc_scalar;
-#else
 			//can't set this without the first real frame
 			if (ffPicture) {
 				if (ffPicture->linesize[0] & 15)
@@ -553,7 +445,6 @@ int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFm
 				else
 					funcs->convert = Y420toY422_sse2;
 			}
-#endif
 			break;
 		case PIX_FMT_BGR24:
 			funcs->clear = ClearRGB24;
@@ -561,7 +452,7 @@ int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFm
 			break;
 		case PIX_FMT_ARGB:
 			funcs->clear = ClearRGB32;
-#ifdef __ppc__
+#ifdef __BIG_ENDIAN__
 			funcs->convert = RGB32toRGB32Swap;
 #else
 			funcs->convert = RGB32toRGB32Copy;
@@ -569,7 +460,7 @@ int ColorConversionFindFor(ColorConversionFuncs *funcs, enum PixelFormat ffPixFm
 			break;
 		case PIX_FMT_BGRA:
 			funcs->clear = ClearRGB32;
-#ifdef __ppc__
+#ifdef __BIG_ENDIAN__
 			funcs->convert = RGB32toRGB32Copy;
 #else
 			funcs->convert = RGB32toRGB32Swap;

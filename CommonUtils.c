@@ -451,21 +451,6 @@ int IsTransparentSubtitleHackEnabled()
 	return forced;
 }
 
-int IsAltivecSupported()
-{
-	static int altivec = -1;
-	
-	if (altivec == -1) {
-		long response = 0;
-		int err = Gestalt(gestaltPowerPCProcessorFeatures, &response);
-		
-		altivec = !err && ((response & (1 << gestaltPowerPCHasVectorInstructions)) != 0);
-	}
-	
-	return altivec;
-}
-
-
 // this could be a defaults setting, but no real call for it yet
 int ShouldImportFontFileName(const char *filename)
 {
