@@ -1183,30 +1183,31 @@ pascal ComponentResult FFusionCodecDrawBand(FFusionGlobals glob, ImageSubCodecDe
 	
 	CCConverterContext *colorConv = &glob->colorConv;
 
-	// TODO not sure we can safely init the converter this early (without picture set)
-	// color range, input line size may not be known
-
-	if (!colorConv->convert) {
+	if (!colorConv->width) {
 		colorConv->inPixFmt = glob->avContext->pix_fmt;
 		colorConv->width    = glob->avContext->width;
 		colorConv->height   = glob->avContext->height;
-		colorConv->inColorRange     = glob->avContext->color_range;
-		colorConv->inChromaLocation = glob->avContext->chroma_sample_location;
 		colorConv->outLineSize = drp->rowBytes;
-
-		CCOpenConverter(colorConv);
 	}
 	
 	if (!hasBuffer && !hasLastPicture) {
 		//Display black (no frame decoded yet)
 		
-		colorConv->clear((UInt8*)drp->baseAddr);
+		CCClearPicture(colorConv, (UInt8*)drp->baseAddr);
 		return noErr;
 	} else if (!hasBuffer && hasLastPicture) {
 		picture = glob->lastDisplayedPicture;
 	} else {
 		picture = &myDrp->buffer->picture;
 		glob->lastDisplayedPicture = picture;
+	}
+	
+	if (!colorConv->convert) {
+		colorConv->inColorRange     = glob->avContext->color_range;
+		colorConv->inChromaLocation = glob->avContext->chroma_sample_location;
+		memcpy(colorConv->inLineSizes, picture->linesize, sizeof(picture->linesize));
+		
+		CCOpenConverter(colorConv);
 	}
 	
 	colorConv->convert(picture, (UInt8*)drp->baseAddr);

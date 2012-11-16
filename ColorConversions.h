@@ -50,7 +50,6 @@ typedef struct CCConverterContext {
 	enum PixelFormat outPixFmt;
 	
 	void (^convert)(AVPicture *inPicture, uint8_t *outPicture) FASTCALL;
-	void (^clear)(uint8_t *picture) FASTCALL;
 	
 	// Private
 	int  type;
@@ -58,6 +57,7 @@ typedef struct CCConverterContext {
 } CCConverterContext;
 
 enum PixelFormat CCOutputPixFmtForInput(enum PixelFormat inPixFmt);
+void CCClearPicture(CCConverterContext *ctx, uint8_t *outPicture);
 void CCOpenConverter(CCConverterContext *ctx);
 void CCCloseConverter(CCConverterContext *ctx);
 #endif
