@@ -200,6 +200,48 @@ static FASTCALL void Y420toY422_x86_scalar(AVPicture *picture, UInt8 *o, int out
 	HandleLastRow(o, yc, u, v, halfwidth, height);
 }
 
+static FASTCALL void Y420_10toY422_8(AVPicture *picture, UInt8 *o, int outRB, int width, int height)
+{
+	UInt16	*yc = (UInt16*)picture->data[0], *u = (UInt16*)picture->data[1], *v = (UInt16*)picture->data[2];
+	int		rY = picture->linesize[0]/2, rUV = picture->linesize[1]/2;
+	int		halfheight = height >> 1, halfwidth = width >> 1;
+	int		y, x;
+	
+	impossible(width <= 1 || height <= 1 || outRB <= 0 || rY <= 0 || rUV <= 0);
+	
+	for (y = 0; y < halfheight; y ++) {
+		UInt8 *o2 = o + outRB;
+		UInt16 *yc2 = yc + rY;
+		
+		for (x = 0; x < halfwidth; x++) {
+			int x4 = x*4, x2 = x*2;
+			o2[x4]     = o[x4] = u[x]>>2;
+			o [x4 + 1] = yc[x2]>>2;
+			o2[x4 + 1] = yc2[x2]>>2;
+			o2[x4 + 2] = o[x4 + 2] = v[x]>>2;
+			o [x4 + 3] = yc[x2 + 1]>>2;
+			o2[x4 + 3] = yc2[x2 + 1]>>2;
+		}
+		
+		o  += outRB*2;
+		yc += rY*2;
+		u  += rUV;
+		v  += rUV;
+	}
+	
+	if (likely((height&1)==0)) return;
+	
+	for(x=0; x < halfwidth; x++)
+	{
+		int x4 = x*4, x2 = x*2;
+		
+		o[x4]   = u[x]>>2;
+		o[x4+1] = yc[x2]>>2;
+		o[x4+2] = v[x]>>2;
+		o[x4+3] = yc[x2+1]>>2;
+	}
+}
+
 //Y420+Alpha Planar to V408 (YUV 4:4:4+Alpha 32-bit packed)
 //Could be fully unrolled to avoid x/2
 static FASTCALL void YA420toV408(AVPicture *picture, UInt8 *o, int outRB, int width, int height)
@@ -455,8 +497,8 @@ static enum PixelFormat CCSimplePixFmtForInput(enum PixelFormat inPixFmt)
 			outPixFmt = PIX_FMT_YUV444P; // not quite...
 			break;
 		case PIX_FMT_YUV420P10LE:
-			// k422YpCbCr10CodecType? k2vuyPixelFormat? straight to RGB?
-			// same for full range 8-bit
+			outPixFmt = PIX_FMT_YUV422P;
+			break;
 		default:
 			Codecprintf(NULL, "Unknown input pix fmt %d\n", inPixFmt);
 			outPixFmt = -1;
@@ -495,6 +537,10 @@ static void CCOpenSimpleConverter(CCConverterContext *ctx)
 		case PIX_FMT_YUV420P:
 			clear = ClearY422;
 			convert = Y420toY422_sse2;
+			break;
+		case PIX_FMT_YUV420P10LE:
+			clear = ClearY422;
+			convert = Y420_10toY422_8;
 			break;
 		case PIX_FMT_BGR24:
 			clear = ClearRGB24;
