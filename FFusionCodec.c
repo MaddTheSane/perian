@@ -303,22 +303,6 @@ static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avct
     return pix_fmt;
 }
 
-static void SetupMultithreadedDecoding(AVCodecContext *s, enum CodecID codecID)
-{
-	int nthreads = 1;
-	size_t len = 4;
-	
-    // multithreading is only effective for mpeg1/2 and h.264 with slices
-    if (codecID != CODEC_ID_MPEG1VIDEO && codecID != CODEC_ID_MPEG2VIDEO && codecID != CODEC_ID_H264) return;
-    
-	// two threads on multicore, otherwise 1
-	if (sysctlbyname("hw.activecpu", &nthreads, &len, NULL, 0) == -1) nthreads = 1;
-	else nthreads = FFMIN(nthreads, 2);
-	
-	s->thread_count = nthreads;
-	s->thread_type  = FF_THREAD_SLICE;
-}
-
 static void SetSkipLoopFilter(FFusionGlobals glob, AVCodecContext *avctx)
 {
 	Boolean keyExists = FALSE;
@@ -745,8 +729,8 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		glob->avContext->get_buffer = FFusionGetBuffer;
 		glob->avContext->release_buffer = FFusionReleaseBuffer;
 		
-		// multi-slice decoding
-		SetupMultithreadedDecoding(glob->avContext, codecID);
+		// cap threads at a smaller number to be polite
+		glob->avContext->thread_count = 2;
 		
 		// deblock skipping for h264
 		SetSkipLoopFilter(glob, glob->avContext);
@@ -763,7 +747,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
             
 			err = paramErr;
         }
-		
         // codec was opened, but didn't give us its pixfmt
 		// we have to decode the first frame to find out one
 		else if (glob->avContext->pix_fmt == PIX_FMT_NONE && p->bufferSize && p->data) {
@@ -774,7 +757,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 				err = paramErr;
 		}
     }
-    
+
     // Specify the minimum image band height supported by the component
     // bandInc specifies a common factor of supported image band heights - 
     // if your component supports only image bands that are an even

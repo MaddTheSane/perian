@@ -45,11 +45,6 @@
          FilePath = "/Applications/Utilities/QuickTime Player 7.app">
       </PathRunnable>
       <AdditionalOptions>
-         <AdditionalOption
-            key = "MallocScribble"
-            value = ""
-            isEnabled = "YES">
-         </AdditionalOption>
       </AdditionalOptions>
    </LaunchAction>
    <ProfileAction
