@@ -273,33 +273,34 @@ static void DumpFrameDropStats(FFusionGlobals glob)
 
 static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avctx, Ptr data, int bufferSize)
 {
-    AVCodecContext tmpContext;
-    AVFrame tmpFrame;
+    AVCodecContext *tmpContext;
+    AVFrame *tmpFrame;
     int got_picture;
     enum PixelFormat pix_fmt;
     
-    avcodec_get_context_defaults3(&tmpContext, codec);
-	avcodec_get_frame_defaults(&tmpFrame);
-    tmpContext.width = avctx->width;
-    tmpContext.height = avctx->height;
-	tmpContext.flags = avctx->flags;
-	tmpContext.bits_per_coded_sample = avctx->bits_per_coded_sample;
-    tmpContext.codec_tag = avctx->codec_tag;
-	tmpContext.codec_id  = avctx->codec_id;
-	tmpContext.extradata = avctx->extradata;
-	tmpContext.extradata_size = avctx->extradata_size;
+	tmpContext = avcodec_alloc_context3(codec);
+	tmpFrame   = avcodec_alloc_frame();
+
+	avcodec_copy_context(tmpContext, avctx);
 	
-    if (avcodec_open2(&tmpContext, codec, NULL)) {
-		return PIX_FMT_NONE;
+    if (avcodec_open2(tmpContext, codec, NULL)) {
+		pix_fmt = PIX_FMT_NONE;
+		goto bail;
 	}
+	
 	AVPacket pkt;
 	av_init_packet(&pkt);
 	pkt.data = (UInt8*)data;
 	pkt.size = bufferSize;
-    avcodec_decode_video2(&tmpContext, &tmpFrame, &got_picture, &pkt);
-    pix_fmt = tmpContext.pix_fmt;
-    avcodec_close(&tmpContext);
-    
+    avcodec_decode_video2(tmpContext, tmpFrame, &got_picture, &pkt);
+    pix_fmt = tmpContext->pix_fmt;
+    avcodec_close(tmpContext);
+	
+bail:
+	
+    av_freep(&tmpContext);
+	av_freep(&tmpFrame);
+	
     return pix_fmt;
 }
 
