@@ -37,15 +37,17 @@
 #define unlikely(x) __builtin_expect(x, 0)
 #define likely(x) __builtin_expect(x, 1)
 #define impossible(x) if (x) __builtin_unreachable()
+#define always_inline __attribute__((always_inline))
 #else
 #define unlikely(x) x
 #define likely(x)   x
 #define impossible(x)
+#define always_inline inline
 #endif
 
 //Handles the last row for Y420 videos with an odd number of luma rows
 //FIXME: odd number of luma columns is not handled and they will be lost
-static void Y420toY422_lastrow(UInt8 *o, UInt8 *yc, UInt8 *uc, UInt8 *vc, int halfWidth)
+static always_inline void Y420toY422_lastrow(UInt8 *o, UInt8 *yc, UInt8 *uc, UInt8 *vc, int halfWidth)
 {
 	int x;
 	for(x=0; x < halfWidth; x++)
@@ -200,7 +202,7 @@ static FASTCALL void Y420toY422_x86_scalar(AVPicture *picture, UInt8 *o, int out
 	HandleLastRow(o, yc, u, v, halfwidth, height);
 }
 
-static FASTCALL void Y420_10toY422_8(AVPicture *picture, UInt8 *o, int outRB, int width, int height)
+static always_inline void Y420_xtoY422_8(AVPicture *picture, UInt8 *o, int outRB, int width, int height, int shift)
 {
 	UInt16	*yc = (UInt16*)picture->data[0], *u = (UInt16*)picture->data[1], *v = (UInt16*)picture->data[2];
 	int		rY = picture->linesize[0]/2, rUV = picture->linesize[1]/2;
@@ -215,12 +217,12 @@ static FASTCALL void Y420_10toY422_8(AVPicture *picture, UInt8 *o, int outRB, in
 		
 		for (x = 0; x < halfwidth; x++) {
 			int x4 = x*4, x2 = x*2;
-			o2[x4]     = o[x4] = u[x]>>2;
-			o [x4 + 1] = yc[x2]>>2;
-			o2[x4 + 1] = yc2[x2]>>2;
-			o2[x4 + 2] = o[x4 + 2] = v[x]>>2;
-			o [x4 + 3] = yc[x2 + 1]>>2;
-			o2[x4 + 3] = yc2[x2 + 1]>>2;
+			o2[x4]     = o[x4] = u[x] >> shift;
+			o [x4 + 1] = yc[x2]  >> shift;
+			o2[x4 + 1] = yc2[x2] >> shift;
+			o2[x4 + 2] = o[x4 + 2] = v[x] >> shift;
+			o [x4 + 3] = yc[x2 + 1]  >> shift;
+			o2[x4 + 3] = yc2[x2 + 1] >> shift;
 		}
 		
 		o  += outRB*2;
@@ -235,11 +237,26 @@ static FASTCALL void Y420_10toY422_8(AVPicture *picture, UInt8 *o, int outRB, in
 	{
 		int x4 = x*4, x2 = x*2;
 		
-		o[x4]   = u[x]>>2;
-		o[x4+1] = yc[x2]>>2;
-		o[x4+2] = v[x]>>2;
-		o[x4+3] = yc[x2+1]>>2;
+		o[x4]   = u[x] >> shift;
+		o[x4+1] = yc[x2] >> shift;
+		o[x4+2] = v[x] >> shift;
+		o[x4+3] = yc[x2+1] >> shift;
 	}
+}
+
+static FASTCALL void Y420_9toY422_8(AVPicture *picture, UInt8 *o, int outRB, int width, int height)
+{
+	Y420_xtoY422_8(picture, o, outRB, width, height, 1);
+}
+
+static FASTCALL void Y420_10toY422_8(AVPicture *picture, UInt8 *o, int outRB, int width, int height)
+{
+	Y420_xtoY422_8(picture, o, outRB, width, height, 2);
+}
+
+static FASTCALL void Y420_16toY422_8(AVPicture *picture, UInt8 *o, int outRB, int width, int height)
+{
+	Y420_xtoY422_8(picture, o, outRB, width, height, 8);
 }
 
 //Y420+Alpha Planar to V408 (YUV 4:4:4+Alpha 32-bit packed)
@@ -496,7 +513,9 @@ static enum PixelFormat CCSimplePixFmtForInput(enum PixelFormat inPixFmt)
 		case PIX_FMT_YUVA420P:
 			outPixFmt = PIX_FMT_YUV444P; // not quite...
 			break;
+		case PIX_FMT_YUV420P9LE:
 		case PIX_FMT_YUV420P10LE:
+		case PIX_FMT_YUV420P16LE:
 			outPixFmt = PIX_FMT_YUV422P;
 			break;
 		default:
@@ -538,9 +557,17 @@ static void CCOpenSimpleConverter(CCConverterContext *ctx)
 			clear = ClearY422;
 			convert = Y420toY422_sse2;
 			break;
+		case PIX_FMT_YUV420P9LE:
+			clear = ClearY422;
+			convert = Y420_9toY422_8;
+			break;
 		case PIX_FMT_YUV420P10LE:
 			clear = ClearY422;
 			convert = Y420_10toY422_8;
+			break;
+		case PIX_FMT_YUV420P16LE:
+			clear = ClearY422;
+			convert = Y420_16toY422_8;
 			break;
 		case PIX_FMT_BGR24:
 			clear = ClearRGB24;
