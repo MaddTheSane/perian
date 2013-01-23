@@ -248,21 +248,6 @@ static NSMutableDictionary *fontIDCache = nil;
 static ItemCount fontCount;
 static ATSUFontID *fontIDs = NULL;
 
-static void CleanupFontIDCache() __attribute__((destructor));
-static void CleanupFontIDCache()
-{
-	@autoreleasepool {
-		if (fontIDCache) {
-			[fontIDCache release];
-			fontIDCache = nil;
-		}
-		if (fontIDs) {
-			free(fontIDs);
-			fontIDs = NULL;
-		}
-	}
-}
-
 // Assumes ATSUFontID = ATSFontRef. This is true.
 static ATSUFontID GetFontIDForSSAName(NSString *name)
 {	
@@ -363,12 +348,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 		
 		SetATSUStyleOther(style, kATSUFontMatrixTag, sizeof(CGAffineTransform), &mat);
 	}
-
-	const ATSUFontFeatureType ftypes[] = {kLigaturesType, kTypographicExtrasType, kTypographicExtrasType, kTypographicExtrasType};
-	const ATSUFontFeatureSelector fsels[] = {kCommonLigaturesOnSelector, kSmartQuotesOnSelector, kPeriodsToEllipsisOnSelector, kHyphenToEnDashOnSelector};
 	
-	ATSUSetFontFeatures(style, sizeof(ftypes) / sizeof(ATSUFontFeatureType), ftypes, fsels);
-
 	s.extra = [[[SubATSUStyle alloc] initWithATSUStyle:style] autorelease];
 }
 
