@@ -924,22 +924,18 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		}
 	}
 	
-	for(i = 0; i < storage->map_count; i++)
-		firstPts[i] = -1;
-	
-	// record stream durations before we add any samples so that we know what to tell InsertMediaIntoTrack later
-	// also, tell ffmpeg that we don't want them parsing because their parsers screw up the position/size data!!!
 	for(i = 0; i < storage->map_count; i++) {
 		ncstream = &storage->stream_map[i];
 		Media media = ncstream->media;
 		
+		firstPts[i] = -1;
 		if(media && ncstream->duration == -1)
 			ncstream->duration = GetMediaDuration(media);
-		ncstream->str->need_parsing = AVSTREAM_PARSE_NONE;
 	}
 	
-	while((readResult = av_read_frame(formatContext, &packet)) == 0) {		
+	while((readResult = av_read_frame(formatContext, &packet)) == 0) {
 		bool trustPacketDuration = true;
+		int64_t dts = packet.dts;
 		ncstream = &storage->stream_map[packet.stream_index];
 		stream = ncstream->str;
 		codecContext = stream->codec;
@@ -952,15 +948,17 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			flags |= mediaSampleNotSync;
 		
 		if(IS_NUV(storage->componentType) && codecContext->codec_id == CODEC_ID_MP3) trustPacketDuration = false;
-		if(IS_FLV(storage->componentType) && codecContext->codec_id == CODEC_ID_H264) trustPacketDuration = false;
-		if(IS_FLV(storage->componentType) && codecContext->codec_type == AVMEDIA_TYPE_AUDIO) trustPacketDuration = false;
-		
+		if(IS_FLV(storage->componentType)) trustPacketDuration = false;
+
 		memset(&sampleRec, 0, sizeof(sampleRec));
 		sampleRec.dataOffset.hi = packet.pos >> 32;
 		sampleRec.dataOffset.lo = (uint32_t)packet.pos;
 		sampleRec.dataSize = packet.size;
 		sampleRec.sampleFlags = flags;
 				
+		if (packet.pos <= 0)
+			continue;
+		
 		if(firstPts[packet.stream_index] < 0)
 			firstPts[packet.stream_index] = packet.pts;
 		
@@ -978,22 +976,34 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		//add any samples waiting to be added
 		if(ncstream->lastSample.numberOfSamples > 0) {
 			//calculate the duration of the sample before adding it
-			ncstream->lastSample.durationPerSample = (packet.dts - ncstream->lastdts) * ncstream->base.num;
+			ncstream->lastSample.durationPerSample = (dts - ncstream->lastdts) * ncstream->base.num;
 			
 			AddMediaSampleReferences64(ncstream->media, ncstream->sampleHdl, 1, &ncstream->lastSample, NULL);
 		}
 		
-
+#if 0
+		if (0) {
+			Codecprintf(NULL, "Stream:%d Pts:%lld Dts:%lld DtsUsed:%lld Pos:%lld Size:%d\n", packet.stream_index, packet.pts, packet.dts, dts, packet.pos, packet.size);
+			Codecprintf(NULL, "Stream:%d Nsamples:%ld RealDuration:%d CalcDuration:%ld TimeDts:%lld TimeDurations:%lld FrameDts:%d FrameGuess:%lld\n",
+						packet.stream_index, sampleRec.numberOfSamples, packet.duration, ncstream->lastSample.durationPerSample,
+						packet.dts, ncstream->timeByDurations, (int)((packet.dts * stream->time_base.num * ncstream->asbd.mSampleRate) / stream->time_base.den),
+						ncstream->timeByFrames);
+			
+			ncstream->timeByDurations += packet.duration;
+			ncstream->timeByFrames += ncstream->asbd.mFramesPerPacket;
+		}
+#endif
+		
+		ncstream->lastSample = sampleRec;
+		ncstream->lastdts = packet.dts;
+		
         // If this is a nuv file, then we want to set the duration to zero.
         // This is because the nuv container doesn't have the framesize info 
-        // for audio. 
-
+        // for audio.
 		if(packet.duration == 0 || !trustPacketDuration) {
 			//no duration, we'll have to wait for the next packet to calculate it
 			// keep the duration of the last sample, so we can use it if it's the last frame
 			sampleRec.durationPerSample = ncstream->lastSample.durationPerSample;
-			ncstream->lastSample = sampleRec;
-			ncstream->lastdts = packet.dts;
 		} else {
 			ncstream->lastSample.numberOfSamples = 0;
 			

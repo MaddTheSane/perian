@@ -453,11 +453,21 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 		*outFlags |= movieImportResultUsedMultipleTracks;
 	
 	/* The usedTrack parameter. Count the number of Tracks and set usedTrack if we operated
-		* on a single track. Note that this requires the media to be set by track counting above*/
+	 * on a single track. Note that this requires the media to be set by track counting above */
 	if(usedTrack && count == 1 && media)
 		*usedTrack = GetMediaTrack(media);
 	
 	*addedDuration = 0;
+	
+	// Force libavformat to not parse apart frames. QT needs position/size info instead of importing from memory.
+	// This means we need decoder side support for anything that needs to be parsed.
+	for(j = 0; j < storage->map_count; j++) {
+		NCStream *ncstream = &storage->stream_map[j];
+
+		if (ncstream->str->need_parsing != AVSTREAM_PARSE_NONE) {
+			ncstream->str->need_parsing = AVSTREAM_PARSE_HEADERS;
+		}
+	}
 	
 	//attempt to import using indexes.
 	result = import_using_index(storage, &hadIndex, addedDuration);
@@ -504,6 +514,10 @@ bail:
 	if (ic)
 		avformat_free_context(ic);
 	
+	if (result != noErr) {
+		Codecprintf(NULL, "ImportDataRef err %ld\n", result);
+	}
+	
 	return result;
 } /* FFAvi_MovieImportDataRef */
 
@@ -530,6 +544,10 @@ ComponentResult FFAvi_MovieImportIdle(ff_global_ptr storage, long inFlags, long 
 	err = import_with_idle(storage, inFlags | movieImportWithIdle, outFlags, 0, 1000, addSamples);
 	
 	storage->lastIdleTime = currentIdleTime;
+	
+	if (err != noErr) {
+		Codecprintf(NULL, "ImportIdle err %ld\n", err);
+	}
 	return err;
 }
 

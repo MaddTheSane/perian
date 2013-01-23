@@ -40,6 +40,8 @@ struct _NCStream {
 	SampleReference64Ptr sampleTable;
 	SampleReference64Record lastSample;
 	TimeValue duration;
+
+	int64_t timeByDurations, timeByFrames;
 };
 typedef struct _NCStream NCStream;
 
@@ -111,10 +113,6 @@ uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatI
 Handle create_strf_ext(AVCodecContext *codec);
 void set_track_clean_aperture_ext(ImageDescriptionHandle imgDesc, Fixed displayW, Fixed displayH, Fixed pixelW, Fixed pixelH);
 void set_track_colorspace_ext(ImageDescriptionHandle imgDescHandle, Fixed displayW, Fixed displayH);
-
-uint8_t *write_int32(uint8_t *target, int32_t data);
-uint8_t *write_int16(uint8_t *target, int16_t data);
-uint8_t *write_data(uint8_t *target, uint8_t* data, int32_t data_size);
 
 #define BSWAP(a) ( (((a)&0xff) << 24) | (((a)&0xff00) << 8) | (((a)&0xff0000) >> 8) | (((a) >> 24) & 0xff) )
 
