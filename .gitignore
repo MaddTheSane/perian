@@ -1,2 +1,6 @@
 build
 *.DS_Store
+Perian.xcodeproj/project.xcworkspace
+Perian.xcodeproj/xcshareddata
+Perian.xcodeproj/xcuserdata/
+UniversalDetector/UniversalDetector.xcodeproj/xcuserdata/
