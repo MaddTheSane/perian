@@ -4,3 +4,6 @@
 [submodule "libmatroska"]
 	path = libmatroska
 	url = https://github.com/Matroska-Org/libmatroska.git
+[submodule "a52codec"]
+	path = a52codec
+	url = https://github.com/MaddTheSane/a52codec.git
