@@ -1,0 +1,6 @@
+[submodule "libebml"]
+	path = libebml
+	url = https://github.com/Matroska-Org/libebml.git
+[submodule "libmatroska"]
+	path = libmatroska
+	url = https://github.com/Matroska-Org/libmatroska.git
