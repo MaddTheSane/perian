@@ -1,6 +1,6 @@
 #!/bin/sh -v
 PATH=$PWD/Binaries:$PATH
-buildid_ffmpeg="r`svn info ffmpeg | grep -F Revision | awk '{print $2}'`"
+buildid_ffmpeg="r`git --git-dir=./ffmpeg/.git rev-parse HEAD`"
 
 if [ "$MACOSX_DEPLOYMENT_TARGET" = "" ]; then
 	MACOSX_DEPLOYMENT_TARGET="10.6"
@@ -54,9 +54,9 @@ if [ "$buildid_ffmpeg" = "$oldbuildid_ffmpeg" ] ; then
 else
     echo "Static ffmpeg libs are out-of-date ; rebuilding"
     
-    if [ -e ffmpeg/.svn ]; then
+    if [ -e ffmpeg/.git ]; then
     if [ -e ffmpeg/patched ] ; then
-		cd ffmpeg && svn revert -R . && rm patched && cd ..
+		cd ffmpeg && git reset --hard && rm patched && cd ..
 	fi
 
 	cd ffmpeg

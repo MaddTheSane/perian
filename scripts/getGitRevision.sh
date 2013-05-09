@@ -5,14 +5,14 @@
 
 # further modified by Augie Fackler to be gross and sh-based in places
 # so that you can have svn installed anywhere
-PATH=/sw/bin:/opt/local/bin:/usr/local/bin:/usr/bin:$PATH
-ffmpeg_rev=`svnversion -n ./ffmpeg/`
-REV=`svnversion -n ./`
+#PATH=/sw/bin:/opt/local/bin:/usr/local/bin:/usr/bin:$PATH
+ffmpeg_rev=`git --git-dir=./ffmpeg/.git rev-parse HEAD`
+REV=`git rev-parse HEAD`
 echo $REV
 
 cat > $SCRIPT_OUTPUT_FILE_0.tmp <<EOF
-#define SVNREVISION $REV
-#define SVNREVISION_C_STRING "$REV"
+#define GITREVISION $REV
+#define GITREVISION_C_STRING "$REV"
 #define FFMPEGREVISION $ffmpeg_rev
 #define FFMPEGREVISION_C_STRING "$ffmpeg_rev"
 EOF

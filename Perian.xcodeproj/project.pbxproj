@@ -18,15 +18,15 @@
 			name = "FFmpeg Static Libraries";
 			productName = "Version Macros and Static Libraries";
 		};
-		F5121EB70EB3A54A0048EF67 /* Make SVN Rev */ = {
+		F5121EB70EB3A54A0048EF67 /* Make Git Rev */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = F5121EBB0EB3A5680048EF67 /* Build configuration list for PBXAggregateTarget "Make SVN Rev" */;
+			buildConfigurationList = F5121EBB0EB3A5680048EF67 /* Build configuration list for PBXAggregateTarget "Make Git Rev" */;
 			buildPhases = (
 				F5121EB60EB3A54A0048EF67 /* ShellScript */,
 			);
 			dependencies = (
 			);
-			name = "Make SVN Rev";
+			name = "Make Git Rev";
 			productName = "Make SVN Rev";
 		};
 		F59E09EA0A670E3D0019A3F0 /* Debug in QuickTime Player */ = {
@@ -276,23 +276,14 @@
 		61CB11CE0ACDF50F007994BD /* KaxAttachments.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11B60ACDF50F007994BD /* KaxAttachments.cpp */; };
 		61CB11CF0ACDF50F007994BD /* KaxBlock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11B70ACDF50F007994BD /* KaxBlock.cpp */; };
 		61CB11D00ACDF50F007994BD /* KaxBlockData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11B80ACDF50F007994BD /* KaxBlockData.cpp */; };
-		61CB11D10ACDF50F007994BD /* KaxChapters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11B90ACDF50F007994BD /* KaxChapters.cpp */; };
 		61CB11D20ACDF50F007994BD /* KaxCluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BA0ACDF50F007994BD /* KaxCluster.cpp */; };
-		61CB11D30ACDF50F007994BD /* KaxClusterData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BB0ACDF50F007994BD /* KaxClusterData.cpp */; };
-		61CB11D40ACDF50F007994BD /* KaxContentEncoding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BC0ACDF50F007994BD /* KaxContentEncoding.cpp */; };
 		61CB11D50ACDF50F007994BD /* KaxContexts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BD0ACDF50F007994BD /* KaxContexts.cpp */; };
 		61CB11D60ACDF50F007994BD /* KaxCues.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BE0ACDF50F007994BD /* KaxCues.cpp */; };
 		61CB11D70ACDF50F007994BD /* KaxCuesData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11BF0ACDF50F007994BD /* KaxCuesData.cpp */; };
-		61CB11D80ACDF50F007994BD /* KaxInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C00ACDF50F007994BD /* KaxInfo.cpp */; };
 		61CB11D90ACDF50F007994BD /* KaxInfoData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C10ACDF50F007994BD /* KaxInfoData.cpp */; };
 		61CB11DA0ACDF50F007994BD /* KaxSeekHead.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C20ACDF50F007994BD /* KaxSeekHead.cpp */; };
 		61CB11DB0ACDF50F007994BD /* KaxSegment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C30ACDF50F007994BD /* KaxSegment.cpp */; };
-		61CB11DC0ACDF50F007994BD /* KaxTag.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C40ACDF50F007994BD /* KaxTag.cpp */; };
-		61CB11DE0ACDF50F007994BD /* KaxTags.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C60ACDF50F007994BD /* KaxTags.cpp */; };
-		61CB11DF0ACDF50F007994BD /* KaxTrackAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C70ACDF50F007994BD /* KaxTrackAudio.cpp */; };
-		61CB11E00ACDF50F007994BD /* KaxTrackEntryData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C80ACDF50F007994BD /* KaxTrackEntryData.cpp */; };
 		61CB11E10ACDF50F007994BD /* KaxTracks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11C90ACDF50F007994BD /* KaxTracks.cpp */; };
-		61CB11E20ACDF50F007994BD /* KaxTrackVideo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11CA0ACDF50F007994BD /* KaxTrackVideo.cpp */; };
 		61CB11E30ACDF50F007994BD /* KaxVersion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61CB11CB0ACDF50F007994BD /* KaxVersion.cpp */; };
 		61CB11F30ACE0F6D007994BD /* libebml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CB10FF0ACDF350007994BD /* libebml.a */; };
 		61CB11F40ACE0F73007994BD /* libmatroska.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 61CB11770ACDF4D8007994BD /* libmatroska.a */; };
@@ -787,23 +778,14 @@
 		61CB11B60ACDF50F007994BD /* KaxAttachments.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxAttachments.cpp; path = libmatroska/src/KaxAttachments.cpp; sourceTree = "<group>"; };
 		61CB11B70ACDF50F007994BD /* KaxBlock.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxBlock.cpp; path = libmatroska/src/KaxBlock.cpp; sourceTree = "<group>"; };
 		61CB11B80ACDF50F007994BD /* KaxBlockData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxBlockData.cpp; path = libmatroska/src/KaxBlockData.cpp; sourceTree = "<group>"; };
-		61CB11B90ACDF50F007994BD /* KaxChapters.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxChapters.cpp; path = libmatroska/src/KaxChapters.cpp; sourceTree = "<group>"; };
 		61CB11BA0ACDF50F007994BD /* KaxCluster.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxCluster.cpp; path = libmatroska/src/KaxCluster.cpp; sourceTree = "<group>"; };
-		61CB11BB0ACDF50F007994BD /* KaxClusterData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxClusterData.cpp; path = libmatroska/src/KaxClusterData.cpp; sourceTree = "<group>"; };
-		61CB11BC0ACDF50F007994BD /* KaxContentEncoding.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxContentEncoding.cpp; path = libmatroska/src/KaxContentEncoding.cpp; sourceTree = "<group>"; };
 		61CB11BD0ACDF50F007994BD /* KaxContexts.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxContexts.cpp; path = libmatroska/src/KaxContexts.cpp; sourceTree = "<group>"; };
 		61CB11BE0ACDF50F007994BD /* KaxCues.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxCues.cpp; path = libmatroska/src/KaxCues.cpp; sourceTree = "<group>"; };
 		61CB11BF0ACDF50F007994BD /* KaxCuesData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxCuesData.cpp; path = libmatroska/src/KaxCuesData.cpp; sourceTree = "<group>"; };
-		61CB11C00ACDF50F007994BD /* KaxInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxInfo.cpp; path = libmatroska/src/KaxInfo.cpp; sourceTree = "<group>"; };
 		61CB11C10ACDF50F007994BD /* KaxInfoData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxInfoData.cpp; path = libmatroska/src/KaxInfoData.cpp; sourceTree = "<group>"; };
 		61CB11C20ACDF50F007994BD /* KaxSeekHead.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxSeekHead.cpp; path = libmatroska/src/KaxSeekHead.cpp; sourceTree = "<group>"; };
 		61CB11C30ACDF50F007994BD /* KaxSegment.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxSegment.cpp; path = libmatroska/src/KaxSegment.cpp; sourceTree = "<group>"; };
-		61CB11C40ACDF50F007994BD /* KaxTag.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTag.cpp; path = libmatroska/src/KaxTag.cpp; sourceTree = "<group>"; };
-		61CB11C60ACDF50F007994BD /* KaxTags.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTags.cpp; path = libmatroska/src/KaxTags.cpp; sourceTree = "<group>"; };
-		61CB11C70ACDF50F007994BD /* KaxTrackAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTrackAudio.cpp; path = libmatroska/src/KaxTrackAudio.cpp; sourceTree = "<group>"; };
-		61CB11C80ACDF50F007994BD /* KaxTrackEntryData.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTrackEntryData.cpp; path = libmatroska/src/KaxTrackEntryData.cpp; sourceTree = "<group>"; };
 		61CB11C90ACDF50F007994BD /* KaxTracks.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTracks.cpp; path = libmatroska/src/KaxTracks.cpp; sourceTree = "<group>"; };
-		61CB11CA0ACDF50F007994BD /* KaxTrackVideo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxTrackVideo.cpp; path = libmatroska/src/KaxTrackVideo.cpp; sourceTree = "<group>"; };
 		61CB11CB0ACDF50F007994BD /* KaxVersion.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = KaxVersion.cpp; path = libmatroska/src/KaxVersion.cpp; sourceTree = "<group>"; };
 		61D514DC0ADF3DBA00A671E1 /* SubImport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubImport.h; path = Subtitles/SubImport.h; sourceTree = "<group>"; };
 		61D514DD0ADF3DBA00A671E1 /* SubImport.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = SubImport.mm; path = Subtitles/SubImport.mm; sourceTree = "<group>"; };
@@ -1330,24 +1312,15 @@
 				61CB11B60ACDF50F007994BD /* KaxAttachments.cpp */,
 				61CB11B70ACDF50F007994BD /* KaxBlock.cpp */,
 				61CB11B80ACDF50F007994BD /* KaxBlockData.cpp */,
-				61CB11B90ACDF50F007994BD /* KaxChapters.cpp */,
 				61CB11BA0ACDF50F007994BD /* KaxCluster.cpp */,
-				61CB11BB0ACDF50F007994BD /* KaxClusterData.cpp */,
-				61CB11BC0ACDF50F007994BD /* KaxContentEncoding.cpp */,
 				61CB11BD0ACDF50F007994BD /* KaxContexts.cpp */,
 				61CB11BE0ACDF50F007994BD /* KaxCues.cpp */,
 				61CB11BF0ACDF50F007994BD /* KaxCuesData.cpp */,
-				61CB11C00ACDF50F007994BD /* KaxInfo.cpp */,
 				61CB11C10ACDF50F007994BD /* KaxInfoData.cpp */,
 				61CB11C20ACDF50F007994BD /* KaxSeekHead.cpp */,
 				61CB11C30ACDF50F007994BD /* KaxSegment.cpp */,
 				3D70B04C13CC188300711D41 /* KaxSemantic.cpp */,
-				61CB11C40ACDF50F007994BD /* KaxTag.cpp */,
-				61CB11C60ACDF50F007994BD /* KaxTags.cpp */,
-				61CB11C70ACDF50F007994BD /* KaxTrackAudio.cpp */,
-				61CB11C80ACDF50F007994BD /* KaxTrackEntryData.cpp */,
 				61CB11C90ACDF50F007994BD /* KaxTracks.cpp */,
-				61CB11CA0ACDF50F007994BD /* KaxTrackVideo.cpp */,
 				61CB11CB0ACDF50F007994BD /* KaxVersion.cpp */,
 				61CB117C0ACDF4FF007994BD /* FileKax.h */,
 				61CB117D0ACDF4FF007994BD /* KaxAttached.h */,
@@ -1812,7 +1785,7 @@
 				F5CFD3BA0B50142100616865 /* Setup Build Directories */,
 				F5CFD2DB0B5012AA00616865 /* A52Codec */,
 				116C42510B5041BD00FB0738 /* PerianUpdateChecker */,
-				F5121EB70EB3A54A0048EF67 /* Make SVN Rev */,
+				F5121EB70EB3A54A0048EF67 /* Make Git Rev */,
 				3DAD08070FBF7C6F001E156F /* ssa2html */,
 				3DAD09A70FBFAB08001E156F /* detect-encoding */,
 				3D802EA61032B8B00034BF4A /* ssa2pdf */,
@@ -1966,11 +1939,11 @@
 				"$(SRCROOT)/ffmpeg/.svn/dir-wcprops",
 			);
 			outputPaths = (
-				"$(TARGET_BUILD_DIR)/include/SVNRevision.h",
+				"$(TARGET_BUILD_DIR)/include/GITRevision.h",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "source scripts/getSVNRevision.sh";
+			shellScript = "source scripts/getGitRevision.sh";
 		};
 		F535FCD50B4D605900F00D14 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2157,23 +2130,14 @@
 				61CB11CE0ACDF50F007994BD /* KaxAttachments.cpp in Sources */,
 				61CB11CF0ACDF50F007994BD /* KaxBlock.cpp in Sources */,
 				61CB11D00ACDF50F007994BD /* KaxBlockData.cpp in Sources */,
-				61CB11D10ACDF50F007994BD /* KaxChapters.cpp in Sources */,
 				61CB11D20ACDF50F007994BD /* KaxCluster.cpp in Sources */,
-				61CB11D30ACDF50F007994BD /* KaxClusterData.cpp in Sources */,
-				61CB11D40ACDF50F007994BD /* KaxContentEncoding.cpp in Sources */,
 				61CB11D50ACDF50F007994BD /* KaxContexts.cpp in Sources */,
 				61CB11D60ACDF50F007994BD /* KaxCues.cpp in Sources */,
 				61CB11D70ACDF50F007994BD /* KaxCuesData.cpp in Sources */,
-				61CB11D80ACDF50F007994BD /* KaxInfo.cpp in Sources */,
 				61CB11D90ACDF50F007994BD /* KaxInfoData.cpp in Sources */,
 				61CB11DA0ACDF50F007994BD /* KaxSeekHead.cpp in Sources */,
 				61CB11DB0ACDF50F007994BD /* KaxSegment.cpp in Sources */,
-				61CB11DC0ACDF50F007994BD /* KaxTag.cpp in Sources */,
-				61CB11DE0ACDF50F007994BD /* KaxTags.cpp in Sources */,
-				61CB11DF0ACDF50F007994BD /* KaxTrackAudio.cpp in Sources */,
-				61CB11E00ACDF50F007994BD /* KaxTrackEntryData.cpp in Sources */,
 				61CB11E10ACDF50F007994BD /* KaxTracks.cpp in Sources */,
-				61CB11E20ACDF50F007994BD /* KaxTrackVideo.cpp in Sources */,
 				61CB11E30ACDF50F007994BD /* KaxVersion.cpp in Sources */,
 				3D70B04D13CC188300711D41 /* KaxSemantic.cpp in Sources */,
 			);
@@ -2225,12 +2189,12 @@
 		};
 		3DDA62C8134FCAE500E11438 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			target = F5121EB70EB3A54A0048EF67 /* Make Git Rev */;
 			targetProxy = 3DDA62C7134FCAE500E11438 /* PBXContainerItemProxy */;
 		};
 		3DDA62CF134FCB2C00E11438 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			target = F5121EB70EB3A54A0048EF67 /* Make Git Rev */;
 			targetProxy = 3DDA62CE134FCB2C00E11438 /* PBXContainerItemProxy */;
 		};
 		3DE8D9CE1044501E0007C7E7 /* PBXTargetDependency */ = {
@@ -2250,7 +2214,7 @@
 		};
 		F5121EBD0EB3A5AE0048EF67 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F5121EB70EB3A54A0048EF67 /* Make SVN Rev */;
+			target = F5121EB70EB3A54A0048EF67 /* Make Git Rev */;
 			targetProxy = F5121EBC0EB3A5AE0048EF67 /* PBXContainerItemProxy */;
 		};
 		F59E09EC0A670E420019A3F0 /* PBXTargetDependency */ = {
@@ -2357,7 +2321,7 @@
 				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
-				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = (
@@ -2400,7 +2364,7 @@
 				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
-				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = (
@@ -2570,7 +2534,7 @@
 				);
 				INFOPLIST_FILE = "Plists/Perian-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
-				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/QuickTime";
 				LIBRARY_SEARCH_PATHS = (
@@ -2636,7 +2600,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
-				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				PRODUCT_NAME = Perian;
@@ -2802,7 +2766,7 @@
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_OUTPUT_FORMAT = "same-as-input";
-				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -2819,7 +2783,7 @@
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_OUTPUT_FORMAT = "same-as-input";
-				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -2836,7 +2800,7 @@
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_OUTPUT_FORMAT = "same-as-input";
-				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -2898,7 +2862,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
-				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				ONLY_ACTIVE_ARCH = NO;
@@ -2915,7 +2879,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
-				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/SVNRevision.h";
+				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
 				PRODUCT_NAME = Perian;
@@ -3139,7 +3103,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Deployment+Debug";
 		};
-		F5121EBB0EB3A5680048EF67 /* Build configuration list for PBXAggregateTarget "Make SVN Rev" */ = {
+		F5121EBB0EB3A5680048EF67 /* Build configuration list for PBXAggregateTarget "Make Git Rev" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F5121EB80EB3A54A0048EF67 /* Development */,
