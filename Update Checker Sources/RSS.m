@@ -43,7 +43,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #import "RSS.h"
 
 // This comparator function is used to sort the RSS items by their published date.
-int compareNewsItems(id item1, id item2, void *context)
+NSInteger compareNewsItems(id item1, id item2, void *context)
 {
 	// We compare item2 with item1 instead of the other way 'round because we want descending, not ascending. Bit of a hack.
 	return [(NSDate *)[NSDate dateWithNaturalLanguageString:[item2 objectForKey:@"pubDate"]] compare:(NSDate *)[NSDate dateWithNaturalLanguageString:[item1 objectForKey:@"pubDate"]]];
