@@ -7,6 +7,3 @@
 [submodule "a52codec"]
 	path = a52codec
 	url = https://github.com/MaddTheSane/a52codec.git
-[submodule "ffmpeg"]
-	path = ffmpeg
-	url = git://source.ffmpeg.org/ffmpeg.git
