@@ -13,7 +13,7 @@
 
 - initWithDictionary:(NSDictionary *)dict
 {
-	[super init];
+	self = [super init];
 	[self setTitle:[dict objectForKey:@"title"]];
 	[self setDate:[dict objectForKey:@"pubDate"]];
 	[self setDescription:[dict objectForKey:@"description"]];

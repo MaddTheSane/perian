@@ -51,6 +51,9 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 
 @implementation RSS
 
+@synthesize headerItems;
+@synthesize newsItems;
+@synthesize version;
 
 #define titleKey @"title"
 #define linkKey @"link"
@@ -65,80 +68,84 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	return [[self newsItems] objectAtIndex:0];
 }
 
-- (RSS *) initWithTitle: (NSString *) title andDescription: (NSString *) description {
+- (RSS *) initWithTitle: (NSString *) title andDescription: (NSString *) description
+{
 	
 	/*
-	Create an empty feed. Useful for synthetic feeds.
-	*/
+	 Create an empty feed. Useful for synthetic feeds.
+	 */
 	
-	NSMutableDictionary *header;
-
-	flRdf = NO;
+	if (self = [super init]) {
+		
+		NSMutableDictionary *header;
+		
+		flRdf = NO;
+		
+		header = [NSMutableDictionary dictionaryWithCapacity: 2];
+		
+		[header setObject: title forKey: titleKey];
+		
+		[header setObject: description forKey: descriptionKey];
+		
+		headerItems = (NSDictionary *) [header copy];
+		
+		newsItems = [[NSMutableArray alloc] initWithCapacity: 0];
+		
+		version = [[NSString alloc] initWithString: @"synthetic"];
+		
+	}
+	return self;
+} /*initWithTitle*/
 	
-	header = [NSMutableDictionary dictionaryWithCapacity: 2];
 	
-	[header setObject: title forKey: titleKey];
+- (RSS *) initWithData: (NSData *) rssData normalize: (BOOL) fl
+{
 	
-	[header setObject: description forKey: descriptionKey];
-	
-	headerItems = (NSDictionary *) [header copy];
-	
-	newsItems = [[NSMutableArray alloc] initWithCapacity: 0];
-	
-	version = [[NSString alloc] initWithString: @"synthetic"];
-	
-	return (self);
-	} /*initWithTitle*/
-	
-	
-- (RSS *) initWithData: (NSData *) rssData normalize: (BOOL) fl {
-	
-	CFXMLTreeRef tree;
-	
-	flRdf = NO;
-	
-	normalize = fl;
-	
-	NS_DURING
-	
+	if (self = [super init]) {
+		
+		CFXMLTreeRef tree;
+		
+		flRdf = NO;
+		
+		normalize = fl;
+		
+		NS_DURING
+		
 		tree = CFXMLTreeCreateFromData (kCFAllocatorDefault, (CFDataRef) rssData,
-			NULL,  kCFXMLParserSkipWhitespace, kCFXMLNodeCurrentVersion);
-	
-	NS_HANDLER
+										NULL,  kCFXMLParserSkipWhitespace, kCFXMLNodeCurrentVersion);
+		
+		NS_HANDLER
 		
 		tree = nil;
-	
-	NS_ENDHANDLER
-	
-	if (tree == nil) {
 		
-		/*If there was a problem parsing the RSS file,
-		raise an exception.*/
-	
-		NSException *exception = [NSException exceptionWithName: @"RSSParseFailed"
-			reason: @"The XML parser could not parse the RSS data." userInfo: nil];
+		NS_ENDHANDLER
 		
-		[exception raise];
+		if (tree == nil) {
+			
+			/*If there was a problem parsing the RSS file,
+			 raise an exception.*/
+			
+			NSException *exception = [NSException exceptionWithName: @"RSSParseFailed"
+															 reason: @"The XML parser could not parse the RSS data." userInfo: nil];
+			
+			[exception raise];
 		} /*if*/
-	
-	[self createheaderdictionary: tree];
-	
-	[self createitemsarray: tree];
-	
-	[self setversionstring: tree];
-	
-	CFRelease (tree);
-	
-	return (self);
-	} /*initWithData*/
-
+		
+		[self createheaderdictionary: tree];
+		
+		[self createitemsarray: tree];
+		
+		[self setversionstring: tree];
+		
+		CFRelease (tree);
+	}
+	return self;
+} /*initWithData*/
 
 - (RSS *) initWithURL: (NSURL *) url normalize: (BOOL) fl
 {
 	return [self initWithURL: url normalize: fl userAgent: nil];
 }
-
-	 
 	
 - (RSS *) initWithURL: (NSURL *) url normalize: (BOOL) fl userAgent: (NSString*)userAgent
 {
@@ -164,11 +171,10 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	return [self initWithData: rssData normalize: fl];	
 } /*initWithUrl*/
 
-
-- (NSDictionary *) headerItems {
-	
+- (NSDictionary *) headerItems
+{
 	return (headerItems);
-	} /*headerItems*/
+} /*headerItems*/
 
 
 - (NSMutableArray *) newsItems {
@@ -329,7 +335,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		} /*for*/
 	
 	// Sort the news items by published date, descending.
-	newsItems = [[itemsArrayMutable sortedArrayUsingFunction:compareNewsItems context:NULL] retain];
+	newsItems = [[NSMutableArray alloc] initWithArray:[itemsArrayMutable sortedArrayUsingFunction:compareNewsItems context:NULL]];
 	} /*createitemsarray*/
 
 

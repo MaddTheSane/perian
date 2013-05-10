@@ -55,6 +55,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	BOOL normalize;
 	}
 
+@property (readonly) NSDictionary *headerItems;
+@property (readonly) NSMutableArray *newsItems;
+@property (readonly) NSString *version;
+
 
 /*Public*/
 
@@ -64,12 +68,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 - (RSS *) initWithURL: (NSURL *) url normalize: (BOOL) fl;
 - (RSS *) initWithURL: (NSURL *) url normalize: (BOOL) fl userAgent:(NSString *)userAgent;
-
-- (NSDictionary *) headerItems;
-
-- (NSMutableArray *) newsItems;
-
-- (NSString *) version;
 
 // AMM's extensions for Sparkle
 - (NSDictionary *)newestItem;

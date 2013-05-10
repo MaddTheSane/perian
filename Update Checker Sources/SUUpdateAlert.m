@@ -13,7 +13,7 @@
 
 @implementation SUUpdateAlert
 
-- initWithAppcastItem:(SUAppcastItem *)item
+- (id)initWithAppcastItem:(SUAppcastItem *)item
 {
 	NSBundle *current = [NSBundle bundleForClass:[self class]];
 	NSString *path = [current pathForResource:@"SUUpdateAlert" ofType:@"nib"];
@@ -23,7 +23,10 @@
 		path = [framework pathForResource:@"SUUpdateAlert" ofType:@"nib"];
 	}
 	
-	[super initWithWindowNibPath:path owner:self];
+	if (!(self = [super initWithWindowNibPath:path owner:self]))
+	{
+		return nil;
+	}
 	
 	updateItem = [item retain];
 	[self setShouldCascadeWindows:NO];
@@ -47,17 +50,17 @@
 		[delegate updateAlert:self finishedWithChoice:choice];
 }
 
-- (IBAction)installUpdate:sender
+- (IBAction)installUpdate:(id)sender
 {
 	[self endWithSelection:SUInstallUpdateChoice];
 }
 
-- (IBAction)skipThisVersion:sender
+- (IBAction)skipThisVersion:(id)sender
 {
 	[self endWithSelection:SUSkipThisVersionChoice];
 }
 
-- (IBAction)remindMeLater:sender
+- (IBAction)remindMeLater:(id)sender
 {
 	[self endWithSelection:SURemindMeLaterChoice];
 }

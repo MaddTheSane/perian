@@ -93,6 +93,7 @@
 	NSString *currentSystemVersion = [[[NSDictionary dictionaryWithContentsOfFile:versionPlistPath] objectForKey:@"ProductVersion"] retain];
 
 	BOOL updateAvailable = SUStandardVersionComparison([latest minimumSystemVersion], currentSystemVersion);
+	[currentSystemVersion release];
     NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	
@@ -180,8 +181,15 @@
 		name = [name stringByDeletingPathExtension];
 	
 	// We create a temporary directory in /tmp and stick the file there.
+#if 1
 	NSString *tempDir = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
 	BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:tempDir attributes:nil];
+#else
+	NSURL *tempURL = [[[NSFileManager defaultManager] URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:[NSURL fileURLWithPath:@"/tmp"] create:YES error:nil] URLByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+	NSString *tempDir = [tempURL path];
+	BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:tempDir withIntermediateDirectories:YES attributes:nil error:nil];
+#endif
+
 	if (!success)
 	{
 		[NSException raise:@"SUFailTmpWrite" format:@"Couldn't create temporary directory in /tmp"];
@@ -243,6 +251,7 @@ extern char **environ;
 	NSDirectoryEnumerator *dirEnum = [[NSFileManager defaultManager] enumeratorAtPath:[downloadPath stringByDeletingLastPathComponent]];
 	NSString *file = nil;
 	NSString *prefpanelocation = nil;
+	NSError *moveErr = nil;
 	while((file = [dirEnum nextObject]) != nil)
 	{
 		if([[[dirEnum fileAttributes] objectForKey:NSFileTypeSymbolicLink] boolValue])
@@ -252,12 +261,12 @@ extern char **environ;
 			NSString *containingLocation = [downloadPath stringByDeletingLastPathComponent];
 			NSString *oldLocation = [containingLocation stringByAppendingPathComponent:file];
 			prefpanelocation = [[containingLocation stringByDeletingLastPathComponent] stringByAppendingPathComponent:[file lastPathComponent]];
-			[[NSFileManager defaultManager] movePath:oldLocation toPath:prefpanelocation handler:nil];
+			[[NSFileManager defaultManager] moveItemAtPath:oldLocation toPath:prefpanelocation error:&moveErr];
 		}
 	}
 	
 	const char *buf = "open \"$PREFPANE_LOCATION\"; rm -rf \"$TEMP_FOLDER\"";
-	if(!buf)
+	if(!buf || moveErr)
 	{
 		[self updateFailed];
 		[self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Create Extraction Script",@"")];
@@ -265,6 +274,7 @@ extern char **environ;
 	
 	NSAppleScript *quitSysPrefsScript = [[NSAppleScript alloc] initWithSource:@"tell application \"System Preferences\" to quit"];
 	[quitSysPrefsScript executeAndReturnError:nil];
+	[quitSysPrefsScript release];
 	
 	const char *args[] = {"/bin/sh", "-c", buf, NULL};
 	setenv("PREFPANE_LOCATION", [prefpanelocation fileSystemRepresentation], 1);
