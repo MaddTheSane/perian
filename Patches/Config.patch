@@ -1,0 +1,14 @@
+diff --git a/configure b/configure
+index 291fb2d..97d2ca0 100755
+--- a/configure
++++ b/configure
+@@ -3763,8 +3763,7 @@ return i;
+ EOF
+ 
+     # check whether EBX is available on x86
+-    check_inline_asm ebx_available '""::"b"(0)' &&
+-        check_inline_asm ebx_available '"":::"%ebx"'
++    check_inline_asm ebx_available '""::"b"(0)'
+ 
+     # check whether xmm clobbers are supported
+     check_inline_asm xmm_clobbers '"":::"%xmm0"'

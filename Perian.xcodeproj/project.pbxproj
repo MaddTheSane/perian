@@ -2280,7 +2280,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		116C42560B5041BF00FB0738 /* Development */ = {
+		116C42560B5041BF00FB0738 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_OBJC_GC = unsupported;
@@ -2289,9 +2289,9 @@
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
-			name = Development;
+			name = Debug;
 		};
-		116C42570B5041BF00FB0738 /* Deployment */ = {
+		116C42570B5041BF00FB0738 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_OBJC_GC = unsupported;
@@ -2300,9 +2300,9 @@
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
-			name = Deployment;
+			name = Release;
 		};
-		11A70AC90A3D0111002058D4 /* Development */ = {
+		11A70AC90A3D0111002058D4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -2343,9 +2343,9 @@
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = component;
 			};
-			name = Development;
+			name = Debug;
 		};
-		11A70ACA0A3D0111002058D4 /* Deployment */ = {
+		11A70ACA0A3D0111002058D4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -2385,26 +2385,36 @@
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = component;
 			};
-			name = Deployment;
+			name = Release;
 		};
-		11BA39B10A61E453008AF206 /* Development */ = {
+		11BA39B10A61E453008AF206 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				DEAD_CODE_STRIPPING = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "FFmpeg Static Libraries";
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
 				SDKROOT = macosx;
 			};
-			name = Development;
+			name = Debug;
 		};
-		11BA39B20A61E453008AF206 /* Deployment */ = {
+		11BA39B20A61E453008AF206 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				DEAD_CODE_STRIPPING = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				PRODUCT_NAME = "FFmpeg Static Libraries";
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
 				SDKROOT = macosx;
 			};
-			name = Deployment;
+			name = Release;
 		};
-		11D4ED480A3CE59A0066D45F /* Development */ = {
+		11D4ED480A3CE59A0066D45F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
@@ -2414,7 +2424,6 @@
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_OBJC_GC = supported;
-				GCC_FORCE_CPU_SUBTYPE_ALL = YES;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2445,9 +2454,9 @@
 				STRIP_STYLE = debugging;
 				WARNING_CFLAGS = "-Werror=implicit";
 			};
-			name = Development;
+			name = Debug;
 		};
-		11D4ED490A3CE59A0066D45F /* Deployment */ = {
+		11D4ED490A3CE59A0066D45F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
@@ -2458,7 +2467,6 @@
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_OBJC_GC = supported;
-				GCC_FORCE_CPU_SUBTYPE_ALL = YES;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
@@ -2483,17 +2491,22 @@
 				STRIP_STYLE = debugging;
 				WARNING_CFLAGS = "-Werror=implicit";
 			};
-			name = Deployment;
+			name = Release;
 		};
-		3D4BBE460B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE460B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				DEAD_CODE_STRIPPING = NO;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				PRODUCT_NAME = "FFmpeg Static Libraries";
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
 				SDKROOT = macosx;
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE470B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE470B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -2502,9 +2515,9 @@
 				PRODUCT_NAME = ebml;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE480B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE480B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -2513,9 +2526,9 @@
 				PRODUCT_NAME = matroska;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE490B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE490B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -2555,30 +2568,30 @@
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = component;
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE4A0B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE4A0B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "Debug in QuickTime Player";
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE4B0B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE4B0B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "Setup Build Directories";
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE4C0B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE4C0B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = A52Codec;
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE4D0B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE4D0B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
@@ -2590,16 +2603,16 @@
 				PRODUCT_NAME = PerianPanePListGenerator;
 				SDKROOT = "";
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE4E0B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE4E0B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = CreatePrefPanePlist;
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE4F0B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE4F0B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2613,9 +2626,9 @@
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE500B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE500B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_OBJC_GC = unsupported;
@@ -2624,9 +2637,9 @@
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D4BBE510B59EE0A000EDE04 /* Deployment+Debug */ = {
+		3D4BBE510B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
@@ -2636,7 +2649,6 @@
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_OBJC_GC = supported;
-				GCC_FORCE_CPU_SUBTYPE_ALL = YES;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
@@ -2659,9 +2671,9 @@
 				STRIP_STYLE = debugging;
 				WARNING_CFLAGS = "-Werror=implicit";
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3D802EB81032B8B00034BF4A /* Development */ = {
+		3D802EB81032B8B00034BF4A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2672,9 +2684,9 @@
 				PRODUCT_NAME = ssa2pdf;
 				SDKROOT = "";
 			};
-			name = Development;
+			name = Debug;
 		};
-		3D802EB91032B8B00034BF4A /* Deployment */ = {
+		3D802EB91032B8B00034BF4A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2685,9 +2697,9 @@
 				PRODUCT_NAME = ssa2pdf;
 				SDKROOT = "";
 			};
-			name = Deployment;
+			name = Release;
 		};
-		3D802EBA1032B8B00034BF4A /* Deployment+Debug */ = {
+		3D802EBA1032B8B00034BF4A /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2698,9 +2710,9 @@
 				PRODUCT_NAME = ssa2pdf;
 				SDKROOT = "";
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3DAD080A0FBF7C70001E156F /* Development */ = {
+		3DAD080A0FBF7C70001E156F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2709,9 +2721,9 @@
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
 			};
-			name = Development;
+			name = Debug;
 		};
-		3DAD080B0FBF7C70001E156F /* Deployment */ = {
+		3DAD080B0FBF7C70001E156F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2720,9 +2732,9 @@
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
 			};
-			name = Deployment;
+			name = Release;
 		};
-		3DAD080C0FBF7C70001E156F /* Deployment+Debug */ = {
+		3DAD080C0FBF7C70001E156F /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2730,9 +2742,9 @@
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3DAD09AA0FBFAB0A001E156F /* Development */ = {
+		3DAD09AA0FBFAB0A001E156F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2741,9 +2753,9 @@
 				PRODUCT_NAME = "detect-encoding";
 				SDKROOT = "";
 			};
-			name = Development;
+			name = Debug;
 		};
-		3DAD09AB0FBFAB0A001E156F /* Deployment */ = {
+		3DAD09AB0FBFAB0A001E156F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2752,9 +2764,9 @@
 				PRODUCT_NAME = "detect-encoding";
 				SDKROOT = "";
 			};
-			name = Deployment;
+			name = Release;
 		};
-		3DAD09AC0FBFAB0A001E156F /* Deployment+Debug */ = {
+		3DAD09AC0FBFAB0A001E156F /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2763,9 +2775,9 @@
 				PRODUCT_NAME = "detect-encoding";
 				SDKROOT = "";
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		3DE8D6E1104440F70007C7E7 /* Development */ = {
+		3DE8D6E1104440F70007C7E7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2781,9 +2793,9 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
-			name = Development;
+			name = Debug;
 		};
-		3DE8D6E2104440F70007C7E7 /* Deployment */ = {
+		3DE8D6E2104440F70007C7E7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2799,9 +2811,9 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
-			name = Deployment;
+			name = Release;
 		};
-		3DE8D6E3104440F70007C7E7 /* Deployment+Debug */ = {
+		3DE8D6E3104440F70007C7E7 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2817,9 +2829,9 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		61CB11040ACDF37C007994BD /* Development */ = {
+		61CB11040ACDF37C007994BD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -2829,9 +2841,9 @@
 				PRODUCT_NAME = ebml;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
 			};
-			name = Development;
+			name = Debug;
 		};
-		61CB11050ACDF37C007994BD /* Deployment */ = {
+		61CB11050ACDF37C007994BD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -2840,9 +2852,9 @@
 				PRODUCT_NAME = ebml;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libebml";
 			};
-			name = Deployment;
+			name = Release;
 		};
-		61CB11B10ACDF4FF007994BD /* Development */ = {
+		61CB11B10ACDF4FF007994BD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -2852,9 +2864,9 @@
 				PRODUCT_NAME = matroska;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
 			};
-			name = Development;
+			name = Debug;
 		};
-		61CB11B20ACDF4FF007994BD /* Deployment */ = {
+		61CB11B20ACDF4FF007994BD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
@@ -2863,9 +2875,9 @@
 				PRODUCT_NAME = matroska;
 				USER_HEADER_SEARCH_PATHS = "$(SRCROOT)/libmatroska $(SRCROOT)/libebml";
 			};
-			name = Deployment;
+			name = Release;
 		};
-		83D1D6CB0B4C794900E09EC9 /* Development */ = {
+		83D1D6CB0B4C794900E09EC9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2880,9 +2892,9 @@
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
 			};
-			name = Development;
+			name = Debug;
 		};
-		83D1D6CC0B4C794900E09EC9 /* Deployment */ = {
+		83D1D6CC0B4C794900E09EC9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -2896,44 +2908,44 @@
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
 			};
-			name = Deployment;
+			name = Release;
 		};
-		F5121EB80EB3A54A0048EF67 /* Development */ = {
+		F5121EB80EB3A54A0048EF67 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "Make SVN Rev";
 			};
-			name = Development;
+			name = Debug;
 		};
-		F5121EB90EB3A54A0048EF67 /* Deployment */ = {
+		F5121EB90EB3A54A0048EF67 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "Make SVN Rev";
 			};
-			name = Deployment;
+			name = Release;
 		};
-		F5121EBA0EB3A54A0048EF67 /* Deployment+Debug */ = {
+		F5121EBA0EB3A54A0048EF67 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "Make SVN Rev";
 			};
-			name = "Deployment+Debug";
+			name = "Release+Debug";
 		};
-		F59E0A0C0A670E950019A3F0 /* Development */ = {
+		F59E0A0C0A670E950019A3F0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "Debug in QuickTime Player";
 			};
-			name = Development;
+			name = Debug;
 		};
-		F59E0A0D0A670E950019A3F0 /* Deployment */ = {
+		F59E0A0D0A670E950019A3F0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "Debug in QuickTime Player";
 			};
-			name = Deployment;
+			name = Release;
 		};
-		F5CFD1B90B5000AF00616865 /* Development */ = {
+		F5CFD1B90B5000AF00616865 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
@@ -2945,9 +2957,9 @@
 				PRODUCT_NAME = PerianPanePListGenerator;
 				SDKROOT = "";
 			};
-			name = Development;
+			name = Debug;
 		};
-		F5CFD1BA0B5000AF00616865 /* Deployment */ = {
+		F5CFD1BA0B5000AF00616865 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
@@ -2959,49 +2971,49 @@
 				PRODUCT_NAME = PerianPanePListGenerator;
 				SDKROOT = "";
 			};
-			name = Deployment;
+			name = Release;
 		};
-		F5CFD2660B500B9D00616865 /* Development */ = {
+		F5CFD2660B500B9D00616865 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = CreatePrefPanePlist;
 			};
-			name = Development;
+			name = Debug;
 		};
-		F5CFD2670B500B9D00616865 /* Deployment */ = {
+		F5CFD2670B500B9D00616865 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = CreatePrefPanePlist;
 			};
-			name = Deployment;
+			name = Release;
 		};
-		F5CFD2EB0B5012E800616865 /* Development */ = {
+		F5CFD2EB0B5012E800616865 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = A52Codec;
 			};
-			name = Development;
+			name = Debug;
 		};
-		F5CFD2EC0B5012E800616865 /* Deployment */ = {
+		F5CFD2EC0B5012E800616865 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = A52Codec;
 			};
-			name = Deployment;
+			name = Release;
 		};
-		F5CFD3C20B50144E00616865 /* Development */ = {
+		F5CFD3C20B50144E00616865 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "Setup Build Directories";
 			};
-			name = Development;
+			name = Debug;
 		};
-		F5CFD3C30B50144E00616865 /* Deployment */ = {
+		F5CFD3C30B50144E00616865 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "Setup Build Directories";
 			};
-			name = Deployment;
+			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
@@ -3009,172 +3021,172 @@
 		116C42550B5041BF00FB0738 /* Build configuration list for PBXNativeTarget "PerianUpdateChecker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				116C42560B5041BF00FB0738 /* Development */,
-				116C42570B5041BF00FB0738 /* Deployment */,
-				3D4BBE500B59EE0A000EDE04 /* Deployment+Debug */,
+				116C42560B5041BF00FB0738 /* Debug */,
+				116C42570B5041BF00FB0738 /* Release */,
+				3D4BBE500B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		11A70AC80A3D0111002058D4 /* Build configuration list for PBXNativeTarget "Perian" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				11A70AC90A3D0111002058D4 /* Development */,
-				11A70ACA0A3D0111002058D4 /* Deployment */,
-				3D4BBE490B59EE0A000EDE04 /* Deployment+Debug */,
+				11A70AC90A3D0111002058D4 /* Debug */,
+				11A70ACA0A3D0111002058D4 /* Release */,
+				3D4BBE490B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		11BA39B00A61E453008AF206 /* Build configuration list for PBXAggregateTarget "FFmpeg Static Libraries" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				11BA39B10A61E453008AF206 /* Development */,
-				11BA39B20A61E453008AF206 /* Deployment */,
-				3D4BBE460B59EE0A000EDE04 /* Deployment+Debug */,
+				11BA39B10A61E453008AF206 /* Debug */,
+				11BA39B20A61E453008AF206 /* Release */,
+				3D4BBE460B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		11D4ED470A3CE59A0066D45F /* Build configuration list for PBXProject "Perian" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				11D4ED480A3CE59A0066D45F /* Development */,
-				11D4ED490A3CE59A0066D45F /* Deployment */,
-				3D4BBE510B59EE0A000EDE04 /* Deployment+Debug */,
+				11D4ED480A3CE59A0066D45F /* Debug */,
+				11D4ED490A3CE59A0066D45F /* Release */,
+				3D4BBE510B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		3D802EB71032B8B00034BF4A /* Build configuration list for PBXNativeTarget "ssa2pdf" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3D802EB81032B8B00034BF4A /* Development */,
-				3D802EB91032B8B00034BF4A /* Deployment */,
-				3D802EBA1032B8B00034BF4A /* Deployment+Debug */,
+				3D802EB81032B8B00034BF4A /* Debug */,
+				3D802EB91032B8B00034BF4A /* Release */,
+				3D802EBA1032B8B00034BF4A /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		3DAD080D0FBF7C71001E156F /* Build configuration list for PBXNativeTarget "ssa2html" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3DAD080A0FBF7C70001E156F /* Development */,
-				3DAD080B0FBF7C70001E156F /* Deployment */,
-				3DAD080C0FBF7C70001E156F /* Deployment+Debug */,
+				3DAD080A0FBF7C70001E156F /* Debug */,
+				3DAD080B0FBF7C70001E156F /* Release */,
+				3DAD080C0FBF7C70001E156F /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		3DAD09AD0FBFAB59001E156F /* Build configuration list for PBXNativeTarget "detect-encoding" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3DAD09AA0FBFAB0A001E156F /* Development */,
-				3DAD09AB0FBFAB0A001E156F /* Deployment */,
-				3DAD09AC0FBFAB0A001E156F /* Deployment+Debug */,
+				3DAD09AA0FBFAB0A001E156F /* Debug */,
+				3DAD09AB0FBFAB0A001E156F /* Release */,
+				3DAD09AC0FBFAB0A001E156F /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		3DE8D6E4104440F70007C7E7 /* Build configuration list for PBXNativeTarget "PerianOpener" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3DE8D6E1104440F70007C7E7 /* Development */,
-				3DE8D6E2104440F70007C7E7 /* Deployment */,
-				3DE8D6E3104440F70007C7E7 /* Deployment+Debug */,
+				3DE8D6E1104440F70007C7E7 /* Debug */,
+				3DE8D6E2104440F70007C7E7 /* Release */,
+				3DE8D6E3104440F70007C7E7 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		61CB11030ACDF37C007994BD /* Build configuration list for PBXNativeTarget "ebml" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				61CB11040ACDF37C007994BD /* Development */,
-				61CB11050ACDF37C007994BD /* Deployment */,
-				3D4BBE470B59EE0A000EDE04 /* Deployment+Debug */,
+				61CB11040ACDF37C007994BD /* Debug */,
+				61CB11050ACDF37C007994BD /* Release */,
+				3D4BBE470B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		61CB11B00ACDF4FF007994BD /* Build configuration list for PBXNativeTarget "matroska" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				61CB11B10ACDF4FF007994BD /* Development */,
-				61CB11B20ACDF4FF007994BD /* Deployment */,
-				3D4BBE480B59EE0A000EDE04 /* Deployment+Debug */,
+				61CB11B10ACDF4FF007994BD /* Debug */,
+				61CB11B20ACDF4FF007994BD /* Release */,
+				3D4BBE480B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		83D1D6CA0B4C794900E09EC9 /* Build configuration list for PBXNativeTarget "PerianPane" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				83D1D6CB0B4C794900E09EC9 /* Development */,
-				83D1D6CC0B4C794900E09EC9 /* Deployment */,
-				3D4BBE4F0B59EE0A000EDE04 /* Deployment+Debug */,
+				83D1D6CB0B4C794900E09EC9 /* Debug */,
+				83D1D6CC0B4C794900E09EC9 /* Release */,
+				3D4BBE4F0B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		F5121EBB0EB3A5680048EF67 /* Build configuration list for PBXAggregateTarget "Make Git Rev" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F5121EB80EB3A54A0048EF67 /* Development */,
-				F5121EB90EB3A54A0048EF67 /* Deployment */,
-				F5121EBA0EB3A54A0048EF67 /* Deployment+Debug */,
+				F5121EB80EB3A54A0048EF67 /* Debug */,
+				F5121EB90EB3A54A0048EF67 /* Release */,
+				F5121EBA0EB3A54A0048EF67 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		F59E0A0B0A670E950019A3F0 /* Build configuration list for PBXAggregateTarget "Debug in QuickTime Player" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F59E0A0C0A670E950019A3F0 /* Development */,
-				F59E0A0D0A670E950019A3F0 /* Deployment */,
-				3D4BBE4A0B59EE0A000EDE04 /* Deployment+Debug */,
+				F59E0A0C0A670E950019A3F0 /* Debug */,
+				F59E0A0D0A670E950019A3F0 /* Release */,
+				3D4BBE4A0B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		F5CFD1B80B5000AF00616865 /* Build configuration list for PBXNativeTarget "PerianPanePListGenerator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F5CFD1B90B5000AF00616865 /* Development */,
-				F5CFD1BA0B5000AF00616865 /* Deployment */,
-				3D4BBE4D0B59EE0A000EDE04 /* Deployment+Debug */,
+				F5CFD1B90B5000AF00616865 /* Debug */,
+				F5CFD1BA0B5000AF00616865 /* Release */,
+				3D4BBE4D0B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		F5CFD2650B500B9D00616865 /* Build configuration list for PBXAggregateTarget "CreatePrefPanePlist" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F5CFD2660B500B9D00616865 /* Development */,
-				F5CFD2670B500B9D00616865 /* Deployment */,
-				3D4BBE4E0B59EE0A000EDE04 /* Deployment+Debug */,
+				F5CFD2660B500B9D00616865 /* Debug */,
+				F5CFD2670B500B9D00616865 /* Release */,
+				3D4BBE4E0B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		F5CFD2EA0B5012E800616865 /* Build configuration list for PBXAggregateTarget "A52Codec" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F5CFD2EB0B5012E800616865 /* Development */,
-				F5CFD2EC0B5012E800616865 /* Deployment */,
-				3D4BBE4C0B59EE0A000EDE04 /* Deployment+Debug */,
+				F5CFD2EB0B5012E800616865 /* Debug */,
+				F5CFD2EC0B5012E800616865 /* Release */,
+				3D4BBE4C0B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 		F5CFD3C10B50144E00616865 /* Build configuration list for PBXAggregateTarget "Setup Build Directories" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F5CFD3C20B50144E00616865 /* Development */,
-				F5CFD3C30B50144E00616865 /* Deployment */,
-				3D4BBE4B0B59EE0A000EDE04 /* Deployment+Debug */,
+				F5CFD3C20B50144E00616865 /* Debug */,
+				F5CFD3C30B50144E00616865 /* Release */,
+				3D4BBE4B0B59EE0A000EDE04 /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Deployment+Debug";
+			defaultConfigurationName = "Release+Debug";
 		};
 /* End XCConfigurationList section */
 	};

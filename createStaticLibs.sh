@@ -9,12 +9,12 @@ fi
 CC=`xcrun -find clang`
 
 configureflags="--cc=$CC --disable-amd3dnow --disable-doc --disable-encoders \
-     --disable-avprobe --disable-avserver --disable-muxers --disable-network \
-     --disable-avfilter --disable-ffmpeg --disable-avconv --target-os=darwin"
+     --disable-muxers --disable-network --disable-programs \
+     --target-os=darwin"
 
 cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -fvisibility=hidden -w"
 
-if [ "$BUILD_STYLE" = "Development" -o "$CONFIGURATION" = "Development" ] ; then
+if [ "$BUILD_STYLE" = "Debug" -o "$CONFIGURATION" = "Debug" ] ; then
     configureflags="$configureflags --disable-optimizations --disable-asm"
 	buildid_ffmpeg="${buildid_ffmpeg}Dev"
 else
@@ -45,7 +45,7 @@ if [ `echo $ARCHS | grep -c i386` -gt 0 ] ; then
    buildi386=1
    buildppc=0
 else
-    echo "No architectures"
+    echo "No valid architectures"
     exit 0
 fi
 
@@ -60,8 +60,8 @@ else
 	fi
 
 	cd ffmpeg
-	patch -p1 < ../Patches/0001-Double-INTERNAL_BUFFER_SIZE-to-fix-running-out-of-bu.patch
 	patch -p1 < ../Patches/0002-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
+	#patch -p1 < ../Patches/config.patch
 	cd ..
 
 	touch ffmpeg/patched
@@ -82,7 +82,7 @@ else
         BUILDDIR="$BUILT_PRODUCTS_DIR/i386"
         mkdir -p "$BUILDDIR"
 
-		if [ "$BUILD_STYLE" != "Development" ] ; then
+		if [ "$BUILD_STYLE" != "Debug" ] ; then
         	optcflags_i386="$optcflags -mdynamic-no-pic $x86flags"
         fi
 
@@ -95,7 +95,7 @@ else
             make depend > /dev/null 2>&1 || true
         fi
         
-        fpcflags=`grep -m 1 CFLAGS= "$BUILDDIR"/config.mak | sed -e s/CFLAGS=// -e s/-fomit-frame-pointer//` 
+        fpcflags=`grep -m 1 -e "^CFLAGS=" "$BUILDDIR"/config.mak | sed -e s/CFLAGS=// -e s/-fomit-frame-pointer//` 
 
         make -j3 CFLAGS="$fpcflags" V=1 $fptargets || exit 1
         make -j3 V=1 || exit 1
