@@ -20,9 +20,10 @@
  */
 
 #include <AudioToolbox/AudioToolbox.h>
+extern "C" {
 #include <libavcodec/dca.h>
 #include <libavcodec/bytestream.h>
-
+}
 #include "ComponentBase.h"
 #include "FFissionDecoder.h"
 #include "PerianResourceIDs.h"

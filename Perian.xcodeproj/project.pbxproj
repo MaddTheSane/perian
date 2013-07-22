@@ -195,6 +195,7 @@
 		3DE8D9D5104451A80007C7E7 /* Perian - Open in QT Player.app in Resources */ = {isa = PBXBuildFile; fileRef = 3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */; };
 		3DF2958C104F0EF40047B8EC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
 		55247B14173D76A700531BBC /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
+		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
 		6116E5580B43C27B0020F1CE /* FFissionCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */; };
 		6116E55A0B43C27B0020F1CE /* FFissionDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */; };
 		6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */; };
@@ -689,6 +690,7 @@
 		3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "PerianOpener-Info.plist"; path = "Plists/PerianOpener-Info.plist"; sourceTree = "<group>"; };
 		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = OpenerMainMenu.xib; path = Opener/OpenerMainMenu.xib; sourceTree = "<group>"; };
 		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = /System/Library/Frameworks/AppleScriptKit.framework; sourceTree = "<absolute>"; };
+		5585E1A6179DE5EA0045A322 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 		55C06647173C6F4D00D8CF2C /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ffmpeg; sourceTree = "<group>"; };
 		6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionCodec.cpp; sourceTree = "<group>"; };
 		6116E54D0B43C27B0020F1CE /* FFissionCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = FFissionCodec.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -862,6 +864,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */,
 				61CB11F40ACE0F73007994BD /* libmatroska.a in Frameworks */,
 				61CB11F30ACE0F6D007994BD /* libebml.a in Frameworks */,
 				11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */,
@@ -988,6 +991,8 @@
 				3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */,
 				3DAD08570FBF80D8001E156F /* libobjc.dylib */,
 				3D95B9000E208965007C8F51 /* libbz2.dylib */,
+				5585E1A6179DE5EA0045A322 /* libiconv.dylib */,
+				1156DBD80A3CE9F500963B0E /* libz.dylib */,
 				F539CD110B62BC82005A72C9 /* Foundation.framework */,
 				1162A0530B51ECE1006591C8 /* WebKit.framework */,
 				11629EEA0B51E4F1006591C8 /* Cocoa.framework */,
@@ -996,7 +1001,6 @@
 				61CB11020ACDF37C007994BD /* libebml */,
 				61CB11720ACDF4BB007994BD /* libmatroska */,
 				8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */,
-				1156DBD80A3CE9F500963B0E /* libz.dylib */,
 				11D4EFA10A3CE8C10066D45F /* libavcodec.a */,
 				8F483B540A642644002CCA73 /* libavformat.a */,
 				11D4EFA20A3CE8C10066D45F /* libavutil.a */,
