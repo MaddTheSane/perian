@@ -63,9 +63,9 @@ static int dataref_open(URLContext *h, const char *filename, int flags)
 	dataref_private *private;
 	long access = 0;
 	
-	if((flags & URL_RDWR) == URL_RDWR) {
+	if((flags & AVIO_FLAG_READ_WRITE) == AVIO_FLAG_READ_WRITE) {
 		access = kDataHCanRead | kDataHCanWrite;
-	} else if(flags & URL_WRONLY) {
+	} else if(flags & AVIO_FLAG_WRITE) {
 		access = kDataHCanWrite;
 	} else {
 		access = kDataHCanRead;
@@ -96,7 +96,7 @@ bail:
 	return result;
 } /* dataref_open() */
 
-static int dataref_read(URLContext *h, unsigned char *buf, int size)
+static int dataref_read(URLContext *h, const char *buf, int size, AVDictionary **dict)
 {
 	int result;
 	dataref_private *p = (dataref_private*)h->priv_data;
@@ -138,7 +138,7 @@ bail:
 		return (int)read;
 } /* dataref_read() */
 
-static int dataref_write(URLContext *h, const unsigned char *buf, int size)
+static int dataref_write(URLContext *h, unsigned char *buf, int size)
 {
 	int result;
 	int written = size;
@@ -210,7 +210,7 @@ URLProtocol dataref_protocol = {
     dataref_open,
     dataref_read,
     dataref_write,
-    dataref_seek,
+    .url_seek = dataref_seek,
     dataref_close,
 };
 
@@ -236,13 +236,13 @@ OSStatus url_open_dataref(AVIOContext **pb, Handle dataRef, OSType dataRefType, 
 	}
 	uc->filename = NULL;
 	uc->prot = up;
-	uc->flags = URL_RDONLY; // we're just using the read access...
+	uc->flags = AVIO_FLAG_READ; // we're just using the read access...
 	uc->is_streamed = 0; // not streamed...
 	uc->max_packet_size = 0; // stream file
 	uc->priv_data = private;
 	uc->is_connected = 1;
 	
-	err = up->url_open(uc, uc->filename, URL_RDONLY);
+	err = up->url_open(uc, uc->filename, AVIO_FLAG_READ);
 		
 	if(err < 0) {
 		av_free(uc);

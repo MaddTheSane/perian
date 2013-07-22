@@ -152,7 +152,7 @@ void FFInitFFmpeg()
 // XXX this is probably a duplicate of something inside libavformat
 static const struct {
 	OSType mFormatID;
-	enum CodecID codecID;
+	enum AVCodecID codecID;
 } kAudioCodecMap[] =
 {
 	{ kAudioFormatWMA1MS, CODEC_ID_WMAV1 },
@@ -179,7 +179,7 @@ static const struct {
 	{ 0, CODEC_ID_NONE }
 };
 
-enum CodecID FFFourCCToCodecID(OSType formatID)
+enum AVCodecID FFFourCCToCodecID(OSType formatID)
 {
 	for (int i = 0; kAudioCodecMap[i].codecID != CODEC_ID_NONE; i++) {
 		if (kAudioCodecMap[i].mFormatID == formatID)
@@ -188,7 +188,7 @@ enum CodecID FFFourCCToCodecID(OSType formatID)
 	return CODEC_ID_NONE;
 }
 
-OSType FFCodecIDToFourCC(enum CodecID codecID)
+OSType FFCodecIDToFourCC(enum AVCodecID codecID)
 {
 	for (int i = 0; kAudioCodecMap[i].codecID != CODEC_ID_NONE; i++) {
 		if (kAudioCodecMap[i].codecID == codecID)

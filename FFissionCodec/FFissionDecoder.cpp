@@ -98,7 +98,7 @@ FFissionDecoder::FFissionDecoder(AudioComponentInstance inInstance) : FFissionCo
 	
 	inputBuffer.Initialize(4096); /* allocation hint, it will resize */
 	outBufUsed = 0;
-	outBufSize = AVCODEC_MAX_AUDIO_FRAME_SIZE;
+	outBufSize = CODEC_CAP_VARIABLE_FRAME_SIZE;
 	outputBuffer = new Byte[outBufSize];
 	
 	CFStringRef myApp = MY_APP_DOMAIN;
@@ -353,7 +353,7 @@ void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& i
 	
 	CloseAVCodec();
 
-	CodecID codecID = FFFourCCToCodecID(inInputFormat.mFormatID);
+	AVCodecID codecID = FFFourCCToCodecID(inInputFormat.mFormatID);
 	
 	// check to make sure the input format is legal
 	if (avcodec_find_decoder(codecID) == NULL) {
@@ -377,7 +377,7 @@ void FFissionDecoder::OpenAVCodec()
 	
 	CloseAVCodec();
 	
-	CodecID codecID = FFFourCCToCodecID(mInputFormat.mFormatID);
+	AVCodecID codecID = FFFourCCToCodecID(mInputFormat.mFormatID);
 	avCodec = avcodec_find_decoder(codecID);
 	
 	avcodec_get_context_defaults3(avContext, avCodec);

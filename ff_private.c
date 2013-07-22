@@ -314,7 +314,7 @@ bail:
 	return err;
 } /* initialize_audio_map() */
 
-OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
+OSType map_video_codec_to_mov_tag(enum AVCodecID codec_id)
 {
 	switch(codec_id) {
 		case CODEC_ID_FLV1:
@@ -330,7 +330,7 @@ OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
 	}
 }
 
-OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
+OSType forced_map_video_codec_to_mov_tag(enum AVCodecID codec_id)
 {
 	switch (codec_id) {
 		case CODEC_ID_H264:
@@ -343,7 +343,7 @@ OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
 }
 
 /* maps the codec_id tag of libavformat to a constant the AudioToolbox can work with */
-void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map, int channels)
+void map_avi_to_mov_tag(enum AVCodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map, int channels)
 {
 	OSType fourcc = FFCodecIDToFourCC(codec_id);
 	

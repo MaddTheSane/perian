@@ -295,7 +295,7 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 			require_noerr(result, bail);
 			
 			OSType fourcc = get_avi_strf_fourcc(byteContext);
-			enum CodecID id = ff_codec_get_id(ff_codec_bmp_tags, BSWAP(fourcc));
+			enum AVCodecID id = ff_codec_get_id(ff_codec_bmp_tags, BSWAP(fourcc));
 			
 			if (id == CODEC_ID_MJPEG || id == CODEC_ID_DVVIDEO || id == CODEC_ID_RAWVIDEO || id == CODEC_ID_MSVIDEO1 || id == CODEC_ID_MSRLE)
 				*valid = 0;
