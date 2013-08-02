@@ -48,17 +48,17 @@ typedef enum
 	InstallStatusInstalled = 5
 } InstallStatus;
 
-InstallStatus inline currentInstallStatus(InstallStatus status)
+static inline InstallStatus currentInstallStatus(InstallStatus status)
 {
 	return (status | 1);
 }
 
-BOOL inline isWrongLocationInstalled(InstallStatus status)
+static inline BOOL isWrongLocationInstalled(InstallStatus status)
 {
 	return ((status & 1) == 0);
 }
 
-InstallStatus inline setWrongLocationInstalled(InstallStatus status)
+static inline InstallStatus setWrongLocationInstalled(InstallStatus status)
 {
 	return (status & ~1);
 }
