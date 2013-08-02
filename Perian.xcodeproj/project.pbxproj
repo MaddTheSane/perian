@@ -1943,8 +1943,8 @@
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/.svn/dir-wcprops",
-				"$(SRCROOT)/ffmpeg/.svn/dir-wcprops",
+				"$(SRCROOT)/.git",
+				"$(SRCROOT)/ffmpeg/.git",
 			);
 			outputPaths = (
 				"$(TARGET_BUILD_DIR)/include/GITRevision.h",
