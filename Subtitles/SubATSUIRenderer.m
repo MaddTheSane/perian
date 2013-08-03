@@ -1289,7 +1289,8 @@ void SubRendererDispose(SubRendererPtr s)
 	}
 }
 
-#pragma options align=mac68k
+#pragma pack(push, 2)
+
 typedef struct TT_Header
 {
     Fixed   Table_Version;
@@ -1370,7 +1371,8 @@ typedef struct TT_OS2
     UInt16   usMaxContext;
 	
 } TT_OS2;
-#pragma options align=reset
+
+#pragma pack(pop)
 
 // Windows and OS X use different TrueType fields to measure text.
 // Some Windows fonts have one field set incorrectly(?), so we have to compensate.

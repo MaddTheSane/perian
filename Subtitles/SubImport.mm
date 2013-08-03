@@ -557,120 +557,120 @@ void SubLoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount)
 static ComponentResult LoadSingleTextSubtitle(CFURLRef theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack, int subtitleType, int whichTrack)
 {
 	ComponentResult err=noErr;
-@autoreleasepool {
-NS_DURING
-	NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString*)filename];
-	
-	SubSerializer *ss = [[[SubSerializer alloc] init] autorelease];
-	
-	FourCharCode subCodec;
-	Handle header = NULL;
-	TimeScale timeBase;
-	Fixed movieRate = fixed1;
-	
-	switch (subtitleType) {
-		case kSubTypeASS:
-		case kSubTypeSSA:
-		default:
-		{
-			timeBase = 100;
-			subCodec = kSubFormatSSA;
-			const char *cheader = [SubLoadSSAFromPath(nsPath, ss) UTF8String];
-			int headerLen = strlen(cheader);
-			PtrToHand(cheader, &header, headerLen);
+	@autoreleasepool {
+		NS_DURING
+		NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString*)filename];
+		
+		SubSerializer *ss = [[[SubSerializer alloc] init] autorelease];
+		
+		FourCharCode subCodec;
+		Handle header = NULL;
+		TimeScale timeBase;
+		Fixed movieRate = fixed1;
+		
+		switch (subtitleType) {
+			case kSubTypeASS:
+			case kSubTypeSSA:
+			default:
+			{
+				timeBase = 100;
+				subCodec = kSubFormatSSA;
+				const char *cheader = [SubLoadSSAFromPath(nsPath, ss) UTF8String];
+				int headerLen = strlen(cheader);
+				PtrToHand(cheader, &header, headerLen);
+			}
+				break;
+			case kSubTypeSRT:
+				timeBase = 1000;
+				subCodec = kSubFormatUTF8;
+				SubLoadSRTFromPath(nsPath, ss);
+				break;
+			case kSubTypeSMI:
+				timeBase = 1000;
+				subCodec = kSubFormatUTF8;
+				SubLoadSMIFromPath(nsPath, ss, whichTrack);
+				break;
 		}
-			break;
-		case kSubTypeSRT:
-			timeBase = 1000;
-			subCodec = kSubFormatUTF8;
-			SubLoadSRTFromPath(nsPath, ss);
-			break;
-		case kSubTypeSMI:
-			timeBase = 1000;
-			subCodec = kSubFormatUTF8;
-			SubLoadSMIFromPath(nsPath, ss, whichTrack);
-			break;
-	}
-	
-	ss.finished = YES;
-	SubRendererPrerollFromHeader(header ? *header : NULL, header ? GetHandleSize(header) : 0);
-	
-	Handle dataRefHndl = NewHandleClear(sizeof(Handle) + 1);
-	UInt32 emptyDataRefExt[2] = {EndianU32_NtoB(sizeof(UInt32)*2), EndianU32_NtoB(kDataRefExtensionInitializationData)};
-	PtrAndHand(emptyDataRefExt, dataRefHndl, sizeof(emptyDataRefExt));
-	
-	Rect movieBox;
-	GetMovieBox(theMovie, &movieBox);
-	
-	ImageDescriptionHandle textDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
-
-	Track theTrack = CreatePlaintextSubTrack(theMovie, textDesc, timeBase, dataRefHndl, HandleDataHandlerSubType, subCodec, header, movieBox);
-	Media theMedia = NULL;
-	TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
-	
-	if (theTrack == NULL) {
-		err = GetMoviesError();
-		goto bail;
-	}
-	
-	theMedia = GetTrackMedia(theTrack);
-	if (theMedia == NULL) {
-		err = GetMoviesError();
-		goto bail;
-	}
-	
-	BeginMediaEdits(theMedia);
-	
-	while (![ss isEmpty]) {
-		SubLine *sl = [ss getSerializedPacket];
-		TimeRecord startTime = {SInt64ToWide(sl->begin_time), timeBase, 0};
-		TimeValue sampleTime;
-		const char *str = [sl->line UTF8String];
-		int sampleLen = strlen(str);
-		Handle sampleHndl;
 		
-		PtrToHand(str, &sampleHndl, sampleLen);
-		err = AddMediaSample(theMedia, sampleHndl, 0, sampleLen, sl->end_time - sl->begin_time, (SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
+		ss.finished = YES;
+		SubRendererPrerollFromHeader(header ? *header : NULL, header ? GetHandleSize(header) : 0);
 		
-		if (err) {
+		Handle dataRefHndl = NewHandleClear(sizeof(Handle) + 1);
+		UInt32 emptyDataRefExt[2] = {EndianU32_NtoB(sizeof(UInt32)*2), EndianU32_NtoB(kDataRefExtensionInitializationData)};
+		PtrAndHand(emptyDataRefExt, dataRefHndl, sizeof(emptyDataRefExt));
+		
+		Rect movieBox;
+		GetMovieBox(theMovie, &movieBox);
+		
+		ImageDescriptionHandle textDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
+		
+		Track theTrack = CreatePlaintextSubTrack(theMovie, textDesc, timeBase, dataRefHndl, HandleDataHandlerSubType, subCodec, header, movieBox);
+		Media theMedia = NULL;
+		TimeScale movieTimeScale = GetMovieTimeScale(theMovie);
+		
+		if (theTrack == NULL) {
 			err = GetMoviesError();
-			Codecprintf(NULL,"SSA: error %d adding line from %d to %d",(int)err,sl->begin_time,sl->end_time);
-		} else {
-			ConvertTimeScale(&startTime, movieTimeScale);
-			InsertMediaIntoTrack(theTrack, startTime.value.lo, sampleTime, sl->end_time - sl->begin_time, movieRate);
+			goto bail;
 		}
 		
-		err = noErr;
-		DisposeHandle(sampleHndl);
-	}
-	
-	EndMediaEdits(theMedia);
-	
-	if (*firstSubTrack == NULL)
-		*firstSubTrack = theTrack;
-	else
-		SetTrackAlternate(*firstSubTrack, theTrack);
-	
-	SetMediaLanguage(theMedia, GetFilenameLanguage(filename));
-	
-bail:	
-	if (err) {
-		if (theMedia)
-			DisposeTrackMedia(theMedia);
+		theMedia = GetTrackMedia(theTrack);
+		if (theMedia == NULL) {
+			err = GetMoviesError();
+			goto bail;
+		}
 		
-		if (theTrack)
-			DisposeMovieTrack(theTrack);
+		BeginMediaEdits(theMedia);
+		
+		while (![ss isEmpty]) {
+			SubLine *sl = [ss getSerializedPacket];
+			TimeRecord startTime = {SInt64ToWide(sl->begin_time), timeBase, 0};
+			TimeValue sampleTime;
+			const char *str = [sl->line UTF8String];
+			int sampleLen = strlen(str);
+			Handle sampleHndl;
+			
+			PtrToHand(str, &sampleHndl, sampleLen);
+			err = AddMediaSample(theMedia, sampleHndl, 0, sampleLen, sl->end_time - sl->begin_time, (SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
+			
+			if (err) {
+				err = GetMoviesError();
+				Codecprintf(NULL,"SSA: error %d adding line from %d to %d",(int)err,sl->begin_time,sl->end_time);
+			} else {
+				ConvertTimeScale(&startTime, movieTimeScale);
+				InsertMediaIntoTrack(theTrack, startTime.value.lo, sampleTime, sl->end_time - sl->begin_time, movieRate);
+			}
+			
+			err = noErr;
+			DisposeHandle(sampleHndl);
+		}
+		
+		EndMediaEdits(theMedia);
+		
+		if (*firstSubTrack == NULL)
+			*firstSubTrack = theTrack;
+		else
+			SetTrackAlternate(*firstSubTrack, theTrack);
+		
+		SetMediaLanguage(theMedia, GetFilenameLanguage(filename));
+		
+	bail:
+		if (err) {
+			if (theMedia)
+				DisposeTrackMedia(theMedia);
+			
+			if (theTrack)
+				DisposeMovieTrack(theTrack);
+		}
+		
+		if (textDesc)    DisposeHandle((Handle)textDesc);
+		if (header)      DisposeHandle((Handle)header);
+		if (dataRefHndl) DisposeHandle((Handle)dataRefHndl);
+		
+		NS_HANDLER
+		Codecprintf(stderr, "Exception occurred while importing subtitles");
+		NS_ENDHANDLER	
+		return err;
 	}
-	
-	if (textDesc)    DisposeHandle((Handle)textDesc);
-	if (header)      DisposeHandle((Handle)header);
-	if (dataRefHndl) DisposeHandle((Handle)dataRefHndl);
-	
-NS_HANDLER
-	Codecprintf(stderr, "Exception occurred while importing subtitles");
-NS_ENDHANDLER	
-	return err;
-}
 }
 
 #pragma mark IDX Parsing
@@ -924,139 +924,139 @@ typedef enum {
 static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
 {
 	ComponentResult err = noErr;
-@autoreleasepool {
-NS_DURING
-	NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString *)filename];
-	NSString *idxContent = SubLoadFileWithUnknownEncoding(nsPath);
-	NSData *privateData = nil;
-	
-	VobSubState state = VOB_SUB_STATE_READING_PRIVATE;
-	VobSubTrack *currentTrack = nil;
-	int imageWidth = 0, imageHeight = 0;
-	long delay=0;
-
-	NSString *subFileName = [[nsPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sub"];
-
-	if([idxContent length]) {
-		NSError *nsErr;
-		NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:subFileName error:&nsErr];
-		if (!attr) goto bail;
-		int subFileSize = [[attr objectForKey:NSFileSize] intValue];
-	
-	NSArray *lines = [idxContent componentsSeparatedByString:@"\n"];
-	NSMutableArray *privateLines = [NSMutableArray array];
-	NSEnumerator *lineEnum = [lines objectEnumerator];
-	NSString *line;
-	Rect movieBox;
-	GetMovieBox(theMovie, &movieBox);
-	
-	NSMutableArray *tracks = [NSMutableArray array];
-	
-	while((line = getNextVobSubLine(lineEnum)) != NULL)
-	{
-		if([line hasPrefix:@"timestamp: "])
-			state = VOB_SUB_STATE_READING_TRACK_DATA;
-		else if([line hasPrefix:@"id: "])
-		{
-			if(privateData == nil)
-			{
-				NSString *allLines = [privateLines componentsJoinedByString:@"\n"];
-				privateData = [allLines dataUsingEncoding:NSUTF8StringEncoding];
-			}
-			state = VOB_SUB_STATE_READING_TRACK_HEADER;
-		}
-		else if([line hasPrefix:@"delay: "])
-			state = VOB_SUB_STATE_READING_DELAY;
-		else if(state != VOB_SUB_STATE_READING_PRIVATE)
-			state = VOB_SUB_STATE_READING_TRACK_HEADER;
+	@autoreleasepool {
+		NS_DURING
+		NSString *nsPath = [[(NSURL*)theDirectory path] stringByAppendingPathComponent:(NSString *)filename];
+		NSString *idxContent = SubLoadFileWithUnknownEncoding(nsPath);
+		NSData *privateData = nil;
 		
-		switch(state)
-		{
-			case VOB_SUB_STATE_READING_PRIVATE:
-				[privateLines addObject:line];
-				if([line hasPrefix:@"size: "])
+		VobSubState state = VOB_SUB_STATE_READING_PRIVATE;
+		VobSubTrack *currentTrack = nil;
+		int imageWidth = 0, imageHeight = 0;
+		long delay=0;
+		
+		NSString *subFileName = [[nsPath stringByDeletingPathExtension] stringByAppendingPathExtension:@"sub"];
+		
+		if([idxContent length]) {
+			NSError *nsErr;
+			NSDictionary *attr = [[NSFileManager defaultManager] attributesOfItemAtPath:subFileName error:&nsErr];
+			if (!attr) goto bail;
+			int subFileSize = [[attr objectForKey:NSFileSize] intValue];
+			
+			NSArray *lines = [idxContent componentsSeparatedByString:@"\n"];
+			NSMutableArray *privateLines = [NSMutableArray array];
+			NSEnumerator *lineEnum = [lines objectEnumerator];
+			NSString *line;
+			Rect movieBox;
+			GetMovieBox(theMovie, &movieBox);
+			
+			NSMutableArray *tracks = [NSMutableArray array];
+			
+			while((line = getNextVobSubLine(lineEnum)) != NULL)
+			{
+				if([line hasPrefix:@"timestamp: "])
+					state = VOB_SUB_STATE_READING_TRACK_DATA;
+				else if([line hasPrefix:@"id: "])
 				{
-					sscanf([line UTF8String], "size: %dx%d", &imageWidth, &imageHeight);
+					if(privateData == nil)
+					{
+						NSString *allLines = [privateLines componentsJoinedByString:@"\n"];
+						privateData = [allLines dataUsingEncoding:NSUTF8StringEncoding];
+					}
+					state = VOB_SUB_STATE_READING_TRACK_HEADER;
 				}
-				break;
-			case VOB_SUB_STATE_READING_TRACK_HEADER:
-				if([line hasPrefix:@"id: "])
+				else if([line hasPrefix:@"delay: "])
+					state = VOB_SUB_STATE_READING_DELAY;
+				else if(state != VOB_SUB_STATE_READING_PRIVATE)
+					state = VOB_SUB_STATE_READING_TRACK_HEADER;
+				
+				switch(state)
 				{
-					char *langStr = (char *)malloc([line length]);
-					int index;
-					sscanf([line UTF8String], "id: %s index: %d", langStr, &index);
-					int langLength = strlen(langStr);
-					if(langLength > 0 && langStr[langLength-1] == ',')
-						langStr[langLength-1] = 0;
-					NSString *language = [NSString stringWithUTF8String:langStr];
-					
-					currentTrack = [[VobSubTrack alloc] initWithPrivateData:privateData language:language andIndex:index];
-					[tracks addObject:currentTrack];
-					[currentTrack release];
+					case VOB_SUB_STATE_READING_PRIVATE:
+						[privateLines addObject:line];
+						if([line hasPrefix:@"size: "])
+						{
+							sscanf([line UTF8String], "size: %dx%d", &imageWidth, &imageHeight);
+						}
+						break;
+					case VOB_SUB_STATE_READING_TRACK_HEADER:
+						if([line hasPrefix:@"id: "])
+						{
+							char *langStr = (char *)malloc([line length]);
+							int index;
+							sscanf([line UTF8String], "id: %s index: %d", langStr, &index);
+							int langLength = strlen(langStr);
+							if(langLength > 0 && langStr[langLength-1] == ',')
+								langStr[langLength-1] = 0;
+							NSString *language = [NSString stringWithUTF8String:langStr];
+							
+							currentTrack = [[VobSubTrack alloc] initWithPrivateData:privateData language:language andIndex:index];
+							[tracks addObject:currentTrack];
+							[currentTrack release];
+						}
+						break;
+					case VOB_SUB_STATE_READING_DELAY:
+						delay = ParseSubTime([[line substringFromIndex:7] UTF8String], 1000, YES);
+						break;
+					case VOB_SUB_STATE_READING_TRACK_DATA:
+					{
+						char *timeStr = (char *)malloc([line length]);
+						unsigned int position;
+						sscanf([line UTF8String], "timestamp: %s filepos: %x", timeStr, &position);
+						long time = ParseSubTime(timeStr, 1000, YES);
+						free(timeStr);
+						if(position > subFileSize)
+							position = subFileSize;
+						[currentTrack addSampleTime:time + delay offset:position];
+					}
+						break;
 				}
-				break;
-			case VOB_SUB_STATE_READING_DELAY:
-				delay = ParseSubTime([[line substringFromIndex:7] UTF8String], 1000, YES);
-				break;
-			case VOB_SUB_STATE_READING_TRACK_DATA:
-			{
-				char *timeStr = (char *)malloc([line length]);
-				unsigned int position;
-				sscanf([line UTF8String], "timestamp: %s filepos: %x", timeStr, &position);
-				long time = ParseSubTime(timeStr, 1000, YES);
-				free(timeStr);
-				if(position > subFileSize)
-					position = subFileSize;
-				[currentTrack addSampleTime:time + delay offset:position];
-			}
-				break;
-		}
-	}
-		
-	if([tracks count])
-	{
-		OSType dataRefType;
-		Handle dataRef = NULL;
-		
-		NSData *subFileData = [NSData dataWithContentsOfMappedFile:subFileName];
-		FSRef subFile;
-		FSPathMakeRef((const UInt8*)[subFileName fileSystemRepresentation], &subFile, NULL);
-		
-		if((err = QTNewDataReferenceFromFSRef(&subFile, 0, &dataRef, &dataRefType)) != noErr)
-			goto bail;
-		
-		NSEnumerator *trackEnum = [tracks objectEnumerator];
-		VobSubTrack *track = nil;
-		while((track = [trackEnum nextObject]) != nil)
-		{
-			Track theTrack = NULL;
-			VobSubInfo info = {theMovie, dataRefType, dataRef, imageWidth, imageHeight, movieBox, subFileData};
-			uint8_t hasForced = 0;
-			err = loadTrackIntoMovie(track, info, 0, &theTrack, &hasForced);
-			if(theTrack && hasForced)
-			{
-				Track forcedTrack;
-				err = loadTrackIntoMovie(track, info, 1, &forcedTrack, &hasForced);
-				if(*firstSubTrack == NULL)
-					*firstSubTrack = forcedTrack;
-				else
-					SetTrackAlternate(*firstSubTrack, forcedTrack);
 			}
 			
-			if (*firstSubTrack == NULL)
-				*firstSubTrack = theTrack;
-			else if(theTrack)
-				SetTrackAlternate(*firstSubTrack, theTrack);
+			if([tracks count])
+			{
+				OSType dataRefType;
+				Handle dataRef = NULL;
+				
+				NSData *subFileData = [NSData dataWithContentsOfMappedFile:subFileName];
+				FSRef subFile;
+				FSPathMakeRef((const UInt8*)[subFileName fileSystemRepresentation], &subFile, NULL);
+				
+				if((err = QTNewDataReferenceFromFSRef(&subFile, 0, &dataRef, &dataRefType)) != noErr)
+					goto bail;
+				
+				NSEnumerator *trackEnum = [tracks objectEnumerator];
+				VobSubTrack *track = nil;
+				while((track = [trackEnum nextObject]) != nil)
+				{
+					Track theTrack = NULL;
+					VobSubInfo info = {theMovie, dataRefType, dataRef, imageWidth, imageHeight, movieBox, subFileData};
+					uint8_t hasForced = 0;
+					err = loadTrackIntoMovie(track, info, 0, &theTrack, &hasForced);
+					if(theTrack && hasForced)
+					{
+						Track forcedTrack;
+						err = loadTrackIntoMovie(track, info, 1, &forcedTrack, &hasForced);
+						if(*firstSubTrack == NULL)
+							*firstSubTrack = forcedTrack;
+						else
+							SetTrackAlternate(*firstSubTrack, forcedTrack);
+					}
+					
+					if (*firstSubTrack == NULL)
+						*firstSubTrack = theTrack;
+					else if(theTrack)
+						SetTrackAlternate(*firstSubTrack, theTrack);
+				}
+			}
 		}
+	bail:
+		;
+		NS_HANDLER
+		Codecprintf(stderr, "Exception occurred while importing VobSub\n");
+		NS_ENDHANDLER	
+		return err;
 	}
-	}
-bail:
-	;
-NS_HANDLER
-	Codecprintf(stderr, "Exception occurred while importing VobSub\n");
-NS_ENDHANDLER	
-	return err;
-}
 }
 
 static Boolean ShouldLoadExternalSubtitles()
@@ -1453,51 +1453,51 @@ CXXSubSerializer::~CXXSubSerializer()
 
 void CXXSubSerializer::pushLine(const char *line, size_t size, unsigned start, unsigned end)
 {
-@autoreleasepool {
-NS_DURING
-	NSMutableString *str = [[NSMutableString alloc] initWithBytes:line length:size encoding:NSUTF8StringEncoding];
-	if (!str) return; // in case of invalid UTF-8?
-	[str appendString:@"\n"];
-	
-	SubLine *sl = [[SubLine alloc] initWithLine:str start:start end:end];
-	
-	[str autorelease];
-	[sl autorelease];
-	
-	[(SubSerializer*)priv addLine:sl];
-NS_HANDLER
-	Codecprintf(stderr, "Exception occured while reading Matroska subtitles");
-NS_ENDHANDLER
-}
+	@autoreleasepool {
+		NS_DURING
+		NSMutableString *str = [[NSMutableString alloc] initWithBytes:line length:size encoding:NSUTF8StringEncoding];
+		if (!str) return; // in case of invalid UTF-8?
+		[str appendString:@"\n"];
+		
+		SubLine *sl = [[SubLine alloc] initWithLine:str start:start end:end];
+		
+		[str autorelease];
+		[sl autorelease];
+		
+		[(SubSerializer*)priv addLine:sl];
+		NS_HANDLER
+		Codecprintf(stderr, "Exception occured while reading Matroska subtitles");
+		NS_ENDHANDLER
+	}
 }
 
 void CXXSubSerializer::setFinished()
 {
-@autoreleasepool {
-	((SubSerializer*)priv).finished = YES;
-}
+	@autoreleasepool {
+		((SubSerializer*)priv).finished = YES;
+	}
 }
 
 Handle CXXSubSerializer::popPacket(unsigned *start, unsigned *end)
 {
-@autoreleasepool {
-NS_DURING
-	SubLine *sl = [(SubSerializer*)priv getSerializedPacket];
-	if (!sl) return NULL;
-	const char *u = [sl->line UTF8String];
-	*start = sl->begin_time;
-	*end   = sl->end_time;
-	
-	Handle h;
-	
-	PtrToHand(u, &h, strlen(u));
+	@autoreleasepool {
+		NS_DURING
+		SubLine *sl = [(SubSerializer*)priv getSerializedPacket];
+		if (!sl) return NULL;
+		const char *u = [sl->line UTF8String];
+		*start = sl->begin_time;
+		*end   = sl->end_time;
 		
-	return h;
-NS_HANDLER
-	Codecprintf(stderr, "Exception occured while reading Matroska subtitles");
-NS_ENDHANDLER
-	return NULL;
-}
+		Handle h;
+		
+		PtrToHand(u, &h, strlen(u));
+		
+		return h;
+		NS_HANDLER
+		Codecprintf(stderr, "Exception occured while reading Matroska subtitles");
+		NS_ENDHANDLER
+		return NULL;
+	}
 }
 
 void CXXSubSerializer::release()

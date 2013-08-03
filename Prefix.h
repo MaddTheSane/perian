@@ -28,3 +28,4 @@
 #endif
 
 #include <QuickTime/QuickTime.h>
+#include <Carbon/Carbon.h>

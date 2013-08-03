@@ -170,6 +170,6 @@ CFMutableStringRef CopyHomeDirectory()
 {	
 	@autoreleasepool {
 		NSString *home = NSHomeDirectory();
-		return CFStringCreateMutableCopy(NULL, 0, (CFStringRef)home);
+		return CFStringCreateMutableCopy(kCFAllocatorDefault, 0, (CFStringRef)home);
 	}
 }
