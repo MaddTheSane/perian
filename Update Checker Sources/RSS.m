@@ -68,7 +68,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	return [[self newsItems] objectAtIndex:0];
 }
 
-- (RSS *) initWithTitle: (NSString *) title andDescription: (NSString *) description
+- (id) initWithTitle: (NSString *) title andDescription: (NSString *) description
 {
 	
 	/*
@@ -76,52 +76,33 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	 */
 	
 	if (self = [super init]) {
-		
 		NSMutableDictionary *header;
-		
 		flRdf = NO;
-		
 		header = [NSMutableDictionary dictionaryWithCapacity: 2];
-		
 		[header setObject: title forKey: titleKey];
-		
 		[header setObject: description forKey: descriptionKey];
-		
 		headerItems = (NSDictionary *) [header copy];
-		
 		newsItems = [[NSMutableArray alloc] initWithCapacity: 0];
-		
 		version = [[NSString alloc] initWithString: @"synthetic"];
 		
 	}
 	return self;
 } /*initWithTitle*/
-	
-	
-- (RSS *) initWithData: (NSData *) rssData normalize: (BOOL) fl
+
+- (id) initWithData: (NSData *) rssData normalize: (BOOL) fl
 {
 	
 	if (self = [super init]) {
-		
 		CFXMLTreeRef tree;
-		
 		flRdf = NO;
-		
 		normalize = fl;
-		
 		NS_DURING
-		
 		tree = CFXMLTreeCreateFromData (kCFAllocatorDefault, (CFDataRef) rssData,
 										NULL,  kCFXMLParserSkipWhitespace, kCFXMLNodeCurrentVersion);
-		
 		NS_HANDLER
-		
 		tree = nil;
-		
 		NS_ENDHANDLER
-		
 		if (tree == nil) {
-			
 			/*If there was a problem parsing the RSS file,
 			 raise an exception.*/
 			
@@ -132,33 +113,29 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		} /*if*/
 		
 		[self createheaderdictionary: tree];
-		
 		[self createitemsarray: tree];
-		
 		[self setversionstring: tree];
-		
 		CFRelease (tree);
 	}
 	return self;
 } /*initWithData*/
 
-- (RSS *) initWithURL: (NSURL *) url normalize: (BOOL) fl
+- (id) initWithURL: (NSURL *) url normalize: (BOOL) fl
 {
 	return [self initWithURL: url normalize: fl userAgent: nil];
 }
-	
+
 - (RSS *) initWithURL: (NSURL *) url normalize: (BOOL) fl userAgent: (NSString*)userAgent
 {
 	NSData *rssData;
-
+	
 	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL: url cachePolicy: NSURLRequestReloadIgnoringCacheData
-										timeoutInterval: 30.0];
+													   timeoutInterval: 30.0];
 	if (userAgent)
 		[request setValue: userAgent forHTTPHeaderField: @"User-Agent"];
-			
+	
 	NSURLResponse *response=0;
 	NSError *error=0;
-
 	rssData = [NSURLConnection sendSynchronousRequest: request returningResponse: &response error: &error];
 	
 	if (rssData == nil)
@@ -168,7 +145,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		[exception raise];
 	}
 	
-	return [self initWithData: rssData normalize: fl];	
+	return [self initWithData: rssData normalize: fl];
 } /*initWithUrl*/
 
 - (NSDictionary *) headerItems
@@ -180,24 +157,23 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 - (NSMutableArray *) newsItems {
 	
 	return (newsItems);
-	} /*newsItems*/
+} /*newsItems*/
 
 
 - (NSString *) version {
 	
 	return (version);
-	} /*version*/
+} /*version*/
 
 
 - (void) dealloc {
-		
-	[headerItems release];
-
-	[newsItems release];
 	
+	[headerItems release];
+	[newsItems release];
 	[version release];
+	
 	[super dealloc];
-	} /*dealloc*/
+} /*dealloc*/
 
 
 
@@ -215,17 +191,17 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	channelTree = [self getchanneltree: tree];
 	
 	if (channelTree == nil) {
-	
+		
 		NSException *exception = [NSException exceptionWithName: @"RSSCreateHeaderDictionaryFailed"
-			reason: @"Couldn't find the channel tree." userInfo: nil];
-
+														 reason: @"Couldn't find the channel tree." userInfo: nil];
+		
 		[exception raise];
-		} /*if*/
-
+	} /*if*/
+	
 	childCount = CFTreeGetChildCount (channelTree);
 	
 	headerItemsMutable = [NSMutableDictionary dictionaryWithCapacity: childCount];
-		
+	
 	for (i = 0; i < childCount; i++) {
 		
 		childTree = CFTreeGetChildAtIndex (channelTree, i);
@@ -242,12 +218,12 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		
 		if ([childName isEqualTo: @"image"])
 			[self flattenimagechildren: childTree into: headerItemsMutable];
-
+		
 		[headerItemsMutable setObject: [self getelementvalue: childTree] forKey: childName];
-		} /*for*/
+	} /*for*/
 	
 	headerItems = [headerItemsMutable copy];
-	} /*initheaderdictionary*/
+} /*initheaderdictionary*/
 
 
 - (void) createitemsarray: (CFXMLTreeRef) tree {
@@ -268,10 +244,10 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	if (channelTree == nil) {
 		
 		NSException *exception = [NSException exceptionWithName: @"RSSCreateItemsArrayFailed"
-			reason: @"Couldn't find the news items." userInfo: nil];
-
+														 reason: @"Couldn't find the news items." userInfo: nil];
+		
 		[exception raise];
-		} /*if*/
+	} /*if*/
 	
 	childCount = CFTreeGetChildCount (channelTree);
 	
@@ -296,7 +272,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		itemDictionaryMutable = [NSMutableDictionary dictionaryWithCapacity: itemChildCount];
 		
 		for (j = 0; j < itemChildCount; j++) {
-				
+			
 			itemTree = CFTreeGetChildAtIndex (childTree, j);
 			
 			itemNode = CFXMLTreeGetNode (itemTree);
@@ -326,17 +302,17 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 				[self flattensourceattributes: itemNode into: itemDictionaryMutable];
 			
 			[itemDictionaryMutable setObject: itemValue forKey: itemName];
-			} /*for*/
+		} /*for*/
 		
 		if (normalize)
 			[self normalizeRSSItem: itemDictionaryMutable];
 		
 		[itemsArrayMutable addObject: itemDictionaryMutable];
-		} /*for*/
+	} /*for*/
 	
 	// Sort the news items by published date, descending.
 	newsItems = [[NSMutableArray alloc] initWithArray:[itemsArrayMutable sortedArrayUsingFunction:compareNewsItems context:NULL]];
-	} /*createitemsarray*/
+} /*createitemsarray*/
 
 
 - (void) setversionstring: (CFXMLTreeRef) tree {
@@ -350,17 +326,17 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		version = [[NSString alloc] initWithString: @"rdf"];
 		
 		return;
-		} /*if*/
-		
+	} /*if*/
+	
 	rssTree = [self getnamedtree: tree name: @"rss"];
 	
 	node = CFXMLTreeGetNode (rssTree);
-
-	elementInfo = CFXMLNodeGetInfoPtr (node);
-
-	version = [[NSString alloc] initWithString: [(NSDictionary *) (*elementInfo).attributes objectForKey: @"version"]];	
-	} /*setversionstring*/
 	
+	elementInfo = CFXMLNodeGetInfoPtr (node);
+	
+	version = [[NSString alloc] initWithString: [(NSDictionary *) (*elementInfo).attributes objectForKey: @"version"]];
+} /*setversionstring*/
+
 
 - (void) flattenimagechildren: (CFXMLTreeRef) tree into: (NSMutableDictionary *) dictionary {
 	
@@ -372,7 +348,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	
 	if (childCount < 1)
 		return;
-		
+	
 	for (i = 0; i < childCount; i++) {
 		
 		childTree = CFTreeGetChildAtIndex (tree, i);
@@ -389,15 +365,15 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		keyName = [NSString stringWithFormat: @"image%@", childName];
 		
 		[dictionary setObject: childValue forKey: keyName];
-		} /*for*/
-	} /*flattenimagechildren*/
+	} /*for*/
+} /*flattenimagechildren*/
 
 
 - (void) flattensourceattributes: (CFXMLNodeRef) node into: (NSMutableDictionary *) dictionary {
 	
 	const CFXMLElementInfo *elementInfo;
 	NSString *sourceHomeUrl, *sourceRssUrl;
-
+	
 	elementInfo = CFXMLNodeGetInfoPtr (node);
 	
 	sourceHomeUrl = [(NSDictionary *) (*elementInfo).attributes objectForKey: @"homeUrl"];
@@ -409,9 +385,9 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	
 	if (sourceRssUrl != nil)
 		[dictionary setObject: sourceRssUrl forKey: @"sourceRssUrl"];
-	} /*flattensourceattributes*/
-	
-	
+} /*flattensourceattributes*/
+
+
 - (CFXMLTreeRef) getchanneltree: (CFXMLTreeRef) tree {
 	
 	CFXMLTreeRef rssTree, channelTree;
@@ -419,12 +395,12 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	rssTree = [self getnamedtree: tree name: @"rss"];
 	
 	if (rssTree == nil) { /*It might be "rdf:RDF" instead, a 1.0 or greater feed.*/
-	
+		
 		rssTree = [self getnamedtree: tree name: @"rdf:RDF"];
 		
-		if (rssTree != nil)		
+		if (rssTree != nil)
 			flRdf = YES; /*This info will be needed later when creating the items array.*/
-		} /*if*/
+	} /*if*/
 	
 	if (rssTree == nil)
 		return (nil);
@@ -435,7 +411,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		channelTree = [self getnamedtree: rssTree name: @"rss:channel"];
 	
 	return (channelTree);
-	} /*getchanneltree*/
+} /*getchanneltree*/
 
 
 - (CFXMLTreeRef) getnamedtree: (CFXMLTreeRef) currentTree name: (NSString *) name {
@@ -457,19 +433,19 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		
 		if ([itemName isEqualToString: name])
 			return (xmlTreeNode);
-		} /*for*/
+	} /*for*/
 	
 	return (nil);
-	} /*getnamedtree*/
+} /*getnamedtree*/
 
 
 - (void) normalizeRSSItem: (NSMutableDictionary *) rssItem {
 	
 	/*
-	Make sure item, link, and description are present and have
-	reasonable values. Description and link may be "".
-	Also trim white space, remove HTML when appropriate.
-	*/
+	 Make sure item, link, and description are present and have
+	 reasonable values. Description and link may be "".
+	 Also trim white space, remove HTML when appropriate.
+	 */
 	
 	NSString *description, *link, *title;
 	BOOL nilDescription = NO;
@@ -483,7 +459,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		description = @"";
 		
 		nilDescription = YES;
-		} /*if*/
+	} /*if*/
 	
 	description = [description trimWhiteSpace];
 	
@@ -501,19 +477,19 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		/*Try to get a URL from the description.*/
 		
 		if (!nilDescription) {
-					
+			
 			NSArray *stringComponents = [description componentsSeparatedByString: @"href=\""];
 			
 			if ([stringComponents count] > 1) {
-							
+				
 				link = [stringComponents objectAtIndex: 1];
-			
+				
 				stringComponents = [link componentsSeparatedByString: @"\""];
-
-				link = [stringComponents objectAtIndex: 0];			
-				} /*if*/				
+				
+				link = [stringComponents objectAtIndex: 0];
 			} /*if*/
 		} /*if*/
+	} /*if*/
 	
 	if (link == nil)
 		link = @"";
@@ -525,70 +501,69 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	/*Title*/
 	
 	title = [rssItem objectForKey: titleKey];
-		
-	if (title != nil) {
 	
+	if (title != nil) {
+		
 		title = [title stripHTML];
 		
 		title = [title trimWhiteSpace];
-		} /*if*/
+	} /*if*/
 	
 	if ([NSString stringIsEmpty: title]) {
 		
 		/*Grab a title from the description.*/
 		
 		if (!nilDescription) {
-
+			
 			NSArray *stringComponents = [description componentsSeparatedByString: @">"];
 			
 			if ([stringComponents count] > 1) {
-			
+				
 				title = [stringComponents objectAtIndex: 1];
 				
 				stringComponents = [title componentsSeparatedByString: @"<"];
-	
+				
 				title = [stringComponents objectAtIndex: 0];
 				
 				title = [title stripHTML];
 				
 				title = [title trimWhiteSpace];
-				} /*if*/
+			} /*if*/
 			
 			if ([NSString stringIsEmpty: title]) { /*use first part of description*/
 				
 				NSString *shortTitle = [[[description stripHTML] trimWhiteSpace] ellipsizeAfterNWords: 5];
-
+				
 				shortTitle = [shortTitle trimWhiteSpace];
 				
-				title = [NSString stringWithFormat: @"%@...", shortTitle];				
-				} /*else*/				
-			} /*if*/
-			
-		title = [title stripHTML];
-	
-		title = [title trimWhiteSpace];
-	
-		if ([NSString stringIsEmpty: title])
-			title = @"Untitled";	
+				title = [NSString stringWithFormat: @"%@...", shortTitle];
+			} /*else*/
 		} /*if*/
 		
+		title = [title stripHTML];
+		
+		title = [title trimWhiteSpace];
+		
+		if ([NSString stringIsEmpty: title])
+			title = @"Untitled";
+	} /*if*/
+	
 	[rssItem setObject: title forKey: titleKey];
 	
 	/*dangerousmeta case: super-long title with no description*/
 	
 	if ((nilDescription) && ([title length] > 50)) {
-						
+		
 		NSString *shortTitle = [[[title stripHTML] trimWhiteSpace] ellipsizeAfterNWords: 7];
-				
 		description = [[title copy] autorelease];
 		
 		[rssItem setObject: description forKey: descriptionKey];
 		
-		title = [NSString stringWithFormat: @"%@...", shortTitle];				
+		title = [NSString stringWithFormat: @"%@...", shortTitle];
 		
 		[rssItem setObject: title forKey: titleKey];
-		} /*if*/
-
+	} /*if*/
+	
 	{ /*deal with entities*/
 		
 		const char *tempcstring;
@@ -603,7 +578,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 			stringComponents = [title componentsSeparatedByString: @";"];
 			
 			if ([stringComponents count] > 1) {
-			
+				
 				int len;
 				
 				tempcstring = [title UTF8String];
@@ -611,28 +586,28 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 				len = strlen (tempcstring);
 				
 				if (len > 0) {
-				
+					
 					s = [[NSAttributedString alloc]
-						initWithHTML: [NSData dataWithBytes: tempcstring length: strlen (tempcstring)]
-						documentAttributes: (NSDictionary **) NULL];
-		
+						 initWithHTML: [NSData dataWithBytes: tempcstring length: strlen (tempcstring)]
+						 documentAttributes: (NSDictionary **) NULL];
+					
 					convertedTitle = [s string];
-				
+					
 					[s autorelease];
-									
+					
 					convertedTitle = [convertedTitle stripHTML];
-				
-					convertedTitle = [convertedTitle trimWhiteSpace];				
-					} /*if*/
+					
+					convertedTitle = [convertedTitle trimWhiteSpace];
+				} /*if*/
 				
 				if ([NSString stringIsEmpty: convertedTitle])
 					convertedTitle = @"Untitled";
 				
 				[rssItem setObject: convertedTitle forKey: @"convertedTitle"];
-				} /*if*/
 			} /*if*/
-		} /*deal with entities*/
-	} /*normalizeRSSItem*/
+		} /*if*/
+	} /*deal with entities*/
+} /*normalizeRSSItem*/
 
 
 - (NSString *) getelementvalue: (CFXMLTreeRef) tree {
@@ -647,7 +622,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	childCount = CFTreeGetChildCount (tree);
 	
 	valueMutable = [[NSMutableString alloc] init];
-
+	
 	for (ix = 0; ix < childCount; ix++) {
 		
 		itemTree = CFTreeGetChildAtIndex (tree, ix);
@@ -657,12 +632,12 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		name = (NSString *) CFXMLNodeGetString (node);
 		
 		if (name != nil) {
-		
+			
 			if (CFXMLNodeGetTypeCode (node) == kCFXMLNodeTypeEntityReference) {
 				
 				if ([name isEqualTo: @"lt"])
 					name = @"<";
-
+				
 				else if ([name isEqualTo: @"gt"])
 					name = @">";
 				
@@ -679,20 +654,20 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 					name = @"\"";
 				
 				else if ([name isEqualTo: @"apos"])
-					name = @"'";				
+					name = @"'";
 				else
 					name = [NSString stringWithFormat: @"&%@;", name];
-				} /*if*/
-						
-			[valueMutable appendString: name];
 			} /*if*/
-		} /*for*/
+			
+			[valueMutable appendString: name];
+		} /*if*/
+	} /*for*/
 	
 	value = [valueMutable copy];
 	
 	[valueMutable autorelease];
-
+	
 	return ([value autorelease]);
-	} /*getelementvalue*/
+} /*getelementvalue*/
 
 @end

@@ -12,20 +12,17 @@
 #import "RSS.h"
 
 @implementation SUAppcast
+@synthesize delegate;
 
 - (void)fetchAppcastFromURL:(NSURL *)url
 {
 	[NSThread detachNewThreadSelector:@selector(_fetchAppcastFromURL:) toTarget:self withObject:url]; // let's not block the main thread
 }
 
-- (void)setDelegate:del
-{
-	delegate = del;
-}
-
 - (void)dealloc
 {
 	[items release];
+	
 	[super dealloc];
 }
 
@@ -41,7 +38,7 @@
 
 - (void)_fetchAppcastFromURL:(NSURL *)url
 {
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	NSAutoreleasePool* pool = [NSAutoreleasePool new];
 	
 	RSS *feed;
 	@try
@@ -51,9 +48,7 @@
 		feed = [[RSS alloc] initWithURL:url normalize:YES userAgent:userAgent];
 		// Set up all the appcast items
 		NSMutableArray *tempItems = [NSMutableArray array];
-		id enumerator = [[feed newsItems] objectEnumerator], current;
-		while ((current = [enumerator nextObject]))
-		{
+		for (id current in [feed newsItems]) {
 			[tempItems addObject:[[[SUAppcastItem alloc] initWithDictionary:current] autorelease]];
 		}
 		items = [[NSArray arrayWithArray:tempItems] retain];
@@ -70,7 +65,7 @@
 	}
 	@finally
 	{
-		[pool release];	
+		[pool drain];
 	}
 }
 

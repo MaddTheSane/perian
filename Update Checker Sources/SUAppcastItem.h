@@ -27,36 +27,21 @@
 }
 
 // Initializes with data from a dictionary provided by the RSS class.
-- initWithDictionary:(NSDictionary *)dict;
+- (id)initWithDictionary:(NSDictionary *)dict;
 
-- (NSString *)title;
-- (void)setTitle:(NSString *)aTitle;
+@property (copy) NSString *title;
+@property (copy) NSDate *date;
+@property (copy) NSString *description;
 
-- (NSDate *)date;
-- (void)setDate:(NSDate *)aDate;
+@property (retain) NSURL *releaseNotesURL;
 
-- (NSString *)description;
-- (void)setDescription:(NSString *)aDescription;
+@property (copy) NSString *DSASignature;
+@property (copy) NSString *MD5Sum;
 
-- (NSURL *)releaseNotesURL;
-- (void)setReleaseNotesURL:(NSURL *)aReleaseNotesURL;
+@property (retain) NSURL *fileURL;
+@property (copy) NSString *fileVersion;
+@property (copy) NSString *versionString;
 
-- (NSString *)DSASignature;
-- (void)setDSASignature:(NSString *)aDSASignature;
-
-- (NSString *)MD5Sum;
-- (void)setMD5Sum:(NSString *)aMd5Sum;
-
-- (NSURL *)fileURL;
-- (void)setFileURL:(NSURL *)aFileURL;
-
-- (NSString *)fileVersion;
-- (void)setFileVersion:(NSString *)aFileVersion;
-
-- (NSString *)versionString;
-- (void)setVersionString:(NSString *)versionString;
-
-- (NSString *)minimumSystemVersion;
-- (void)setMinimumSystemVersion:(NSString *)systemVersionString;
+@property (copy) NSString *minimumSystemVersion;
 
 @end

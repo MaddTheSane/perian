@@ -9,19 +9,23 @@
 #import <Cocoa/Cocoa.h>
 
 @class RSS, SUAppcastItem;
+@protocol SUAppcastDelegate;
+
 @interface SUAppcast : NSObject {
 	NSArray *items;
-	id delegate;
+	NSObject<SUAppcastDelegate> *delegate;
 }
 
 - (void)fetchAppcastFromURL:(NSURL *)url;
-- (void)setDelegate:delegate;
+@property (assign) NSObject<SUAppcastDelegate> *delegate;
 
 - (SUAppcastItem *)newestItem;
 - (NSArray *)items;
 
 @end
 
-@interface NSObject (SUAppcastDelegate)
+@protocol SUAppcastDelegate <NSObject>
+@optional
 - (void)appcastDidFinishLoading:(SUAppcast *)appcast;
+- (void)appcastDidFailToLoad:(SUAppcast *)appcast;
 @end

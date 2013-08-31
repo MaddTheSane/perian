@@ -46,14 +46,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 
 @interface RSS : NSObject {
-	
 	NSDictionary *headerItems;
 	NSMutableArray *newsItems;
 	NSString *version;
 	
 	BOOL flRdf;
 	BOOL normalize;
-	}
+}
 
 @property (readonly) NSDictionary *headerItems;
 @property (readonly) NSMutableArray *newsItems;
@@ -62,12 +61,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 /*Public*/
 
-- (RSS *) initWithTitle: (NSString *) title andDescription: (NSString *) description;
+- (id) initWithTitle: (NSString *) title andDescription: (NSString *) description;
 
-- (RSS *) initWithData: (NSData *) rssData normalize: (BOOL) fl;
+- (id) initWithData: (NSData *) rssData normalize: (BOOL) fl;
 
-- (RSS *) initWithURL: (NSURL *) url normalize: (BOOL) fl;
-- (RSS *) initWithURL: (NSURL *) url normalize: (BOOL) fl userAgent:(NSString *)userAgent;
+- (id) initWithURL: (NSURL *) url normalize: (BOOL) fl;
+- (id) initWithURL: (NSURL *) url normalize: (BOOL) fl userAgent:(NSString *)userAgent;
 
 // AMM's extensions for Sparkle
 - (NSDictionary *)newestItem;
