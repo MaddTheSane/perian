@@ -109,8 +109,6 @@
 		116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E70B504D2700FB0738 /* SUAppcastItem.m */; };
 		1184A2D30B50504900C8452A /* UpdateCheckerAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */; };
 		1184A3140B50548700C8452A /* SUUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A3130B50548700C8452A /* SUUtilities.m */; };
-		1184A3680B50586C00C8452A /* SUUpdateAlert.nib in Resources */ = {isa = PBXBuildFile; fileRef = 1184A3660B50586C00C8452A /* SUUpdateAlert.nib */; };
-		1184A3840B505A8800C8452A /* SUStatus.nib in Resources */ = {isa = PBXBuildFile; fileRef = 1184A3830B505A8800C8452A /* SUStatus.nib */; };
 		1184A38D0B505A9800C8452A /* SUStatusController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A38C0B505A9800C8452A /* SUStatusController.m */; };
 		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA10A3CE8C10066D45F /* libavcodec.a */; };
@@ -196,6 +194,8 @@
 		3DF2958C104F0EF40047B8EC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
 		55247B14173D76A700531BBC /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
+		558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB417D2468000EB0DE7 /* SUStatus.xib */; };
+		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
 		6116E5580B43C27B0020F1CE /* FFissionCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */; };
 		6116E55A0B43C27B0020F1CE /* FFissionDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */; };
 		6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */; };
@@ -610,8 +610,6 @@
 		116C42E70B504D2700FB0738 /* SUAppcastItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUAppcastItem.m; sourceTree = "<group>"; };
 		1184A3020B50548700C8452A /* SUUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUUtilities.h; sourceTree = "<group>"; };
 		1184A3130B50548700C8452A /* SUUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUUtilities.m; sourceTree = "<group>"; };
-		1184A3670B50586C00C8452A /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/SUUpdateAlert.nib; sourceTree = "<group>"; };
-		1184A3830B505A8800C8452A /* SUStatus.nib */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; path = SUStatus.nib; sourceTree = "<group>"; };
 		1184A38B0B505A9800C8452A /* SUStatusController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUStatusController.h; sourceTree = "<group>"; };
 		1184A38C0B505A9800C8452A /* SUStatusController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUStatusController.m; sourceTree = "<group>"; };
 		11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Perian-Info.plist"; path = "Plists/Perian-Info.plist"; sourceTree = "<group>"; };
@@ -691,6 +689,8 @@
 		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = OpenerMainMenu.xib; path = Opener/OpenerMainMenu.xib; sourceTree = "<group>"; };
 		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = /System/Library/Frameworks/AppleScriptKit.framework; sourceTree = "<absolute>"; };
 		5585E1A6179DE5EA0045A322 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
+		558E7CB417D2468000EB0DE7 /* SUStatus.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SUStatus.xib; sourceTree = "<group>"; };
+		558E7CB717D246B000EB0DE7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SUUpdateAlert.xib; sourceTree = "<group>"; };
 		55C06647173C6F4D00D8CF2C /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ffmpeg; sourceTree = "<group>"; };
 		6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionCodec.cpp; sourceTree = "<group>"; };
 		6116E54D0B43C27B0020F1CE /* FFissionCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = FFissionCodec.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -1087,8 +1087,8 @@
 				11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */,
 				1184A38B0B505A9800C8452A /* SUStatusController.h */,
 				1184A38C0B505A9800C8452A /* SUStatusController.m */,
-				1184A3830B505A8800C8452A /* SUStatus.nib */,
-				1184A3660B50586C00C8452A /* SUUpdateAlert.nib */,
+				558E7CB417D2468000EB0DE7 /* SUStatus.xib */,
+				558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */,
 				1184A3020B50548700C8452A /* SUUtilities.h */,
 				1184A3130B50548700C8452A /* SUUtilities.m */,
 				116C42E40B504D2700FB0738 /* RSS.h */,
@@ -1851,10 +1851,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1184A3680B50586C00C8452A /* SUUpdateAlert.nib in Resources */,
-				1184A3840B505A8800C8452A /* SUStatus.nib in Resources */,
 				3DAD0AC10FC1365E001E156F /* UpdateCheckerMainMenu.xib in Resources */,
 				F57CF183121ADBF800132DAF /* Perian_icon.icns in Resources */,
+				558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */,
+				558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2273,12 +2273,12 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		1184A3660B50586C00C8452A /* SUUpdateAlert.nib */ = {
+		558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				1184A3670B50586C00C8452A /* en */,
+				558E7CB717D246B000EB0DE7 /* en */,
 			);
-			name = SUUpdateAlert.nib;
+			name = SUUpdateAlert.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
