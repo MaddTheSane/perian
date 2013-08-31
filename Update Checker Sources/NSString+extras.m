@@ -64,9 +64,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	NSMutableString *s = [[self mutableCopy] autorelease];
 	
 	CFStringTrimWhitespace ((CFMutableStringRef) s);
-
-	return (NSString *) [[s copy] autorelease];
-	} /*trimWhiteSpace*/
+	
+	return [NSString stringWithString:s];
+} /*trimWhiteSpace*/
 
 
 - (NSString *) ellipsizeAfterNWords: (int) n {
@@ -81,9 +81,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	
 	[componentsCopy removeObjectsInRange: NSMakeRange (ix, len - ix)];
     [componentsCopy autorelease];
-
+	
 	return [componentsCopy componentsJoinedByString: @" "];
-	} /*ellipsizeAfterNWords*/
+} /*ellipsizeAfterNWords*/
 
 
 - (NSString *) stripHTML {
@@ -100,23 +100,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			level++;
 		
 		else if ([ch isEqualTo: @">"]) {
-		
+			
 			level--;
 			
-			if (level == 0)			
+			if (level == 0)
 				[s appendString: @" "];
-			} /*else if*/
+		} /*else if*/
 		
-		else if (level == 0)			
+		else if (level == 0)
 			[s appendString: ch];
-		} /*for*/
+	} /*for*/
 	
-	return (NSString *) [[s copy] autorelease];
-	} /*stripHTML*/
+	return [NSString stringWithString:s];
+} /*stripHTML*/
 
 
 + (BOOL) stringIsEmpty: (NSString *) s {
-
+	
 	NSString *copy;
 	
 	if (s == nil)
@@ -129,8 +129,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	
 	if ([[copy trimWhiteSpace] isEqualTo: @""])
 		return (YES);
-		
+	
 	return (NO);
-	} /*stringIsEmpty*/
+} /*stringIsEmpty*/
 
 @end

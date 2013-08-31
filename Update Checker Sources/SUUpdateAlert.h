@@ -16,9 +16,11 @@ typedef enum
 } SUUpdateAlertChoice;
 
 @class WebView, SUAppcastItem;
+@protocol SUUpdateAlertDelegate;
+
 @interface SUUpdateAlert : NSWindowController {
 	SUAppcastItem *updateItem;
-	id delegate;
+	NSObject<SUUpdateAlertDelegate> *delegate;
 	
 	IBOutlet WebView *releaseNotesView;
 	IBOutlet NSTextField *description;
@@ -26,8 +28,9 @@ typedef enum
 	BOOL webViewFinishedLoading;
 }
 
-- initWithAppcastItem:(SUAppcastItem *)item;
-- (void)setDelegate:delegate;
+@property (assign) NSObject<SUUpdateAlertDelegate> *delegate;
+
+- (id)initWithAppcastItem:(SUAppcastItem *)item;
 
 - (IBAction)installUpdate:sender;
 - (IBAction)skipThisVersion:sender;
@@ -35,6 +38,7 @@ typedef enum
 
 @end
 
-@interface NSObject (SUUpdateAlertDelegate)
+@protocol SUUpdateAlertDelegate <NSObject>
+@optional
 - (void)updateAlert:(SUUpdateAlert *)updateAlert finishedWithChoice:(SUUpdateAlertChoice)updateChoice;
 @end

@@ -12,6 +12,7 @@
 #import <WebKit/WebKit.h>
 
 @implementation SUUpdateAlert
+@synthesize delegate;
 
 - (id)initWithAppcastItem:(SUAppcastItem *)item
 {
@@ -155,11 +156,6 @@
     else {
         [listener use];
     }
-}
-
-- (void)setDelegate:del
-{
-	delegate = del;
 }
 
 @end
