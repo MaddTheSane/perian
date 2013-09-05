@@ -183,7 +183,6 @@
 		3DCF890915042C8400C171F8 /* ACCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DCF88F815042C8400C171F8 /* ACCodec.cpp */; };
 		3DCF890A15042C8400C171F8 /* GetCodecBundle_Perian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DCF88FC15042C8400C171F8 /* GetCodecBundle_Perian.cpp */; };
 		3DCF890B15042C8400C171F8 /* ComponentBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3DCF890115042C8400C171F8 /* ComponentBase.cpp */; };
-		3DD34C791019B16A006905AB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167EFE841241C02AAC07 /* InfoPlist.strings */; };
 		3DE8D6C31043BE350007C7E7 /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		3DE8D6F1104444420007C7E7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DE8D6EF104444420007C7E7 /* main.m */; };
 		3DE8D6F9104444690007C7E7 /* Application.applescript in AppleScript */ = {isa = PBXBuildFile; fileRef = 3DE8D6EE104444420007C7E7 /* Application.applescript */; settings = {ATTRIBUTES = (Debug, ); }; };
@@ -193,6 +192,7 @@
 		3DE8D9D5104451A80007C7E7 /* Perian - Open in QT Player.app in Resources */ = {isa = PBXBuildFile; fileRef = 3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */; };
 		3DF2958C104F0EF40047B8EC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
 		55247B14173D76A700531BBC /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
+		5557DF4B17D8E0AE00142C72 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5557DF4D17D8E0AE00142C72 /* InfoPlist.strings */; };
 		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
 		558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB417D2468000EB0DE7 /* SUStatus.xib */; };
 		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
@@ -587,7 +587,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		089C167EFE841241C02AAC07 /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = Plists/InfoPlist.strings; sourceTree = "<group>"; };
 		11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; name = ComponentInfo.plist; path = Plists/ComponentInfo.plist; sourceTree = "<group>"; };
 		113F58980A6B091600509987 /* Codecprintf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Codecprintf.h; sourceTree = "<group>"; };
 		113F58990A6B091600509987 /* Codecprintf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Codecprintf.c; sourceTree = "<group>"; };
@@ -688,6 +687,7 @@
 		3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "PerianOpener-Info.plist"; path = "Plists/PerianOpener-Info.plist"; sourceTree = "<group>"; };
 		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = OpenerMainMenu.xib; path = Opener/OpenerMainMenu.xib; sourceTree = "<group>"; };
 		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = /System/Library/Frameworks/AppleScriptKit.framework; sourceTree = "<absolute>"; };
+		5557DF4C17D8E0AE00142C72 /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5585E1A6179DE5EA0045A322 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 		558E7CB417D2468000EB0DE7 /* SUStatus.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SUStatus.xib; sourceTree = "<group>"; };
 		558E7CB717D246B000EB0DE7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SUUpdateAlert.xib; sourceTree = "<group>"; };
@@ -1034,7 +1034,7 @@
 				61D691590AC8E382000EFC7D /* MatroskaImport.r */,
 				61D691540AC8E382000EFC7D /* MatroskaExport.r */,
 				8F483B8B0A642886002CCA73 /* PerianAviImporter.r */,
-				089C167EFE841241C02AAC07 /* InfoPlist.strings */,
+				5557DF4D17D8E0AE00142C72 /* InfoPlist.strings */,
 				F50D440903EAD8E701B1D299 /* Images */,
 				F59B2AB81007A0D000FAAAD8 /* PerianResources.r */,
 			);
@@ -1863,7 +1863,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D717EB011A7C1640084F048 /* Read Me.rtf in Resources */,
-				3DD34C791019B16A006905AB /* InfoPlist.strings in Resources */,
+				5557DF4B17D8E0AE00142C72 /* InfoPlist.strings in Resources */,
 				3DE8D6C31043BE350007C7E7 /* Perian_icon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2273,6 +2273,15 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		5557DF4D17D8E0AE00142C72 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5557DF4C17D8E0AE00142C72 /* en */,
+			);
+			name = InfoPlist.strings;
+			path = Plists;
+			sourceTree = "<group>";
+		};
 		558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
