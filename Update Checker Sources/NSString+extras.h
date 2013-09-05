@@ -48,13 +48,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 @interface NSString (extras)
 
 - (NSString *)stringWithSubstitute:(NSString *)subs forCharactersFromSet:(NSCharacterSet *)set;
-
 - (NSString *) trimWhiteSpace;
-
 - (NSString *) stripHTML;
-
 - (NSString *) ellipsizeAfterNWords: (int) n;
-
 + (BOOL) stringIsEmpty: (NSString *) s;
 
 

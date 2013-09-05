@@ -56,7 +56,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		r = [newString rangeOfCharacterFromSet:set];
 	}
 	while (r.location != NSNotFound);
-	return AUTORELEASEOBJ(newString);
+	return [NSString stringWithString:AUTORELEASEOBJ(newString)];
 }
 
 - (NSString *) trimWhiteSpace {

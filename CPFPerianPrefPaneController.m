@@ -794,14 +794,12 @@
 {
 	NSArray *userComponents = [self installedComponentsForUser:YES];
 	NSArray *systemComponents = [self installedComponentsForUser:NO];
-	unsigned numComponents = [userComponents count] + [systemComponents count];
+	NSUInteger numComponents = [userComponents count] + [systemComponents count];
 	NSMutableArray *components = [[NSMutableArray alloc] initWithCapacity:numComponents];
-	NSEnumerator *compEnum = [userComponents objectEnumerator];
-	NSString *compName;
-	for (compName in userComponents)
+	for (NSString *compName in userComponents)
 		[components addObject:[self componentInfoForComponent:compName userInstalled:YES]];
 	
-	for (compName in systemComponents)
+	for (NSString *compName in systemComponents)
 		[components addObject:[self componentInfoForComponent:compName userInstalled:NO]];
 	return [components autorelease];
 }

@@ -90,7 +90,7 @@ NSArray *SUSplitVersionString(NSString *version)
         // Nothing to do here
         return parts;
     }
-    s = AUTORELEASEOBJ([[version substringToIndex:1] mutableCopy]);
+    s = [NSMutableString stringWithString:[version substringToIndex:1]];
     oldType = SUGetCharType(s);
     n = [version length] - 1;
     for (i = 1; i <= n; ++i) {

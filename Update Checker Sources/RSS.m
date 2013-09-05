@@ -43,13 +43,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #import "RSS.h"
 #import "ARCBridge.h"
 
-// This comparator function is used to sort the RSS items by their published date.
-NSInteger compareNewsItems(id item1, id item2, void *context)
-{
-	// We compare item2 with item1 instead of the other way 'round because we want descending, not ascending. Bit of a hack.
-	return [(NSDate *)[NSDate dateWithNaturalLanguageString:[item2 objectForKey:@"pubDate"]] compare:(NSDate *)[NSDate dateWithNaturalLanguageString:[item1 objectForKey:@"pubDate"]]];
-}
-
 @interface RSS ()
 /*Private*/
 //TODO: Use NSXML functions, the CoreFoundation XMLs are deprecated as of 10.8
@@ -183,7 +176,6 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 
 /*Private methods. Don't call these: they may change.*/
 
-
 - (void) createheaderdictionary: (CFXMLTreeRef) tree {
 	
 	CFXMLTreeRef channelTree, childTree;
@@ -207,11 +199,8 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	headerItemsMutable = [NSMutableDictionary dictionaryWithCapacity: childCount];
 	
 	for (i = 0; i < childCount; i++) {
-		
 		childTree = CFTreeGetChildAtIndex (channelTree, i);
-		
 		childNode = CFXMLTreeGetNode (childTree);
-		
 		childName = BRIDGE(NSString *, CFXMLNodeGetString(childNode));
 		
 		if ([childName hasPrefix: @"rss:"])
@@ -315,6 +304,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	} /*for*/
 	
 	// Sort the news items by published date, descending.
+	// This comparator function is used to sort the RSS items by their published date.
 	newsItems = [[NSMutableArray alloc] initWithArray:[itemsArrayMutable sortedArrayWithOptions:NSSortConcurrent usingComparator:^NSComparisonResult(id item1, id item2) {
 		// We compare item2 with item1 instead of the other way 'round because we want descending, not ascending. Bit of a hack.
 		return [(NSDate *)[NSDate dateWithNaturalLanguageString:[item2 objectForKey:@"pubDate"]] compare:(NSDate *)[NSDate dateWithNaturalLanguageString:[item1 objectForKey:@"pubDate"]]];
@@ -356,20 +346,15 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 		return;
 	
 	for (i = 0; i < childCount; i++) {
-		
 		childTree = CFTreeGetChildAtIndex (tree, i);
-		
 		childNode = CFXMLTreeGetNode (childTree);
-		
 		childName = BRIDGE(NSString *, CFXMLNodeGetString(childNode));
 		
 		if ([childName hasPrefix: @"rss:"])
 			childName = [childName substringFromIndex: 4];
 		
 		childValue = [self getelementvalue: childTree];
-		
 		keyName = [NSString stringWithFormat: @"image%@", childName];
-		
 		[dictionary setObject: childValue forKey: keyName];
 	} /*for*/
 } /*flattenimagechildren*/
@@ -432,9 +417,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	for (i = childCount - 1; i >= 0; i--) {
 		
 		xmlTreeNode = CFTreeGetChildAtIndex (currentTree, i);
-		
 		xmlNode = CFXMLTreeGetNode (xmlTreeNode);
-		
 		itemName = BRIDGE(NSString *, CFXMLNodeGetString(xmlNode));
 		
 		if ([itemName isEqualToString: name])
@@ -461,9 +444,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	description = [rssItem objectForKey: descriptionKey];
 	
 	if (description == nil) {
-		
 		description = @"";
-		
 		nilDescription = YES;
 	} /*if*/
 	
@@ -487,11 +468,8 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 			NSArray *stringComponents = [description componentsSeparatedByString: @"href=\""];
 			
 			if ([stringComponents count] > 1) {
-				
 				link = [stringComponents objectAtIndex: 1];
-				
 				stringComponents = [link componentsSeparatedByString: @"\""];
-				
 				link = [stringComponents objectAtIndex: 0];
 			} /*if*/
 		} /*if*/
@@ -561,12 +539,9 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	if ((nilDescription) && ([title length] > 50)) {
 		
 		NSString *shortTitle = [[[title stripHTML] trimWhiteSpace] ellipsizeAfterNWords: 7];
-		description = AUTORELEASEOBJ([title copy]);
-		
-		[rssItem setObject: description forKey: descriptionKey];
-		
+		description = [NSString stringWithString:title];
+		[rssItem setObject:description forKey: descriptionKey];
 		title = [NSString stringWithFormat: @"%@...", shortTitle];
-		
 		[rssItem setObject: title forKey: titleKey];
 	} /*if*/
 	
@@ -599,10 +574,8 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 					
 					convertedTitle = [s string];
 					
-					AUTORELEASEOBJNORETURN(s);
-					
+					RELEASEOBJ(s);
 					convertedTitle = [convertedTitle stripHTML];
-					
 					convertedTitle = [convertedTitle trimWhiteSpace];
 				} /*if*/
 				
@@ -626,20 +599,16 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	NSString *name;
 	
 	childCount = CFTreeGetChildCount (tree);
-	
 	valueMutable = [[NSMutableString alloc] init];
 	
 	for (ix = 0; ix < childCount; ix++) {
-		
-		itemTree = CFTreeGetChildAtIndex (tree, ix);
-		
-		node = CFXMLTreeGetNode (itemTree);
-		
+		itemTree = CFTreeGetChildAtIndex(tree, ix);
+		node = CFXMLTreeGetNode(itemTree);
 		name = BRIDGE(NSString *, CFXMLNodeGetString(node));
 		
 		if (name != nil) {
 			
-			if (CFXMLNodeGetTypeCode (node) == kCFXMLNodeTypeEntityReference) {
+			if (CFXMLNodeGetTypeCode(node) == kCFXMLNodeTypeEntityReference) {
 				
 				if ([name isEqualTo: @"lt"])
 					name = @"<";
@@ -670,9 +639,7 @@ NSInteger compareNewsItems(id item1, id item2, void *context)
 	} /*for*/
 	
 	value = [NSString stringWithString:valueMutable];
-	
 	RELEASEOBJ(valueMutable);
-	
 	return value;
 } /*getelementvalue*/
 
