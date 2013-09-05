@@ -87,6 +87,7 @@
 	return self;
 }
 
+#if !__has_feature(objc_arc)
 - (void)dealloc
 {
     self.title = nil;
@@ -100,5 +101,6 @@
 	self.versionString = nil;
     [super dealloc];
 }
+#endif
 
 @end

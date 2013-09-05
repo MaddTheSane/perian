@@ -8,8 +8,18 @@
 
 #import "SUStatusController.h"
 #import "SUUtilities.h"
+#import "ARCBridge.h"
+
+@interface SUStatusController ()
+@property (copy) NSString *title, *buttonTitle;
+@end
 
 @implementation SUStatusController
+@synthesize progressValue;
+@synthesize maxProgressValue;
+@synthesize statusText;
+@synthesize title;
+@synthesize buttonTitle;
 
 - init
 {
@@ -28,13 +38,15 @@
 	return self;
 }
 
+#if !__has_feature(objc_arc)
 - (void)dealloc
 {
-	[title release];
-	[statusText release];
-	[buttonTitle release];
+	self.title = nil;
+	self.statusText = nil;
+	self.buttonTitle = nil;
 	[super dealloc];
 }
+#endif
 
 - (void)awakeFromNib
 {
@@ -54,9 +66,7 @@
 
 - (void)beginActionWithTitle:(NSString *)aTitle maxProgressValue:(double)aMaxProgressValue statusText:(NSString *)aStatusText
 {
-	[self willChangeValueForKey:@"title"];
-	title = [aTitle copy];
-	[self didChangeValueForKey:@"title"];
+	self.title = aTitle;
 	
 	[self setMaxProgressValue:aMaxProgressValue];
 	[self setStatusText:aStatusText];
@@ -64,9 +74,7 @@
 
 - (void)setButtonTitle:(NSString *)aButtonTitle target:target action:(SEL)action isDefault:(BOOL)isDefault
 {
-	[self willChangeValueForKey:@"buttonTitle"];
-	buttonTitle = [aButtonTitle copy];
-	[self didChangeValueForKey:@"buttonTitle"];	
+	self.buttonTitle = aButtonTitle;
 	
 	[actionButton sizeToFit];
 	// Except we're going to add 15 px for padding.
@@ -86,21 +94,9 @@
 	[actionButton setEnabled:enabled];
 }
 
-- (double)progressValue
+- (BOOL)isButtonEnabled
 {
-	return progressValue;
-}
-
-- (void)setProgressValue:(double)value
-{
-	[self willChangeValueForKey:@"progressValue"];
-	progressValue = value;
-	[self didChangeValueForKey:@"progressValue"];	
-}
-
-- (double)maxProgressValue
-{
-	return maxProgressValue;
+	return [actionButton isEnabled];
 }
 
 - (void)setMaxProgressValue:(double)value
@@ -109,13 +105,6 @@
 	maxProgressValue = value;
 	[self didChangeValueForKey:@"maxProgressValue"];
 	[self setProgressValue:0];
-}
-
-- (void)setStatusText:(NSString *)aStatusText
-{
-	[self willChangeValueForKey:@"statusText"];
-	statusText = [aStatusText copy];
-	[self didChangeValueForKey:@"statusText"];	
 }
 
 @end

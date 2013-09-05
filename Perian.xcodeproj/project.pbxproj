@@ -113,7 +113,6 @@
 		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA10A3CE8C10066D45F /* libavcodec.a */; };
 		11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA20A3CE8C10066D45F /* libavutil.a */; };
-		11A70AD20A3D0131002058D4 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1156DBD80A3CE9F500963B0E /* libz.dylib */; };
 		11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EED50A3CE7EC0066D45F /* QuickTime.framework */; };
 		11BEFB2D0C18E23E00BC9324 /* Read Me.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */; };
 		11C85ED80A641E6400DF3D73 /* ff_dataref.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED30A641E6400DF3D73 /* ff_dataref.c */; };
@@ -144,21 +143,16 @@
 		3D802EAD1032B8B00034BF4A /* SubParsing.m.rl in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A2F0B6B1AD80051299D /* SubParsing.m.rl */; };
 		3D802EAE1032B8B00034BF4A /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
 		3D802EAF1032B8B00034BF4A /* Codecprintf.c in Sources */ = {isa = PBXBuildFile; fileRef = 113F58990A6B091600509987 /* Codecprintf.c */; };
-		3D802EB11032B8B00034BF4A /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD08570FBF80D8001E156F /* libobjc.dylib */; };
 		3D802EB21032B8B00034BF4A /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
 		3D802EB31032B8B00034BF4A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
 		3D802EB41032B8B00034BF4A /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
-		3D802EB51032B8B00034BF4A /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */; };
 		3D802EBF1032B9860034BF4A /* SubATSUIRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */; };
 		3D802EC31032B9B50034BF4A /* ssa2pdf.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D802EC21032B9B50034BF4A /* ssa2pdf.m */; };
 		3D802F06103365DB0034BF4A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
 		3D802F171033662F0034BF4A /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		3D802F8610336EE90034BF4A /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D802F8510336EE90034BF4A /* ApplicationServices.framework */; };
-		3D95B9010E208965007C8F51 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D95B9000E208965007C8F51 /* libbz2.dylib */; };
-		3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D95B9000E208965007C8F51 /* libbz2.dylib */; };
 		3DA6322512865F5400AC1962 /* FFmpegUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = 3DA6322412865F5400AC1962 /* FFmpegUtils.c */; };
 		3DAD08250FBF7DA9001E156F /* ssa2html.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DAD08240FBF7DA9001E156F /* ssa2html.m */; };
-		3DAD08580FBF80D8001E156F /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD08570FBF80D8001E156F /* libobjc.dylib */; };
 		3DAD08590FBF80DF001E156F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
 		3DAD085A0FBF80E7001E156F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
 		3DAD08600FBF8194001E156F /* SubContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A1F0B6B1A540051299D /* SubContext.m */; };
@@ -172,10 +166,7 @@
 		3DAD09F80FBFAFD0001E156F /* libuniversaldetector.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D41BE9A0BCD3B330069E7C2 /* libuniversaldetector.a */; };
 		3DAD09FB0FBFAFFF001E156F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
 		3DAD09FC0FBFB004001E156F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F539CD110B62BC82005A72C9 /* Foundation.framework */; };
-		3DAD09FD0FBFB007001E156F /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD08570FBF80D8001E156F /* libobjc.dylib */; };
 		3DAD09FE0FBFB00F001E156F /* SubUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D211A220B6B1A660051299D /* SubUtilities.m */; };
-		3DAD0A120FBFB145001E156F /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */; };
-		3DAD0A130FBFB14D001E156F /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */; };
 		3DAD0AAC0FC133E7001E156F /* PerianPrefPane.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */; };
 		3DAD0AC10FC1365E001E156F /* UpdateCheckerMainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.xib */; };
 		3DB2BB290B6C92F000416863 /* SubATSUIRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DB2BB280B6C92F000416863 /* SubATSUIRenderer.m */; };
@@ -193,6 +184,15 @@
 		3DF2958C104F0EF40047B8EC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
 		55247B14173D76A700531BBC /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		5557DF4B17D8E0AE00142C72 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5557DF4D17D8E0AE00142C72 /* InfoPlist.strings */; };
+		5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5417D8F6C400142C72 /* libz.dylib */; };
+		5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5617D8F6E300142C72 /* libbz2.dylib */; };
+		5557DF5817D8F6F800142C72 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5617D8F6E300142C72 /* libbz2.dylib */; };
+		5557DF5A17D8F71200142C72 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5917D8F71200142C72 /* libstdc++.6.dylib */; };
+		5557DF5C17D8F71C00142C72 /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5B17D8F71B00142C72 /* libobjc.dylib */; };
+		5557DF5D17D8F73F00142C72 /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5B17D8F71B00142C72 /* libobjc.dylib */; };
+		5557DF5E17D8F73F00142C72 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5917D8F71200142C72 /* libstdc++.6.dylib */; };
+		5557DF5F17D8F74000142C72 /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5B17D8F71B00142C72 /* libobjc.dylib */; };
+		5557DF6017D8F74000142C72 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5917D8F71200142C72 /* libstdc++.6.dylib */; };
 		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
 		558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB417D2468000EB0DE7 /* SUStatus.xib */; };
 		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
@@ -590,7 +590,6 @@
 		11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; name = ComponentInfo.plist; path = Plists/ComponentInfo.plist; sourceTree = "<group>"; };
 		113F58980A6B091600509987 /* Codecprintf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Codecprintf.h; sourceTree = "<group>"; };
 		113F58990A6B091600509987 /* Codecprintf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Codecprintf.c; sourceTree = "<group>"; };
-		1156DBD80A3CE9F500963B0E /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		11629EE00B51E482006591C8 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		11629EEA0B51E4F1006591C8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		11629EF30B51E4FB006591C8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -649,24 +648,21 @@
 		3D2A136E1213D3CC002BFAEA /* KaxDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KaxDefines.h; path = libmatroska/matroska/KaxDefines.h; sourceTree = "<group>"; };
 		3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UniversalDetector.xcodeproj; path = UniversalDetector/UniversalDetector.xcodeproj; sourceTree = "<group>"; };
 		3D41BEBC0BCD63510069E7C2 /* UniversalDetector.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = UniversalDetector.h; path = UniversalDetector/UniversalDetector.h; sourceTree = "<group>"; };
-		3D4893DC1491ED9700E0A09D /* QD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QD.framework; path = /System/Library/Frameworks/ApplicationServices.framework/Frameworks/QD.framework; sourceTree = "<absolute>"; };
+		3D4893DC1491ED9700E0A09D /* QD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QD.framework; path = System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/QD.framework; sourceTree = SDKROOT; };
 		3D4A7A970B5533BC004C5D6A /* ColorConversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ColorConversions.h; sourceTree = "<group>"; };
 		3D4A7A980B5533BC004C5D6A /* ColorConversions.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ColorConversions.c; sourceTree = "<group>"; };
 		3D70B04A13CC187900711D41 /* KaxSemantic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KaxSemantic.h; path = libmatroska/matroska/KaxSemantic.h; sourceTree = "<group>"; };
 		3D70B04C13CC188300711D41 /* KaxSemantic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = KaxSemantic.cpp; path = libmatroska/src/KaxSemantic.cpp; sourceTree = "<group>"; };
 		3D802EBB1032B8B00034BF4A /* ssa2pdf */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ssa2pdf; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D802EC21032B9B50034BF4A /* ssa2pdf.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ssa2pdf.m; path = Subtitles/ssa2pdf.m; sourceTree = "<group>"; };
-		3D802F8510336EE90034BF4A /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
-		3D95B9000E208965007C8F51 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = /usr/lib/libbz2.dylib; sourceTree = "<absolute>"; };
-		3D9D088016563BEE0016C817 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = "DerivedData/Perian/Build/Products/Deployment+Debug/Universal/libswscale.a"; sourceTree = "<group>"; };
+		3D802F8510336EE90034BF4A /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
+		3D9D088016563BEE0016C817 /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswscale.a; path = Universal/libswscale.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DA6322312865F5400AC1962 /* FFmpegUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = FFmpegUtils.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		3DA6322412865F5400AC1962 /* FFmpegUtils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = FFmpegUtils.c; sourceTree = "<group>"; };
 		3DAD08080FBF7C6F001E156F /* ssa2html */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ssa2html; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DAD08240FBF7DA9001E156F /* ssa2html.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ssa2html.m; path = Subtitles/ssa2html.m; sourceTree = "<group>"; };
-		3DAD08570FBF80D8001E156F /* libobjc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.dylib; path = /usr/lib/libobjc.dylib; sourceTree = "<absolute>"; };
 		3DAD09A80FBFAB08001E156F /* detect-encoding */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "detect-encoding"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DAD09AE0FBFAB68001E156F /* detect-encoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "detect-encoding.m"; path = "Subtitles/detect-encoding.m"; sourceTree = "<group>"; };
-		3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "/usr/lib/libstdc++.6.dylib"; sourceTree = "<absolute>"; };
 		3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = PerianPrefPane.xib; path = Resources/PerianPrefPane.xib; sourceTree = "<group>"; };
 		3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = UpdateCheckerMainMenu.xib; path = "Update Checker Sources/UpdateCheckerMainMenu.xib"; sourceTree = "<group>"; };
 		3DB2BB270B6C92F000416863 /* SubATSUIRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SubATSUIRenderer.h; path = Subtitles/SubATSUIRenderer.h; sourceTree = "<group>"; };
@@ -685,9 +681,14 @@
 		3DE8D6EE104444420007C7E7 /* Application.applescript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.applescript; path = Application.applescript; sourceTree = "<group>"; };
 		3DE8D6EF104444420007C7E7 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "PerianOpener-Info.plist"; path = "Plists/PerianOpener-Info.plist"; sourceTree = "<group>"; };
-		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = OpenerMainMenu.xib; path = Opener/OpenerMainMenu.xib; sourceTree = "<group>"; };
-		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = /System/Library/Frameworks/AppleScriptKit.framework; sourceTree = "<absolute>"; };
+		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OpenerMainMenu.xib; sourceTree = "<group>"; };
+		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = System/Library/Frameworks/AppleScriptKit.framework; sourceTree = SDKROOT; };
 		5557DF4C17D8E0AE00142C72 /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5557DF5417D8F6C400142C72 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		5557DF5617D8F6E300142C72 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
+		5557DF5917D8F71200142C72 /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "usr/lib/libstdc++.6.dylib"; sourceTree = SDKROOT; };
+		5557DF5B17D8F71B00142C72 /* libobjc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.dylib; path = usr/lib/libobjc.dylib; sourceTree = SDKROOT; };
+		5557DF6217D8FC2000142C72 /* ARCBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARCBridge.h; sourceTree = "<group>"; };
 		5585E1A6179DE5EA0045A322 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 		558E7CB417D2468000EB0DE7 /* SUStatus.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SUStatus.xib; sourceTree = "<group>"; };
 		558E7CB717D246B000EB0DE7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SUUpdateAlert.xib; sourceTree = "<group>"; };
@@ -813,7 +814,7 @@
 		61FD41320B4F6F0800BEEFEA /* MatroskaImportPrivate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MatroskaImportPrivate.cpp; sourceTree = "<group>"; };
 		83D1D6C80B4C794700E09EC9 /* Perian.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
 		83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PerianPane-Info.plist"; path = "Plists/PerianPane-Info.plist"; sourceTree = "<group>"; };
-		83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PreferencePanes.framework; path = /System/Library/Frameworks/PreferencePanes.framework; sourceTree = "<absolute>"; };
+		83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PreferencePanes.framework; path = System/Library/Frameworks/PreferencePanes.framework; sourceTree = SDKROOT; };
 		83D1D6E00B4C81F200E09EC9 /* CPFPerianPrefPaneController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CPFPerianPrefPaneController.h; sourceTree = "<group>"; };
 		83D1D6E10B4C81F200E09EC9 /* CPFPerianPrefPaneController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CPFPerianPrefPaneController.m; sourceTree = "<group>"; };
 		83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = Perian_icon.icns; path = Resources/Perian_icon.icns; sourceTree = "<group>"; };
@@ -825,14 +826,14 @@
 		F50E79F51014F61B00D3E6FF /* codecID.c.m4 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 0; path = codecID.c.m4; sourceTree = "<group>"; };
 		F52286240B50625E00F8CF7D /* bitstream_info.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bitstream_info.h; sourceTree = "<group>"; };
 		F52286250B50625E00F8CF7D /* bitstream_info.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = bitstream_info.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
-		F539CD110B62BC82005A72C9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		F53E18E40B4F483C003A0471 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
+		F539CD110B62BC82005A72C9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		F53E18E40B4F483C003A0471 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		F560DECD03D61B6101ABA332 /* Components.k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Components.k.h; sourceTree = "<group>"; };
 		F560DEFE03D61C4601ABA332 /* FFusionCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFusionCodecDispatch.h; sourceTree = "<group>"; };
 		F560DF0003D61D0101ABA332 /* FFusionCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = FFusionCodec.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		F57676040BE1A18300B2434B /* FrameBuffer.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = FrameBuffer.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		F57676050BE1A18300B2434B /* FrameBuffer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FrameBuffer.h; sourceTree = "<group>"; };
-		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
+		F57755F40B51EB1800C7D833 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		F59B2AB81007A0D000FAAAD8 /* PerianResources.r */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.rez; path = PerianResources.r; sourceTree = "<group>"; };
 		F5BD450112171BDE0089D5FA /* CompressVideoCodecDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CompressVideoCodecDispatch.h; sourceTree = "<group>"; };
 		F5BD450A12171C4C0089D5FA /* CompressVideoCodec.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = CompressVideoCodec.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
@@ -864,19 +865,19 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */,
+				5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */,
 				5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */,
 				61CB11F40ACE0F73007994BD /* libmatroska.a in Frameworks */,
 				61CB11F30ACE0F6D007994BD /* libebml.a in Frameworks */,
 				11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */,
 				11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */,
 				11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */,
-				11A70AD20A3D0131002058D4 /* libz.dylib in Frameworks */,
 				11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */,
 				8F483B550A642644002CCA73 /* libavformat.a in Frameworks */,
 				8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */,
 				3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */,
 				3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */,
-				3D95B9020E20896F007C8F51 /* libbz2.dylib in Frameworks */,
 				3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */,
 				F5BD48FE121786C90089D5FA /* AudioUnit.framework in Frameworks */,
 			);
@@ -886,14 +887,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D802EB11032B8B00034BF4A /* libobjc.dylib in Frameworks */,
 				3D802EB21032B8B00034BF4A /* CoreFoundation.framework in Frameworks */,
 				3D802EB31032B8B00034BF4A /* Foundation.framework in Frameworks */,
 				3D802EB41032B8B00034BF4A /* libuniversaldetector.a in Frameworks */,
-				3D802EB51032B8B00034BF4A /* libstdc++.6.dylib in Frameworks */,
 				3D802F06103365DB0034BF4A /* Cocoa.framework in Frameworks */,
 				3D802F171033662F0034BF4A /* Carbon.framework in Frameworks */,
 				3D802F8610336EE90034BF4A /* ApplicationServices.framework in Frameworks */,
+				5557DF5F17D8F74000142C72 /* libobjc.dylib in Frameworks */,
+				5557DF6017D8F74000142C72 /* libstdc++.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -901,11 +902,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3DAD08580FBF80D8001E156F /* libobjc.dylib in Frameworks */,
+				5557DF5C17D8F71C00142C72 /* libobjc.dylib in Frameworks */,
+				5557DF5A17D8F71200142C72 /* libstdc++.6.dylib in Frameworks */,
 				3DAD08590FBF80DF001E156F /* CoreFoundation.framework in Frameworks */,
 				3DAD085A0FBF80E7001E156F /* Foundation.framework in Frameworks */,
 				3DAD08900FBF848B001E156F /* libuniversaldetector.a in Frameworks */,
-				3DAD0A130FBFB14D001E156F /* libstdc++.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -916,8 +917,8 @@
 				3DAD09F80FBFAFD0001E156F /* libuniversaldetector.a in Frameworks */,
 				3DAD09FB0FBFAFFF001E156F /* CoreFoundation.framework in Frameworks */,
 				3DAD09FC0FBFB004001E156F /* Foundation.framework in Frameworks */,
-				3DAD09FD0FBFB007001E156F /* libobjc.dylib in Frameworks */,
-				3DAD0A120FBFB145001E156F /* libstdc++.6.dylib in Frameworks */,
+				5557DF5D17D8F73F00142C72 /* libobjc.dylib in Frameworks */,
+				5557DF5E17D8F73F00142C72 /* libstdc++.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -951,9 +952,9 @@
 				83D1D6CF0B4C7AC400E09EC9 /* PreferencePanes.framework in Frameworks */,
 				F53E18E50B4F483C003A0471 /* Security.framework in Frameworks */,
 				F57755F50B51EB1800C7D833 /* CoreFoundation.framework in Frameworks */,
-				3D95B9010E208965007C8F51 /* libbz2.dylib in Frameworks */,
 				3D0A03BD100692E20087E580 /* Cocoa.framework in Frameworks */,
 				3D0A03BE100692E30087E580 /* Carbon.framework in Frameworks */,
+				5557DF5817D8F6F800142C72 /* libbz2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -985,26 +986,21 @@
 		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				3D4893DC1491ED9700E0A09D /* QD.framework */,
+				5557DF5317D8F53900142C72 /* Other frameworks */,
+				83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */,
 				3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */,
-				3D802F8510336EE90034BF4A /* ApplicationServices.framework */,
-				3DAD0A110FBFB145001E156F /* libstdc++.6.dylib */,
-				3DAD08570FBF80D8001E156F /* libobjc.dylib */,
-				3D95B9000E208965007C8F51 /* libbz2.dylib */,
+				5557DF5B17D8F71B00142C72 /* libobjc.dylib */,
+				5557DF5917D8F71200142C72 /* libstdc++.6.dylib */,
 				5585E1A6179DE5EA0045A322 /* libiconv.dylib */,
-				1156DBD80A3CE9F500963B0E /* libz.dylib */,
-				F539CD110B62BC82005A72C9 /* Foundation.framework */,
+				5557DF5617D8F6E300142C72 /* libbz2.dylib */,
+				5557DF5417D8F6C400142C72 /* libz.dylib */,
 				1162A0530B51ECE1006591C8 /* WebKit.framework */,
 				11629EEA0B51E4F1006591C8 /* Cocoa.framework */,
-				11629EF30B51E4FB006591C8 /* AppKit.framework */,
 				F57755F40B51EB1800C7D833 /* CoreFoundation.framework */,
 				61CB11020ACDF37C007994BD /* libebml */,
 				61CB11720ACDF4BB007994BD /* libmatroska */,
 				8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */,
-				11D4EFA10A3CE8C10066D45F /* libavcodec.a */,
-				8F483B540A642644002CCA73 /* libavformat.a */,
-				11D4EFA20A3CE8C10066D45F /* libavutil.a */,
-				3D9D088016563BEE0016C817 /* libswscale.a */,
+				5557DF6117D8F7C600142C72 /* FFmpeg libs */,
 				11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */,
 				11D4EED50A3CE7EC0066D45F /* QuickTime.framework */,
 				F53E18E40B4F483C003A0471 /* Security.framework */,
@@ -1026,16 +1022,13 @@
 				F50E79F41014F61B00D3E6FF /* codecResources.r.m4 */,
 				11207C720C2F4A4E002A0FF0 /* ComponentInfo.plist */,
 				11BEFB2C0C18E23E00BC9324 /* Read Me.rtf */,
-				3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */,
 				3DAD0AC00FC1365E001E156F /* UpdateCheckerMainMenu.xib */,
 				83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */,
 				3DAD0AAB0FC133E7001E156F /* PerianPrefPane.xib */,
-				83D1D6D00B4C7AD200E09EC9 /* Frameworks */,
 				61D691590AC8E382000EFC7D /* MatroskaImport.r */,
 				61D691540AC8E382000EFC7D /* MatroskaExport.r */,
 				8F483B8B0A642886002CCA73 /* PerianAviImporter.r */,
 				5557DF4D17D8E0AE00142C72 /* InfoPlist.strings */,
-				F50D440903EAD8E701B1D299 /* Images */,
 				F59B2AB81007A0D000FAAAD8 /* PerianResources.r */,
 			);
 			name = Resources;
@@ -1073,6 +1066,7 @@
 				1184A37C0B505A2E00C8452A /* Sparkle Files */,
 				116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */,
 				116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */,
+				5557DF6217D8FC2000142C72 /* ARCBridge.h */,
 				11629EE00B51E482006591C8 /* main.m */,
 			);
 			path = "Update Checker Sources";
@@ -1211,8 +1205,31 @@
 			children = (
 				3DE8D6EE104444420007C7E7 /* Application.applescript */,
 				3DE8D6EF104444420007C7E7 /* main.m */,
+				3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */,
 			);
 			path = Opener;
+			sourceTree = "<group>";
+		};
+		5557DF5317D8F53900142C72 /* Other frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3D4893DC1491ED9700E0A09D /* QD.framework */,
+				3D802F8510336EE90034BF4A /* ApplicationServices.framework */,
+				F539CD110B62BC82005A72C9 /* Foundation.framework */,
+				11629EF30B51E4FB006591C8 /* AppKit.framework */,
+			);
+			name = "Other frameworks";
+			sourceTree = "<group>";
+		};
+		5557DF6117D8F7C600142C72 /* FFmpeg libs */ = {
+			isa = PBXGroup;
+			children = (
+				11D4EFA10A3CE8C10066D45F /* libavcodec.a */,
+				8F483B540A642644002CCA73 /* libavformat.a */,
+				11D4EFA20A3CE8C10066D45F /* libavutil.a */,
+				3D9D088016563BEE0016C817 /* libswscale.a */,
+			);
+			name = "FFmpeg libs";
 			sourceTree = "<group>";
 		};
 		6116E54B0B43C27B0020F1CE /* Audio Codec */ = {
@@ -1396,14 +1413,6 @@
 			name = Export;
 			sourceTree = "<group>";
 		};
-		83D1D6D00B4C7AD200E09EC9 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		83D1D6DF0B4C81E000E09EC9 /* PrefPane */ = {
 			isa = PBXGroup;
 			children = (
@@ -1412,13 +1421,6 @@
 				F5CFD1BD0B5000CE00616865 /* GBPerianPanePListGenerator.m */,
 			);
 			name = PrefPane;
-			sourceTree = "<group>";
-		};
-		F50D440903EAD8E701B1D299 /* Images */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Images;
 			sourceTree = "<group>";
 		};
 		F53AD5E20B2A4EC000D93AC9 /* FFMPEG */ = {
@@ -1782,21 +1784,21 @@
 			projectRoot = "";
 			targets = (
 				11A70AC00A3D0105002058D4 /* Perian */,
+				83D1D6C70B4C794700E09EC9 /* PerianPane */,
+				116C42510B5041BD00FB0738 /* PerianUpdateChecker */,
+				3DE8D6DD104440F60007C7E7 /* PerianOpener */,
 				11BA39A80A61E450008AF206 /* FFmpeg Static Libraries */,
 				F59E09EA0A670E3D0019A3F0 /* Debug in QuickTime Player */,
 				61CB10FE0ACDF350007994BD /* ebml */,
 				61CB11760ACDF4D8007994BD /* matroska */,
-				83D1D6C70B4C794700E09EC9 /* PerianPane */,
 				F5CFD1B30B50009000616865 /* PerianPanePListGenerator */,
 				F5CFD2560B500B5E00616865 /* CreatePrefPanePlist */,
 				F5CFD3BA0B50142100616865 /* Setup Build Directories */,
 				F5CFD2DB0B5012AA00616865 /* A52Codec */,
-				116C42510B5041BD00FB0738 /* PerianUpdateChecker */,
 				F5121EB70EB3A54A0048EF67 /* Make Git Rev */,
 				3DAD08070FBF7C6F001E156F /* ssa2html */,
 				3DAD09A70FBFAB08001E156F /* detect-encoding */,
 				3D802EA61032B8B00034BF4A /* ssa2pdf */,
-				3DE8D6DD104440F60007C7E7 /* PerianOpener */,
 			);
 		};
 /* End PBXProject section */
@@ -2296,9 +2298,13 @@
 		116C42560B5041BF00FB0738 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				"CLANG_ENABLE_OBJC_ARC[arch=x86_64]" = YES;
 				GCC_ENABLE_OBJC_GC = unsupported;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2307,9 +2313,12 @@
 		116C42570B5041BF00FB0738 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				"CLANG_ENABLE_OBJC_ARC[arch=x86_64]" = YES;
 				GCC_ENABLE_OBJC_GC = unsupported;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2326,6 +2335,7 @@
 					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Frameworks\"",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2367,6 +2377,7 @@
 					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Frameworks\"",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2432,7 +2443,6 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2468,7 +2478,6 @@
 				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
 				GCC_STRICT_ALIASING = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -2504,7 +2513,6 @@
 		3D4BBE470B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = ebml;
@@ -2515,7 +2523,6 @@
 		3D4BBE480B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = matroska;
@@ -2534,6 +2541,7 @@
 					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Frameworks\"",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2593,6 +2601,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = "";
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
 				SDKROOT = "";
 			};
@@ -2609,13 +2618,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
-				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
 			};
@@ -2624,9 +2634,12 @@
 		3D4BBE500B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = NO;
+				"CLANG_ENABLE_OBJC_ARC[arch=x86_64]" = YES;
 				GCC_ENABLE_OBJC_GC = unsupported;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2641,7 +2654,6 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					DEBUG_BUILD,
@@ -2773,7 +2785,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
@@ -2783,6 +2794,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
 			name = Debug;
@@ -2791,7 +2803,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
@@ -2801,6 +2812,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
 			name = Release;
@@ -2809,7 +2821,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
@@ -2819,6 +2830,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
 			name = "Release+Debug";
@@ -2826,7 +2838,6 @@
 		61CB11040ACDF37C007994BD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				ONLY_ACTIVE_ARCH = NO;
@@ -2838,7 +2849,6 @@
 		61CB11050ACDF37C007994BD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = ebml;
@@ -2849,7 +2859,6 @@
 		61CB11B10ACDF4FF007994BD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				ONLY_ACTIVE_ARCH = NO;
@@ -2861,7 +2870,6 @@
 		61CB11B20ACDF4FF007994BD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = matroska;
@@ -2873,13 +2881,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
-				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
@@ -2890,13 +2899,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
-				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = prefPane;
 			};
@@ -2946,6 +2956,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = "";
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
 				SDKROOT = "";
 			};
@@ -2960,6 +2971,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = "";
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
 				SDKROOT = "";
 			};

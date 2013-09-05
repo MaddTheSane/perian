@@ -37,6 +37,7 @@
 	SUUpdateAlert *updateAlert;
 	SUAppcastItem *latest;
 	SUStatusController *statusController;
+	SUAppcast *appcast;
 	NSURLDownload *downloader;
 	NSString *downloadPath;
     NSDate *lastRunDate;

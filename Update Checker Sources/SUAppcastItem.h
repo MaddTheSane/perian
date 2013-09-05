@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-
+#import "ARCBridge.h"
 
 @interface SUAppcastItem : NSObject {
 	NSString *title;
@@ -33,12 +33,12 @@
 @property (copy) NSDate *date;
 @property (copy) NSString *description;
 
-@property (retain) NSURL *releaseNotesURL;
+@property (arcstrong) NSURL *releaseNotesURL;
 
 @property (copy) NSString *DSASignature;
 @property (copy) NSString *MD5Sum;
 
-@property (retain) NSURL *fileURL;
+@property (arcstrong) NSURL *fileURL;
 @property (copy) NSString *fileVersion;
 @property (copy) NSString *versionString;
 

@@ -41,7 +41,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #import "NSString+extras.h"
-
+#import "ARCBridge.h"
 
 @implementation NSString (extras)
 
@@ -56,12 +56,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		r = [newString rangeOfCharacterFromSet:set];
 	}
 	while (r.location != NSNotFound);
-	return [newString autorelease];
+	return AUTORELEASEOBJ(newString);
 }
 
 - (NSString *) trimWhiteSpace {
 	
-	NSMutableString *s = [[self mutableCopy] autorelease];
+	NSMutableString *s = [NSMutableString stringWithString:self];
 	
 	CFStringTrimWhitespace ((CFMutableStringRef) s);
 	
@@ -80,9 +80,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		ix = len;
 	
 	[componentsCopy removeObjectsInRange: NSMakeRange (ix, len - ix)];
-    [componentsCopy autorelease];
 	
-	return [componentsCopy componentsJoinedByString: @" "];
+	return [AUTORELEASEOBJ(componentsCopy) componentsJoinedByString: @" "];
 } /*ellipsizeAfterNWords*/
 
 
@@ -125,7 +124,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	if ([s isEqualTo: @""])
 		return (YES);
 	
-	copy = [[s copy] autorelease];
+	copy = AUTORELEASEOBJ([s copy]);
 	
 	if ([[copy trimWhiteSpace] isEqualTo: @""])
 		return (YES);

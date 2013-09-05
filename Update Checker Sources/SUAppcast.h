@@ -7,20 +7,21 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "ARCBridge.h"
 
 @class RSS, SUAppcastItem;
 @protocol SUAppcastDelegate;
 
 @interface SUAppcast : NSObject {
 	NSArray *items;
-	NSObject<SUAppcastDelegate> *delegate;
+	__arcweak NSObject<SUAppcastDelegate> *delegate;
 }
 
 - (void)fetchAppcastFromURL:(NSURL *)url;
-@property (assign) NSObject<SUAppcastDelegate> *delegate;
+@property (readonly) NSArray *items;
+@property (arcweak) NSObject<SUAppcastDelegate> *delegate;
 
 - (SUAppcastItem *)newestItem;
-- (NSArray *)items;
 
 @end
 

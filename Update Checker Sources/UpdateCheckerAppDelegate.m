@@ -25,29 +25,41 @@
 // we can be more sure that the update won't get run twice accidentaly.
 
 #import "UpdateCheckerAppDelegate.h"
+#import "ARCBridge.h"
 #include <stdlib.h>
 
 //define the following to use the beta appcast URL, but DON'T commit that change
 //#define betaAppcastUrl @"whatever"
 
-@interface UpdateCheckerAppDelegate (private)
+@interface UpdateCheckerAppDelegate ()
 - (void)showUpdateErrorAlertWithInfo:(NSString *)info;
+@property (arcretain) NSDate *lastRunDate;
+@property (arcretain) SUAppcastItem *latest;
+@property (arcretain) NSString *downloadPath;
+@property (arcretain) SUAppcast *appcast;
 @end
 
 @implementation UpdateCheckerAppDelegate
+@synthesize lastRunDate;
+@synthesize latest;
+@synthesize downloadPath;
+@synthesize appcast;
 
+#if !__has_feature(objc_arc)
 - (void)dealloc
 {
     [downloader release];
     [downloadPath release];
+	[appcast release];
     [lastRunDate release];
     [super dealloc];
 }
+#endif
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	lastRunDate = [[defaults objectForKey:NEXT_RUN_KEY] retain];
+	self.lastRunDate = [defaults objectForKey:NEXT_RUN_KEY];
     
     if (![lastRunDate isEqualToDate:[NSDate distantFuture]]) {
         [defaults setObject:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN] forKey:NEXT_RUN_KEY];
@@ -71,14 +83,14 @@
 	if(manualRun)
 		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:UPDATE_STATUS_NOTIFICATION object:@"Starting"];
 	
-	SUAppcast *appcast = [[SUAppcast alloc] init];
+	self.appcast = AUTORELEASEOBJ([[SUAppcast alloc] init]);
 	[appcast setDelegate:self];
 	[appcast fetchAppcastFromURL:[NSURL URLWithString:updateUrlString]];
 }
 
-- (void)appcastDidFinishLoading:(SUAppcast *)appcast
+- (void)appcastDidFinishLoading:(SUAppcast *)anappcast
 {
-	latest = [[appcast newestItem] retain];
+	self.latest = [anappcast newestItem];
 	
 	if (![latest fileVersion])
 	{
@@ -90,10 +102,10 @@
 	// This code *should* use NSSearchPathForDirectoriesInDomains(NSCoreServiceDirectory, NSSystemDomainMask, YES)
 	// but that returns /Library/CoreServices for some reason
 	NSString *versionPlistPath = @"/System/Library/CoreServices/SystemVersion.plist";
-	NSString *currentSystemVersion = [[[NSDictionary dictionaryWithContentsOfFile:versionPlistPath] objectForKey:@"ProductVersion"] retain];
-
+	NSString *currentSystemVersion = RETAINOBJ([[NSDictionary dictionaryWithContentsOfFile:versionPlistPath] objectForKey:@"ProductVersion"] );
+	
 	BOOL updateAvailable = SUStandardVersionComparison([latest minimumSystemVersion], currentSystemVersion);
-	[currentSystemVersion release];
+	RELEASEOBJ(currentSystemVersion);
     NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	
@@ -103,9 +115,9 @@
 	}
 	
 	NSString *skippedVersion = [[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY];
-
-	if (updateAvailable && (!skippedVersion || 
-		(skippedVersion && ![skippedVersion isEqualToString:[latest versionString]]))) {
+	
+	if (updateAvailable && (!skippedVersion ||
+							(skippedVersion && ![skippedVersion isEqualToString:[latest versionString]]))) {
 		if(manualRun)
 			[[NSDistributedNotificationCenter defaultCenter] postNotificationName:UPDATE_STATUS_NOTIFICATION object:@"YesUpdates"];
 		[self showUpdatePanelForItem:latest];
@@ -115,15 +127,17 @@
 		[[NSApplication sharedApplication] terminate:self];
 	}
     
-    [appcast release];
+	//RELEASEOBJ(appcast);
+	self.appcast = nil;
 }
 
-- (void)appcastDidFailToLoad:(SUAppcast *)appcast
+- (void)appcastDidFailToLoad:(SUAppcast *)anappcast
 {
 	[self updateFailed];
 	if(manualRun)
 		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:UPDATE_STATUS_NOTIFICATION object:@"Error"];
-    [appcast release];
+	//RELEASEOBJ(anappcast);
+	self.appcast = nil;
 	[[NSApplication sharedApplication] terminate:self];	
 }
 
@@ -194,10 +208,10 @@
 	{
 		[NSException raise:@"SUFailTmpWrite" format:@"Couldn't create temporary directory in /tmp"];
 		[download cancel];
-		[download release];
+		RELEASEOBJ(download);
 	}
 	
-	downloadPath = [[tempDir stringByAppendingPathComponent:name] retain];
+	self.downloadPath = [tempDir stringByAppendingPathComponent:name];
 	[download setDestination:downloadPath allowOverwrite:YES];
 }
 
@@ -235,7 +249,7 @@ extern char **environ;
 
 - (void)downloadDidFinish:(NSURLDownload *)download
 {
-	[download release];
+	RELEASEOBJ(download);
 	downloader = nil;
 	
 	//Indeterminate progress bar
@@ -274,7 +288,7 @@ extern char **environ;
 	
 	NSAppleScript *quitSysPrefsScript = [[NSAppleScript alloc] initWithSource:@"tell application \"System Preferences\" to quit"];
 	[quitSysPrefsScript executeAndReturnError:nil];
-	[quitSysPrefsScript release];
+	RELEASEOBJ(quitSysPrefsScript);
 	
 	const char *args[] = {"/bin/sh", "-c", buf, NULL};
 	setenv("PREFPANE_LOCATION", [prefpanelocation fileSystemRepresentation], 1);

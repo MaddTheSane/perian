@@ -7,6 +7,7 @@
 //
 
 #import "SUUtilities.h"
+#import "ARCBridge.h"
 
 @interface SUUtilities : NSObject
 	+(NSString *)localizedStringForKey:(NSString *)key withComment:(NSString *)comment;
@@ -89,7 +90,7 @@ NSArray *SUSplitVersionString(NSString *version)
         // Nothing to do here
         return parts;
     }
-    s = [[[version substringToIndex:1] mutableCopy] autorelease];
+    s = AUTORELEASEOBJ([[version substringToIndex:1] mutableCopy]);
     oldType = SUGetCharType(s);
     n = [version length] - 1;
     for (i = 1; i <= n; ++i) {
@@ -99,7 +100,7 @@ NSArray *SUSplitVersionString(NSString *version)
             // We've reached a new segment
 			NSString *aPart = [[NSString alloc] initWithString:s];
             [parts addObject:aPart];
-			[aPart release];
+			RELEASEOBJ(aPart);
             [s setString:character];
         } else {
             // Add character to string and continue

@@ -58,38 +58,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 @property (readonly) NSMutableArray *newsItems;
 @property (readonly) NSString *version;
 
-
 /*Public*/
 
 - (id) initWithTitle: (NSString *) title andDescription: (NSString *) description;
-
 - (id) initWithData: (NSData *) rssData normalize: (BOOL) fl;
-
 - (id) initWithURL: (NSURL *) url normalize: (BOOL) fl;
 - (id) initWithURL: (NSURL *) url normalize: (BOOL) fl userAgent:(NSString *)userAgent;
 
 // AMM's extensions for Sparkle
 - (NSDictionary *)newestItem;
 
-
-/*Private*/
-
-- (void) createheaderdictionary: (CFXMLTreeRef) tree;
-
-- (void) createitemsarray: (CFXMLTreeRef) tree;
-
-- (void) setversionstring: (CFXMLTreeRef) tree;
-
-- (void) flattenimagechildren: (CFXMLTreeRef) tree into: (NSMutableDictionary *) dictionary;
-
-- (void) flattensourceattributes: (CFXMLNodeRef) node into: (NSMutableDictionary *) dictionary;
-
-- (CFXMLTreeRef) getchanneltree: (CFXMLTreeRef) tree;
-
-- (CFXMLTreeRef) getnamedtree: (CFXMLTreeRef) currentTree name: (NSString *) name;
-
-- (void) normalizeRSSItem: (NSMutableDictionary *) rssItem;
-
-- (NSString *) getelementvalue: (CFXMLTreeRef) tree;
 
 @end
