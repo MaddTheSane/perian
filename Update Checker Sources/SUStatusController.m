@@ -21,13 +21,13 @@
 @synthesize title;
 @synthesize buttonTitle;
 
-- init
+- (id)init
 {
 	NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"SUStatus" ofType:@"nib"];
 	if (!path) // slight hack to resolve issues with running in debug configurations
 	{
-		//NSBundle *current = [NSBundle bundleForClass:[self class]];
-		NSString *frameworkPath = [[[NSBundle mainBundle] sharedFrameworksPath] stringByAppendingPathComponent:@"/Sparkle.framework"];
+		NSBundle *current = [NSBundle bundleForClass:[self class]];
+		NSString *frameworkPath = [NSString pathWithComponents:[[[[NSBundle mainBundle] sharedFrameworksPath] pathComponents] arrayByAddingObjectsFromArray:@[[current bundleIdentifier], @"Sparkle.framework"]]];
 		NSBundle *framework = [NSBundle bundleWithPath:frameworkPath];
 		path = [framework pathForResource:@"SUStatus" ofType:@"nib"];
 	}
@@ -104,7 +104,7 @@
 	[self willChangeValueForKey:@"maxProgressValue"];
 	maxProgressValue = value;
 	[self didChangeValueForKey:@"maxProgressValue"];
-	[self setProgressValue:0];
+	self.progressValue = 0;
 }
 
 @end

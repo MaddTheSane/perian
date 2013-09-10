@@ -47,13 +47,13 @@ int main(int argc, char *argv[])
 				unlink(lockPath);
 				fp = open(lockPath, O_CREAT | O_EXCL | O_EXLOCK, S_IWUSR | S_IRUSR);
 			}
-		}		
+		}
 	}
 	if(fp == -1)
 		return 0;
 	
 	atexit(deleteLock);
-
+	
 	int ret = NSApplicationMain(argc,  (const char **) argv);
 	
 	return ret;

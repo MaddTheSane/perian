@@ -78,7 +78,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 - (NSDictionary *)newestItem
 {
 	// The news items are already sorted by published date, descending.
-	return [[self newsItems] objectAtIndex:0];
+	return [self.newsItems objectAtIndex:0];
 }
 
 - (id) initWithTitle: (NSString *) title andDescription: (NSString *) description
@@ -163,8 +163,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 
 #if !__has_feature(objc_arc)
-- (void) dealloc {
-	
+- (void) dealloc
+{	
 	[headerItems release];
 	[newsItems release];
 	[version release];
@@ -225,7 +225,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	CFXMLNodeRef childNode, itemNode;
 	NSString *childName;
 	NSString *itemName, *itemValue;
-	int childCount, itemChildCount, i, j;
+	CFIndex childCount, itemChildCount, i, j;
 	NSMutableDictionary *itemDictionaryMutable;
 	NSMutableArray *itemsArrayMutable;
 	
@@ -235,7 +235,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		channelTree = [self getchanneltree: tree];
 	
 	if (channelTree == nil) {
-		
 		NSException *exception = [NSException exceptionWithName: @"RSSCreateItemsArrayFailed"
 														 reason: @"Couldn't find the news items." userInfo: nil];
 		
@@ -243,15 +242,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	} /*if*/
 	
 	childCount = CFTreeGetChildCount (channelTree);
-	
 	itemsArrayMutable = [NSMutableArray arrayWithCapacity: childCount];
 	
 	for (i = 0; i < childCount; i++) {
 		
 		childTree = CFTreeGetChildAtIndex (channelTree, i);
-		
 		childNode = CFXMLTreeGetNode (childTree);
-		
 		childName = BRIDGE(NSString *, CFXMLNodeGetString(childNode));
 		
 		if ([childName hasPrefix: @"rss:"])
@@ -261,15 +257,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			continue;
 		
 		itemChildCount = CFTreeGetChildCount (childTree);
-		
 		itemDictionaryMutable = [NSMutableDictionary dictionaryWithCapacity: itemChildCount];
 		
 		for (j = 0; j < itemChildCount; j++) {
 			
 			itemTree = CFTreeGetChildAtIndex (childTree, j);
-			
 			itemNode = CFXMLTreeGetNode (itemTree);
-			
 			itemName = BRIDGE(NSString *, CFXMLNodeGetString(itemNode));
 			
 			if ([itemName hasPrefix: @"rss:"])
@@ -283,7 +276,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 				NSDictionary *tmpAttrs = BRIDGE(NSDictionary *,websiteInfo->attributes);
 				for (NSString *current in [tmpAttrs keyEnumerator]) {
 					[enclosureDictionary setObject:[tmpAttrs objectForKey:current] forKey:current];
-
+					
 				}
 				[itemDictionaryMutable setObject: enclosureDictionary forKey: itemName];
 				continue;
@@ -308,7 +301,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	newsItems = [[NSMutableArray alloc] initWithArray:[itemsArrayMutable sortedArrayWithOptions:NSSortConcurrent usingComparator:^NSComparisonResult(id item1, id item2) {
 		// We compare item2 with item1 instead of the other way 'round because we want descending, not ascending. Bit of a hack.
 		return [(NSDate *)[NSDate dateWithNaturalLanguageString:[item2 objectForKey:@"pubDate"]] compare:(NSDate *)[NSDate dateWithNaturalLanguageString:[item1 objectForKey:@"pubDate"]]];
-
+		
 	}]];
 } /*createitemsarray*/
 
@@ -326,11 +319,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	
 	rssTree = [self getnamedtree: tree name: @"rss"];
 	
-	node = CFXMLTreeGetNode (rssTree);
+	node = CFXMLTreeGetNode(rssTree);
 	
-	elementInfo = CFXMLNodeGetInfoPtr (node);
+	elementInfo = CFXMLNodeGetInfoPtr(node);
 	
-	version = [[NSString alloc] initWithString: [BRIDGE(NSDictionary *, (*elementInfo).attributes) objectForKey: @"version"]];
+	version = [[NSString alloc] initWithString: [BRIDGE(NSDictionary *, elementInfo->attributes) objectForKey: @"version"]];
 } /*setversionstring*/
 
 
@@ -365,9 +358,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	const CFXMLElementInfo *elementInfo;
 	NSString *sourceHomeUrl, *sourceRssUrl;
 	
-	elementInfo = CFXMLNodeGetInfoPtr (node);
+	elementInfo = CFXMLNodeGetInfoPtr(node);
 	
-	NSDictionary *tmpAttrs = BRIDGE(NSDictionary*, (*elementInfo).attributes);
+	NSDictionary *tmpAttrs = BRIDGE(NSDictionary*, elementInfo->attributes);
 	sourceHomeUrl = [tmpAttrs objectForKey: @"homeUrl"];
 	sourceRssUrl = [tmpAttrs objectForKey: @"url"];
 	
@@ -515,11 +508,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			} /*if*/
 			
 			if ([NSString stringIsEmpty: title]) { /*use first part of description*/
-				
 				NSString *shortTitle = [[[description stripHTML] trimWhiteSpace] ellipsizeAfterNWords: 5];
-				
 				shortTitle = [shortTitle trimWhiteSpace];
-				
 				title = [NSString stringWithFormat: @"%@...", shortTitle];
 			} /*else*/
 		} /*if*/

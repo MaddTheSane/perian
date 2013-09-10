@@ -49,7 +49,7 @@
 			feed = [[RSS alloc] initWithURL:url normalize:YES userAgent:userAgent];
 			// Set up all the appcast items
 			NSMutableArray *tempItems = [NSMutableArray array];
-			for (id current in [feed newsItems]) {
+			for (id current in feed.newsItems) {
 				[tempItems addObject:AUTORELEASEOBJ([[SUAppcastItem alloc] initWithDictionary:current])];
 			}
 			self.items = [NSArray arrayWithArray:tempItems];

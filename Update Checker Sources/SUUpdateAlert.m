@@ -89,14 +89,14 @@
 	else
 	{
 		[[releaseNotesView mainFrame] loadHTMLString:[updateItem description] baseURL:nil];
-	}	
+	}
 }
 
 - (void)awakeFromNib
-{	
+{
 	[[self window] setLevel:NSFloatingWindowLevel];
 	[[self window] setFrameAutosaveName:@"SUUpdateAlertFrame"];
-		
+	
 	// We're gonna do some frame magic to match the window's size to the description field and the presence of the release notes view.
 	NSRect frame = [[self window] frame];
 	
@@ -136,28 +136,28 @@
 
 - (NSString *)descriptionText
 {
-	return [NSString stringWithFormat:SULocalizedString(@"%@ %@ is now available (you have %@). Would you like to download it now?", nil), SUHostAppDisplayName(), [updateItem versionString], SUHostAppVersionString()];	
+	return [NSString stringWithFormat:SULocalizedString(@"%@ %@ is now available (you have %@). Would you like to download it now?", nil), SUHostAppDisplayName(), [updateItem versionString], SUHostAppVersionString()];
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:frame
 {
-    if ([frame parentFrame] == nil) {
-        webViewFinishedLoading = YES;
+	if ([frame parentFrame] == nil) {
+		webViewFinishedLoading = YES;
 		[releaseNotesSpinner setHidden:YES];
 		[sender display]; // necessary to prevent weird scroll bar artifacting
-    }
+	}
 }
 
 - (void)webView:sender decidePolicyForNavigationAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request frame:frame decisionListener:listener
 {
-    if (webViewFinishedLoading == YES) {
-        [[NSWorkspace sharedWorkspace] openURL:[request URL]];
+	if (webViewFinishedLoading == YES) {
+		[[NSWorkspace sharedWorkspace] openURL:[request URL]];
 		
-        [listener ignore];
-    }    
-    else {
-        [listener use];
-    }
+		[listener ignore];
+	}    
+	else {
+		[listener use];
+	}
 }
 
 @end

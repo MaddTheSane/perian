@@ -40,7 +40,7 @@
 	SUAppcast *appcast;
 	NSURLDownload *downloader;
 	NSString *downloadPath;
-    NSDate *lastRunDate;
+	NSDate *lastRunDate;
 	BOOL	manualRun;
 }
 

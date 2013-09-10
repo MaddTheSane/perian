@@ -68,7 +68,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	return [NSString stringWithString:s];
 } /*trimWhiteSpace*/
 
-
 - (NSString *) ellipsizeAfterNWords: (int) n {
 	
 	NSArray *stringComponents = [self componentsSeparatedByString: @" "];
@@ -83,7 +82,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	
 	return [AUTORELEASEOBJ(componentsCopy) componentsJoinedByString: @" "];
 } /*ellipsizeAfterNWords*/
-
 
 - (NSString *) stripHTML {
 	
@@ -124,7 +122,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	if ([s isEqualTo: @""])
 		return (YES);
 	
-	copy = AUTORELEASEOBJ([s copy]);
+	copy = [NSString stringWithString:s];
 	
 	if ([[copy trimWhiteSpace] isEqualTo: @""])
 		return (YES);

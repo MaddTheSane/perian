@@ -48,11 +48,12 @@
 #if !__has_feature(objc_arc)
 - (void)dealloc
 {
-    [downloader release];
-    [downloadPath release];
-	[appcast release];
-    [lastRunDate release];
-    [super dealloc];
+	[downloader release];
+	self.lastRunDate = nil;
+	self.downloadPath = nil;
+	self.appcast = nil;
+	self.lastRunDate = nil;
+	[super dealloc];
 }
 #endif
 
@@ -60,11 +61,11 @@
 {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	self.lastRunDate = [defaults objectForKey:NEXT_RUN_KEY];
-    
-    if (![lastRunDate isEqualToDate:[NSDate distantFuture]]) {
-        [defaults setObject:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN] forKey:NEXT_RUN_KEY];
-    }
-    
+	
+	if (![lastRunDate isEqualToDate:[NSDate distantFuture]]) {
+		[defaults setObject:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN] forKey:NEXT_RUN_KEY];
+	}
+	
 	manualRun = [defaults boolForKey:MANUAL_RUN_KEY];
 	[defaults removeObjectForKey:MANUAL_RUN_KEY];
 	[defaults synchronize];
@@ -76,7 +77,7 @@
 	NSString *updateUrlString = SUInfoValueForKey(UPDATE_URL_KEY);
 	
 	if (!updateUrlString) { [NSException raise:@"NoFeedURL" format:@"No feed URL is specified in the Info.plist!"]; }
-
+	
 #ifdef betaAppcastUrl
 	updateUrlString = [[updateUrlString substringToIndex:[updateUrlString length]-4] stringByAppendingFormat:@"-%@.xml", betaAppcastUrl];
 #endif
@@ -94,7 +95,7 @@
 	
 	if (![latest fileVersion])
 	{
-        [self updateFailed];
+		[self updateFailed];
 		[NSException raise:@"SUAppcastException" format:@"Can't extract a version string from the appcast feed. The filenames should look like YourApp_1.5.tgz, where 1.5 is the version number."];
 	}
 	
@@ -104,14 +105,14 @@
 	NSString *versionPlistPath = @"/System/Library/CoreServices/SystemVersion.plist";
 	NSString *currentSystemVersion = RETAINOBJ([[NSDictionary dictionaryWithContentsOfFile:versionPlistPath] objectForKey:@"ProductVersion"] );
 	
-	BOOL updateAvailable = SUStandardVersionComparison([latest minimumSystemVersion], currentSystemVersion);
+	BOOL updateAvailable = SUStandardVersionComparison(latest.minimumSystemVersion, currentSystemVersion);
 	RELEASEOBJ(currentSystemVersion);
-    NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
+	NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	
 	if (![[panePath lastPathComponent] isEqualToString:@"Perian.prefPane"]) {
 		NSLog(@"The update checker needs to be run from inside the preference pane, quitting...");
-		updateAvailable = 0;
+		updateAvailable = NO;
 	}
 	
 	NSString *skippedVersion = [[NSUserDefaults standardUserDefaults] objectForKey:SKIPPED_VERSION_KEY];
@@ -126,7 +127,7 @@
 			[[NSDistributedNotificationCenter defaultCenter] postNotificationName:UPDATE_STATUS_NOTIFICATION object:@"NoUpdates"];
 		[[NSApplication sharedApplication] terminate:self];
 	}
-    
+	
 	//RELEASEOBJ(appcast);
 	self.appcast = nil;
 }
@@ -138,13 +139,13 @@
 		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:UPDATE_STATUS_NOTIFICATION object:@"Error"];
 	//RELEASEOBJ(anappcast);
 	self.appcast = nil;
-	[[NSApplication sharedApplication] terminate:self];	
+	[[NSApplication sharedApplication] terminate:self];
 }
 
 - (void)showUpdatePanelForItem:(SUAppcastItem *)updateItem
 {
 	updateAlert = [[SUUpdateAlert alloc] initWithAppcastItem:updateItem];
- 	[updateAlert setDelegate:self];
+	[updateAlert setDelegate:self];
 	[updateAlert showWindow:self];
 }
 
@@ -171,7 +172,7 @@
 	[statusController setButtonTitle:SULocalizedString(@"Cancel", nil) target:self action:@selector(cancelDownload:) isDefault:NO];
 	[statusController showWindow:self];
 	
-	downloader = [[NSURLDownload alloc] initWithRequest:[NSURLRequest requestWithURL:[latest fileURL]] delegate:self];	
+	downloader = [[NSURLDownload alloc] initWithRequest:[NSURLRequest requestWithURL:[latest fileURL]] delegate:self];
 }
 
 - (void)cancelDownload:(id)sender
@@ -203,7 +204,7 @@
 	NSString *tempDir = [tempURL path];
 	BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:tempDir withIntermediateDirectories:YES attributes:nil error:nil];
 #endif
-
+	
 	if (!success)
 	{
 		[NSException raise:@"SUFailTmpWrite" format:@"Couldn't create temporary directory in /tmp"];
@@ -293,8 +294,8 @@ extern char **environ;
 	const char *args[] = {"/bin/sh", "-c", buf, NULL};
 	setenv("PREFPANE_LOCATION", [prefpanelocation fileSystemRepresentation], 1);
 	setenv("TEMP_FOLDER", [[downloadPath stringByDeletingLastPathComponent] fileSystemRepresentation], 1);
-    int forkVal = fork();
-    if(forkVal == -1)
+	int forkVal = fork();
+	if(forkVal == -1)
 	{
 		[self updateFailed];
 		[self showUpdateErrorAlertWithInfo:NSLocalizedString(@"Could not Run Update",@"")];
@@ -303,7 +304,7 @@ extern char **environ;
 		execve("/bin/sh", args, environ);
 	[NSApp terminate:self];
 	//And, we are out of here!!!
-}	
+}
 
 - (BOOL)showsReleaseNotes
 {
@@ -312,11 +313,10 @@ extern char **environ;
 
 - (void)updateFailed
 {
-    if(lastRunDate == nil)
-        [[NSUserDefaults standardUserDefaults] removeObjectForKey:NEXT_RUN_KEY];
-    else
-        [[NSUserDefaults standardUserDefaults] setObject:lastRunDate forKey:NEXT_RUN_KEY];
+	if(lastRunDate == nil)
+		[[NSUserDefaults standardUserDefaults] removeObjectForKey:NEXT_RUN_KEY];
+	else
+		[[NSUserDefaults standardUserDefaults] setObject:lastRunDate forKey:NEXT_RUN_KEY];
 }
-
 
 @end

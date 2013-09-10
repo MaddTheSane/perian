@@ -25,35 +25,35 @@
 - (id)initWithDictionary:(NSDictionary *)dict
 {
 	if(self = [super init]) {
-		[self setTitle:[dict objectForKey:@"title"]];
-		[self setDate:[dict objectForKey:@"pubDate"]];
-		[self setDescription:[dict objectForKey:@"description"]];
+		self.title = [dict objectForKey:@"title"];
+		self.date = [dict objectForKey:@"pubDate"];
+		self.description = [dict objectForKey:@"description"];
 		
-		id enclosure = [dict objectForKey:@"enclosure"];
-		[self setDSASignature:[enclosure objectForKey:@"sparkle:dsaSignature"]];
-		[self setMD5Sum:[enclosure objectForKey:@"sparkle:md5Sum"]];
+		NSDictionary *enclosure = [dict objectForKey:@"enclosure"];
+		self.DSASignature = [enclosure objectForKey:@"sparkle:dsaSignature"];
+		self.MD5Sum = [enclosure objectForKey:@"sparkle:md5Sum"];
 		
-		[self setFileURL:[NSURL URLWithString:[[enclosure objectForKey:@"url"] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+		self.fileURL = [NSURL URLWithString:[[enclosure objectForKey:@"url"] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 		
 		// Find the appropriate release notes URL.
 		if ([dict objectForKey:@"sparkle:releaseNotesLink"])
 		{
-			[self setReleaseNotesURL:[NSURL URLWithString:[dict objectForKey:@"sparkle:releaseNotesLink"]]];
+			self.ReleaseNotesURL = [NSURL URLWithString:[dict objectForKey:@"sparkle:releaseNotesLink"]];
 		}
 		else if ([[self description] hasPrefix:@"http://"]) // if the description starts with http://, use that.
 		{
-			[self setReleaseNotesURL:[NSURL URLWithString:[self description]]];
+			self.releaseNotesURL = [NSURL URLWithString:self.description];
 		}
 		else
 		{
-			[self setReleaseNotesURL:nil];
+			self.releaseNotesURL = nil;
 		}
 		
 		NSString *minVersion = [dict objectForKey:@"sparkle:minimumSystemVersion"];
 		if(minVersion)
-			[self setMinimumSystemVersion:minVersion];
+			self.minimumSystemVersion = minVersion;
 		else
-			[self setMinimumSystemVersion:@"10.3.0"];//sparkle doesn't run on 10.2-, so we don't have to worry about it
+			self.minimumSystemVersion = @"10.3.0";//sparkle doesn't run on 10.2-, so we don't have to worry about it
 		
 		// Try to find a version string.
 		// Finding the new version number from the RSS feed is a little bit hacky. There are two ways:
@@ -72,17 +72,17 @@
 			if ([fileComponents count] > 1)
 				newVersion = [[fileComponents lastObject] stringByDeletingPathExtension];
 		}
-		[self setFileVersion:newVersion];
+		self.fileVersion = newVersion;
 		
 		NSString *shortVersionString = [enclosure objectForKey:@"sparkle:shortVersionString"];
 		if (shortVersionString)
 		{
-			if (![[self fileVersion] isEqualToString:shortVersionString])
+			if (![self.fileVersion isEqualToString:shortVersionString])
 				shortVersionString = [shortVersionString stringByAppendingFormat:@"/%@", [self fileVersion]];
-			[self setVersionString:shortVersionString];
+			self.versionString = shortVersionString;
 		}
 		else
-			[self setVersionString:[self fileVersion]];
+			self.versionString = self.fileVersion;
 	}
 	return self;
 }
@@ -90,16 +90,16 @@
 #if !__has_feature(objc_arc)
 - (void)dealloc
 {
-    self.title = nil;
-    self.date = nil;
-    self.description = nil;
-    self.releaseNotesURL = nil;
-    self.DSASignature = nil;
-    self.MD5Sum = nil;
-    self.fileURL = nil;
-    self.fileVersion = nil;
+	self.title = nil;
+	self.date = nil;
+	self.description = nil;
+	self.releaseNotesURL = nil;
+	self.DSASignature = nil;
+	self.MD5Sum = nil;
+	self.fileURL = nil;
+	self.fileVersion = nil;
 	self.versionString = nil;
-    [super dealloc];
+	[super dealloc];
 }
 #endif
 

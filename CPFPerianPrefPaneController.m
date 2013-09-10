@@ -55,7 +55,7 @@
 }
 @end
 
-@interface CPFPerianPrefPaneController(_private)
+@interface CPFPerianPrefPaneController()
 - (void)setAC3DynamicRange:(float)newVal;
 - (void)saveAC3DynamicRange:(float)newVal;
 @end
@@ -100,9 +100,9 @@
 	CFRelease(numRef);
 }
 
-- (unsigned int)getUnsignedIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(int)defaultValue
+- (NSUInteger)getUnsignedIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(NSUInteger)defaultValue
 {
-	int ret; Boolean exists = FALSE;
+	NSUInteger ret; Boolean exists = FALSE;
 	
 	ret = CFPreferencesGetAppIntegerValue(key, appID, &exists);
 	
@@ -223,7 +223,7 @@
 	
 	infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
 	if(infoDict == nil)
-		/* Above result is all there is */
+	/* Above result is all there is */
 		return ret;
 	
 	return setWrongLocationInstalled(ret);
@@ -257,8 +257,8 @@
 			userInstalled = NO;
 		else
 			userInstalled = YES;
-
-//#warning TODO(durin42) Should filter out components that aren't installed from this list.
+		
+		//#warning TODO(durin42) Should filter out components that aren't installed from this list.
 		componentReplacementInfo = [[NSArray alloc] initWithContentsOfFile:[[[self bundle] resourcePath] stringByAppendingPathComponent:ComponentInfoPlist]];
 	}
 	
@@ -368,8 +368,8 @@
 	NSString *myVersion = [[self myInfoDict] objectForKey:BundleVersionKey];
 	
 	NSAttributedString		*about;
-    about = [[[NSAttributedString alloc] initWithPath:[[self bundle] pathForResource:@"Read Me" ofType:@"rtf"] 
-									 documentAttributes:nil] autorelease];
+	about = [[[NSAttributedString alloc] initWithPath:[[self bundle] pathForResource:@"Read Me" ofType:@"rtf"]
+								   documentAttributes:nil] autorelease];
 	[[textView_about textStorage] setAttributedString:about];
 	[[textView_about enclosingScrollView] setLineScroll:10];
 	[[textView_about enclosingScrollView] setPageScroll:20];
@@ -404,7 +404,7 @@
 			/* matches 2 and 10, which is Stereo and Dolby */
 			twoChannelMode = A52_DOLBY;
 		}
-		twoChannelMode &= ~A52_ADJUST_LEVEL & ~A52_LFE;		
+		twoChannelMode &= ~A52_ADJUST_LEVEL & ~A52_LFE;
 	}
 	else
 		twoChannelMode = [self upgradeA52Prefs];
@@ -423,11 +423,11 @@
 			break;
 		default:
 			[popup_outputMode selectItemAtIndex:3];
-			break;			
+			break;
 	}
 	
 	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
-
+	
 	[button_loadExternalSubtitles setState:[self getBoolFromKey:ExternalSubtitlesKey forAppID:perianAppID withDefault:YES]];
 }
 
@@ -525,7 +525,7 @@
 	}
 	else
 		errorString = [[NSString stringWithFormat:NSLocalizedString(@"authentication failed while extracting %@\n", @""), [finalPath lastPathComponent]] retain];
-		
+	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
 	unsetenv("DST_PATH");
@@ -565,7 +565,7 @@
 {
 	NSString *containingDir = [self basePathForType:type user:userInstalled];
 	BOOL ret = YES;
-
+	
 	InstallStatus pieceStatus = [self installStatusForComponent:component type:type withMyVersion:myVersion];
 	if(!userInstalled && currentInstallStatus(pieceStatus) != InstallStatusInstalled)
 	{
@@ -591,13 +591,13 @@
 			BOOL result = [self _extractArchivePath:archivePath toDestination:containingDir finalPath:[containingDir stringByAppendingPathComponent:component]];
 			if(result == NO)
 				ret = NO;
-		}		
+		}
 	}
 	if(ret != NO && isWrongLocationInstalled(pieceStatus) != 0)
 	{
 		/* Let's try and remove the wrong one, if we can, but only if install succeeded */
 		containingDir = [self basePathForType:type user:!userInstalled];
-
+		
 		if(userInstalled)
 			ret = [self _authenticatedRemove:[containingDir stringByAppendingPathComponent:component]];
 		else
@@ -618,7 +618,7 @@
 	
 	NSEnumerator *appEnum = [apps objectEnumerator];
 	NSString *app = nil;
-
+	
 	while ((app = [appEnum nextObject]))
 	{
 		NSURL *url = [NSURL fileURLWithPath:[resourcePath stringByAppendingPathComponent:app]];
@@ -638,99 +638,99 @@
 
 - (void)install:(id)sender
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *infoDict = [self myInfoDict];
-	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
-	NSString *componentPath = [[[self bundle] resourcePath] stringByAppendingPathComponent:@"Components"];
-	NSString *coreAudioComponentPath = [componentPath stringByAppendingPathComponent:@"CoreAudio"];
-	NSString *quickTimeComponentPath = [componentPath stringByAppendingPathComponent:@"QuickTime"];
-	NSString *frameworkComponentPath = [componentPath stringByAppendingPathComponent:@"Frameworks"];
-
-	[errorString release];
-	errorString = nil;
-	/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
-	if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
+	@autoreleasepool {
+		NSDictionary *infoDict = [self myInfoDict];
+		NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
+		NSString *componentPath = [[[self bundle] resourcePath] stringByAppendingPathComponent:@"Components"];
+		NSString *coreAudioComponentPath = [componentPath stringByAppendingPathComponent:@"CoreAudio"];
+		NSString *quickTimeComponentPath = [componentPath stringByAppendingPathComponent:@"QuickTime"];
+		NSString *frameworkComponentPath = [componentPath stringByAppendingPathComponent:@"Frameworks"];
+		
+		[errorString release];
+		errorString = nil;
+		/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
+		if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
 		/* Oh well, hope we don't need it */
-		auth = nil;
-	
-	[self installArchive:[componentPath stringByAppendingPathComponent:@"Perian.zip"] forPiece:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey]];
-	
-	NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
-	NSDictionary *myComponent = nil;
-	while((myComponent = [componentEnum nextObject]) != nil)
-	{
-		NSString *archivePath = nil;
-		ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
-		switch(type)
+			auth = nil;
+		
+		[self installArchive:[componentPath stringByAppendingPathComponent:@"Perian.zip"] forPiece:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey]];
+		
+		NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
+		NSDictionary *myComponent = nil;
+		while((myComponent = [componentEnum nextObject]) != nil)
 		{
-			case ComponentTypeCoreAudio:
-				archivePath = [coreAudioComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
+			NSString *archivePath = nil;
+			ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
+			switch(type)
+			{
+				case ComponentTypeCoreAudio:
+					archivePath = [coreAudioComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
+					break;
+				case ComponentTypeQuickTime:
+					archivePath = [quickTimeComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
+					break;
+				case ComponentTypeFramework:
+					archivePath = [frameworkComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
+					break;
+			}
+			if (![self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey]]) {
 				break;
-			case ComponentTypeQuickTime:
-				archivePath = [quickTimeComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
-				break;
-			case ComponentTypeFramework:
-				archivePath = [frameworkComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
-				break;
+			}
 		}
-		if (![self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey]]) {
-			break;
+		if(auth != nil)
+		{
+			AuthorizationFree(auth, 0);
+			auth = nil;
 		}
+		
+		[self lsRegisterApps];
+		[self deletePluginCache];
+		
+		[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
 	}
-	if(auth != nil)
-	{
-		AuthorizationFree(auth, 0);
-		auth = nil;
-	}
-	
-	[self lsRegisterApps];
-	[self deletePluginCache];
-	
-	[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
-	[pool release];
 }
 
 - (void)uninstall:(id)sender
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *infoDict = [self myInfoDict];
-	NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
-	NSFileManager *fileManager = [NSFileManager defaultManager];
-	NSString *componentPath;
-
-	[errorString release];
-	errorString = nil;
-	/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
-	if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
+	@autoreleasepool {
+		NSDictionary *infoDict = [self myInfoDict];
+		NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
+		NSFileManager *fileManager = [NSFileManager defaultManager];
+		NSString *componentPath;
+		
+		[errorString release];
+		errorString = nil;
+		/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
+		if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
 		/* Oh well, hope we don't need it */
-		auth = nil;
-	
-	componentPath = [[self quickTimeComponentDir:userInstalled] stringByAppendingPathComponent:@"Perian.component"];
-	if(auth != nil && !userInstalled)
-		[self _authenticatedRemove:componentPath];
-	else
-		[fileManager removeFileAtPath:componentPath handler:nil];
-	
-	NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
-	NSDictionary *myComponent = nil;
-	while((myComponent = [componentEnum nextObject]) != nil)
-	{
-		ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
-		NSString *directory = [self basePathForType:type user:userInstalled];
-		componentPath = [directory stringByAppendingPathComponent:[myComponent objectForKey:ComponentNameKey]];
+			auth = nil;
+		
+		componentPath = [[self quickTimeComponentDir:userInstalled] stringByAppendingPathComponent:@"Perian.component"];
 		if(auth != nil && !userInstalled)
 			[self _authenticatedRemove:componentPath];
 		else
 			[fileManager removeFileAtPath:componentPath handler:nil];
+		
+		NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
+		NSDictionary *myComponent = nil;
+		while((myComponent = [componentEnum nextObject]) != nil)
+		{
+			ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
+			NSString *directory = [self basePathForType:type user:userInstalled];
+			componentPath = [directory stringByAppendingPathComponent:[myComponent objectForKey:ComponentNameKey]];
+			if(auth != nil && !userInstalled)
+				[self _authenticatedRemove:componentPath];
+			else
+				[fileManager removeFileAtPath:componentPath handler:nil];
+		}
+		if(auth != nil)
+		{
+			AuthorizationFree(auth, 0);
+			auth = nil;
+		}
+		
+		[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
 	}
-	if(auth != nil)
-	{
-		AuthorizationFree(auth, 0);
-		auth = nil;
-	}
-	
-	[self performSelectorOnMainThread:@selector(installComplete:) withObject:nil waitUntilDone:NO];
-	[pool release];
 }
 
 - (IBAction)installUninstall:(id)sender
@@ -751,7 +751,7 @@
 {
 	NSString *path = [self basePathForType:ComponentTypeQuickTime user:user];
 	NSArray *installedComponents = [[NSFileManager defaultManager] directoryContentsAtPath:path];
-	NSMutableArray *retArray = [[NSMutableArray alloc] initWithCapacity:[installedComponents count]]; 
+	NSMutableArray *retArray = [[NSMutableArray alloc] initWithCapacity:[installedComponents count]];
 	NSString *component;
 	for (component in installedComponents) {
 		if ([[component pathExtension] isEqualToString:@"component"])
@@ -766,7 +766,7 @@
 	if ([[component pathExtension] isEqualToString:@"component"])
 		compName = [component stringByDeletingPathExtension];
 	NSMutableDictionary *componentInfo = [[NSMutableDictionary alloc] initWithObjectsAndKeys:compName, @"name", NULL];
-	NSBundle *componentBundle = [NSBundle bundleWithPath:[[self basePathForType:ComponentTypeQuickTime 
+	NSBundle *componentBundle = [NSBundle bundleWithPath:[[self basePathForType:ComponentTypeQuickTime
 																		   user:user] stringByAppendingPathComponent:component]];
 	NSDictionary *infoDictionary = nil;
 	if (componentBundle)
@@ -835,7 +835,7 @@
 	}
 }
 
-- (IBAction)updateCheck:(id)sender 
+- (IBAction)updateCheck:(id)sender
 {
 	FSRef updateCheckRef;
 	
@@ -848,21 +848,21 @@
 		return;
 	
 	LSOpenFSRef(&updateCheckRef, NULL);
-} 
+}
 
-- (IBAction)setAutoUpdateCheck:(id)sender 
+- (IBAction)setAutoUpdateCheck:(id)sender
 {
 	CFStringRef key = (CFStringRef)NEXT_RUN_KEY;
 	if([button_autoUpdateCheck intValue])
 		[self setKey:key forAppID:perianAppID fromDate:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN]];
 	else
 		[self setKey:key forAppID:perianAppID fromDate:[NSDate distantFuture]];
-    
-    CFPreferencesAppSynchronize(perianAppID);
-} 
+	
+	CFPreferencesAppSynchronize(perianAppID);
+}
 
 
-#pragma mark AC3 
+#pragma mark AC3
 - (IBAction)setAC3DynamicRangePopup:(id)sender
 {
 	int selected = [popup_ac3DynamicRangeType indexOfSelectedItem];
@@ -912,7 +912,7 @@
 			break;
 		default:
 			break;
-	}	
+	}
 }
 
 - (void)setAC3DynamicRange:(float)newVal
@@ -979,7 +979,7 @@
 - (IBAction)setLoadExternalSubtitles:(id)sender
 {	
 	[self setKey:ExternalSubtitlesKey forAppID:perianAppID fromBool:(BOOL)[sender state]];
-    CFPreferencesAppSynchronize(perianAppID);
+	CFPreferencesAppSynchronize(perianAppID);
 }
 
 #pragma mark About 
@@ -995,7 +995,7 @@
 
 - (IBAction)launchForum:(id)sender 
 {
-	[[NSWorkspace sharedWorkspace] openURL:perianForumURL];	
+	[[NSWorkspace sharedWorkspace] openURL:perianForumURL];
 }
 
 @end
