@@ -110,6 +110,7 @@
 			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
+				<string>com.apple.flash-video</string>
 				<string>com.adobe.flash.video</string>
 			</array>
 			<key>LSTypeIsPackage</key>
@@ -367,6 +368,10 @@
 			<string>http://www.adobe.com/devnet/flv/</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
+				<key>public.uti</key>
+				<array>
+					<string>com.apple.flash-video</string>
+				</array>
 				<key>com.apple.ostype</key>
 				<array>
 					<string>MFLV</string>
