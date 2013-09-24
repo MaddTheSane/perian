@@ -13,9 +13,9 @@ PERIAN_DIR=$(BUILD_DIR)/Perian
 ART_DIR=Artwork
 
 ifeq ($(BETA),TRUE)
-    BUILDSTYLE=Deployment+Debug
+    BUILDSTYLE=Release+Debug
 else
-    BUILDSTYLE=Deployment
+    BUILDSTYLE=Release
 endif
 
 
