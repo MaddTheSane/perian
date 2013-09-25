@@ -184,6 +184,7 @@
 		3DF2958C104F0EF40047B8EC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
 		55247B14173D76A700531BBC /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		553F329717F2CCC200221391 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 553F329617F2CCC200221391 /* OpenCL.framework */; };
+		553F329B17F2D29C00221391 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		5557DF4B17D8E0AE00142C72 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5557DF4D17D8E0AE00142C72 /* InfoPlist.strings */; };
 		5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5417D8F6C400142C72 /* libz.dylib */; };
 		5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5617D8F6E300142C72 /* libbz2.dylib */; };
@@ -311,7 +312,6 @@
 		F57676060BE1A18300B2434B /* FrameBuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = F57676040BE1A18300B2434B /* FrameBuffer.c */; };
 		F57755F50B51EB1800C7D833 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
 		F57CF183121ADBF800132DAF /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
-		F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		F5BD450B12171C4C0089D5FA /* CompressVideoCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = F5BD450A12171C4C0089D5FA /* CompressVideoCodec.c */; };
 		F5BD4764121769B90089D5FA /* CompressCodecUtils.c in Sources */ = {isa = PBXBuildFile; fileRef = F5BD4763121769B90089D5FA /* CompressCodecUtils.c */; };
 		F5BD48FA121786C50089D5FA /* CompressAudioCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BD47DC121771960089D5FA /* CompressAudioCodec.cpp */; };
@@ -561,7 +561,7 @@
 			dstPath = "$(HOME)/Library/QuickTime";
 			dstSubfolderSpec = 0;
 			files = (
-				F59E09F10A670E570019A3F0 /* Perian.component in CopyFiles */,
+				553F329B17F2D29C00221391 /* Perian.component in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2587,6 +2587,7 @@
 		3D4BBE4A0B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				PRODUCT_NAME = "Debug in QuickTime Player";
 			};
 			name = "Release+Debug";
@@ -2960,6 +2961,8 @@
 		F59E0A0C0A670E950019A3F0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Debug in QuickTime Player";
 			};
 			name = Debug;
@@ -2967,6 +2970,7 @@
 		F59E0A0D0A670E950019A3F0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				PRODUCT_NAME = "Debug in QuickTime Player";
 			};
 			name = Release;
