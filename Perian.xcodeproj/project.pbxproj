@@ -685,6 +685,10 @@
 		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OpenerMainMenu.xib; sourceTree = "<group>"; };
 		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = System/Library/Frameworks/AppleScriptKit.framework; sourceTree = SDKROOT; };
 		553F329617F2CCC200221391 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
+		553F32D817F38A6400221391 /* generateCodecIDs.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = generateCodecIDs.sh; sourceTree = "<group>"; };
+		553F32D917F38A6400221391 /* getGitRevision.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = getGitRevision.sh; sourceTree = "<group>"; };
+		553F32DA17F38A7E00221391 /* archiveComponents.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = archiveComponents.sh; sourceTree = SOURCE_ROOT; };
+		553F32DB17F38A7E00221391 /* createStaticLibs.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = createStaticLibs.sh; sourceTree = SOURCE_ROOT; };
 		5557DF4C17D8E0AE00142C72 /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5557DF5417D8F6C400142C72 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		5557DF5617D8F6E300142C72 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
@@ -977,6 +981,7 @@
 			isa = PBXGroup;
 			children = (
 				55C06647173C6F4D00D8CF2C /* ffmpeg */,
+				553F32D717F38A6400221391 /* scripts */,
 				08FB77ADFE841716C02AAC07 /* Source */,
 				089C167CFE841241C02AAC07 /* Resources */,
 				089C1671FE841209C02AAC07 /* External Frameworks and Libraries */,
@@ -1212,6 +1217,17 @@
 				3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */,
 			);
 			path = Opener;
+			sourceTree = "<group>";
+		};
+		553F32D717F38A6400221391 /* scripts */ = {
+			isa = PBXGroup;
+			children = (
+				553F32DA17F38A7E00221391 /* archiveComponents.sh */,
+				553F32DB17F38A7E00221391 /* createStaticLibs.sh */,
+				553F32D817F38A6400221391 /* generateCodecIDs.sh */,
+				553F32D917F38A6400221391 /* getGitRevision.sh */,
+			);
+			path = scripts;
 			sourceTree = "<group>";
 		};
 		5557DF5317D8F53900142C72 /* Other frameworks */ = {
