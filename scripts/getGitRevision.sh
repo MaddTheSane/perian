@@ -1,3 +1,4 @@
+#!/bin/bash
 # Xcode auto-versioning script for Subversion
 # by Axel Andersson, modified by Daniel Jalkut to add
 # "--revision HEAD" to the svn info line, which allows
@@ -6,8 +7,28 @@
 # further modified by Augie Fackler to be gross and sh-based in places
 # so that you can have svn installed anywhere
 #PATH=/sw/bin:/opt/local/bin:/usr/local/bin:/usr/bin:$PATH
-ffmpeg_rev=`git --git-dir=./ffmpeg/.git rev-parse HEAD`
-REV=`git rev-parse HEAD`
+
+function GitRevCount {
+	git --git-dir=$1 rev-list HEAD | sort > config.git-hash
+	LOCALVER=`wc -l config.git-hash | awk '{print $1}'`
+
+	if [ $LOCALVER \> 1 ] ; then
+		VER=`git --git-dir=$1 rev-list $2 | sort | join config.git-hash - | wc -l | awk '{print $1}'`
+
+		if [ $VER != $LOCALVER ] ; then
+			VER=$LOCALVER
+		fi
+
+	else
+		VER="unknown"
+	fi
+	rm -f config.git-hash
+}
+
+GitRevCount "./.git" "origin/master"
+REV=$VER
+GitRevCount "./ffmpeg/.git" "origin/perian"
+ffmpeg_rev=$VER
 echo $REV
 
 cat > $SCRIPT_OUTPUT_FILE_0.tmp <<EOF
