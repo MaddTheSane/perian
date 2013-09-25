@@ -2303,8 +2303,6 @@
 				GCC_ENABLE_OBJC_GC = unsupported;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
-				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2318,7 +2316,6 @@
 				GCC_ENABLE_OBJC_GC = unsupported;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2334,7 +2331,6 @@
 					"$(inherited)",
 					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Frameworks\"",
 				);
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
@@ -2376,7 +2372,6 @@
 					"$(inherited)",
 					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Frameworks\"",
 				);
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
@@ -2438,9 +2433,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++98";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
@@ -2456,11 +2454,12 @@
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-fstack-protector";
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = debugging;
 				USER_HEADER_SEARCH_PATHS = "libmatroska libebml ffmpeg \"$(BUILT_PRODUCTS_DIR)\"";
@@ -2471,11 +2470,15 @@
 		11D4ED490A3CE59A0066D45F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APPLY_RULES_IN_COPY_FILES = YES;
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++98";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_POSTPROCESSING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
@@ -2486,10 +2489,13 @@
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
 				OTHER_CFLAGS = "-fstack-protector";
+				PLIST_FILE_OUTPUT_FORMAT = binary;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRINGS_FILE_OUTPUT_ENCODING = binary;
 				STRIP_INSTALLED_PRODUCT = YES;
 				STRIP_STYLE = debugging;
 				USER_HEADER_SEARCH_PATHS = "libmatroska libebml ffmpeg \"$(BUILT_PRODUCTS_DIR)\"";
@@ -2540,7 +2546,6 @@
 					"$(inherited)",
 					"\"$(SYSTEM_LIBRARY_DIR)/Frameworks/ApplicationServices.framework/Frameworks\"",
 				);
-				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
@@ -2627,6 +2632,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
 				PRODUCT_NAME = Perian;
+				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = prefPane;
 			};
 			name = "Release+Debug";
@@ -2639,7 +2645,6 @@
 				GCC_ENABLE_OBJC_GC = unsupported;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2649,9 +2654,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++98";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
@@ -2666,10 +2674,11 @@
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
 				OTHER_CFLAGS = "-fstack-protector";
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
 				STRIP_STYLE = debugging;
 				USER_HEADER_SEARCH_PATHS = "libmatroska libebml ffmpeg \"$(BUILT_PRODUCTS_DIR)\"";
@@ -2687,6 +2696,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2pdf;
 				SDKROOT = "";
+				SKIP_INSTALL = NO;
 			};
 			name = Debug;
 		};
@@ -2700,6 +2710,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2pdf;
 				SDKROOT = "";
+				SKIP_INSTALL = NO;
 			};
 			name = Release;
 		};
@@ -2713,6 +2724,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2pdf;
 				SDKROOT = "";
+				SKIP_INSTALL = NO;
 			};
 			name = "Release+Debug";
 		};
@@ -2724,6 +2736,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
+				SKIP_INSTALL = NO;
 			};
 			name = Debug;
 		};
@@ -2735,6 +2748,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
+				SKIP_INSTALL = NO;
 			};
 			name = Release;
 		};
@@ -2745,6 +2759,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
+				SKIP_INSTALL = NO;
 			};
 			name = "Release+Debug";
 		};
@@ -2756,6 +2771,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "detect-encoding";
 				SDKROOT = "";
+				SKIP_INSTALL = NO;
 			};
 			name = Debug;
 		};
@@ -2767,6 +2783,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "detect-encoding";
 				SDKROOT = "";
+				SKIP_INSTALL = NO;
 			};
 			name = Release;
 		};
@@ -2778,6 +2795,7 @@
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "detect-encoding";
 				SDKROOT = "";
+				SKIP_INSTALL = NO;
 			};
 			name = "Release+Debug";
 		};
@@ -2794,7 +2812,6 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
-				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
 			name = Debug;
@@ -2812,7 +2829,6 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
-				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
 			name = Release;
@@ -2830,7 +2846,6 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
-				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
 			name = "Release+Debug";
@@ -2889,8 +2904,8 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
-				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = Perian;
+				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = prefPane;
 			};
 			name = Debug;
@@ -2908,6 +2923,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
 				PRODUCT_NAME = Perian;
+				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = prefPane;
 			};
 			name = Release;
