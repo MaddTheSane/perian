@@ -25,7 +25,7 @@ function GitRevCount {
 	rm -f config.git-hash
 }
 
-GitRevCount "./.git" "origin/master"
+GitRevCount "./.git" "origin/opener-rewrite"
 REV=$VER
 GitRevCount "./ffmpeg/.git" "origin/perian"
 ffmpeg_rev=$VER
