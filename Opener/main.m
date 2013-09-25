@@ -1,8 +1,9 @@
-#import <AppKit/NSApplication.h>
-extern void ASKInitialize();
+#import <Cocoa/Cocoa.h>
 
-int main(int argc, const char *argv[])
+#import <AppleScriptObjC/AppleScriptObjC.h>
+
+int main(int argc, const char * argv[])
 {
-    ASKInitialize();
-    return NSApplicationMain(argc, argv);
+	[[NSBundle mainBundle] loadAppleScriptObjectiveCScripts];
+	return NSApplicationMain(argc, argv);
 }

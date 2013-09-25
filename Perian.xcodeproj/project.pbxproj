@@ -185,6 +185,8 @@
 		55247B14173D76A700531BBC /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		553F329717F2CCC200221391 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 553F329617F2CCC200221391 /* OpenCL.framework */; };
 		553F329B17F2D29C00221391 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
+		553F32CB17F2F33900221391 /* AppleScriptObjC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 553F32CA17F2F33900221391 /* AppleScriptObjC.framework */; };
+		553F32CC17F2F67800221391 /* AppDelegate.applescript in Sources */ = {isa = PBXBuildFile; fileRef = 553F32C817F2F16600221391 /* AppDelegate.applescript */; };
 		5557DF4B17D8E0AE00142C72 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5557DF4D17D8E0AE00142C72 /* InfoPlist.strings */; };
 		5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5417D8F6C400142C72 /* libz.dylib */; };
 		5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5617D8F6E300142C72 /* libbz2.dylib */; };
@@ -685,6 +687,8 @@
 		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OpenerMainMenu.xib; sourceTree = "<group>"; };
 		3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptKit.framework; path = System/Library/Frameworks/AppleScriptKit.framework; sourceTree = SDKROOT; };
 		553F329617F2CCC200221391 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
+		553F32C817F2F16600221391 /* AppDelegate.applescript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.applescript; path = AppDelegate.applescript; sourceTree = "<group>"; };
+		553F32CA17F2F33900221391 /* AppleScriptObjC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptObjC.framework; path = System/Library/Frameworks/AppleScriptObjC.framework; sourceTree = SDKROOT; };
 		5557DF4C17D8E0AE00142C72 /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5557DF5417D8F6C400142C72 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		5557DF5617D8F6E300142C72 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
@@ -929,6 +933,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				553F32CB17F2F33900221391 /* AppleScriptObjC.framework in Frameworks */,
 				3DE8D78510444E500007C7E7 /* Cocoa.framework in Frameworks */,
 				3DE8D9C910444E680007C7E7 /* AppleScriptKit.framework in Frameworks */,
 			);
@@ -990,6 +995,7 @@
 			isa = PBXGroup;
 			children = (
 				5557DF5317D8F53900142C72 /* Other frameworks */,
+				553F32CA17F2F33900221391 /* AppleScriptObjC.framework */,
 				553F329617F2CCC200221391 /* OpenCL.framework */,
 				83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */,
 				3DE8D9C810444E680007C7E7 /* AppleScriptKit.framework */,
@@ -1208,6 +1214,7 @@
 			isa = PBXGroup;
 			children = (
 				3DE8D6EE104444420007C7E7 /* Application.applescript */,
+				553F32C817F2F16600221391 /* AppDelegate.applescript */,
 				3DE8D6EF104444420007C7E7 /* main.m */,
 				3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */,
 			);
@@ -2104,6 +2111,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3DE8D6F1104444420007C7E7 /* main.m in Sources */,
+				553F32CC17F2F67800221391 /* AppDelegate.applescript in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
