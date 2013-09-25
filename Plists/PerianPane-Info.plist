@@ -10,6 +10,8 @@
 	<string>Perian_icon</string>
 	<key>NSPrefPaneIconFile</key>
 	<string>Perian_icon</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.perian.PerianPane</string>
 	<key>CFBundleInfoDictionaryVersion</key>
