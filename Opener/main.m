@@ -1,5 +1,4 @@
 #import <Cocoa/Cocoa.h>
-
 #import <AppleScriptObjC/AppleScriptObjC.h>
 
 int main(int argc, const char * argv[])
