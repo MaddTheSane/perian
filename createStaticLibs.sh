@@ -9,8 +9,9 @@ fi
 CC=`xcrun -find clang`
 
 configureflags="--cc=$CC --disable-amd3dnow --disable-doc --disable-encoders \
-     --disable-muxers --disable-network --disable-programs \
-     --target-os=darwin --enable-opencl"
+    --disable-avprobe --disable-avserver --disable-muxers --disable-network \
+    --disable-avfilter --disable-ffmpeg --disable-avconv \
+    --target-os=darwin"
 
 cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -fvisibility=hidden -w"
 
@@ -60,8 +61,8 @@ else
 	fi
 
 	cd ffmpeg
-	patch -p1 < ../Patches/0002-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
-	#patch -p1 < ../Patches/config.patch
+	#patch -p1 < ../Patches/0002-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
+    #patch -p1 < ../Patches/config.patch
 	cd ..
 
 	touch ffmpeg/patched
