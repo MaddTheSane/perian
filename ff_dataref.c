@@ -96,7 +96,7 @@ bail:
 	return result;
 } /* dataref_open() */
 
-static int dataref_read(URLContext *h, const char *buf, int size, AVDictionary **dict)
+static int dataref_read(URLContext *h, unsigned char *buf, int size)
 {
 	int result;
 	dataref_private *p = (dataref_private*)h->priv_data;
@@ -138,7 +138,7 @@ bail:
 		return (int)read;
 } /* dataref_read() */
 
-static int dataref_write(URLContext *h, unsigned char *buf, int size)
+static int dataref_write(URLContext *h, const unsigned char *buf, int size)
 {
 	int result;
 	int written = size;
@@ -210,7 +210,7 @@ URLProtocol dataref_protocol = {
     dataref_open,
     dataref_read,
     dataref_write,
-    .url_seek = dataref_seek,
+    dataref_seek,
     dataref_close,
 };
 
