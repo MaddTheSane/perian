@@ -18,7 +18,7 @@ define(<!ResourceOnly!>, <!!>)dnl
 
 int getCodecID(OSType componentType)
 {
-	enum AVCodecID codecID = CODEC_ID_NONE;
+	enum CodecID codecID = CODEC_ID_NONE;
 	switch(componentType)
 	{
 include(<!codecList.m4!>)

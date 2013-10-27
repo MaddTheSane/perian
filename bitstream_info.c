@@ -46,20 +46,6 @@
 #undef malloc
 #undef free
 
-//FIXME: get rid of this dependancy
-typedef struct ParseContext1{
-	ParseContext pc;
-	/* XXX/FIXME PC1 vs. PC */
-	/* MPEG-2-specific */
-	AVRational frame_rate;
-	int progressive_sequence;
-	int width, height;
-	
-	/* XXX: suppress that, needed by MPEG-4 */
-	struct MpegEncContext *enc;
-	int first_picture;
-} ParseContext1;
-
 static const int nfchans_tbl[8] = { 2, 1, 2, 3, 3, 4, 4, 5 };
 static const int ac3_layout_no_lfe[8] = {
 	kAudioChannelLayoutTag_Stereo,

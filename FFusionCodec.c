@@ -566,7 +566,7 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
     return noErr;
 }
 
-static inline int shouldDecode(FFusionGlobals glob, enum AVCodecID codecID)
+static inline int shouldDecode(FFusionGlobals glob, enum CodecID codecID)
 {
 	FFusionDecodeAbilities decode = FFUSION_PREFER_DECODE;
 	if (glob->componentType == 'avc1')
@@ -614,7 +614,7 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		initFFusionParsers();
 
 		OSType componentType = glob->componentType;
-		enum AVCodecID codecID = getCodecID(componentType);
+		enum CodecID codecID = getCodecID(componentType);
 		
 		glob->packedType = DefaultPackedTypeForCodec(componentType);
 

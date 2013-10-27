@@ -354,7 +354,7 @@ void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& i
 	
 	CloseAVCodec();
 
-	AVCodecID codecID = FFFourCCToCodecID(inInputFormat.mFormatID);
+	CodecID codecID = FFFourCCToCodecID(inInputFormat.mFormatID);
 	
 	// check to make sure the input format is legal
 	if (avcodec_find_decoder(codecID) == NULL) {
@@ -378,7 +378,7 @@ void FFissionDecoder::OpenAVCodec()
 	
 	CloseAVCodec();
 	
-	AVCodecID codecID = FFFourCCToCodecID(mInputFormat.mFormatID);
+	CodecID codecID = FFFourCCToCodecID(mInputFormat.mFormatID);
 	avCodec = avcodec_find_decoder(codecID);
 	
 	avcodec_get_context_defaults3(avContext, avCodec);

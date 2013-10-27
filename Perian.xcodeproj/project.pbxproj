@@ -1761,7 +1761,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 0460;
+				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = Perian;
 			};
 			buildConfigurationList = 11D4ED470A3CE59A0066D45F /* Build configuration list for PBXProject "Perian" */;
@@ -2325,7 +2325,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = NO;
 				"CLANG_ENABLE_OBJC_ARC[arch=x86_64]" = YES;
-				GCC_ENABLE_OBJC_GC = unsupported;
+				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;
@@ -2338,7 +2338,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = NO;
 				"CLANG_ENABLE_OBJC_ARC[arch=x86_64]" = YES;
-				GCC_ENABLE_OBJC_GC = unsupported;
+				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;
@@ -2350,6 +2350,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = Resources/PerianExportedSymbols.txt;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2391,6 +2392,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = Resources/PerianExportedSymbols.txt;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2467,8 +2469,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = YES;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					DEBUG,
@@ -2507,8 +2508,7 @@
 				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = YES;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_STRICT_ALIASING = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
@@ -2570,6 +2570,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				EXPORTED_SYMBOLS_FILE = Resources/PerianExportedSymbols.txt;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -2631,7 +2632,6 @@
 		3D4BBE4D0B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -2639,7 +2639,7 @@
 				MACOSX_DEPLOYMENT_TARGET = "";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
-				SDKROOT = "";
+				SDKROOT = macosx;
 			};
 			name = "Release+Debug";
 		};
@@ -2653,6 +2653,7 @@
 		3D4BBE4F0B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -2673,7 +2674,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = NO;
 				"CLANG_ENABLE_OBJC_ARC[arch=x86_64]" = YES;
-				GCC_ENABLE_OBJC_GC = unsupported;
+				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;
@@ -2692,8 +2693,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = YES;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					DEBUG_BUILD,
 					DEBUG,
@@ -2721,12 +2721,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2pdf;
-				SDKROOT = "";
 				SKIP_INSTALL = NO;
 			};
 			name = Debug;
@@ -2735,12 +2733,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2pdf;
-				SDKROOT = "";
 				SKIP_INSTALL = NO;
 			};
 			name = Release;
@@ -2749,12 +2745,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2pdf;
-				SDKROOT = "";
 				SKIP_INSTALL = NO;
 			};
 			name = "Release+Debug";
@@ -2801,7 +2795,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "detect-encoding";
-				SDKROOT = "";
 				SKIP_INSTALL = NO;
 			};
 			name = Debug;
@@ -2813,7 +2806,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "detect-encoding";
-				SDKROOT = "";
 				SKIP_INSTALL = NO;
 			};
 			name = Release;
@@ -2825,7 +2817,6 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "detect-encoding";
-				SDKROOT = "";
 				SKIP_INSTALL = NO;
 			};
 			name = "Release+Debug";
@@ -2834,7 +2825,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_OBJC_GC = unsupported;
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
@@ -2850,7 +2841,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_OBJC_GC = unsupported;
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
@@ -2866,7 +2857,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_OBJC_GC = unsupported;
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
@@ -2923,6 +2914,7 @@
 		83D1D6CB0B4C794900E09EC9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -2941,6 +2933,7 @@
 		83D1D6CC0B4C794900E09EC9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -2997,7 +2990,6 @@
 		F5CFD1B90B5000AF00616865 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -3005,14 +2997,13 @@
 				MACOSX_DEPLOYMENT_TARGET = "";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
-				SDKROOT = "";
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
 		F5CFD1BA0B5000AF00616865 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
@@ -3020,7 +3011,7 @@
 				MACOSX_DEPLOYMENT_TARGET = "";
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = PerianPanePListGenerator;
-				SDKROOT = "";
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
