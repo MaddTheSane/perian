@@ -164,8 +164,8 @@
 		3DE8D78510444E500007C7E7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
 		3DE8D9D5104451A80007C7E7 /* Perian - Open in QT Player.app in Resources */ = {isa = PBXBuildFile; fileRef = 3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */; };
 		3DF2958C104F0EF40047B8EC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
+		550CC2C118586FF900272A53 /* VideoDecodeAcceleration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 550CC2C018586FF900272A53 /* VideoDecodeAcceleration.framework */; };
 		55247B14173D76A700531BBC /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
-		553F329717F2CCC200221391 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 553F329617F2CCC200221391 /* OpenCL.framework */; };
 		553F329B17F2D29C00221391 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		553F32CB17F2F33900221391 /* AppleScriptObjC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 553F32CA17F2F33900221391 /* AppleScriptObjC.framework */; };
 		553F32CC17F2F67800221391 /* AppDelegate.applescript in Sources */ = {isa = PBXBuildFile; fileRef = 553F32C817F2F16600221391 /* AppDelegate.applescript */; };
@@ -667,6 +667,7 @@
 		3DE8D6EF104444420007C7E7 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "PerianOpener-Info.plist"; path = "Plists/PerianOpener-Info.plist"; sourceTree = "<group>"; };
 		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OpenerMainMenu.xib; sourceTree = "<group>"; };
+		550CC2C018586FF900272A53 /* VideoDecodeAcceleration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoDecodeAcceleration.framework; path = System/Library/Frameworks/VideoDecodeAcceleration.framework; sourceTree = SDKROOT; };
 		553F329617F2CCC200221391 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
 		553F32C817F2F16600221391 /* AppDelegate.applescript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.applescript; path = AppDelegate.applescript; sourceTree = "<group>"; };
 		553F32CA17F2F33900221391 /* AppleScriptObjC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptObjC.framework; path = System/Library/Frameworks/AppleScriptObjC.framework; sourceTree = SDKROOT; };
@@ -858,10 +859,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				553F329717F2CCC200221391 /* OpenCL.framework in Frameworks */,
-				5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */,
-				5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */,
-				5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */,
 				61CB11F40ACE0F73007994BD /* libmatroska.a in Frameworks */,
 				61CB11F30ACE0F6D007994BD /* libebml.a in Frameworks */,
 				11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */,
@@ -874,6 +871,10 @@
 				3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */,
 				3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */,
 				F5BD48FE121786C90089D5FA /* AudioUnit.framework in Frameworks */,
+				550CC2C118586FF900272A53 /* VideoDecodeAcceleration.framework in Frameworks */,
+				5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */,
+				5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */,
+				5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -971,17 +972,23 @@
 				553F32D717F38A6400221391 /* scripts */,
 				08FB77ADFE841716C02AAC07 /* Source */,
 				089C167CFE841241C02AAC07 /* Resources */,
-				089C1671FE841209C02AAC07 /* External Frameworks and Libraries */,
+				61CB11020ACDF37C007994BD /* libebml */,
+				61CB11720ACDF4BB007994BD /* libmatroska */,
+				089C1671FE841209C02AAC07 /* Frameworks */,
 				19C28FB4FE9D528D11CA2CBB /* Products */,
 				F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */,
 			);
 			name = "ffmpeg DivX";
 			sourceTree = "<group>";
 		};
-		089C1671FE841209C02AAC07 /* External Frameworks and Libraries */ = {
+		089C1671FE841209C02AAC07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				5557DF5317D8F53900142C72 /* Other frameworks */,
+				550CC2C018586FF900272A53 /* VideoDecodeAcceleration.framework */,
+				3D4893DC1491ED9700E0A09D /* QD.framework */,
+				3D802F8510336EE90034BF4A /* ApplicationServices.framework */,
+				F539CD110B62BC82005A72C9 /* Foundation.framework */,
+				11629EF30B51E4FB006591C8 /* AppKit.framework */,
 				553F32CA17F2F33900221391 /* AppleScriptObjC.framework */,
 				553F329617F2CCC200221391 /* OpenCL.framework */,
 				83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */,
@@ -993,8 +1000,6 @@
 				1162A0530B51ECE1006591C8 /* WebKit.framework */,
 				11629EEA0B51E4F1006591C8 /* Cocoa.framework */,
 				F57755F40B51EB1800C7D833 /* CoreFoundation.framework */,
-				61CB11020ACDF37C007994BD /* libebml */,
-				61CB11720ACDF4BB007994BD /* libmatroska */,
 				8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */,
 				5557DF6117D8F7C600142C72 /* FFmpeg libs */,
 				11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */,
@@ -1002,7 +1007,7 @@
 				F53E18E40B4F483C003A0471 /* Security.framework */,
 				F5BD48A4121784320089D5FA /* AudioUnit.framework */,
 			);
-			name = "External Frameworks and Libraries";
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		089C167CFE841241C02AAC07 /* Resources */ = {
@@ -1215,17 +1220,6 @@
 				553F32D917F38A6400221391 /* getGitRevision.sh */,
 			);
 			path = scripts;
-			sourceTree = "<group>";
-		};
-		5557DF5317D8F53900142C72 /* Other frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				3D4893DC1491ED9700E0A09D /* QD.framework */,
-				3D802F8510336EE90034BF4A /* ApplicationServices.framework */,
-				F539CD110B62BC82005A72C9 /* Foundation.framework */,
-				11629EF30B51E4FB006591C8 /* AppKit.framework */,
-			);
-			name = "Other frameworks";
 			sourceTree = "<group>";
 		};
 		5557DF6117D8F7C600142C72 /* FFmpeg libs */ = {
@@ -2351,7 +2345,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
+				DEAD_CODE_STRIPPING = NO;
 				EXPORTED_SYMBOLS_FILE = Resources/PerianExportedSymbols.txt;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2419,6 +2413,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/DerivedData/Perian/Build/Products/Deployment+Debug/Universal\"",
 				);
+				LLVM_LTO = YES;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
@@ -2484,7 +2479,10 @@
 				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
 				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = "-fstack-protector";
+				OTHER_CFLAGS = (
+					"-fstack-protector",
+					"$(inherited)",
+				);
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -2519,7 +2517,10 @@
 				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
 				LLVM_VECTORIZE_LOOPS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
-				OTHER_CFLAGS = "-fstack-protector";
+				OTHER_CFLAGS = (
+					"-fstack-protector",
+					"$(inherited)",
+				);
 				PLIST_FILE_OUTPUT_FORMAT = binary;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx;
@@ -2706,7 +2707,10 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
 				MACOSX_DEPLOYMENT_TARGET = 10.6.8;
-				OTHER_CFLAGS = "-fstack-protector";
+				OTHER_CFLAGS = (
+					"-fstack-protector",
+					"$(inherited)",
+				);
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -3039,6 +3043,7 @@
 		F5CFD2EC0B5012E800616865 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				LLVM_LTO = YES;
 				PRODUCT_NAME = A52Codec;
 			};
 			name = Release;

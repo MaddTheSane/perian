@@ -10,7 +10,7 @@ CC=`xcrun -find clang`
 
 configureflags="--cc=$CC --disable-amd3dnow --disable-doc --disable-encoders \
     --disable-avprobe --disable-avserver --disable-muxers --disable-network \
-    --disable-avfilter --disable-ffmpeg --disable-avconv \
+    --disable-avfilter --disable-ffmpeg --disable-avconv --disable-avplay \
     --target-os=darwin"
 
 cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -fvisibility=hidden -w"
@@ -90,7 +90,7 @@ else
         cd "$BUILDDIR"
         if [ "$oldbuildid_ffmpeg" != "quick" ] ; then
             "$SRCROOT/ffmpeg/configure" --extra-ldflags="$cflags -arch i386" \
-            --cpu=core2 --extra-cflags="-arch i386 $cflags $optcflags_i386" \
+            --cpu=core2 --extra-cflags="-arch i386 $cflags $optcflags_i386 $OTHER_CFLAGS" \
             $configureflags || exit 1
         
             make depend > /dev/null 2>&1 || true

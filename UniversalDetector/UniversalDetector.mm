@@ -48,9 +48,11 @@ class wrappedUniversalDetector:public nsUniversalDetector
 			}
 			break;
 
+			default:
 			case ePureAscii:
 				confidence=0;
 				return "US-ASCII";
+				break;
 		}
 
 		confidence=0;
@@ -77,47 +79,47 @@ class wrappedUniversalDetector:public nsUniversalDetector
 	void reset() { Reset(); }
 };
 
-
+@interface UniversalDetector ()
+@property (retain, nonatomic, readwrite) NSString *MIMECharset;
+@end
 
 @implementation UniversalDetector
+@synthesize MIMECharset = charset;
 
--(id)init
+- (id)init
 {
-	if(self=[super init])
-	{
+	if (self = [super init]) {
 		detectorptr=(void *)new wrappedUniversalDetector;
-		charset=nil;
 	}
 	return self;
 }
 
--(void)dealloc
+- (void)dealloc
 {
 	delete (wrappedUniversalDetector *)detectorptr;
-	[charset release];
+	self.MIMECharset = nil;
 	[super dealloc];
 }
 
--(void)finalize
+- (void)finalize
 {
 	delete (wrappedUniversalDetector *)detectorptr;
 	[super finalize];
 }
 
--(void)analyzeData:(NSData *)data
+- (void)analyzeData:(NSData *)data
 {
 	[self analyzeBytes:(const char *)[data bytes] length:[data length]];
 }
 
--(void)analyzeBytes:(const char *)data length:(int)len
+- (void)analyzeBytes:(const char *)data length:(int)len
 {
 	wrappedUniversalDetector *detector=(wrappedUniversalDetector *)detectorptr;
 
 	if(detector->done()) return;
 
 	detector->HandleData(data,len);
-	[charset release];
-	charset=nil;
+	self.MIMECharset = nil;
 }
 
 -(void)reset
@@ -132,40 +134,44 @@ class wrappedUniversalDetector:public nsUniversalDetector
 	return detector->done()?YES:NO;
 }
 
--(NSString *)MIMECharset
+- (NSString *)MIMECharset
 {
 	if(!charset)
 	{
 		wrappedUniversalDetector *detector=(wrappedUniversalDetector *)detectorptr;
-		const char *cstr=detector->charset(confidence);
-		if(!cstr) return nil;
-		charset=[[NSString alloc] initWithUTF8String:cstr];
+		const char *cstr = detector->charset(confidence);
+		if(!cstr)
+			return nil;
+		self.MIMECharset = @(cstr);
 	}
 	return charset;
 }
 
--(NSStringEncoding)encoding
+- (NSStringEncoding)encoding
 {
-	NSString *mimecharset=[self MIMECharset];
-	if(!mimecharset) return 0;
-	CFStringEncoding cfenc=CFStringConvertIANACharSetNameToEncoding((CFStringRef)mimecharset);
-	if(cfenc==kCFStringEncodingInvalidId) return 0;
+	NSString *mimecharset = self.MIMECharset;
+	if (!mimecharset)
+		return 0;
+	CFStringEncoding cfenc = CFStringConvertIANACharSetNameToEncoding((CFStringRef)mimecharset);
+	if (cfenc == kCFStringEncodingInvalidId)
+		return 0;
 	return CFStringConvertEncodingToNSStringEncoding(cfenc);
 }
 
--(float)confidence
+- (float)confidence
 {
-	if(!charset) [self MIMECharset];
+	if(!charset)
+		[self MIMECharset];
 	return confidence;
 }
 
--(void)debugDump
+- (void)debugDump
 {
     wrappedUniversalDetector *detector=(wrappedUniversalDetector *)detectorptr;
     return detector->debug();
 }
 
-+(UniversalDetector *)detector
++ (UniversalDetector *)detector
 {
 	return [[[UniversalDetector alloc] init] autorelease];
 }

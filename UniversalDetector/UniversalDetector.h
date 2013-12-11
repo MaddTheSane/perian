@@ -2,15 +2,15 @@
 
 #define UniversalDetector SubUniversalDetector
 
-@interface UniversalDetector:NSObject
+@interface UniversalDetector : NSObject
 {
 	void *detectorptr;
 	NSString *charset;
 	float confidence;
 }
+@property (retain, nonatomic, readonly) NSString *MIMECharset;
 
 -(id)init;
--(void)dealloc;
 
 -(void)analyzeData:(NSData *)data;
 -(void)analyzeBytes:(const char *)data length:(int)len;
