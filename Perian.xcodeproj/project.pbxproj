@@ -2497,7 +2497,7 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
-				STRIP_STYLE = debugging;
+				STRIP_STYLE = "non-global";
 				USER_HEADER_SEARCH_PATHS = "libmatroska libebml ffmpeg \"$(BUILT_PRODUCTS_DIR)\"";
 				WARNING_CFLAGS = "-Werror=implicit";
 			};
@@ -2513,7 +2513,6 @@
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
@@ -2537,7 +2536,7 @@
 				SKIP_INSTALL = YES;
 				STRINGS_FILE_OUTPUT_ENCODING = binary;
 				STRIP_INSTALLED_PRODUCT = YES;
-				STRIP_STYLE = debugging;
+				STRIP_STYLE = all;
 				USER_HEADER_SEARCH_PATHS = "libmatroska libebml ffmpeg \"$(BUILT_PRODUCTS_DIR)\"";
 				WARNING_CFLAGS = "-Werror=implicit";
 			};
@@ -2772,7 +2771,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
 				SKIP_INSTALL = NO;
@@ -2783,7 +2781,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
 				SKIP_INSTALL = NO;
