@@ -20,12 +20,17 @@
  */
 
 #ifdef __OBJC__
-#import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
 #endif
 
 #ifdef _cplusplus
-#import "matroska/KaxBlock.h"
+#include <new>
+#include <vector>
+#include <string>
+#include "matroska/KaxBlock.h"
 #endif
 
+#ifndef __LP64__
 #include <QuickTime/QuickTime.h>
+#endif
 #include <Carbon/Carbon.h>

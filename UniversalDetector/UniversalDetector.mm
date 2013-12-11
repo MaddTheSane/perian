@@ -6,11 +6,11 @@
 #import "nsUniversalDetector.h"
 #import "nsCharSetProber.h"
 
-class wrappedUniversalDetector:public nsUniversalDetector
+class wrappedUniversalDetector : public nsUniversalDetector
 {
-	public:
+public:
 	void Report(const char* aCharset) {}
-
+	
 	const char *charset(float &confidence)
 	{
 		if(!mGotData)
@@ -18,13 +18,13 @@ class wrappedUniversalDetector:public nsUniversalDetector
 			confidence=0;
 			return 0;
 		}
-
+		
 		if(mDetectedCharset)
 		{
 			confidence=1;
 			return mDetectedCharset;
 		}
-
+		
 		switch(mInputState)
 		{
 			case eHighbyte:
@@ -32,7 +32,7 @@ class wrappedUniversalDetector:public nsUniversalDetector
 				float proberConfidence;
 				float maxProberConfidence = (float)0.0;
 				PRInt32 maxProber = 0;
-
+				
 				for (PRInt32 i = 0; i < NUM_OF_CHARSET_PROBERS; i++)
 				{
 					proberConfidence = mCharSetProbers[i]->GetConfidence();
@@ -42,23 +42,23 @@ class wrappedUniversalDetector:public nsUniversalDetector
 						maxProber = i;
 					}
 				}
-
+				
 				confidence=maxProberConfidence;
 				return mCharSetProbers[maxProber]->GetCharSetName();
 			}
-			break;
-
+				break;
+				
 			default:
 			case ePureAscii:
 				confidence=0;
 				return "US-ASCII";
 				break;
 		}
-
+		
 		confidence=0;
 		return 0;
 	}
-
+	
 	bool done()
 	{
 		if(mDetectedCharset) return true;
@@ -75,7 +75,7 @@ class wrappedUniversalDetector:public nsUniversalDetector
                 mCharSetProbers[i]->DumpStatus();
         }
     }
-
+	
 	void reset() { Reset(); }
 };
 
@@ -85,6 +85,8 @@ class wrappedUniversalDetector:public nsUniversalDetector
 
 @implementation UniversalDetector
 @synthesize MIMECharset = charset;
+@synthesize confidence;
+@dynamic encoding;
 
 - (id)init
 {
@@ -128,10 +130,15 @@ class wrappedUniversalDetector:public nsUniversalDetector
 	detector->reset();
 }
 
--(BOOL)done
+- (BOOL)isDone
 {
 	wrappedUniversalDetector *detector=(wrappedUniversalDetector *)detectorptr;
-	return detector->done()?YES:NO;
+	return detector->done() ? YES : NO;
+}
+
+- (BOOL)done
+{
+	return [self isDone];
 }
 
 - (NSString *)MIMECharset
@@ -168,7 +175,7 @@ class wrappedUniversalDetector:public nsUniversalDetector
 - (void)debugDump
 {
     wrappedUniversalDetector *detector=(wrappedUniversalDetector *)detectorptr;
-    return detector->debug();
+    detector->debug();
 }
 
 + (UniversalDetector *)detector

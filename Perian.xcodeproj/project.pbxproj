@@ -164,7 +164,6 @@
 		3DE8D78510444E500007C7E7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
 		3DE8D9D5104451A80007C7E7 /* Perian - Open in QT Player.app in Resources */ = {isa = PBXBuildFile; fileRef = 3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */; };
 		3DF2958C104F0EF40047B8EC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
-		550CC2C118586FF900272A53 /* VideoDecodeAcceleration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 550CC2C018586FF900272A53 /* VideoDecodeAcceleration.framework */; };
 		55247B14173D76A700531BBC /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		553F329B17F2D29C00221391 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		553F32CB17F2F33900221391 /* AppleScriptObjC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 553F32CA17F2F33900221391 /* AppleScriptObjC.framework */; };
@@ -864,14 +863,13 @@
 				11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */,
 				11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */,
 				11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */,
-				11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */,
 				8F483B550A642644002CCA73 /* libavformat.a in Frameworks */,
+				11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */,
 				8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */,
 				3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */,
 				3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */,
 				3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */,
 				F5BD48FE121786C90089D5FA /* AudioUnit.framework in Frameworks */,
-				550CC2C118586FF900272A53 /* VideoDecodeAcceleration.framework in Frameworks */,
 				5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */,
 				5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */,
 				5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */,
@@ -2320,6 +2318,8 @@
 				CLANG_ENABLE_OBJC_ARC = NO;
 				"CLANG_ENABLE_OBJC_ARC[arch=x86_64]" = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Prefix.h;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;
@@ -2333,6 +2333,8 @@
 				CLANG_ENABLE_OBJC_ARC = NO;
 				"CLANG_ENABLE_OBJC_ARC[arch=x86_64]" = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Prefix.h;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;
@@ -2354,6 +2356,10 @@
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					AUDIOCODECS_SUPPORT_PLUGINS,
+					"$(inherited)",
+				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(BUILT_PRODUCTS_DIR)\"/$(arch)",
@@ -2396,6 +2402,10 @@
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					AUDIOCODECS_SUPPORT_PLUGINS,
+					"$(inherited)",
+				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(BUILT_PRODUCTS_DIR)\"/$(arch)",
@@ -2581,6 +2591,10 @@
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					AUDIOCODECS_SUPPORT_PLUGINS,
+					"$(inherited)",
+				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(BUILT_PRODUCTS_DIR)\"/$(arch)",
@@ -2633,9 +2647,8 @@
 		3D4BBE4D0B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_ENABLE_OBJC_GC = unsupported;
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = "";
 				ONLY_ACTIVE_ARCH = NO;
@@ -2657,7 +2670,6 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_GC = supported;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
@@ -2676,6 +2688,8 @@
 				CLANG_ENABLE_OBJC_ARC = NO;
 				"CLANG_ENABLE_OBJC_ARC[arch=x86_64]" = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Prefix.h;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;
@@ -2725,7 +2739,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2pdf;
@@ -2737,7 +2750,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2pdf;
@@ -2749,7 +2761,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2pdf;
@@ -2762,7 +2773,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
 				SKIP_INSTALL = NO;
@@ -2774,7 +2784,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
 				SKIP_INSTALL = NO;
@@ -2785,7 +2794,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = ssa2html;
 				SKIP_INSTALL = NO;
@@ -2796,7 +2804,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "detect-encoding";
 				SKIP_INSTALL = NO;
@@ -2807,7 +2814,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "detect-encoding";
 				SKIP_INSTALL = NO;
@@ -2818,7 +2824,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = "detect-encoding";
 				SKIP_INSTALL = NO;
@@ -2830,7 +2835,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
@@ -2846,7 +2850,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
@@ -2862,7 +2865,6 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "Plists/PerianOpener-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
@@ -2921,7 +2923,6 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_GC = supported;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
@@ -2940,7 +2941,6 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_GC = supported;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				INFOPLIST_FILE = "Plists/PerianPaneReal-Info.plist";
 				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "-C";
@@ -2994,9 +2994,8 @@
 		F5CFD1B90B5000AF00616865 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_ENABLE_OBJC_GC = unsupported;
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = "";
 				ONLY_ACTIVE_ARCH = NO;
@@ -3008,9 +3007,8 @@
 		F5CFD1BA0B5000AF00616865 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_ENABLE_OBJC_GC = unsupported;
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INSTALL_PATH = "$(HOME)/bin";
 				MACOSX_DEPLOYMENT_TARGET = "";
 				ONLY_ACTIVE_ARCH = NO;

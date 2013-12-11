@@ -9,20 +9,20 @@
 	float confidence;
 }
 @property (retain, nonatomic, readonly) NSString *MIMECharset;
+@property (readonly) NSStringEncoding encoding;
+@property (readonly) float confidence;
 
--(id)init;
+- (id)init;
 
--(void)analyzeData:(NSData *)data;
--(void)analyzeBytes:(const char *)data length:(int)len;
--(void)reset;
+- (void)analyzeData:(NSData *)data;
+- (void)analyzeBytes:(const char *)data length:(int)len;
+- (void)reset;
 
--(BOOL)done;
--(NSString *)MIMECharset;
--(NSStringEncoding)encoding;
--(float)confidence;
+- (BOOL)done DEPRECATED_ATTRIBUTE;
+- (BOOL)isDone;
 
--(void)debugDump;
+- (void)debugDump;
 
-+(UniversalDetector *)detector;
++ (UniversalDetector *)detector;
 
 @end
