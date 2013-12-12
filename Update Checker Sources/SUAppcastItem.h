@@ -7,25 +7,8 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "ARCBridge.h"
 
-@interface SUAppcastItem : NSObject {
-	NSString *title;
-	NSDate *date;
-	NSString *description;
-	
-	NSURL *releaseNotesURL;
-	
-	NSString *DSASignature;
-	NSString *MD5Sum;
-	
-	NSString *minimumSystemVersion;
-	
-	NSURL *fileURL;
-	NSString *fileVersion;
-	NSString *versionString;
-}
-
+@interface SUAppcastItem : NSObject
 // Initializes with data from a dictionary provided by the RSS class.
 - (id)initWithDictionary:(NSDictionary *)dict;
 
@@ -33,12 +16,12 @@
 @property (copy) NSDate *date;
 @property (copy) NSString *description;
 
-@property (arcstrong) NSURL *releaseNotesURL;
+@property (strong) NSURL *releaseNotesURL;
 
 @property (copy) NSString *DSASignature;
 @property (copy) NSString *MD5Sum;
 
-@property (arcstrong) NSURL *fileURL;
+@property (strong) NSURL *fileURL;
 @property (copy) NSString *fileVersion;
 @property (copy) NSString *versionString;
 

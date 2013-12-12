@@ -7,10 +7,9 @@
 //
 
 #import "SUUtilities.h"
-#import "ARCBridge.h"
 
 @interface SUUtilities : NSObject
-+(NSString *)localizedStringForKey:(NSString *)key withComment:(NSString *)comment;
++ (NSString *)localizedStringForKey:(NSString *)key withComment:(NSString *)comment;
 @end
 
 id SUUnlocalizedInfoValueForKey(NSString *key)
@@ -29,13 +28,17 @@ id SUInfoValueForKey(NSString *key)
 
 NSString *SUHostAppName()
 {
-	if (SUInfoValueForKey(@"CFBundleName")) { return SUInfoValueForKey(@"CFBundleName"); }
+	if (SUInfoValueForKey(@"CFBundleName")) {
+		return SUInfoValueForKey(@"CFBundleName");
+	}
 	return [[[NSFileManager defaultManager] displayNameAtPath:[[NSBundle mainBundle] bundlePath]] stringByDeletingPathExtension];
 }
 
 NSString *SUHostAppDisplayName()
 {
-	if (SUInfoValueForKey(@"CFBundleDisplayName")) { return SUInfoValueForKey(@"CFBundleDisplayName"); }
+	if (SUInfoValueForKey(@"CFBundleDisplayName")) {
+		return SUInfoValueForKey(@"CFBundleDisplayName");
+	}
 	return SUHostAppName();
 }
 
@@ -47,13 +50,11 @@ NSString *SUHostAppVersion()
 NSString *SUHostAppVersionString()
 {
 	NSString *shortVersionString = SUInfoValueForKey(@"CFBundleShortVersionString");
-	if (shortVersionString)
-	{
+	if (shortVersionString) {
 		if (![shortVersionString isEqualToString:SUHostAppVersion()])
 			shortVersionString = [shortVersionString stringByAppendingFormat:@"/%@", SUHostAppVersion()];
 		return shortVersionString;
-	}
-	else
+	} else
 		return SUHostAppVersion(); // fall back on CFBundleVersion
 }
 
@@ -100,7 +101,6 @@ NSArray *SUSplitVersionString(NSString *version)
 			// We've reached a new segment
 			NSString *aPart = [[NSString alloc] initWithString:s];
 			[parts addObject:aPart];
-			RELEASEOBJ(aPart);
 			[s setString:character];
 		} else {
 			// Add character to string and continue
@@ -124,8 +124,8 @@ NSComparisonResult SUStandardVersionComparison(NSString *versionA, NSString *ver
 	
 	n = MIN([partsA count], [partsB count]);
 	for (i = 0; i < n; ++i) {
-		partA = [partsA objectAtIndex:i];
-		partB = [partsB objectAtIndex:i];
+		partA = partsA[i];
+		partB = partsB[i];
 		
 		typeA = SUGetCharType(partA);
 		typeB = SUGetCharType(partB);
@@ -174,11 +174,11 @@ NSComparisonResult SUStandardVersionComparison(NSString *versionA, NSString *ver
 		int missingType, shorterResult, largerResult;
 		
 		if ([partsA count] > [partsB count]) {
-			missingPart = [partsA objectAtIndex:n];
+			missingPart = partsA[n];
 			shorterResult = NSOrderedDescending;
 			largerResult = NSOrderedAscending;
 		} else {
-			missingPart = [partsB objectAtIndex:n];
+			missingPart = partsB[n];
 			shorterResult = NSOrderedAscending;
 			largerResult = NSOrderedDescending;
 		}

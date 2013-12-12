@@ -7,7 +7,6 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "ARCBridge.h"
 
 typedef enum
 {
@@ -21,15 +20,13 @@ typedef enum
 
 @interface SUUpdateAlert : NSWindowController {
 	SUAppcastItem *updateItem;
-	__arcweak NSObject<SUUpdateAlertDelegate> *delegate;
 	
 	IBOutlet WebView *releaseNotesView;
 	IBOutlet NSTextField *description;
 	NSProgressIndicator *releaseNotesSpinner;
 	BOOL webViewFinishedLoading;
 }
-
-@property (arcweak) NSObject<SUUpdateAlertDelegate> *delegate;
+@property (weak) NSObject<SUUpdateAlertDelegate> *delegate;
 
 - (id)initWithAppcastItem:(SUAppcastItem *)item;
 

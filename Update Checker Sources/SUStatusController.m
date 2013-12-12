@@ -8,7 +8,6 @@
 
 #import "SUStatusController.h"
 #import "SUUtilities.h"
-#import "ARCBridge.h"
 
 @interface SUStatusController ()
 @property (copy) NSString *title, *buttonTitle;
@@ -37,16 +36,6 @@
 	}
 	return self;
 }
-
-#if !__has_feature(objc_arc)
-- (void)dealloc
-{
-	self.title = nil;
-	self.statusText = nil;
-	self.buttonTitle = nil;
-	[super dealloc];
-}
-#endif
 
 - (void)awakeFromNib
 {

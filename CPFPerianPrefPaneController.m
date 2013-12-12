@@ -211,7 +211,7 @@
 	NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
 	if(infoDict != nil)
 	{
-		NSString *currentVersion = [infoDict objectForKey:BundleVersionKey];
+		NSString *currentVersion = infoDict[BundleVersionKey];
 		if([currentVersion isVersionStringOlderThan:myVersion])
 			ret = InstallStatusOutdated;
 		else
@@ -235,7 +235,7 @@
 	NSString *currentVersion = @"-";
 	NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
 	if (infoDict != nil)
-		currentVersion = [infoDict objectForKey:BundleVersionKey];
+		currentVersion = infoDict[BundleVersionKey];
 	[textField_currentVersion setStringValue:[NSLocalizedString(@"Installed Version: ", @"") stringByAppendingString:currentVersion]];
 }
 
@@ -273,7 +273,7 @@
 - (void)checkForInstallation:(BOOL)freshInstall
 {
 	NSDictionary *infoDict = [self myInfoDict];
-	NSString *myVersion = [infoDict objectForKey:BundleVersionKey];
+	NSString *myVersion = infoDict[BundleVersionKey];
 	
 	[self setInstalledVersionString];
 	installStatus = [self installStatusForComponent:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:myVersion];
@@ -290,14 +290,14 @@
 	else
 	{
 		//Perian is fine, but check components
-		NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
+		NSDictionary *myComponentsInfo = infoDict[ComponentInfoDictionaryKey];
 		if(myComponentsInfo != nil)
 		{
 			NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
 			NSDictionary *componentInfo = nil;
 			while((componentInfo = [componentEnum nextObject]) != nil)
 			{
-				InstallStatus tstatus = [self installStatusForComponent:[componentInfo objectForKey:ComponentNameKey] type:[[componentInfo objectForKey:ComponentTypeKey] intValue] withMyVersion:[componentInfo objectForKey:BundleVersionKey]];
+				InstallStatus tstatus = [self installStatusForComponent:componentInfo[ComponentNameKey] type:[componentInfo[ComponentTypeKey] intValue] withMyVersion:componentInfo[BundleVersionKey]];
 				if(tstatus < installStatus)
 					installStatus = tstatus;
 			}
@@ -365,7 +365,7 @@
 {
 	/* General */
 	NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
-	NSString *myVersion = [[self myInfoDict] objectForKey:BundleVersionKey];
+	NSString *myVersion = [self myInfoDict][BundleVersionKey];
 	
 	NSAttributedString		*about;
 	about = [[[NSAttributedString alloc] initWithPath:[[self bundle] pathForResource:@"Read Me" ofType:@"rtf"]
@@ -614,7 +614,7 @@
 {
 	NSString *resourcePath = [[self bundle] resourcePath];
 	NSDictionary *infoDict = [self myInfoDict];
-	NSDictionary *apps = [infoDict objectForKey:AppsToRegisterDictionaryKey];
+	NSDictionary *apps = infoDict[AppsToRegisterDictionaryKey];
 	
 	NSEnumerator *appEnum = [apps objectEnumerator];
 	NSString *app = nil;
@@ -640,7 +640,7 @@
 {
 	@autoreleasepool {
 		NSDictionary *infoDict = [self myInfoDict];
-		NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
+		NSDictionary *myComponentsInfo = infoDict[ComponentInfoDictionaryKey];
 		NSString *componentPath = [[[self bundle] resourcePath] stringByAppendingPathComponent:@"Components"];
 		NSString *coreAudioComponentPath = [componentPath stringByAppendingPathComponent:@"CoreAudio"];
 		NSString *quickTimeComponentPath = [componentPath stringByAppendingPathComponent:@"QuickTime"];
@@ -653,27 +653,27 @@
 		/* Oh well, hope we don't need it */
 			auth = nil;
 		
-		[self installArchive:[componentPath stringByAppendingPathComponent:@"Perian.zip"] forPiece:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:[infoDict objectForKey:BundleVersionKey]];
+		[self installArchive:[componentPath stringByAppendingPathComponent:@"Perian.zip"] forPiece:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:infoDict[BundleVersionKey]];
 		
 		NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
 		NSDictionary *myComponent = nil;
 		while((myComponent = [componentEnum nextObject]) != nil)
 		{
 			NSString *archivePath = nil;
-			ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
+			ComponentType type = [myComponent[ComponentTypeKey] intValue];
 			switch(type)
 			{
 				case ComponentTypeCoreAudio:
-					archivePath = [coreAudioComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
+					archivePath = [coreAudioComponentPath stringByAppendingPathComponent:myComponent[ComponentArchiveNameKey]];
 					break;
 				case ComponentTypeQuickTime:
-					archivePath = [quickTimeComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
+					archivePath = [quickTimeComponentPath stringByAppendingPathComponent:myComponent[ComponentArchiveNameKey]];
 					break;
 				case ComponentTypeFramework:
-					archivePath = [frameworkComponentPath stringByAppendingPathComponent:[myComponent objectForKey:ComponentArchiveNameKey]];
+					archivePath = [frameworkComponentPath stringByAppendingPathComponent:myComponent[ComponentArchiveNameKey]];
 					break;
 			}
-			if (![self installArchive:archivePath forPiece:[myComponent objectForKey:ComponentNameKey] type:type withMyVersion:[myComponent objectForKey:BundleVersionKey]]) {
+			if (![self installArchive:archivePath forPiece:myComponent[ComponentNameKey] type:type withMyVersion:myComponent[BundleVersionKey]]) {
 				break;
 			}
 		}
@@ -694,7 +694,7 @@
 {
 	@autoreleasepool {
 		NSDictionary *infoDict = [self myInfoDict];
-		NSDictionary *myComponentsInfo = [infoDict objectForKey:ComponentInfoDictionaryKey];
+		NSDictionary *myComponentsInfo = infoDict[ComponentInfoDictionaryKey];
 		NSFileManager *fileManager = [NSFileManager defaultManager];
 		NSString *componentPath;
 		
@@ -715,9 +715,9 @@
 		NSDictionary *myComponent = nil;
 		while((myComponent = [componentEnum nextObject]) != nil)
 		{
-			ComponentType type = [[myComponent objectForKey:ComponentTypeKey] intValue];
+			ComponentType type = [myComponent[ComponentTypeKey] intValue];
 			NSString *directory = [self basePathForType:type user:userInstalled];
-			componentPath = [directory stringByAppendingPathComponent:[myComponent objectForKey:ComponentNameKey]];
+			componentPath = [directory stringByAppendingPathComponent:myComponent[ComponentNameKey]];
 			if(auth != nil && !userInstalled)
 				[self _authenticatedRemove:componentPath];
 			else
@@ -771,21 +771,21 @@
 	NSDictionary *infoDictionary = nil;
 	if (componentBundle)
 		infoDictionary = [componentBundle infoDictionary];
-	if (infoDictionary && [infoDictionary objectForKey:BundleIdentifierKey]) {
-		NSString *componentVersion = [infoDictionary objectForKey:BundleVersionKey];
+	if (infoDictionary && infoDictionary[BundleIdentifierKey]) {
+		NSString *componentVersion = infoDictionary[BundleVersionKey];
 		if (componentVersion)
-			[componentInfo setObject:componentVersion forKey:@"version"];
+			componentInfo[@"version"] = componentVersion;
 		else
-			[componentInfo setObject:@"Unknown" forKey:@"version"];
-		[componentInfo setObject:(user ? @"User" : @"System") forKey:@"installType"];
-		[componentInfo setObject:[self checkComponentStatusByBundleIdentifier:[componentBundle bundleIdentifier]] forKey:@"status"];
-		[componentInfo setObject:[componentBundle bundleIdentifier] forKey:@"bundleID"];
+			componentInfo[@"version"] = @"Unknown";
+		componentInfo[@"installType"] = (user ? @"User" : @"System");
+		componentInfo[@"status"] = [self checkComponentStatusByBundleIdentifier:[componentBundle bundleIdentifier]];
+		componentInfo[@"bundleID"] = [componentBundle bundleIdentifier];
 	} else {
-		[componentInfo setObject:@"Unknown" forKey:@"version"];
-		[componentInfo setObject:(user ? @"User" : @"System") forKey:@"installType"];
+		componentInfo[@"version"] = @"Unknown";
+		componentInfo[@"installType"] = (user ? @"User" : @"System");
 		NSString *bundleIdent = [NSString stringWithFormat:PERIAN_NO_BUNDLE_ID_FORMAT,compName];
-		[componentInfo setObject:[self checkComponentStatusByBundleIdentifier:bundleIdent] forKey:@"status"];
-		[componentInfo setObject:bundleIdent forKey:@"bundleID"];
+		componentInfo[@"status"] = [self checkComponentStatusByBundleIdentifier:bundleIdent];
+		componentInfo[@"bundleID"] = bundleIdent;
 	}
 	return [componentInfo autorelease];
 }
@@ -809,11 +809,11 @@
 	NSString *status = @"OK";
 	NSDictionary *infoDict;
 	for (infoDict in componentReplacementInfo) {
-		NSEnumerator *stringsEnum = [[infoDict objectForKey:ObsoletesKey] objectEnumerator];
+		NSEnumerator *stringsEnum = [infoDict[ObsoletesKey] objectEnumerator];
 		NSString *obsoletedID;
 		while ((obsoletedID = [stringsEnum nextObject]))
 			if ([obsoletedID isEqualToString:bundleID])
-				status = [NSString stringWithFormat:@"Obsoleted by %@",[infoDict objectForKey:HumanReadableNameKey]];
+				status = [NSString stringWithFormat:@"Obsoleted by %@",infoDict[HumanReadableNameKey]];
 	}
 	return status;
 }

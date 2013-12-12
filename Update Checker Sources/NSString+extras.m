@@ -41,51 +41,51 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #import "NSString+extras.h"
-#import "ARCBridge.h"
 
 @implementation NSString (extras)
 
 - (NSString *)stringWithSubstitute:(NSString *)subs forCharactersFromSet:(NSCharacterSet *)set
 {
 	NSRange r = [self rangeOfCharacterFromSet:set];
-	if (r.location == NSNotFound) return self;
+	if (r.location == NSNotFound)
+		return self;
 	NSMutableString *newString = [self mutableCopy];
-	do
-	{
+	do {
 		[newString replaceCharactersInRange:r withString:subs];
 		r = [newString rangeOfCharacterFromSet:set];
 	}
 	while (r.location != NSNotFound);
-	return [NSString stringWithString:AUTORELEASEOBJ(newString)];
+	return [[NSString alloc] initWithString:newString];
 }
 
-- (NSString *) trimWhiteSpace {
+- (NSString *)trimWhiteSpace
+{
 	
 	NSMutableString *s = [NSMutableString stringWithString:self];
 	
-	CFStringTrimWhitespace ((CFMutableStringRef) s);
+	CFStringTrimWhitespace ((__bridge CFMutableStringRef) s);
 	
 	return [NSString stringWithString:s];
 } /*trimWhiteSpace*/
 
-- (NSString *) ellipsizeAfterNWords: (int) n {
-	
+- (NSString *) ellipsizeAfterNWords:(NSInteger)n
+{
 	NSArray *stringComponents = [self componentsSeparatedByString: @" "];
 	NSMutableArray *componentsCopy = [stringComponents mutableCopy];
-	int ix = n;
-	int len = [componentsCopy count];
+	NSInteger ix = n;
+	NSInteger len = [componentsCopy count];
 	
 	if (len < n)
 		ix = len;
 	
 	[componentsCopy removeObjectsInRange: NSMakeRange (ix, len - ix)];
 	
-	return [AUTORELEASEOBJ(componentsCopy) componentsJoinedByString: @" "];
+	return [componentsCopy componentsJoinedByString: @" "];
 } /*ellipsizeAfterNWords*/
 
-- (NSString *) stripHTML {
-	
-	int len = [self length];
+- (NSString *)stripHTML
+{
+	NSInteger len = [self length];
 	NSMutableString *s = [NSMutableString stringWithCapacity: len];
 	int i = 0, level = 0;
 	
@@ -112,22 +112,22 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 } /*stripHTML*/
 
 
-+ (BOOL) stringIsEmpty: (NSString *) s {
-	
++ (BOOL) stringIsEmpty: (NSString *) s
+{
 	NSString *copy;
 	
 	if (s == nil)
-		return (YES);
+		return YES;
 	
 	if ([s isEqualTo: @""])
-		return (YES);
+		return YES;
 	
 	copy = [NSString stringWithString:s];
 	
 	if ([[copy trimWhiteSpace] isEqualTo: @""])
-		return (YES);
+		return YES;
 	
-	return (NO);
+	return NO;
 } /*stringIsEmpty*/
 
 @end

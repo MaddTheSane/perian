@@ -25,7 +25,6 @@
 // we can be more sure that the update won't get run twice accidentaly.
 
 #import "UpdateCheckerAppDelegate.h"
-#import "ARCBridge.h"
 #include <stdlib.h>
 
 //define the following to use the beta appcast URL, but DON'T commit that change
@@ -33,10 +32,10 @@
 
 @interface UpdateCheckerAppDelegate ()
 - (void)showUpdateErrorAlertWithInfo:(NSString *)info;
-@property (arcretain) NSDate *lastRunDate;
-@property (arcretain) SUAppcastItem *latest;
-@property (arcretain) NSString *downloadPath;
-@property (arcretain) SUAppcast *appcast;
+@property (strong) NSDate *lastRunDate;
+@property (strong) SUAppcastItem *latest;
+@property (strong) NSString *downloadPath;
+@property (strong) SUAppcast *appcast;
 @end
 
 @implementation UpdateCheckerAppDelegate
@@ -84,7 +83,7 @@
 	if(manualRun)
 		[[NSDistributedNotificationCenter defaultCenter] postNotificationName:UPDATE_STATUS_NOTIFICATION object:@"Starting"];
 	
-	self.appcast = AUTORELEASEOBJ([[SUAppcast alloc] init]);
+	self.appcast = [[SUAppcast alloc] init];
 	[appcast setDelegate:self];
 	[appcast fetchAppcastFromURL:[NSURL URLWithString:updateUrlString]];
 }
@@ -103,10 +102,9 @@
 	// This code *should* use NSSearchPathForDirectoriesInDomains(NSCoreServiceDirectory, NSSystemDomainMask, YES)
 	// but that returns /Library/CoreServices for some reason
 	NSString *versionPlistPath = @"/System/Library/CoreServices/SystemVersion.plist";
-	NSString *currentSystemVersion = RETAINOBJ([[NSDictionary dictionaryWithContentsOfFile:versionPlistPath] objectForKey:@"ProductVersion"] );
+	NSString *currentSystemVersion = [NSDictionary dictionaryWithContentsOfFile:versionPlistPath][@"ProductVersion"];
 	
 	BOOL updateAvailable = SUStandardVersionComparison(latest.minimumSystemVersion, currentSystemVersion);
-	RELEASEOBJ(currentSystemVersion);
 	NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
 	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	
@@ -196,7 +194,7 @@
 		name = [name stringByDeletingPathExtension];
 	
 	// We create a temporary directory in /tmp and stick the file there.
-#if 1
+#if 0
 	NSString *tempDir = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
 	BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:tempDir attributes:nil];
 #else
@@ -209,7 +207,6 @@
 	{
 		[NSException raise:@"SUFailTmpWrite" format:@"Couldn't create temporary directory in /tmp"];
 		[download cancel];
-		RELEASEOBJ(download);
 	}
 	
 	self.downloadPath = [tempDir stringByAppendingPathComponent:name];
@@ -234,12 +231,12 @@
 - (BOOL)extractDMG:(NSString *)archivePath
 {
 	// First, we internet-enable the volume.
-	NSTask *hdiTask = [NSTask launchedTaskWithLaunchPath:@"/usr/bin/env" arguments:[NSArray arrayWithObjects:@"hdiutil", @"internet-enable", @"-quiet", archivePath, nil]];
+	NSTask *hdiTask = [NSTask launchedTaskWithLaunchPath:@"/usr/bin/env" arguments:@[@"hdiutil", @"internet-enable", @"-quiet", archivePath]];
 	[hdiTask waitUntilExit];
 	if ([hdiTask terminationStatus] != 0) { return NO; }
 	
 	// Now, open the volume; it'll extract into its own directory.
-	hdiTask = [NSTask launchedTaskWithLaunchPath:@"/usr/bin/env" arguments:[NSArray arrayWithObjects:@"hdiutil", @"attach", @"-idme", @"-noidmereveal", @"-noidmetrash", @"-noverify", @"-nobrowse", @"-noautoopen", @"-quiet", archivePath, nil]];
+	hdiTask = [NSTask launchedTaskWithLaunchPath:@"/usr/bin/env" arguments:@[@"hdiutil", @"attach", @"-idme", @"-noidmereveal", @"-noidmetrash", @"-noverify", @"-nobrowse", @"-noautoopen", @"-quiet", archivePath]];
 	[hdiTask waitUntilExit];
 	if ([hdiTask terminationStatus] != 0) { return NO; }
 	
@@ -250,7 +247,6 @@ extern char **environ;
 
 - (void)downloadDidFinish:(NSURLDownload *)download
 {
-	RELEASEOBJ(download);
 	downloader = nil;
 	
 	//Indeterminate progress bar
@@ -269,7 +265,7 @@ extern char **environ;
 	NSError *moveErr = nil;
 	while((file = [dirEnum nextObject]) != nil)
 	{
-		if([[[dirEnum fileAttributes] objectForKey:NSFileTypeSymbolicLink] boolValue])
+		if([[dirEnum fileAttributes][NSFileTypeSymbolicLink] boolValue])
 			[dirEnum skipDescendents];
 		if([[file pathExtension] isEqualToString:@"prefPane"])
 		{
@@ -289,9 +285,8 @@ extern char **environ;
 	
 	NSAppleScript *quitSysPrefsScript = [[NSAppleScript alloc] initWithSource:@"tell application \"System Preferences\" to quit"];
 	[quitSysPrefsScript executeAndReturnError:nil];
-	RELEASEOBJ(quitSysPrefsScript);
 	
-	const char *args[] = {"/bin/sh", "-c", buf, NULL};
+	const char * args[] = {"/bin/sh", "-c", buf, NULL};
 	setenv("PREFPANE_LOCATION", [prefpanelocation fileSystemRepresentation], 1);
 	setenv("TEMP_FOLDER", [[downloadPath stringByDeletingLastPathComponent] fileSystemRepresentation], 1);
 	int forkVal = fork();

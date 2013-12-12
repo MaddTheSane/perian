@@ -44,7 +44,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #import <CoreFoundation/CoreFoundation.h>
 #import "NSString+extras.h"
 
-@interface RSS : NSObject {
+@interface RSS : NSObject
+{
 	NSDictionary *headerItems;
 	NSMutableArray *newsItems;
 	NSString *version;

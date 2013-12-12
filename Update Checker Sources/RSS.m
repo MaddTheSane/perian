@@ -41,7 +41,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 
 #import "RSS.h"
-#import "ARCBridge.h"
 
 @interface RSS ()
 /*Private*/
@@ -57,7 +56,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 - (NSString *) getelementvalue: (CFXMLTreeRef) tree;
 
 @property (readwrite, copy) NSDictionary *headerItems;
-@property (readwrite, arcstrong) NSMutableArray *newsItems;
+@property (readwrite, strong) NSMutableArray *newsItems;
 @property (readwrite, copy) NSString *version;
 
 @end
@@ -78,7 +77,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 - (NSDictionary *)newestItem
 {
 	// The news items are already sorted by published date, descending.
-	return [self.newsItems objectAtIndex:0];
+	return (self.newsItems)[0];
 }
 
 - (id) initWithTitle: (NSString *) title andDescription: (NSString *) description
@@ -92,8 +91,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		NSMutableDictionary *header;
 		flRdf = NO;
 		header = [NSMutableDictionary dictionaryWithCapacity: 2];
-		[header setObject: title forKey: titleKey];
-		[header setObject: description forKey: descriptionKey];
+		header[titleKey] = title;
+		header[descriptionKey] = description;
 		self.headerItems = header;
 		newsItems = [[NSMutableArray alloc] initWithCapacity: 0];
 		self.version = @"synthetic";
@@ -110,7 +109,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		flRdf = NO;
 		normalize = fl;
 		NS_DURING
-		tree = CFXMLTreeCreateFromData (kCFAllocatorDefault, BRIDGE(CFDataRef, rssData),
+		tree = CFXMLTreeCreateFromData (kCFAllocatorDefault, (__bridge CFDataRef)rssData,
 										NULL,  kCFXMLParserSkipWhitespace, kCFXMLNodeCurrentVersion);
 		NS_HANDLER
 		tree = nil;
@@ -201,7 +200,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	for (i = 0; i < childCount; i++) {
 		childTree = CFTreeGetChildAtIndex (channelTree, i);
 		childNode = CFXMLTreeGetNode (childTree);
-		childName = BRIDGE(NSString *, CFXMLNodeGetString(childNode));
+		childName = (__bridge NSString*)(CFXMLNodeGetString(childNode));
 		
 		if ([childName hasPrefix: @"rss:"])
 			childName = [childName substringFromIndex: 4];
@@ -212,7 +211,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		if ([childName isEqualTo: @"image"])
 			[self flattenimagechildren: childTree into: headerItemsMutable];
 		
-		[headerItemsMutable setObject: [self getelementvalue: childTree] forKey: childName];
+		headerItemsMutable[childName] = [self getelementvalue: childTree];
 	} /*for*/
 	
 	headerItems = [headerItemsMutable copy];
@@ -248,7 +247,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		
 		childTree = CFTreeGetChildAtIndex (channelTree, i);
 		childNode = CFXMLTreeGetNode (childTree);
-		childName = BRIDGE(NSString *, CFXMLNodeGetString(childNode));
+		childName = (__bridge NSString*)(CFXMLNodeGetString(childNode));
 		
 		if ([childName hasPrefix: @"rss:"])
 			childName = [childName substringFromIndex: 4];
@@ -263,7 +262,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			
 			itemTree = CFTreeGetChildAtIndex (childTree, j);
 			itemNode = CFXMLTreeGetNode (itemTree);
-			itemName = BRIDGE(NSString *, CFXMLNodeGetString(itemNode));
+			itemName = (__bridge NSString*)(CFXMLNodeGetString(itemNode));
 			
 			if ([itemName hasPrefix: @"rss:"])
 				itemName = [itemName substringFromIndex: 4];
@@ -273,12 +272,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 				// Hack to add attributes to the dictionary in addition to children. (AMM)
 				const CFXMLElementInfo *websiteInfo = CFXMLNodeGetInfoPtr(itemNode);
 				NSMutableDictionary *enclosureDictionary = [NSMutableDictionary dictionary];
-				NSDictionary *tmpAttrs = BRIDGE(NSDictionary *,websiteInfo->attributes);
+				NSDictionary *tmpAttrs = (__bridge NSDictionary *)(websiteInfo->attributes);
 				for (NSString *current in [tmpAttrs keyEnumerator]) {
-					[enclosureDictionary setObject:[tmpAttrs objectForKey:current] forKey:current];
+					enclosureDictionary[current] = tmpAttrs[current];
 					
 				}
-				[itemDictionaryMutable setObject: enclosureDictionary forKey: itemName];
+				itemDictionaryMutable[itemName] = enclosureDictionary;
 				continue;
 			}
 			
@@ -287,7 +286,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			if ([itemName isEqualTo: @"source"])
 				[self flattensourceattributes: itemNode into: itemDictionaryMutable];
 			
-			[itemDictionaryMutable setObject: itemValue forKey: itemName];
+			itemDictionaryMutable[itemName] = itemValue;
 		} /*for*/
 		
 		if (normalize)
@@ -300,7 +299,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	// This comparator function is used to sort the RSS items by their published date.
 	newsItems = [[NSMutableArray alloc] initWithArray:[itemsArrayMutable sortedArrayWithOptions:NSSortConcurrent usingComparator:^NSComparisonResult(id item1, id item2) {
 		// We compare item2 with item1 instead of the other way 'round because we want descending, not ascending. Bit of a hack.
-		return [(NSDate *)[NSDate dateWithNaturalLanguageString:[item2 objectForKey:@"pubDate"]] compare:(NSDate *)[NSDate dateWithNaturalLanguageString:[item1 objectForKey:@"pubDate"]]];
+		return [(NSDate *)[NSDate dateWithNaturalLanguageString:item2[@"pubDate"]] compare:(NSDate *)[NSDate dateWithNaturalLanguageString:item1[@"pubDate"]]];
 		
 	}]];
 } /*createitemsarray*/
@@ -323,7 +322,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	
 	elementInfo = CFXMLNodeGetInfoPtr(node);
 	
-	version = [[NSString alloc] initWithString: [BRIDGE(NSDictionary *, elementInfo->attributes) objectForKey: @"version"]];
+	version = [[NSString alloc] initWithString: ((__bridge NSDictionary *)(elementInfo->attributes))[@"version"]];
 } /*setversionstring*/
 
 
@@ -341,14 +340,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	for (i = 0; i < childCount; i++) {
 		childTree = CFTreeGetChildAtIndex (tree, i);
 		childNode = CFXMLTreeGetNode (childTree);
-		childName = BRIDGE(NSString *, CFXMLNodeGetString(childNode));
+		childName = (__bridge NSString*)(CFXMLNodeGetString(childNode));
 		
 		if ([childName hasPrefix: @"rss:"])
 			childName = [childName substringFromIndex: 4];
 		
 		childValue = [self getelementvalue: childTree];
 		keyName = [NSString stringWithFormat: @"image%@", childName];
-		[dictionary setObject: childValue forKey: keyName];
+		dictionary[keyName] = childValue;
 	} /*for*/
 } /*flattenimagechildren*/
 
@@ -360,15 +359,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	
 	elementInfo = CFXMLNodeGetInfoPtr(node);
 	
-	NSDictionary *tmpAttrs = BRIDGE(NSDictionary*, elementInfo->attributes);
-	sourceHomeUrl = [tmpAttrs objectForKey: @"homeUrl"];
-	sourceRssUrl = [tmpAttrs objectForKey: @"url"];
+	NSDictionary *tmpAttrs = (__bridge NSDictionary*)(elementInfo->attributes);
+	sourceHomeUrl = tmpAttrs[@"homeUrl"];
+	sourceRssUrl = tmpAttrs[@"url"];
 	
 	if (sourceHomeUrl != nil)
-		[dictionary setObject: sourceHomeUrl forKey: @"sourceHomeUrl"];
+		dictionary[@"sourceHomeUrl"] = sourceHomeUrl;
 	
 	if (sourceRssUrl != nil)
-		[dictionary setObject: sourceRssUrl forKey: @"sourceRssUrl"];
+		dictionary[@"sourceRssUrl"] = sourceRssUrl;
 } /*flattensourceattributes*/
 
 
@@ -398,30 +397,31 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 } /*getchanneltree*/
 
 
-- (CFXMLTreeRef) getnamedtree: (CFXMLTreeRef) currentTree name: (NSString *) name {
-	
-	int childCount, i;
+- (CFXMLTreeRef)getnamedtree:(CFXMLTreeRef)currentTree name:(NSString *)name
+{
+	NSInteger childCount, i;
 	CFXMLNodeRef xmlNode;
 	CFXMLTreeRef xmlTreeNode;
 	NSString *itemName;
 	
-	childCount = CFTreeGetChildCount (currentTree);
+	childCount = CFTreeGetChildCount(currentTree);
 	
 	for (i = childCount - 1; i >= 0; i--) {
 		
 		xmlTreeNode = CFTreeGetChildAtIndex (currentTree, i);
 		xmlNode = CFXMLTreeGetNode (xmlTreeNode);
-		itemName = BRIDGE(NSString *, CFXMLNodeGetString(xmlNode));
+		itemName = (__bridge NSString*)(CFXMLNodeGetString(xmlNode));
 		
 		if ([itemName isEqualToString: name])
-			return (xmlTreeNode);
+			return xmlTreeNode;
 	} /*for*/
 	
-	return (nil);
+	return nil;
 } /*getnamedtree*/
 
 
-- (void) normalizeRSSItem: (NSMutableDictionary *) rssItem {
+- (void)normalizeRSSItem:(NSMutableDictionary *)rssItem
+{
 	
 	/*
 	 Make sure item, link, and description are present and have
@@ -434,7 +434,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	
 	/*Description*/
 	
-	description = [rssItem objectForKey: descriptionKey];
+	description = rssItem[descriptionKey];
 	
 	if (description == nil) {
 		description = @"";
@@ -446,11 +446,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	if ([description isEqualTo: @""])
 		nilDescription = YES;
 	
-	[rssItem setObject: description forKey: descriptionKey];
+	rssItem[descriptionKey] = description;
 	
 	/*Link*/
 	
-	link = [rssItem objectForKey: linkKey];
+	link = rssItem[linkKey];
 	
 	if ([NSString stringIsEmpty: link]) {
 		
@@ -461,9 +461,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			NSArray *stringComponents = [description componentsSeparatedByString: @"href=\""];
 			
 			if ([stringComponents count] > 1) {
-				link = [stringComponents objectAtIndex: 1];
+				link = stringComponents[1];
 				stringComponents = [link componentsSeparatedByString: @"\""];
-				link = [stringComponents objectAtIndex: 0];
+				link = stringComponents[0];
 			} /*if*/
 		} /*if*/
 	} /*if*/
@@ -473,11 +473,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	
 	link = [link trimWhiteSpace];
 	
-	[rssItem setObject: link forKey: linkKey];
+	rssItem[linkKey] = link;
 	
 	/*Title*/
 	
-	title = [rssItem objectForKey: titleKey];
+	title = rssItem[titleKey];
 	
 	if (title != nil) {
 		
@@ -496,11 +496,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			
 			if ([stringComponents count] > 1) {
 				
-				title = [stringComponents objectAtIndex: 1];
+				title = stringComponents[1];
 				
 				stringComponents = [title componentsSeparatedByString: @"<"];
 				
-				title = [stringComponents objectAtIndex: 0];
+				title = stringComponents[0];
 				
 				title = [title stripHTML];
 				
@@ -522,7 +522,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			title = @"Untitled";
 	} /*if*/
 	
-	[rssItem setObject: title forKey: titleKey];
+	rssItem[titleKey] = title;
 	
 	/*dangerousmeta case: super-long title with no description*/
 	
@@ -530,9 +530,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		
 		NSString *shortTitle = [[[title stripHTML] trimWhiteSpace] ellipsizeAfterNWords: 7];
 		description = [NSString stringWithString:title];
-		[rssItem setObject:description forKey: descriptionKey];
+		rssItem[descriptionKey] = description;
 		title = [NSString stringWithFormat: @"%@...", shortTitle];
-		[rssItem setObject: title forKey: titleKey];
+		rssItem[titleKey] = title;
 	} /*if*/
 	
 	{ /*deal with entities*/
@@ -564,7 +564,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 					
 					convertedTitle = [s string];
 					
-					RELEASEOBJ(s);
 					convertedTitle = [convertedTitle stripHTML];
 					convertedTitle = [convertedTitle trimWhiteSpace];
 				} /*if*/
@@ -572,20 +571,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 				if ([NSString stringIsEmpty: convertedTitle])
 					convertedTitle = @"Untitled";
 				
-				[rssItem setObject: convertedTitle forKey: @"convertedTitle"];
+				rssItem[@"convertedTitle"] = convertedTitle;
 			} /*if*/
 		} /*if*/
 	} /*deal with entities*/
 } /*normalizeRSSItem*/
 
 
-- (NSString *) getelementvalue: (CFXMLTreeRef) tree {
-	
+- (NSString *) getelementvalue: (CFXMLTreeRef) tree
+{
 	CFXMLNodeRef node;
 	CFXMLTreeRef itemTree;
 	int childCount, ix;
 	NSMutableString *valueMutable;
-	NSString *value;
 	NSString *name;
 	
 	childCount = CFTreeGetChildCount (tree);
@@ -594,7 +592,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	for (ix = 0; ix < childCount; ix++) {
 		itemTree = CFTreeGetChildAtIndex(tree, ix);
 		node = CFXMLTreeGetNode(itemTree);
-		name = BRIDGE(NSString *, CFXMLNodeGetString(node));
+		name = (__bridge NSString*)(CFXMLNodeGetString(node));
 		
 		if (name != nil) {
 			
@@ -628,9 +626,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		} /*if*/
 	} /*for*/
 	
-	value = [NSString stringWithString:valueMutable];
-	RELEASEOBJ(valueMutable);
-	return value;
+	return [[NSString alloc] initWithString:valueMutable];
 } /*getelementvalue*/
 
 @end

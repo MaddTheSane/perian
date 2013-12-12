@@ -48,6 +48,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 - (NSString *)stringWithSubstitute:(NSString *)subs forCharactersFromSet:(NSCharacterSet *)set;
 - (NSString *)trimWhiteSpace;
 - (NSString *)stripHTML;
-- (NSString *)ellipsizeAfterNWords:(int)n;
-+ (BOOL) stringIsEmpty:(NSString *)s;
+- (NSString *)ellipsizeAfterNWords:(NSInteger)n;
++ (BOOL)stringIsEmpty:(NSString *)s;
 @end

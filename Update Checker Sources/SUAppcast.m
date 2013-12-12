@@ -12,7 +12,7 @@
 #import "RSS.h"
 
 @interface SUAppcast ()
-@property (readwrite, arcstrong) NSArray *items;
+@property (readwrite, strong) NSArray *items;
 @end
 
 @implementation SUAppcast
@@ -24,18 +24,9 @@
 	[NSThread detachNewThreadSelector:@selector(_fetchAppcastFromURL:) toTarget:self withObject:url]; // let's not block the main thread
 }
 
-#if !__has_feature(objc_arc)
-- (void)dealloc
-{
-	[items release];
-	
-	[super dealloc];
-}
-#endif
-
 - (SUAppcastItem *)newestItem
 {
-	return [items objectAtIndex:0]; // the RSS class takes care of sorting by published date, descending.
+	return items[0]; // the RSS class takes care of sorting by published date, descending.
 }
 
 - (void)_fetchAppcastFromURL:(NSURL *)url
@@ -50,10 +41,9 @@
 			// Set up all the appcast items
 			NSMutableArray *tempItems = [NSMutableArray array];
 			for (id current in feed.newsItems) {
-				[tempItems addObject:AUTORELEASEOBJ([[SUAppcastItem alloc] initWithDictionary:current])];
+				[tempItems addObject:[[SUAppcastItem alloc] initWithDictionary:current]];
 			}
 			self.items = [NSArray arrayWithArray:tempItems];
-			RELEASEOBJ(feed);
 			
 			if ([delegate respondsToSelector:@selector(appcastDidFinishLoading:)])
 				[delegate performSelectorOnMainThread:@selector(appcastDidFinishLoading:) withObject:self waitUntilDone:NO];

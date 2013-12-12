@@ -24,21 +24,21 @@
 int main(int argc, char *argv[])
 {
 	@autoreleasepool {
-		NSString *filename = [NSString stringWithUTF8String:argv[1]];
-		NSString *componentDir = [NSString stringWithUTF8String:argv[2]];
+		NSString *filename = @(argv[1]);
+		NSString *componentDir = @(argv[2]);
 		
 		NSMutableDictionary *plist = [[NSDictionary dictionaryWithContentsOfFile:filename] mutableCopy];
 		NSMutableArray *components = [NSMutableArray array];
 		
 		NSFileManager *fileManager = [NSFileManager defaultManager];
-		NSArray *types = [NSArray arrayWithObjects:@"QuickTime", @"CoreAudio", @"Frameworks", nil];
-		NSArray *extensions = [NSArray arrayWithObjects:@"component", @"component", @"framework", nil];
+		NSArray *types = @[@"QuickTime", @"CoreAudio", @"Frameworks"];
+		NSArray *extensions = @[@"component", @"component", @"framework"];
 		int i;
 		
 		for(i=0; i<[types count]; i++)
 		{
-			NSString *directory = [componentDir stringByAppendingPathComponent:[types objectAtIndex:i]];
-			NSString *extension = [extensions objectAtIndex:i];
+			NSString *directory = [componentDir stringByAppendingPathComponent:types[i]];
+			NSString *extension = extensions[i];
 			//note: the warning below can't be fixed, the method's replacement isn't in 10.4
 			NSEnumerator *dirEnum = [[fileManager directoryContentsAtPath:directory] objectEnumerator];
 			NSString *candidate = nil;
@@ -53,18 +53,15 @@ int main(int argc, char *argv[])
 				if(info == nil)
 					continue;
 				
-				NSDictionary *componentInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-											   [info objectForKey:BundleVersionKey], BundleVersionKey,
-											   candidate, ComponentNameKey,
-											   [[candidate stringByDeletingPathExtension] stringByAppendingPathExtension:@"zip"], ComponentArchiveNameKey,
-											   [NSNumber numberWithInt:i], ComponentTypeKey,
-											   nil];
+				NSDictionary *componentInfo = @{BundleVersionKey: info[BundleVersionKey],
+											   ComponentNameKey: candidate,
+											   ComponentArchiveNameKey: [[candidate stringByDeletingPathExtension] stringByAppendingPathExtension:@"zip"],
+											   ComponentTypeKey: @(i)};
 				[components addObject:componentInfo];
 			}
 		}
-		[plist setObject:components forKey:ComponentInfoDictionaryKey];
-		[plist writeToFile:[NSString stringWithUTF8String:argv[3]] atomically:YES];
-		[plist release];
+		plist[ComponentInfoDictionaryKey] = components;
+		[plist writeToFile:@(argv[3]) atomically:YES];
 		
 		return EXIT_SUCCESS;
 	}
