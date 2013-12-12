@@ -57,7 +57,7 @@
                                     <rect key="frame" x="10" y="33" width="549" height="298"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="39">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="39">
                                             <rect key="frame" x="279" y="215" width="179" height="17"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <constraints>
@@ -80,7 +80,7 @@
                                                 <action selector="installUninstall:" target="-2" id="71"/>
                                             </connections>
                                         </button>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="41">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="41">
                                             <rect key="frame" x="127" y="240" width="327" height="13"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <constraints>
@@ -120,7 +120,7 @@
                                                 <outlet property="nextKeyView" destination="47" id="48"/>
                                             </connections>
                                         </button>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="91">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="91">
                                             <rect key="frame" x="152" y="108" width="94" height="17"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Audio Output:" id="278">
@@ -148,7 +148,7 @@
                                                 <action selector="set2ChannelModePopup:" target="-2" id="119"/>
                                             </connections>
                                         </popUpButton>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="97">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="97">
                                             <rect key="frame" x="134" y="78" width="112" height="17"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Play Soft Sounds:" id="280">
@@ -178,7 +178,7 @@
                                                 <action selector="setAC3DynamicRangePopup:" target="-2" id="120"/>
                                             </connections>
                                         </popUpButton>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="125">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="125">
                                             <rect key="frame" x="93" y="261" width="81" height="17"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Installation" id="282">
@@ -187,7 +187,7 @@
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="126">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="126">
                                             <rect key="frame" x="93" y="133" width="102" height="17"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Audio Options" id="283">
@@ -207,7 +207,7 @@
                                                 <action selector="setAutoUpdateCheck:" target="-2" id="73"/>
                                             </connections>
                                         </button>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="156">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="156">
                                             <rect key="frame" x="93" y="39" width="114" height="17"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Subtitle Options" id="284">
@@ -227,7 +227,7 @@
                                                 <action selector="setLoadExternalSubtitles:" target="-2" id="159"/>
                                             </connections>
                                         </button>
-                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="186">
+                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="186">
                                             <rect key="frame" x="124" y="158" width="327" height="13"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <constraints>
@@ -379,15 +379,15 @@
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" wantsToBeColor="NO" visibleAtLaunch="NO" animationBehavior="default" id="104" userLabel="DynRangSheet">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="133" y="569" width="406" height="155"/>
+            <rect key="contentRect" x="133" y="569" width="406" height="144"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1058"/>
             <value key="minSize" type="size" width="213" height="107"/>
             <view key="contentView" id="105">
-                <rect key="frame" x="0.0" y="0.0" width="406" height="155"/>
+                <rect key="frame" x="0.0" y="0.0" width="406" height="144"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="112">
-                        <rect key="frame" x="17" y="118" width="306" height="17"/>
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="112">
+                        <rect key="frame" x="54" y="104" width="274" height="17"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Dynamic Range Compression (default is 1):" id="295">
                             <font key="font" metaFont="system"/>
@@ -395,8 +395,8 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="111">
-                        <rect key="frame" x="39" y="81" width="349" height="25"/>
+                    <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="111">
+                        <rect key="frame" x="38" y="69" width="350" height="27"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <sliderCell key="cell" continuous="YES" alignment="left" maxValue="4" doubleValue="1" tickMarkPosition="below" numberOfTickMarks="13" sliderType="linear" id="294">
                             <font key="font" size="12" name="Helvetica"/>
@@ -405,9 +405,12 @@
                             <action selector="setAC3DynamicRangeSlider:" target="-2" id="121"/>
                         </connections>
                     </slider>
-                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="109">
-                        <rect key="frame" x="334" y="113" width="52" height="22"/>
+                    <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="109">
+                        <rect key="frame" x="334" y="102" width="52" height="22"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="52" id="TZR-0x-d7t"/>
+                        </constraints>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" alignment="left" drawsBackground="YES" id="293">
                             <numberFormatter key="formatter" formatterBehavior="10_0" positiveFormat="#0.00" negativeFormat="-#0.00" hasThousandSeparators="NO" thousandSeparator="," id="110">
                                 <attributedString key="attributedStringForZero">
@@ -424,8 +427,8 @@
                             <action selector="setAC3DynamicRangeValue:" target="-2" id="122"/>
                         </connections>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="113">
-                        <rect key="frame" x="41" y="60" width="96" height="13"/>
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="113">
+                        <rect key="frame" x="38" y="49" width="96" height="13"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="More Compression" id="296">
                             <font key="font" size="10" name="LucidaGrande"/>
@@ -433,8 +436,8 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="106">
-                        <rect key="frame" x="276" y="60" width="110" height="13"/>
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="106">
+                        <rect key="frame" x="278" y="49" width="110" height="13"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="right" title="Reduce Compression " id="290">
                             <font key="font" size="10" name="LucidaGrande"/>
@@ -442,8 +445,8 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="108">
-                        <rect key="frame" x="310" y="12" width="82" height="32"/>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="108">
+                        <rect key="frame" x="323" y="13" width="69" height="32"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <buttonCell key="cell" type="push" title="Save" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="292">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -456,8 +459,8 @@ DQ
                             <action selector="saveDynRangeSheet:" target="-2" id="124"/>
                         </connections>
                     </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="107">
-                        <rect key="frame" x="228" y="12" width="82" height="32"/>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="107">
+                        <rect key="frame" x="241" y="13" width="82" height="32"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="291">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -471,6 +474,25 @@ Gw
                         </connections>
                     </button>
                 </subviews>
+                <constraints>
+                    <constraint firstItem="111" firstAttribute="top" secondItem="109" secondAttribute="bottom" constant="8" symbolic="YES" id="1kx-GB-kWJ"/>
+                    <constraint firstItem="108" firstAttribute="leading" secondItem="107" secondAttribute="trailing" constant="12" symbolic="YES" id="57J-jc-q4L"/>
+                    <constraint firstItem="109" firstAttribute="top" secondItem="105" secondAttribute="top" constant="20" symbolic="YES" id="70m-ZQ-qxY"/>
+                    <constraint firstItem="109" firstAttribute="leading" secondItem="112" secondAttribute="trailing" constant="8" symbolic="YES" id="9UX-1T-y1o"/>
+                    <constraint firstItem="106" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="113" secondAttribute="trailing" constant="140" id="ApI-uH-i6a"/>
+                    <constraint firstItem="107" firstAttribute="baseline" secondItem="108" secondAttribute="baseline" id="BQE-zj-Zp8"/>
+                    <constraint firstItem="111" firstAttribute="trailing" secondItem="106" secondAttribute="trailing" id="Du0-hZ-kyr"/>
+                    <constraint firstAttribute="trailing" secondItem="109" secondAttribute="trailing" constant="20" symbolic="YES" id="GCh-Mz-yDf"/>
+                    <constraint firstItem="111" firstAttribute="leading" secondItem="105" secondAttribute="leading" constant="40" id="HeQ-gt-baP"/>
+                    <constraint firstItem="112" firstAttribute="baseline" secondItem="109" secondAttribute="baseline" id="Iy5-dL-16a"/>
+                    <constraint firstAttribute="trailing" secondItem="108" secondAttribute="trailing" constant="20" symbolic="YES" id="V8U-gO-Q1a"/>
+                    <constraint firstItem="107" firstAttribute="top" secondItem="106" secondAttribute="bottom" constant="8" symbolic="YES" id="Yv9-at-CBD"/>
+                    <constraint firstAttribute="trailing" secondItem="111" secondAttribute="trailing" constant="20" symbolic="YES" id="akb-qv-ZHG"/>
+                    <constraint firstAttribute="bottom" secondItem="108" secondAttribute="bottom" constant="20" symbolic="YES" id="mpm-qr-hpB"/>
+                    <constraint firstItem="113" firstAttribute="baseline" secondItem="106" secondAttribute="baseline" id="o5d-7z-Bjl"/>
+                    <constraint firstItem="113" firstAttribute="leading" secondItem="111" secondAttribute="leading" id="wTg-io-tIM"/>
+                    <constraint firstItem="106" firstAttribute="top" secondItem="111" secondAttribute="bottom" constant="8" symbolic="YES" id="xgs-Le-hdU"/>
+                </constraints>
             </view>
         </window>
         <arrayController id="139" userLabel="Components">
@@ -493,8 +515,8 @@ Gw
                 <rect key="frame" x="0.0" y="0.0" width="406" height="200"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="250">
-                        <rect key="frame" x="302" y="12" width="90" height="32"/>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="250">
+                        <rect key="frame" x="333" y="13" width="59" height="32"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <buttonCell key="cell" type="push" title="OK" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="297">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -507,9 +529,12 @@ DQ
                             <action selector="dismissMultiChannelSheet:" target="-2" id="270"/>
                         </connections>
                     </button>
-                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="261">
-                        <rect key="frame" x="17" y="48" width="372" height="132"/>
+                    <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="261">
+                        <rect key="frame" x="18" y="50" width="370" height="130"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="130" id="ze1-Sf-ifB"/>
+                        </constraints>
                         <textFieldCell key="cell" selectable="YES" sendsActionOnEndEditing="YES" allowsEditingTextAttributes="YES" id="298">
                             <font key="font" metaFont="system"/>
                             <string key="title">Multi-Channel Output is not Dolby Digital Passthrough!  If you selected this expecting passthrough, you are following the wrong instructions.  Follow these instead.</string>
@@ -517,8 +542,8 @@ DQ
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="265">
-                        <rect key="frame" x="18" y="24" width="164" height="18"/>
+                    <button translatesAutoresizingMaskIntoConstraints="NO" id="265">
+                        <rect key="frame" x="18" y="22" width="163" height="22"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="check" title="Don't Show This Again" bezelStyle="regularSquare" imagePosition="left" alignment="left" inset="2" id="299">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
@@ -526,6 +551,16 @@ DQ
                         </buttonCell>
                     </button>
                 </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="250" secondAttribute="trailing" constant="20" symbolic="YES" id="9Pw-Nf-uJk"/>
+                    <constraint firstItem="261" firstAttribute="leading" secondItem="245" secondAttribute="leading" constant="20" symbolic="YES" id="Gm4-LI-fZ0"/>
+                    <constraint firstItem="265" firstAttribute="baseline" secondItem="250" secondAttribute="baseline" id="K86-Bo-0wu"/>
+                    <constraint firstItem="261" firstAttribute="top" secondItem="245" secondAttribute="top" constant="20" symbolic="YES" id="OBG-7F-8zX"/>
+                    <constraint firstItem="265" firstAttribute="leading" secondItem="245" secondAttribute="leading" constant="20" id="PQJ-0I-1CP"/>
+                    <constraint firstAttribute="bottom" secondItem="250" secondAttribute="bottom" constant="20" symbolic="YES" id="Pbi-tz-k7r"/>
+                    <constraint firstItem="265" firstAttribute="top" secondItem="261" secondAttribute="bottom" constant="8" symbolic="YES" id="baS-19-bd1"/>
+                    <constraint firstAttribute="trailing" secondItem="261" secondAttribute="trailing" constant="20" symbolic="YES" id="yxD-e7-BkI"/>
+                </constraints>
             </view>
         </window>
     </objects>
