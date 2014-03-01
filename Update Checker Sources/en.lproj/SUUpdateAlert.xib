@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment defaultVersion="1070" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
@@ -52,7 +52,7 @@
                     <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="17">
                         <rect key="frame" x="102" y="263" width="446" height="14"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Release Notes:" id="109">
+                        <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" title="Release Notes:" id="109">
                             <font key="font" metaFont="smallSystemBold"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -129,7 +129,7 @@ DQ
                         <constraints>
                             <constraint firstAttribute="height" constant="28" id="c9e-F7-cE6"/>
                         </constraints>
-                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" alignment="left" id="113">
+                        <textFieldCell key="cell" controlSize="small" sendsActionOnEndEditing="YES" alignment="left" id="113">
                             <font key="font" metaFont="smallSystem"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -160,6 +160,7 @@ DQ
                     <constraint firstItem="7" firstAttribute="top" secondItem="6" secondAttribute="top" constant="20" symbolic="YES" id="m4r-aN-Dbo"/>
                     <constraint firstItem="17" firstAttribute="centerX" secondItem="89" secondAttribute="centerX" id="pxU-RO-clr"/>
                     <constraint firstItem="10" firstAttribute="trailing" secondItem="101" secondAttribute="trailing" id="qDw-uA-FSg"/>
+                    <constraint firstItem="22" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="23" secondAttribute="trailing" constant="12" symbolic="YES" id="v2S-3e-kBd"/>
                     <constraint firstAttribute="trailing" secondItem="89" secondAttribute="trailing" constant="20" symbolic="YES" id="wRh-LR-qy3"/>
                 </constraints>
             </view>

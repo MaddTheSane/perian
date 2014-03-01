@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment defaultVersion="1070" identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
@@ -16,11 +16,11 @@
         <window title="Set in Code" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" wantsToBeColor="NO" visibleAtLaunch="NO" animationBehavior="default" id="5" userLabel="Window">
             <windowStyleMask key="styleMask" titled="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="289" y="305" width="382" height="111"/>
+            <rect key="contentRect" x="289" y="305" width="366" height="111"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1058"/>
             <value key="minSize" type="size" width="213" height="107"/>
             <view key="contentView" id="6">
-                <rect key="frame" x="0.0" y="0.0" width="382" height="111"/>
+                <rect key="frame" x="0.0" y="0.0" width="366" height="111"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <imageView translatesAutoresizingMaskIntoConstraints="NO" id="7">
@@ -36,9 +36,9 @@
                         </connections>
                     </imageView>
                     <textField verticalHuggingPriority="750" id="8">
-                        <rect key="frame" x="106" y="75" width="258" height="17"/>
+                        <rect key="frame" x="90" y="74" width="258" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Status Text (set by loc. string in code)" id="37">
+                        <textFieldCell key="cell" sendsActionOnEndEditing="YES" placeholderString="Status Text (set by loc. string in code)" id="37">
                             <font key="font" metaFont="systemBold"/>
                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -48,25 +48,25 @@
                         </connections>
                     </textField>
                     <progressIndicator verticalHuggingPriority="750" maxValue="100" bezeled="NO" indeterminate="YES" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="11">
-                        <rect key="frame" x="92" y="47" width="270" height="20"/>
+                        <rect key="frame" x="92" y="47" width="254" height="20"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <connections>
-                            <binding destination="-2" name="animate" keyPath="progressValue" id="30">
-                                <dictionary key="options">
-                                    <string key="NSValueTransformerName">NSIsNotNil</string>
-                                </dictionary>
-                            </binding>
+                            <binding destination="-2" name="maxValue" keyPath="maxProgressValue" id="13"/>
                             <binding destination="-2" name="isIndeterminate" keyPath="maxProgressValue" previousBinding="30" id="31">
                                 <dictionary key="options">
                                     <string key="NSValueTransformerName">NSNegateBoolean</string>
                                 </dictionary>
                             </binding>
-                            <binding destination="-2" name="maxValue" keyPath="maxProgressValue" id="13"/>
                             <binding destination="-2" name="value" keyPath="progressValue" previousBinding="13" id="27"/>
+                            <binding destination="-2" name="animate" keyPath="progressValue" id="30">
+                                <dictionary key="options">
+                                    <string key="NSValueTransformerName">NSIsNotNil</string>
+                                </dictionary>
+                            </binding>
                         </connections>
                     </progressIndicator>
                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="12">
-                        <rect key="frame" x="285.99999976158142" y="13" width="82" height="32"/>
+                        <rect key="frame" x="270.00000028950831" y="13" width="82" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES"/>
                         <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="38">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -85,18 +85,18 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                         <connections>
+                            <binding destination="-2" name="value" keyPath="statusText" id="17"/>
                             <binding destination="-2" name="hidden" keyPath="statusText" id="33">
                                 <dictionary key="options">
                                     <string key="NSValueTransformerName">NSIsNil</string>
                                 </dictionary>
                             </binding>
-                            <binding destination="-2" name="value" keyPath="statusText" id="17"/>
                         </connections>
                     </textField>
                 </subviews>
                 <constraints>
                     <constraint firstItem="12" firstAttribute="baseline" secondItem="16" secondAttribute="baseline" id="BH9-g5-6D1"/>
-                    <constraint firstItem="12" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="16" secondAttribute="trailing" constant="55" id="Dv8-lY-JST"/>
+                    <constraint firstItem="12" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="16" secondAttribute="trailing" constant="8" symbolic="YES" id="Dv8-lY-JST"/>
                     <constraint firstItem="7" firstAttribute="leading" secondItem="6" secondAttribute="leading" constant="20" symbolic="YES" id="HUu-dQ-1Cg"/>
                     <constraint firstItem="11" firstAttribute="leading" secondItem="8" secondAttribute="leading" id="V5h-oR-Qld"/>
                     <constraint firstItem="7" firstAttribute="top" secondItem="8" secondAttribute="top" id="Vwg-CN-hnb"/>

@@ -24,6 +24,7 @@
 
 #include "DataHandlerCallback.h"
 #include <QuickTime/QuickTime.h>
+#include <string>
 
 #include "ebml/Debug.h"
 #include "ebml/EbmlConfig.h"

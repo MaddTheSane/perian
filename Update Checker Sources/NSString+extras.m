@@ -60,11 +60,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 - (NSString *)trimWhiteSpace
 {
-	
 	NSMutableString *s = [NSMutableString stringWithString:self];
-	
 	CFStringTrimWhitespace ((__bridge CFMutableStringRef) s);
-	
 	return [NSString stringWithString:s];
 } /*trimWhiteSpace*/
 
