@@ -650,7 +650,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 				uint32_t algoHeader[] = {
 					EndianS32_NtoB(12),
 					EndianS32_NtoB(kCompressionAlgorithm),
-					EndianS32_NtoB(algo)
+					EndianU32_NtoB(algo)
 				};
 				Handle newCookieHandle;
 				PtrToHand(algoHeader, &newCookieHandle, sizeof(algoHeader));
@@ -659,7 +659,7 @@ ComponentResult MatroskaImport::AddAudioTrack(KaxTrackEntry &kaxTrack, MatroskaT
 				int compSize = settings.GetSize();
 				if(compSize > 0) {
 					uint32_t settingsHeader[] = {
-						EndianS32_NtoB(8 + compSize),
+						EndianU32_NtoB(8 + compSize),
 						EndianS32_NtoB(kCompressionSettingsExtension),
 					};
 					PtrAndHand(settingsHeader, newCookieHandle, sizeof(settingsHeader));
