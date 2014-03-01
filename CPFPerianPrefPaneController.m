@@ -119,23 +119,23 @@
 - (NSString *)getStringFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
 {
 	CFPropertyListRef value;
+	NSString *nsVal;
 	
 	value = CFPreferencesCopyAppValue(key, appID);
 	
 	if(value) {
-		CFMakeCollectable(value);
-		[(id)value autorelease];
+		nsVal = CFBridgingRelease(value);
 		
 		if (CFGetTypeID(value) != CFStringGetTypeID())
 			return nil;
 	}
 	
-	return (NSString*)value;
+	return nsVal;
 }
 
 - (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromString:(NSString *)value
 {
-	CFPreferencesSetAppValue(key, value, appID);
+	CFPreferencesSetAppValue(key, (__bridge CFPropertyListRef)value, appID);
 }
 
 - (NSDate *)getDateFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
@@ -144,18 +144,17 @@
 	NSDate *ret = nil;
 	
 	value = CFPreferencesCopyAppValue(key, appID);
+	ret = CFBridgingRelease(value);
+	
 	if(value && CFGetTypeID(value) == CFDateGetTypeID())
-		ret = [[(NSDate *)value retain] autorelease];
-	
-	if(value)
-		CFRelease(value);
-	
-	return ret;
+		return ret;
+	else
+		return nil;
 }
 
 - (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromDate:(NSDate *)value
 {
-	CFPreferencesSetAppValue(key, value, appID);
+	CFPreferencesSetAppValue(key, (__bridge CFPropertyListRef)value, appID);
 }
 
 #pragma mark Private Functions
@@ -368,8 +367,8 @@
 	NSString *myVersion = [self myInfoDict][BundleVersionKey];
 	
 	NSAttributedString		*about;
-	about = [[[NSAttributedString alloc] initWithPath:[[self bundle] pathForResource:@"Read Me" ofType:@"rtf"]
-								   documentAttributes:nil] autorelease];
+	about = [[NSAttributedString alloc] initWithPath:[[self bundle] pathForResource:@"Read Me" ofType:@"rtf"]
+								   documentAttributes:nil];
 	[[textView_about textStorage] setAttributedString:about];
 	[[textView_about enclosingScrollView] setLineScroll:10];
 	[[textView_about enclosingScrollView] setPageScroll:20];
@@ -440,23 +439,10 @@
 - (void)dealloc
 {
 	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
-	[perianForumURL release];
-	[perianDonateURL release];
-	[perianWebSiteURL release];
 	if(auth != nil)
 		AuthorizationFree(auth, 0);
-	[errorString release];
-	[componentReplacementInfo release];
-	[super dealloc];
 }
 
-- (void)finalize
-{
-	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
-	if(auth != nil)
-		AuthorizationFree(auth, 0);
-	[super finalize];
-}
 
 #pragma mark Install/Uninstall
 
@@ -484,7 +470,7 @@
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		ret = YES;
 	else
-		errorString = [[NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]] retain];
+		errorString = [NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]];
 	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
@@ -521,10 +507,10 @@
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			errorString = [[NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]] retain];
+			errorString = [NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]];
 	}
 	else
-		errorString = [[NSString stringWithFormat:NSLocalizedString(@"authentication failed while extracting %@\n", @""), [finalPath lastPathComponent]] retain];
+		errorString = [NSString stringWithFormat:NSLocalizedString(@"authentication failed while extracting %@\n", @""), [finalPath lastPathComponent]];
 	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
@@ -552,10 +538,10 @@
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), [componentPath lastPathComponent]] retain];
+			errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), [componentPath lastPathComponent]];
 	}
 	else
-		errorString = [[NSString stringWithFormat:NSLocalizedString(@"authentication failed while removing %@\n", @""), [componentPath lastPathComponent]] retain];
+		errorString = [NSString stringWithFormat:NSLocalizedString(@"authentication failed while removing %@\n", @""), [componentPath lastPathComponent]];
 	
 	unsetenv("COMP_PATH");
 	return ret;
@@ -581,7 +567,7 @@
 			//Remove the old one here
 			BOOL result = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
 			if(result == NO) {
-				errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component] retain];
+				errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
 				ret = NO;
 			}
 		}
@@ -604,7 +590,7 @@
 		{
 			ret = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
 			if(ret == NO)
-				errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component] retain];
+				errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
 		}
 	}
 	return ret;
@@ -623,7 +609,7 @@
 	{
 		NSURL *url = [NSURL fileURLWithPath:[resourcePath stringByAppendingPathComponent:app]];
 		
-		LSRegisterURL((CFURLRef)url, true);
+		LSRegisterURL((__bridge CFURLRef)url, true);
 	}
 }
 
@@ -646,7 +632,6 @@
 		NSString *quickTimeComponentPath = [componentPath stringByAppendingPathComponent:@"QuickTime"];
 		NSString *frameworkComponentPath = [componentPath stringByAppendingPathComponent:@"Frameworks"];
 		
-		[errorString release];
 		errorString = nil;
 		/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
 		if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
@@ -698,7 +683,6 @@
 		NSFileManager *fileManager = [NSFileManager defaultManager];
 		NSString *componentPath;
 		
-		[errorString release];
 		errorString = nil;
 		/* This doesn't ask the user, so create it anyway.  If we don't need it, no problem */
 		if(AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &auth) != errAuthorizationSuccess)
@@ -757,7 +741,7 @@
 		if ([[component pathExtension] isEqualToString:@"component"])
 			[retArray addObject:component];
 	}
-	return [retArray autorelease];
+	return retArray;
 }
 
 - (NSDictionary *)componentInfoForComponent:(NSString *)component userInstalled:(BOOL)user
@@ -787,7 +771,7 @@
 		componentInfo[@"status"] = [self checkComponentStatusByBundleIdentifier:bundleIdent];
 		componentInfo[@"bundleID"] = bundleIdent;
 	}
-	return [componentInfo autorelease];
+	return componentInfo;
 }
 
 - (NSArray *)installedComponents
@@ -801,7 +785,7 @@
 	
 	for (NSString *compName in systemComponents)
 		[components addObject:[self componentInfoForComponent:compName userInstalled:NO]];
-	return [components autorelease];
+	return components;
 }
 
 - (NSString *)checkComponentStatusByBundleIdentifier:(NSString *)bundleID
@@ -887,7 +871,6 @@
 	NSString *multiChannelWarning = NSLocalizedString(@"<p style=\"font: 13pt Lucida Grande;\">Multi-Channel Output is not Dolby Digital Passthrough!  It is designed for those with multiple discrete speakers connected to their mac.  If you selected this expecting passthrough, you are following the wrong instructions.  Follow <a href=\"http://www.cod3r.com/2008/02/the-correct-way-to-enable-ac3-passthrough-with-quicktime/\">these</a> instead.</p>", @"");
 	NSAttributedString *multiChannelWarningAttr = [[NSAttributedString alloc] initWithHTML:[multiChannelWarning dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:nil];
 	[textField_multiChannelText setAttributedStringValue:multiChannelWarningAttr];
-	[multiChannelWarningAttr release];
 	[NSApp beginSheet:window_multiChannelSheet modalForWindow:[[self mainView] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
 }
 
