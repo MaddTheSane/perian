@@ -37,14 +37,11 @@ int main(int argc, char *argv[])
 		
 		for(i=0; i<[types count]; i++)
 		{
-			NSString *directory = [componentDir stringByAppendingPathComponent:types[i]];
-			NSString *extension = extensions[i];
-			//note: the warning below can't be fixed, the method's replacement isn't in 10.4
-			NSEnumerator *dirEnum = [[fileManager directoryContentsAtPath:directory] objectEnumerator];
-			NSString *candidate = nil;
+			NSString *directory = [componentDir stringByAppendingPathComponent:[types objectAtIndex:i]];
+			NSString *extension = [extensions objectAtIndex:i];
+			NSArray *dirContents = [fileManager contentsOfDirectoryAtPath:directory error:NULL];
 			
-			while((candidate = [dirEnum nextObject]) != nil)
-			{
+			for (NSString *candidate in dirContents) {
 				if(![[candidate pathExtension] isEqualToString:extension])
 					continue;
 				

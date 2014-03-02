@@ -378,7 +378,7 @@
 		/*Check for temp after an update */
 		NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
 		
-		[[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:tempPrefPane] error:NULL];
+		[[NSFileManager defaultManager] removeItemAtPath:tempPrefPane error:NULL];
 		
 		[self installUninstall:nil];
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
@@ -565,7 +565,7 @@
 		if(currentInstallStatus(pieceStatus) == InstallStatusOutdated)
 		{
 			//Remove the old one here
-			BOOL result = [[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:[containingDir stringByAppendingPathComponent:component]] error:NULL];
+			BOOL result = [[NSFileManager defaultManager] removeItemAtPath:[containingDir stringByAppendingPathComponent:component] error:NULL];
 			if(result == NO) {
 				errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
 				ret = NO;
@@ -588,7 +588,7 @@
 			ret = [self _authenticatedRemove:[containingDir stringByAppendingPathComponent:component]];
 		else
 		{
-			ret = [[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:[containingDir stringByAppendingPathComponent:component]] error:NULL];
+			ret = [[NSFileManager defaultManager] removeItemAtPath:[containingDir stringByAppendingPathComponent:component] error:NULL];
 			if(ret == NO)
 				errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
 		}
@@ -619,7 +619,7 @@
 	// unfortunately there is no way for this to work for "all users" installs
 	
 	NSString *path = [@"~/Library/Preferences/com.apple.quicktime.plugin.preferences.plist" stringByExpandingTildeInPath];
-	[[NSFileManager defaultManager] removeItemAtURL:[NSURL fileURLWithPath:path] error:NULL];
+	[[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
 }
 
 - (void)install:(id)sender
@@ -693,7 +693,7 @@
 		if(auth != nil && !userInstalled)
 			[self _authenticatedRemove:componentPath];
 		else
-			[fileManager removeItemAtURL:[NSURL fileURLWithPath:componentPath] error:NULL];
+			[fileManager removeItemAtPath:componentPath error:NULL];
 		
 		NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
 		NSDictionary *myComponent = nil;
@@ -705,7 +705,7 @@
 			if(auth != nil && !userInstalled)
 				[self _authenticatedRemove:componentPath];
 			else
-				[fileManager removeItemAtURL:[NSURL fileURLWithPath:componentPath] error:NULL];
+				[fileManager removeItemAtPath:componentPath error:NULL];
 		}
 		if(auth != nil)
 		{
