@@ -10,3 +10,6 @@
 [submodule "ffmpeg"]
 	path = ffmpeg
 	url = https://github.com/MaddTheSane/FFmpeg.git
+[submodule "Sparkle"]
+	path = Update Checker Sources/Sparkle
+	url = https://github.com/pornel/Sparkle.git

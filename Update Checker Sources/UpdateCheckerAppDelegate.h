@@ -20,11 +20,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "SUAppcast.h"
-#import "SUAppcastItem.h"
-#import "SUUtilities.h"
-#import "SUUpdateAlert.h"
-#import "SUStatusController.h"
+#import <Sparkle/Sparkle.h>
 
 #define NEXT_RUN_KEY @"NextRunDate"
 #define MANUAL_RUN_KEY @"ManualUpdateCheck"
@@ -33,10 +29,10 @@
 #define UPDATE_STATUS_NOTIFICATION @"org.perian.UpdateCheckStatus"
 #define TIME_INTERVAL_TIL_NEXT_RUN 7*24*60*60
 
-@interface UpdateCheckerAppDelegate : NSObject <NSURLDownloadDelegate, SUAppcastDelegate, SUUpdateAlertDelegate> {
-	SUUpdateAlert *updateAlert;
+@interface UpdateCheckerAppDelegate : NSObject <NSURLDownloadDelegate, SUAppcastDelegate/*, SUUpdateAlertDelegate*/> {
+	//SUUpdateAlert *updateAlert;
 	SUAppcastItem *latest;
-	SUStatusController *statusController;
+	//SUStatusController *statusController;
 	SUAppcast *appcast;
 	NSURLDownload *downloader;
 	NSString *downloadPath;

@@ -89,14 +89,8 @@
 		11629EE10B51E482006591C8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629EE00B51E482006591C8 /* main.m */; };
 		11629EEB0B51E4F1006591C8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
 		11629EF40B51E4FB006591C8 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
-		11629FD10B51E65F006591C8 /* NSString+extras.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629FD00B51E65F006591C8 /* NSString+extras.m */; };
 		1162A0540B51ECE1006591C8 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1162A0530B51ECE1006591C8 /* WebKit.framework */; };
-		116C42BC0B504C7C00FB0738 /* SUAppcast.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42BB0B504C7C00FB0738 /* SUAppcast.m */; };
-		116C42E80B504D2700FB0738 /* RSS.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E50B504D2700FB0738 /* RSS.m */; };
-		116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E70B504D2700FB0738 /* SUAppcastItem.m */; };
 		1184A2D30B50504900C8452A /* UpdateCheckerAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */; };
-		1184A3140B50548700C8452A /* SUUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A3130B50548700C8452A /* SUUtilities.m */; };
-		1184A38D0B505A9800C8452A /* SUStatusController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A38C0B505A9800C8452A /* SUStatusController.m */; };
 		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA10A3CE8C10066D45F /* libavcodec.a */; };
 		11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA20A3CE8C10066D45F /* libavutil.a */; };
@@ -104,7 +98,6 @@
 		11C85ED80A641E6400DF3D73 /* ff_dataref.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED30A641E6400DF3D73 /* ff_dataref.c */; };
 		11C85EDA0A641E6400DF3D73 /* ff_private.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED60A641E6400DF3D73 /* ff_private.c */; };
 		11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */; };
-		11F28DAD0B52EB75000AF78C /* SUUpdateAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */; };
 		3D0A03BD100692E20087E580 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
 		3D0A03BE100692E30087E580 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		3D0E88401504307C00C0EA90 /* CABundleLocker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D0E88381504307C00C0EA90 /* CABundleLocker.cpp */; };
@@ -181,9 +174,9 @@
 		5557DF5E17D8F73F00142C72 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5917D8F71200142C72 /* libstdc++.6.dylib */; };
 		5557DF5F17D8F74000142C72 /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5B17D8F71B00142C72 /* libobjc.dylib */; };
 		5557DF6017D8F74000142C72 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5917D8F71200142C72 /* libstdc++.6.dylib */; };
+		557A9B5118C3E3B40058161A /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557A9B4618C3E3870058161A /* Sparkle.framework */; };
+		557A9B5318C3E3DC0058161A /* Sparkle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 557A9B4618C3E3870058161A /* Sparkle.framework */; };
 		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
-		558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB417D2468000EB0DE7 /* SUStatus.xib */; };
-		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
 		6116E5580B43C27B0020F1CE /* FFissionCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */; };
 		6116E55A0B43C27B0020F1CE /* FFissionDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */; };
 		6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */; };
@@ -433,6 +426,48 @@
 			remoteGlobalIDString = 3DE8D6DD104440F60007C7E7;
 			remoteInfo = "Perian Opener";
 		};
+		557A9B4518C3E3870058161A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 557A9B3D18C3E3860058161A /* Sparkle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
+			remoteInfo = Sparkle;
+		};
+		557A9B4718C3E3870058161A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 557A9B3D18C3E3860058161A /* Sparkle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 61B5F90209C4CEE200B25A18;
+			remoteInfo = "Sparkle Test App";
+		};
+		557A9B4918C3E3870058161A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 557A9B3D18C3E3860058161A /* Sparkle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 612279D90DB5470200AB99EA;
+			remoteInfo = "Sparkle Unit Tests";
+		};
+		557A9B4B18C3E3870058161A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 557A9B3D18C3E3860058161A /* Sparkle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5D06E8D00FD68C7C005AE3F6;
+			remoteInfo = BinaryDelta;
+		};
+		557A9B4D18C3E3870058161A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 557A9B3D18C3E3860058161A /* Sparkle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 55C14BB7136EEF1500649790;
+			remoteInfo = finish_installation;
+		};
+		557A9B4F18C3E3A40058161A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 557A9B3D18C3E3860058161A /* Sparkle.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
+			remoteInfo = Sparkle;
+		};
 		61CB120F0ACE0FB1007994BD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 089C1669FE841209C02AAC07 /* Project object */;
@@ -541,6 +576,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		557A9B5218C3E3C40058161A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				557A9B5318C3E3DC0058161A /* Sparkle.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F59E09E90A670E3D0019A3F0 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -580,23 +625,11 @@
 		11629EE00B51E482006591C8 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		11629EEA0B51E4F1006591C8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		11629EF30B51E4FB006591C8 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
-		11629FCF0B51E65F006591C8 /* NSString+extras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+extras.h"; sourceTree = "<group>"; };
-		11629FD00B51E65F006591C8 /* NSString+extras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+extras.m"; sourceTree = "<group>"; };
 		1162A0530B51ECE1006591C8 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PerianUpdateChecker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PerianUpdateChecker-Info.plist"; path = "Plists/PerianUpdateChecker-Info.plist"; sourceTree = "<group>"; };
 		116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateCheckerAppDelegate.h; sourceTree = "<group>"; };
 		116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateCheckerAppDelegate.m; sourceTree = "<group>"; };
-		116C42BA0B504C7C00FB0738 /* SUAppcast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUAppcast.h; sourceTree = "<group>"; };
-		116C42BB0B504C7C00FB0738 /* SUAppcast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUAppcast.m; sourceTree = "<group>"; };
-		116C42E40B504D2700FB0738 /* RSS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSS.h; sourceTree = "<group>"; };
-		116C42E50B504D2700FB0738 /* RSS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = RSS.m; sourceTree = "<group>"; };
-		116C42E60B504D2700FB0738 /* SUAppcastItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUAppcastItem.h; sourceTree = "<group>"; };
-		116C42E70B504D2700FB0738 /* SUAppcastItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUAppcastItem.m; sourceTree = "<group>"; };
-		1184A3020B50548700C8452A /* SUUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUUtilities.h; sourceTree = "<group>"; };
-		1184A3130B50548700C8452A /* SUUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUUtilities.m; sourceTree = "<group>"; };
-		1184A38B0B505A9800C8452A /* SUStatusController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUStatusController.h; sourceTree = "<group>"; };
-		1184A38C0B505A9800C8452A /* SUStatusController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUStatusController.m; sourceTree = "<group>"; };
 		11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Perian-Info.plist"; path = "Plists/Perian-Info.plist"; sourceTree = "<group>"; };
 		11A70AC10A3D0105002058D4 /* Perian.component */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Perian.component; sourceTree = BUILT_PRODUCTS_DIR; };
 		11C85ED30A641E6400DF3D73 /* ff_dataref.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ff_dataref.c; sourceTree = "<group>"; };
@@ -608,8 +641,6 @@
 		11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = Universal/libavcodec.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = Universal/libavutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		11F28DAB0B52EB75000AF78C /* SUUpdateAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUUpdateAlert.h; sourceTree = "<group>"; };
-		11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUUpdateAlert.m; sourceTree = "<group>"; };
 		3D0A039710068CAF0087E580 /* Prefix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Prefix.h; sourceTree = "<group>"; };
 		3D0E88381504307C00C0EA90 /* CABundleLocker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CABundleLocker.cpp; sourceTree = "<group>"; };
 		3D0E88391504307C00C0EA90 /* CABundleLocker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CABundleLocker.h; sourceTree = "<group>"; };
@@ -682,9 +713,8 @@
 		5557DF5917D8F71200142C72 /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "usr/lib/libstdc++.6.dylib"; sourceTree = SDKROOT; };
 		5557DF5B17D8F71B00142C72 /* libobjc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.dylib; path = usr/lib/libobjc.dylib; sourceTree = SDKROOT; };
 		5557DF6217D8FC2000142C72 /* ARCBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARCBridge.h; sourceTree = "<group>"; };
+		557A9B3D18C3E3860058161A /* Sparkle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Sparkle.xcodeproj; path = Sparkle/Sparkle.xcodeproj; sourceTree = "<group>"; };
 		5585E1A6179DE5EA0045A322 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
-		558E7CB417D2468000EB0DE7 /* SUStatus.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SUStatus.xib; sourceTree = "<group>"; };
-		558E7CB717D246B000EB0DE7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SUUpdateAlert.xib; sourceTree = "<group>"; };
 		55C06647173C6F4D00D8CF2C /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ffmpeg; sourceTree = "<group>"; };
 		6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionCodec.cpp; sourceTree = "<group>"; };
 		6116E54D0B43C27B0020F1CE /* FFissionCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = FFissionCodec.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -848,9 +878,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				11629EEB0B51E4F1006591C8 /* Cocoa.framework in Frameworks */,
 				11629EF40B51E4FB006591C8 /* AppKit.framework in Frameworks */,
+				11629EEB0B51E4F1006591C8 /* Cocoa.framework in Frameworks */,
 				1162A0540B51ECE1006591C8 /* WebKit.framework in Frameworks */,
+				557A9B5118C3E3B40058161A /* Sparkle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1062,36 +1093,13 @@
 		116C425C0B50420D00FB0738 /* Update Checker Sources */ = {
 			isa = PBXGroup;
 			children = (
-				1184A37C0B505A2E00C8452A /* Sparkle Files */,
+				557A9B3D18C3E3860058161A /* Sparkle.xcodeproj */,
 				116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */,
 				116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */,
 				5557DF6217D8FC2000142C72 /* ARCBridge.h */,
 				11629EE00B51E482006591C8 /* main.m */,
 			);
 			path = "Update Checker Sources";
-			sourceTree = "<group>";
-		};
-		1184A37C0B505A2E00C8452A /* Sparkle Files */ = {
-			isa = PBXGroup;
-			children = (
-				11629FCF0B51E65F006591C8 /* NSString+extras.h */,
-				11629FD00B51E65F006591C8 /* NSString+extras.m */,
-				11F28DAB0B52EB75000AF78C /* SUUpdateAlert.h */,
-				11F28DAC0B52EB75000AF78C /* SUUpdateAlert.m */,
-				1184A38B0B505A9800C8452A /* SUStatusController.h */,
-				1184A38C0B505A9800C8452A /* SUStatusController.m */,
-				558E7CB417D2468000EB0DE7 /* SUStatus.xib */,
-				558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */,
-				1184A3020B50548700C8452A /* SUUtilities.h */,
-				1184A3130B50548700C8452A /* SUUtilities.m */,
-				116C42E40B504D2700FB0738 /* RSS.h */,
-				116C42E50B504D2700FB0738 /* RSS.m */,
-				116C42E60B504D2700FB0738 /* SUAppcastItem.h */,
-				116C42E70B504D2700FB0738 /* SUAppcastItem.m */,
-				116C42BA0B504C7C00FB0738 /* SUAppcast.h */,
-				116C42BB0B504C7C00FB0738 /* SUAppcast.m */,
-			);
-			name = "Sparkle Files";
 			sourceTree = "<group>";
 		};
 		19C28FB4FE9D528D11CA2CBB /* Products */ = {
@@ -1229,6 +1237,18 @@
 				3D9D088016563BEE0016C817 /* libswscale.a */,
 			);
 			name = "FFmpeg libs";
+			sourceTree = "<group>";
+		};
+		557A9B3E18C3E3860058161A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				557A9B4618C3E3870058161A /* Sparkle.framework */,
+				557A9B4818C3E3870058161A /* Sparkle Test App.app */,
+				557A9B4A18C3E3870058161A /* Sparkle Unit Tests.octest */,
+				557A9B4C18C3E3870058161A /* BinaryDelta */,
+				557A9B4E18C3E3870058161A /* Autoupdate.app */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		6116E54B0B43C27B0020F1CE /* Audio Codec */ = {
@@ -1565,10 +1585,12 @@
 				116C424E0B5041BD00FB0738 /* Resources */,
 				116C424F0B5041BD00FB0738 /* Sources */,
 				116C42500B5041BD00FB0738 /* Frameworks */,
+				557A9B5218C3E3C40058161A /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				557A9B5018C3E3A40058161A /* PBXTargetDependency */,
 			);
 			name = PerianUpdateChecker;
 			productName = PerianUpdateChecker;
@@ -1775,6 +1797,10 @@
 					ProjectRef = F5CFD2C90B5012A100616865 /* A52Codec.xcodeproj */;
 				},
 				{
+					ProductGroup = 557A9B3E18C3E3860058161A /* Products */;
+					ProjectRef = 557A9B3D18C3E3860058161A /* Sparkle.xcodeproj */;
+				},
+				{
 					ProductGroup = 3D41BE8D0BCD3B330069E7C2 /* Products */;
 					ProjectRef = 3D41BE8C0BCD3B330069E7C2 /* UniversalDetector.xcodeproj */;
 				},
@@ -1823,6 +1849,41 @@
 			remoteRef = 3D41BE990BCD3B330069E7C2 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		557A9B4618C3E3870058161A /* Sparkle.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = Sparkle.framework;
+			remoteRef = 557A9B4518C3E3870058161A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		557A9B4818C3E3870058161A /* Sparkle Test App.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "Sparkle Test App.app";
+			remoteRef = 557A9B4718C3E3870058161A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		557A9B4A18C3E3870058161A /* Sparkle Unit Tests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "Sparkle Unit Tests.octest";
+			remoteRef = 557A9B4918C3E3870058161A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		557A9B4C18C3E3870058161A /* BinaryDelta */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = BinaryDelta;
+			remoteRef = 557A9B4B18C3E3870058161A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		557A9B4E18C3E3870058161A /* Autoupdate.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = Autoupdate.app;
+			remoteRef = 557A9B4D18C3E3870058161A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		F5CFD2D60B5012A100616865 /* A52Codec.component */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
@@ -1853,8 +1914,6 @@
 			files = (
 				3DAD0AC10FC1365E001E156F /* UpdateCheckerMainMenu.xib in Resources */,
 				F57CF183121ADBF800132DAF /* Perian_icon.icns in Resources */,
-				558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */,
-				558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1999,15 +2058,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				116C42BC0B504C7C00FB0738 /* SUAppcast.m in Sources */,
-				116C42E80B504D2700FB0738 /* RSS.m in Sources */,
-				116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */,
 				1184A2D30B50504900C8452A /* UpdateCheckerAppDelegate.m in Sources */,
-				1184A3140B50548700C8452A /* SUUtilities.m in Sources */,
-				1184A38D0B505A9800C8452A /* SUStatusController.m in Sources */,
 				11629EE10B51E482006591C8 /* main.m in Sources */,
-				11629FD10B51E65F006591C8 /* NSString+extras.m in Sources */,
-				11F28DAD0B52EB75000AF78C /* SUUpdateAlert.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2211,6 +2263,11 @@
 			target = 3DE8D6DD104440F60007C7E7 /* PerianOpener */;
 			targetProxy = 3DE8D9CD1044501E0007C7E7 /* PBXContainerItemProxy */;
 		};
+		557A9B5018C3E3A40058161A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Sparkle;
+			targetProxy = 557A9B4F18C3E3A40058161A /* PBXContainerItemProxy */;
+		};
 		61CB12100ACE0FB1007994BD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 61CB10FE0ACDF350007994BD /* ebml */;
@@ -2301,14 +2358,6 @@
 			path = Plists;
 			sourceTree = "<group>";
 		};
-		558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				558E7CB717D246B000EB0DE7 /* en */,
-			);
-			name = SUUpdateAlert.xib;
-			sourceTree = "<group>";
-		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
@@ -2322,6 +2371,7 @@
 				GCC_PREFIX_HEADER = Prefix.h;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2337,6 +2387,7 @@
 				GCC_PREFIX_HEADER = Prefix.h;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
