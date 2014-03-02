@@ -1025,10 +1025,7 @@ static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef fi
 				if((err = QTNewDataReferenceFromFSRef(&subFile, 0, &dataRef, &dataRefType)) != noErr)
 					goto bail;
 				
-				NSEnumerator *trackEnum = [tracks objectEnumerator];
-				VobSubTrack *track = nil;
-				while((track = [trackEnum nextObject]) != nil)
-				{
+				for (VobSubTrack *track in tracks) {
 					Track theTrack = NULL;
 					VobSubInfo info = {theMovie, dataRefType, dataRef, imageWidth, imageHeight, movieBox, subFileData};
 					uint8_t hasForced = 0;
