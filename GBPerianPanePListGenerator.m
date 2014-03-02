@@ -31,20 +31,17 @@ int main(int argc, char *argv[])
 		NSMutableArray *components = [NSMutableArray array];
 		
 		NSFileManager *fileManager = [NSFileManager defaultManager];
-		NSArray *types = [NSArray arrayWithObjects:@"QuickTime", @"CoreAudio", @"Frameworks", nil];
-		NSArray *extensions = [NSArray arrayWithObjects:@"component", @"component", @"framework", nil];
+		NSArray *types = @[@"QuickTime", @"CoreAudio", @"Frameworks"];
+		NSArray *extensions = @[@"component", @"component", @"framework"];
 		int i;
 		
 		for(i=0; i<[types count]; i++)
 		{
 			NSString *directory = [componentDir stringByAppendingPathComponent:[types objectAtIndex:i]];
 			NSString *extension = [extensions objectAtIndex:i];
-			//note: the warning below can't be fixed, the method's replacement isn't in 10.4
-			NSEnumerator *dirEnum = [[fileManager directoryContentsAtPath:directory] objectEnumerator];
-			NSString *candidate = nil;
+			NSArray *dirContents = [fileManager contentsOfDirectoryAtPath:directory error:NULL];
 			
-			while((candidate = [dirEnum nextObject]) != nil)
-			{
+			for (NSString *candidate in dirContents) {
 				if(![[candidate pathExtension] isEqualToString:extension])
 					continue;
 				

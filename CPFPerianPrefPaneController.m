@@ -379,7 +379,7 @@
 		/*Check for temp after an update */
 		NSString *tempPrefPane = [NSTemporaryDirectory() stringByAppendingPathComponent:@"PerianPane.prefPane"];
 		
-		[[NSFileManager defaultManager] removeFileAtPath:tempPrefPane handler:nil];
+		[[NSFileManager defaultManager] removeItemAtPath:tempPrefPane error:NULL];
 		
 		[self installUninstall:nil];
 		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
@@ -579,7 +579,7 @@
 		if(currentInstallStatus(pieceStatus) == InstallStatusOutdated)
 		{
 			//Remove the old one here
-			BOOL result = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
+			BOOL result = [[NSFileManager defaultManager] removeItemAtPath:[containingDir stringByAppendingPathComponent:component] error:NULL];
 			if(result == NO) {
 				errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component] retain];
 				ret = NO;
@@ -602,7 +602,7 @@
 			ret = [self _authenticatedRemove:[containingDir stringByAppendingPathComponent:component]];
 		else
 		{
-			ret = [[NSFileManager defaultManager] removeFileAtPath:[containingDir stringByAppendingPathComponent:component] handler:nil];
+			ret = [[NSFileManager defaultManager] removeItemAtPath:[containingDir stringByAppendingPathComponent:component] error:NULL];
 			if(ret == NO)
 				errorString = [[NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component] retain];
 		}
@@ -633,7 +633,7 @@
 	// unfortunately there is no way for this to work for "all users" installs
 	
 	NSString *path = [@"~/Library/Preferences/com.apple.quicktime.plugin.preferences.plist" stringByExpandingTildeInPath];
-	[[NSFileManager defaultManager] removeFileAtPath:path handler:nil];
+	[[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
 }
 
 - (void)install:(id)sender
@@ -709,7 +709,7 @@
 		if(auth != nil && !userInstalled)
 			[self _authenticatedRemove:componentPath];
 		else
-			[fileManager removeFileAtPath:componentPath handler:nil];
+			[fileManager removeItemAtPath:componentPath error:NULL];
 		
 		NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
 		NSDictionary *myComponent = nil;
@@ -721,7 +721,7 @@
 			if(auth != nil && !userInstalled)
 				[self _authenticatedRemove:componentPath];
 			else
-				[fileManager removeFileAtPath:componentPath handler:nil];
+				[fileManager removeItemAtPath:componentPath error:NULL];
 		}
 		if(auth != nil)
 		{
@@ -750,7 +750,7 @@
 - (NSArray *)installedComponentsForUser:(BOOL)user
 {
 	NSString *path = [self basePathForType:ComponentTypeQuickTime user:user];
-	NSArray *installedComponents = [[NSFileManager defaultManager] directoryContentsAtPath:path];
+	NSArray *installedComponents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:path error:NULL];
 	NSMutableArray *retArray = [[NSMutableArray alloc] initWithCapacity:[installedComponents count]];
 	NSString *component;
 	for (component in installedComponents) {

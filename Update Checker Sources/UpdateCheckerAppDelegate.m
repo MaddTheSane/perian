@@ -198,11 +198,11 @@
 	// We create a temporary directory in /tmp and stick the file there.
 #if 1
 	NSString *tempDir = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
-	BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:tempDir attributes:nil];
+	BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:tempDir withIntermediateDirectories:YES attributes:nil error:NULL];
 #else
 	NSURL *tempURL = [[[NSFileManager defaultManager] URLForDirectory:NSItemReplacementDirectory inDomain:NSUserDomainMask appropriateForURL:[NSURL fileURLWithPath:@"/tmp"] create:YES error:nil] URLByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
 	NSString *tempDir = [tempURL path];
-	BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:tempDir withIntermediateDirectories:YES attributes:nil error:nil];
+	BOOL success = [[NSFileManager defaultManager] createDirectoryAtPath:tempDir withIntermediateDirectories:YES attributes:nil error:NULL];
 #endif
 	
 	if (!success)
