@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
 		
 		for(i=0; i<[types count]; i++)
 		{
-			NSString *directory = [componentDir stringByAppendingPathComponent:[types objectAtIndex:i]];
-			NSString *extension = [extensions objectAtIndex:i];
+			NSString *directory = [componentDir stringByAppendingPathComponent:types[i]];
+			NSString *extension = extensions[i];
 			NSArray *dirContents = [fileManager contentsOfDirectoryAtPath:directory error:NULL];
 			
 			for (NSString *candidate in dirContents) {

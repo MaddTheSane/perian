@@ -675,22 +675,6 @@ static ComponentResult LoadSingleTextSubtitle(CFURLRef theDirectory, CFStringRef
 
 #pragma mark IDX Parsing
 
-static NSString *getNextVobSubLine(NSEnumerator *lineEnum)
-{
-	NSString *line;
-	while ((line = [lineEnum nextObject]) != nil) {
-		//Reject empty lines which may contain whitespace
-		if([line length] < 3)
-			continue;
-		
-		if([line characterAtIndex:0] == '#')
-			continue;
-		
-		break;
-	}
-	return line;
-}
-
 static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHandle *imgDescHand, Handle dataRef, OSType dataRefType, VobSubTrack *track, int imageWidth, int imageHeight)
 {
 	ImageDescriptionHandle imgDesc = (ImageDescriptionHandle) NewHandleClear(sizeof(ImageDescription));
@@ -945,15 +929,19 @@ static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef fi
 			
 			NSArray *lines = [idxContent componentsSeparatedByString:@"\n"];
 			NSMutableArray *privateLines = [NSMutableArray array];
-			NSEnumerator *lineEnum = [lines objectEnumerator];
-			NSString *line;
 			Rect movieBox;
 			GetMovieBox(theMovie, &movieBox);
 			
 			NSMutableArray *tracks = [NSMutableArray array];
 			
-			while((line = getNextVobSubLine(lineEnum)) != NULL)
-			{
+			for (NSString *line in lines) {
+				//Reject empty lines which may contain whitespace
+				if([line length] < 3)
+					continue;
+				
+				if([line characterAtIndex:0] == '#')
+					continue;
+				
 				if([line hasPrefix:@"timestamp: "])
 					state = VOB_SUB_STATE_READING_TRACK_DATA;
 				else if([line hasPrefix:@"id: "])
@@ -1025,10 +1013,7 @@ static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef fi
 				if((err = QTNewDataReferenceFromFSRef(&subFile, 0, &dataRef, &dataRefType)) != noErr)
 					goto bail;
 				
-				NSEnumerator *trackEnum = [tracks objectEnumerator];
-				VobSubTrack *track = nil;
-				while((track = [trackEnum nextObject]) != nil)
-				{
+				for (VobSubTrack *track in tracks) {
 					Track theTrack = NULL;
 					VobSubInfo info = {theMovie, dataRefType, dataRef, imageWidth, imageHeight, movieBox, subFileData};
 					uint8_t hasForced = 0;

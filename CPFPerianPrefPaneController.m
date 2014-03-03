@@ -292,16 +292,12 @@
 		NSDictionary *myComponentsInfo = infoDict[ComponentInfoDictionaryKey];
 		if(myComponentsInfo != nil)
 		{
-			NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
-			NSDictionary *componentInfo = nil;
-			while((componentInfo = [componentEnum nextObject]) != nil)
-			{
+			for (NSDictionary *componentInfo in myComponentsInfo) {
 				InstallStatus tstatus = [self installStatusForComponent:componentInfo[ComponentNameKey] type:[componentInfo[ComponentTypeKey] intValue] withMyVersion:componentInfo[BundleVersionKey]];
 				if(tstatus < installStatus)
 					installStatus = tstatus;
 			}
-			switch(installStatus)
-			{
+			switch (installStatus) {
 				case InstallStatusInstalledInWrongLocation:
 				case InstallStatusNotInstalled:
 					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed, but parts are not installed", @"")];
@@ -602,11 +598,7 @@
 	NSDictionary *infoDict = [self myInfoDict];
 	NSDictionary *apps = infoDict[AppsToRegisterDictionaryKey];
 	
-	NSEnumerator *appEnum = [apps objectEnumerator];
-	NSString *app = nil;
-	
-	while ((app = [appEnum nextObject]))
-	{
+	for (NSString *app in apps) {
 		NSURL *url = [NSURL fileURLWithPath:[resourcePath stringByAppendingPathComponent:app]];
 		
 		LSRegisterURL((__bridge CFURLRef)url, true);
@@ -640,10 +632,7 @@
 		
 		[self installArchive:[componentPath stringByAppendingPathComponent:@"Perian.zip"] forPiece:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:infoDict[BundleVersionKey]];
 		
-		NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
-		NSDictionary *myComponent = nil;
-		while((myComponent = [componentEnum nextObject]) != nil)
-		{
+		for (NSDictionary *myComponent in myComponentsInfo) {
 			NSString *archivePath = nil;
 			ComponentType type = [myComponent[ComponentTypeKey] intValue];
 			switch(type)
@@ -695,10 +684,7 @@
 		else
 			[fileManager removeItemAtPath:componentPath error:NULL];
 		
-		NSEnumerator *componentEnum = [myComponentsInfo objectEnumerator];
-		NSDictionary *myComponent = nil;
-		while((myComponent = [componentEnum nextObject]) != nil)
-		{
+		for (NSDictionary *myComponent in myComponentsInfo) {
 			ComponentType type = [myComponent[ComponentTypeKey] intValue];
 			NSString *directory = [self basePathForType:type user:userInstalled];
 			componentPath = [directory stringByAppendingPathComponent:myComponent[ComponentNameKey]];
@@ -780,24 +766,25 @@
 	NSArray *systemComponents = [self installedComponentsForUser:NO];
 	NSUInteger numComponents = [userComponents count] + [systemComponents count];
 	NSMutableArray *components = [[NSMutableArray alloc] initWithCapacity:numComponents];
-	for (NSString *compName in userComponents)
+	for (NSString *compName in userComponents) {
 		[components addObject:[self componentInfoForComponent:compName userInstalled:YES]];
+	}
 	
-	for (NSString *compName in systemComponents)
+	for (NSString *compName in systemComponents) {
 		[components addObject:[self componentInfoForComponent:compName userInstalled:NO]];
+	}
 	return components;
 }
 
 - (NSString *)checkComponentStatusByBundleIdentifier:(NSString *)bundleID
 {
 	NSString *status = @"OK";
-	NSDictionary *infoDict;
-	for (infoDict in componentReplacementInfo) {
-		NSEnumerator *stringsEnum = [infoDict[ObsoletesKey] objectEnumerator];
-		NSString *obsoletedID;
-		while ((obsoletedID = [stringsEnum nextObject]))
-			if ([obsoletedID isEqualToString:bundleID])
-				status = [NSString stringWithFormat:@"Obsoleted by %@",infoDict[HumanReadableNameKey]];
+	for (NSDictionary *infoDict in componentReplacementInfo) {
+		for (NSString *obsoletedID in infoDict[ObsoletesKey]) {
+			if ([obsoletedID isEqualToString:bundleID]) {
+				status = [NSString stringWithFormat:@"Obsoleted by %@", infoDict[HumanReadableNameKey]];
+			}
+		}
 	}
 	return status;
 }
