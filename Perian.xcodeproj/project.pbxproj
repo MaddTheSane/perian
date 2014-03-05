@@ -171,6 +171,14 @@
 		553F32DC17F38EBA00221391 /* Read Me.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 553F32DF17F38EBA00221391 /* Read Me.rtf */; };
 		553F32DD17F38EBA00221391 /* Read Me.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 553F32DF17F38EBA00221391 /* Read Me.rtf */; };
 		553F32E017F38ECE00221391 /* PerianPrefPane.xib in Resources */ = {isa = PBXBuildFile; fileRef = 553F32E217F38ECE00221391 /* PerianPrefPane.xib */; };
+		55564EA518C6B037005CE05E /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55564EA418C6B037005CE05E /* QuickLook.framework */; };
+		55564EA618C6B037005CE05E /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D802F8510336EE90034BF4A /* ApplicationServices.framework */; };
+		55564EA818C6B037005CE05E /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55564EA718C6B037005CE05E /* CoreServices.framework */; };
+		55564EA918C6B037005CE05E /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F57755F40B51EB1800C7D833 /* CoreFoundation.framework */; };
+		55564EAF18C6B037005CE05E /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 55564EAD18C6B037005CE05E /* InfoPlist.strings */; };
+		55564EB118C6B037005CE05E /* GenerateThumbnailForURL.c in Sources */ = {isa = PBXBuildFile; fileRef = 55564EB018C6B037005CE05E /* GenerateThumbnailForURL.c */; };
+		55564EB318C6B037005CE05E /* GeneratePreviewForURL.c in Sources */ = {isa = PBXBuildFile; fileRef = 55564EB218C6B037005CE05E /* GeneratePreviewForURL.c */; };
+		55564EB518C6B037005CE05E /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 55564EB418C6B037005CE05E /* main.c */; };
 		5557DF4B17D8E0AE00142C72 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5557DF4D17D8E0AE00142C72 /* InfoPlist.strings */; };
 		5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5417D8F6C400142C72 /* libz.dylib */; };
 		5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5617D8F6E300142C72 /* libbz2.dylib */; };
@@ -676,6 +684,15 @@
 		553F32DB17F38A7E00221391 /* createStaticLibs.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = createStaticLibs.sh; sourceTree = SOURCE_ROOT; };
 		553F32DE17F38EBA00221391 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = "en.lproj/Read Me.rtf"; sourceTree = "<group>"; };
 		553F32E117F38ECE00221391 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PerianPrefPane.xib; sourceTree = "<group>"; };
+		55564EA318C6B037005CE05E /* PerianQL.qlgenerator */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PerianQL.qlgenerator; sourceTree = BUILT_PRODUCTS_DIR; };
+		55564EA418C6B037005CE05E /* QuickLook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickLook.framework; path = System/Library/Frameworks/QuickLook.framework; sourceTree = SDKROOT; };
+		55564EA718C6B037005CE05E /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		55564EAC18C6B037005CE05E /* PerianQL-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "PerianQL-Info.plist"; sourceTree = "<group>"; };
+		55564EAE18C6B037005CE05E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		55564EB018C6B037005CE05E /* GenerateThumbnailForURL.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = GenerateThumbnailForURL.c; sourceTree = "<group>"; };
+		55564EB218C6B037005CE05E /* GeneratePreviewForURL.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = GeneratePreviewForURL.c; sourceTree = "<group>"; };
+		55564EB418C6B037005CE05E /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		55564EB618C6B037005CE05E /* PerianQL-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PerianQL-Prefix.pch"; sourceTree = "<group>"; };
 		5557DF4C17D8E0AE00142C72 /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5557DF5417D8F6C400142C72 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		5557DF5617D8F6E300142C72 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
@@ -924,6 +941,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		55564E9E18C6B037005CE05E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				55564EA918C6B037005CE05E /* CoreFoundation.framework in Frameworks */,
+				55564EA518C6B037005CE05E /* QuickLook.framework in Frameworks */,
+				55564EA818C6B037005CE05E /* CoreServices.framework in Frameworks */,
+				55564EA618C6B037005CE05E /* ApplicationServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61CB10FD0ACDF350007994BD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -970,6 +998,7 @@
 				553F32D717F38A6400221391 /* scripts */,
 				08FB77ADFE841716C02AAC07 /* Source */,
 				089C167CFE841241C02AAC07 /* Resources */,
+				55564EAA18C6B037005CE05E /* PerianQL */,
 				089C1671FE841209C02AAC07 /* Frameworks */,
 				19C28FB4FE9D528D11CA2CBB /* Products */,
 			);
@@ -1001,6 +1030,8 @@
 				11D4EED50A3CE7EC0066D45F /* QuickTime.framework */,
 				F53E18E40B4F483C003A0471 /* Security.framework */,
 				F5BD48A4121784320089D5FA /* AudioUnit.framework */,
+				55564EA418C6B037005CE05E /* QuickLook.framework */,
+				55564EA718C6B037005CE05E /* CoreServices.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1104,6 +1135,7 @@
 				3DAD09A80FBFAB08001E156F /* detect-encoding */,
 				3D802EBB1032B8B00034BF4A /* ssa2pdf */,
 				3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */,
+				55564EA318C6B037005CE05E /* PerianQL.qlgenerator */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1215,6 +1247,27 @@
 				553F32D917F38A6400221391 /* getGitRevision.sh */,
 			);
 			path = scripts;
+			sourceTree = "<group>";
+		};
+		55564EAA18C6B037005CE05E /* PerianQL */ = {
+			isa = PBXGroup;
+			children = (
+				55564EB018C6B037005CE05E /* GenerateThumbnailForURL.c */,
+				55564EB218C6B037005CE05E /* GeneratePreviewForURL.c */,
+				55564EB418C6B037005CE05E /* main.c */,
+				55564EAB18C6B037005CE05E /* Supporting Files */,
+			);
+			path = PerianQL;
+			sourceTree = "<group>";
+		};
+		55564EAB18C6B037005CE05E /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				55564EAC18C6B037005CE05E /* PerianQL-Info.plist */,
+				55564EAD18C6B037005CE05E /* InfoPlist.strings */,
+				55564EB618C6B037005CE05E /* PerianQL-Prefix.pch */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		5557DF6117D8F7C600142C72 /* FFmpeg libs */ = {
@@ -1496,6 +1549,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		55564E9F18C6B037005CE05E /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61CB10FB0ACDF350007994BD /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -1680,6 +1740,25 @@
 			productReference = 3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */;
 			productType = "com.apple.product-type.application";
 		};
+		55564EA218C6B037005CE05E /* PerianQL */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 55564EBF18C6B037005CE05E /* Build configuration list for PBXNativeTarget "PerianQL" */;
+			buildPhases = (
+				55564E9D18C6B037005CE05E /* Sources */,
+				55564E9E18C6B037005CE05E /* Frameworks */,
+				55564E9F18C6B037005CE05E /* Headers */,
+				55564EA018C6B037005CE05E /* Resources */,
+				55564EA118C6B037005CE05E /* Rez */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PerianQL;
+			productName = PerianQL;
+			productReference = 55564EA318C6B037005CE05E /* PerianQL.qlgenerator */;
+			productType = "com.apple.product-type.bundle";
+		};
 		61CB10FE0ACDF350007994BD /* ebml */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 61CB11030ACDF37C007994BD /* Build configuration list for PBXNativeTarget "ebml" */;
@@ -1805,6 +1884,7 @@
 				3DAD08070FBF7C6F001E156F /* ssa2html */,
 				3DAD09A70FBFAB08001E156F /* detect-encoding */,
 				3D802EA61032B8B00034BF4A /* ssa2pdf */,
+				55564EA218C6B037005CE05E /* PerianQL */,
 			);
 		};
 /* End PBXProject section */
@@ -1885,6 +1965,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		55564EA018C6B037005CE05E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				55564EAF18C6B037005CE05E /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		83D1D6C40B4C794700E09EC9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1908,6 +1996,13 @@
 				F50E79F71014F62D00D3E6FF /* codecResources.r.m4 in Rez */,
 				8F483B8C0A642886002CCA73 /* PerianAviImporter.r in Rez */,
 				61CB12260ACE1074007994BD /* MatroskaImport.r in Rez */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		55564EA118C6B037005CE05E /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2110,6 +2205,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		55564E9D18C6B037005CE05E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				55564EB118C6B037005CE05E /* GenerateThumbnailForURL.c in Sources */,
+				55564EB318C6B037005CE05E /* GeneratePreviewForURL.c in Sources */,
+				55564EB518C6B037005CE05E /* main.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61CB10FC0ACDF350007994BD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2298,6 +2403,14 @@
 			);
 			name = PerianPrefPane.xib;
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		55564EAD18C6B037005CE05E /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				55564EAE18C6B037005CE05E /* en */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 		5557DF4D17D8E0AE00142C72 /* InfoPlist.strings */ = {
@@ -2880,6 +2993,107 @@
 			};
 			name = "Release+Debug";
 		};
+		55564EB718C6B037005CE05E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "PerianQL/PerianQL-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "PerianQL/PerianQL-Info.plist";
+				INSTALL_PATH = /Library/QuickLook;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = qlgenerator;
+			};
+			name = Debug;
+		};
+		55564EB818C6B037005CE05E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "PerianQL/PerianQL-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "PerianQL/PerianQL-Info.plist";
+				INSTALL_PATH = /Library/QuickLook;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = qlgenerator;
+			};
+			name = Release;
+		};
+		55564EB918C6B037005CE05E /* Release+Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "PerianQL/PerianQL-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				INFOPLIST_FILE = "PerianQL/PerianQL-Info.plist";
+				INSTALL_PATH = /Library/QuickLook;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = qlgenerator;
+			};
+			name = "Release+Debug";
+		};
 		61CB11040ACDF37C007994BD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3147,6 +3361,15 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Release+Debug";
+		};
+		55564EBF18C6B037005CE05E /* Build configuration list for PBXNativeTarget "PerianQL" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				55564EB718C6B037005CE05E /* Debug */,
+				55564EB818C6B037005CE05E /* Release */,
+				55564EB918C6B037005CE05E /* Release+Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 		61CB11030ACDF37C007994BD /* Build configuration list for PBXNativeTarget "ebml" */ = {
 			isa = XCConfigurationList;
