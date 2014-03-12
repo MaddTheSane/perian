@@ -1840,7 +1840,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = Perian;
 			};
 			buildConfigurationList = 11D4ED470A3CE59A0066D45F /* Build configuration list for PBXProject "Perian" */;
@@ -3370,6 +3370,7 @@
 				55564EB918C6B037005CE05E /* Release+Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Release+Debug";
 		};
 		61CB11030ACDF37C007994BD /* Build configuration list for PBXNativeTarget "ebml" */ = {
 			isa = XCConfigurationList;
