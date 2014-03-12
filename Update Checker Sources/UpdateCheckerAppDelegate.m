@@ -160,7 +160,7 @@
 
 - (void)showUpdateErrorAlertWithInfo:(NSString *)info
 {
-	NSRunAlertPanel(SULocalizedString(@"Update Error!", nil), info, SULocalizedString(@"Cancel", nil), nil, nil);
+	NSRunAlertPanel(SULocalizedString(@"Update Error!", nil), @"%@", SULocalizedString(@"Cancel", nil), nil, nil, info);
 }
 
 - (void)beginDownload

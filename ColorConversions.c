@@ -639,7 +639,7 @@ static void CCOpenSimpleConverter(CCConverterContext *ctx)
 {
 	ConvertFunc convert;
 	
-	void (^convertBlock)(AVPicture*, uint8_t*) FASTCALL = nil;
+	void (^convertBlock)(AVPicture*, uint8_t*) = NULL;
 	
 	switch (ctx->inPixFmt) {
 		case PIX_FMT_YUVJ420P:
@@ -695,7 +695,7 @@ static void CCOpenSimpleConverter(CCConverterContext *ctx)
 	}
 		
 	if (!convertBlock)
-		convertBlock = ^(AVPicture *inPicture, UInt8 *outPicture) FASTCALL {
+		convertBlock = ^(AVPicture *inPicture, UInt8 *outPicture) {
 			convert(ctx, inPicture, outPicture);
 		};
 	
@@ -774,7 +774,7 @@ static void CCOpenSwscaleConverter(CCConverterContext *ctx)
 	
 	ctx->opaque = sws;
 	
-	ctx->convert = Block_copy(^(AVPicture *inPicture, uint8_t *outPicture) FASTCALL {
+	ctx->convert = Block_copy(^(AVPicture *inPicture, uint8_t *outPicture) {
 		uint8_t * const outdata[4] = {outPicture};
 		int outlinesize[4] = {ctx->outLineSize};
 		sws_scale(ctx->opaque,

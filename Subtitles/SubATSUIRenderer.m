@@ -74,12 +74,6 @@ static ATSUFontID GetFontIDForSSAName(NSString *name);
 	ATSUDisposeStyle(style);
 	[super dealloc];
 }
-
--(void)finalize
-{
-	ATSUDisposeStyle(style);
-	[super finalize];
-}
 @end
 
 @implementation SubATSUISpanExtra
@@ -165,14 +159,6 @@ static CGColorRef CopyCGColorWithAlpha(CGColorRef c, float alpha)
 	CGColorRelease(outlineColor);
 	CGColorRelease(shadowColor);
 	[super dealloc];
-}
-
--(void)finalize
-{
-	CGColorRelease(primaryColor);
-	CGColorRelease(outlineColor);
-	CGColorRelease(shadowColor);
-	[super finalize];
 }
 @end
 
@@ -1210,15 +1196,6 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	CGColorSpaceRelease(srgbCSpace);
 	ATSUDisposeTextLayout(layout);
 	[super dealloc];
-}
-
--(void)finalize
-{
-	free(breakBuffer);
-	UCDisposeTextBreakLocator(&breakLocator);
-	CGColorSpaceRelease(srgbCSpace);
-	ATSUDisposeTextLayout(layout);
-	[super finalize];
 }
 @end
 

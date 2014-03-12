@@ -50,7 +50,7 @@ typedef struct CCConverterContext {
 	// Parameters end here
 	enum PixelFormat outPixFmt;
 	
-	void (^convert)(AVPicture *inPicture, uint8_t *outPicture) FASTCALL;
+	void (^convert)(AVPicture *inPicture, uint8_t *outPicture);
 	
 	// Private
 	int  type;
