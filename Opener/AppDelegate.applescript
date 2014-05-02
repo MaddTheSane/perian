@@ -9,6 +9,11 @@
 script AppDelegate
 	property parent : class "NSObject"
 	
+	on isMavericksOrLater()
+		-- TODO: Implement
+		return yes
+	end isMavericksOrLater
+	
 	on applicationWillFinishLaunching_(aNotification)
 		-- Insert code here to initialize your application before any files are opened 
 	end applicationWillFinishLaunching_
@@ -28,6 +33,20 @@ script AppDelegate
 	end applicationShouldTerminate_
 	
 	on application_openFiles_(appl, theFiles)
+		
+		set mavericks to isMavericksOrLater()
+		if mavericks is true
+		tell application "com.apple.quicktimeplayer"
+			repeat with theFile in theFiles's allObjects()
+				set theFilePox to (theFile's fileSystemRepresentation())
+				open theFilePox as POSIX file
+			end repeat
+			
+			activate
+		end tell
+
+		else
+		
 		tell application "QuickTime Player"
 			repeat with theFile in theFiles's allObjects()
 				set theFilePox to (theFile's fileSystemRepresentation())
@@ -36,6 +55,7 @@ script AppDelegate
 			
 			activate
 		end tell
+		end
 		quit
 		
 		return yes
