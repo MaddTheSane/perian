@@ -25,9 +25,9 @@ function GitRevCount {
 	rm -f config.git-hash
 }
 
-GitRevCount "./.git" "origin/lionAndLater"
+GitRevCount "./.git" "origin/updatedFFMpeg"
 REV=$VER
-GitRevCount "./ffmpeg/.git" "origin/perianSvn"
+GitRevCount "./ffmpeg/.git" "origin/perian2.2"
 ffmpeg_rev=$VER
 echo $REV
 
