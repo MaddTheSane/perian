@@ -13,8 +13,10 @@
 
 @implementation SUUpdateAlert
 @synthesize delegate;
+@synthesize itemDescription = description;
+@synthesize releaseNotesView;
 
-- (id)initWithAppcastItem:(SUAppcastItem *)item
+- (instancetype)initWithAppcastItem:(SUAppcastItem *)item
 {
 	NSBundle *current = [NSBundle bundleForClass:[self class]];
 	NSString *path = [current pathForResource:@"SUUpdateAlert" ofType:@"nib"];
@@ -41,8 +43,7 @@
 	[releaseNotesView setFrameLoadDelegate:nil];
 	[releaseNotesView setPolicyDelegate:nil];
 	[self close];
-	if ([delegate respondsToSelector:@selector(updateAlert:finishedWithChoice:)])
-		[delegate updateAlert:self finishedWithChoice:choice];
+	[delegate updateAlert:self finishedWithChoice:choice];
 }
 
 - (IBAction)installUpdate:(id)sender

@@ -9,9 +9,6 @@
 #import <Cocoa/Cocoa.h>
 
 @interface SUAppcastItem : NSObject
-// Initializes with data from a dictionary provided by the RSS class.
-- (id)initWithDictionary:(NSDictionary *)dict;
-
 @property (copy) NSString *title;
 @property (copy) NSDate *date;
 @property (copy) NSString *description;
@@ -27,4 +24,6 @@
 
 @property (copy) NSString *minimumSystemVersion;
 
+// Initializes with data from a dictionary provided by the RSS class.
+- (instancetype)initWithDictionary:(NSDictionary *)dict;
 @end

@@ -39,22 +39,20 @@
 @end
 
 @implementation UpdateCheckerAppDelegate
+{
+	SUUpdateAlert *updateAlert;
+	SUAppcastItem *latest;
+	SUStatusController *statusController;
+	SUAppcast *appcast;
+	NSURLDownload *downloader;
+	NSString *downloadPath;
+	NSDate *lastRunDate;
+	BOOL	manualRun;
+}
 @synthesize lastRunDate;
 @synthesize latest;
 @synthesize downloadPath;
 @synthesize appcast;
-
-#if !__has_feature(objc_arc)
-- (void)dealloc
-{
-	[downloader release];
-	self.lastRunDate = nil;
-	self.downloadPath = nil;
-	self.appcast = nil;
-	self.lastRunDate = nil;
-	[super dealloc];
-}
-#endif
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
@@ -143,7 +141,7 @@
 - (void)showUpdatePanelForItem:(SUAppcastItem *)updateItem
 {
 	updateAlert = [[SUUpdateAlert alloc] initWithAppcastItem:updateItem];
-	[updateAlert setDelegate:self];
+	updateAlert.delegate = self;
 	[updateAlert showWindow:self];
 }
 

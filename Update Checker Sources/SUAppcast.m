@@ -33,8 +33,7 @@
 {
 	@autoreleasepool {
 		RSS *feed;
-		@try
-		{
+		@try {
 			NSString *userAgent = [NSString stringWithFormat: @"%@/%@ (Mac OS X) Sparkle/1.0", SUHostAppName(), SUHostAppVersion()];
 			
 			feed = [[RSS alloc] initWithURL:url normalize:YES userAgent:userAgent];
@@ -48,9 +47,7 @@
 			if ([delegate respondsToSelector:@selector(appcastDidFinishLoading:)])
 				[delegate performSelectorOnMainThread:@selector(appcastDidFinishLoading:) withObject:self waitUntilDone:NO];
 			
-		}
-		@catch (NSException *e)
-		{
+		} @catch (NSException *e) {
 			if ([delegate respondsToSelector:@selector(appcastDidFailToLoad:)])
 				[delegate performSelectorOnMainThread:@selector(appcastDidFailToLoad:) withObject:self waitUntilDone:NO];
 		}
