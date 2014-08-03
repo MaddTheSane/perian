@@ -24,68 +24,88 @@
 
 #include <QuickTime/QuickTime.h>
 
-__BEGIN_DECLS
-
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
 
 @interface SubLine : NSObject
 {
-	@public
+@private
 	NSString *line;
-	unsigned begin_time, end_time;
-	int num; // line number, used only by SubSerializer
+	NSUInteger begin_time, end_time;
+	NSInteger num; // line number, used only by SubSerializer
 }
--(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e;
+@property (readonly, copy) NSString *line;
+@property NSUInteger beginTime;
+@property NSUInteger endTime;
+@property NSInteger num;
+
+- (instancetype)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e;
 @end
 
 @interface SubSerializer : NSObject
 {
 	// input lines, sorted by 1. beginning time 2. original insertion order
+@private
 	NSMutableArray *lines;
 	BOOL finished;
 	
-	unsigned last_begin_time, last_end_time;
-	int num_lines_input;
+	NSUInteger last_begin_time, last_end_time;
+	NSInteger num_lines_input;
 }
 
 @property (assign) BOOL finished;
+@property (readonly, getter = isEmpty) BOOL empty;
+@property NSUInteger lastBeginTime;
+@property NSUInteger lastEndTime;
+@property NSInteger numLinesInput;
 
 -(void)addLine:(SubLine *)sline;
 -(SubLine*)getSerializedPacket;
--(BOOL)isEmpty;
 @end
 
 @interface VobSubSample : NSObject
 {
-	@public
+@private
 	long		timeStamp;
 	long		fileOffset;
 }
+@property long timeStamp;
+@property long fileOffset;
 
-- (id)initWithTime:(long)time offset:(long)offset;
+- (instancetype)initWithTime:(long)time offset:(long)offset;
 @end
 
-@interface VobSubTrack : NSObject
+@interface VobSubTrack : NSObject <NSFastEnumeration>
 {
-	@public
+@private
 	NSData			*privateData;
 	NSString		*language;
-	int				index;
+	NSInteger		index;
 	NSMutableArray	*samples;
 }
 
-- (id)initWithPrivateData:(NSData *)idxPrivateData language:(NSString *)lang andIndex:(int)trackIndex;
+@property (retain, readonly) NSData *privateData;
+@property (copy) NSString *language;
+@property NSInteger index;
+@property (assign, readonly) NSArray *samples;
+
+- (instancetype)initWithPrivateData:(NSData *)idxPrivateData language:(NSString *)lang andIndex:(int)trackIndex;
 - (void)addSample:(VobSubSample *)sample;
 - (void)addSampleTime:(long)time offset:(long)offset;
 
 @end
 
+__BEGIN_DECLS
+
 NSString *SubLoadSSAFromPath(NSString *path, SubSerializer *ss);
 void SubLoadSRTFromPath(NSString *path, SubSerializer *ss);
 void SubLoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount);
 
+__END_DECLS
+
 #endif // ___OBJC__
+
+__BEGIN_DECLS
 
 #if !__LP64__
 
@@ -99,6 +119,7 @@ Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, Ti
 __END_DECLS
 
 #ifdef __cplusplus
+#include <string>
 
 #ifndef __OBJC_GC__
 #define __strong
@@ -114,6 +135,7 @@ public:
 	~CXXSubSerializer();
 	
 	void pushLine(const char *line, size_t size, unsigned start, unsigned end);
+	void pushLine(const std::string &cppstr, unsigned start, unsigned end);
 	void setFinished();
 	Handle popPacket(unsigned *start, unsigned *end);
 	void release();
