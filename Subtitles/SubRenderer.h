@@ -29,12 +29,12 @@ __BEGIN_DECLS
 @class SubStyle, SubStyleExtra;
 @class SubContext, SubRenderDiv, SubRenderSpan, SubRenderSpanExtra;
 
-typedef enum {
+typedef NS_ENUM(int, SubSSATagName) {
 	tag_b=0, tag_i, tag_u, tag_s, tag_bord, tag_shad, tag_be,
 	tag_fn, tag_fs, tag_fscx, tag_fscy, tag_fsp, tag_frx,
 	tag_fry, tag_frz, tag_1c, tag_2c, tag_3c, tag_4c, tag_alpha,
 	tag_1a, tag_2a, tag_3a, tag_4a, tag_r, tag_p
-} SubSSATagName;
+};
 
 @interface SubRenderer : NSObject
 -(void)didCompleteHeaderParsing:(SubContext*)sc;

@@ -30,9 +30,9 @@ typedef NS_ENUM(int, SUUpdateAlertChoice) {
 
 - (instancetype)initWithAppcastItem:(SUAppcastItem *)item;
 
-- (IBAction)installUpdate:sender;
-- (IBAction)skipThisVersion:sender;
-- (IBAction)remindMeLater:sender;
+- (IBAction)installUpdate:(id)sender;
+- (IBAction)skipThisVersion:(id)sender;
+- (IBAction)remindMeLater:(id)sender;
 
 @end
 

@@ -50,11 +50,11 @@ typedef struct FFusionParser
 	struct FFusionParser *next;
 } FFusionParser;
 
-typedef enum {
+typedef CF_ENUM(int, FFusionDecodeAbilities) {
 	FFUSION_CANNOT_DECODE,
 	FFUSION_PREFER_NOT_DECODE,
 	FFUSION_PREFER_DECODE,
-} FFusionDecodeAbilities;
+};
 
 void initFFusionParsers();
 FFusionParserContext *ffusionParserInit(int codec_id);

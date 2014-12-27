@@ -19,7 +19,7 @@ script AppDelegate
 		if (osList's item 3) is equal to "." then
 			return yes
 			else
-			set preTen to osList's as text as real
+			set preTen to osList as text as real
 			if preTen is greater than or equal to 9.0 then
 				return yes
 				else
