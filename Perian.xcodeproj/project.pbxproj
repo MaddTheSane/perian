@@ -179,6 +179,7 @@
 		556427F61A4E7EB9006A7269 /* SafeReadIOCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 556427F51A4E7EB9006A7269 /* SafeReadIOCallback.h */; };
 		556427F81A4E7EFA006A7269 /* MemReadIOCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 556427F71A4E7EFA006A7269 /* MemReadIOCallback.h */; };
 		556427FA1A4E7F10006A7269 /* MemReadIOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 556427F91A4E7F10006A7269 /* MemReadIOCallback.cpp */; };
+		556427FD1A4F780B006A7269 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 556427FF1A4F780B006A7269 /* Localizable.strings */; };
 		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
 		558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB417D2468000EB0DE7 /* SUStatus.xib */; };
 		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
@@ -681,6 +682,7 @@
 		556427F51A4E7EB9006A7269 /* SafeReadIOCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SafeReadIOCallback.h; path = libebml/ebml/SafeReadIOCallback.h; sourceTree = "<group>"; };
 		556427F71A4E7EFA006A7269 /* MemReadIOCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MemReadIOCallback.h; path = libebml/ebml/MemReadIOCallback.h; sourceTree = "<group>"; };
 		556427F91A4E7F10006A7269 /* MemReadIOCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MemReadIOCallback.cpp; path = libebml/src/MemReadIOCallback.cpp; sourceTree = "<group>"; };
+		556427FE1A4F780B006A7269 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5585E1A6179DE5EA0045A322 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 		558E7CB417D2468000EB0DE7 /* SUStatus.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SUStatus.xib; sourceTree = "<group>"; };
 		558E7CB717D246B000EB0DE7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SUUpdateAlert.xib; sourceTree = "<group>"; };
@@ -1017,6 +1019,7 @@
 				8F483B8B0A642886002CCA73 /* PerianAviImporter.r */,
 				F59B2AB81007A0D000FAAAD8 /* PerianResources.r */,
 				5557DF4D17D8E0AE00142C72 /* InfoPlist.strings */,
+				556427FF1A4F780B006A7269 /* Localizable.strings */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1888,6 +1891,7 @@
 				F5EB823E0BA7221F001064E5 /* PerianUpdateChecker.app in Resources */,
 				83D1D6F50B4C85AB00E09EC9 /* Perian_icon.icns in Resources */,
 				553F32DD17F38EBA00221391 /* Read Me.rtf in Resources */,
+				556427FD1A4F780B006A7269 /* Localizable.strings in Resources */,
 				11207C730C2F4A4E002A0FF0 /* ComponentInfo.plist in Resources */,
 				553F32E017F38ECE00221391 /* PerianPrefPane.xib in Resources */,
 				3DE8D9D5104451A80007C7E7 /* Perian - Open in QT Player.app in Resources */,
@@ -2305,6 +2309,15 @@
 			);
 			name = InfoPlist.strings;
 			path = Plists;
+			sourceTree = "<group>";
+		};
+		556427FF1A4F780B006A7269 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				556427FE1A4F780B006A7269 /* en */,
+			);
+			name = Localizable.strings;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */ = {

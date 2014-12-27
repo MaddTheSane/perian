@@ -62,6 +62,9 @@
 @property (copy) NSString *a52AppID;
 @end
 
+#define CPFLocalizedStringFromBundle(key, bundle, comment) \
+    [bundle localizedStringForKey:(key) value:@"" table:nil]
+
 @implementation CPFPerianPrefPaneController
 
 #pragma mark Preferences Functions
@@ -242,7 +245,7 @@
 	NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
 	if (infoDict != nil)
 		currentVersion = infoDict[BundleVersionKey];
-	[textField_currentVersion setStringValue:[NSLocalizedString(@"Installed Version: ", @"") stringByAppendingString:currentVersion]];
+	[textField_currentVersion setStringValue:[CPFLocalizedStringFromBundle(@"Installed Version: ", self.bundle, @"") stringByAppendingString:currentVersion]];
 }
 
 #pragma mark Preference Pane Support
@@ -285,13 +288,13 @@
 	installStatus = [self installStatusForComponent:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:myVersion];
 	if(currentInstallStatus(installStatus) == InstallStatusNotInstalled)
 	{
-		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is not installed", @"")];
-		[button_install setTitle:NSLocalizedString(@"Install Perian", @"")];
+		[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is not installed", self.bundle, @"")];
+		[button_install setTitle:CPFLocalizedStringFromBundle(@"Install Perian", self.bundle, @"")];
 	}
 	else if(currentInstallStatus(installStatus) == InstallStatusOutdated)
 	{
-		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed, but outdated", @"")];
-		[button_install setTitle:NSLocalizedString(@"Update Perian", @"")];
+		[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed, but outdated", self.bundle, @"")];
+		[button_install setTitle:CPFLocalizedStringFromBundle(@"Update Perian", self.bundle, @"")];
 	}
 	else
 	{
@@ -307,36 +310,36 @@
 			switch (installStatus) {
 				case InstallStatusInstalledInWrongLocation:
 				case InstallStatusNotInstalled:
-					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed, but parts are not installed", @"")];
-					[button_install setTitle:NSLocalizedString(@"Install Perian", @"")];
+					[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed, but parts are not installed", self.bundle, @"")];
+					[button_install setTitle:CPFLocalizedStringFromBundle(@"Install Perian", self.bundle, @"")];
 					break;
 				case InstallStatusOutdatedWithAnotherInWrongLocation:
 				case InstallStatusOutdated:
-					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed, but parts are outdated", @"")];
-					[button_install setTitle:NSLocalizedString(@"Update Perian", @"")];
+					[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed, but parts are outdated", self.bundle, @"")];
+					[button_install setTitle:CPFLocalizedStringFromBundle(@"Update Perian", self.bundle, @"")];
 					break;
 				case InstallStatusInstalledInBothLocations:
-					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed twice", @"")];
-					[button_install setTitle:NSLocalizedString(@"Correct Installation", @"")];
+					[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed twice", self.bundle, @"")];
+					[button_install setTitle:CPFLocalizedStringFromBundle(@"Correct Installation", self.bundle, @"")];
 					break;
 				case InstallStatusInstalled:
 					if(freshInstall)
-						[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed; please restart your applications that use Perian", @"")];
+						[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed; please restart your applications that use Perian", self.bundle, @"")];
 					else
-						[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed", @"")];
-					[button_install setTitle:NSLocalizedString(@"Remove Perian", @"")];
+						[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed", self.bundle, @"")];
+					[button_install setTitle:CPFLocalizedStringFromBundle(@"Remove Perian", self.bundle, @"")];
 					break;
 			}
 		}
 		else if(isWrongLocationInstalled(installStatus))
 		{
-			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed twice", @"")];
-			[button_install setTitle:NSLocalizedString(@"Correct Installation", @"")];
+			[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed twice", self.bundle, @"")];
+			[button_install setTitle:CPFLocalizedStringFromBundle(@"Correct Installation", self.bundle, @"")];
 		}
 		else
 		{
-			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed", @"")];
-			[button_install setTitle:NSLocalizedString(@"Remove Perian", @"")];
+			[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed", self.bundle, @"")];
+			[button_install setTitle:CPFLocalizedStringFromBundle(@"Remove Perian", self.bundle, @"")];
 		}
 		
 	}
@@ -473,7 +476,7 @@
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		ret = YES;
 	else
-		errorString = [NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]];
+		errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"extraction of %@ failed\n", self.bundle, @""), [finalPath lastPathComponent]];
 	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
@@ -510,10 +513,10 @@
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			errorString = [NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]];
+			errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"extraction of %@ failed\n", self.bundle, @""), [finalPath lastPathComponent]];
 	}
 	else
-		errorString = [NSString stringWithFormat:NSLocalizedString(@"authentication failed while extracting %@\n", @""), [finalPath lastPathComponent]];
+		errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"authentication failed while extracting %@\n", self.bundle, @""), [finalPath lastPathComponent]];
 	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
@@ -541,10 +544,10 @@
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), [componentPath lastPathComponent]];
+			errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"removal of %@ failed\n", self.bundle, @""), [componentPath lastPathComponent]];
 	}
 	else
-		errorString = [NSString stringWithFormat:NSLocalizedString(@"authentication failed while removing %@\n", @""), [componentPath lastPathComponent]];
+		errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"authentication failed while removing %@\n", self.bundle, @""), [componentPath lastPathComponent]];
 	
 	unsetenv("COMP_PATH");
 	return ret;
@@ -570,7 +573,7 @@
 			//Remove the old one here
 			BOOL result = [[NSFileManager defaultManager] removeItemAtPath:[containingDir stringByAppendingPathComponent:component] error:NULL];
 			if(result == NO) {
-				errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
+				errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"removal of %@ failed\n", self.bundle, @""), component];
 				ret = NO;
 			}
 		}
@@ -593,7 +596,7 @@
 		{
 			ret = [[NSFileManager defaultManager] removeItemAtPath:[containingDir stringByAppendingPathComponent:component] error:NULL];
 			if(ret == NO)
-				errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
+				errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"removal of %@ failed\n", self.bundle, @""), component];
 		}
 	}
 	return ret;
@@ -862,7 +865,7 @@
 
 - (void)displayMultiChannelWarning
 {
-	NSString *multiChannelWarning = NSLocalizedString(@"<p style=\"font: 13pt Lucida Grande;\">Multi-Channel Output is not Dolby Digital Passthrough!  It is designed for those with multiple discrete speakers connected to their mac.  If you selected this expecting passthrough, you are following the wrong instructions.  Follow <a href=\"http://www.cod3r.com/2008/02/the-correct-way-to-enable-ac3-passthrough-with-quicktime/\">these</a> instead.</p>", @"");
+	NSString *multiChannelWarning = CPFLocalizedStringFromBundle(@"<p style=\"font: 13pt Lucida Grande;\">Multi-Channel Output is not Dolby Digital Passthrough!  It is designed for those with multiple discrete speakers connected to their mac.  If you selected this expecting passthrough, you are following the wrong instructions.  Follow <a href=\"http://www.cod3r.com/2008/02/the-correct-way-to-enable-ac3-passthrough-with-quicktime/\">these</a> instead.</p>", self.bundle, @"");
 	NSAttributedString *multiChannelWarningAttr = [[NSAttributedString alloc] initWithHTML:[multiChannelWarning dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:nil];
 	[textField_multiChannelText setAttributedStringValue:multiChannelWarningAttr];
 	[NSApp beginSheet:window_multiChannelSheet modalForWindow:[[self mainView] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
