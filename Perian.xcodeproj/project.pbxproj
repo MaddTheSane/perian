@@ -175,6 +175,10 @@
 		5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5417D8F6C400142C72 /* libz.dylib */; };
 		5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5617D8F6E300142C72 /* libbz2.dylib */; };
 		5557DF5817D8F6F800142C72 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5617D8F6E300142C72 /* libbz2.dylib */; };
+		556427F41A4E7E99006A7269 /* SafeReadIOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 556427F31A4E7E99006A7269 /* SafeReadIOCallback.cpp */; };
+		556427F61A4E7EB9006A7269 /* SafeReadIOCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 556427F51A4E7EB9006A7269 /* SafeReadIOCallback.h */; };
+		556427F81A4E7EFA006A7269 /* MemReadIOCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 556427F71A4E7EFA006A7269 /* MemReadIOCallback.h */; };
+		556427FA1A4E7F10006A7269 /* MemReadIOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 556427F91A4E7F10006A7269 /* MemReadIOCallback.cpp */; };
 		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
 		558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB417D2468000EB0DE7 /* SUStatus.xib */; };
 		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
@@ -673,6 +677,10 @@
 		5557DF4C17D8E0AE00142C72 /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5557DF5417D8F6C400142C72 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		5557DF5617D8F6E300142C72 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
+		556427F31A4E7E99006A7269 /* SafeReadIOCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SafeReadIOCallback.cpp; path = libebml/src/SafeReadIOCallback.cpp; sourceTree = "<group>"; };
+		556427F51A4E7EB9006A7269 /* SafeReadIOCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SafeReadIOCallback.h; path = libebml/ebml/SafeReadIOCallback.h; sourceTree = "<group>"; };
+		556427F71A4E7EFA006A7269 /* MemReadIOCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MemReadIOCallback.h; path = libebml/ebml/MemReadIOCallback.h; sourceTree = "<group>"; };
+		556427F91A4E7F10006A7269 /* MemReadIOCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MemReadIOCallback.cpp; path = libebml/src/MemReadIOCallback.cpp; sourceTree = "<group>"; };
 		5585E1A6179DE5EA0045A322 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 		558E7CB417D2468000EB0DE7 /* SUStatus.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SUStatus.xib; sourceTree = "<group>"; };
 		558E7CB717D246B000EB0DE7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SUUpdateAlert.xib; sourceTree = "<group>"; };
@@ -1287,6 +1295,10 @@
 				61CB114B0ACDF3C2007994BD /* IOCallback.cpp */,
 				61CB114C0ACDF3C2007994BD /* MemIOCallback.cpp */,
 				61CB114D0ACDF3C2007994BD /* StdIOCallback.cpp */,
+				556427F51A4E7EB9006A7269 /* SafeReadIOCallback.h */,
+				556427F31A4E7E99006A7269 /* SafeReadIOCallback.cpp */,
+				556427F71A4E7EFA006A7269 /* MemReadIOCallback.h */,
+				556427F91A4E7F10006A7269 /* MemReadIOCallback.cpp */,
 				61CB11070ACDF3A2007994BD /* Debug.h */,
 				61CB11080ACDF3A2007994BD /* EbmlBinary.h */,
 				61CB11090ACDF3A2007994BD /* EbmlConfig.h */,
@@ -1495,8 +1507,10 @@
 				61CB112A0ACDF3A2007994BD /* EbmlHead.h in Headers */,
 				61CB112B0ACDF3A2007994BD /* EbmlId.h in Headers */,
 				61CB112C0ACDF3A2007994BD /* EbmlMaster.h in Headers */,
+				556427F81A4E7EFA006A7269 /* MemReadIOCallback.h in Headers */,
 				61CB112D0ACDF3A2007994BD /* EbmlSInteger.h in Headers */,
 				61CB112E0ACDF3A2007994BD /* EbmlStream.h in Headers */,
+				556427F61A4E7EB9006A7269 /* SafeReadIOCallback.h in Headers */,
 				61CB112F0ACDF3A2007994BD /* EbmlString.h in Headers */,
 				61CB11300ACDF3A2007994BD /* EbmlSubHead.h in Headers */,
 				61CB11310ACDF3A2007994BD /* EbmlTypes.h in Headers */,
@@ -2097,7 +2111,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				61CB114E0ACDF3C2007994BD /* Debug.cpp in Sources */,
+				556427F41A4E7E99006A7269 /* SafeReadIOCallback.cpp in Sources */,
 				61CB114F0ACDF3C2007994BD /* EbmlBinary.cpp in Sources */,
+				556427FA1A4E7F10006A7269 /* MemReadIOCallback.cpp in Sources */,
 				61CB11500ACDF3C2007994BD /* EbmlContexts.cpp in Sources */,
 				61CB11510ACDF3C2007994BD /* EbmlCrc32.cpp in Sources */,
 				61CB11520ACDF3C2007994BD /* EbmlDate.cpp in Sources */,
