@@ -111,9 +111,6 @@ PERIAN_EXPORTED
 	NSURL								*perianDonateURL;
 	NSURL								*perianWebSiteURL;
 	
-	CFStringRef							perianAppID;
-	CFStringRef							a52AppID;
-	
 	float								nextDynValue;
 }
 //General Pane
