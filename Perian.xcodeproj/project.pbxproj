@@ -175,12 +175,6 @@
 		5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5417D8F6C400142C72 /* libz.dylib */; };
 		5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5617D8F6E300142C72 /* libbz2.dylib */; };
 		5557DF5817D8F6F800142C72 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5617D8F6E300142C72 /* libbz2.dylib */; };
-		5557DF5A17D8F71200142C72 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5917D8F71200142C72 /* libstdc++.6.dylib */; };
-		5557DF5C17D8F71C00142C72 /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5B17D8F71B00142C72 /* libobjc.dylib */; };
-		5557DF5D17D8F73F00142C72 /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5B17D8F71B00142C72 /* libobjc.dylib */; };
-		5557DF5E17D8F73F00142C72 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5917D8F71200142C72 /* libstdc++.6.dylib */; };
-		5557DF5F17D8F74000142C72 /* libobjc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5B17D8F71B00142C72 /* libobjc.dylib */; };
-		5557DF6017D8F74000142C72 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5557DF5917D8F71200142C72 /* libstdc++.6.dylib */; };
 		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
 		558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB417D2468000EB0DE7 /* SUStatus.xib */; };
 		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
@@ -679,8 +673,6 @@
 		5557DF4C17D8E0AE00142C72 /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		5557DF5417D8F6C400142C72 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		5557DF5617D8F6E300142C72 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
-		5557DF5917D8F71200142C72 /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "usr/lib/libstdc++.6.dylib"; sourceTree = SDKROOT; };
-		5557DF5B17D8F71B00142C72 /* libobjc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.dylib; path = usr/lib/libobjc.dylib; sourceTree = SDKROOT; };
 		5585E1A6179DE5EA0045A322 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 		558E7CB417D2468000EB0DE7 /* SUStatus.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SUStatus.xib; sourceTree = "<group>"; };
 		558E7CB717D246B000EB0DE7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SUUpdateAlert.xib; sourceTree = "<group>"; };
@@ -885,8 +877,6 @@
 				3D802F06103365DB0034BF4A /* Cocoa.framework in Frameworks */,
 				3D802F171033662F0034BF4A /* Carbon.framework in Frameworks */,
 				3D802F8610336EE90034BF4A /* ApplicationServices.framework in Frameworks */,
-				5557DF5F17D8F74000142C72 /* libobjc.dylib in Frameworks */,
-				5557DF6017D8F74000142C72 /* libstdc++.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -894,8 +884,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5557DF5C17D8F71C00142C72 /* libobjc.dylib in Frameworks */,
-				5557DF5A17D8F71200142C72 /* libstdc++.6.dylib in Frameworks */,
 				3DAD08590FBF80DF001E156F /* CoreFoundation.framework in Frameworks */,
 				3DAD085A0FBF80E7001E156F /* Foundation.framework in Frameworks */,
 				3DAD08900FBF848B001E156F /* libuniversaldetector.a in Frameworks */,
@@ -909,8 +897,6 @@
 				3DAD09F80FBFAFD0001E156F /* libuniversaldetector.a in Frameworks */,
 				3DAD09FB0FBFAFFF001E156F /* CoreFoundation.framework in Frameworks */,
 				3DAD09FC0FBFB004001E156F /* Foundation.framework in Frameworks */,
-				5557DF5D17D8F73F00142C72 /* libobjc.dylib in Frameworks */,
-				5557DF5E17D8F73F00142C72 /* libstdc++.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -986,8 +972,6 @@
 				553F32CA17F2F33900221391 /* AppleScriptObjC.framework */,
 				553F329617F2CCC200221391 /* OpenCL.framework */,
 				83D1D6CE0B4C7AC400E09EC9 /* PreferencePanes.framework */,
-				5557DF5B17D8F71B00142C72 /* libobjc.dylib */,
-				5557DF5917D8F71200142C72 /* libstdc++.6.dylib */,
 				5585E1A6179DE5EA0045A322 /* libiconv.dylib */,
 				5557DF5617D8F6E300142C72 /* libbz2.dylib */,
 				5557DF5417D8F6C400142C72 /* libz.dylib */,

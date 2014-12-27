@@ -1363,7 +1363,8 @@ canOutput:
 
 -(void)dealloc
 {
-	self.line = nil;
+	[line release];
+	line = nil;
 	[super dealloc];
 }
 
@@ -1428,8 +1429,10 @@ canOutput:
 
 - (void)dealloc
 {
-	self.privateData = nil;
-	self.language = nil;
+	[privateData release];
+	[language release];
+	privateData = nil;
+	language = nil;
 	[samples release];
 	[super dealloc];
 }

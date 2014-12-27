@@ -235,8 +235,12 @@ BOOL IsScriptASS(NSDictionary *headers)
 -(void)dealloc
 {
 	[styles release];
+	styles = nil;
 	[defaultStyle release];
+	defaultStyle = nil;
 	[headers release];
+	headers = nil;
+	
 	[super dealloc];
 }
 
