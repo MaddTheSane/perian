@@ -27,7 +27,7 @@
 
 #define CODEC_HEADER			"Perian: "
 
-static int Codecvprintf(FILE *fileLog, const char *format, va_list va, int print_header)
+static int Codecvprintf(FILE *fileLog, const char *format, va_list va, bool print_header)
 {
 	int ret = 0;
 	
@@ -85,14 +85,14 @@ void FourCCprintf(const char *string, FourCharCode a)
 void FFMpegCodecprintf(void* ptr, int level, const char* fmt, va_list vl)
 {
     static int print_prefix=1;
-	int print_header = 1;
+	bool print_header = true;
     AVClass* avc= ptr ? *(AVClass**)ptr : NULL;
     if(level>av_log_get_level())
         return;
 
     if(print_prefix && avc) {
 		Codecprintf(NULL, "[%s @ %p]", avc->item_name(ptr), avc);
-		print_header = 0;
+		print_header = false;
     }
 	
     print_prefix= strstr(fmt, "\n") != NULL;

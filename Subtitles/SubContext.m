@@ -26,12 +26,26 @@
 NSString * const kSubDefaultFontName = @"Helvetica";
 
 @implementation SubStyle
+@synthesize extra;
+@synthesize name;
+@synthesize fontname;
+@synthesize delegate;
+
+@synthesize size;
+@synthesize primaryColor, secondaryColor, outlineColor, shadowColor;
+@synthesize scaleX, scaleY, tracking, angle;
+@synthesize outlineRadius, shadowDist;
+@synthesize weight;
+@synthesize italic, underline, strikeout, vertical;
+@synthesize marginL, marginR, marginV;
+@synthesize alignH, alignV, borderStyle;
+@synthesize platformSizeScale;
 
 +(SubStyle*)defaultStyleWithDelegate:(SubRenderer*)delegate
 {
-	SubStyle *sty = [[[SubStyle alloc] init] autorelease];
+	SubStyle *sty = [[SubStyle alloc] init];
 	
-	sty->name = @"Default";
+	sty.name = @"Default";
 	sty->fontname = kSubDefaultFontName;
 	sty->platformSizeScale = 1;
 	sty->size = 32 * sqrt([delegate aspectRatio] / (4./3.));
@@ -51,12 +65,10 @@ NSString * const kSubDefaultFontName = @"Helvetica";
 	sty->delegate = delegate;
 	
 	[delegate didCompleteStyleParsing:sty];
-	return sty;
+	return [sty autorelease];
 }
 
-@synthesize extra;
-
--(SubStyle*)initWithDictionary:(NSDictionary *)s scriptVersion:(UInt8)version delegate:(SubRenderer*)delegate_
+- (instancetype)initWithDictionary:(NSDictionary *)s scriptVersion:(UInt8)version delegate:(SubRenderer*)delegate_
 {
 	if (self = [super init]) {
 		NSString *tmp;
@@ -152,6 +164,10 @@ static NSString *ColorString(SubRGBAColor *c)
 	[extra release];
 	[name release];
 	[fontname release];
+	extra = nil;
+	name = nil;
+	fontname = nil;
+
 	[super dealloc];
 }
 @end

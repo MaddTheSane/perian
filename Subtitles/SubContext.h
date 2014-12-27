@@ -57,9 +57,22 @@ extern NSString * const kSubDefaultFontName;
 }
 
 @property (retain) id extra;
+@property (copy) NSString *name;
+@property (copy) NSString *fontname;
+@property (assign) SubRenderer *delegate;
+	
+@property Float32 size;
+@property SubRGBAColor primaryColor, secondaryColor, outlineColor, shadowColor;
+@property Float32 scaleX, scaleY, tracking, angle;
+@property Float32 outlineRadius, shadowDist;
+@property Float32 weight;
+@property BOOL italic, underline, strikeout, vertical;
+@property int marginL, marginR, marginV;
+@property UInt8 alignH, alignV, borderStyle;
+@property Float32 platformSizeScale;
 
-+(SubStyle*)defaultStyleWithDelegate:(SubRenderer*)delegate;
--(SubStyle*)initWithDictionary:(NSDictionary *)ssaDict scriptVersion:(UInt8)version delegate:(SubRenderer *)renderer;
++ (instancetype)defaultStyleWithDelegate:(SubRenderer*)delegate;
+- (instancetype)initWithDictionary:(NSDictionary *)ssaDict scriptVersion:(UInt8)version delegate:(SubRenderer *)renderer;
 @end
 
 @interface SubContext : NSObject {
@@ -72,7 +85,7 @@ extern NSString * const kSubDefaultFontName;
 	float resX, resY;
 }
 
--(SubContext*)initWithScriptType:(int)type headers:(NSDictionary *)headers styles:(NSArray *)styles delegate:(SubRenderer*)delegate;
+- (instancetype)initWithScriptType:(int)type headers:(NSDictionary *)headers styles:(NSArray *)styles delegate:(SubRenderer*)delegate;
 -(SubStyle*)styleForName:(NSString *)name;
 @end
 
