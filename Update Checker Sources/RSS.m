@@ -45,15 +45,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 @interface RSS ()
 /*Private*/
 //TODO: Use NSXML functions, the CoreFoundation XMLs are deprecated as of 10.8
-- (void) createheaderdictionary: (CFXMLTreeRef) tree;
-- (void) createitemsarray: (CFXMLTreeRef) tree;
-- (void) setversionstring: (CFXMLTreeRef) tree;
+- (void) createHeaderDictionary: (CFXMLTreeRef) tree;
+- (void) createItemsArray: (CFXMLTreeRef) tree;
+- (void) setVersionString: (CFXMLTreeRef) tree;
 - (void) flattenimagechildren: (CFXMLTreeRef) tree into: (NSMutableDictionary *) dictionary;
 - (void) flattensourceattributes: (CFXMLNodeRef) node into: (NSMutableDictionary *) dictionary;
 - (CFXMLTreeRef) getchanneltree: (CFXMLTreeRef) tree;
 - (CFXMLTreeRef) getnamedtree: (CFXMLTreeRef) currentTree name: (NSString *) name;
 - (void) normalizeRSSItem: (NSMutableDictionary *) rssItem;
-- (NSString *) getelementvalue: (CFXMLTreeRef) tree;
+- (NSString *) getElementValue: (CFXMLTreeRef) tree;
 
 @property (readwrite, copy) NSDictionary *headerItems;
 @property (readwrite, strong) NSMutableArray *newsItems;
@@ -62,7 +62,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 @end
 
 @implementation RSS
-
+{
+	BOOL flRdf;
+	BOOL normalize;
+}
 @synthesize headerItems;
 @synthesize newsItems;
 @synthesize version;
@@ -80,7 +83,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	return (self.newsItems)[0];
 }
 
-- (id) initWithTitle: (NSString *) title andDescription: (NSString *) description
+- (instancetype) initWithTitle: (NSString *) title andDescription: (NSString *) description
 {
 	
 	/*
@@ -101,7 +104,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	return self;
 } /*initWithTitle*/
 
-- (id) initWithData: (NSData *) rssData normalize: (BOOL) fl
+- (instancetype) initWithData: (NSData *) rssData normalize: (BOOL) fl
 {
 	
 	if (self = [super init]) {
@@ -124,20 +127,20 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			[exception raise];
 		} /*if*/
 		
-		[self createheaderdictionary: tree];
-		[self createitemsarray: tree];
-		[self setversionstring: tree];
+		[self createHeaderDictionary:tree];
+		[self createItemsArray:tree];
+		[self setVersionString:tree];
 		CFRelease (tree);
 	}
 	return self;
 } /*initWithData*/
 
-- (id) initWithURL: (NSURL *) url normalize: (BOOL) fl
+- (instancetype) initWithURL: (NSURL *) url normalize: (BOOL) fl
 {
 	return [self initWithURL: url normalize: fl userAgent: nil];
 }
 
-- (id) initWithURL: (NSURL *) url normalize: (BOOL) fl userAgent: (NSString*)userAgent
+- (instancetype) initWithURL: (NSURL *) url normalize: (BOOL) fl userAgent: (NSString*)userAgent
 {
 	NSData *rssData;
 	
@@ -161,22 +164,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 } /*initWithUrl*/
 
 
-#if !__has_feature(objc_arc)
-- (void) dealloc
-{	
-	[headerItems release];
-	[newsItems release];
-	[version release];
-	
-	[super dealloc];
-} /*dealloc*/
-#endif
-
-
 /*Private methods. Don't call these: they may change.*/
-
-- (void) createheaderdictionary: (CFXMLTreeRef) tree {
-	
+- (void) createHeaderDictionary: (CFXMLTreeRef) tree
+{
 	CFXMLTreeRef channelTree, childTree;
 	CFXMLNodeRef childNode;
 	int childCount, i;
@@ -186,7 +176,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	channelTree = [self getchanneltree: tree];
 	
 	if (channelTree == nil) {
-		
 		NSException *exception = [NSException exceptionWithName: @"RSSCreateHeaderDictionaryFailed"
 														 reason: @"Couldn't find the channel tree." userInfo: nil];
 		
@@ -211,15 +200,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		if ([childName isEqualTo: @"image"])
 			[self flattenimagechildren: childTree into: headerItemsMutable];
 		
-		headerItemsMutable[childName] = [self getelementvalue: childTree];
+		headerItemsMutable[childName] = [self getElementValue:childTree];
 	} /*for*/
 	
 	headerItems = [headerItemsMutable copy];
 } /*initheaderdictionary*/
 
 
-- (void) createitemsarray: (CFXMLTreeRef) tree {
-	
+- (void) createItemsArray: (CFXMLTreeRef) tree
+{
 	CFXMLTreeRef channelTree, childTree, itemTree;
 	CFXMLNodeRef childNode, itemNode;
 	NSString *childName;
@@ -281,7 +270,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 				continue;
 			}
 			
-			itemValue = [self getelementvalue: itemTree];
+			itemValue = [self getElementValue:itemTree];
 			
 			if ([itemName isEqualTo: @"source"])
 				[self flattensourceattributes: itemNode into: itemDictionaryMutable];
@@ -305,8 +294,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 } /*createitemsarray*/
 
 
-- (void) setversionstring: (CFXMLTreeRef) tree {
-	
+- (void) setVersionString:(CFXMLTreeRef)tree
+{
 	CFXMLTreeRef rssTree;
 	const CFXMLElementInfo *elementInfo;
 	CFXMLNodeRef node;
@@ -345,15 +334,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		if ([childName hasPrefix: @"rss:"])
 			childName = [childName substringFromIndex: 4];
 		
-		childValue = [self getelementvalue: childTree];
+		childValue = [self getElementValue:childTree];
 		keyName = [NSString stringWithFormat: @"image%@", childName];
 		dictionary[keyName] = childValue;
 	} /*for*/
 } /*flattenimagechildren*/
 
 
-- (void) flattensourceattributes: (CFXMLNodeRef) node into: (NSMutableDictionary *) dictionary {
-	
+- (void) flattensourceattributes: (CFXMLNodeRef) node into: (NSMutableDictionary *) dictionary
+{
 	const CFXMLElementInfo *elementInfo;
 	NSString *sourceHomeUrl, *sourceRssUrl;
 	
@@ -510,7 +499,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			if ([NSString stringIsEmpty: title]) { /*use first part of description*/
 				NSString *shortTitle = [[[description stripHTML] trimWhiteSpace] ellipsizeAfterNWords: 5];
 				shortTitle = [shortTitle trimWhiteSpace];
-				title = [NSString stringWithFormat: @"%@...", shortTitle];
+				title = [NSString stringWithFormat: @"%@…", shortTitle];
 			} /*else*/
 		} /*if*/
 		
@@ -531,7 +520,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		NSString *shortTitle = [[[title stripHTML] trimWhiteSpace] ellipsizeAfterNWords: 7];
 		description = [NSString stringWithString:title];
 		rssItem[descriptionKey] = description;
-		title = [NSString stringWithFormat: @"%@...", shortTitle];
+		title = [NSString stringWithFormat: @"%@…", shortTitle];
 		rssItem[titleKey] = title;
 	} /*if*/
 	
@@ -578,7 +567,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 } /*normalizeRSSItem*/
 
 
-- (NSString *) getelementvalue: (CFXMLTreeRef) tree
+- (NSString *) getElementValue:(CFXMLTreeRef) tree
 {
 	CFXMLNodeRef node;
 	CFXMLTreeRef itemTree;

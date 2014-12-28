@@ -80,7 +80,7 @@ public:
 };
 
 @interface UniversalDetector ()
-@property (retain, nonatomic, readwrite) NSString *MIMECharset;
+@property (copy, nonatomic, readwrite) NSString *MIMECharset;
 @end
 
 @implementation UniversalDetector
@@ -99,7 +99,8 @@ public:
 - (void)dealloc
 {
 	delete (wrappedUniversalDetector *)detectorptr;
-	self.MIMECharset = nil;
+	[charset release];
+	charset = nil;
 	[super dealloc];
 }
 

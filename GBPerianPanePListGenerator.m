@@ -24,19 +24,18 @@
 int main(int argc, char *argv[])
 {
 	@autoreleasepool {
-		NSString *filename = @(argv[1]);
-		NSString *componentDir = @(argv[2]);
+		NSFileManager *fileManager = [NSFileManager defaultManager];
+		NSString *filename = [fileManager stringWithFileSystemRepresentation:argv[1] length:strlen(argv[1])];
+		NSString *componentDir = [fileManager stringWithFileSystemRepresentation:argv[2] length:strlen(argv[2])];
+		NSString *plistPath = [fileManager stringWithFileSystemRepresentation:argv[3] length:strlen(argv[3])];
 		
 		NSMutableDictionary *plist = [[NSDictionary dictionaryWithContentsOfFile:filename] mutableCopy];
 		NSMutableArray *components = [NSMutableArray array];
 		
-		NSFileManager *fileManager = [NSFileManager defaultManager];
 		NSArray *types = @[@"QuickTime", @"CoreAudio", @"Frameworks"];
 		NSArray *extensions = @[@"component", @"component", @"framework"];
-		int i;
 		
-		for(i=0; i<[types count]; i++)
-		{
+		for (NSInteger i = 0; i < [types count]; i++) {
 			NSString *directory = [componentDir stringByAppendingPathComponent:types[i]];
 			NSString *extension = extensions[i];
 			NSArray *dirContents = [fileManager contentsOfDirectoryAtPath:directory error:NULL];
@@ -58,7 +57,7 @@ int main(int argc, char *argv[])
 			}
 		}
 		plist[ComponentInfoDictionaryKey] = components;
-		[plist writeToFile:@(argv[3]) atomically:YES];
+		[plist writeToFile:plistPath atomically:YES];
 		
 		return EXIT_SUCCESS;
 	}

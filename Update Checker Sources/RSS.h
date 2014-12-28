@@ -45,25 +45,17 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #import "NSString+extras.h"
 
 @interface RSS : NSObject
-{
-	NSDictionary *headerItems;
-	NSMutableArray *newsItems;
-	NSString *version;
-	
-	BOOL flRdf;
-	BOOL normalize;
-}
 
-@property (readonly) NSDictionary *headerItems;
-@property (readonly) NSMutableArray *newsItems;
-@property (readonly) NSString *version;
+@property (copy, readonly) NSDictionary *headerItems;
+@property (strong, readonly) NSMutableArray *newsItems;
+@property (copy, readonly) NSString *version;
 
 /*Public*/
 
-- (id) initWithTitle: (NSString *) title andDescription: (NSString *) description;
-- (id) initWithData: (NSData *) rssData normalize: (BOOL) fl;
-- (id) initWithURL: (NSURL *) url normalize: (BOOL) fl;
-- (id) initWithURL: (NSURL *) url normalize: (BOOL) fl userAgent:(NSString *)userAgent;
+- (instancetype) initWithTitle: (NSString *) title andDescription: (NSString *) description;
+- (instancetype) initWithData: (NSData *) rssData normalize: (BOOL) fl;
+- (instancetype) initWithURL: (NSURL *) url normalize: (BOOL) fl;
+- (instancetype) initWithURL: (NSURL *) url normalize: (BOOL) fl userAgent:(NSString *)userAgent;
 
 // AMM's extensions for Sparkle
 - (NSDictionary *)newestItem;

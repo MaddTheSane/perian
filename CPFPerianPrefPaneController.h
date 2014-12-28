@@ -38,15 +38,14 @@
 #define ComponentArchiveNameKey @"ArchiveName"
 #define ComponentTypeKey @"Type"
 
-typedef enum
-{
+typedef NS_ENUM(NSInteger, InstallStatus) {
 	InstallStatusInstalledInWrongLocation = 0,
 	InstallStatusNotInstalled = 1,
 	InstallStatusOutdatedWithAnotherInWrongLocation = 2,
 	InstallStatusOutdated = 3,
 	InstallStatusInstalledInBothLocations = 4,
 	InstallStatusInstalled = 5
-} InstallStatus;
+};
 
 static inline InstallStatus currentInstallStatus(InstallStatus status)
 {
@@ -63,12 +62,12 @@ static inline InstallStatus setWrongLocationInstalled(InstallStatus status)
 	return (status & ~1);
 }
 
-typedef enum
+typedef NS_ENUM(NSInteger, ComponentType)
 {
 	ComponentTypeQuickTime,
 	ComponentTypeCoreAudio,
 	ComponentTypeFramework
-} ComponentType;
+};
 
 PERIAN_EXPORTED
 @interface CPFPerianPrefPaneController : NSPreferencePane

@@ -8,21 +8,21 @@
 	NSString *charset;
 	float confidence;
 }
-@property (retain, nonatomic, readonly) NSString *MIMECharset;
+@property (copy, nonatomic, readonly) NSString *MIMECharset;
 @property (readonly) NSStringEncoding encoding;
 @property (readonly) float confidence;
 
-- (id)init;
+- (instancetype)init;
 
 - (void)analyzeData:(NSData *)data;
 - (void)analyzeBytes:(const char *)data length:(int)len;
 - (void)reset;
 
 - (BOOL)done DEPRECATED_ATTRIBUTE;
-- (BOOL)isDone;
+@property (readonly, getter=isDone) BOOL done;
 
 - (void)debugDump;
 
-+ (UniversalDetector *)detector;
++ (instancetype)detector;
 
 @end

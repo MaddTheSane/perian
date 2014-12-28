@@ -33,17 +33,7 @@
 #define UPDATE_STATUS_NOTIFICATION @"org.perian.UpdateCheckStatus"
 #define TIME_INTERVAL_TIL_NEXT_RUN 7*24*60*60
 
-@interface UpdateCheckerAppDelegate : NSObject <NSURLDownloadDelegate, SUAppcastDelegate, SUUpdateAlertDelegate> {
-	SUUpdateAlert *updateAlert;
-	SUAppcastItem *latest;
-	SUStatusController *statusController;
-	SUAppcast *appcast;
-	NSURLDownload *downloader;
-	NSString *downloadPath;
-	NSDate *lastRunDate;
-	BOOL	manualRun;
-}
-
+@interface UpdateCheckerAppDelegate : NSObject <NSURLDownloadDelegate, SUAppcastDelegate, SUUpdateAlertDelegate>
 - (void)doUpdateCheck;
 - (void)showUpdatePanelForItem:(SUAppcastItem *)updateItem;
 - (void)beginDownload;

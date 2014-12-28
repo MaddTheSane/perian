@@ -22,7 +22,6 @@
 @end
 
 @protocol SUAppcastDelegate <NSObject>
-@optional
 - (void)appcastDidFinishLoading:(SUAppcast *)appcast;
 - (void)appcastDidFailToLoad:(SUAppcast *)appcast;
 @end

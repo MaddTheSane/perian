@@ -142,7 +142,7 @@
 			#define DebugMessageN8(msg, N1, N2, N3, N4, N5, N6, N7, N8)		DebugPrintfRtn(DebugPrintfFileComma "%17qd: "msg DebugPrintfLineEnding, CAHostTimeBase::GetCurrentTimeInNanos(), N1, N2, N3, N4, N5, N6, N7, N8) FlushRtn
 			#define DebugMessageN9(msg, N1, N2, N3, N4, N5, N6, N7, N8, N9)	DebugPrintfRtn(DebugPrintfFileComma "%17qd: "msg DebugPrintfLineEnding, CAHostTimeBase::GetCurrentTimeInNanos(), N1, N2, N3, N4, N5, N6, N7, N8, N9) FlushRtn
 		#else
-			#define	DebugMessage(msg)										DebugPrintfRtn(DebugPrintfFileComma "%s"DebugPrintfLineEnding, msg) FlushRtn
+			#define	DebugMessage(msg)										DebugPrintfRtn(DebugPrintfFileComma "%s" DebugPrintfLineEnding, msg) FlushRtn
 			#define DebugMessageN1(msg, N1)									DebugPrintfRtn(DebugPrintfFileComma msg DebugPrintfLineEnding, N1) FlushRtn
 			#define DebugMessageN2(msg, N1, N2)								DebugPrintfRtn(DebugPrintfFileComma msg DebugPrintfLineEnding, N1, N2) FlushRtn
 			#define DebugMessageN3(msg, N1, N2, N3)							DebugPrintfRtn(DebugPrintfFileComma msg DebugPrintfLineEnding, N1, N2, N3) FlushRtn

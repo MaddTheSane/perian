@@ -47,10 +47,10 @@ using namespace libmatroska;
 #define MKV_A_PCM_FLOAT "A_PCM/FLOAT/IEEE"
 
 
-typedef enum {
+typedef CF_ENUM(int, DescExtDirection) {
 	kToKaxTrackEntry,
 	kToSampleDescription
-} DescExtDirection;
+};
 
 extern ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescriptionHandle desc, DescExtDirection dir);
 extern ComponentResult MkvFinishAudioDescription(KaxTrackEntry *tr_entry, Handle *cookie, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl);

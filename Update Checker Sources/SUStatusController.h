@@ -9,11 +9,8 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface SUStatusController : NSWindowController {
-	double progressValue, maxProgressValue;
-	NSString *title, *statusText, *buttonTitle;
-	IBOutlet NSButton *actionButton;
-}
+@interface SUStatusController : NSWindowController
+@property (weak) IBOutlet NSButton *actionButton;
 
 @property (copy) NSString *statusText;
 @property double progressValue;

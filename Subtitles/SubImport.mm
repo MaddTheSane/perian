@@ -623,21 +623,21 @@ static ComponentResult LoadSingleTextSubtitle(CFURLRef theDirectory, CFStringRef
 		
 		while (![ss isEmpty]) {
 			SubLine *sl = [ss getSerializedPacket];
-			TimeRecord startTime = {SInt64ToWide(sl->begin_time), timeBase, 0};
+			TimeRecord startTime = {SInt64ToWide(sl.beginTime), timeBase, 0};
 			TimeValue sampleTime;
-			const char *str = [sl->line UTF8String];
+			const char *str = [sl.line UTF8String];
 			int sampleLen = strlen(str);
 			Handle sampleHndl;
 			
 			PtrToHand(str, &sampleHndl, sampleLen);
-			err = AddMediaSample(theMedia, sampleHndl, 0, sampleLen, sl->end_time - sl->begin_time, (SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
+			err = AddMediaSample(theMedia, sampleHndl, 0, sampleLen, sl.endTime - sl.beginTime, (SampleDescriptionHandle)textDesc, 1, 0, &sampleTime);
 			
 			if (err) {
 				err = GetMoviesError();
-				Codecprintf(NULL,"SSA: error %d adding line from %d to %d",(int)err,sl->begin_time,sl->end_time);
+				Codecprintf(NULL,"SSA: error %d adding line from %d to %d",(int)err,sl.beginTime,sl.endTime);
 			} else {
 				ConvertTimeScale(&startTime, movieTimeScale);
-				InsertMediaIntoTrack(theTrack, startTime.value.lo, sampleTime, sl->end_time - sl->begin_time, movieRate);
+				InsertMediaIntoTrack(theTrack, startTime.value.lo, sampleTime, sl.endTime - sl.beginTime, movieRate);
 			}
 			
 			err = noErr;
@@ -709,8 +709,10 @@ static Media createVobSubMedia(Movie theMovie, Rect movieBox, ImageDescriptionHa
 		(*imgDesc)->height = imageHeight;
 	}	
 	
-	Handle imgDescExt = NewHandle([track->privateData length]);
-	memcpy(*imgDescExt, [track->privateData bytes], [track->privateData length]);
+	NSData *privDat = track.privateData;
+	
+	Handle imgDescExt = NewHandle([privDat length]);
+	memcpy(*imgDescExt, [privDat bytes], [privDat length]);
 	
 	AddImageDescriptionExtension(imgDesc, imgDescExt, kVobSubIdxExtension);
 	DisposeHandle(imgDescExt);
@@ -807,7 +809,7 @@ typedef struct {
 
 static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onlyForced, Track *theTrack, uint8_t *hasForcedSubtitles)
 {
-	int sampleCount = [track->samples count];
+	int sampleCount = [track.samples count];
 	if(sampleCount == 0)
 		return noErr;
 	
@@ -817,18 +819,16 @@ static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onl
 	int totalSamples = 0;
 	SampleReference64Ptr samples = (SampleReference64Ptr)calloc(sampleCount*2, sizeof(SampleReference64Record));
 	SampleReference64Ptr sample = samples;
-	int i;
 	uint32_t lastTime = 0;
 	VobSubSample *firstSample = nil;
-	for(i=0; i<sampleCount; i++)
-	{
-		VobSubSample *currentSample = [track->samples objectAtIndex:i];
-		int offset = currentSample->fileOffset;
+	for (VobSubSample *currentSample in track) {
+		NSInteger i = [track.samples indexOfObject:currentSample];
+		int offset = currentSample.fileOffset;
 		int nextOffset;
 		if(i == sampleCount - 1)
 			nextOffset = [info.subFileData length];
 		else
-			nextOffset = ((VobSubSample *)[track->samples objectAtIndex:i+1])->fileOffset;
+			nextOffset = ((VobSubSample *)[track.samples objectAtIndex:i+1]).fileOffset;
 		int size = nextOffset - offset;
 		if(size < 0)
 			//Skip samples for which we cannot determine size
@@ -848,15 +848,15 @@ static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onl
 		if(forced)
 			*hasForcedSubtitles = forced;
 		free(extracted);
-		uint32_t startTime = currentSample->timeStamp + startTimestamp;
-		uint32_t endTime = currentSample->timeStamp + endTimestamp;
+		uint32_t startTime = currentSample.timeStamp + startTimestamp;
+		uint32_t endTime = currentSample.timeStamp + endTimestamp;
 		int duration = endTimestamp - startTimestamp;
 		if(duration <= 0)
 			//Skip samples which are broken
 			continue;
 		if(firstSample == nil)
 		{
-			currentSample->timeStamp = startTime;
+			currentSample.timeStamp = startTime;
 			firstSample = currentSample;
 		}
 		else if(lastTime != startTime)
@@ -882,7 +882,7 @@ static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onl
 	}
 	AddMediaSampleReferences64(trackMedia, (SampleDescriptionHandle)imgDesc, totalSamples, samples, NULL);
 	free(samples);
-	NSString *langStr = track->language;
+	NSString *langStr = track.language;
 	int lang = langUnspecified;
 	if([langStr length] == 3)
 		lang = ISO639_2ToQTLangCode([langStr UTF8String]);
@@ -894,16 +894,16 @@ static OSErr loadTrackIntoMovie(VobSubTrack *track, VobSubInfo info, uint8_t onl
 	TimeValue movieTimeScale = GetMovieTimeScale(info.theMovie);
 	*theTrack = GetMediaTrack(trackMedia);
 	if(firstSample == nil)
-		firstSample = [track->samples objectAtIndex:0];
-	return InsertMediaIntoTrack(*theTrack, (firstSample->timeStamp * movieTimeScale)/1000, 0, mediaDuration, fixed1);
+		firstSample = [track.samples objectAtIndex:0];
+	return InsertMediaIntoTrack(*theTrack, (firstSample.timeStamp * movieTimeScale)/1000, 0, mediaDuration, fixed1);
 }
 
-typedef enum {
+typedef NS_ENUM(NSInteger, VobSubState) {
 	VOB_SUB_STATE_READING_PRIVATE,
 	VOB_SUB_STATE_READING_TRACK_HEADER,
 	VOB_SUB_STATE_READING_DELAY,
 	VOB_SUB_STATE_READING_TRACK_DATA
-} VobSubState;
+};
 
 static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef filename, Movie theMovie, Track *firstSubTrack)
 {
@@ -1200,13 +1200,18 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 #pragma mark Obj-C Classes
 
 @implementation SubSerializer
--(id)init
+@synthesize finished;
+@synthesize lastBeginTime = last_begin_time;
+@synthesize lastEndTime = last_end_time;
+@synthesize numLinesInput = num_lines_input;
+
+-(instancetype)init
 {
 	if (self = [super init]) {
 		lines = [[NSMutableArray alloc] init];
-		finished = NO;
-		last_begin_time = last_end_time = 0;
-		num_lines_input = 0;
+		self.finished = NO;
+		self.lastBeginTime = self.lastEndTime = 0;
+		self.numLinesInput = 0;
 	}
 	
 	return self;
@@ -1220,24 +1225,24 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 
 -(void)addLine:(SubLine *)line
 {
-	if (line->begin_time >= line->end_time) {
-		if (line->begin_time)
-			Codecprintf(NULL, "Invalid times (%d and %d) for line \"%s\"", line->begin_time, line->end_time, [line->line UTF8String]);
+	if (line.beginTime >= line.endTime) {
+		if (line.beginTime)
+			Codecprintf(NULL, "Invalid times (%d and %d) for line \"%s\"", line.beginTime, line.endTime, [line.line UTF8String]);
 		return;
 	}
 	
-	line->num = num_lines_input++;
+	line.num = num_lines_input++;
 	
 	int i = [lines indexOfObject:line inSortedRange:NSMakeRange(0, [lines count])
 				   options:NSBinarySearchingInsertionIndex|NSBinarySearchingLastEqual
 				   usingComparator:^NSComparisonResult(id a, id b){
 		SubLine *al = a, *bl = b;
 					   
-		if (al->begin_time > bl->begin_time) return NSOrderedDescending;
-		if (al->begin_time < bl->begin_time) return NSOrderedAscending;
+		if (al.beginTime > bl.beginTime) return NSOrderedDescending;
+		if (al.beginTime < bl.beginTime) return NSOrderedAscending;
 					   
-		if (al->num > bl->num) return NSOrderedDescending;
-		if (al->num < bl->num) return NSOrderedAscending;
+		if (al.num > bl.num) return NSOrderedDescending;
+		if (al.num < bl.num) return NSOrderedAscending;
 		return NSOrderedSame;
 	}];
 	
@@ -1252,16 +1257,16 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 
 	if (!finished) {
 		if (nlines > 1) {
-			unsigned maxEndTime = first->end_time;
+			unsigned maxEndTime = first.endTime;
 			
 			for (i = 1; i < nlines; i++) {
 				SubLine *l = [lines objectAtIndex:i];
 				
-				if (l->begin_time >= maxEndTime) {
+				if (l.beginTime >= maxEndTime) {
 					goto canOutput;
 				}
 				
-				maxEndTime = MAX(maxEndTime, l->end_time);
+				maxEndTime = MAX(maxEndTime, l.endTime);
 			}
 		}
 		
@@ -1269,28 +1274,28 @@ ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType data
 	}
 	
 canOutput:
-	NSMutableString *str = [NSMutableString stringWithString:first->line];
-	unsigned begin_time = last_end_time, end_time = first->end_time;
+	NSMutableString *str = [NSMutableString stringWithString:first.line];
+	unsigned begin_time = last_end_time, end_time = first.endTime;
 	int deleted = 0;
 		
 	for (i = 1; i < nlines; i++) {
 		SubLine *l = [lines objectAtIndex:i];
-		if (l->begin_time >= end_time) break;
+		if (l.beginTime >= end_time) break;
 		
 		//shorten packet end time if another shorter time (begin or end) is found
 		//as long as it isn't the begin time
-		end_time = MIN(end_time, l->end_time);
-		if (l->begin_time > begin_time)
-			end_time = MIN(end_time, l->begin_time);
+		end_time = MIN(end_time, l.endTime);
+		if (l.beginTime > begin_time)
+			end_time = MIN(end_time, l.beginTime);
 		
-		if (l->begin_time <= begin_time)
-			[str appendString:l->line];
+		if (l.beginTime <= begin_time)
+			[str appendString:l.line];
 	}
 	
 	for (i = 0; i < nlines; i++) {
 		SubLine *l = [lines objectAtIndex:i - deleted];
 		
-		if (l->end_time == end_time) {
+		if (l.endTime == end_time) {
 			[lines removeObjectAtIndex:i - deleted];
 			deleted++;
 		}
@@ -1307,21 +1312,19 @@ canOutput:
 	
 	SubLine *nextline = [lines objectAtIndex:0], *ret;
 	
-	if (nextline->begin_time > last_end_time) {
-		ret = [[SubLine alloc] initWithLine:@"\n" start:last_end_time end:nextline->begin_time];
+	if (nextline.beginTime > last_end_time) {
+		ret = [[SubLine alloc] initWithLine:@"\n" start:last_end_time end:nextline.beginTime];
 	} else {
 		ret = [self copyNextRealSerializedPacket];
 	}
 	
 	if (!ret) return nil;
 	
-	last_begin_time = ret->begin_time;
-	last_end_time   = ret->end_time;
+	last_begin_time = ret.beginTime;
+	last_end_time   = ret.endTime;
 		
 	return [ret autorelease];
 }
-
-@synthesize finished;
 
 -(BOOL)isEmpty
 {
@@ -1334,13 +1337,22 @@ canOutput:
 }
 @end
 
+@interface SubLine ()
+@property (readwrite, copy) NSString *line;
+@end
+
 @implementation SubLine
--(id)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e
+@synthesize line;
+@synthesize beginTime = begin_time;
+@synthesize endTime = end_time;
+@synthesize num;
+
+-(instancetype)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e
 {
 	if (self = [super init]) {
 		int length = [l length];
 		if (!length || [l characterAtIndex:length-1] != '\n') l = [l stringByAppendingString:@"\n"];
-		line = [l retain];
+		self.line = l;
 		begin_time = s;
 		end_time = e;
 		num = 0;
@@ -1352,6 +1364,7 @@ canOutput:
 -(void)dealloc
 {
 	[line release];
+	line = nil;
 	[super dealloc];
 }
 
@@ -1362,6 +1375,8 @@ canOutput:
 @end
 
 @implementation VobSubSample
+@synthesize timeStamp;
+@synthesize fileOffset;
 
 - (id)initWithTime:(long)time offset:(long)offset
 {
@@ -1377,7 +1392,26 @@ canOutput:
 
 @end
 
+@interface VobSubTrack ()
+
+@property (retain, readwrite) NSData *privateData;
+
+@end
+
 @implementation VobSubTrack
+@synthesize privateData;
+@synthesize language;
+@synthesize index;
+
+- (NSArray*)samples
+{
+	return [NSArray arrayWithArray:samples];
+}
+
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id __unsafe_unretained [])buffer count:(NSUInteger)len
+{
+	return [samples countByEnumeratingWithState:state objects:buffer count:len];
+}
 
 - (id)initWithPrivateData:(NSData *)idxPrivateData language:(NSString *)lang andIndex:(int)trackIndex
 {
@@ -1385,9 +1419,9 @@ canOutput:
 	if(!self)
 		return self;
 	
-	privateData = [idxPrivateData retain];
-	language = [lang retain];
-	index = trackIndex;
+	self.privateData = idxPrivateData;
+	self.language = lang;
+	self.index = trackIndex;
 	samples = [[NSMutableArray alloc] init];
 	
 	return self;
@@ -1397,6 +1431,8 @@ canOutput:
 {
 	[privateData release];
 	[language release];
+	privateData = nil;
+	language = nil;
 	[samples release];
 	[super dealloc];
 }
@@ -1436,6 +1472,27 @@ CXXSubSerializer::~CXXSubSerializer()
 	}
 }
 
+void CXXSubSerializer::pushLine(const std::string &cppstr, unsigned start, unsigned end)
+{
+	@autoreleasepool {
+		@try {
+			NSMutableString *str = [[NSMutableString alloc] initWithBytes:cppstr.c_str() length:cppstr.length() encoding:NSUTF8StringEncoding];
+			if (!str) return; // in case of invalid UTF-8?
+			[str appendString:@"\n"];
+			
+			SubLine *sl = [[SubLine alloc] initWithLine:str start:start end:end];
+			
+			[str autorelease];
+			
+			[(SubSerializer*)priv addLine:sl];
+			[sl release];
+		} @catch(id) {
+			Codecprintf(stderr, "Exception occured while reading Matroska subtitles");
+		}
+	}
+}
+
+
 void CXXSubSerializer::pushLine(const char *line, size_t size, unsigned start, unsigned end)
 {
 	@autoreleasepool {
@@ -1469,9 +1526,9 @@ Handle CXXSubSerializer::popPacket(unsigned *start, unsigned *end)
 		NS_DURING
 		SubLine *sl = [(SubSerializer*)priv getSerializedPacket];
 		if (!sl) return NULL;
-		const char *u = [sl->line UTF8String];
-		*start = sl->begin_time;
-		*end   = sl->end_time;
+		const char *u = [sl.line UTF8String];
+		*start = sl.beginTime;
+		*end   = sl.endTime;
 		
 		Handle h;
 		

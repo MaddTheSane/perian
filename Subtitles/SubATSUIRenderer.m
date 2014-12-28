@@ -40,7 +40,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name);
 @public;
 	ATSUStyle style;
 }
--(SubATSUStyle*)initWithATSUStyle:(ATSUStyle)_style;
+- (instancetype)initWithATSUStyle:(ATSUStyle)_style;
 @end
 
 @interface SubATSUISpanExtra : NSObject <NSCopying> {
@@ -51,25 +51,25 @@ static ATSUFontID GetFontIDForSSAName(NSString *name);
 	BOOL blurEdges, vertical;
 	ATSUFontID font;
 }
--(SubATSUISpanExtra*)initWithStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs;
+-(instancetype)initWithStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs;
 @end
 
 @implementation SubATSUStyle
--(SubATSUStyle*)initWithATSUStyle:(ATSUStyle)_style
+-(instancetype)initWithATSUStyle:(ATSUStyle)_style
 {
 	self = [super init];
 	style = _style;
 	return self;
 }
 
--(SubATSUStyle*)copyWithZone:(NSZone*)zone
+- (id)copyWithZone:(NSZone*)zone
 {
 	SubATSUStyle *sty = [SubATSUStyle new];
 	ATSUCreateAndCopyStyle(style, &sty->style);
 	return sty;
 }
 
--(void)dealloc
+- (void)dealloc
 {
 	ATSUDisposeStyle(style);
 	[super dealloc];
@@ -98,7 +98,7 @@ static CGColorRef CopyCGColorWithAlpha(CGColorRef c, float alpha)
 	return new;
 }
 
--(SubATSUISpanExtra*)initWithStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs
+- (instancetype)initWithStyle:(SubStyle*)sstyle colorSpace:(CGColorSpaceRef)cs
 {	
 	if (self = [super init]) {
 		SubATSUStyle *extra = sstyle.extra;
@@ -123,7 +123,7 @@ static CGColorRef CopyCGColorWithAlpha(CGColorRef c, float alpha)
 	return self;
 }
 
--(SubATSUISpanExtra*)copyWithZone:(NSZone*)zone
+-(id)copyWithZone:(NSZone*)zone
 {
 	SubATSUISpanExtra *ret = [[SubATSUISpanExtra alloc] init];
 	
@@ -193,7 +193,7 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 
 @implementation SubATSUIRenderer
 
--(SubATSUIRenderer*)initWithScriptType:(int)type header:(NSString*)header videoWidth:(float)width videoHeight:(float)height
+- (instancetype)initWithScriptType:(int)type header:(NSString*)header videoWidth:(float)width videoHeight:(float)height
 {
 	if (self = [super init]) {
 		NSDictionary *headers = nil;

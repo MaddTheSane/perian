@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13C64" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="5056" systemVersion="13E28" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment defaultVersion="1070" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
-        <plugIn identifier="com.apple.WebKitIBPlugin" version="3338"/>
+        <development version="5100" identifier="xcode"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="5056"/>
+        <plugIn identifier="com.apple.WebKitIBPlugin" version="5056"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="SUUpdateAlert">
             <connections>
-                <outlet property="description" destination="101" id="105"/>
+                <outlet property="itemDescription" destination="101" id="Wdt-vX-WkI"/>
                 <outlet property="releaseNotesView" destination="18" id="32"/>
                 <outlet property="window" destination="5" id="69"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application"/>
-        <window title="Software Update" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" wantsToBeColor="NO" visibleAtLaunch="NO" frameAutosaveName="SUUpdateAlertFrame" animationBehavior="default" id="5" userLabel="Update Alert (release notes)">
+        <window title="Software Update" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="SUUpdateAlertFrame" animationBehavior="default" id="5" userLabel="Update Alert (release notes)">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="159" y="340" width="566" height="358"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1920" height="1058"/>
             <value key="minSize" type="size" width="566" height="350"/>
@@ -59,7 +59,7 @@
                         </textFieldCell>
                     </textField>
                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="22">
-                        <rect key="frame" x="279" y="13" width="146" height="32"/>
+                        <rect key="frame" x="260" y="13" width="146" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="push" title="Remind Me Later" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="110">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -84,7 +84,7 @@ Gw
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="76">
-                        <rect key="frame" x="425" y="13" width="127" height="32"/>
+                        <rect key="frame" x="406" y="13" width="146" height="32"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="push" title="Install Update" bezelStyle="rounded" alignment="center" borderStyle="border" inset="2" id="112">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -143,6 +143,7 @@ DQ
                     <constraint firstItem="76" firstAttribute="leading" secondItem="22" secondAttribute="trailing" constant="12" symbolic="YES" id="33h-0Q-Bpo"/>
                     <constraint firstItem="23" firstAttribute="leading" secondItem="89" secondAttribute="leading" id="7ZA-UI-hxr"/>
                     <constraint firstItem="76" firstAttribute="trailing" secondItem="89" secondAttribute="trailing" id="DDm-3R-jyP"/>
+                    <constraint firstItem="22" firstAttribute="width" secondItem="76" secondAttribute="width" id="GvS-Vf-eYy"/>
                     <constraint firstItem="10" firstAttribute="leading" secondItem="7" secondAttribute="trailing" constant="20" id="Ihk-W3-EY6"/>
                     <constraint firstItem="101" firstAttribute="top" secondItem="10" secondAttribute="bottom" constant="8" symbolic="YES" id="Jz4-gU-LFJ"/>
                     <constraint firstAttribute="bottom" secondItem="23" secondAttribute="bottom" constant="20" symbolic="YES" id="Kce-t5-bzJ"/>

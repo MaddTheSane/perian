@@ -22,7 +22,7 @@
 @synthesize releaseNotesURL;
 @synthesize versionString;
 
-- (id)initWithDictionary:(NSDictionary *)dict
+- (instancetype)initWithDictionary:(NSDictionary *)dict
 {
 	if(self = [super init]) {
 		self.title = dict[@"title"];

@@ -62,12 +62,12 @@ typedef struct
 	uint8_t		ffmpegUsing;
 } FFusionBuffer;
 
-typedef enum
+typedef CF_ENUM(CFIndex, FFusionPacked)
 {
 	PACKED_QUICKTIME_KNOWS_ORDER, /* This is for non-stupid container formats which actually know the difference between decode and display order */
 	PACKED_ALL_IN_FIRST_FRAME, /* This is for the divx hack which contains a P frame and all subsequent B frames in a single frame. Ex: I, PB, -, PB, -, I...*/
 	PACKED_DELAY_BY_ONE_FRAME /* This is for stupid containers where frames are soley writen in decode order.  Ex: I, P, B, P, B, P, I.... */
-} FFusionPacked;
+};
 
 /* Why do these small structs?  It makes the usage of these variables clearer, no other reason */
 

@@ -19,6 +19,7 @@
 @synthesize statusText;
 @synthesize title;
 @synthesize buttonTitle;
+@synthesize actionButton;
 
 - (id)init
 {
@@ -39,8 +40,8 @@
 
 - (void)awakeFromNib
 {
-	[[self window] center];
-	[[self window] setFrameAutosaveName:@"SUStatusFrame"];
+	[self.window center];
+	self.window.frameAutosaveName = @"SUStatusFrame";
 }
 
 - (NSString *)windowTitle
@@ -73,9 +74,9 @@
 	// Redisplay superview to clean up artifacts
 	[[actionButton superview] display];
 	
-	[actionButton setTarget:target];
-	[actionButton setAction:action];
-	[actionButton setKeyEquivalent:isDefault ? @"\r" : @""];
+	actionButton.target = target;
+	actionButton.action = action;
+	actionButton.keyEquivalent = isDefault ? @"\r" : @"";
 }
 
 - (void)setButtonEnabled:(BOOL)enabled

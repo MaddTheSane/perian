@@ -62,7 +62,7 @@ NSString *SULocalizedString(NSString *key, NSString *comment) {
 	return [SUUtilities localizedStringForKey:key withComment:comment];
 }
 
-enum {
+typedef NS_ENUM(int, CharacterType) {
 	kNumberType,
 	kStringType,
 	kPeriodType
@@ -70,7 +70,7 @@ enum {
 
 // The version comparison code here is courtesy of Kevin Ballard, adapted from MacPAD. Thanks, Kevin!
 
-int SUGetCharType(NSString *character)
+CharacterType SUGetCharType(NSString *character)
 {
 	if ([character isEqualToString:@"."]) {
 		return kPeriodType;
@@ -85,7 +85,8 @@ NSArray *SUSplitVersionString(NSString *version)
 {
 	NSString *character;
 	NSMutableString *s;
-	int i, n, oldType, newType;
+	int i, n;
+	CharacterType oldType, newType;
 	NSMutableArray *parts = [NSMutableArray array];
 	if ([version length] == 0) {
 		// Nothing to do here
@@ -120,7 +121,8 @@ NSComparisonResult SUStandardVersionComparison(NSString *versionA, NSString *ver
 	NSArray *partsB = SUSplitVersionString(versionB);
 	
 	NSString *partA, *partB;
-	int i, n, typeA, typeB, intA, intB;
+	int i, n, intA, intB;
+	CharacterType typeA, typeB;
 	
 	n = MIN([partsA count], [partsB count]);
 	for (i = 0; i < n; ++i) {

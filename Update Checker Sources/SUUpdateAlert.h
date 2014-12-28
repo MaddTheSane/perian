@@ -7,36 +7,35 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import <WebKit/WebView.h>
 
-typedef enum
-{
+typedef NS_ENUM(int, SUUpdateAlertChoice) {
 	SUInstallUpdateChoice,
 	SURemindMeLaterChoice,
 	SUSkipThisVersionChoice
-} SUUpdateAlertChoice;
+};
 
-@class WebView, SUAppcastItem;
+@class SUAppcastItem;
 @protocol SUUpdateAlertDelegate;
 
 @interface SUUpdateAlert : NSWindowController {
 	SUAppcastItem *updateItem;
 	
-	IBOutlet WebView *releaseNotesView;
-	IBOutlet NSTextField *description;
 	NSProgressIndicator *releaseNotesSpinner;
 	BOOL webViewFinishedLoading;
 }
 @property (weak) NSObject<SUUpdateAlertDelegate> *delegate;
+@property (weak) IBOutlet WebView *releaseNotesView;
+@property (weak) IBOutlet NSTextField *itemDescription;
 
-- (id)initWithAppcastItem:(SUAppcastItem *)item;
+- (instancetype)initWithAppcastItem:(SUAppcastItem *)item;
 
-- (IBAction)installUpdate:sender;
-- (IBAction)skipThisVersion:sender;
-- (IBAction)remindMeLater:sender;
+- (IBAction)installUpdate:(id)sender;
+- (IBAction)skipThisVersion:(id)sender;
+- (IBAction)remindMeLater:(id)sender;
 
 @end
 
 @protocol SUUpdateAlertDelegate <NSObject>
-@optional
 - (void)updateAlert:(SUUpdateAlert *)updateAlert finishedWithChoice:(SUUpdateAlertChoice)updateChoice;
 @end
