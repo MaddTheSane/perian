@@ -90,22 +90,15 @@
 
 - (float)getFloatFromKey:(NSString*)key forAppID:(NSString*)appID withDefault:(float)defaultValue
 {
-	CFPropertyListRef value;
-	float ret = defaultValue;
+	CFPropertyListRef value = CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID);
+	NSNumber *aVal = CFBridgingRelease(value);
 	
-	value = CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID);
-	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
-		CFNumberGetValue(value, kCFNumberFloatType, &ret);
-	
-	if(value)
-		CFRelease(value);
-	
-	return ret;
+	return [aVal isKindOfClass:[NSNumber class]] ? aVal.floatValue : defaultValue;
 }
 
 - (void)setKey:(NSString*)key forAppID:(NSString*)appID fromFloat:(float)value
 {
-	CFNumberRef numRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberFloatType, &value);
+	CFNumberRef numRef = CFBridgingRetain(@(value));
 	CFPreferencesSetAppValue((__bridge CFStringRef)key, numRef, (__bridge CFStringRef)appID);
 	CFRelease(numRef);
 }
@@ -121,26 +114,17 @@
 
 - (void)setKey:(NSString*)key forAppID:(NSString*)appID fromInt:(int)value
 {
-	CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberIntType, &value);
+	CFNumberRef numRef = CFBridgingRetain(@(value));
 	CFPreferencesSetAppValue((__bridge CFStringRef)key, numRef, (__bridge CFStringRef)appID);
 	CFRelease(numRef);
 }
 
 - (NSString *)getStringFromKey:(NSString*)key forAppID:(NSString*)appID
 {
-	CFPropertyListRef value;
-	NSString *nsVal;
+	CFPropertyListRef value = CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID);
+	NSString *toRet = CFBridgingRelease(value);
 	
-	value = CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID);
-	
-	if(value) {
-		nsVal = CFBridgingRelease(value);
-		
-		if (CFGetTypeID(value) != CFStringGetTypeID())
-			return nil;
-	}
-	
-	return nsVal;
+	return [toRet isKindOfClass:[NSString class]] ? toRet : nil;
 }
 
 - (void)setKey:(NSString*)key forAppID:(NSString*)appID fromString:(NSString *)value
@@ -150,16 +134,10 @@
 
 - (NSDate *)getDateFromKey:(NSString*)key forAppID:(NSString*)appID
 {
-	CFPropertyListRef value;
-	NSDate *ret = nil;
+	CFPropertyListRef value = CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID);
+	NSDate *ret = CFBridgingRelease(value);
 	
-	value = CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID);
-	ret = CFBridgingRelease(value);
-	
-	if(value && CFGetTypeID(value) == CFDateGetTypeID())
-		return ret;
-	else
-		return nil;
+	return [ret isKindOfClass:[NSDate class]] ? ret : nil;
 }
 
 - (void)setKey:(NSString*)key forAppID:(NSString*)appID fromDate:(NSDate *)value
