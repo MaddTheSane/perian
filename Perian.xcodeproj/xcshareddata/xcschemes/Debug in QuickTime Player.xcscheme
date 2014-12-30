@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0510"
+   LastUpgradeVersion = "0610"
    version = "1.8">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -44,6 +44,15 @@
       <PathRunnable
          FilePath = "/Applications/Utilities/QuickTime Player 7.app">
       </PathRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "F59E09EA0A670E3D0019A3F0"
+            BuildableName = "Debug in QuickTime Player"
+            BlueprintName = "Debug in QuickTime Player"
+            ReferencedContainer = "container:Perian.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
