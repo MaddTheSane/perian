@@ -22,7 +22,16 @@
 #ifndef __CODECIDS_H__
 #define __CODECIDS_H__
 
-enum {
+#ifndef REZ
+#include <CoreFoundation/CFBase.h>
+#endif
+
+#ifndef REZ
+typedef CF_ENUM(OSType, PerianFourCharCodecIDs)
+#else
+enum
+#endif
+{
 	// these are atoms/extension types defined by XiphQT for their codecs
 	kCookieTypeOggSerialNo = 'oCtN',
 	
@@ -58,8 +67,12 @@ enum {
 	kCompressionAlgorithm = 'CpAl',
 };
 
-
-enum {
+#ifndef REZ
+typedef CF_ENUM(OSType, PerianAddlFourCharCodecIDs)
+#else
+enum
+#endif
+	{
 	// XiphQT's codec IDs
 	kAudioFormatXiphVorbis                  = 'XiVs',
 	kAudioFormatXiphSpeex                   = 'XiSp',

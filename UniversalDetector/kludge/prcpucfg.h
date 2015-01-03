@@ -42,8 +42,13 @@
 #define XP_MAC
 #endif
 
+#ifdef __BIG_ENDIAN__
 #undef  IS_LITTLE_ENDIAN
 #define IS_BIG_ENDIAN 1
+#else
+#define IS_LITTLE_ENDIAN 1
+#undef  IS_BIG_ENDIAN
+#endif
 
 #define	HAVE_LONG_LONG
 
@@ -53,7 +58,11 @@
 #define PR_BYTES_PER_SHORT  2L
 #define PR_BYTES_PER_INT    4L
 #define PR_BYTES_PER_INT64  8L
+#ifdef __LP64__
+#define PR_BYTES_PER_LONG   8L
+#else
 #define PR_BYTES_PER_LONG   4L
+#endif
 #define PR_BYTES_PER_FLOAT  4L
 #define PR_BYTES_PER_DOUBLE 8L
 #define PR_BYTES_PER_WORD   4L
@@ -63,7 +72,11 @@
 #define PR_BITS_PER_SHORT   16L
 #define PR_BITS_PER_INT     32L
 #define PR_BITS_PER_INT64   64L
+#ifdef __LP64__
+#define PR_BITS_PER_LONG    64L
+#else
 #define PR_BITS_PER_LONG    32L
+#endif
 #define PR_BITS_PER_FLOAT   32L
 #define PR_BITS_PER_DOUBLE  64L
 #define PR_BITS_PER_WORD    32L
@@ -72,7 +85,11 @@
 #define PR_BITS_PER_SHORT_LOG2  4L
 #define PR_BITS_PER_INT_LOG2    5L
 #define PR_BITS_PER_INT64_LOG2  6L
+#ifdef __LP64__
+#define PR_BITS_PER_LONG_LOG2   6L
+#else
 #define PR_BITS_PER_LONG_LOG2   5L
+#endif
 #define PR_BITS_PER_FLOAT_LOG2  5L
 #define PR_BITS_PER_DOUBLE_LOG2 6L
 #define PR_BITS_PER_WORD_LOG2   5L

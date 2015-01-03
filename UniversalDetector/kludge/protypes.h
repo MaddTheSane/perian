@@ -104,7 +104,7 @@ typedef PRUintn uint;
  * uint64
  */
 
-#if !defined(XP_BEOS) && !defined(VMS)
+#if !defined(XP_BEOS) && !defined(VMS) && !defined(_UINT64)
 typedef PRUint64 uint64;
 #endif
 
@@ -112,7 +112,7 @@ typedef PRUint64 uint64;
  * uint32
  */
 
-#if !defined(XP_BEOS) && !defined(VMS)
+#if !defined(XP_BEOS) && !defined(VMS) && !defined(_UINT32)
 #if !defined(XP_MAC) && !defined(_WIN32) && !defined(XP_OS2) && !defined(NTO)
 typedef PRUint32 uint32;
 #else

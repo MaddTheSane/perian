@@ -25,8 +25,7 @@
 #include <QuickTime/QuickTime.h>
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 // ISO 639-1 to language ID expected by SetMediaLanguage
@@ -57,7 +56,7 @@ int ShouldImportFontFileName(const char *filename);
 int ShouldPlayHighFreqSBR();
 	
 // CFPreferencesCopyAppValue() wrapper which checks the type of the value returned
-CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type);
+CFPropertyListRef CopyPreferencesValueTyped(CFStringRef key, CFTypeID type) CF_RETURNS_RETAINED;
 
 void *fast_realloc_with_padding(void *ptr, unsigned int *size, unsigned int min_size);
 

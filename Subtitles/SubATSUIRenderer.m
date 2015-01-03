@@ -310,7 +310,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	
 	Boolean b = s->weight > 0, i = s->italic, u = s->underline, st = s->strikeout;
 	ATSStyleRenderingOptions opt = kATSStyleApplyAntiAliasing;
-	ATSUFontID font = GetFontIDForSSAName(s->fontname);
+	ATSUFontID font = GetFontIDForSSAName(s.fontname);
 	ATSFontRef fontRef = font;
 	ATSUStyle style;
 	Fixed size;

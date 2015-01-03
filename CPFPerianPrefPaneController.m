@@ -21,15 +21,15 @@
 #import "CPFPerianPrefPaneController.h"
 #import "UpdateCheckerAppDelegate.h"
 
-#define AC3DynamicRangeKey CFSTR("dynamicRange")
-#define LastInstalledVersionKey CFSTR("LastInstalledVersion")
-#define AC3TwoChannelModeKey CFSTR("twoChannelMode")
-#define ExternalSubtitlesKey CFSTR("LoadExternalSubtitles")
-#define DontShowMultiChannelWarning CFSTR("DontShowMultiChannelWarning")
+#define AC3DynamicRangeKey @"dynamicRange"
+#define LastInstalledVersionKey @"LastInstalledVersion"
+#define AC3TwoChannelModeKey @"twoChannelMode"
+#define ExternalSubtitlesKey @"LoadExternalSubtitles"
+#define DontShowMultiChannelWarning @"DontShowMultiChannelWarning"
 
 //Old
-#define AC3StereoOverDolbyKey CFSTR("useStereoOverDolby")
-#define AC3ProLogicIIKey CFSTR("useDolbyProLogicII")
+#define AC3StereoOverDolbyKey @"useStereoOverDolby"
+#define AC3ProLogicIIKey @"useDolbyProLogicII"
 
 //A52 Constants
 #define A52_STEREO 2
@@ -58,103 +58,91 @@
 @interface CPFPerianPrefPaneController()
 - (void)setAC3DynamicRange:(float)newVal;
 - (void)saveAC3DynamicRange:(float)newVal;
+@property (copy) NSString *perianAppID;
+@property (copy) NSString *a52AppID;
 @end
+
+#define CPFLocalizedStringFromBundle(key, bundle, comment) \
+    [bundle localizedStringForKey:(key) value:@"" table:nil]
 
 @implementation CPFPerianPrefPaneController
 
 #pragma mark Preferences Functions
 
-- (BOOL)getBoolFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(BOOL)defaultValue
+- (void)synchronizePreferencesForApp:(NSString*)appName
+{
+	CFPreferencesAppSynchronize((__bridge CFStringRef)appName);
+}
+
+- (BOOL)getBoolFromKey:(NSString*)key forAppID:(NSString*)appID withDefault:(BOOL)defaultValue
 {
 	Boolean ret, exists = FALSE;
 	
-	ret = CFPreferencesGetAppBooleanValue(key, appID, &exists);
+	ret = CFPreferencesGetAppBooleanValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID, &exists);
 	
 	return exists ? ret : defaultValue;
 }
 
-- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromBool:(BOOL)value
+- (void)setKey:(NSString*)key forAppID:(NSString*)appID fromBool:(BOOL)value
 {
-	CFPreferencesSetAppValue(key, value ? kCFBooleanTrue : kCFBooleanFalse, appID);
+	CFPreferencesSetAppValue((__bridge CFStringRef)key, value ? kCFBooleanTrue : kCFBooleanFalse, (__bridge CFStringRef)appID);
 }
 
-- (float)getFloatFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(float)defaultValue
+- (float)getFloatFromKey:(NSString*)key forAppID:(NSString*)appID withDefault:(float)defaultValue
 {
-	CFPropertyListRef value;
-	float ret = defaultValue;
+	CFPropertyListRef value = CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID);
+	NSNumber *aVal = CFBridgingRelease(value);
 	
-	value = CFPreferencesCopyAppValue(key, appID);
-	if(value && CFGetTypeID(value) == CFNumberGetTypeID())
-		CFNumberGetValue(value, kCFNumberFloatType, &ret);
-	
-	if(value)
-		CFRelease(value);
-	
-	return ret;
+	return [aVal isKindOfClass:[NSNumber class]] ? aVal.floatValue : defaultValue;
 }
 
-- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromFloat:(float)value
+- (void)setKey:(NSString*)key forAppID:(NSString*)appID fromFloat:(float)value
 {
-	CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberFloatType, &value);
-	CFPreferencesSetAppValue(key, numRef, appID);
+	CFNumberRef numRef = CFBridgingRetain(@(value));
+	CFPreferencesSetAppValue((__bridge CFStringRef)key, numRef, (__bridge CFStringRef)appID);
 	CFRelease(numRef);
 }
 
-- (NSUInteger)getUnsignedIntFromKey:(CFStringRef)key forAppID:(CFStringRef)appID withDefault:(NSUInteger)defaultValue
+- (NSUInteger)getUnsignedIntFromKey:(NSString*)key forAppID:(NSString*)appID withDefault:(NSUInteger)defaultValue
 {
 	NSUInteger ret; Boolean exists = FALSE;
 	
-	ret = CFPreferencesGetAppIntegerValue(key, appID, &exists);
+	ret = CFPreferencesGetAppIntegerValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID, &exists);
 	
 	return exists ? ret : defaultValue;
 }
 
-- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromInt:(int)value
+- (void)setKey:(NSString*)key forAppID:(NSString*)appID fromInt:(int)value
 {
-	CFNumberRef numRef = CFNumberCreate(NULL, kCFNumberIntType, &value);
-	CFPreferencesSetAppValue(key, numRef, appID);
+	CFNumberRef numRef = CFBridgingRetain(@(value));
+	CFPreferencesSetAppValue((__bridge CFStringRef)key, numRef, (__bridge CFStringRef)appID);
 	CFRelease(numRef);
 }
 
-- (NSString *)getStringFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
+- (NSString *)getStringFromKey:(NSString*)key forAppID:(NSString*)appID
 {
-	CFPropertyListRef value;
-	NSString *nsVal;
+	CFPropertyListRef value = CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID);
+	NSString *toRet = CFBridgingRelease(value);
 	
-	value = CFPreferencesCopyAppValue(key, appID);
-	
-	if(value) {
-		nsVal = CFBridgingRelease(value);
-		
-		if (CFGetTypeID(value) != CFStringGetTypeID())
-			return nil;
-	}
-	
-	return nsVal;
+	return [toRet isKindOfClass:[NSString class]] ? toRet : nil;
 }
 
-- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromString:(NSString *)value
+- (void)setKey:(NSString*)key forAppID:(NSString*)appID fromString:(NSString *)value
 {
-	CFPreferencesSetAppValue(key, (__bridge CFPropertyListRef)value, appID);
+	CFPreferencesSetAppValue((__bridge CFStringRef)key, (__bridge CFPropertyListRef)value, (__bridge CFStringRef)appID);
 }
 
-- (NSDate *)getDateFromKey:(CFStringRef)key forAppID:(CFStringRef)appID
+- (NSDate *)getDateFromKey:(NSString*)key forAppID:(NSString*)appID
 {
-	CFPropertyListRef value;
-	NSDate *ret = nil;
+	CFPropertyListRef value = CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)appID);
+	NSDate *ret = CFBridgingRelease(value);
 	
-	value = CFPreferencesCopyAppValue(key, appID);
-	ret = CFBridgingRelease(value);
-	
-	if(value && CFGetTypeID(value) == CFDateGetTypeID())
-		return ret;
-	else
-		return nil;
+	return [ret isKindOfClass:[NSDate class]] ? ret : nil;
 }
 
-- (void)setKey:(CFStringRef)key forAppID:(CFStringRef)appID fromDate:(NSDate *)value
+- (void)setKey:(NSString*)key forAppID:(NSString*)appID fromDate:(NSDate *)value
 {
-	CFPreferencesSetAppValue(key, (__bridge CFPropertyListRef)value, appID);
+	CFPreferencesSetAppValue((__bridge CFStringRef)key, (__bridge CFPropertyListRef)value, (__bridge CFStringRef)appID);
 }
 
 #pragma mark Private Functions
@@ -235,7 +223,7 @@
 	NSDictionary *infoDict = [NSDictionary dictionaryWithContentsOfFile:[path stringByAppendingPathComponent:@"Contents/Info.plist"]];
 	if (infoDict != nil)
 		currentVersion = infoDict[BundleVersionKey];
-	[textField_currentVersion setStringValue:[NSLocalizedString(@"Installed Version: ", @"") stringByAppendingString:currentVersion]];
+	[textField_currentVersion setStringValue:[CPFLocalizedStringFromBundle(@"Installed Version: ", self.bundle, @"") stringByAppendingString:currentVersion]];
 }
 
 #pragma mark Preference Pane Support
@@ -247,8 +235,8 @@
 		perianDonateURL = [[NSURL alloc] initWithString:@"http://perian.org"];
 		perianWebSiteURL = [[NSURL alloc] initWithString:@"http://perian.org"];
 		
-		perianAppID = CFSTR("org.perian.Perian");
-		a52AppID = CFSTR("com.cod3r.a52codec");
+		self.perianAppID = @"org.perian.Perian";
+		self.a52AppID = @"com.cod3r.a52codec";
 		
 		NSString *myPath = [[self bundle] bundlePath];
 		
@@ -278,13 +266,13 @@
 	installStatus = [self installStatusForComponent:@"Perian.component" type:ComponentTypeQuickTime withMyVersion:myVersion];
 	if(currentInstallStatus(installStatus) == InstallStatusNotInstalled)
 	{
-		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is not installed", @"")];
-		[button_install setTitle:NSLocalizedString(@"Install Perian", @"")];
+		[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is not installed", self.bundle, @"")];
+		[button_install setTitle:CPFLocalizedStringFromBundle(@"Install Perian", self.bundle, @"")];
 	}
 	else if(currentInstallStatus(installStatus) == InstallStatusOutdated)
 	{
-		[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed, but outdated", @"")];
-		[button_install setTitle:NSLocalizedString(@"Update Perian", @"")];
+		[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed, but outdated", self.bundle, @"")];
+		[button_install setTitle:CPFLocalizedStringFromBundle(@"Update Perian", self.bundle, @"")];
 	}
 	else
 	{
@@ -300,36 +288,36 @@
 			switch (installStatus) {
 				case InstallStatusInstalledInWrongLocation:
 				case InstallStatusNotInstalled:
-					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed, but parts are not installed", @"")];
-					[button_install setTitle:NSLocalizedString(@"Install Perian", @"")];
+					[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed, but parts are not installed", self.bundle, @"")];
+					[button_install setTitle:CPFLocalizedStringFromBundle(@"Install Perian", self.bundle, @"")];
 					break;
 				case InstallStatusOutdatedWithAnotherInWrongLocation:
 				case InstallStatusOutdated:
-					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed, but parts are outdated", @"")];
-					[button_install setTitle:NSLocalizedString(@"Update Perian", @"")];
+					[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed, but parts are outdated", self.bundle, @"")];
+					[button_install setTitle:CPFLocalizedStringFromBundle(@"Update Perian", self.bundle, @"")];
 					break;
 				case InstallStatusInstalledInBothLocations:
-					[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed twice", @"")];
-					[button_install setTitle:NSLocalizedString(@"Correct Installation", @"")];
+					[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed twice", self.bundle, @"")];
+					[button_install setTitle:CPFLocalizedStringFromBundle(@"Correct Installation", self.bundle, @"")];
 					break;
 				case InstallStatusInstalled:
 					if(freshInstall)
-						[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed; please restart your applications that use Perian", @"")];
+						[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed; please restart your applications that use Perian", self.bundle, @"")];
 					else
-						[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed", @"")];
-					[button_install setTitle:NSLocalizedString(@"Remove Perian", @"")];
+						[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed", self.bundle, @"")];
+					[button_install setTitle:CPFLocalizedStringFromBundle(@"Remove Perian", self.bundle, @"")];
 					break;
 			}
 		}
 		else if(isWrongLocationInstalled(installStatus))
 		{
-			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed twice", @"")];
-			[button_install setTitle:NSLocalizedString(@"Correct Installation", @"")];
+			[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed twice", self.bundle, @"")];
+			[button_install setTitle:CPFLocalizedStringFromBundle(@"Correct Installation", self.bundle, @"")];
 		}
 		else
 		{
-			[textField_installStatus setStringValue:NSLocalizedString(@"Perian is installed", @"")];
-			[button_install setTitle:NSLocalizedString(@"Remove Perian", @"")];
+			[textField_installStatus setStringValue:CPFLocalizedStringFromBundle(@"Perian is installed", self.bundle, @"")];
+			[button_install setTitle:CPFLocalizedStringFromBundle(@"Remove Perian", self.bundle, @"")];
 		}
 		
 	}
@@ -345,21 +333,21 @@
 - (int)upgradeA52Prefs
 {
 	int twoChannelMode;
-	if([self getBoolFromKey:AC3StereoOverDolbyKey forAppID:a52AppID withDefault:NO])
+	if([self getBoolFromKey:AC3StereoOverDolbyKey forAppID:_a52AppID withDefault:NO])
 		twoChannelMode = A52_STEREO;
-	else if([self getBoolFromKey:AC3ProLogicIIKey forAppID:a52AppID withDefault:NO])
+	else if([self getBoolFromKey:AC3ProLogicIIKey forAppID:_a52AppID withDefault:NO])
 		twoChannelMode = A52_DOLBY | A52_USE_DPLII;
 	else
 		twoChannelMode = A52_DOLBY;
 	
-	[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:twoChannelMode];
+	[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:twoChannelMode];
 	return twoChannelMode;
 }
 
 - (void)didSelect
 {
 	/* General */
-	NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:perianAppID];
+	NSString *lastInstVersion = [self getStringFromKey:LastInstalledVersionKey forAppID:_perianAppID];
 	NSString *myVersion = [self myInfoDict][BundleVersionKey];
 	
 	NSAttributedString		*about;
@@ -377,20 +365,20 @@
 		[[NSFileManager defaultManager] removeItemAtPath:tempPrefPane error:NULL];
 		
 		[self installUninstall:nil];
-		[self setKey:LastInstalledVersionKey forAppID:perianAppID fromString:myVersion];
+		[self setKey:LastInstalledVersionKey forAppID:_perianAppID fromString:myVersion];
 		[self updateCheck:nil];
 	} else {
 		[self checkForInstallation:NO];
 	}
 	
-	NSDate *updateDate = [self getDateFromKey:(CFStringRef)NEXT_RUN_KEY forAppID:perianAppID];
+	NSDate *updateDate = [self getDateFromKey:NEXT_RUN_KEY forAppID:_perianAppID];
 	if([updateDate timeIntervalSinceNow] > 1000000000) //futureDate
 		[button_autoUpdateCheck setIntValue:0];
 	else
 		[button_autoUpdateCheck setIntValue:1];
 	
 	/* A52 Prefs */
-	unsigned int twoChannelMode = [self getUnsignedIntFromKey:AC3TwoChannelModeKey forAppID:a52AppID withDefault:0xffffffff];
+	unsigned int twoChannelMode = [self getUnsignedIntFromKey:AC3TwoChannelModeKey forAppID:_a52AppID withDefault:0xffffffff];
 	if(twoChannelMode != 0xffffffff)
 	{
 		/* sanity checks */
@@ -403,8 +391,8 @@
 	}
 	else
 		twoChannelMode = [self upgradeA52Prefs];
-	CFPreferencesSetAppValue(AC3StereoOverDolbyKey, NULL, a52AppID);
-	CFPreferencesSetAppValue(AC3ProLogicIIKey, NULL, a52AppID);
+	CFPreferencesSetAppValue((__bridge CFStringRef)AC3StereoOverDolbyKey, NULL, (__bridge CFStringRef)_a52AppID);
+	CFPreferencesSetAppValue((__bridge CFStringRef)AC3ProLogicIIKey, NULL, (__bridge CFStringRef)_a52AppID);
 	switch(twoChannelMode)
 	{
 		case A52_STEREO:
@@ -421,15 +409,15 @@
 			break;
 	}
 	
-	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
+	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:_a52AppID withDefault:1.0]];
 	
-	[button_loadExternalSubtitles setState:[self getBoolFromKey:ExternalSubtitlesKey forAppID:perianAppID withDefault:YES]];
+	[button_loadExternalSubtitles setState:[self getBoolFromKey:ExternalSubtitlesKey forAppID:_perianAppID withDefault:YES]];
 }
 
 - (void)didUnselect
 {
-	CFPreferencesAppSynchronize(perianAppID);
-	CFPreferencesAppSynchronize(a52AppID);
+	[self synchronizePreferencesForApp:_perianAppID];
+	[self synchronizePreferencesForApp:_a52AppID];
 }
 
 - (void)dealloc
@@ -466,7 +454,7 @@
 	if(WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		ret = YES;
 	else
-		errorString = [NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]];
+		errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"extraction of %@ failed\n", self.bundle, @""), [finalPath lastPathComponent]];
 	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
@@ -503,10 +491,10 @@
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			errorString = [NSString stringWithFormat:NSLocalizedString(@"extraction of %@ failed\n", @""), [finalPath lastPathComponent]];
+			errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"extraction of %@ failed\n", self.bundle, @""), [finalPath lastPathComponent]];
 	}
 	else
-		errorString = [NSString stringWithFormat:NSLocalizedString(@"authentication failed while extracting %@\n", @""), [finalPath lastPathComponent]];
+		errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"authentication failed while extracting %@\n", self.bundle, @""), [finalPath lastPathComponent]];
 	
 	unsetenv("SRC_ARCHIVE");
 	unsetenv("DST_COMPONENT");
@@ -534,10 +522,10 @@
 		if(pid != -1 && WIFEXITED(status) && WEXITSTATUS(status) == 0)
 			ret = YES;
 		else
-			errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), [componentPath lastPathComponent]];
+			errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"removal of %@ failed\n", self.bundle, @""), [componentPath lastPathComponent]];
 	}
 	else
-		errorString = [NSString stringWithFormat:NSLocalizedString(@"authentication failed while removing %@\n", @""), [componentPath lastPathComponent]];
+		errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"authentication failed while removing %@\n", self.bundle, @""), [componentPath lastPathComponent]];
 	
 	unsetenv("COMP_PATH");
 	return ret;
@@ -563,7 +551,7 @@
 			//Remove the old one here
 			BOOL result = [[NSFileManager defaultManager] removeItemAtPath:[containingDir stringByAppendingPathComponent:component] error:NULL];
 			if(result == NO) {
-				errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
+				errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"removal of %@ failed\n", self.bundle, @""), component];
 				ret = NO;
 			}
 		}
@@ -586,7 +574,7 @@
 		{
 			ret = [[NSFileManager defaultManager] removeItemAtPath:[containingDir stringByAppendingPathComponent:component] error:NULL];
 			if(ret == NO)
-				errorString = [NSString stringWithFormat:NSLocalizedString(@"removal of %@ failed\n", @""), component];
+				errorString = [NSString stringWithFormat:CPFLocalizedStringFromBundle(@"removal of %@ failed\n", self.bundle, @""), component];
 		}
 	}
 	return ret;
@@ -812,8 +800,8 @@
 	
 	[[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:UPDATE_STATUS_NOTIFICATION object:nil];
 	[[NSDistributedNotificationCenter defaultCenter] addObserver:self selector:@selector(updateCheckStatusChanged:) name:UPDATE_STATUS_NOTIFICATION object:nil];
-	[self setKey:(CFStringRef)MANUAL_RUN_KEY forAppID:perianAppID fromBool:YES];
-	CFPreferencesAppSynchronize(perianAppID);
+	[self setKey:MANUAL_RUN_KEY forAppID:_perianAppID fromBool:YES];
+	[self synchronizePreferencesForApp:_perianAppID];
 	OSStatus status = FSPathMakeRef((UInt8 *)[[[[self bundle] bundlePath] stringByAppendingPathComponent:@"Contents/Resources/PerianUpdateChecker.app"] fileSystemRepresentation], &updateCheckRef, NULL);
 	if(status != noErr)
 		return;
@@ -823,13 +811,13 @@
 
 - (IBAction)setAutoUpdateCheck:(id)sender
 {
-	CFStringRef key = (CFStringRef)NEXT_RUN_KEY;
+	NSString *key = NEXT_RUN_KEY;
 	if([button_autoUpdateCheck intValue])
-		[self setKey:key forAppID:perianAppID fromDate:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN]];
+		[self setKey:key forAppID:_perianAppID fromDate:[NSDate dateWithTimeIntervalSinceNow:TIME_INTERVAL_TIL_NEXT_RUN]];
 	else
-		[self setKey:key forAppID:perianAppID fromDate:[NSDate distantFuture]];
+		[self setKey:key forAppID:_perianAppID fromDate:[NSDate distantFuture]];
 	
-	CFPreferencesAppSynchronize(perianAppID);
+	[self synchronizePreferencesForApp:_perianAppID];
 }
 
 
@@ -855,7 +843,7 @@
 
 - (void)displayMultiChannelWarning
 {
-	NSString *multiChannelWarning = NSLocalizedString(@"<p style=\"font: 13pt Lucida Grande;\">Multi-Channel Output is not Dolby Digital Passthrough!  It is designed for those with multiple discrete speakers connected to their mac.  If you selected this expecting passthrough, you are following the wrong instructions.  Follow <a href=\"http://www.cod3r.com/2008/02/the-correct-way-to-enable-ac3-passthrough-with-quicktime/\">these</a> instead.</p>", @"");
+	NSString *multiChannelWarning = CPFLocalizedStringFromBundle(@"<p style=\"font: 13pt Lucida Grande;\">Multi-Channel Output is not Dolby Digital Passthrough!  It is designed for those with multiple discrete speakers connected to their mac.  If you selected this expecting passthrough, you are following the wrong instructions.  Follow <a href=\"http://www.cod3r.com/2008/02/the-correct-way-to-enable-ac3-passthrough-with-quicktime/\">these</a> instead.</p>", self.bundle, @"");
 	NSAttributedString *multiChannelWarningAttr = [[NSAttributedString alloc] initWithHTML:[multiChannelWarning dataUsingEncoding:NSUTF8StringEncoding] documentAttributes:nil];
 	[textField_multiChannelText setAttributedStringValue:multiChannelWarningAttr];
 	[NSApp beginSheet:window_multiChannelSheet modalForWindow:[[self mainView] window] modalDelegate:nil didEndSelector:nil contextInfo:NULL];
@@ -867,17 +855,17 @@
 	switch(selected)
 	{
 		case 0:
-			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:A52_STEREO];
+			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:A52_STEREO];
 			break;
 		case 1:
-			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:A52_DOLBY];
+			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:A52_DOLBY];
 			break;
 		case 2:
-			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:A52_DOLBY | A52_USE_DPLII];
+			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:A52_DOLBY | A52_USE_DPLII];
 			break;
 		case 3:
-			[self setKey:AC3TwoChannelModeKey forAppID:a52AppID fromInt:0];
-			if(![self getBoolFromKey:DontShowMultiChannelWarning forAppID:perianAppID withDefault:NO])
+			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:0];
+			if(![self getBoolFromKey:DontShowMultiChannelWarning forAppID:_perianAppID withDefault:NO])
 				[self displayMultiChannelWarning];
 			break;
 		default:
@@ -905,7 +893,7 @@
 
 - (void)saveAC3DynamicRange:(float)newVal
 {
-	[self setKey:AC3DynamicRangeKey forAppID:a52AppID fromFloat:newVal];
+	[self setKey:AC3DynamicRangeKey forAppID:_a52AppID fromFloat:newVal];
 	[self setAC3DynamicRange:newVal];
 }
 
@@ -925,7 +913,7 @@
 
 - (IBAction)cancelDynRangeSheet:(id)sender
 {
-	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:a52AppID withDefault:1.0]];
+	[self setAC3DynamicRange:[self getFloatFromKey:AC3DynamicRangeKey forAppID:_a52AppID withDefault:1.0]];
 	[NSApp endSheet:window_dynRangeSheet];
 	[window_dynRangeSheet orderOut:self];
 }
@@ -940,16 +928,16 @@
 - (IBAction)dismissMultiChannelSheet:(id)sender
 {
 	[NSApp endSheet:window_multiChannelSheet];
-	[self setKey:DontShowMultiChannelWarning forAppID:perianAppID fromBool:[button_multiChannelNeverShow state]];
+	[self setKey:DontShowMultiChannelWarning forAppID:_perianAppID fromBool:[button_multiChannelNeverShow state]];
 	[window_multiChannelSheet orderOut:self];
-	CFPreferencesAppSynchronize(perianAppID);
+	[self synchronizePreferencesForApp:_perianAppID];
 }
 
 #pragma mark Subtitles
 - (IBAction)setLoadExternalSubtitles:(id)sender
 {	
-	[self setKey:ExternalSubtitlesKey forAppID:perianAppID fromBool:(BOOL)[sender state]];
-	CFPreferencesAppSynchronize(perianAppID);
+	[self setKey:ExternalSubtitlesKey forAppID:_perianAppID fromBool:(BOOL)[sender state]];
+	[self synchronizePreferencesForApp:_perianAppID];
 }
 
 #pragma mark About 

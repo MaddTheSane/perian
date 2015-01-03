@@ -1,0 +1,29 @@
+/* 
+  Localizable.strings
+  Perian
+
+  Created by C.W. Betts on 12/27/14.
+  Copyright (c) 2014 Perian. All rights reserved.
+*/
+
+// Install status
+"Installed Version: " = "Installed Version: ";
+"Perian is not installed" = "Perian is not installed";
+"Install Perian" = "Install Perian";
+"Perian is installed, but outdated" = "Perian is installed, but outdated";
+"Update Perian" = "Update Perian";
+"Perian is installed, but parts are not installed" = "Perian is installed, but parts are not installed";
+"Perian is installed, but parts are outdated" = "Perian is installed, but parts are outdated";
+"Perian is installed twice" = "Perian is installed twice";
+"Correct Installation" = "Correct Installation";
+"Perian is installed; please restart your applications that use Perian" = "Perian is installed; please restart your applications that use Perian";
+"Perian is installed" = "Perian is installed";
+"Remove Perian" = "Remove Perian";
+
+// Install errors
+"removal of %@ failed\n" = "removal of %@ failed\n";
+"authentication failed while removing %@\n" = "authentication failed while removing %@\n";
+"extraction of %@ failed\n" = "extraction of %@ failed\n";
+"authentication failed while extracting %@\n" = "authentication failed while extracting %@\n";
+
+"<p style=\"font: 13pt Lucida Grande;\">Multi-Channel Output is not Dolby Digital Passthrough!  It is designed for those with multiple discrete speakers connected to their mac.  If you selected this expecting passthrough, you are following the wrong instructions.  Follow <a href=\"http://www.cod3r.com/2008/02/the-correct-way-to-enable-ac3-passthrough-with-quicktime/\">these</a> instead.</p>" = "<p style=\"font: 13pt Lucida Grande;\">Multi-Channel Output is not Dolby Digital Passthrough!  It is designed for those with multiple discrete speakers connected to their mac.  If you selected this expecting passthrough, you are following the wrong instructions.  Follow <a href=\"http://www.cod3r.com/2008/02/the-correct-way-to-enable-ac3-passthrough-with-quicktime/\">these</a> instead.</p>";

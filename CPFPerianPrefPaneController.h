@@ -62,8 +62,7 @@ static inline InstallStatus setWrongLocationInstalled(InstallStatus status)
 	return (status & ~1);
 }
 
-typedef NS_ENUM(NSInteger, ComponentType)
-{
+typedef NS_ENUM(NSInteger, ComponentType) {
 	ComponentTypeQuickTime,
 	ComponentTypeCoreAudio,
 	ComponentTypeFramework
@@ -111,9 +110,6 @@ PERIAN_EXPORTED
 	NSURL								*perianForumURL;
 	NSURL								*perianDonateURL;
 	NSURL								*perianWebSiteURL;
-	
-	CFStringRef							perianAppID;
-	CFStringRef							a52AppID;
 	
 	float								nextDynValue;
 }
