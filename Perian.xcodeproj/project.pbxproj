@@ -92,7 +92,6 @@
 		11629FD10B51E65F006591C8 /* NSString+extras.m in Sources */ = {isa = PBXBuildFile; fileRef = 11629FD00B51E65F006591C8 /* NSString+extras.m */; };
 		1162A0540B51ECE1006591C8 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1162A0530B51ECE1006591C8 /* WebKit.framework */; };
 		116C42BC0B504C7C00FB0738 /* SUAppcast.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42BB0B504C7C00FB0738 /* SUAppcast.m */; };
-		116C42E80B504D2700FB0738 /* RSS.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E50B504D2700FB0738 /* RSS.m */; };
 		116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E70B504D2700FB0738 /* SUAppcastItem.m */; };
 		1184A2D30B50504900C8452A /* UpdateCheckerAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */; };
 		1184A3140B50548700C8452A /* SUUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A3130B50548700C8452A /* SUUtilities.m */; };
@@ -183,6 +182,8 @@
 		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
 		558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB417D2468000EB0DE7 /* SUStatus.xib */; };
 		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
+		55DB617B1A589F3400A6776A /* SUConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 55DB61751A589F3400A6776A /* SUConstants.m */; };
+		55DB617C1A589F3400A6776A /* SULog.m in Sources */ = {isa = PBXBuildFile; fileRef = 55DB61781A589F3400A6776A /* SULog.m */; };
 		6116E5580B43C27B0020F1CE /* FFissionCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */; };
 		6116E55A0B43C27B0020F1CE /* FFissionDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */; };
 		6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */; };
@@ -588,8 +589,6 @@
 		116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateCheckerAppDelegate.m; sourceTree = "<group>"; };
 		116C42BA0B504C7C00FB0738 /* SUAppcast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUAppcast.h; sourceTree = "<group>"; };
 		116C42BB0B504C7C00FB0738 /* SUAppcast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUAppcast.m; sourceTree = "<group>"; };
-		116C42E40B504D2700FB0738 /* RSS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSS.h; sourceTree = "<group>"; };
-		116C42E50B504D2700FB0738 /* RSS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = RSS.m; sourceTree = "<group>"; };
 		116C42E60B504D2700FB0738 /* SUAppcastItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUAppcastItem.h; sourceTree = "<group>"; };
 		116C42E70B504D2700FB0738 /* SUAppcastItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUAppcastItem.m; sourceTree = "<group>"; };
 		1184A3020B50548700C8452A /* SUUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUUtilities.h; sourceTree = "<group>"; };
@@ -687,6 +686,13 @@
 		558E7CB417D2468000EB0DE7 /* SUStatus.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SUStatus.xib; sourceTree = "<group>"; };
 		558E7CB717D246B000EB0DE7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SUUpdateAlert.xib; sourceTree = "<group>"; };
 		55C06647173C6F4D00D8CF2C /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ffmpeg; sourceTree = "<group>"; };
+		55DB61741A589F3400A6776A /* SUConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUConstants.h; sourceTree = "<group>"; };
+		55DB61751A589F3400A6776A /* SUConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUConstants.m; sourceTree = "<group>"; };
+		55DB61761A589F3400A6776A /* SUErrors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUErrors.h; sourceTree = "<group>"; };
+		55DB61771A589F3400A6776A /* SULog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SULog.h; sourceTree = "<group>"; };
+		55DB61781A589F3400A6776A /* SULog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SULog.m; sourceTree = "<group>"; };
+		55DB61791A589F3400A6776A /* SUVersionComparisonProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUVersionComparisonProtocol.h; sourceTree = "<group>"; };
+		55DB617A1A589F3400A6776A /* SUVersionDisplayProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUVersionDisplayProtocol.h; sourceTree = "<group>"; };
 		6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionCodec.cpp; sourceTree = "<group>"; };
 		6116E54D0B43C27B0020F1CE /* FFissionCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = FFissionCodec.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionDecoder.cpp; sourceTree = "<group>"; };
@@ -1074,12 +1080,17 @@
 				558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */,
 				1184A3020B50548700C8452A /* SUUtilities.h */,
 				1184A3130B50548700C8452A /* SUUtilities.m */,
-				116C42E40B504D2700FB0738 /* RSS.h */,
-				116C42E50B504D2700FB0738 /* RSS.m */,
 				116C42E60B504D2700FB0738 /* SUAppcastItem.h */,
 				116C42E70B504D2700FB0738 /* SUAppcastItem.m */,
 				116C42BA0B504C7C00FB0738 /* SUAppcast.h */,
 				116C42BB0B504C7C00FB0738 /* SUAppcast.m */,
+				55DB61741A589F3400A6776A /* SUConstants.h */,
+				55DB61751A589F3400A6776A /* SUConstants.m */,
+				55DB61761A589F3400A6776A /* SUErrors.h */,
+				55DB61771A589F3400A6776A /* SULog.h */,
+				55DB61781A589F3400A6776A /* SULog.m */,
+				55DB61791A589F3400A6776A /* SUVersionComparisonProtocol.h */,
+				55DB617A1A589F3400A6776A /* SUVersionDisplayProtocol.h */,
 			);
 			name = "Sparkle Files";
 			sourceTree = "<group>";
@@ -2008,14 +2019,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				116C42BC0B504C7C00FB0738 /* SUAppcast.m in Sources */,
-				116C42E80B504D2700FB0738 /* RSS.m in Sources */,
 				116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */,
 				1184A2D30B50504900C8452A /* UpdateCheckerAppDelegate.m in Sources */,
 				1184A3140B50548700C8452A /* SUUtilities.m in Sources */,
 				1184A38D0B505A9800C8452A /* SUStatusController.m in Sources */,
 				11629EE10B51E482006591C8 /* main.m in Sources */,
+				55DB617C1A589F3400A6776A /* SULog.m in Sources */,
 				11629FD10B51E65F006591C8 /* NSString+extras.m in Sources */,
 				11F28DAD0B52EB75000AF78C /* SUUpdateAlert.m in Sources */,
+				55DB617B1A589F3400A6776A /* SUConstants.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2341,6 +2353,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"SPARKLE_BUNDLE_IDENTIFIER=\\\"org.perian.UpdateCheckStatus\\\"",
+					"$(inherited)",
+				);
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;
@@ -2358,6 +2374,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"SPARKLE_BUNDLE_IDENTIFIER=\\\"org.perian.UpdateCheckStatus\\\"",
+					"$(inherited)",
+				);
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LLVM_LTO = YES;
@@ -2712,6 +2732,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"SPARKLE_BUNDLE_IDENTIFIER=\\\"org.perian.UpdateCheckStatus\\\"",
+					"$(inherited)",
+				);
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = PerianUpdateChecker;

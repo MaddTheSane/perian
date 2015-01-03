@@ -88,9 +88,9 @@
 
 - (void)appcastDidFinishLoading:(SUAppcast *)anappcast
 {
-	self.latest = [anappcast newestItem];
+	self.latest = [anappcast items][0];
 	
-	if (![latest fileVersion])
+	if (![latest versionString])
 	{
 		[self updateFailed];
 		[NSException raise:@"SUAppcastException" format:@"Can't extract a version string from the appcast feed. The filenames should look like YourApp_1.5.tgz, where 1.5 is the version number."];
@@ -104,7 +104,7 @@
 	
 	BOOL updateAvailable = SUStandardVersionComparison(latest.minimumSystemVersion, currentSystemVersion);
 	NSString *panePath = [[[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
-	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest fileVersion], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
+	updateAvailable = (updateAvailable && (SUStandardVersionComparison([latest versionString], [[NSBundle bundleWithPath:panePath] objectForInfoDictionaryKey:@"CFBundleVersion"]) == NSOrderedAscending));
 	
 	if (![[panePath lastPathComponent] isEqualToString:@"Perian.prefPane"]) {
 		NSLog(@"The update checker needs to be run from inside the preference pane, quitting...");
@@ -136,6 +136,11 @@
 	//RELEASEOBJ(anappcast);
 	self.appcast = nil;
 	[[NSApplication sharedApplication] terminate:self];
+}
+
+- (void)appcast:(SUAppcast *)aappcast failedToLoadWithError:(NSError *)error
+{
+	[self appcastDidFailToLoad:aappcast];
 }
 
 - (void)showUpdatePanelForItem:(SUAppcastItem *)updateItem
