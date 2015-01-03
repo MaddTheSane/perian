@@ -16,7 +16,7 @@ private let UPDATE_STATUS_NOTIFICATION = "org.perian.UpdateCheckStatus"
 private let TIME_INTERVAL_TIL_NEXT_RUN = NSTimeInterval(7*24*60*60)
 
 
-class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelegate, SUUpdateAlertDelegate {
+public class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelegate, SUUpdateAlertDelegate, NSApplicationDelegate {
 	private var updateAlert: SUUpdateAlert? = nil
 	private var latest: SUAppcastItem? = nil
 	private var statusController: SUStatusController? = nil
@@ -26,7 +26,7 @@ class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelega
 	private var lastRunDate: NSDate! = nil
 	private var manualRun = false
 
-	func applicationDidFinishLaunching(aNotification: NSNotification) {
+	public func applicationDidFinishLaunching(aNotification: NSNotification) {
 		let defaults = NSUserDefaults.standardUserDefaults()
 		if let aVal = defaults.objectForKey(NEXT_RUN_KEY) as? NSDate {
 			lastRunDate = aVal
@@ -56,7 +56,7 @@ class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelega
 		}
 	}
 	
-	func appcastDidFinishLoading(anappcast: SUAppcast!) {
+	public func appcastDidFinishLoading(anappcast: SUAppcast!) {
 		self.latest = (anappcast.items.first as SUAppcastItem)
 		
 		if let latestVer = latest?.versionString {
@@ -98,7 +98,7 @@ class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelega
 		}
 	}
 	
-	func appcast(aappcast: SUAppcast!, failedToLoadWithError error: NSError!) {
+	public func appcast(aappcast: SUAppcast!, failedToLoadWithError error: NSError!) {
 		appcastDidFailToLoad(aappcast)
 	}
 	
@@ -118,7 +118,7 @@ class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelega
 		anUpdateAlert.showWindow(self)
 	}
 	
-	func updateAlert(updateAlert: SUUpdateAlert!, finishedWithChoice choice: SUUpdateAlertChoice) {
+	public func updateAlert(updateAlert: SUUpdateAlert!, finishedWithChoice choice: SUUpdateAlertChoice) {
 		if (choice == .InstallUpdateChoice) {
 			beginDownload()
 		} else {
@@ -155,11 +155,11 @@ class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelega
 	}
 	
 	// MARK: NSURLDownload delegate methods
-	func download(download: NSURLDownload, didReceiveResponse response: NSURLResponse) {
+	public func download(download: NSURLDownload, didReceiveResponse response: NSURLResponse) {
 		statusController?.maxProgressValue = Double(response.expectedContentLength)
 	}
 	
-	func download(download: NSURLDownload, decideDestinationWithSuggestedFilename filename: String) {
+	public func download(download: NSURLDownload, decideDestinationWithSuggestedFilename filename: String) {
 		var name = filename
 		// If name ends in .txt, the server probably has a stupid MIME configuration. We'll give
 		// the developer the benefit of the doubt and chop that off.
@@ -184,12 +184,12 @@ class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelega
 		download.setDestination(downloadPath, allowOverwrite: true)
 	}
 	
-	func download(download: NSURLDownload, didReceiveDataOfLength length: Int) {
+	public func download(download: NSURLDownload, didReceiveDataOfLength length: Int) {
 		statusController?.progressValue += Double(length)
 		statusController?.statusText = NSString(format: SULocalizedString("%.0lfk of %.0lfk", nil), statusController!.progressValue / 1024.0, statusController!.maxProgressValue / 1024.0)
 	}
 	
-	func download(download: NSURLDownload, didFailWithError error: NSError) {
+	public func download(download: NSURLDownload, didFailWithError error: NSError) {
 		updateFailed()
 		NSLog("Download error: %@", error.localizedDescription)
 		showUpdateErrorAlert(info: SULocalizedString("An error occurred while trying to download the newest version of Perian. Please try again later.", nil))
@@ -215,7 +215,7 @@ class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelega
 		return true
 	}
 	
-	func downloadDidFinish(download: NSURLDownload) {
+	public func downloadDidFinish(download: NSURLDownload) {
 		downloader = nil
 		
 		//Indeterminate progress bar

@@ -585,8 +585,6 @@
 		1162A0530B51ECE1006591C8 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		116C42520B5041BD00FB0738 /* PerianUpdateChecker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PerianUpdateChecker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		116C42540B5041BD00FB0738 /* PerianUpdateChecker-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PerianUpdateChecker-Info.plist"; path = "Plists/PerianUpdateChecker-Info.plist"; sourceTree = "<group>"; };
-		116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateCheckerAppDelegate.h; sourceTree = "<group>"; };
-		116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateCheckerAppDelegate.m; sourceTree = "<group>"; };
 		116C42BA0B504C7C00FB0738 /* SUAppcast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUAppcast.h; sourceTree = "<group>"; };
 		116C42BB0B504C7C00FB0738 /* SUAppcast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUAppcast.m; sourceTree = "<group>"; };
 		116C42E60B504D2700FB0738 /* SUAppcastItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUAppcastItem.h; sourceTree = "<group>"; };
@@ -1064,8 +1062,6 @@
 			children = (
 				551452B71A5877D8003587BD /* PerianUpdateChecker-Bridging-Header.h */,
 				1184A37C0B505A2E00C8452A /* Sparkle Files */,
-				116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */,
-				116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */,
 				551452BA1A587AEE003587BD /* UpdateCheckerAppDelegate.swift */,
 				11629EE00B51E482006591C8 /* main.m */,
 				551452B81A5877DA003587BD /* main.swift */,
