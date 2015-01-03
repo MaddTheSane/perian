@@ -57,9 +57,9 @@ class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelega
 	}
 	
 	func appcastDidFinishLoading(anappcast: SUAppcast!) {
-		self.latest = anappcast.newestItem;
+		self.latest = (anappcast.items.first as SUAppcastItem)
 		
-		if let latestVer = latest?.fileVersion {
+		if let latestVer = latest?.versionString {
 		// OS version (Apple recommends using SystemVersion.plist instead of Gestalt() here, don't ask me why).
 		// This code *should* use NSSearchPathForDirectoriesInDomains(NSCoreServiceDirectory, NSSystemDomainMask, YES)
 		// but that returns /Library/CoreServices for some reason
@@ -68,7 +68,7 @@ class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelega
 		
 		var updateAvailable = SUStandardVersionComparison(latest!.minimumSystemVersion, currentSystemVersion) != .OrderedDescending;
 		let panePath = NSBundle.mainBundle().bundlePath.stringByDeletingLastPathComponent.stringByDeletingLastPathComponent.stringByDeletingLastPathComponent
-		updateAvailable = updateAvailable && ((SUStandardVersionComparison(latest!.fileVersion, NSBundle(path:panePath)?.objectForInfoDictionaryKey("CFBundleVersion") as String)) == .OrderedAscending)
+		updateAvailable = updateAvailable && ((SUStandardVersionComparison(latest!.versionString, NSBundle(path:panePath)?.objectForInfoDictionaryKey("CFBundleVersion") as String)) == .OrderedAscending)
 		
 		if panePath.lastPathComponent != "Perian.prefPane" {
 			NSLog("The update checker needs to be run from inside the preference pane, quitting...");
@@ -96,6 +96,10 @@ class UpdateCheckerAppDelegate: NSObject, NSURLDownloadDelegate, SUAppcastDelega
 			updateFailed()
 			fatalError("Can't extract a version string from the appcast feed. The filenames should look like YourApp_1.5.tgz, where 1.5 is the version number.")
 		}
+	}
+	
+	func appcast(aappcast: SUAppcast!, failedToLoadWithError error: NSError!) {
+		appcastDidFailToLoad(aappcast)
 	}
 	
 	func appcastDidFailToLoad(appcast: SUAppcast!) {
