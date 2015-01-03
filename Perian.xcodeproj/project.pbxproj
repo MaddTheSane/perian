@@ -94,7 +94,6 @@
 		116C42BC0B504C7C00FB0738 /* SUAppcast.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42BB0B504C7C00FB0738 /* SUAppcast.m */; };
 		116C42E80B504D2700FB0738 /* RSS.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E50B504D2700FB0738 /* RSS.m */; };
 		116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42E70B504D2700FB0738 /* SUAppcastItem.m */; };
-		1184A2D30B50504900C8452A /* UpdateCheckerAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */; };
 		1184A3140B50548700C8452A /* SUUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A3130B50548700C8452A /* SUUtilities.m */; };
 		1184A38D0B505A9800C8452A /* SUStatusController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1184A38C0B505A9800C8452A /* SUStatusController.m */; };
 		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
@@ -164,6 +163,7 @@
 		3DE8D78510444E500007C7E7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EEA0B51E4F1006591C8 /* Cocoa.framework */; };
 		3DE8D9D5104451A80007C7E7 /* Perian - Open in QT Player.app in Resources */ = {isa = PBXBuildFile; fileRef = 3DE8D6DE104440F60007C7E7 /* Perian - Open in QT Player.app */; };
 		3DF2958C104F0EF40047B8EC /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11629EF30B51E4FB006591C8 /* AppKit.framework */; };
+		551452BB1A587AEE003587BD /* UpdateCheckerAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551452BA1A587AEE003587BD /* UpdateCheckerAppDelegate.swift */; };
 		55247B14173D76A700531BBC /* Perian_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 83D1D6F40B4C85AB00E09EC9 /* Perian_icon.icns */; };
 		553F329B17F2D29C00221391 /* Perian.component in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A70AC10A3D0105002058D4 /* Perian.component */; };
 		553F32CB17F2F33900221391 /* AppleScriptObjC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 553F32CA17F2F33900221391 /* AppleScriptObjC.framework */; };
@@ -666,6 +666,9 @@
 		3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "PerianOpener-Info.plist"; path = "Plists/PerianOpener-Info.plist"; sourceTree = "<group>"; };
 		3DE8D74E10444A6E0007C7E7 /* OpenerMainMenu.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = OpenerMainMenu.xib; sourceTree = "<group>"; };
 		550CC2C018586FF900272A53 /* VideoDecodeAcceleration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoDecodeAcceleration.framework; path = System/Library/Frameworks/VideoDecodeAcceleration.framework; sourceTree = SDKROOT; };
+		551452B71A5877D8003587BD /* PerianUpdateChecker-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "PerianUpdateChecker-Bridging-Header.h"; sourceTree = "<group>"; };
+		551452B81A5877DA003587BD /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		551452BA1A587AEE003587BD /* UpdateCheckerAppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateCheckerAppDelegate.swift; sourceTree = "<group>"; };
 		553F329617F2CCC200221391 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
 		553F32C817F2F16600221391 /* AppDelegate.applescript */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.applescript; path = AppDelegate.applescript; sourceTree = "<group>"; };
 		553F32CA17F2F33900221391 /* AppleScriptObjC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppleScriptObjC.framework; path = System/Library/Frameworks/AppleScriptObjC.framework; sourceTree = SDKROOT; };
@@ -1053,10 +1056,13 @@
 		116C425C0B50420D00FB0738 /* Update Checker Sources */ = {
 			isa = PBXGroup;
 			children = (
+				551452B71A5877D8003587BD /* PerianUpdateChecker-Bridging-Header.h */,
 				1184A37C0B505A2E00C8452A /* Sparkle Files */,
 				116C42650B50426700FB0738 /* UpdateCheckerAppDelegate.h */,
 				116C42660B50426700FB0738 /* UpdateCheckerAppDelegate.m */,
+				551452BA1A587AEE003587BD /* UpdateCheckerAppDelegate.swift */,
 				11629EE00B51E482006591C8 /* main.m */,
+				551452B81A5877DA003587BD /* main.swift */,
 			);
 			path = "Update Checker Sources";
 			sourceTree = "<group>";
@@ -2008,9 +2014,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				116C42BC0B504C7C00FB0738 /* SUAppcast.m in Sources */,
+				551452BB1A587AEE003587BD /* UpdateCheckerAppDelegate.swift in Sources */,
 				116C42E80B504D2700FB0738 /* RSS.m in Sources */,
 				116C42E90B504D2700FB0738 /* SUAppcastItem.m in Sources */,
-				1184A2D30B50504900C8452A /* UpdateCheckerAppDelegate.m in Sources */,
 				1184A3140B50548700C8452A /* SUUtilities.m in Sources */,
 				1184A38D0B505A9800C8452A /* SUStatusController.m in Sources */,
 				11629EE10B51E482006591C8 /* main.m in Sources */,
@@ -2343,7 +2349,11 @@
 				GCC_PREFIX_HEADER = Prefix.h;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = PerianUpdateChecker;
+				SWIFT_OBJC_BRIDGING_HEADER = "Update Checker Sources/PerianUpdateChecker-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -2360,8 +2370,11 @@
 				GCC_PREFIX_HEADER = Prefix.h;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LLVM_LTO = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = PerianUpdateChecker;
+				SWIFT_OBJC_BRIDGING_HEADER = "Update Checker Sources/PerianUpdateChecker-Bridging-Header.h";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -2714,7 +2727,10 @@
 				GCC_PREFIX_HEADER = Prefix.h;
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = PerianUpdateChecker;
+				SWIFT_OBJC_BRIDGING_HEADER = "Update Checker Sources/PerianUpdateChecker-Bridging-Header.h";
 				WRAPPER_EXTENSION = app;
 			};
 			name = "Release+Debug";

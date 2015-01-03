@@ -12,12 +12,12 @@
 @protocol SUAppcastDelegate;
 
 @interface SUAppcast : NSObject
-@property (readonly) NSArray *items;
+@property (readonly, copy) NSArray *items;
 @property (weak) NSObject<SUAppcastDelegate> *delegate;
 
 - (void)fetchAppcastFromURL:(NSURL *)url;
 
-- (SUAppcastItem *)newestItem;
+@property (readonly, unsafe_unretained) SUAppcastItem *newestItem;
 
 @end
 

@@ -12,7 +12,7 @@
 #import "RSS.h"
 
 @interface SUAppcast ()
-@property (readwrite, strong) NSArray *items;
+@property (readwrite, copy) NSArray *items;
 @end
 
 @implementation SUAppcast
@@ -21,37 +21,35 @@
 
 - (void)fetchAppcastFromURL:(NSURL *)url
 {
-	[NSThread detachNewThreadSelector:@selector(_fetchAppcastFromURL:) toTarget:self withObject:url]; // let's not block the main thread
+	// let's not block the main thread
+	dispatch_async(dispatch_get_global_queue(0, 0), ^{
+		@autoreleasepool {
+			RSS *feed;
+			@try {
+				NSString *userAgent = [NSString stringWithFormat: @"%@/%@ (Mac OS X) Sparkle/1.0", SUHostAppName(), SUHostAppVersion()];
+				
+				feed = [[RSS alloc] initWithURL:url normalize:YES userAgent:userAgent];
+				// Set up all the appcast items
+				NSMutableArray *tempItems = [NSMutableArray array];
+				for (id current in feed.newsItems) {
+					[tempItems addObject:[[SUAppcastItem alloc] initWithDictionary:current]];
+				}
+				self.items = [NSArray arrayWithArray:tempItems];
+				
+				if ([delegate respondsToSelector:@selector(appcastDidFinishLoading:)])
+					[delegate performSelectorOnMainThread:@selector(appcastDidFinishLoading:) withObject:self waitUntilDone:NO];
+				
+			} @catch (NSException *e) {
+				if ([delegate respondsToSelector:@selector(appcastDidFailToLoad:)])
+					[delegate performSelectorOnMainThread:@selector(appcastDidFailToLoad:) withObject:self waitUntilDone:NO];
+			}
+		}
+	});
 }
 
 - (SUAppcastItem *)newestItem
 {
 	return items[0]; // the RSS class takes care of sorting by published date, descending.
-}
-
-- (void)_fetchAppcastFromURL:(NSURL *)url
-{
-	@autoreleasepool {
-		RSS *feed;
-		@try {
-			NSString *userAgent = [NSString stringWithFormat: @"%@/%@ (Mac OS X) Sparkle/1.0", SUHostAppName(), SUHostAppVersion()];
-			
-			feed = [[RSS alloc] initWithURL:url normalize:YES userAgent:userAgent];
-			// Set up all the appcast items
-			NSMutableArray *tempItems = [NSMutableArray array];
-			for (id current in feed.newsItems) {
-				[tempItems addObject:[[SUAppcastItem alloc] initWithDictionary:current]];
-			}
-			self.items = [NSArray arrayWithArray:tempItems];
-			
-			if ([delegate respondsToSelector:@selector(appcastDidFinishLoading:)])
-				[delegate performSelectorOnMainThread:@selector(appcastDidFinishLoading:) withObject:self waitUntilDone:NO];
-			
-		} @catch (NSException *e) {
-			if ([delegate respondsToSelector:@selector(appcastDidFailToLoad:)])
-				[delegate performSelectorOnMainThread:@selector(appcastDidFailToLoad:) withObject:self waitUntilDone:NO];
-		}
-	}
 }
 
 @end
