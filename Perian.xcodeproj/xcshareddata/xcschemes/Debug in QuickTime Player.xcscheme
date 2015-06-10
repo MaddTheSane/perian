@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0610"
+   LastUpgradeVersion = "0630"
    version = "1.8">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -42,6 +42,7 @@
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
       <PathRunnable
+         runnableDebuggingMode = "0"
          FilePath = "/Applications/Utilities/QuickTime Player 7.app">
       </PathRunnable>
       <MacroExpansion>
