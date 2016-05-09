@@ -976,7 +976,7 @@ static ComponentResult LoadVobSubSubtitles(CFURLRef theDirectory, CFStringRef fi
 							int langLength = strlen(langStr);
 							if(langLength > 0 && langStr[langLength-1] == ',')
 								langStr[langLength-1] = 0;
-							NSString *language = [NSString stringWithUTF8String:langStr];
+							NSString *language = @(langStr);
 							
 							currentTrack = [[VobSubTrack alloc] initWithPrivateData:privateData language:language andIndex:index];
 							[tracks addObject:currentTrack];
