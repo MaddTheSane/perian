@@ -143,7 +143,7 @@ typedef struct
 //---------------------------------------------------------------------------
 
 static OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, AVFrame *picture, int length);
-static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic);
+static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic, int flags);
 static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
 static FFusionBuffer *retainBuffer(FFusionGlobals glob, FFusionBuffer *buf);
 static void releaseBuffer(AVCodecContext *s, AVFrame *pic);
@@ -267,20 +267,20 @@ static void DumpFrameDropStats(FFusionGlobals glob)
 	}
 }
 
-static enum PixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avctx, Ptr data, int bufferSize)
+static enum AVPixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *avctx, Ptr data, int bufferSize)
 {
     AVCodecContext *tmpContext;
     AVFrame *tmpFrame;
     int got_picture;
-    enum PixelFormat pix_fmt;
+    enum AVPixelFormat pix_fmt;
     
 	tmpContext = avcodec_alloc_context3(codec);
-	tmpFrame   = avcodec_alloc_frame();
+	tmpFrame   = av_frame_alloc();
 
 	avcodec_copy_context(tmpContext, avctx);
 	
     if (avcodec_open2(tmpContext, codec, NULL)) {
-		pix_fmt = PIX_FMT_NONE;
+		pix_fmt = AV_PIX_FMT_NONE;
 		goto bail;
 	}
 	
@@ -566,13 +566,13 @@ pascal ComponentResult FFusionCodecInitialize(FFusionGlobals glob, ImageSubCodec
     return noErr;
 }
 
-static inline int shouldDecode(FFusionGlobals glob, enum CodecID codecID)
+static inline int shouldDecode(FFusionGlobals glob, enum AVCodecID codecID)
 {
 	FFusionDecodeAbilities decode = FFUSION_PREFER_DECODE;
 	if (glob->componentType == 'avc1')
 		decode = ffusionIsParsedVideoDecodable(glob->begin.parser);
 	if(decode > FFUSION_CANNOT_DECODE && 
-	   (codecID == CODEC_ID_H264 || codecID == CODEC_ID_MPEG4) && CFPreferencesGetAppBooleanValue(CFSTR("PreferAppleCodecs"), PERIAN_PREF_DOMAIN, NULL))
+	   (codecID == AV_CODEC_ID_H264 || codecID == AV_CODEC_ID_MPEG4) && CFPreferencesGetAppBooleanValue(CFSTR("PreferAppleCodecs"), PERIAN_PREF_DOMAIN, NULL))
 		decode = FFUSION_PREFER_NOT_DECODE;
 	if(decode > FFUSION_CANNOT_DECODE)
 		if(IsForcedDecodeEnabled())
@@ -614,21 +614,21 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		initFFusionParsers();
 
 		OSType componentType = glob->componentType;
-		enum CodecID codecID = getCodecID(componentType);
+		enum AVCodecID codecID = getCodecID(componentType);
 		
 		glob->packedType = DefaultPackedTypeForCodec(componentType);
 
-		if(codecID == CODEC_ID_NONE)
+		if(codecID == AV_CODEC_ID_NONE)
 		{
 			Codecprintf(glob->fileLog, "Warning! Unknown codec type! Using MPEG4 by default.\n");
-			codecID = CODEC_ID_MPEG4;
+			codecID = AV_CODEC_ID_MPEG4;
 		}
 		
 		glob->avCodec = avcodec_find_decoder(codecID);
 //		if(glob->packedType != PACKED_QUICKTIME_KNOWS_ORDER)
 			glob->begin.parser = ffusionParserInit(codecID);
                 
-		if ((codecID == CODEC_ID_MPEG4 || codecID == CODEC_ID_H264) && !glob->begin.parser)
+		if ((codecID == AV_CODEC_ID_MPEG4 || codecID == AV_CODEC_ID_H264) && !glob->begin.parser)
 			Codecprintf(glob->fileLog, "This is a parseable format, but we couldn't open a parser!\n");
 		
         // we do the same for the AVCodecContext since all context values are
@@ -725,8 +725,9 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		// some hooks into ffmpeg's buffer allocation to get frames in 
 		// decode order without delay more easily
 		glob->avContext->opaque = glob;
-		glob->avContext->get_buffer = FFusionGetBuffer;
-		glob->avContext->release_buffer = FFusionReleaseBuffer;
+		glob->avContext->get_buffer2 = FFusionGetBuffer;
+		glob->avContext->refcounted_frames = 1;
+		//glob->avContext->release_buffer = FFusionReleaseBuffer;
 		
 		// cap threads at a smaller number to be polite
 		glob->avContext->thread_count = 2;
@@ -748,11 +749,11 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
         }
         // codec was opened, but didn't give us its pixfmt
 		// we have to decode the first frame to find out one
-		else if (glob->avContext->pix_fmt == PIX_FMT_NONE && p->bufferSize && p->data) {
+		else if (glob->avContext->pix_fmt == AV_PIX_FMT_NONE && p->bufferSize && p->data) {
             glob->avContext->pix_fmt = FindPixFmtFromVideo(glob->avCodec, glob->avContext, p->data, p->bufferSize);
 			
 			// first frame is invalid so we still have no pixfmt
-			if (glob->avContext->pix_fmt == PIX_FMT_NONE)
+			if (glob->avContext->pix_fmt == AV_PIX_FMT_NONE)
 				err = paramErr;
 		}
     }
@@ -1290,10 +1291,10 @@ pascal ComponentResult FFusionCodecGetCodecInfo(FFusionGlobals glob, CodecInfo *
 	return getPerianCodecInfo(glob->self, glob->componentType, info);
 }
 
-static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic)
+static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic, int flags)
 {
 	FFusionGlobals glob = s->opaque;
-	int ret = avcodec_default_get_buffer(s, pic);
+	int ret = avcodec_default_get_buffer2(s, pic, flags);
 	int i;
 	
 	if (ret >= 0) {
@@ -1360,7 +1361,7 @@ OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dat
     int len = 0;
 	
 	FFusionDebugPrint("%p Decompress %d bytes.\n", glob, length);
-    avcodec_get_frame_defaults(picture);
+    av_frame_unref(picture);
 	
 	AVPacket pkt;
 	av_init_packet(&pkt);

@@ -208,7 +208,7 @@ static int dataref_close(URLContext *h)
 URLProtocol dataref_protocol = {
     "Data Ref",
     dataref_open,
-    dataref_read,
+    .url_read=dataref_read,
     dataref_write,
     dataref_seek,
     dataref_close,

@@ -22,6 +22,7 @@
 #include <AudioToolbox/AudioToolbox.h>
 extern "C" {
 #include <libavcodec/dca.h>
+#include <libavcodec/dca_syncwords.h>
 #include <libavcodec/bytestream.h>
 }
 #include "ComponentBase.h"
@@ -354,7 +355,7 @@ void FFissionDecoder::SetCurrentInputFormat(const AudioStreamBasicDescription& i
 	
 	CloseAVCodec();
 
-	CodecID codecID = FFFourCCToCodecID(inInputFormat.mFormatID);
+	AVCodecID codecID = FFFourCCToCodecID(inInputFormat.mFormatID);
 	
 	// check to make sure the input format is legal
 	if (avcodec_find_decoder(codecID) == NULL) {
@@ -378,7 +379,7 @@ void FFissionDecoder::OpenAVCodec()
 	
 	CloseAVCodec();
 	
-	CodecID codecID = FFFourCCToCodecID(mInputFormat.mFormatID);
+	AVCodecID codecID = FFFourCCToCodecID(mInputFormat.mFormatID);
 	avCodec = avcodec_find_decoder(codecID);
 	
 	avcodec_get_context_defaults3(avContext, avCodec);
@@ -504,20 +505,20 @@ int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *p
 	mrk |= bytestream2_get_be16(&g);
 	
 	switch (mrk) {
-		case DCA_MARKER_RAW_BE:
+		case DCA_SYNCWORD_CORE_BE:
 			s1 = bytestream2_get_be16(&g);
 			s2 = bytestream2_get_be16(&g);
 			blockCount = (s1 >> 2) & 0x7f;
 			frameSize = (s1 & 0x3) << 12 | ((s2 >> 4) & 0xfff);
 			break;
-		case DCA_MARKER_RAW_LE:
+		case DCA_SYNCWORD_CORE_LE:
 			s1 = bytestream2_get_le16(&g);
 			s2 = bytestream2_get_le16(&g);
 			blockCount = (s1 >> 2) & 0x7f;
 			frameSize = (s1 & 0x3) << 12 | ((s2 >> 4) & 0xfff);
 			break;
-		case DCA_MARKER_14B_BE:
-		case DCA_MARKER_14B_LE:
+		case DCA_SYNCWORD_CORE_14B_BE:
+		case DCA_SYNCWORD_CORE_14B_LE:
 		default:
 			return -1;
 	}
@@ -566,7 +567,7 @@ int produceDTSPassthroughPackets(Byte *outputBuffer, int *outBufUsed, uint8_t *p
 	
 	offset += channelCount * 2;
 	
-	if((mrk == DCA_MARKER_RAW_BE || mrk == DCA_MARKER_14B_BE) && !bigEndian)
+	if((mrk == DCA_SYNCWORD_CORE_BE || mrk == DCA_SYNCWORD_CORE_14B_BE) && !bigEndian)
 	{
 		int i;
 		int count = frameSize & ~0x3;
@@ -677,8 +678,9 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 			av_init_packet(&pkt);
 			pkt.data = packet;
 			pkt.size = packetSize;
+			AVFrame frame;
 			// FIXME avcodec_decode_audio4
-			len = avcodec_decode_audio3(avContext, (int16_t *)outputBuffer, &outBufUsed, &pkt);
+			len = ::avcodec_decode_audio3(avContext, (int16_t *)outputBuffer, &outBufUsed, &pkt);
 		}
 		
 		if (len < 0) {

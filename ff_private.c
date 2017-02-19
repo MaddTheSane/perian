@@ -163,7 +163,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	
 	// 12 is invalid in mov
 	// FIXME: it might be better to set this based entirely on pix_fmt
-	if (imgPtr->depth == 12 || imgPtr->depth == 0) imgPtr->depth = codec->pix_fmt == PIX_FMT_YUVA420P ? 32 : 24;
+	if (imgPtr->depth == 12 || imgPtr->depth == 0) imgPtr->depth = codec->pix_fmt == AV_PIX_FMT_YUVA420P ? 32 : 24;
 	
 	/* Create the strf image description extension (see AVI's BITMAPINFOHEADER) */
 	imgDescExt = create_strf_ext(codec);
@@ -314,28 +314,28 @@ bail:
 	return err;
 } /* initialize_audio_map() */
 
-OSType map_video_codec_to_mov_tag(enum CodecID codec_id)
+OSType map_video_codec_to_mov_tag(enum AVCodecID codec_id)
 {
 	switch(codec_id) {
-		case CODEC_ID_FLV1:
+		case AV_CODEC_ID_FLV1:
 			return 'FLV1';
-		case CODEC_ID_VP6F:
+		case AV_CODEC_ID_VP6F:
 			return 'VP6F';
-		case CODEC_ID_FLASHSV:
+		case AV_CODEC_ID_FLASHSV:
 			return 'FSV1';
-		case CODEC_ID_VP6A:
+		case AV_CODEC_ID_VP6A:
 			return 'VP6A';
 		default:
 			return 0;
 	}
 }
 
-OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
+OSType forced_map_video_codec_to_mov_tag(enum AVCodecID codec_id)
 {
 	switch (codec_id) {
-		case CODEC_ID_H264:
+		case AV_CODEC_ID_H264:
 			return 'H264';
-		case CODEC_ID_MPEG4:
+		case AV_CODEC_ID_MPEG4:
 			return 'MP4S';
 		default:
 			return 0;
@@ -343,7 +343,7 @@ OSType forced_map_video_codec_to_mov_tag(enum CodecID codec_id)
 }
 
 /* maps the codec_id tag of libavformat to a constant the AudioToolbox can work with */
-void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map, int channels)
+void map_avi_to_mov_tag(enum AVCodecID codec_id, AudioStreamBasicDescription *asbd, NCStream *map, int channels)
 {
 	OSType fourcc = FFCodecIDToFourCC(codec_id);
 	
@@ -351,21 +351,21 @@ void map_avi_to_mov_tag(enum CodecID codec_id, AudioStreamBasicDescription *asbd
 		asbd->mFormatID = fourcc;
 	
 	switch(codec_id) {
-		case CODEC_ID_AC3:
+		case AV_CODEC_ID_AC3:
 			map->vbr = 1;
 			break;
-		case CODEC_ID_PCM_S16LE:
+		case AV_CODEC_ID_PCM_S16LE:
 			asbd->mFormatFlags = kLinearPCMFormatFlagIsSignedInteger;
 			asbd->mBytesPerPacket = 2 * channels;
 			break;
-		case CODEC_ID_PCM_U8:
+		case AV_CODEC_ID_PCM_U8:
 			asbd->mFormatFlags = kLinearPCMFormatFlagIsBigEndian;
 			asbd->mBytesPerPacket = channels;
 			break;
-		case CODEC_ID_VORBIS:
+		case AV_CODEC_ID_VORBIS:
 			asbd->mFormatID = 'OggV';
 			break;
-		case CODEC_ID_DTS:
+		case AV_CODEC_ID_DTS:
 			map->vbr = 1;
 			break;
 		default:
@@ -607,7 +607,7 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 			track = NewMovieTrack(theMovie, width, height, kNoVolume);
 
             // Support for 'old' NUV files, that didn't put the codec_tag in the file. 
-            if( st->codec->codec_id == CODEC_ID_NUV && st->codec->codec_tag == 0 ) {
+            if( st->codec->codec_id == AV_CODEC_ID_NUV && st->codec->codec_tag == 0 ) {
                 st->codec->codec_tag = MKTAG( 'N', 'U', 'V', '1' );
             }
 			
@@ -947,7 +947,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		if((packet.flags & AV_PKT_FLAG_KEY) == 0)
 			flags |= mediaSampleNotSync;
 		
-		if(IS_NUV(storage->componentType) && codecContext->codec_id == CODEC_ID_MP3) trustPacketDuration = false;
+		if(IS_NUV(storage->componentType) && codecContext->codec_id == AV_CODEC_ID_MP3) trustPacketDuration = false;
 		if(IS_FLV(storage->componentType)) trustPacketDuration = false;
 
 		memset(&sampleRec, 0, sizeof(sampleRec));

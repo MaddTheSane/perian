@@ -706,6 +706,7 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kVideoFormatTheora, "V_THEORA" },
 	{ kVideoFormatSnow, "V_SNOW" },
 	{ kVideoFormatVP8, "V_VP8" },
+	{ kVideoFormatVP9, "V_VP9" },
 	
 	{ kAudioFormatMPEG4AAC, "A_AAC" },
 	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/LC" },
