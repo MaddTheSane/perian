@@ -101,16 +101,6 @@ BOOL SubDifferentiateLatin12(const unsigned char *data, NSInteger length)
 	return frcount <= 0;
 }
 
-int Codecprintf(FILE *fileLog, const char *format, ...)
-{
-	int ret;
-	va_list va;
-	va_start(va, format);
-	ret = vfprintf(fileLog, format, va);
-	va_end(va);
-	return ret;
-}
-
 NSString *SubLoadFileWithUnknownEncoding(NSString *path)
 {
 	NSData *data = [NSData dataWithContentsOfMappedFile:path];

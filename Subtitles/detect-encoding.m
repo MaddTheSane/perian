@@ -23,6 +23,16 @@
 #import "SubUtilities.h"
 #import "UniversalDetector.h"
 
+int Codecprintf(FILE *fileLog, const char *format, ...)
+{
+	int ret;
+	va_list va;
+	va_start(va, format);
+	ret = vfprintf(fileLog, format, va);
+	va_end(va);
+	return ret;
+}
+
 int main(int argc, char *argv[])
 {
 	if (argc != 2)
