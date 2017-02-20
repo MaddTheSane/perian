@@ -596,6 +596,20 @@ static const AudioChannelLayout dtsChannelLayouts[6] = {
 	{ kAudioChannelLayoutTag_MPEG_5_1_D },			// C L R Ls Rs Lfe
 };
 
+// Taken from Apple's ALAC source code
+static const AudioChannelLayout	ALACChannelLayoutTags[] =
+{
+	{ kAudioChannelLayoutTag_Mono },        // C
+	{ kAudioChannelLayoutTag_Stereo },		// L R
+	{ kAudioChannelLayoutTag_MPEG_3_0_B },	// C L R
+	{ kAudioChannelLayoutTag_MPEG_4_0_B },	// C L R Cs
+	{ kAudioChannelLayoutTag_MPEG_5_0_D },	// C L R Ls Rs
+	{ kAudioChannelLayoutTag_MPEG_5_1_D },	// C L R Ls Rs LFE
+	{ kAudioChannelLayoutTag_AAC_6_1 },		// C L R Ls Rs Cs LFE
+	{ kAudioChannelLayoutTag_MPEG_7_1_B }	// C Lc Rc L R Ls Rs LFE    (doc: IS-13818-7 MPEG2-AAC)
+};
+
+
 AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 {
 	AudioChannelLayout acl = {0};
@@ -623,6 +637,10 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 				
 			case kAudioFormatDTS:
 				acl = dtsChannelLayouts[channelIndex];
+				break;
+				
+			case kAudioFormatAppleLossless:
+				acl = ALACChannelLayoutTags[channelIndex];
 				break;
 		}
 	}
@@ -681,6 +699,8 @@ static const WavCodec kWavCodecIDs[] = {
 	{ kAudioFormatDTS, 0x2001 },
 	{ kAudioFormatMPEG4AAC, 0xff },
 	{ kAudioFormatXiphFLAC, 0xf1ac },
+	{ kAudioFormatWMA1MS, 0x0160 },
+	{ kAudioFormatWMA2MS, 0x0161 },
 	{ 0, 0 }
 };
 
@@ -696,6 +716,7 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kMPEG4VisualCodecType, "V_MPEG4/ISO/SP" },
 	{ kMPEG4VisualCodecType, "V_MPEG4/ISO/AP" },
 	{ kH264CodecType, "V_MPEG4/ISO/AVC" },
+	{ kVideoFormatHEVC, "V_MPEGH/ISO/HEVC" },
 	{ kVideoFormatMSMPEG4v3, "V_MPEG4/MS/V3" },
 	{ kMPEG1VisualCodecType, "V_MPEG1" },
 	{ kMPEG2VisualCodecType, "V_MPEG2" },
@@ -707,6 +728,7 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kVideoFormatSnow, "V_SNOW" },
 	{ kVideoFormatVP8, "V_VP8" },
 	{ kVideoFormatVP9, "V_VP9" },
+	//{ kVideoFormatProRes, "V_PRORES" },
 	
 	{ kAudioFormatMPEG4AAC, "A_AAC" },
 	{ kAudioFormatMPEG4AAC, "A_AAC/MPEG4/LC" },
@@ -732,6 +754,8 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kAudioFormatLinearPCM, "A_PCM/INT/BIG" },
 	{ kAudioFormatLinearPCM, "A_PCM/FLOAT/IEEE" },
 	{ kAudioFormatDTS, "A_DTS" },
+	{ kAudioFormatDTS, "A_DTS/EXPRESS" },
+	{ kAudioFormatDTS, "A_DTS/LOSSLESS" },
 	{ kAudioFormatTTA, "A_TTA1" },
 	{ kAudioFormatWavepack, "A_WAVPACK4" },
 	{ kAudioFormatReal1, "A_REAL/14_4" },
@@ -740,6 +764,8 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kAudioFormatRealSipro, "A_REAL/SIPR" },
 	{ kAudioFormatRealLossless, "A_REAL/RALF" },
 	{ kAudioFormatRealAtrac3, "A_REAL/ATRC" },
+	{ kAudioFormatOpus, "A_OPUS" },
+	{ kAudioFormatAppleLossless, "A_ALAC" },
 	
 #if 0
 	{ kBMPCodecType, "S_IMAGE/BMP" },

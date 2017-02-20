@@ -32,6 +32,39 @@ static float GetWinFontSizeScale(ATSFontRef font);
 static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, uint8_t *breakOpportunities);
 static ATSUFontID GetFontIDForSSAName(NSString *name);
 
+#ifdef QD_HEADERS_ARE_PRIVATE
+extern OSStatus ATSUCreateAndCopyStyle(ATSUStyle, ATSUStyle*);
+extern OSStatus ATSUFindFontFromName(const void *, ByteCount, FontNameCode, FontPlatformCode, FontScriptCode, FontLanguageCode, ATSUFontID *);
+extern OSStatus ATSUFontCount(ItemCount*);
+extern OSStatus ATSUSetAttributes(ATSUStyle, ItemCount, const ATSUAttributeTag[], const ByteCount[], const ATSUAttributeValuePtr[]);
+extern OSStatus ATSUSetLayoutControls(ATSUTextLayout, ItemCount, const ATSUAttributeTag[], const ByteCount[], const ATSUAttributeValuePtr[]);
+extern OSStatus ATSUGetFontIDs(ATSUFontID[], ItemCount, ItemCount *);
+extern OSStatus ATSUFindFontName(ATSUFontID, FontNameCode, FontPlatformCode, FontScriptCode, FontLanguageCode, ByteCount, Ptr, ByteCount *, ItemCount *);
+
+extern OSStatus ATSUCreateStyle(ATSUStyle *);
+extern OSStatus ATSUDisposeStyle(ATSUStyle);
+extern OSStatus ATSUGetGlyphBounds(ATSUTextLayout, ATSUTextMeasurement, ATSUTextMeasurement, UniCharArrayOffset, UniCharCount, UInt16, ItemCount, ATSTrapezoid[], ItemCount *);
+
+
+extern OSStatus ATSUCreateTextLayout(ATSUTextLayout *);
+extern OSStatus ATSUDisposeTextLayout(ATSUTextLayout);
+extern OSStatus ATSUMeasureTextImage(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement, ATSUTextMeasurement, Rect *);
+extern OSStatus ATSUGetRunStyle(ATSUTextLayout, UniCharArrayOffset, ATSUStyle *, UniCharArrayOffset *, UniCharCount *);
+extern OSStatus ATSUSetRunStyle(ATSUTextLayout, ATSUStyle, UniCharArrayOffset, UniCharCount);
+extern OSStatus ATSUGetSoftLineBreaks(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ItemCount, UniCharArrayOffset[], ItemCount *);
+extern OSStatus ATSUSetSoftLineBreak(ATSUTextLayout, UniCharArrayOffset);
+extern OSStatus ATSUDrawText(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement, ATSUTextMeasurement);
+extern OSStatus ATSUGetUnjustifiedBounds(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement *, ATSUTextMeasurement *, ATSUTextMeasurement *, ATSUTextMeasurement *);
+extern OSStatus ATSUDirectGetLayoutDataArrayPtrFromTextLayout(ATSUTextLayout, UniCharArrayOffset, ATSUDirectDataSelector, void *[], ItemCount *);
+extern OSStatus ATSUBatchBreakLines(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement, ItemCount *);
+extern OSStatus ATSUSetTextPointerLocation(ATSUTextLayout, ConstUniCharArrayPtr, UniCharArrayOffset, UniCharCount, UniCharCount);
+extern OSStatus ATSUSetTransientFontMatching(ATSUTextLayout, Boolean);
+extern OSStatus ATSUGetLineControl(ATSUTextLayout, UniCharArrayOffset, ATSUAttributeTag, ByteCount, ATSUAttributeValuePtr, ByteCount *);
+
+extern OSStatus ATSUDirectReleaseLayoutDataArrayPtr(ATSULineRef, ATSUDirectDataSelector, void *[]);
+
+#endif
+
 #define declare_bitfield(name, bits) uint8_t name[bits / 8 + 1]; bzero(name, sizeof(name));
 #define bitfield_set(name, bit) name[(bit) / 8] |= 1 << ((bit) % 8);
 #define bitfield_test(name, bit) ((name[(bit) / 8] & (1 << ((bit) % 8))) != 0)
@@ -79,7 +112,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name);
 @implementation SubATSUISpanExtra
 static CGColorRef CreateCGColorFromRGBA(SubRGBAColor c, CGColorSpaceRef cspace)
 {
-	const float components[] = {c.red, c.green, c.blue, c.alpha};
+	const CGFloat components[] = {c.red, c.green, c.blue, c.alpha};
 	
 	return CGColorCreate(cspace, components);
 }
@@ -802,7 +835,7 @@ static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreak
 	
 	return;
 err:
-	Codecprintf(NULL, "ATSU error %ld accessing text layout\n", err);
+	Codecprintf(NULL, "ATSU error %d accessing text layout\n", (int)err);
 }
 
 static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, UniCharArrayOffset *breaks, ItemCount *nbreaks, Fixed breakingWidth, const unichar *utext, int textLen)
