@@ -100,6 +100,7 @@ void FFInitFFmpeg()
 		REGISTER_DEMUXER(nuv);
 		REGISTER_PARSER(ac3);
 		REGISTER_PARSER(mpegaudio);
+		REGISTER_PARSER(opus);
 		
 		REGISTER_DECODER(msmpeg4v1);
 		REGISTER_DECODER(msmpeg4v2);
