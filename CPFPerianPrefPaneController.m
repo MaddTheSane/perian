@@ -32,6 +32,7 @@
 #define AC3ProLogicIIKey @"useDolbyProLogicII"
 
 //A52 Constants
+typedef unsigned int A52ChannelMode;
 #define A52_STEREO 2
 #define A52_DOLBY 10
 #define A52_CHANNEL_MASK 15
@@ -330,9 +331,9 @@
 	[button_install setEnabled:YES];
 }
 
-- (int)upgradeA52Prefs
+- (A52ChannelMode)upgradeA52Prefs
 {
-	int twoChannelMode;
+	A52ChannelMode twoChannelMode;
 	if([self getBoolFromKey:AC3StereoOverDolbyKey forAppID:_a52AppID withDefault:NO])
 		twoChannelMode = A52_STEREO;
 	else if([self getBoolFromKey:AC3ProLogicIIKey forAppID:_a52AppID withDefault:NO])
@@ -378,7 +379,7 @@
 		[button_autoUpdateCheck setIntValue:1];
 	
 	/* A52 Prefs */
-	unsigned int twoChannelMode = [self getUnsignedIntFromKey:AC3TwoChannelModeKey forAppID:_a52AppID withDefault:0xffffffff];
+	A52ChannelMode twoChannelMode = [self getUnsignedIntFromKey:AC3TwoChannelModeKey forAppID:_a52AppID withDefault:0xffffffff];
 	if(twoChannelMode != 0xffffffff)
 	{
 		/* sanity checks */
@@ -851,7 +852,7 @@
 
 - (IBAction)set2ChannelModePopup:(id)sender;
 {
-	int selected = [popup_outputMode indexOfSelectedItem];
+	NSInteger selected = [popup_outputMode indexOfSelectedItem];
 	switch(selected)
 	{
 		case 0:
