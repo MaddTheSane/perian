@@ -71,7 +71,7 @@ Codec(kMPEG1L2CodecResourceID, AV_CODEC_ID_MP2, "MPEG-1 Layer 2", "An AudioCodec
 Codec(kTrueAudioCodecResourceID, AV_CODEC_ID_TTA, "True Audio", "An AudioCodec that decodes True Audio into linear PCM", kAudioFormatTTA)
 Codec(kDTSCodecResourceID, AV_CODEC_ID_DTS, "DTS Coherent Acoustics", "An AudioCodec that decodes DCA Audio into linear PCM", kAudioFormatDTS)
 Codec(kNellymoserCodecResourceID, AV_CODEC_ID_NELLYMOSER, "Nellymoser ASAO", "An AudioCodec that decodes Nellymoser ASAO into linear PCM", kAudioFormatNellymoser)
-Codec(kAudioFormatOpusCodecResourceID, AV_CODEC_ID_OPUS, "Opus", "An AudioCodec that decodes Opus into linear PCM", kAudioFormatXiphVorbis)
+Codec(kAudioFormatOpusCodecResourceID, AV_CODEC_ID_OPUS, "Opus", "An AudioCodec that decodes Opus into linear PCM", kAudioFormatOpus)
 
 EntryPoint(kFFissionCodecManufacturer, kFFissionCodecVersion, kCompressAC3CodecResourceID, "CompressAudioDecoderEntry", cmpThreadSafeOnMac, )
 Codec(kCompressAC3CodecResourceID, AV_CODEC_ID_NONE, "AC3", "Decompresses compressed video stream stored in H.264 format.", kCompressedAC3)

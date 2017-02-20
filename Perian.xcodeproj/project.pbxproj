@@ -99,7 +99,6 @@
 		11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */; };
 		11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA10A3CE8C10066D45F /* libavcodec.a */; };
 		11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EFA20A3CE8C10066D45F /* libavutil.a */; };
-		11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D4EED50A3CE7EC0066D45F /* QuickTime.framework */; };
 		11C85ED80A641E6400DF3D73 /* ff_dataref.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED30A641E6400DF3D73 /* ff_dataref.c */; };
 		11C85EDA0A641E6400DF3D73 /* ff_private.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED60A641E6400DF3D73 /* ff_private.c */; };
 		11C85FE50A64314400DF3D73 /* ff_MovieImport.c in Sources */ = {isa = PBXBuildFile; fileRef = 11C85ED40A641E6400DF3D73 /* ff_MovieImport.c */; };
@@ -184,6 +183,7 @@
 		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
 		55DB617B1A589F3400A6776A /* SUConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 55DB61751A589F3400A6776A /* SUConstants.m */; };
 		55DB617C1A589F3400A6776A /* SULog.m in Sources */ = {isa = PBXBuildFile; fileRef = 55DB61781A589F3400A6776A /* SULog.m */; };
+		55F030561E5A98D1008225CC /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55F030551E5A98D0008225CC /* QuickTime.framework */; };
 		6116E5580B43C27B0020F1CE /* FFissionCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */; };
 		6116E55A0B43C27B0020F1CE /* FFissionDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */; };
 		6123D6260AD0A3FF003EDE52 /* VobSubCodec.c in Sources */ = {isa = PBXBuildFile; fileRef = 6123D6220AD0A3FE003EDE52 /* VobSubCodec.c */; };
@@ -602,7 +602,6 @@
 		11C85ED50A641E6400DF3D73 /* ff_MovieImportVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_MovieImportVersion.h; sourceTree = "<group>"; };
 		11C85ED60A641E6400DF3D73 /* ff_private.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 0; path = ff_private.c; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.c; };
 		11C85ED70A641E6400DF3D73 /* ff_private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ff_private.h; sourceTree = "<group>"; };
-		11D4EED50A3CE7EC0066D45F /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
 		11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		11D4EFA10A3CE8C10066D45F /* libavcodec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavcodec.a; path = Universal/libavcodec.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		11D4EFA20A3CE8C10066D45F /* libavutil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libavutil.a; path = Universal/libavutil.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -693,6 +692,8 @@
 		55DB61781A589F3400A6776A /* SULog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SULog.m; sourceTree = "<group>"; };
 		55DB61791A589F3400A6776A /* SUVersionComparisonProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUVersionComparisonProtocol.h; sourceTree = "<group>"; };
 		55DB617A1A589F3400A6776A /* SUVersionDisplayProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUVersionDisplayProtocol.h; sourceTree = "<group>"; };
+		55F030551E5A98D0008225CC /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = OldQTFrameworks/QuickTime.framework; sourceTree = "<group>"; };
+		55F030571E5A991F008225CC /* PerianExportedSymbols.exp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.exports; name = PerianExportedSymbols.exp; path = Resources/PerianExportedSymbols.exp; sourceTree = "<group>"; };
 		6116E54C0B43C27B0020F1CE /* FFissionCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionCodec.cpp; sourceTree = "<group>"; };
 		6116E54D0B43C27B0020F1CE /* FFissionCodec.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = FFissionCodec.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		6116E54F0B43C27B0020F1CE /* FFissionDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = FFissionDecoder.cpp; sourceTree = "<group>"; };
@@ -871,11 +872,11 @@
 				11A70ACF0A3D0131002058D4 /* libavcodec.a in Frameworks */,
 				11A70AD00A3D0131002058D4 /* libavutil.a in Frameworks */,
 				8F483B550A642644002CCA73 /* libavformat.a in Frameworks */,
-				11A70AD30A3D0131002058D4 /* QuickTime.framework in Frameworks */,
 				8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */,
 				3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */,
 				3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */,
 				3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */,
+				55F030561E5A98D1008225CC /* QuickTime.framework in Frameworks */,
 				F5BD48FE121786C90089D5FA /* AudioUnit.framework in Frameworks */,
 				5557DF5717D8F6E400142C72 /* libbz2.dylib in Frameworks */,
 				5557DF5517D8F6C400142C72 /* libz.dylib in Frameworks */,
@@ -980,6 +981,7 @@
 		089C1671FE841209C02AAC07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				55F030551E5A98D0008225CC /* QuickTime.framework */,
 				550CC2C018586FF900272A53 /* VideoDecodeAcceleration.framework */,
 				3D4893DC1491ED9700E0A09D /* QD.framework */,
 				3D802F8510336EE90034BF4A /* ApplicationServices.framework */,
@@ -997,7 +999,6 @@
 				8F483B5D0A6426C1002CCA73 /* AudioToolbox.framework */,
 				5557DF6117D8F7C600142C72 /* FFmpeg libs */,
 				11D4EEFC0A3CE7FA0066D45F /* Carbon.framework */,
-				11D4EED50A3CE7EC0066D45F /* QuickTime.framework */,
 				F53E18E40B4F483C003A0471 /* Security.framework */,
 				F5BD48A4121784320089D5FA /* AudioUnit.framework */,
 			);
@@ -1007,6 +1008,7 @@
 		089C167CFE841241C02AAC07 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				55F030571E5A991F008225CC /* PerianExportedSymbols.exp */,
 				11A709DA0A3CFCB6002058D4 /* Perian-Info.plist */,
 				83D1D6C90B4C794800E09EC9 /* PerianPane-Info.plist */,
 				3DE8D6F0104444420007C7E7 /* PerianOpener-Info.plist */,
@@ -1771,7 +1773,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 0630;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = Perian;
 			};
 			buildConfigurationList = 11D4ED470A3CE59A0066D45F /* Build configuration list for PBXProject "Perian" */;
@@ -2358,6 +2360,7 @@
 				);
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.perian.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2379,6 +2382,7 @@
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				LLVM_LTO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.perian.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2391,7 +2395,11 @@
 				CLANG_ENABLE_MODULES = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = NO;
-				EXPORTED_SYMBOLS_FILE = Resources/PerianExportedSymbols.txt;
+				EXPORTED_SYMBOLS_FILE = Resources/PerianExportedSymbols.exp;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/OldQTFrameworks",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2420,7 +2428,8 @@
 					"-read_only_relocs",
 					suppress,
 				);
-				OTHER_REZFLAGS = "-rd -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
+				OTHER_REZFLAGS = "-rd -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\" -F OldQTFrameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.perian.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = component;
 			};
@@ -2433,7 +2442,11 @@
 				CLANG_ENABLE_MODULES = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				EXPORTED_SYMBOLS_FILE = Resources/PerianExportedSymbols.txt;
+				EXPORTED_SYMBOLS_FILE = Resources/PerianExportedSymbols.exp;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/OldQTFrameworks",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2462,7 +2475,8 @@
 					"-read_only_relocs",
 					suppress,
 				);
-				OTHER_REZFLAGS = "-rd -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
+				OTHER_REZFLAGS = "-rd -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\" -F OldQTFrameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.perian.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = component;
 			};
@@ -2502,25 +2516,41 @@
 		11D4ED480A3CE59A0066D45F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				FRAMEWORK_SEARCH_PATHS = "~/oldQTFrameworks";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = OldQTFrameworks;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					DEBUG,
 					DEBUG_BUILD,
 				);
 				GCC_STRICT_ALIASING = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
@@ -2544,20 +2574,35 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLY_RULES_IN_COPY_FILES = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = "~/oldQTFrameworks";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = OldQTFrameworks;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_STRICT_ALIASING = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_OUTPUT_FORMAT = binary;
@@ -2625,7 +2670,11 @@
 				CLANG_ENABLE_MODULES = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				EXPORTED_SYMBOLS_FILE = Resources/PerianExportedSymbols.txt;
+				EXPORTED_SYMBOLS_FILE = Resources/PerianExportedSymbols.exp;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/OldQTFrameworks",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Prefix.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2653,7 +2702,8 @@
 					"-read_only_relocs",
 					suppress,
 				);
-				OTHER_REZFLAGS = "-rd -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\"";
+				OTHER_REZFLAGS = "-rd -d i386_$(i386) -d TARGET_REZ_CARBON_MACHO=1 -i \"$(SRCROOT)\" -i \"$(DERIVED_FILE_DIR)\" -F OldQTFrameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.perian.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = Perian;
 				WRAPPER_EXTENSION = component;
 			};
@@ -2715,6 +2765,7 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
+				PRODUCT_BUNDLE_IDENTIFIER = org.perian.PerianPane;
 				PRODUCT_NAME = Perian;
 				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = prefPane;
@@ -2736,6 +2787,7 @@
 				);
 				INFOPLIST_FILE = "Plists/PerianUpdateChecker-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.perian.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = PerianUpdateChecker;
 				WRAPPER_EXTENSION = app;
 			};
@@ -2744,24 +2796,40 @@
 		3D4BBE510B59EE0A000EDE04 /* Release+Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COMBINE_HIDPI_IMAGES = NO;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				FRAMEWORK_SEARCH_PATHS = "~/oldQTFrameworks";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = OldQTFrameworks;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					DEBUG,
 					DEBUG_BUILD,
 				);
 				GCC_STRICT_ALIASING = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)/Universal";
@@ -2886,6 +2954,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.perian.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
 			name = Debug;
@@ -2903,6 +2972,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.perian.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
 			name = Release;
@@ -2920,6 +2990,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INFOPLIST_PREPROCESSOR_DEFINITIONS = "";
 				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.perian.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "Perian - Open in QT Player";
 			};
 			name = "Release+Debug";
@@ -2987,6 +3058,7 @@
 				INFOPLIST_PREFIX_HEADER = "$(TARGET_BUILD_DIR)/include/GITRevision.h";
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
+				PRODUCT_BUNDLE_IDENTIFIER = org.perian.PerianPane;
 				PRODUCT_NAME = Perian;
 				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = prefPane;
@@ -3007,6 +3079,7 @@
 				INFOPLIST_PREPROCESS = YES;
 				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
 				LLVM_LTO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.perian.PerianPane;
 				PRODUCT_NAME = Perian;
 				SKIP_INSTALL = NO;
 				WRAPPER_EXTENSION = prefPane;

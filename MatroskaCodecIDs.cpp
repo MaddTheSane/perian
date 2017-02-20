@@ -447,6 +447,22 @@ ComponentResult ASBDExt_LPCM(KaxTrackEntry *tr_entry, AudioStreamBasicDescriptio
 	return noErr;
 }
 
+static ComponentResult ASBDExt_ALAC(KaxTrackEntry *tr_entry, Handle cookie, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
+{
+	if (!tr_entry || !asbd) return paramErr;
+	
+	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
+	if (!tr_codec) return paramErr;
+	string codecid(*tr_codec);
+	bool isFloat = codecid == MKV_A_PCM_FLOAT;
+	
+	asbd->mFormatFlags = CalculateLPCMFlags(asbd->mBitsPerChannel, asbd->mBitsPerChannel, isFloat, isFloat ? false : (codecid == MKV_A_PCM_BIG), false);
+	if (asbd->mBitsPerChannel == 8)
+		asbd->mFormatFlags &= ~kLinearPCMFormatFlagIsSignedInteger;
+	
+	return noErr;
+}
+
 ComponentResult ASBDExt_AAC(KaxTrackEntry *tr_entry, Handle cookie, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
 {
 	if (!tr_entry || !asbd) return paramErr;
@@ -648,6 +664,10 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 	return acl;
 }
 
+static ComponentResult MkvFinishAudioDescriptionALAC(KaxTrackEntry *tr_entry, Handle *cookie, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
+{
+	return noErr;
+}
 
 ComponentResult MkvFinishAudioDescription(KaxTrackEntry *tr_entry, Handle *cookie, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
 {
@@ -672,6 +692,10 @@ ComponentResult MkvFinishAudioDescription(KaxTrackEntry *tr_entry, Handle *cooki
 		case kMPEG4AudioFormat:
 			DescExt_aac(tr_entry, cookie, kToSampleDescription);
 			break;
+			
+		case kAudioFormatAppleLossless:
+			MkvFinishAudioDescriptionALAC(tr_entry, cookie, asbd, acl);
+			break;
 	}
 	
 	switch (asbd->mFormatID) {
@@ -682,6 +706,11 @@ ComponentResult MkvFinishAudioDescription(KaxTrackEntry *tr_entry, Handle *cooki
 			
 		case kAudioFormatLinearPCM:
 			ASBDExt_LPCM(tr_entry, asbd);
+			break;
+			
+		case kAudioFormatAppleLossless:
+			if (!cookie || !*cookie) return paramErr;
+			ASBDExt_ALAC(tr_entry, *cookie, asbd, acl);
 			break;
 	}
 	return noErr;

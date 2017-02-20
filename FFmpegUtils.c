@@ -169,6 +169,7 @@ static const struct {
 	{ kAudioFormatDTS, AV_CODEC_ID_DTS },
 	{ kAudioFormatNellymoser, AV_CODEC_ID_NELLYMOSER },
 	{ kAudioFormatTTA, AV_CODEC_ID_TTA },
+	{ kAudioFormatOpus, AV_CODEC_ID_OPUS },
 	
 	{ kAudioFormatAC3MS, AV_CODEC_ID_AC3 },
 	{ kAudioFormatLinearPCM, AV_CODEC_ID_PCM_S16LE },
