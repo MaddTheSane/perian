@@ -170,7 +170,7 @@ static int parse_mpeg4_extra(FFusionParserContext *parser, const uint8_t *buf, i
 	return 1;
 }
 
-/*
+/*!
  * Long story short, FFMpeg's parsers suck for our use.  This function parses an mpeg4 bitstream,
  * and assumes that it is given at least a full frame of data.
  * @param parser A FFusionParserContext structure containg all our info
@@ -186,7 +186,7 @@ static int parse_mpeg4_stream(FFusionParserContext *parser, const uint8_t *buf, 
 	ParseContext *pc1 = (ParseContext *)parser->pc->priv_data;
 	pc1->frame_start_found = 0;
 	
-	int endOfFrame = ff_mpeg4_find_frame_end(&(pc1->pc), buf, buf_size);
+	int endOfFrame = ff_mpeg4_find_frame_end(pc1, buf, buf_size);
 	
 	MpegEncContext *s = pc1->enc;
 	GetBitContext gb1, *gb = &gb1;

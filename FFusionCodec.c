@@ -44,6 +44,10 @@
 #include "CodecIDs.h"
 #include "FFmpegUtils.h"
 
+// TODO: re-write this completely!!!
+//#error re-write this completely!!!
+// Example: https://github.com/git-for-windows/MINGW-packages/blob/master/mingw-w64-openscenegraph/replace-ffmpeg-deprecated-api.patch
+
 //---------------------------------------------------------------------------
 // Types
 //---------------------------------------------------------------------------
@@ -144,7 +148,7 @@ typedef struct
 
 static OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dataPtr, AVFrame *picture, int length);
 static int FFusionGetBuffer(AVCodecContext *s, AVFrame *pic, int flags);
-static void FFusionReleaseBuffer(AVCodecContext *s, AVFrame *pic);
+static void FFusionFreeBuffer(void *opaque, uint8_t *data);
 static FFusionBuffer *retainBuffer(FFusionGlobals glob, FFusionBuffer *buf);
 static void releaseBuffer(AVCodecContext *s, AVFrame *pic);
 
@@ -726,8 +730,6 @@ pascal ComponentResult FFusionCodecPreflight(FFusionGlobals glob, CodecDecompres
 		// decode order without delay more easily
 		glob->avContext->opaque = glob;
 		glob->avContext->get_buffer2 = FFusionGetBuffer;
-		glob->avContext->refcounted_frames = 1;
-		//glob->avContext->release_buffer = FFusionReleaseBuffer;
 		
 		// cap threads at a smaller number to be polite
 		glob->avContext->thread_count = 2;
@@ -859,7 +861,7 @@ pascal ComponentResult FFusionCodecBeginBand(FFusionGlobals glob, CodecDecompres
 	myDrp->frameData = NULL;
 	myDrp->buffer = NULL;
 	
-	FFusionDebugPrint("%p BeginBand #%ld. (%sdecoded, packed %d)\n", glob, p->frameNumber, not(myDrp->decoded), glob->packedType);
+	FFusionDebugPrint("%p BeginBand #%ld. (%sdecoded, packed %ld)\n", glob, p->frameNumber, not(myDrp->decoded), (long)glob->packedType);
 	
 	if (!glob->avContext) {
 		Codecprintf(glob->fileLog, "Perian: QT tried to call BeginBand without preflighting!\n");
@@ -1060,7 +1062,7 @@ pascal ComponentResult FFusionCodecDecodeBand(FFusionGlobals glob, ImageSubCodec
 	
 	glob->stats.type[drp->frameType].decode_calls++;
 	RecomputeMaxCounts(glob);
-	FFusionDebugPrint("%p DecodeBand #%d qtType %d. (packed %d)\n", glob, myDrp->frameNumber, drp->frameType, glob->packedType);
+	FFusionDebugPrint("%p DecodeBand #%d qtType %d. (packed %ld)\n", glob, myDrp->frameNumber, drp->frameType, (long)glob->packedType);
 	
 	// QuickTime will drop H.264 frames when necessary if a sample dependency table exists
 	// we don't want to flush buffers in that case.
@@ -1346,6 +1348,19 @@ static void releaseBuffer(AVCodecContext *s, AVFrame *pic)
 		avcodec_default_release_buffer(s, pic);
 		buf->picture.data[0] = NULL;
 	}
+}
+
+void FFusionFreeBuffer(void *opaque, uint8_t *data)
+{
+	FFusionBuffer *buf = opaque;
+	if(buf->ffmpegUsing)
+	{
+		buf->ffmpegUsing = 0;
+		//releaseBuffer(s, pic);
+	}
+	//AVBufferRef *ref = (AVBufferRef *)opaque;
+	//av_buffer_unref(&ref);
+	//av_free(data);
 }
 
 //-----------------------------------------------------------------
