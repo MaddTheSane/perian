@@ -25,12 +25,13 @@
 __BEGIN_DECLS
 
 @class SubSerializer, SubRenderer;
+@class SubRenderSpan;
 
 @interface SubRenderDiv : NSObject {
 	@public;
 	NSString *text;
 	SubStyle *styleLine;
-	NSArray  *spans;
+	NSArray<SubRenderSpan*>  *spans;
 
 	float posX, posY;
 	int marginL, marginR, marginV, layer;
@@ -45,16 +46,17 @@ __BEGIN_DECLS
 	UniCharArrayOffset offset;
 }
 @property (retain) id extra;
+@property (readonly) UniCharArrayOffset offset;
 @end
 
-SubRGBAColor SubParseSSAColor(unsigned rgb);
-SubRGBAColor SubParseSSAColorString(NSString *c);
+extern SubRGBAColor SubParseSSAColor(unsigned rgb);
+extern SubRGBAColor SubParseSSAColorString(NSString *c);
 
-UInt8 SubASSFromSSAAlignment(UInt8 a);
-void  SubParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV);
-BOOL  SubParseFontVerticality(NSString **fontname);
+extern UInt8 SubASSFromSSAAlignment(UInt8 a);
+extern void  SubParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV);
+extern BOOL  SubParseFontVerticality(NSString **fontname);
 	
-void     SubParseSSAFile(NSString *ssa, NSDictionary **headers, NSArray **styles, NSArray **subs);
-NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate);
+extern void     SubParseSSAFile(NSString *ssa, NSDictionary **headers, NSArray **styles, NSArray **subs);
+extern NSArray<SubRenderDiv*> *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate);
 
 __END_DECLS

@@ -88,17 +88,27 @@ static const short frequencies[] = {
 	-1912, 4259, 2573, 8866, 55, 0, 0, -2247, -831, -3788, -3043, 0, 0, 3412, 2921, 1251, 
 	0, 0, 1377, 520, 1344, 0, -1123, 0, 0, -1213, 2208, -458, -794, 2636, 3824, 0};
 
-BOOL SubDifferentiateLatin12(const unsigned char *data, int length)
+BOOL SubDifferentiateLatin12(const unsigned char *data, NSInteger length)
 {
 	// generated from french/german (latin1) and hungarian/romanian (latin2)
 	
-	int frcount = 0;
+	NSInteger frcount = 0;
 	
 	while (length--) {
 		frcount += frequencies[*data++];
 	}
 	
 	return frcount <= 0;
+}
+
+int Codecprintf(FILE *fileLog, const char *format, ...)
+{
+	int ret;
+	va_list va;
+	va_start(va, format);
+	ret = vfprintf(fileLog, format, va);
+	va_end(va);
+	return ret;
 }
 
 NSString *SubLoadFileWithUnknownEncoding(NSString *path)

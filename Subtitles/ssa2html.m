@@ -209,7 +209,7 @@ NSString *htmlfilter(NSString *s)
 -(void)htmlifyDivArray:(NSArray*)divs
 {
 	for (SubRenderDiv *div in divs) {
-		int j, spancount = [div->spans count], spans = 1, close_div = 0;
+		NSInteger j, spancount = [div->spans count], spans = 1, close_div = 0;
 		
 		if (div->positioned) {
 			[html appendFormat:@"<div style=\"top: %fpx; left: %fpx; position: absolute\">", div->posY, div->posX];
@@ -235,8 +235,8 @@ NSString *htmlfilter(NSString *s)
 
 -(void)addSub:(SubLine*)sl
 {	
-	unichar *ubuf = malloc(sizeof(unichar) * [sl->line length]);
-	NSArray *divs = SubParsePacket(sl->line, sc, self);
+	unichar *ubuf = malloc(sizeof(unichar) * [sl.line length]);
+	NSArray *divs = SubParsePacket(sl.line, sc, self);
 	free(ubuf);
 	NSMutableArray *top = [NSMutableArray array], *bot = [NSMutableArray array], *abs = [NSMutableArray array];
 	
@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
 	
 	while (![ss isEmpty]) {
 		SubLine *sl = [ss getSerializedPacket];
-		if ([sl->line length] == 1) continue;
+		if ([sl.line length] == 1) continue;
 		
 		[htm addSub:sl];
 	}

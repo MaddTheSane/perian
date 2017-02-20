@@ -117,6 +117,7 @@ BOOL SubParseFontVerticality(NSString **fontname)
 }
 
 @synthesize extra;
+@synthesize offset;
 
 -(void)dealloc
 {
@@ -133,10 +134,10 @@ BOOL SubParseFontVerticality(NSString **fontname)
 @implementation SubRenderDiv
 -(NSString*)description
 {
-	int i, sc = [spans count];
-	NSMutableString *tmp = [NSMutableString stringWithFormat:@"div \"%@\" with %d spans:", text, sc];
+	NSInteger i, sc = [spans count];
+	NSMutableString *tmp = [NSMutableString stringWithFormat:@"div \"%@\" with %ld spans:", text, (long)sc];
 	for (i = 0; i < sc; i++) {[tmp appendFormat:@" %ld",((SubRenderSpan*)[spans objectAtIndex:i])->offset];}
-	[tmp appendFormat:@" %d", [text length]];
+	[tmp appendFormat:@" %ld", (long)[text length]];
 	return tmp;
 }
 

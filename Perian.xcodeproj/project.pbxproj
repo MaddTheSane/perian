@@ -670,7 +670,7 @@
 		553F32D817F38A6400221391 /* generateCodecIDs.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = generateCodecIDs.sh; sourceTree = "<group>"; };
 		553F32D917F38A6400221391 /* getGitRevision.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = getGitRevision.sh; sourceTree = "<group>"; };
 		553F32DA17F38A7E00221391 /* archiveComponents.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = archiveComponents.sh; sourceTree = SOURCE_ROOT; };
-		553F32DB17F38A7E00221391 /* createStaticLibs.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = createStaticLibs.sh; sourceTree = SOURCE_ROOT; };
+		553F32DB17F38A7E00221391 /* createStaticLibs.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = createStaticLibs.sh; sourceTree = SOURCE_ROOT; usesTabs = 0; };
 		553F32DE17F38EBA00221391 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = "en.lproj/Read Me.rtf"; sourceTree = "<group>"; };
 		553F32E117F38ECE00221391 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PerianPrefPane.xib; sourceTree = "<group>"; };
 		5557DF4C17D8E0AE00142C72 /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -2644,6 +2644,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = ebml;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -2656,6 +2657,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = matroska;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -2916,6 +2918,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lc++";
 				PRODUCT_NAME = "detect-encoding";
 				SKIP_INSTALL = NO;
 			};
@@ -2926,6 +2929,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lc++";
 				PRODUCT_NAME = "detect-encoding";
 				SKIP_INSTALL = NO;
 			};
@@ -2936,6 +2940,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lc++";
 				PRODUCT_NAME = "detect-encoding";
 				SKIP_INSTALL = NO;
 			};
@@ -3000,6 +3005,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				INSTALL_PATH = /usr/local/lib;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = ebml;
@@ -3013,6 +3019,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = ebml;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -3025,6 +3032,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				INSTALL_PATH = /usr/local/lib;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = matroska;
@@ -3038,6 +3046,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = matroska;
 				STRIP_INSTALLED_PRODUCT = NO;

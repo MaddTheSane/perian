@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 __BEGIN_DECLS
 	
@@ -29,8 +29,8 @@ NSString *SubLoadFileWithUnknownEncoding(NSString *path);
 
 NSString *SubStandardizeStringNewlines(NSString *str);
 
-BOOL SubDifferentiateLatin12(const unsigned char *data, int length);
+BOOL SubDifferentiateLatin12(const unsigned char *data, NSInteger length);
 
-const unichar *SubUnicodeForString(NSString *str, NSData **datap);
+const unichar *SubUnicodeForString(NSString *str, NSData **NS_RETURNS_RETAINED datap);
 
 __END_DECLS
