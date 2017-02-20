@@ -678,9 +678,27 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 			av_init_packet(&pkt);
 			pkt.data = packet;
 			pkt.size = packetSize;
-			AVFrame frame;
+			AVFrame *frame = av_frame_alloc();
+			//frame->nb_samples = outBufUsed;
 			// FIXME avcodec_decode_audio4
-			len = ::avcodec_decode_audio3(avContext, (int16_t *)outputBuffer, &outBufUsed, &pkt);
+			int gotFramePtr = 0;
+			len = avcodec_decode_audio4(avContext, frame, &gotFramePtr, &pkt);
+			if (gotFramePtr) {
+				int lineSize;
+				outBufUsed = av_samples_get_buffer_size(&lineSize, avContext->channels, frame->nb_samples, avContext->sample_fmt, 1);
+				int planar = av_sample_fmt_is_planar(avContext->sample_fmt);
+				
+				memcpy(outputBuffer, frame->extended_data[0], lineSize);
+				
+				if (planar && avContext->channels > 1) {
+					uint8_t *out = ((uint8_t *)outputBuffer) + lineSize;
+					for (int ch = 1; ch < avContext->channels; ch++) {
+						memcpy(out, frame->extended_data[ch], lineSize);
+						out += lineSize;
+					}
+				}
+			}
+			av_frame_unref(frame);
 		}
 		
 		if (len < 0) {
