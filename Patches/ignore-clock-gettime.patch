@@ -1,0 +1,53 @@
+diff --git a/libavdevice/v4l2.c b/libavdevice/v4l2.c
+index ddf331d43d..652657aa81 100644
+--- a/libavdevice/v4l2.c
++++ b/libavdevice/v4l2.c
+@@ -422,7 +422,7 @@ static void mmap_release_buffer(void *opaque, uint8_t *data)
+     enqueue_buffer(s, &buf);
+ }
+ 
+-#if HAVE_CLOCK_GETTIME && defined(CLOCK_MONOTONIC)
++#if NONSENSE_VALUE && defined(CLOCK_MONOTONIC)
+ static int64_t av_gettime_monotonic(void)
+ {
+     return av_gettime_relative();
+@@ -441,7 +441,7 @@ static int init_convert_timestamp(AVFormatContext *ctx, int64_t ts)
+         s->ts_mode = V4L_TS_CONVERT_READY;
+         return 0;
+     }
+-#if HAVE_CLOCK_GETTIME && defined(CLOCK_MONOTONIC)
++#if NONSENSE_VALUE && defined(CLOCK_MONOTONIC)
+     if (ctx->streams[0]->avg_frame_rate.num) {
+         now = av_gettime_monotonic();
+         if (s->ts_mode == V4L_TS_MONO2ABS ||
+@@ -471,7 +471,7 @@ static int convert_timestamp(AVFormatContext *ctx, int64_t *ts)
+         if (r < 0)
+             return r;
+     }
+-#if HAVE_CLOCK_GETTIME && defined(CLOCK_MONOTONIC)
++#if NONSENSE_VALUE && defined(CLOCK_MONOTONIC)
+     if (s->timefilter) {
+         int64_t nowa = av_gettime();
+         int64_t nowm = av_gettime_monotonic();
+diff --git a/libavutil/time.c b/libavutil/time.c
+index dbaee0264c..de7c9ee8c6 100644
+--- a/libavutil/time.c
++++ b/libavutil/time.c
+@@ -55,7 +55,7 @@ int64_t av_gettime(void)
+ 
+ int64_t av_gettime_relative(void)
+ {
+-#if HAVE_CLOCK_GETTIME && defined(CLOCK_MONOTONIC)
++#if NONSENSE_VALUE && defined(CLOCK_MONOTONIC)
+     struct timespec ts;
+     clock_gettime(CLOCK_MONOTONIC, &ts);
+     return (int64_t)ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+@@ -66,7 +66,7 @@ int64_t av_gettime_relative(void)
+ 
+ int av_gettime_relative_is_monotonic(void)
+ {
+-#if HAVE_CLOCK_GETTIME && defined(CLOCK_MONOTONIC)
++#if NONSENSE_VALUE && defined(CLOCK_MONOTONIC)
+     return 1;
+ #else
+     return 0;
