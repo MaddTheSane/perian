@@ -1345,7 +1345,7 @@ static void releaseBuffer(AVCodecContext *s, AVFrame *pic)
 //	FFusionDebugPrint("%p Released Buffer %p #%d to %d(%d).\n", glob, buf, buf->frameNumber, buf->retainCount, buf->ffmpegUsing);
 	if(!buf->retainCount && !buf->ffmpegUsing)
 	{
-		avcodec_default_release_buffer(s, pic);
+		//avcodec_default_release_buffer(s, pic);
 		buf->picture.data[0] = NULL;
 	}
 }

@@ -178,6 +178,7 @@
 		556427F81A4E7EFA006A7269 /* MemReadIOCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 556427F71A4E7EFA006A7269 /* MemReadIOCallback.h */; };
 		556427FA1A4E7F10006A7269 /* MemReadIOCallback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 556427F91A4E7F10006A7269 /* MemReadIOCallback.cpp */; };
 		556427FD1A4F780B006A7269 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 556427FF1A4F780B006A7269 /* Localizable.strings */; };
+		556696D01E5C3882005BFEC2 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 556696CF1E5C3882005BFEC2 /* libswresample.a */; };
 		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
 		558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB417D2468000EB0DE7 /* SUStatus.xib */; };
 		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
@@ -681,6 +682,7 @@
 		556427F71A4E7EFA006A7269 /* MemReadIOCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MemReadIOCallback.h; path = libebml/ebml/MemReadIOCallback.h; sourceTree = "<group>"; };
 		556427F91A4E7F10006A7269 /* MemReadIOCallback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MemReadIOCallback.cpp; path = libebml/src/MemReadIOCallback.cpp; sourceTree = "<group>"; };
 		556427FE1A4F780B006A7269 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		556696CF1E5C3882005BFEC2 /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libswresample.a; path = Universal/libswresample.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5585E1A6179DE5EA0045A322 /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
 		558E7CB417D2468000EB0DE7 /* SUStatus.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SUStatus.xib; sourceTree = "<group>"; };
 		558E7CB717D246B000EB0DE7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SUUpdateAlert.xib; sourceTree = "<group>"; };
@@ -874,6 +876,7 @@
 				8F483B550A642644002CCA73 /* libavformat.a in Frameworks */,
 				8F483B5E0A6426C1002CCA73 /* AudioToolbox.framework in Frameworks */,
 				3D211A1D0B6B18880051299D /* Foundation.framework in Frameworks */,
+				556696D01E5C3882005BFEC2 /* libswresample.a in Frameworks */,
 				3D41BEB40BCD3B510069E7C2 /* libuniversaldetector.a in Frameworks */,
 				3DAD08850FBF83EB001E156F /* CoreFoundation.framework in Frameworks */,
 				55F030561E5A98D1008225CC /* QuickTime.framework in Frameworks */,
@@ -1229,6 +1232,7 @@
 				11D4EFA10A3CE8C10066D45F /* libavcodec.a */,
 				8F483B540A642644002CCA73 /* libavformat.a */,
 				11D4EFA20A3CE8C10066D45F /* libavutil.a */,
+				556696CF1E5C3882005BFEC2 /* libswresample.a */,
 				3D9D088016563BEE0016C817 /* libswscale.a */,
 			);
 			name = "FFmpeg libs";
