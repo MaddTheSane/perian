@@ -10,7 +10,7 @@ CC=`xcrun -find clang`
 
 configureflags="--cc=$CC --disable-amd3dnow --disable-doc --disable-encoders \
     --disable-muxers --disable-network \
-    --disable-avfilter --disable-ffmpeg \
+    --disable-avfilter --disable-programs --disable-ffmpeg --disable-ffprobe \
     --target-os=darwin"
 
 cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -fvisibility=hidden -w"

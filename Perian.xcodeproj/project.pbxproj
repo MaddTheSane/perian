@@ -2474,7 +2474,6 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/DerivedData/Perian/Build/Products/Deployment+Debug/Universal\"",
 				);
-				LLVM_LTO = YES;
 				OTHER_LDFLAGS = (
 					"-read_only_relocs",
 					suppress,
