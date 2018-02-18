@@ -115,7 +115,7 @@ enum
 	kAudioFormatRealLossless                = 'RALF',
 	kAudioFormatRealAtrac3                  = 'ATRC',
 	kAudioFormatNellymoser					= 'NELL',
-	kAudioFormatOpus						= 'Opus',
+	kAudioFormatOpusPerian					= 'Opus',
 	
 	kSubFormatUTF8                          = 'SRT ',
 	kSubFormatSSA                           = 'SSA ',

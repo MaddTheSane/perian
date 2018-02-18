@@ -48,7 +48,7 @@ static int dataref_update_filesize(dataref_private *private)
 	} else {
 		long size32;
 		result = DataHGetFileSize(private->dh, &size32);
-		require_noerr(result, bail);
+		__Require_noErr(result, bail);
 		private->size = size32;
 	}
 bail:
@@ -73,25 +73,25 @@ static int dataref_open(URLContext *h, const char *filename, int flags)
 	
 	private = h->priv_data;
 	result = OpenAComponent(GetDataHandler(private->dataRef, private->dataRefType, access), &private->dh);
-	require_noerr(result,bail);
+	__Require_noErr(result,bail);
 	
 	result = DataHSetDataRef(private->dh, private->dataRef);
-	require_noerr(result,bail);
+	__Require_noErr(result,bail);
 	
 	if(access & kDataHCanRead) {
 		result = DataHOpenForRead(private->dh);
-		require_noerr(result,bail);
+		__Require_noErr(result,bail);
 	}
 	if(access & kDataHCanWrite) {
 		result = DataHOpenForWrite(private->dh);
-		require_noerr(result,bail);
+		__Require_noErr(result,bail);
 	}
 	
 	private->pos = 0ll;
 	private->size = 0ll;
 	
 	result = dataref_update_filesize(private);
-	require_noerr(result,bail);
+	__Require_noErr(result,bail);
 bail:
 	return result;
 } /* dataref_open() */

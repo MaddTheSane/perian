@@ -204,7 +204,7 @@ ComponentResult FFAvi_MovieImportValidate(ff_global_ptr storage, const FSSpec *t
 	*valid = FALSE;
 	
 	result = QTNewDataReferenceFromFSSpec(theFile, 0, &dataRef, &dataRefType);
-	require_noerr(result,bail);
+	__Require_noErr(result,bail);
 	
 	result = MovieImportValidateDataRef(storage->ci, dataRef, dataRefType, (UInt8*)valid);
 	
@@ -279,7 +279,7 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 	pd.buf_size = PROBE_BUF_SIZE;
 	
 	result = DataHScheduleData(dataHandler, (Ptr)pd.buf, 0, PROBE_BUF_SIZE, 0, NULL, NULL);
-	require_noerr(result,bail);
+	__Require_noErr(result,bail);
 	
 	FFInitFFmpeg();
 	storage->format = av_probe_input_format(&pd, 1);
@@ -292,7 +292,7 @@ ComponentResult FFAvi_MovieImportValidateDataRef(ff_global_ptr storage, Handle d
 		if (IS_AVI(storage->componentType)) {
 			/* Prepare the iocontext structure */
 			result = url_open_dataref(&byteContext, dataRef, dataRefType, NULL, NULL, NULL);
-			require_noerr(result, bail);
+			__Require_noErr(result, bail);
 			
 			OSType fourcc = get_avi_strf_fourcc(byteContext);
 			enum AVCodecID id = ff_codec_get_id(ff_codec_bmp_tags, BSWAP(fourcc));
@@ -323,14 +323,14 @@ ComponentResult FFAvi_MovieImportFile(ff_global_ptr storage, const FSSpec *theFi
 	*outFlags = 0;
 	
 	result = QTNewDataReferenceFromFSSpec(theFile, 0, &dataRef, &dataRefType);
-	require_noerr(result,bail);
+	__Require_noErr(result,bail);
 	
 	result = MovieImportDataRef(storage->ci, dataRef, dataRefType, theMovie, targetTrack, usedTrack, atTime, addedDuration,
 								inFlags, outFlags);
-	require_noerr(result, bail);
+	__Require_noErr(result, bail);
 	
 	result = FSpMakeFSRef(theFile, &theFileFSRef);
-	require_noerr(result, bail);
+	__Require_noErr(result, bail);
 		
 bail:
 		if(dataRef)
@@ -361,14 +361,14 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	/* Prepare the iocontext structure */
 	result = url_open_dataref(&byteContext, dataRef, dataRefType, &storage->dataHandler, &storage->dataHandlerSupportsWideOffsets, &storage->dataSize);
 	storage->isStreamed = dataRefType == URLDataHandlerSubType;
-	require_noerr(result, bail);
+	__Require_noErr(result, bail);
 	
 	/* Open the Format Context */
 	ic = avformat_alloc_context();
 	ic->flags |= AVFMT_FLAG_CUSTOM_IO;
 	ic->pb = byteContext;
 	result = avformat_open_input(&ic, "", storage->format, NULL);
-	require_noerr(result,bail);
+	__Require_noErr(result,bail);
 	storage->format_context = ic;
 	ic = NULL;
 	
@@ -471,7 +471,7 @@ ComponentResult FFAvi_MovieImportDataRef(ff_global_ptr storage, Handle dataRef, 
 	
 	//attempt to import using indexes.
 	result = import_using_index(storage, &hadIndex, addedDuration);
-	require_noerr(result, bail);
+	__Require_noErr(result, bail);
 	
 	if(hadIndex) {
 		//file had an index and was imported; we are done.

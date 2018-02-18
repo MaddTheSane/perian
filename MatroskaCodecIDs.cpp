@@ -793,7 +793,7 @@ static const MatroskaQT_Codec kMatroskaCodecIDs[] = {
 	{ kAudioFormatRealSipro, "A_REAL/SIPR" },
 	{ kAudioFormatRealLossless, "A_REAL/RALF" },
 	{ kAudioFormatRealAtrac3, "A_REAL/ATRC" },
-	{ kAudioFormatOpus, "A_OPUS" },
+	{ kAudioFormatOpusPerian, "A_OPUS" },
 	{ kAudioFormatAppleLossless, "A_ALAC" },
 	
 #if 0
