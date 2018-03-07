@@ -14,7 +14,7 @@ Codec(kMPEG4CodecInfoResID, AV_CODEC_ID_MPEG4, "MPEG-4", "Decompresses video sto
 ResourceOnly(<!#define kCodecVersion kFFusionCodecVersion!>)
 ResourceOnly(<!#define kCodecManufacturer kFFusionCodecManufacturer!>)
 Codec(kH264CodecInfoResID, AV_CODEC_ID_H264, "H.264", "Decompresses video stored in H.264 format.", 'H264', 'h264', 'X264', 'x264', 'DAVC', 'VSSH', 'AVC1', 'avc1')
-Codec(kH265CodecInfoResID, AV_CODEC_ID_H265, "H.265", "Decompresses video stored in H.265 format.", 'hev1', 'hvc1')
+Codec(kHEVCCodecInfoResID, AV_CODEC_ID_HEVC, "HEVC", "Decompresses video stored in HEVC format.", 'hev1', 'hvc1')
 Codec(kFLV1CodecInfoResID, AV_CODEC_ID_FLV1, "Sorenson H.263", "Decompresses video stored in Sorenson H.263 format.", 'FLV1')
 Codec(kFlashSVCodecInfoResID, AV_CODEC_ID_FLASHSV, "Flash Screen Video", "Decompresses video stored in Flash Screen Video format.", 'FSV1')
 Codec(kVP6CodecInfoResID, AV_CODEC_ID_VP6, "TrueMotion VP6", "Decompresses video stored in On2 VP6 format.", 'VP60', 'VP61', 'VP62')
