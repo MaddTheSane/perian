@@ -182,6 +182,8 @@
 		5585E1A7179DE5EA0045A322 /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5585E1A6179DE5EA0045A322 /* libiconv.dylib */; };
 		558E7CB517D2468000EB0DE7 /* SUStatus.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB417D2468000EB0DE7 /* SUStatus.xib */; };
 		558E7CB817D246B000EB0DE7 /* SUUpdateAlert.xib in Resources */ = {isa = PBXBuildFile; fileRef = 558E7CB617D246B000EB0DE7 /* SUUpdateAlert.xib */; };
+		5592DB9D2050A6F800410916 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5592DB9C2050A6F800410916 /* VideoToolbox.framework */; };
+		5592DB9F2050A71C00410916 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5592DB9E2050A71C00410916 /* CoreVideo.framework */; };
 		55DB617B1A589F3400A6776A /* SUConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = 55DB61751A589F3400A6776A /* SUConstants.m */; };
 		55DB617C1A589F3400A6776A /* SULog.m in Sources */ = {isa = PBXBuildFile; fileRef = 55DB61781A589F3400A6776A /* SULog.m */; };
 		55F030561E5A98D1008225CC /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55F030551E5A98D0008225CC /* QuickTime.framework */; };
@@ -687,6 +689,8 @@
 		558E7CB417D2468000EB0DE7 /* SUStatus.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SUStatus.xib; sourceTree = "<group>"; };
 		558E7CB717D246B000EB0DE7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SUUpdateAlert.xib; sourceTree = "<group>"; };
 		5592DB962050883E00410916 /* ARCBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ARCBridge.h; sourceTree = "<group>"; };
+		5592DB9C2050A6F800410916 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		5592DB9E2050A71C00410916 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		55C06647173C6F4D00D8CF2C /* ffmpeg */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ffmpeg; sourceTree = "<group>"; };
 		55DB61741A589F3400A6776A /* SUConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUConstants.h; sourceTree = "<group>"; };
 		55DB61751A589F3400A6776A /* SUConstants.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUConstants.m; sourceTree = "<group>"; };
@@ -869,6 +873,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5592DB9F2050A71C00410916 /* CoreVideo.framework in Frameworks */,
+				5592DB9D2050A6F800410916 /* VideoToolbox.framework in Frameworks */,
 				61CB11F40ACE0F73007994BD /* libmatroska.a in Frameworks */,
 				61CB11F30ACE0F6D007994BD /* libebml.a in Frameworks */,
 				11A70ACE0A3D0131002058D4 /* Carbon.framework in Frameworks */,
@@ -985,6 +991,8 @@
 		089C1671FE841209C02AAC07 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5592DB9E2050A71C00410916 /* CoreVideo.framework */,
+				5592DB9C2050A6F800410916 /* VideoToolbox.framework */,
 				55F030551E5A98D0008225CC /* QuickTime.framework */,
 				550CC2C018586FF900272A53 /* VideoDecodeAcceleration.framework */,
 				3D4893DC1491ED9700E0A09D /* QD.framework */,

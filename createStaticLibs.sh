@@ -63,7 +63,8 @@ else
 	cd ffmpeg
 	#patch -p1 < ../Patches/0002-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
     #patch -p1 < ../Patches/config.patch
-    patch -p1 < ../Patches/ignore-clock-gettime.patch
+    #patch -p1 < ../Patches/ignore-clock-gettime.patch
+    patch -p1 < ../Patches/cxx11Quiet.patch
 	cd ..
 
 	touch ffmpeg/patched
