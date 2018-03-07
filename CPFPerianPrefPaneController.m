@@ -32,13 +32,15 @@
 #define AC3ProLogicIIKey @"useDolbyProLogicII"
 
 //A52 Constants
-typedef unsigned int A52ChannelMode;
-#define A52_STEREO 2
-#define A52_DOLBY 10
-#define A52_CHANNEL_MASK 15
-#define A52_LFE 16
-#define A52_ADJUST_LEVEL 32
-#define A52_USE_DPLII 64
+typedef NS_OPTIONS(unsigned int, A52ChannelMode) {
+	A52ChannelModeStereo = 2,
+	A52ChannelModeDolby = 10,
+	A52ChannelModeChannelMask = 15,
+	A52ChannelModeLFE = 16,
+	A52ChannelModeAdjustLevel = 32,
+	A52ChannelModeUseDPLII = 64,
+	A52ChannelModeUnset = 0xffffffff
+};
 
 @interface NSString (VersionStringCompare)
 - (BOOL)isVersionStringOlderThan:(NSString *)older;
@@ -335,11 +337,11 @@ typedef unsigned int A52ChannelMode;
 {
 	A52ChannelMode twoChannelMode;
 	if([self getBoolFromKey:AC3StereoOverDolbyKey forAppID:_a52AppID withDefault:NO])
-		twoChannelMode = A52_STEREO;
+		twoChannelMode = A52ChannelModeStereo;
 	else if([self getBoolFromKey:AC3ProLogicIIKey forAppID:_a52AppID withDefault:NO])
-		twoChannelMode = A52_DOLBY | A52_USE_DPLII;
+		twoChannelMode = A52ChannelModeDolby | A52ChannelModeUseDPLII;
 	else
-		twoChannelMode = A52_DOLBY;
+		twoChannelMode = A52ChannelModeDolby;
 	
 	[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:twoChannelMode];
 	return twoChannelMode;
@@ -379,16 +381,16 @@ typedef unsigned int A52ChannelMode;
 		[button_autoUpdateCheck setIntValue:1];
 	
 	/* A52 Prefs */
-	A52ChannelMode twoChannelMode = [self getUnsignedIntFromKey:AC3TwoChannelModeKey forAppID:_a52AppID withDefault:0xffffffff];
+	A52ChannelMode twoChannelMode = (A52ChannelMode)[self getUnsignedIntFromKey:AC3TwoChannelModeKey forAppID:_a52AppID withDefault:0xffffffff];
 	if(twoChannelMode != 0xffffffff)
 	{
 		/* sanity checks */
-		if(twoChannelMode & A52_CHANNEL_MASK & 0xf7 != 2)
+		if(twoChannelMode & A52ChannelModeChannelMask & 0xf7 != 2)
 		{
 			/* matches 2 and 10, which is Stereo and Dolby */
-			twoChannelMode = A52_DOLBY;
+			twoChannelMode = A52ChannelModeDolby;
 		}
-		twoChannelMode &= ~A52_ADJUST_LEVEL & ~A52_LFE;
+		twoChannelMode &= ~(A52ChannelModeAdjustLevel | A52ChannelModeLFE);
 	}
 	else
 		twoChannelMode = [self upgradeA52Prefs];
@@ -396,13 +398,13 @@ typedef unsigned int A52ChannelMode;
 	CFPreferencesSetAppValue((__bridge CFStringRef)AC3ProLogicIIKey, NULL, (__bridge CFStringRef)_a52AppID);
 	switch(twoChannelMode)
 	{
-		case A52_STEREO:
+		case A52ChannelModeStereo:
 			[popup_outputMode selectItemAtIndex:0];
 			break;
-		case A52_DOLBY:
+		case A52ChannelModeDolby:
 			[popup_outputMode selectItemAtIndex:1];
 			break;
-		case A52_DOLBY | A52_USE_DPLII:
+		case A52ChannelModeDolby | A52ChannelModeUseDPLII:
 			[popup_outputMode selectItemAtIndex:2];
 			break;
 		default:
@@ -825,7 +827,7 @@ typedef unsigned int A52ChannelMode;
 #pragma mark AC3
 - (IBAction)setAC3DynamicRangePopup:(id)sender
 {
-	int selected = [popup_ac3DynamicRangeType indexOfSelectedItem];
+	NSInteger selected = [popup_ac3DynamicRangeType indexOfSelectedItem];
 	switch(selected)
 	{
 		case 0:
@@ -856,13 +858,13 @@ typedef unsigned int A52ChannelMode;
 	switch(selected)
 	{
 		case 0:
-			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:A52_STEREO];
+			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:A52ChannelModeStereo];
 			break;
 		case 1:
-			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:A52_DOLBY];
+			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:A52ChannelModeDolby];
 			break;
 		case 2:
-			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:A52_DOLBY | A52_USE_DPLII];
+			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:A52ChannelModeDolby | A52ChannelModeUseDPLII];
 			break;
 		case 3:
 			[self setKey:AC3TwoChannelModeKey forAppID:_a52AppID fromInt:0];
