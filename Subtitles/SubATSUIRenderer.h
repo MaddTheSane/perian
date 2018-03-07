@@ -24,6 +24,8 @@
 
 @class SubRenderer, SubContext;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface SubATSUIRenderer : SubRenderer {
 	SubContext *context;
 
@@ -32,9 +34,12 @@
 	UniCharArrayOffset *breakBuffer;
 	TextBreakLocatorRef breakLocator;
 	
-	float screenScaleX, screenScaleY, videoWidth, videoHeight;
+	CGFloat screenScaleX, screenScaleY, videoWidth, videoHeight;
 	BOOL drawTextBounds;
 }
--(SubATSUIRenderer*)initWithScriptType:(int)type header:(NSString*)header videoWidth:(float)width videoHeight:(float)height;
--(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(float)cWidth height:(float)cHeight;
+- (instancetype)init UNAVAILABLE_ATTRIBUTE;
+-(nullable instancetype)initWithScriptType:(int)type header:(nullable NSString*)header videoWidth:(CGFloat)width videoHeight:(CGFloat)height NS_DESIGNATED_INITIALIZER;
+-(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(CGFloat)cWidth height:(CGFloat)cHeight;
 @end
+
+NS_ASSUME_NONNULL_END

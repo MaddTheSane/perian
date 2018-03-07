@@ -23,9 +23,31 @@
 #import "SubContext.h"
 
 __BEGIN_DECLS
+NS_ASSUME_NONNULL_BEGIN
 
 @class SubSerializer, SubRenderer;
 @class SubRenderSpan;
+
+typedef NS_OPTIONS(uint16_t, SubRenderAnimations) {
+	SubRenderAnimationNone = 0,
+	SubRenderAnimationSimpleFade = 1 << 0,
+	SubRenderAnimationCopmlexFade = 1 << 1,
+};
+
+typedef struct SubRenderFad {
+	int startTime;
+	int endTime;
+} SubRenderFad;
+
+typedef struct SubRenderFade {
+	CGFloat a1;
+	CGFloat a2;
+	CGFloat a3;
+	int startTime;
+	int t2;
+	int t3;
+	int endTime;
+} SubRenderFade;
 
 @interface SubRenderDiv : NSObject {
 	@public;
@@ -33,11 +55,39 @@ __BEGIN_DECLS
 	SubStyle *styleLine;
 	NSArray<SubRenderSpan*>  *spans;
 
-	float posX, posY;
+	CGFloat posX, posY;
 	int marginL, marginR, marginV, layer;
-	UInt8 alignH, alignV, wrapStyle, render_complexity;
-	BOOL positioned, shouldResetPens;	
+	SubAlignmentH alignH;
+	SubAlignmentV alignV;
+	SubLineWrap wrapStyle;
+	UInt8 render_complexity;
+	BOOL positioned, shouldResetPens;
+	CGFloat scale;
+	SubRenderAnimations runningAnimations;
+	SubRenderFad simpleFade;
+	SubRenderFade complexFade;
 }
+@property (copy, nullable) NSString *text;
+@property (strong, nullable) SubStyle *styleLine;
+@property (copy, nullable) NSArray<SubRenderSpan*> *spans;
+@property CGFloat posX;
+@property CGFloat posY;
+@property int leftMargin;
+@property int rightMargin;
+@property int verticalMargin;
+@property int layer;
+@property SubAlignmentH alignH;
+@property SubAlignmentV alignV;
+@property SubLineWrap wrapStyle;
+@property UInt8 renderComplexity;
+@property (getter=isPositioned) BOOL positioned;
+@property BOOL shouldResetPens;
+
+@property CGFloat scale;
+@property SubRenderAnimations runningAnimations;
+@property SubRenderFad simpleFade;
+@property SubRenderFade complexFade;
+
 @end
 
 @interface SubRenderSpan : NSObject <NSCopying> {
@@ -53,10 +103,11 @@ extern SubRGBAColor SubParseSSAColor(unsigned rgb);
 extern SubRGBAColor SubParseSSAColorString(NSString *c);
 
 extern UInt8 SubASSFromSSAAlignment(UInt8 a);
-extern void  SubParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV);
-extern BOOL  SubParseFontVerticality(NSString **fontname);
-	
-extern void     SubParseSSAFile(NSString *ssa, NSDictionary **headers, NSArray **styles, NSArray **subs);
-extern NSArray<SubRenderDiv*> *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *delegate);
+extern void  SubParseASSAlignment(UInt8 a, SubAlignmentH *alignH, SubAlignmentV *alignV) NS_REFINED_FOR_SWIFT;
+extern BOOL  SubParseFontVerticality(NSString *_Nonnull* _Nonnull fontname) NS_REFINED_FOR_SWIFT;
 
+extern void     SubParseSSAFile(NSString *ssa, NSDictionary<NSString*,NSString*> *_Nonnull*_Nonnull headers, NSArray<NSDictionary<NSString*,NSString*>*> *_Nonnull*_Nullable styles, NSArray<NSDictionary<NSString*,NSString*>*> *_Nonnull*_Nullable subs) NS_REFINED_FOR_SWIFT;
+extern NSArray<SubRenderDiv*> *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *_Nullable delegate);
+
+NS_ASSUME_NONNULL_END
 __END_DECLS

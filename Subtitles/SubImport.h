@@ -24,8 +24,13 @@
 
 #include <QuickTime/QuickTime.h>
 
+#ifdef __cplusplus
+#include <string>
+#endif
+
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
+CF_ASSUME_NONNULL_BEGIN
 
 @interface SubLine : NSObject
 {
@@ -37,6 +42,7 @@
 @property (readonly, copy) NSString *line;
 @property NSUInteger beginTime;
 @property NSUInteger endTime;
+//! line number, used only by SubSerializer
 @property NSInteger num;
 
 - (instancetype)initWithLine:(NSString*)l start:(unsigned)s end:(unsigned)e;
@@ -46,7 +52,7 @@
 {
 	// input lines, sorted by 1. beginning time 2. original insertion order
 @private
-	NSMutableArray *lines;
+	NSMutableArray<SubLine*> *lines;
 	BOOL finished;
 	
 	NSUInteger last_begin_time, last_end_time;
@@ -60,7 +66,7 @@
 @property NSInteger numLinesInput;
 
 -(void)addLine:(SubLine *)sline;
--(SubLine*)getSerializedPacket;
+-(nullable SubLine*)getSerializedPacket;
 @end
 
 @interface VobSubSample : NSObject
@@ -81,13 +87,13 @@
 	NSData			*privateData;
 	NSString		*language;
 	NSInteger		index;
-	NSMutableArray	*samples;
+	NSMutableArray<VobSubSample*>	*samples;
 }
 
 @property (retain, readonly) NSData *privateData;
 @property (copy) NSString *language;
 @property NSInteger index;
-@property (assign, readonly) NSArray *samples;
+@property (assign, readonly) NSArray<VobSubSample*> *samples;
 
 - (instancetype)initWithPrivateData:(NSData *)idxPrivateData language:(NSString *)lang andIndex:(int)trackIndex;
 - (void)addSample:(VobSubSample *)sample;
@@ -97,29 +103,35 @@
 
 __BEGIN_DECLS
 
-NSString *SubLoadSSAFromPath(NSString *path, SubSerializer *ss);
+NSString *_Nullable SubLoadSSAFromPath(NSString *path, SubSerializer *ss);
+NSString *_Nullable SubLoadSSAFromURL(NSURL *path, SubSerializer *ss);
+NSString *_Nullable SubLoadSSAFromNSData(NSData *data, SubSerializer *ss);
 void SubLoadSRTFromPath(NSString *path, SubSerializer *ss);
 void SubLoadSMIFromPath(NSString *path, SubSerializer *ss, int subCount);
 
 __END_DECLS
 
+#else
+CF_ASSUME_NONNULL_BEGIN
+
 #endif // ___OBJC__
 
 __BEGIN_DECLS
 
+/** if the subtitle filename is something like title.en.srt or movie.fre.srt
+ this function detects it and returns the subtitle language
+ */
+ScriptCode GetFilenameLanguage(CFStringRef _Nonnull filename);
 #if !__LP64__
-
-short GetFilenameLanguage(CFStringRef filename);
-ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle dataRef, OSType dataRefType, Movie theMovie);
+ComponentResult LoadExternalSubtitlesFromFileDataRef(Handle _Nonnull dataRef, OSType dataRefType, Movie _Nonnull theMovie);
 void SetSubtitleMediaHandlerTransparent(MediaHandler mh);
-Track CreatePlaintextSubTrack(Movie theMovie, ImageDescriptionHandle imgDesc, TimeScale timescale, Handle dataRef, OSType dataRefType, FourCharCode subType, Handle imageExtension, Rect movieBox);
+Track _Nullable CreatePlaintextSubTrack(Movie _Nonnull theMovie, ImageDescriptionHandle _Nonnull imgDesc, TimeScale timescale, Handle _Nonnull dataRef, OSType dataRefType, FourCharCode subType, Handle _Nullable imageExtension, Rect movieBox);
 
 #endif
 
 __END_DECLS
 
 #ifdef __cplusplus
-#include <string>
 
 #ifndef __OBJC_GC__
 #define __strong
@@ -137,12 +149,14 @@ public:
 	void pushLine(const char *line, size_t size, unsigned start, unsigned end);
 	void pushLine(const std::string &cppstr, unsigned start, unsigned end);
 	void setFinished();
-	Handle popPacket(unsigned *start, unsigned *end);
+	Handle _Nullable popPacket(unsigned *start, unsigned *end);
 	void release();
 	void retain();
 	bool empty();
 };
 
 #endif // __cplusplus
+
+CF_ASSUME_NONNULL_END
 
 #endif // __SUBIMPORT_H__

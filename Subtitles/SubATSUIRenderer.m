@@ -26,42 +26,45 @@
 #import "SubUtilities.h"
 #import "Codecprintf.h"
 #import "CommonUtils.h"
-#import <pthread.h>
+#include <pthread.h>
+#import "ARCBridge.h"
 
-static float GetWinFontSizeScale(ATSFontRef font);
+static CGFloat GetWinATSFontSizeScale(ATSFontRef font);
 static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, uint8_t *breakOpportunities);
 static ATSUFontID GetFontIDForSSAName(NSString *name);
+static CGColorRef CreateCGColorFromRGBA(SubRGBAColor c, CGColorSpaceRef cspace) CF_RETURNS_RETAINED;
+static CGColorRef CreateCGColorFromRGBOpaque(SubRGBAColor c, CGColorSpaceRef cspace) CF_RETURNS_RETAINED;
 
 #ifdef QD_HEADERS_ARE_PRIVATE
-extern OSStatus ATSUCreateAndCopyStyle(ATSUStyle, ATSUStyle*);
-extern OSStatus ATSUFindFontFromName(const void *, ByteCount, FontNameCode, FontPlatformCode, FontScriptCode, FontLanguageCode, ATSUFontID *);
-extern OSStatus ATSUFontCount(ItemCount*);
-extern OSStatus ATSUSetAttributes(ATSUStyle, ItemCount, const ATSUAttributeTag[], const ByteCount[], const ATSUAttributeValuePtr[]);
-extern OSStatus ATSUSetLayoutControls(ATSUTextLayout, ItemCount, const ATSUAttributeTag[], const ByteCount[], const ATSUAttributeValuePtr[]);
-extern OSStatus ATSUGetFontIDs(ATSUFontID[], ItemCount, ItemCount *);
-extern OSStatus ATSUFindFontName(ATSUFontID, FontNameCode, FontPlatformCode, FontScriptCode, FontLanguageCode, ByteCount, Ptr, ByteCount *, ItemCount *);
+extern OSStatus ATSUCreateAndCopyStyle(ATSUStyle, ATSUStyle*) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUFindFontFromName(const void *, ByteCount, FontNameCode, FontPlatformCode, FontScriptCode, FontLanguageCode, ATSUFontID *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUFontCount(ItemCount*) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUSetAttributes(ATSUStyle, ItemCount, const ATSUAttributeTag[], const ByteCount[], const ATSUAttributeValuePtr[]) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUSetLayoutControls(ATSUTextLayout, ItemCount, const ATSUAttributeTag[], const ByteCount[], const ATSUAttributeValuePtr[]) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUGetFontIDs(ATSUFontID[], ItemCount, ItemCount *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUFindFontName(ATSUFontID, FontNameCode, FontPlatformCode, FontScriptCode, FontLanguageCode, ByteCount, Ptr, ByteCount *, ItemCount *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
 
-extern OSStatus ATSUCreateStyle(ATSUStyle *);
-extern OSStatus ATSUDisposeStyle(ATSUStyle);
-extern OSStatus ATSUGetGlyphBounds(ATSUTextLayout, ATSUTextMeasurement, ATSUTextMeasurement, UniCharArrayOffset, UniCharCount, UInt16, ItemCount, ATSTrapezoid[], ItemCount *);
+extern OSStatus ATSUCreateStyle(ATSUStyle *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUDisposeStyle(ATSUStyle) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUGetGlyphBounds(ATSUTextLayout, ATSUTextMeasurement, ATSUTextMeasurement, UniCharArrayOffset, UniCharCount, UInt16, ItemCount, ATSTrapezoid[], ItemCount *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
 
 
-extern OSStatus ATSUCreateTextLayout(ATSUTextLayout *);
-extern OSStatus ATSUDisposeTextLayout(ATSUTextLayout);
-extern OSStatus ATSUMeasureTextImage(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement, ATSUTextMeasurement, Rect *);
-extern OSStatus ATSUGetRunStyle(ATSUTextLayout, UniCharArrayOffset, ATSUStyle *, UniCharArrayOffset *, UniCharCount *);
-extern OSStatus ATSUSetRunStyle(ATSUTextLayout, ATSUStyle, UniCharArrayOffset, UniCharCount);
-extern OSStatus ATSUGetSoftLineBreaks(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ItemCount, UniCharArrayOffset[], ItemCount *);
-extern OSStatus ATSUSetSoftLineBreak(ATSUTextLayout, UniCharArrayOffset);
-extern OSStatus ATSUDrawText(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement, ATSUTextMeasurement);
-extern OSStatus ATSUGetUnjustifiedBounds(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement *, ATSUTextMeasurement *, ATSUTextMeasurement *, ATSUTextMeasurement *);
-extern OSStatus ATSUDirectGetLayoutDataArrayPtrFromTextLayout(ATSUTextLayout, UniCharArrayOffset, ATSUDirectDataSelector, void *[], ItemCount *);
-extern OSStatus ATSUBatchBreakLines(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement, ItemCount *);
-extern OSStatus ATSUSetTextPointerLocation(ATSUTextLayout, ConstUniCharArrayPtr, UniCharArrayOffset, UniCharCount, UniCharCount);
-extern OSStatus ATSUSetTransientFontMatching(ATSUTextLayout, Boolean);
-extern OSStatus ATSUGetLineControl(ATSUTextLayout, UniCharArrayOffset, ATSUAttributeTag, ByteCount, ATSUAttributeValuePtr, ByteCount *);
+extern OSStatus ATSUCreateTextLayout(ATSUTextLayout *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUDisposeTextLayout(ATSUTextLayout) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUMeasureTextImage(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement, ATSUTextMeasurement, Rect *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUGetRunStyle(ATSUTextLayout, UniCharArrayOffset, ATSUStyle *, UniCharArrayOffset *, UniCharCount *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUSetRunStyle(ATSUTextLayout, ATSUStyle, UniCharArrayOffset, UniCharCount) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUGetSoftLineBreaks(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ItemCount, UniCharArrayOffset[], ItemCount *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUSetSoftLineBreak(ATSUTextLayout, UniCharArrayOffset) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUDrawText(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement, ATSUTextMeasurement) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUGetUnjustifiedBounds(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement *, ATSUTextMeasurement *, ATSUTextMeasurement *, ATSUTextMeasurement *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUDirectGetLayoutDataArrayPtrFromTextLayout(ATSUTextLayout, UniCharArrayOffset, ATSUDirectDataSelector, void *[], ItemCount *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUBatchBreakLines(ATSUTextLayout, UniCharArrayOffset, UniCharCount, ATSUTextMeasurement, ItemCount *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUSetTextPointerLocation(ATSUTextLayout, ConstUniCharArrayPtr, UniCharArrayOffset, UniCharCount, UniCharCount) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUSetTransientFontMatching(ATSUTextLayout, Boolean) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
+extern OSStatus ATSUGetLineControl(ATSUTextLayout, UniCharArrayOffset, ATSUAttributeTag, ByteCount, ATSUAttributeValuePtr, ByteCount *) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
 
-extern OSStatus ATSUDirectReleaseLayoutDataArrayPtr(ATSULineRef, ATSUDirectDataSelector, void *[]);
+extern OSStatus ATSUDirectReleaseLayoutDataArrayPtr(ATSULineRef, ATSUDirectDataSelector, void *[]) ATS_AVAILABLE_BUT_DEPRECATED(10_0, 10_8);
 
 #endif
 
@@ -90,8 +93,9 @@ extern OSStatus ATSUDirectReleaseLayoutDataArrayPtr(ATSULineRef, ATSUDirectDataS
 @implementation SubATSUStyle
 -(instancetype)initWithATSUStyle:(ATSUStyle)_style
 {
-	self = [super init];
-	style = _style;
+	if (self = [super init]) {
+		style = _style;
+	}
 	return self;
 }
 
@@ -124,7 +128,7 @@ static CGColorRef CreateCGColorFromRGBOpaque(SubRGBAColor c, CGColorSpaceRef csp
 	return CreateCGColorFromRGBA(c2, cspace);
 }
 
-static CGColorRef CopyCGColorWithAlpha(CGColorRef c, float alpha)
+static CGColorRef CopyCGColorWithAlpha(CF_CONSUMED CGColorRef c, CGFloat alpha)
 {
 	CGColorRef new = CGColorCreateCopyWithAlpha(c, alpha);
 	CGColorRelease(c);
@@ -226,7 +230,7 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 
 @implementation SubATSUIRenderer
 
-- (instancetype)initWithScriptType:(int)type header:(NSString*)header videoWidth:(float)width videoHeight:(float)height
+- (instancetype)initWithScriptType:(int)type header:(NSString*)header videoWidth:(CGFloat)width videoHeight:(CGFloat)height
 {
 	if (self = [super init]) {
 		NSDictionary *headers = nil;
@@ -258,7 +262,7 @@ static void SetATSULayoutOther(ATSUTextLayout l, ATSUAttributeTag t, ByteCount s
 	screenScaleY = videoHeight / sc->resY;
 }
 
--(float)aspectRatio
+-(CGFloat)aspectRatio
 {
 	return videoWidth / videoHeight;
 }
@@ -276,64 +280,62 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		fontIDCache = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
-					   [NSNumber numberWithInt:ATSFontFindFromName((CFStringRef)kSubDefaultFontName, kATSOptionFlagsDefault)],
+					   @(ATSFontFindFromName((CFStringRef)kSubDefaultFontName, kATSOptionFlagsDefault)),
 					   kSubDefaultFontName, nil];
 	});
 	
-@synchronized(fontIDCache) {
-	idN = [fontIDCache objectForKey:lcName];
-
-	if (idN)
-		return [idN intValue];
-
-	ByteCount nlen = [name length];
-	NSData *unameData;
-	const unichar *uname = SubUnicodeForString(name, &unameData);
-	ATSUFontID font;
-	
-	ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, &font);
-	
-	[unameData release];
-	
-	if (font == kATSUInvalidFontID) font = ATSFontFindFromName((CFStringRef)name, kATSOptionFlagsDefault);
-	if (font == kATSUInvalidFontID) { // try a case-insensitive search
-		if (!fontIDs) {
-			ATSUFontCount(&fontCount);
-			fontIDs = malloc(sizeof(ATSUFontID[fontCount]));
-			ATSUGetFontIDs(fontIDs, fontCount, &fontCount);
+	@synchronized(fontIDCache) {
+		idN = [fontIDCache objectForKey:lcName];
+		
+		if (idN != nil)
+			return [idN unsignedIntValue];
+		
+		ByteCount nlen = [name length];
+		NSData *unameData;
+		const unichar *uname = SubUnicodeForString(name, &unameData);
+		ATSUFontID font;
+		
+		ATSUFindFontFromName(uname, nlen * sizeof(unichar), kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, &font);
+		
+		unameData = nil;
+		
+		if (font == kATSUInvalidFontID) font = ATSFontFindFromName((__bridge CFStringRef)name, kATSOptionFlagsDefault);
+		if (font == kATSUInvalidFontID) { // try a case-insensitive search
+			if (!fontIDs) {
+				ATSUFontCount(&fontCount);
+				fontIDs = malloc(sizeof(ATSUFontID[fontCount]));
+				ATSUGetFontIDs(fontIDs, fontCount, &fontCount);
+			}
+			
+#define kBufLength 512
+			ByteCount len;
+			ItemCount x, index;
+			unichar buf[kBufLength];
+	  
+			for (x = 0; x < fontCount && font == kATSUInvalidFontID; x++) {
+				ATSUFindFontName(fontIDs[x], kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, kBufLength, (Ptr)buf, &len, &index);
+				len = MIN(len, kBufLength);
+				NSString *fname = [[NSString alloc] initWithCharactersNoCopy:buf length:len/sizeof(unichar) freeWhenDone:NO];
+				
+				if ([name caseInsensitiveCompare:fname] == NSOrderedSame)
+					font = fontIDs[x];
+			}
+#undef kBufLength
 		}
 		
-#define kBufLength 512
-		ByteCount len;
-		ItemCount x, index;
-		unichar buf[kBufLength];
-	  
-		for (x = 0; x < fontCount && font == kATSUInvalidFontID; x++) {
-			ATSUFindFontName(fontIDs[x], kFontFamilyName, kFontMicrosoftPlatform, kFontNoScript, kFontNoLanguage, kBufLength, (Ptr)buf, &len, &index);
-			len = MIN(len, kBufLength);
-			NSString *fname = [[NSString alloc] initWithCharactersNoCopy:buf length:len/sizeof(unichar) freeWhenDone:NO];
-
-			if ([name caseInsensitiveCompare:fname] == NSOrderedSame)
-				font = fontIDs[x];
-			
-			[fname release];
-		}
-#undef kBufLength
+		if (font == kATSUInvalidFontID)
+			font = [[fontIDCache objectForKey:kSubDefaultFontName] intValue]; // final fallback
+		
+		/*{
+		 NSString *fontPSName = nil;
+		 ATSFontGetPostScriptName(font, kATSOptionFlagsDefault, (CFStringRef*)&fontPSName);
+		 NSLog(@"Font lookup: %@ -> %@", name, fontPSName);
+		 [fontPSName autorelease];
+		 }*/
+		[fontIDCache setValue:@(font) forKey:lcName];
+		
+		return font;
 	}
-	
-	if (font == kATSUInvalidFontID)
-		font = [[fontIDCache objectForKey:kSubDefaultFontName] intValue]; // final fallback
-	
-	/*{
-		NSString *fontPSName = nil;
-		ATSFontGetPostScriptName(font, kATSOptionFlagsDefault, (CFStringRef*)&fontPSName);
-		NSLog(@"Font lookup: %@ -> %@", name, fontPSName);
-		[fontPSName autorelease];
-	}*/
-	[fontIDCache setValue:[NSNumber numberWithInt:font] forKey:lcName];
-		 
-	return font;
-}
 }
 
 -(void)didCompleteStyleParsing:(SubStyle*)s
@@ -350,7 +352,7 @@ static ATSUFontID GetFontIDForSSAName(NSString *name)
 		
 	const ATSUAttributeValuePtr vals[] = {&opt, &size, &b, &i, &u, &st, &font};
 	
-	if (!s->platformSizeScale) s->platformSizeScale = GetWinFontSizeScale(fontRef);
+	if (!s->platformSizeScale) s->platformSizeScale = GetWinATSFontSizeScale(fontRef);
 	size = FloatToFixed(s->size * s->platformSizeScale * screenScaleY); //FIXME: several other values also change relative to PlayRes but aren't handled
 	
 	ATSUCreateStyle(&style);
@@ -405,7 +407,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 #define bv() bval = *(int*)p;
 #define iv() ival = *(int*)p;
 #define fv() fval = *(float*)p;
-#define sv() sval = *(NSString**)p;
+#define sv() sval = *(NSString*__unsafe_unretained*)p;
 #define fixv() fv(); fixval = FloatToFixed(fval);
 #define colorv() color = CreateCGColorFromRGBA(SubParseSSAColor(*(int*)p), srgbCSpace);
 	
@@ -442,7 +444,7 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			oldFont = spanEx->font;
 			spanEx->vertical = SubParseFontVerticality(&sval);
 			spanEx->font = GetFontIDForSSAName(sval);
-			if (oldFont != spanEx->font) spanEx->platformSizeScale = GetWinFontSizeScale(spanEx->font);
+			if (oldFont != spanEx->font) spanEx->platformSizeScale = GetWinATSFontSizeScale(spanEx->font);
 			UpdateFontNameSize(spanEx, screenScaleY);
 			break;
 		case tag_fs:
@@ -529,8 +531,31 @@ enum {renderMultipleParts = 1, // call ATSUDrawText more than once, needed for c
 			if (!isFirstSpan) div->render_complexity |= renderMultipleParts; //FIXME: blur edges
 			spanEx->blurEdges = bval;
 			break;
+		case tag_p:
+			fv();
+			div->scale = fval;
+			break;
+		case tag_frx:
+			Codecprintf(NULL, "Unimplemented SSA tag 'frx'\n");
+			break;
+		case tag_fry:
+			Codecprintf(NULL, "Unimplemented SSA tag 'fry'\n");
+			break;
+		case tag_2c:
+			Codecprintf(NULL, "Unimplemented SSA tag '2c'\n");
+			break;
+		case tag_2a:
+			Codecprintf(NULL, "Unimplemented SSA tag '2a'\n");
+			break;
+		case tag_t:
+			Codecprintf(NULL, "Unimplemented SSA tag 't'\n");
+			break;
+		case tag_pbo:
+			Codecprintf(NULL, "Unimplemented SSA tag 'pbo'\n");
+			break;
 		default:
 			Codecprintf(NULL, "Unimplemented SSA tag #%d\n",tag);
+			break;
 	}
 }
 
@@ -547,7 +572,7 @@ static ATSUTextMeasurement GetLineHeight(ATSUTextLayout layout, UniCharArrayOffs
 	return ascent + descent;
 }
 
-static void ExpandCGRect(CGRect *rect, float radius)
+static void ExpandCGRect(CGRect *rect, CGFloat radius)
 {
 	rect->origin.x -= radius;
 	rect->origin.y -= radius;
@@ -563,7 +588,7 @@ static void GetTypographicRectangleForLayout(ATSUTextLayout layout, UniCharArray
 	ItemCount trapCount;
 	FixedRect largeRect = {0};
 	Fixed baseY = 0;
-	int i;
+	NSInteger i;
 
 	for (i = breakCount; i >= 0; i--) {		
 		UniCharArrayOffset end = breaks[i+1];
@@ -599,7 +624,7 @@ static void VisualizeLayoutLineHeights(CGContextRef c, ATSUTextLayout layout, Un
 	ATSTrapezoid trap = {0};
 	Rect pixRect = {0};
 	ItemCount trapCount;
-	int i;
+	NSInteger i;
 	
 	CGContextSetLineWidth(c, 3.0);
 	
@@ -655,9 +680,9 @@ static void GetImageBoundingBoxForLayout(ATSUTextLayout layout, UniCharArrayOffs
 }
 #endif
 
-enum {fillc, strokec};
+typedef enum {fillc, strokec} fill_or_stroke;
 
-static void SetColor(CGContextRef c, int whichcolor, CGColorRef col)
+static void SetColor(CGContextRef c, fill_or_stroke whichcolor, CGColorRef col)
 {
 	if (whichcolor == fillc) CGContextSetFillColorWithColor(c, col);
 	else CGContextSetStrokeColorWithColor(c, col);
@@ -678,7 +703,7 @@ static void MakeRunVertical(ATSUTextLayout layout, UniCharArrayOffset spanOffset
 static void EnableVerticalForSpan(ATSUTextLayout layout, SubRenderDiv *div, const unichar *ubuffer, UniCharArrayOffset spanOffset, UniCharArrayOffset length)
 {
 	const unichar tategakiLowerBound = 0x02F1; // copied from http://source.winehq.org/source/dlls/gdi32/freetype.c
-	int runStart, runAboveBound, i;
+	NSInteger runStart, runAboveBound, i;
 	
 	if (!length) return;
 	
@@ -702,8 +727,8 @@ static void EnableVerticalForSpan(ATSUTextLayout layout, SubRenderDiv *div, cons
 
 static void SetStyleSpanRuns(ATSUTextLayout layout, SubRenderDiv *div, const unichar *ubuffer)
 {
-	int span_count = [div->spans count];
-	int i;
+	NSInteger span_count = [div->spans count];
+	NSInteger i;
 	
 	for (i = 0; i < span_count; i++) {
 		SubRenderSpan *span = [div->spans objectAtIndex:i];
@@ -719,7 +744,7 @@ static void SetStyleSpanRuns(ATSUTextLayout layout, SubRenderDiv *div, const uni
 	}
 }
 
-static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 align)
+static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, SubAlignmentH align)
 {
 	const ATSUAttributeTag tags[] = {kATSULineFlushFactorTag, kATSULineWidthTag, kATSULineRotationTag};
 	const ByteCount		  sizes[] = {sizeof(Fract), sizeof(ATSUTextMeasurement), sizeof(Fixed)};
@@ -743,7 +768,7 @@ static void SetLayoutPositioning(ATSUTextLayout layout, Fixed lineWidth, UInt8 a
 }
 
 static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *div, uint8_t *breakOpportunities,
-										   ATSLayoutRecord *records, ItemCount lineLen, Fixed idealLineWidth, Fixed originalLineWidth, Fixed maximumLineWidth, int numBreaks, int lastHardBreak)
+										   ATSLayoutRecord *records, ItemCount lineLen, Fixed idealLineWidth, Fixed originalLineWidth, Fixed maximumLineWidth, NSInteger numBreaks, NSInteger lastHardBreak)
 {		
 	UniCharArrayOffset lastBreakOffset = 0;
 	Fixed widthOffset = 0;
@@ -795,7 +820,7 @@ static UniCharArrayOffset BreakOneLineSpan(ATSUTextLayout layout, SubRenderDiv *
 	return (numBreaks == 0) ? 0 : lastBreakOffset;
 }
 
-static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, Fixed breakingWidth, const unichar *utext, int textLen, ItemCount numHardBreaks)
+static void BreakLinesEvenly(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, Fixed breakingWidth, const unichar *utext, NSInteger textLen, ItemCount numHardBreaks)
 {
 	UniCharArrayOffset hardBreaks[numHardBreaks+2];
 	declare_bitfield(breakOpportunities, textLen);
@@ -838,7 +863,7 @@ err:
 	Codecprintf(NULL, "ATSU error %d accessing text layout\n", (int)err);
 }
 
-static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, UniCharArrayOffset *breaks, ItemCount *nbreaks, Fixed breakingWidth, const unichar *utext, int textLen)
+static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *div, TextBreakLocatorRef breakLocator, UniCharArrayOffset *breaks, ItemCount *nbreaks, Fixed breakingWidth, const unichar *utext, NSInteger textLen)
 {
 	ItemCount breakCount=0;
 	
@@ -872,13 +897,18 @@ static UniCharArrayOffset *FindLineBreaks(ATSUTextLayout layout, SubRenderDiv *d
 typedef struct {
 	UniCharArrayOffset *breaks;
 	ItemCount breakCount;
-	int lStart, lEnd;
+	NSInteger lStart, lEnd;
 	SInt8 direction;
 } BreakContext;
 
-enum {kTextLayerShadow, kTextLayerOutline, kTextLayerPrimary, kTextLayerPrimaryUnstyled};
+typedef enum {
+	kTextLayerShadow,
+	kTextLayerOutline,
+	kTextLayerPrimary,
+	kTextLayerPrimaryUnstyled
+} SubTextLayer;
 
-static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanExtra *spanEx, SubATSUISpanExtra *lastSpanEx, SubRenderDiv *div, int textType, BOOL endLayer)
+static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanExtra *spanEx, SubATSUISpanExtra *lastSpanEx, SubRenderDiv *div, SubTextLayer textType, BOOL endLayer)
 {	
 #define if_different(x) if (!lastSpanEx || lastSpanEx-> x != spanEx-> x)
 	
@@ -923,12 +953,15 @@ static BOOL SetupCGForSpan(CGContextRef c, SubATSUISpanExtra *spanEx, SubATSUISp
 				} else endLayer = NO;
 			}
 			break;
+			
+		case kTextLayerPrimaryUnstyled:
+			break;
 	}
 	
 	return endLayer;
 }
 
-static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak, UniCharArrayOffset lineLen, Fixed penX, Fixed penY, CGContextRef c, SubRenderDiv *div, SubATSUISpanExtra *spanEx, int textType)
+static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak, UniCharArrayOffset lineLen, Fixed penX, Fixed penY, CGContextRef c, SubRenderDiv *div, SubATSUISpanExtra *spanEx, SubTextLayer textType)
 {
 	//ATS bug(?) with some fonts:
 	//drawing \n draws some random other character, so skip them
@@ -947,21 +980,21 @@ static void RenderActualLine(ATSUTextLayout layout, UniCharArrayOffset thisBreak
 		
 		ExpandCGRect(&borderRect, spanEx->outlineRadius);
 		
-		borderRect.origin.x = floorf(borderRect.origin.x);
-		borderRect.origin.y = floorf(borderRect.origin.y);
-		borderRect.size.width  = ceilf(borderRect.size.width);
-		borderRect.size.height = ceilf(borderRect.size.height);
+		borderRect.origin.x = floor(borderRect.origin.x);
+		borderRect.origin.y = floor(borderRect.origin.y);
+		borderRect.size.width  = ceil(borderRect.size.width);
+		borderRect.size.height = ceil(borderRect.size.height);
 		
 		CGContextFillRect(c, borderRect);
 	} else ATSUDrawText(layout, thisBreak, lineLen, penX, penY);
 }
 
-static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY, SubATSUISpanExtra *firstSpanEx, int textType)
+static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *div, const BreakContext breakc, Fixed penX, Fixed penY, SubATSUISpanExtra *firstSpanEx, SubTextLayer textType)
 {
 	const CGTextDrawingMode textModes[] = {kCGTextFillStroke, kCGTextStroke, kCGTextFill, kCGTextFill};
 	SubATSUISpanExtra *lastSpanEx = nil;
 	BOOL endLayer = NO, multipleParts = !!(div->render_complexity & renderMultipleParts);
-	int i;
+	NSInteger i;
 
 	CGContextSetTextDrawingMode(c, textModes[textType]);
 	
@@ -969,13 +1002,13 @@ static Fixed DrawTextLines(CGContextRef c, ATSUTextLayout layout, SubRenderDiv *
 	
 	for (i = breakc.lStart; i != breakc.lEnd; i -= breakc.direction) {
 		UniCharArrayOffset thisBreak = breakc.breaks[i], nextBreak = breakc.breaks[i+1], linelen = nextBreak - thisBreak;
-		float extraHeight = 0;
+		CGFloat extraHeight = 0;
 		
 		if (!multipleParts) {
 			RenderActualLine(layout, thisBreak, linelen, penX, penY, c, div, firstSpanEx, textType);
 			extraHeight = div->styleLine->outlineRadius;
 		} else {
-			int j, nspans = [div->spans count];
+			NSInteger j, nspans = [div->spans count];
 			
 			//linear search for the next span to draw
 			//FIXME: make sure this never skips any spans
@@ -1066,14 +1099,73 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	return penY;
 }
 
+static void drawShapePart(CGContextRef c, CGPathRef path, SubRenderDiv *div, SubATSUISpanExtra *firstSpanEx, SubTextLayer textType)
+{
+	const CGPathDrawingMode textModes[] = {kCGPathFillStroke, kCGPathStroke, kCGPathFill, kCGPathFill};
+	SubATSUISpanExtra *lastSpanEx = nil;
+	BOOL endLayer = NO, multipleParts = !!(div->render_complexity & renderMultipleParts);
+	if (!multipleParts) {
+		endLayer = SetupCGForSpan(c, firstSpanEx, lastSpanEx, div, textType, endLayer);
+	}
+	endLayer = SetupCGForSpan(c, firstSpanEx, lastSpanEx, div, textType, endLayer);
+
+	CGContextAddPath(c, path);
+	CGContextDrawPath(c, textModes[textType]);
+
+	if (endLayer) CGContextEndTransparencyLayer(c);
+}
+
+static void drawShape(CGContextRef c, CGPathRef path, SubRenderDiv *div, SubATSUISpanExtra *firstSpanEx)
+{
+	BOOL drawShadow, drawOutline, clearOutlineInnerStroke;
+	BOOL endLayer = NO;
+	if (div->render_complexity & renderMultipleParts) {
+		drawShadow = drawOutline = clearOutlineInnerStroke = YES;
+	} else {
+		drawShadow = div->styleLine->borderStyle == kSubBorderStyleNormal && firstSpanEx->shadowDist;
+		drawOutline= div->styleLine->borderStyle != kSubBorderStyleNormal || firstSpanEx->outlineRadius;
+		clearOutlineInnerStroke = firstSpanEx->primaryAlpha < 1.;
+	}
+
+	
+	if (drawShadow) {
+		if (!(div->render_complexity & renderManualShadows)) {
+			endLayer = YES;
+			CGContextSetShadowWithColor(c, CGSizeMake(firstSpanEx->shadowDist + .5, -(firstSpanEx->shadowDist + .5)), 0, firstSpanEx->shadowColor);
+			CGContextBeginTransparencyLayer(c, NULL);
+		} else {
+			drawShapePart(c, path, div, firstSpanEx, kTextLayerShadow);
+		}
+	}
+	
+	if (drawOutline) {
+		if (clearOutlineInnerStroke) {
+			CGContextBeginTransparencyLayer(c, NULL);
+		}
+		drawShapePart(c, path, div, firstSpanEx, kTextLayerOutline);
+		if (clearOutlineInnerStroke) {
+			CGContextSetBlendMode(c, kCGBlendModeClear);
+			drawShapePart(c, path, div, firstSpanEx, kTextLayerPrimaryUnstyled);
+			CGContextSetBlendMode(c, kCGBlendModeNormal);
+			CGContextEndTransparencyLayer(c);
+		}
+	}
+	
+	drawShapePart(c, path, div, firstSpanEx, kTextLayerPrimary);
+	
+	if (endLayer) {
+		CGContextEndTransparencyLayer(c);
+		CGContextSetShadowWithColor(c, CGSizeMake(0,0), 0, NULL);
+	}
+}
+
 #pragma mark Main Renderer Function
 
--(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(float)cWidth height:(float)cHeight
+-(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(CGFloat)cWidth height:(CGFloat)cHeight
 {
 	Fixed bottomPen = 0, topPen = 0, centerPen = 0, *storePen=NULL;
-	NSArray *divs = SubParsePacket(packet, context, self);
-	int div_count = [divs count], lastLayer = 0;
-	int i;
+	NSArray<SubRenderDiv*> *divs = SubParsePacket(packet, context, self);
+	NSInteger lastLayer = 0;
 
 	CGContextSaveGState(c);
 	if (cWidth != videoWidth || cHeight != videoHeight)
@@ -1085,9 +1177,8 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 	
 	SetATSULayoutOther(layout, kATSUCGContextTag, sizeof(CGContextRef), &c);
 
-	for (i = 0; i < div_count; i++) {
-		SubRenderDiv *div = [divs objectAtIndex:i];
-		int textLen = [div->text length];
+	for (SubRenderDiv *div in divs) {
+		NSInteger textLen = [div->text length];
 		if (!textLen || ![div->spans count]) continue;
 		
 		BOOL resetPens = NO, resetGState = NO;
@@ -1119,7 +1210,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		
 		breakBuffer = FindLineBreaks(layout, div, breakLocator, breakBuffer, &breakCount, breakingWidth, ubuffer, textLen);
 
-		ATSUTextMeasurement imageWidth, imageHeight, descent;
+		ATSUTextMeasurement imageWidth = 0, imageHeight = 0, descent = 0;
 		UniCharArrayOffset *breaks = breakBuffer;
 		
 		if (div->positioned || div->alignV == kSubAlignmentMiddle)
@@ -1171,12 +1262,14 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 			
 			switch (div->alignH) {
 				case kSubAlignmentCenter: penX -= imageWidth / 2; break;
-				case kSubAlignmentRight: penX -= imageWidth;
+				case kSubAlignmentRight: penX -= imageWidth; break;
+				case kSubAlignmentLeft: break;
 			}
 			
 			switch (div->alignV) {
 				case kSubAlignmentMiddle: penY -= imageHeight / 2; break;
 				case kSubAlignmentTop: penY -= imageHeight; break;
+				case kSubAlignmentBottom: break;
 			}
 			
 			penY += descent;
@@ -1187,7 +1280,25 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		
 		SubRenderSpan *firstSpan = [div->spans objectAtIndex:0];
 		SubATSUISpanExtra *firstSpanEx = firstSpan.extra;
-		
+
+		if (div->scale > 0) {
+			CGContextSaveGState(c);
+			//CGContextflip
+			CGAffineTransform trans = CGAffineTransformMakeTranslation(div->posX, div->posY);
+			CGFloat angle = firstSpanEx->angle;
+			angle *= M_PI / 180.;
+			trans = CGAffineTransformRotate(trans, angle);
+			CGAffineTransform trans2 = CGAffineTransformMake(1, 0, 0, -1, 0, videoHeight * screenScaleY);
+			CGContextConcatCTM(c, trans2);
+			//CGContextScaleCTM(c, 1, videoHeight * screenScaleY);
+			//CGContextTranslateCTM(c, div->posX, div->posY);
+			CGPathRef pr = CreateSubParseSubShapesWithString(div->text, &trans);
+			
+			drawShape(c, pr, div, firstSpanEx);
+
+			CGPathRelease(pr);
+			CGContextRestoreGState(c);
+		} else {
 		// FIXME: we can only rotate an entire line at once
 		if (firstSpanEx->angle) {
 			Fixed fangle = FloatToFixed(firstSpanEx->angle);
@@ -1210,7 +1321,7 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 		breakc.breaks = breaks;
 		
 		penY = DrawOneTextDiv(c, layout, div, breakc, penX, penY);
-		
+		}
 		if (resetGState)
 			CGContextRestoreGState(c);
 		
@@ -1232,16 +1343,20 @@ static Fixed DrawOneTextDiv(CGContextRef c, ATSUTextLayout layout, SubRenderDiv 
 }
 @end
 
-SubRendererPtr SubRendererCreate(int isSSA, char *header, size_t headerLen, int width, int height)
+#if 1
+SubRendererRef SubRendererCreate(bool isSSA, char *header, size_t headerLen, int width, int height)
 {
 	@autoreleasepool {
-		SubRendererPtr s = nil;
+		SubRendererRef s = nil;
 		@try {
 			NSString *hdr = nil;
 			if (header) 
-				hdr = [[[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO] autorelease];
-			s = [[SubATSUIRenderer alloc] initWithScriptType:isSSA ? kSubTypeSSA : kSubTypeSRT header:hdr videoWidth:width videoHeight:height];
-			CFRetain(s);
+				hdr = AUTORELEASEOBJ([[NSString alloc] initWithBytesNoCopy:(void*)header length:headerLen encoding:NSUTF8StringEncoding freeWhenDone:NO]);
+#if __has_feature(objc_arc)
+			s = (SubRendererRef)CFBridgingRetain([[SubATSUIRenderer alloc] initWithScriptType:isSSA ? kSubTypeSSA : kSubTypeSRT header:hdr videoWidth:width videoHeight:height]);
+#else
+			s = (SubRendererRef)[[SubATSUIRenderer alloc] initWithScriptType:isSSA ? kSubTypeSSA : kSubTypeSRT header:hdr videoWidth:width videoHeight:height];
+#endif
 		}
 		@catch (NSException *e) {
 			NSLog(@"Caught exception while creating SubRenderer - %@", e);
@@ -1249,12 +1364,13 @@ SubRendererPtr SubRendererCreate(int isSSA, char *header, size_t headerLen, int 
 		return s;
 	}
 }
+#endif
 
-void SubRendererRenderPacket(SubRendererPtr s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
+void SubRendererRenderPacket(SubRendererRef s, CGContextRef c, CFStringRef str, int cWidth, int cHeight)
 {
 	@autoreleasepool {
 		@try {
-			[s renderPacket:(NSString*)str inContext:c width:cWidth height:cHeight];
+			[(__bridge SubRenderer*)s renderPacket:(__bridge NSString*)str inContext:c width:cWidth height:cHeight];
 		}
 		@catch (NSException *e) {
 			NSLog(@"Caught exception during rendering - %@", e);
@@ -1264,7 +1380,7 @@ void SubRendererRenderPacket(SubRendererPtr s, CGContextRef c, CFStringRef str, 
 
 void SubRendererPrerollFromHeader(char *header, int headerLen)
 {
-	SubRendererPtr s = SubRendererCreate(header!=NULL, header, headerLen, 640, 480);
+	SubRendererRef s = SubRendererCreate(header!=NULL, header, headerLen, 640, 480);
 	
 	/*
 	CGColorSpaceRef csp = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
@@ -1291,11 +1407,10 @@ void SubRendererPrerollFromHeader(char *header, int headerLen)
 	SubRendererDispose(s);
 }
 
-void SubRendererDispose(SubRendererPtr s)
+void SubRendererDispose(SubRendererRef s)
 {
 	@autoreleasepool {
-		CFRelease(s);
-		[s release];
+		CFBridgingRelease(s);
 	}
 }
 
@@ -1388,7 +1503,7 @@ typedef struct TT_OS2
 // Some Windows fonts have one field set incorrectly(?), so we have to compensate.
 // FIXME: This function doesn't read from the right fonts; if we're using italic variant, it should get the ATSFontRef for that
 // This should be cached
-static float GetWinFontSizeScale(ATSFontRef font)
+static CGFloat GetWinATSFontSizeScale(ATSFontRef font)
 {
 	TT_Header headTable = {0};
 	TT_OS2 os2Table = {0};
@@ -1399,18 +1514,18 @@ static float GetWinFontSizeScale(ATSFontRef font)
 	
 	err = ATSFontGetTable(font, 'head', 0, 0, NULL, &headSize);
 	if (!headSize || err) return 1;
-
+	
 	ATSFontGetTable(font, 'head', 0, headSize, &headTable, &headSize);
 	ATSFontGetTable(font, 'OS/2', 0, os2Size, &os2Table, &os2Size);
-		
+	
 	// ppem = units_per_em * lfheight / (winAscent + winDescent) c.f. WINE
 	// lfheight being SSA font size
-	unsigned oA = EndianU16_BtoN(os2Table.usWinAscent), oD = EndianU16_BtoN(os2Table.usWinDescent);
+	unsigned short oA = EndianU16_BtoN(os2Table.usWinAscent), oD = EndianU16_BtoN(os2Table.usWinDescent);
 	unsigned winSize = oA + oD;
-		
+	
 	unsigned unitsPerEM = EndianU16_BtoN(headTable.Units_Per_EM);
 	
-	return (winSize && unitsPerEM) ? ((float)unitsPerEM / (float)winSize) : 1;
+	return (winSize && unitsPerEM) ? ((CGFloat)unitsPerEM / (CGFloat)winSize) : 1;
 }
 
 static void FindAllPossibleLineBreaks(TextBreakLocatorRef breakLocator, const unichar *uline, UniCharArrayOffset lineLen, uint8_t *breakOpportunities)

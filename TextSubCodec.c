@@ -44,7 +44,7 @@ typedef struct TextSubGlobalsRecord {
 	
 	CGColorSpaceRef         colorSpace;
 
-	SubRendererPtr			ssa;
+	SubRendererRef			ssa;
 	Boolean					translateSRT;
 } TextSubGlobalsRecord, *TextSubGlobals;
 
