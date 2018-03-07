@@ -60,13 +60,13 @@ int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSTy
 	/* Search the AVFormatContext for a video stream */
 	for(j = 0; j < ic->nb_streams && !outstr; j++) {
 		st = ic->streams[j];
-		if(st->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+		if(st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
 			outstr = st;
 	}
 	/* Search the AVFormatContext for an audio stream (no video stream exists) */
 	for(j = 0; j < ic->nb_streams && !outstr; j++) {
 		st = ic->streams[j];
-		if(st->codec->codec_type == AVMEDIA_TYPE_AUDIO)
+		if(st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
 			outstr = st;
 	}
 	/* Still no stream, then err */
@@ -77,9 +77,9 @@ int prepare_track(ff_global_ptr storage, Track targetTrack, Handle dataRef, OSTy
 	map->index = st->index;
 	map->str = outstr;
 	
-	if(st->codec->codec_type == AVMEDIA_TYPE_VIDEO)
+	if(st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
 		initialize_video_map(map, targetTrack, dataRef, dataRefType, storage->firstFrames + st->index);
-	else if(st->codec->codec_type == AVMEDIA_TYPE_AUDIO)
+	else if(st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
 		initialize_audio_map(map, targetTrack, dataRef, dataRefType, storage->firstFrames + st->index);
 	
 	map->valid = map->media && map->sampleHdl;
@@ -500,7 +500,7 @@ static void add_metadata(AVFormatContext *ic, Movie theMovie)
 
 static void get_track_dimensions_for_codec(AVStream *st, Fixed *fixedWidth, Fixed *fixedHeight)
 {	
-	AVCodecContext *codec = st->codec;
+	AVCodecParameters *codec = st->codecpar;
 	*fixedHeight = IntToFixed(codec->height);
 
 	if (!st->sample_aspect_ratio.num) *fixedWidth = IntToFixed(codec->width);
@@ -600,22 +600,22 @@ OSStatus prepare_movie(ff_global_ptr storage, Movie theMovie, Handle dataRef, OS
 		map[j].str = st;
 		map[j].duration = -1;
 		
-		if(st->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+		if(st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
 			Fixed width, height;
 			
 			get_track_dimensions_for_codec(st, &width, &height);
 			track = NewMovieTrack(theMovie, width, height, kNoVolume);
 
             // Support for 'old' NUV files, that didn't put the codec_tag in the file. 
-            if( st->codec->codec_id == AV_CODEC_ID_NUV && st->codec->codec_tag == 0 ) {
-                st->codec->codec_tag = MKTAG( 'N', 'U', 'V', '1' );
+            if( st->codecpar->codec_id == AV_CODEC_ID_NUV && st->codecpar->codec_tag == 0 ) {
+                st->codecpar->codec_tag = MKTAG( 'N', 'U', 'V', '1' );
             }
 			
 			initialize_video_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
-			set_track_clean_aperture_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height, IntToFixed(st->codec->width), IntToFixed(st->codec->height));
+			set_track_clean_aperture_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height, IntToFixed(st->codecpar->width), IntToFixed(st->codecpar->height));
 			set_track_colorspace_ext((ImageDescriptionHandle)map[j].sampleHdl, width, height);
-		} else if (st->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
-			if (st->codec->sample_rate > 0) {
+		} else if (st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+			if (st->codecpar->sample_rate > 0) {
 				track = NewMovieTrack(theMovie, 0, 0, kFullVolume);
 				err = initialize_audio_map(&map[j], track, dataRef, dataRefType, storage->firstFrames + j);
 				
