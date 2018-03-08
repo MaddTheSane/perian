@@ -98,7 +98,7 @@ else
             make depend > /dev/null 2>&1 || true
         fi
         
-        fpcflags=`grep -m 1 -e "^CFLAGS=" "$BUILDDIR"/config.mak | sed -e s/CFLAGS=// -e s/-fomit-frame-pointer//` 
+        fpcflags=`grep -m 1 -e "^CFLAGS=" "$BUILDDIR"/ffbuild/config.mak | sed -e s/CFLAGS=// -e s/-fomit-frame-pointer//` 
 
         make -j3 CFLAGS="$fpcflags" V=1 $fptargets || exit 1
         make -j3 V=1 || exit 1
