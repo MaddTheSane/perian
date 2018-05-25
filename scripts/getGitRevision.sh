@@ -27,7 +27,7 @@ function GitRevCount {
 
 GitRevCount "./.git" "origin/updatedFFMpeg"
 REV=$VER
-GitRevCount "./ffmpeg/.git" "origin/perian2.2"
+GitRevCount "./ffmpeg/.git" "origin/perian342"
 ffmpeg_rev=$VER
 echo $REV
 
