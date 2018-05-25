@@ -8,6 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebView.h>
+#import <WebKit/WebPolicyDelegate.h>
+#import <WebKit/WebFrameLoadDelegate.h>
 
 typedef NS_ENUM(int, SUUpdateAlertChoice) {
 	SUInstallUpdateChoice,
@@ -18,7 +20,7 @@ typedef NS_ENUM(int, SUUpdateAlertChoice) {
 @class SUAppcastItem;
 @protocol SUUpdateAlertDelegate;
 
-@interface SUUpdateAlert : NSWindowController {
+@interface SUUpdateAlert : NSWindowController<WebPolicyDelegate, WebFrameLoadDelegate> {
 	SUAppcastItem *updateItem;
 	
 	NSProgressIndicator *releaseNotesSpinner;

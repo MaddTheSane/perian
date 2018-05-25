@@ -22,21 +22,26 @@
 #import "SubUtilities.h"
 #import "UniversalDetector.h"
 #import "Codecprintf.h"
+#import "ARCBridge.h"
 
 NSArray *SubSplitStringIgnoringWhitespace(NSString *str, NSString *split)
 {
-	NSArray *tmp = [str componentsSeparatedByString:split];
+	NSMutableArray *values = [[str componentsSeparatedByString:split] mutableCopy];
 	NSCharacterSet *wcs = [NSCharacterSet whitespaceCharacterSet];
-	size_t num = [tmp count], i;
-	NSString *values[num];
+	size_t num = [values count], i;
 	
-	[tmp getObjects:values];
 	for (i = 0; i < num; i++) values[i] = [values[i] stringByTrimmingCharactersInSet:wcs];
 	
-	return [NSArray arrayWithObjects:values count:num];
+#if __has_feature(objc_arc)
+	return [values copy];
+#else
+	NSArray *tmp = [values copy];
+	[values release];
+	return [tmp autorelease];
+#endif
 }
 
-NSArray *SubSplitStringWithCount(NSString *str, NSString *split, size_t count)
+NSArray *SubSplitStringWithCount(NSString *str, NSString *split, NSInteger count)
 {
 	NSMutableArray *ar = [NSMutableArray arrayWithCapacity:count];
 	NSScanner *sc = [NSScanner scannerWithString:str];
@@ -88,11 +93,11 @@ static const short frequencies[] = {
 	-1912, 4259, 2573, 8866, 55, 0, 0, -2247, -831, -3788, -3043, 0, 0, 3412, 2921, 1251, 
 	0, 0, 1377, 520, 1344, 0, -1123, 0, 0, -1213, 2208, -458, -794, 2636, 3824, 0};
 
-BOOL SubDifferentiateLatin12(const unsigned char *data, int length)
+BOOL SubDifferentiateLatin12(const unsigned char *data, NSInteger length)
 {
 	// generated from french/german (latin1) and hungarian/romanian (latin2)
 	
-	int frcount = 0;
+	NSInteger frcount = 0;
 	
 	while (length--) {
 		frcount += frequencies[*data++];
@@ -101,22 +106,12 @@ BOOL SubDifferentiateLatin12(const unsigned char *data, int length)
 	return frcount <= 0;
 }
 
-NSString *SubLoadFileWithUnknownEncoding(NSString *path)
+static NSString *SubloadDataWithEncoding(NSData *data, NS_RELEASES_ARGUMENT UniversalDetector *ud, NSString *path)
 {
-	NSData *data = [NSData dataWithContentsOfMappedFile:path];
-	UniversalDetector *ud = [[UniversalDetector alloc] init];
-	NSString *res = nil;
-	NSStringEncoding enc;
-	float conf;
-	NSString *enc_str;
-	BOOL latin2;
-	
-	[ud analyzeData:data];
-	
-	enc = [ud encoding];
-	conf = [ud confidence];
-	enc_str = [ud MIMECharset];
-	latin2 = enc == NSWindowsCP1250StringEncoding;
+	NSStringEncoding enc = [ud encoding];
+	float conf = [ud confidence];
+	NSString *enc_str = [ud MIMECharset];
+	BOOL latin2 = enc == NSWindowsCP1250StringEncoding;
 	
 	if (latin2) {
 		if (SubDifferentiateLatin12([data bytes], [data length])) { // seems to actually be latin1
@@ -129,29 +124,67 @@ NSString *SubLoadFileWithUnknownEncoding(NSString *path)
 		Codecprintf(NULL,"Guessed encoding \"%s\" for \"%s\", but not sure (confidence %f%%).\n",[enc_str UTF8String],[path UTF8String],conf*100.);
 	}
 	
-	res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
+	NSString *res = AUTORELEASEOBJ([[NSString alloc] initWithData:data encoding:enc]);
 	
 	if (!res) {
 		if (latin2) {
 			Codecprintf(NULL,"Encoding %s failed, retrying.\n",[enc_str UTF8String]);
 			enc = (enc == NSWindowsCP1252StringEncoding) ? NSWindowsCP1250StringEncoding : NSWindowsCP1252StringEncoding;
-			res = [[[NSString alloc] initWithData:data encoding:enc] autorelease];
+			res = AUTORELEASEOBJ([[NSString alloc] initWithData:data encoding:enc]);
 			if (!res) Codecprintf(NULL,"Both of latin1/2 failed.\n");
 		} else Codecprintf(NULL,"Failed to load file as guessed encoding %s.\n",[enc_str UTF8String]);
 	}
-	[ud release];
+	RELEASEOBJ(ud);
 	
 	return res;
 }
 
-const unichar *SubUnicodeForString(NSString *str, NSData **datap)
+NSString *SubLoadDataWithUnknownEncoding(NSData *data)
+{
+	UniversalDetector *ud = [[UniversalDetector alloc] init];
+	
+	[ud analyzeData:data];
+	
+	return SubloadDataWithEncoding(data, ud, @"<Internal Data>");
+}
+
+NSString *SubLoadURLWithUnknownEncoding(NSURL *path)
+{
+	NSData *data = [NSData dataWithContentsOfURL:path options:NSDataReadingMappedIfSafe error:NULL];
+	
+	if (!data) {
+		return nil;
+	}
+	
+	UniversalDetector *ud = [[UniversalDetector alloc] init];
+	
+	[ud analyzeData:data];
+
+	return SubloadDataWithEncoding(data, ud, [path path]);
+}
+
+NSString *SubLoadFileWithUnknownEncoding(NSString *path)
+{
+	NSData *data = [NSData dataWithContentsOfFile:path];
+	if (!data) {
+		return nil;
+	}
+	
+	UniversalDetector *ud = [[UniversalDetector alloc] init];
+	
+	[ud analyzeData:data];
+	
+	return SubloadDataWithEncoding(data, ud, path);
+}
+
+const unichar *SubUnicodeForString(NSString *str, NSData *__strong*datap)
 {
 	const unichar *p = CFStringGetCharactersPtr((CFStringRef)str);
 	
 	*datap = nil;
 	
 	if (!p) {
-		NSData *data = [[str dataUsingEncoding:NSUnicodeStringEncoding] retain];
+		NSData *data = RETAINOBJ([str dataUsingEncoding:NSUnicodeStringEncoding]);
 		
 		p = [data bytes];
 		
@@ -172,4 +205,50 @@ CFMutableStringRef CopyHomeDirectory()
 		NSString *home = NSHomeDirectory();
 		return CFStringCreateMutableCopy(kCFAllocatorDefault, 0, (CFStringRef)home);
 	}
+}
+
+CGPathRef CreateSubParseSubShapesWithString(NSString *aStr, const CGAffineTransform * __nullable m)
+{
+	CGMutablePathRef bPath = CGPathCreateMutable();
+	NSScanner *scanner = [NSScanner scannerWithString:aStr];
+	NSString *scanned;
+	NSString *oldScanned = @"";
+	NSCharacterSet *alphaOnly = [NSCharacterSet characterSetWithCharactersInString:@"mnlbspc"];
+	while (([scanner scanCharactersFromSet:alphaOnly intoString:&scanned] || oldScanned.length != 0) && !scanner.isAtEnd) {
+		if (scanned.length != 0) {
+			oldScanned = scanned;
+		}
+		
+		if ([oldScanned isEqualToString:@"m"] || [oldScanned isEqualToString:@"n"]) {
+			double x = 0, y = 0;
+			if ([scanner scanDouble:&x] && [scanner scanDouble:&y]) {
+				CGPathMoveToPoint(bPath, m, x, y);
+			}
+		} else if ([oldScanned isEqualToString:@"b"]) {
+			double startPtX = 0;
+			double startPtY = 0;
+			double ctrlPt1X = 0;
+			double ctrlPt1Y = 0;
+			double ctrlPt2X = 0;
+			double ctrlPt2Y = 0;
+			if ([scanner scanDouble:&ctrlPt1X] && [scanner scanDouble:&ctrlPt1Y] &&
+				[scanner scanDouble:&ctrlPt2X] && [scanner scanDouble:&ctrlPt2Y] &&
+				[scanner scanDouble:&startPtX] && [scanner scanDouble:&startPtY]) {
+				CGPathAddCurveToPoint(bPath, m, ctrlPt1X, ctrlPt1Y, ctrlPt2X, ctrlPt2Y, startPtX, startPtY);
+			}
+		} else if ([oldScanned isEqualToString:@"c"]) {
+			CGPathCloseSubpath(bPath);
+		} else if ([oldScanned isEqualToString:@"l"]) {
+			double x = 0, y = 0;
+			if ([scanner scanDouble:&x] && [scanner scanDouble:&y]) {
+				CGPathAddLineToPoint(bPath, m, x, y);
+			}
+		} else {
+			// unhandled switches: p s
+			[scanner scanUpToCharactersFromSet:NSCharacterSet.whitespaceCharacterSet intoString:nil];
+		}
+	}
+	
+	CGPathCloseSubpath(bPath);
+	return bPath;
 }

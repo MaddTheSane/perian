@@ -99,7 +99,9 @@ enum
 	kVideoFormatSnow                        = 'SNOW',
 	kVideoFormatIndeo2                      = 'RT21',
 	kVideoFormatIndeo3                      = 'IV32',
+	kVideoFormatHEVC                        = 'hev1',
 	kVideoFormatVP8                         = 'VP80',
+	kVideoFormatVP9                         = 'VP90',
 	kVideoFormatTheora                      = 'PeTh',
 	
 	kAudioFormatFlashADPCM                  = 'FlAd',
@@ -113,6 +115,7 @@ enum
 	kAudioFormatRealLossless                = 'RALF',
 	kAudioFormatRealAtrac3                  = 'ATRC',
 	kAudioFormatNellymoser					= 'NELL',
+	kAudioFormatOpusPerian					= 'Opus',
 	
 	kSubFormatUTF8                          = 'SRT ',
 	kSubFormatSSA                           = 'SSA ',

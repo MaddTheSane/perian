@@ -156,10 +156,10 @@ int parse_ac3_bitstream(AudioStreamBasicDescription *asbd, AudioChannelLayout *a
 
 static int parse_mpeg4_extra(FFusionParserContext *parser, const uint8_t *buf, int buf_size)
 {
-	ParseContext1 *pc1 = (ParseContext1 *)parser->pc->priv_data;
-	pc1->pc.frame_start_found = 0;
+	ParseContext *pc1 = (ParseContext *)parser->pc->priv_data;
+	pc1->frame_start_found = 0;
 	
-	MpegEncContext *s = pc1->enc;
+	MpegEncContext *s = pc1;
 	GetBitContext gb1, *gb = &gb1;
 	
 	s->avctx = parser->avctx;
@@ -170,7 +170,7 @@ static int parse_mpeg4_extra(FFusionParserContext *parser, const uint8_t *buf, i
 	return 1;
 }
 
-/*
+/*!
  * Long story short, FFMpeg's parsers suck for our use.  This function parses an mpeg4 bitstream,
  * and assumes that it is given at least a full frame of data.
  * @param parser A FFusionParserContext structure containg all our info
@@ -183,12 +183,12 @@ static int parse_mpeg4_extra(FFusionParserContext *parser, const uint8_t *buf, i
  */
 static int parse_mpeg4_stream(FFusionParserContext *parser, const uint8_t *buf, int buf_size, int *out_buf_size, int *type, int *skippable, int *skipped)
 {
-	ParseContext1 *pc1 = (ParseContext1 *)parser->pc->priv_data;
-	pc1->pc.frame_start_found = 0;
+	ParseContext *pc1 = (ParseContext *)parser->pc->priv_data;
+	pc1->frame_start_found = 0;
 	
-	int endOfFrame = ff_mpeg4_find_frame_end(&(pc1->pc), buf, buf_size);
+	int endOfFrame = ff_mpeg4_find_frame_end(pc1, buf, buf_size);
 	
-	MpegEncContext *s = pc1->enc;
+	MpegEncContext *s = pc1;
 	GetBitContext gb1, *gb = &gb1;
 	
 	s->avctx = parser->avctx;
@@ -931,7 +931,7 @@ FFusionParserContext *ffusionParserInit(int codec_id)
 	FFusionParser *ffParser;
     int ret, i;
 	
-    if(codec_id == CODEC_ID_NONE)
+    if(codec_id == AV_CODEC_ID_NONE)
         return NULL;
 	
 	if (!ffusionFirstParser) initFFusionParsers();

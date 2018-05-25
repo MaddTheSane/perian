@@ -39,7 +39,7 @@ typedef struct CCConverterContext {
 	short width;
 	short height;
 	
-	enum PixelFormat  inPixFmt;
+	enum AVPixelFormat  inPixFmt;
 	enum AVColorSpace inColorSpace;
 	enum AVColorRange inColorRange;
 	enum AVChromaLocation inChromaLocation;
@@ -48,7 +48,7 @@ typedef struct CCConverterContext {
 	int outLineSize;
 	
 	// Parameters end here
-	enum PixelFormat outPixFmt;
+	enum AVPixelFormat outPixFmt;
 	
 	void (^convert)(AVPicture *inPicture, uint8_t *outPicture);
 	
@@ -57,7 +57,7 @@ typedef struct CCConverterContext {
 	void *opaque;
 } CCConverterContext;
 
-enum PixelFormat CCOutputPixFmtForInput(enum PixelFormat inPixFmt);
+enum AVPixelFormat CCOutputPixFmtForInput(enum AVPixelFormat inPixFmt);
 void CCClearPicture(CCConverterContext *ctx, uint8_t *outPicture);
 void CCOpenConverter(CCConverterContext *ctx);
 void CCCloseConverter(CCConverterContext *ctx);

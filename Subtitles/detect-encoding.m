@@ -23,6 +23,16 @@
 #import "SubUtilities.h"
 #import "UniversalDetector.h"
 
+int Codecprintf(FILE *fileLog, const char *format, ...)
+{
+	int ret;
+	va_list va;
+	va_start(va, format);
+	ret = vfprintf(fileLog, format, va);
+	va_end(va);
+	return ret;
+}
+
 int main(int argc, char *argv[])
 {
 	if (argc != 2)
@@ -36,12 +46,12 @@ int main(int argc, char *argv[])
 	NSStringEncoding enc = [ud encoding];
 	
 	printf("%s:\n", argv[1]);
-	printf("\tUniversalDetector: \"%s\" (%#x) with %f%% confidence\n", [[ud MIMECharset] UTF8String], enc, [ud confidence]*100.f);
+	printf("\tUniversalDetector: \"%s\" (%#lx) with %f%% confidence\n", [[ud MIMECharset] UTF8String], (unsigned long)enc, [ud confidence]*100.f);
 	
 	if (enc == NSWindowsCP1250StringEncoding || enc == NSWindowsCP1252StringEncoding) {
 		enc = SubDifferentiateLatin12([data bytes], [data length]) ? NSWindowsCP1252StringEncoding : NSWindowsCP1250StringEncoding;
 		NSString *encName = (NSString*)CFStringConvertEncodingToIANACharSetName(CFStringConvertNSStringEncodingToEncoding(enc));
-		printf("\tLatin12: \"%s\" (%#x)\n\n", [encName UTF8String], enc);
+		printf("\tLatin12: \"%s\" (%#lx)\n\n", [encName UTF8String], (unsigned long)enc);
 	}
 	
 	[ud debugDump];

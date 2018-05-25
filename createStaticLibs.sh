@@ -10,7 +10,8 @@ CC=`xcrun -find clang`
 
 configureflags="--cc=$CC --disable-amd3dnow --disable-doc --disable-encoders \
     --disable-muxers --disable-network \
-    --disable-avfilter --disable-ffmpeg --target-os=darwin"
+    --disable-avfilter --disable-programs --disable-ffmpeg --disable-ffprobe \
+    --target-os=darwin"
 
 cflags="-isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -Dattribute_deprecated= -fvisibility=hidden -w"
 
@@ -62,6 +63,8 @@ else
 	cd ffmpeg
 	#patch -p1 < ../Patches/0002-Workaround-for-AVI-audio-tracks-importing-1152x-too-.patch
     #patch -p1 < ../Patches/config.patch
+    #patch -p1 < ../Patches/ignore-clock-gettime.patch
+    patch -p1 < ../Patches/cxx11Quiet.patch
 	cd ..
 
 	touch ffmpeg/patched
@@ -95,7 +98,7 @@ else
             make depend > /dev/null 2>&1 || true
         fi
         
-        fpcflags=`grep -m 1 -e "^CFLAGS=" "$BUILDDIR"/config.mak | sed -e s/CFLAGS=// -e s/-fomit-frame-pointer//` 
+        fpcflags=`grep -m 1 -e "^CFLAGS=" "$BUILDDIR"/ffbuild/config.mak | sed -e s/CFLAGS=// -e s/-fomit-frame-pointer//` 
 
         make -j3 CFLAGS="$fpcflags" V=1 $fptargets || exit 1
         make -j3 V=1 || exit 1

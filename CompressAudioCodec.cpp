@@ -36,7 +36,7 @@ static const UInt32 kIntPCMOutFormatFlag = kLinearPCMFormatFlagIsSignedInteger |
 
 CompressAudioCodec::CompressAudioCodec(AudioComponentInstance inInstance) : FFissionCodec(inInstance)
 {
-	for (int i = 0; kAllInputFormats[i] != CODEC_ID_NONE; i++) {
+	for (int i = 0; kAllInputFormats[i] != AV_CODEC_ID_NONE; i++) {
 		CAStreamBasicDescription theInputFormat(kAudioStreamAnyRate, kAllInputFormats[i], 0, 1, 0, 0, 0, 0);
 		AddInputFormat(theInputFormat);
 	}

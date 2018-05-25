@@ -7,3 +7,4 @@ _FFissionDecoderEntry
 _FFissionVBRDecoderEntry
 _CompressCodecComponentDispatch
 _CompressAudioDecoderEntry
+_CompressAudioCodecFactory

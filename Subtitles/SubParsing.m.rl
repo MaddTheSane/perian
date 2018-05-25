@@ -66,9 +66,9 @@ SubRGBAColor SubParseSSAColorString(NSString *c)
 	unsigned int rgb;
 	
 	if (c_[0] == '&') {
-		rgb = strtoul(&c_[2],NULL,16);
+		rgb = (unsigned int)strtoul(&c_[2],NULL,16);
 	} else {
-		rgb = strtol(c_,NULL,0);
+		rgb = (unsigned int)strtol(c_,NULL,0);
 	}
 	
 	return SubParseSSAColor(rgb);
@@ -83,18 +83,18 @@ UInt8 SubASSFromSSAAlignment(UInt8 a)
 	return v * 3 + h;
 }
 
-void SubParseASSAlignment(UInt8 a, UInt8 *alignH, UInt8 *alignV)
+void SubParseASSAlignment(UInt8 a, SubAlignmentH *alignH, SubAlignmentV *alignV)
 {
 	switch (a) {
-		default: case 1 ... 3: *alignV = kSubAlignmentBottom; break;
 		case 4 ... 6: *alignV = kSubAlignmentMiddle; break;
 		case 7 ... 9: *alignV = kSubAlignmentTop; break;
+		default: case 1 ... 3: *alignV = kSubAlignmentBottom; break;
 	}
 	
 	switch (a) {
 		case 1: case 4: case 7: *alignH = kSubAlignmentLeft; break;
-		default: case 2: case 5: case 8: *alignH = kSubAlignmentCenter; break;
 		case 3: case 6: case 9: *alignH = kSubAlignmentRight; break;
+		default: case 2: case 5: case 8: *alignH = kSubAlignmentCenter; break;
 	}
 }
 
@@ -117,6 +117,7 @@ BOOL SubParseFontVerticality(NSString **fontname)
 }
 
 @synthesize extra;
+@synthesize offset;
 
 -(void)dealloc
 {
@@ -131,12 +132,32 @@ BOOL SubParseFontVerticality(NSString **fontname)
 @end
 
 @implementation SubRenderDiv
+@synthesize text;
+@synthesize styleLine;
+@synthesize spans;
+@synthesize posX;
+@synthesize posY;
+@synthesize leftMargin = marginL;
+@synthesize rightMargin = marginR;
+@synthesize verticalMargin = marginV;
+@synthesize layer;
+@synthesize alignH;
+@synthesize alignV;
+@synthesize wrapStyle;
+@synthesize renderComplexity = render_complexity;
+@synthesize positioned;
+@synthesize shouldResetPens;
+@synthesize scale;
+@synthesize runningAnimations;
+@synthesize simpleFade;
+@synthesize complexFade;
+
 -(NSString*)description
 {
-	int i, sc = [spans count];
-	NSMutableString *tmp = [NSMutableString stringWithFormat:@"div \"%@\" with %d spans:", text, sc];
+	NSInteger i, sc = [spans count];
+	NSMutableString *tmp = [NSMutableString stringWithFormat:@"div \"%@\" with %ld spans:", text, (long)sc];
 	for (i = 0; i < sc; i++) {[tmp appendFormat:@" %ld",((SubRenderSpan*)[spans objectAtIndex:i])->offset];}
-	[tmp appendFormat:@" %d", [text length]];
+	[tmp appendFormat:@" %lu", (unsigned long)[text length]];
 	return tmp;
 }
 
@@ -147,12 +168,14 @@ BOOL SubParseFontVerticality(NSString **fontname)
 		styleLine = nil;
 		marginL   = marginR = marginV = layer = 0;
 		spans     = nil;
+		scale = 0;
 		
 		posX   = posY = 0;
-		alignH = kSubAlignmentMiddle; alignV = kSubAlignmentBottom;
+		alignH = kSubAlignmentCenter; alignV = kSubAlignmentBottom;
 		
 		positioned = NO;
 		render_complexity = 0;
+		runningAnimations = 0;
 	}
 	
 	return self;
@@ -169,14 +192,13 @@ BOOL SubParseFontVerticality(NSString **fontname)
 
 extern BOOL IsScriptASS(NSDictionary *headers);
 
-static NSArray *SplitByFormat(NSString *format, NSArray *lines)
+static NSArray<NSDictionary<NSString*,NSString*>*> *SplitByFormat(NSString *format, NSArray<NSString*> *lines)
 {
 	NSArray *formarray = SubSplitStringIgnoringWhitespace(format,@",");
-	int i, numlines = [lines count], numfields = [formarray count];
+	NSInteger numlines = [lines count], numfields = [formarray count];
 	NSMutableArray *ar = [NSMutableArray arrayWithCapacity:numlines];
 	
-	for (i = 0; i < numlines; i++) {
-		NSString *s = [lines objectAtIndex:i];
+	for (NSString *s in lines) {
 		NSArray *splitline = SubSplitStringWithCount(s, @",", numfields);
 		
 		if ([splitline count] != numfields) continue;
@@ -187,9 +209,9 @@ static NSArray *SplitByFormat(NSString *format, NSArray *lines)
 	return ar;
 }
 
-void SubParseSSAFile(NSString *ssastr, NSDictionary **headers, NSArray **styles, NSArray **subs)
+void SubParseSSAFile(NSString *ssastr, NSDictionary<NSString*,NSString*> **headers, NSArray<NSDictionary<NSString*,NSString*>*> **styles, NSArray<NSDictionary<NSString*,NSString*>*> **subs)
 {
-	int len = [ssastr length];
+	NSInteger len = [ssastr length];
 	NSData *ssaData;
 	const unichar *ssa = SubUnicodeForString(ssastr, &ssaData);
 	NSMutableDictionary *headerdict = [NSMutableDictionary dictionary];
@@ -265,7 +287,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 	NSArray *lines = (context->scriptType == kSubTypeSRT) ? [NSArray arrayWithObject:[packet substringToIndex:[packet length]-1]] : [packet componentsSeparatedByString:@"\n"];
 	size_t line_count = [lines count];
 	NSMutableArray *divs = [NSMutableArray arrayWithCapacity:line_count];
-	int i;
+	NSInteger i;
 	
 	for (i = 0; i < line_count; i++) {
 		NSString *inputText = [lines objectAtIndex:(context->collisions == kSubCollisionsReverse) ? (line_count - i - 1) : i];
@@ -319,7 +341,7 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 			SubRenderSpan *current_span = [[SubRenderSpan new] autorelease];
 			int chars_deleted = 0; float floatnum = 0;
 			NSString *strval=NULL;
-			float curX, curY;
+			double curX = 0.0, curY = 0;
 			int intnum = 0;
 			BOOL reachedEnd = NO, setWrapStyle = NO, setPosition = NO, setAlignForDiv = NO, dropThisSpan = NO;
 			
@@ -351,15 +373,16 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 				action outlinea {tag(3a, intnum);}
 				action shadowa {tag(4a, intnum);}
 				action stylerevert {tag(r, strval);}
-				action drawingmode {tag(p, floatnum); dropThisSpan = floatnum > 0;}
+				action drawingmode {tag(p, floatnum);}
+				action drawingoffset {tag(pbo, floatnum);}
 
 				action paramset {parambegin=p;}
 				action setintnum {intnum = [psend() intValue];}
-				action sethexnum {intnum = strtoul([psend() UTF8String], NULL, 16);}
+				action sethexnum {intnum = (int)strtoul([psend() UTF8String], NULL, 16);}
 				action setfloatnum {floatnum = [psend() floatValue];}
 				action setstringval {strval = psend();}
 				action nullstring {strval = @"";}
-				action setpos {curX=curY=0; sscanf([psend() UTF8String], "(%f,%f", &curX, &curY);}
+				action setpos {curX=curY=0; sscanf([psend() UTF8String], "(%lf,%lf", &curX, &curY);}
 
 				action ssaalign {
 					if (!setAlignForDiv) {
@@ -427,8 +450,8 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"fscy" floatnum %scaley
 							|"fsp" floatnum %tracking
 							|"fr" "z"? floatnum %frz
-							|"frx" floatnum
-							|"fry" floatnum
+							|"frx" floatnum %frx
+							|"fry" floatnum %fry
 							|"fe" intnum
 							|"1"? "c" color %primaryc
 							|"2c" color %secondaryc
@@ -448,10 +471,11 @@ NSArray *SubParsePacket(NSString *packet, SubContext *context, SubRenderer *dele
 							|"move" move %position
 							|"t" parens
 							|"org" parens %origin
-							|"fad" "e"? parens
+							|"fad" parens
+							|"fade" parens
 							|"i"? "clip" parens
 							|"p" floatnum %drawingmode
-							|"pbo" floatnum
+							|"pbo" floatnum %drawingoffset
 							|"xbord" floatnum
 							|"ybord" floatnum
 							|"xshad" floatnum

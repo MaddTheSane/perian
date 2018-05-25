@@ -173,6 +173,9 @@ static NSString *ColorString(SubRGBAColor *c)
 @end
 
 @implementation SubContext
+@synthesize resX;
+@synthesize resY;
+@synthesize styles;
 
 BOOL IsScriptASS(NSDictionary *headers)
 {	
@@ -203,7 +206,7 @@ BOOL IsScriptASS(NSDictionary *headers)
 	}
 }
 
--(SubContext*)initWithScriptType:(int)type headers:(NSDictionary *)headers_ styles:(NSArray *)stylesArray delegate:(SubRenderer*)delegate
+-(SubContext*)initWithScriptType:(SubType)type headers:(NSDictionary *)headers_ styles:(NSArray *)stylesArray delegate:(SubRenderer*)delegate
 {
 	if (self = [super init]) {
 		resX = 640;
@@ -268,9 +271,15 @@ BOOL IsScriptASS(NSDictionary *headers)
 @end
 
 @implementation SubRenderer
+- (instancetype)init
+{
+	return self = [super init];
+}
+
 -(void)didCompleteStyleParsing:(SubStyle*)s {assert(0);}
 -(void)didCompleteHeaderParsing:(SubContext*)sc {assert(0);}
 -(void)didCreateStartingSpan:(SubRenderSpan *)span forDiv:(SubRenderDiv *)div {assert(0);}
 -(void)spanChangedTag:(SubSSATagName)tag span:(SubRenderSpan*)span div:(SubRenderDiv*)div param:(void*)p {assert(0);}
--(float)aspectRatio {return 4./3.;}
+-(CGFloat)aspectRatio {return 4./3.;}
+-(void)renderPacket:(NSString *)packet inContext:(CGContextRef)c width:(CGFloat)cWidth height:(CGFloat)cHeight {assert(0);}
 @end

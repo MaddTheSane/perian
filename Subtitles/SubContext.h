@@ -22,13 +22,38 @@
 #import <Cocoa/Cocoa.h>
 
 __BEGIN_DECLS
+NS_ASSUME_NONNULL_BEGIN
 
-enum {kSubTypeSSA, kSubTypeASS, kSubTypeSRT, kSubTypeSMI};
-enum {kSubCollisionsNormal, kSubCollisionsReverse};
-enum {kSubLineWrapTopWider = 0, kSubLineWrapSimple, kSubLineWrapNone, kSubLineWrapBottomWider};
-enum {kSubAlignmentLeft, kSubAlignmentCenter, kSubAlignmentRight};
-enum {kSubAlignmentBottom, kSubAlignmentMiddle, kSubAlignmentTop};
-enum {kSubBorderStyleNormal = 1, kSubBorderStyleBox = 3};
+typedef NS_ENUM(int, SubType) {
+	kSubTypeSSA,
+	kSubTypeASS,
+	kSubTypeSRT,
+	kSubTypeSMI
+};
+typedef NS_ENUM(UInt8, SubCollisions) {
+	kSubCollisionsNormal,
+	kSubCollisionsReverse
+};
+typedef NS_ENUM(UInt8, SubLineWrap) {
+	kSubLineWrapTopWider = 0,
+	kSubLineWrapSimple,
+	kSubLineWrapNone,
+	kSubLineWrapBottomWider
+};
+typedef NS_ENUM(UInt8, SubAlignmentH)  {
+	kSubAlignmentLeft,
+	kSubAlignmentCenter,
+	kSubAlignmentRight
+};
+typedef NS_ENUM(UInt8, SubAlignmentV)  {
+	kSubAlignmentBottom,
+	kSubAlignmentMiddle,
+	kSubAlignmentTop
+};
+typedef NS_ENUM(UInt8, SubBorderStyle) {
+	kSubBorderStyleNormal = 1,
+	kSubBorderStyleBox = 3
+};
 enum {kSubPositionNone = INT_MAX};
 
 typedef ATSURGBAlphaColor SubRGBAColor;
@@ -43,7 +68,7 @@ extern NSString * const kSubDefaultFontName;
 	@public;
 	NSString *name;
 	NSString *fontname;
-	SubRenderer *delegate;
+	__unsafe_unretained SubRenderer *delegate;
 	
 	Float32 size;
 	SubRGBAColor primaryColor, secondaryColor, outlineColor, shadowColor;
@@ -52,7 +77,9 @@ extern NSString * const kSubDefaultFontName;
 	Float32 weight; // 0/1 = not bold/bold, > 1 is a font weight
 	BOOL italic, underline, strikeout, vertical;
 	int marginL, marginR, marginV;
-	UInt8 alignH, alignV, borderStyle;
+	SubAlignmentH alignH;
+	SubAlignmentV alignV;
+	SubBorderStyle borderStyle;
 	Float32 platformSizeScale;
 }
 
@@ -68,25 +95,33 @@ extern NSString * const kSubDefaultFontName;
 @property Float32 weight;
 @property BOOL italic, underline, strikeout, vertical;
 @property int marginL, marginR, marginV;
-@property UInt8 alignH, alignV, borderStyle;
+@property SubAlignmentH alignH;
+@property SubAlignmentV alignV;
+@property SubBorderStyle borderStyle;
 @property Float32 platformSizeScale;
 
 + (instancetype)defaultStyleWithDelegate:(SubRenderer*)delegate;
-- (instancetype)initWithDictionary:(NSDictionary *)ssaDict scriptVersion:(UInt8)version delegate:(SubRenderer *)renderer;
+- (instancetype)initWithDictionary:(NSDictionary<NSString*,id> *)ssaDict scriptVersion:(UInt8)version delegate:(SubRenderer *)renderer;
 @end
 
 @interface SubContext : NSObject {
 	@public;
-	NSDictionary *headers;
-	NSDictionary *styles; SubStyle *defaultStyle;
+	NSDictionary<NSString*,id> *headers;
+	NSDictionary<NSString*,SubStyle*> *styles;
+	SubStyle *defaultStyle;
 
 	UInt8 scriptType, collisions, wrapStyle;
 	
-	float resX, resY;
+	CGFloat resX, resY;
 }
 
-- (instancetype)initWithScriptType:(int)type headers:(NSDictionary *)headers styles:(NSArray *)styles delegate:(SubRenderer*)delegate;
+@property CGFloat resX;
+@property CGFloat resY;
+
+- (instancetype)initWithScriptType:(SubType)type headers:(nullable NSDictionary<NSString*,NSString*> *)headers styles:(nullable NSArray<NSDictionary<NSString*,NSString*>*> *)styles delegate:(nullable SubRenderer*)delegate;
 -(SubStyle*)styleForName:(NSString *)name;
+@property (readonly, copy) NSDictionary<NSString*,SubStyle*> *styles;
 @end
 
+NS_ASSUME_NONNULL_END
 __END_DECLS

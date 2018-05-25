@@ -100,18 +100,21 @@ void FFInitFFmpeg()
 		REGISTER_DEMUXER(nuv);
 		REGISTER_PARSER(ac3);
 		REGISTER_PARSER(mpegaudio);
+		REGISTER_PARSER(opus);
 		
 		REGISTER_DECODER(msmpeg4v1);
 		REGISTER_DECODER(msmpeg4v2);
 		REGISTER_DECODER(msmpeg4v3);
 		REGISTER_DECODER(mpeg4);
 		REGISTER_DECODER(h264);
+		REGISTER_DECODER(hevc); // H.265
 		REGISTER_DECODER(flv);
 		REGISTER_DECODER(flashsv);
 		REGISTER_DECODER(vp3);
 		REGISTER_DECODER(vp6);
 		REGISTER_DECODER(vp6f);
 		REGISTER_DECODER(vp8);
+		REGISTER_DECODER(vp9);
 		REGISTER_DECODER(h263i);
 		REGISTER_DECODER(huffyuv);
 		REGISTER_DECODER(ffvhuff);
@@ -133,6 +136,7 @@ void FFInitFFmpeg()
 		REGISTER_DECODER(dca);
 		REGISTER_DECODER(nellymoser);
 		REGISTER_DECODER(aac);
+		REGISTER_DECODER(opus);
 		
 		REGISTER_DECODER(dvdsub);
 		REGISTER_DECODER(tscc);
@@ -152,69 +156,70 @@ void FFInitFFmpeg()
 // XXX this is probably a duplicate of something inside libavformat
 static const struct {
 	OSType mFormatID;
-	enum CodecID codecID;
+	enum AVCodecID codecID;
 } kAudioCodecMap[] =
 {
-	{ kAudioFormatWMA1MS, CODEC_ID_WMAV1 },
-	{ kAudioFormatWMA2MS, CODEC_ID_WMAV2 },
-	{ kAudioFormatFlashADPCM, CODEC_ID_ADPCM_SWF },
-	{ kAudioFormatXiphVorbis, CODEC_ID_VORBIS },
-	{ kAudioFormatMPEGLayer1, CODEC_ID_MP1 },
-	{ kAudioFormatMPEGLayer2, CODEC_ID_MP2 },
-	{ kAudioFormatMPEGLayer3, CODEC_ID_MP3 },
-	{ 'ms\0\0' + 0x50, CODEC_ID_MP2 },
-	{ kAudioFormatDTS, CODEC_ID_DTS },
-	{ kAudioFormatNellymoser, CODEC_ID_NELLYMOSER },
-	{ kAudioFormatTTA, CODEC_ID_TTA },
+	{ kAudioFormatWMA1MS, AV_CODEC_ID_WMAV1 },
+	{ kAudioFormatWMA2MS, AV_CODEC_ID_WMAV2 },
+	{ kAudioFormatFlashADPCM, AV_CODEC_ID_ADPCM_SWF },
+	{ kAudioFormatXiphVorbis, AV_CODEC_ID_VORBIS },
+	{ kAudioFormatMPEGLayer1, AV_CODEC_ID_MP1 },
+	{ kAudioFormatMPEGLayer2, AV_CODEC_ID_MP2 },
+	{ kAudioFormatMPEGLayer3, AV_CODEC_ID_MP3 },
+	{ 'ms\0\0' + 0x50, AV_CODEC_ID_MP2 },
+	{ kAudioFormatDTS, AV_CODEC_ID_DTS },
+	{ kAudioFormatNellymoser, AV_CODEC_ID_NELLYMOSER },
+	{ kAudioFormatTTA, AV_CODEC_ID_TTA },
+	{ kAudioFormatOpusPerian, AV_CODEC_ID_OPUS },
 	
-	{ kAudioFormatAC3MS, CODEC_ID_AC3 },
-	{ kAudioFormatLinearPCM, CODEC_ID_PCM_S16LE },
-	{ kAudioFormatLinearPCM, CODEC_ID_PCM_U8 },
-	{ kAudioFormatALaw, CODEC_ID_PCM_ALAW },
-	{ kAudioFormatULaw, CODEC_ID_PCM_MULAW },
-	{ kMicrosoftADPCMFormat, CODEC_ID_ADPCM_MS },
-	{ kAudioFormatMPEG4AAC, CODEC_ID_AAC },
-	{ kAudioFormatDTS, CODEC_ID_DTS },
-	{ kAudioFormatFlashADPCM, CODEC_ID_ADPCM_SWF },
-	{ 0, CODEC_ID_NONE }
+	{ kAudioFormatAC3MS, AV_CODEC_ID_AC3 },
+	{ kAudioFormatLinearPCM, AV_CODEC_ID_PCM_S16LE },
+	{ kAudioFormatLinearPCM, AV_CODEC_ID_PCM_U8 },
+	{ kAudioFormatALaw, AV_CODEC_ID_PCM_ALAW },
+	{ kAudioFormatULaw, AV_CODEC_ID_PCM_MULAW },
+	{ kMicrosoftADPCMFormat, AV_CODEC_ID_ADPCM_MS },
+	{ kAudioFormatMPEG4AAC, AV_CODEC_ID_AAC },
+	{ kAudioFormatDTS, AV_CODEC_ID_DTS },
+	{ kAudioFormatFlashADPCM, AV_CODEC_ID_ADPCM_SWF },
+	{ 0, AV_CODEC_ID_NONE }
 };
 
-enum CodecID FFFourCCToCodecID(OSType formatID)
+enum AVCodecID FFFourCCToCodecID(OSType formatID)
 {
-	for (int i = 0; kAudioCodecMap[i].codecID != CODEC_ID_NONE; i++) {
+	for (int i = 0; kAudioCodecMap[i].codecID != AV_CODEC_ID_NONE; i++) {
 		if (kAudioCodecMap[i].mFormatID == formatID)
 			return kAudioCodecMap[i].codecID;
 	}
-	return CODEC_ID_NONE;
+	return AV_CODEC_ID_NONE;
 }
 
-OSType FFCodecIDToFourCC(enum CodecID codecID)
+OSType FFCodecIDToFourCC(enum AVCodecID codecID)
 {
-	for (int i = 0; kAudioCodecMap[i].codecID != CODEC_ID_NONE; i++) {
+	for (int i = 0; kAudioCodecMap[i].codecID != AV_CODEC_ID_NONE; i++) {
 		if (kAudioCodecMap[i].codecID == codecID)
 			return kAudioCodecMap[i].mFormatID;
 	}
-	return CODEC_ID_NONE;
+	return AV_CODEC_ID_NONE;
 }
 
-OSType FFPixFmtToFourCC(enum PixelFormat inPixFmt)
+OSType FFPixFmtToFourCC(enum AVPixelFormat inPixFmt)
 {
 	OSType qtPixFmt;
 
 	switch (inPixFmt) {
-		case PIX_FMT_RGB555BE:
+		case AV_PIX_FMT_RGB555BE:
 			qtPixFmt = k16BE555PixelFormat;
 			break;
-		case PIX_FMT_RGB24:
+		case AV_PIX_FMT_RGB24:
 			qtPixFmt = k24RGBPixelFormat;
 			break;
-		case PIX_FMT_ARGB:
+		case AV_PIX_FMT_ARGB:
 			qtPixFmt = k32ARGBPixelFormat;
 			break;
-		case PIX_FMT_YUV422P:
+		case AV_PIX_FMT_YUV422P:
 			qtPixFmt = k2vuyPixelFormat;
 			break;
-		case PIX_FMT_YUV444P:
+		case AV_PIX_FMT_YUV444P:
 			qtPixFmt = k4444YpCbCrA8PixelFormat;
 			break;
 		default:

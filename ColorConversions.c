@@ -538,36 +538,36 @@ static FASTCALL void ClearY422(const CCConverterContext *ctx, UInt8 * __restrict
 
 #pragma mark Simple converter
 
-static enum PixelFormat CCSimplePixFmtForInput(enum PixelFormat inPixFmt)
+static enum AVPixelFormat CCSimplePixFmtForInput(enum AVPixelFormat inPixFmt)
 {
-	enum PixelFormat outPixFmt;
+	enum AVPixelFormat outPixFmt;
 	
 	switch (inPixFmt) {
-		case PIX_FMT_RGB555LE:
-		case PIX_FMT_RGB555BE:
-			outPixFmt = PIX_FMT_RGB555BE;
+		case AV_PIX_FMT_RGB555LE:
+		case AV_PIX_FMT_RGB555BE:
+			outPixFmt = AV_PIX_FMT_RGB555BE;
 			break;
-		case PIX_FMT_BGR24:
-		case PIX_FMT_RGB24:
-			outPixFmt = PIX_FMT_RGB24;
+		case AV_PIX_FMT_BGR24:
+		case AV_PIX_FMT_RGB24:
+			outPixFmt = AV_PIX_FMT_RGB24;
 			break;
-		case PIX_FMT_ARGB:
-		case PIX_FMT_BGRA:
-			outPixFmt = PIX_FMT_ARGB;
+		case AV_PIX_FMT_ARGB:
+		case AV_PIX_FMT_BGRA:
+			outPixFmt = AV_PIX_FMT_ARGB;
 			break;
-		case PIX_FMT_YUV410P:
-		case PIX_FMT_YUVJ420P:
-		case PIX_FMT_YUV420P:
-		case PIX_FMT_YUV422P:
-			outPixFmt = PIX_FMT_YUV422P;
+		case AV_PIX_FMT_YUV410P:
+		case AV_PIX_FMT_YUVJ420P:
+		case AV_PIX_FMT_YUV420P:
+		case AV_PIX_FMT_YUV422P:
+			outPixFmt = AV_PIX_FMT_YUV422P;
 			break;
-		case PIX_FMT_YUVA420P:
-			outPixFmt = PIX_FMT_YUV444P; // not quite...
+		case AV_PIX_FMT_YUVA420P:
+			outPixFmt = AV_PIX_FMT_YUV444P; // not quite...
 			break;
-		case PIX_FMT_YUV420P9LE:
-		case PIX_FMT_YUV420P10LE:
-		case PIX_FMT_YUV420P16LE:
-			outPixFmt = PIX_FMT_YUV422P;
+		case AV_PIX_FMT_YUV420P9LE:
+		case AV_PIX_FMT_YUV420P10LE:
+		case AV_PIX_FMT_YUV420P16LE:
+			outPixFmt = AV_PIX_FMT_YUV422P;
 			break;
 		default:
 			Codecprintf(NULL, "Unknown input pix fmt %d\n", inPixFmt);
@@ -581,11 +581,11 @@ static enum PixelFormat CCSimplePixFmtForInput(enum PixelFormat inPixFmt)
 static bool CCIsInvalidImage(const CCConverterContext *ctx)
 {	
 	switch (ctx->inPixFmt) {
-		case PIX_FMT_YUVJ420P:
-		case PIX_FMT_YUV420P:
-		case PIX_FMT_YUVA420P:
+		case AV_PIX_FMT_YUVJ420P:
+		case AV_PIX_FMT_YUV420P:
+		case AV_PIX_FMT_YUVA420P:
 			if (ctx->width < 2 || ctx->height < 2) return true;
-		case PIX_FMT_YUV422P:
+		case AV_PIX_FMT_YUV422P:
 			if (ctx->height < 2) return true;
 		default:
 			;
@@ -597,35 +597,35 @@ static bool CCIsInvalidImage(const CCConverterContext *ctx)
 typedef void (*ConvertFunc)(const CCConverterContext *ctx, const AVPicture *picture, UInt8 * __restrict o) FASTCALL;
 typedef void (*ClearFunc)(const CCConverterContext *ctx, UInt8 * __restrict baseAddr) FASTCALL;
 
-static ClearFunc CCSimpleClearForPixFmt(enum PixelFormat pixFmt)
+static ClearFunc CCSimpleClearForPixFmt(enum AVPixelFormat pixFmt)
 {
 	ClearFunc clear = NULL;
 	
 	switch (pixFmt) {
-		case PIX_FMT_YUVJ420P:
-		case PIX_FMT_YUV420P:
-		case PIX_FMT_YUV420P9LE:
-		case PIX_FMT_YUV420P10LE:
-		case PIX_FMT_YUV420P16LE:
-		case PIX_FMT_YUV410P:
-		case PIX_FMT_YUV422P:
+		case AV_PIX_FMT_YUVJ420P:
+		case AV_PIX_FMT_YUV420P:
+		case AV_PIX_FMT_YUV420P9LE:
+		case AV_PIX_FMT_YUV420P10LE:
+		case AV_PIX_FMT_YUV420P16LE:
+		case AV_PIX_FMT_YUV410P:
+		case AV_PIX_FMT_YUV422P:
 			clear = ClearY422;
 			break;
-		case PIX_FMT_BGR24:
+		case AV_PIX_FMT_BGR24:
 			clear = ClearRGB24;
 			break;
-		case PIX_FMT_ARGB:
-		case PIX_FMT_BGRA:
+		case AV_PIX_FMT_ARGB:
+		case AV_PIX_FMT_BGRA:
 			clear = ClearRGB32;
 			break;
-		case PIX_FMT_RGB24:
+		case AV_PIX_FMT_RGB24:
 			clear = ClearRGB24;
 			break;
-		case PIX_FMT_RGB555LE:
-		case PIX_FMT_RGB555BE:
+		case AV_PIX_FMT_RGB555LE:
+		case AV_PIX_FMT_RGB555BE:
 			clear = ClearRGB16;
 			break;
-		case PIX_FMT_YUVA420P:
+		case AV_PIX_FMT_YUVA420P:
 			clear = ClearV408;
 			break;
 		default:
@@ -642,52 +642,52 @@ static void CCOpenSimpleConverter(CCConverterContext *ctx)
 	void (^convertBlock)(AVPicture*, uint8_t*) = NULL;
 	
 	switch (ctx->inPixFmt) {
-		case PIX_FMT_YUVJ420P:
-		case PIX_FMT_YUV420P:
+		case AV_PIX_FMT_YUVJ420P:
+		case AV_PIX_FMT_YUV420P:
 			convert = unlikely(ctx->inLineSizes[0]&15) ? Y420toY422_x86_scalar : Y420toY422_sse2;
 			break;
-		case PIX_FMT_YUV420P9LE:
+		case AV_PIX_FMT_YUV420P9LE:
 			convert = Y420_9toY422_8;
 			break;
-		case PIX_FMT_YUV420P10LE:
+		case AV_PIX_FMT_YUV420P10LE:
 			convert = Y420_10toY422_8;
 			break;
-		case PIX_FMT_YUV420P16LE:
+		case AV_PIX_FMT_YUV420P16LE:
 			convert = Y420_16toY422_8;
 			break;
-		case PIX_FMT_BGR24:
+		case AV_PIX_FMT_BGR24:
 			convert = BGR24toRGB24;
 			break;
-		case PIX_FMT_ARGB:
+		case AV_PIX_FMT_ARGB:
 #ifdef __BIG_ENDIAN__
 			convert = RGB32toRGB32Swap;
 #else
 			convert = RGB32toRGB32Copy;
 #endif
 			break;
-		case PIX_FMT_BGRA:
+		case AV_PIX_FMT_BGRA:
 #ifdef __BIG_ENDIAN__
 			convert = RGB32toRGB32Copy;
 #else
 			convert = RGB32toRGB32Swap;
 #endif
 			break;
-		case PIX_FMT_RGB24:
+		case AV_PIX_FMT_RGB24:
 			convert = RGB24toRGB24;
 			break;
-		case PIX_FMT_RGB555LE:
+		case AV_PIX_FMT_RGB555LE:
 			convert = RGB16toRGB16Swap;
 			break;
-		case PIX_FMT_RGB555BE:
+		case AV_PIX_FMT_RGB555BE:
 			convert = RGB16toRGB16;
 			break;
-		case PIX_FMT_YUV410P:
+		case AV_PIX_FMT_YUV410P:
 			convert = Y410toY422;
 			break;
-		case PIX_FMT_YUV422P:
+		case AV_PIX_FMT_YUV422P:
 			convert = Y422toY422;
 			break;
-		case PIX_FMT_YUVA420P:
+		case AV_PIX_FMT_YUVA420P:
 			convert = YA420toV408;
 			break;
 		default:
@@ -804,14 +804,14 @@ static const enum CCConverterType kConverterType = kCCConverterSwscale;
 static const enum CCConverterType kConverterType = kCCConverterSimple;
 #endif
 
-enum PixelFormat CCOutputPixFmtForInput(enum PixelFormat inPixFmt)
+enum AVPixelFormat CCOutputPixFmtForInput(enum AVPixelFormat inPixFmt)
 {
 	switch (kConverterType) {
 		case kCCConverterSimple:
 		default:
 			return CCSimplePixFmtForInput(inPixFmt);
 		case kCCConverterSwscale:
-			return PIX_FMT_RGB24;
+			return AV_PIX_FMT_RGB24;
 	}
 }
 
