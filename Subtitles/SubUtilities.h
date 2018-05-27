@@ -34,7 +34,7 @@ NSString *SubStandardizeStringNewlines(NSString *str);
 
 BOOL SubDifferentiateLatin12(const unsigned char *data, NSInteger length);
 
-const unichar *__nullable SubUnicodeForString(NSString *str, NSData * __nonnull __strong* __nullable NS_RETURNS_RETAINED datap);
+const unichar *__nullable SubUnicodeForString(NSString *str, NSData * __nonnull __strong* __nullable datap);
 CGPathRef CreateSubParseSubShapesWithString(NSString *aStr, const CGAffineTransform * __nullable m) CF_RETURNS_RETAINED;
 
 NS_ASSUME_NONNULL_END

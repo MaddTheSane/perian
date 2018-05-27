@@ -27,7 +27,7 @@
 #endif
 
 #ifndef REZ
-typedef CF_ENUM(OSType, PerianFourCharCodecIDs)
+CF_ENUM(OSType)
 #else
 enum
 #endif
@@ -68,7 +68,7 @@ enum
 };
 
 #ifndef REZ
-typedef CF_ENUM(OSType, PerianAddlFourCharCodecIDs)
+CF_ENUM(OSType)
 #else
 enum
 #endif

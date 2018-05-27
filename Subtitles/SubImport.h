@@ -133,7 +133,7 @@ __END_DECLS
 
 #ifdef __cplusplus
 
-#ifndef __OBJC_GC__
+#if !defined __OBJC_GC__ && !defined __strong
 #define __strong
 #endif
 

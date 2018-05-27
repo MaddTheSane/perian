@@ -449,6 +449,7 @@ ComponentResult ASBDExt_LPCM(KaxTrackEntry *tr_entry, AudioStreamBasicDescriptio
 
 static ComponentResult ASBDExt_ALAC(KaxTrackEntry *tr_entry, Handle cookie, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
 {
+	//TODO: rewrite!
 	if (!tr_entry || !asbd) return paramErr;
 	
 	KaxCodecID *tr_codec = FindChild<KaxCodecID>(*tr_entry);
@@ -514,7 +515,7 @@ ComponentResult MkvFinishSampleDescription(KaxTrackEntry *tr_entry, SampleDescri
 		memcpy(&(*imgDesc)->cType, codecPrivate.GetBuffer(), codecPrivate.GetSize());
 		// it's stored in big endian, so flip endian to native
 		// I think we have to do this, need to check on Intel without them
-		(*imgDesc)->idSize = codecPrivate.GetSize();
+		(*imgDesc)->idSize = SInt32(codecPrivate.GetSize());
 		(*imgDesc)->cType = EndianU32_BtoN((*imgDesc)->cType);
 		(*imgDesc)->resvd1 = EndianS32_BtoN((*imgDesc)->resvd1);
 		(*imgDesc)->resvd2 = EndianS16_BtoN((*imgDesc)->resvd2);
@@ -631,7 +632,7 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 	AudioChannelLayout acl = {0};
 	int channelIndex = asbd->mChannelsPerFrame - 3;
 	
-	if (channelIndex >= 0 && channelIndex < 6) {
+	if (channelIndex >= 0 && channelIndex < 8) {
 		switch (asbd->mFormatID) {
 			case kAudioFormatXiphVorbis:
 				acl = vorbisChannelLayouts[channelIndex];
@@ -666,6 +667,7 @@ AudioChannelLayout GetDefaultChannelLayout(AudioStreamBasicDescription *asbd)
 
 static ComponentResult MkvFinishAudioDescriptionALAC(KaxTrackEntry *tr_entry, Handle *cookie, AudioStreamBasicDescription *asbd, AudioChannelLayout *acl)
 {
+	//TODO: implement?
 	return noErr;
 }
 
