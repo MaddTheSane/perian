@@ -117,10 +117,10 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	Media media;
 	ImageDescriptionHandle imgHdl;
 	Handle imgDescExt = NULL;
-	AVCodecContext *codec;
+	AVCodecParameters *codec;
 	double num,den;
 	
-	codec = map->str->codec;
+	codec = map->str->codecpar;
 	
 	map->base = map->str->time_base;
 	
@@ -163,7 +163,7 @@ void initialize_video_map(NCStream *map, Track targetTrack, Handle dataRef, OSTy
 	
 	// 12 is invalid in mov
 	// FIXME: it might be better to set this based entirely on pix_fmt
-	if (imgPtr->depth == 12 || imgPtr->depth == 0) imgPtr->depth = codec->pix_fmt == AV_PIX_FMT_YUVA420P ? 32 : 24;
+	if (imgPtr->depth == 12 || imgPtr->depth == 0) imgPtr->depth = codec->format == AV_PIX_FMT_YUVA420P ? 32 : 24;
 	
 	/* Create the strf image description extension (see AVI's BITMAPINFOHEADER) */
 	imgDescExt = create_strf_ext(codec);
@@ -182,14 +182,14 @@ OSStatus initialize_audio_map(NCStream *map, Track targetTrack, Handle dataRef, 
 	Media media;
 	SoundDescriptionHandle sndHdl = NULL;
 	AudioStreamBasicDescription asbd;
-	AVCodecContext *codec;
+	AVCodecParameters *codec;
 	UInt32 ioSize;
 	OSStatus err = noErr;
 	
 	uint8_t *cookie = NULL;
 	size_t cookieSize = 0;
 	
-	codec = map->str->codec;
+	codec = map->str->codecpar;
 	map->base = map->str->time_base;
 	
 	media = NewTrackMedia(targetTrack, SoundMediaType, codec->sample_rate, dataRef, dataRefType);
@@ -376,7 +376,7 @@ void map_avi_to_mov_tag(enum AVCodecID codec_id, AudioStreamBasicDescription *as
 /* This function creates a magic cookie basec on the codec parameter and formatID
  * Return value: a pointer to a magic cookie which has to be av_free()'d
  * in cookieSize, the size of the magic cookie is returned to the caller */
-uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatID, int vbr)
+uint8_t *create_cookie(AVCodecParameters *codec, size_t *cookieSize, UInt32 formatID, int vbr)
 {
 	uint8_t *waveAtom = NULL;
 	PutByteContext p;
@@ -406,7 +406,7 @@ uint8_t *create_cookie(AVCodecContext *codec, size_t *cookieSize, UInt32 formatI
 	bytestream2_put_le32(&p, codec->codec_tag);
 	bytestream2_put_le32(&p, codec->channels);
 	bytestream2_put_le32(&p, codec->sample_rate);
-	bytestream2_put_le32(&p, vbr ? 0 : codec->bit_rate / 8);
+	bytestream2_put_le32(&p, vbr ? 0 : (uint32_t)(codec->bit_rate / 8));
 	bytestream2_put_le16(&p, codec->block_align);
 	bytestream2_put_le16(&p, codec->bits_per_coded_sample);
 	bytestream2_put_le16(&p, codec->extradata_size);
@@ -423,7 +423,7 @@ bail:
  * to decode properly, a copy of the strf (BITMAPINFOHEADER) chunk in the avi.
  * Return value: a handle to an image description extension which has to be DisposeHandle()'d
  * in cookieSize, the size of the image description extension is returned to the caller */
-Handle create_strf_ext(AVCodecContext *codec)
+Handle create_strf_ext(AVCodecParameters *codec)
 {
 	Handle result = NULL;
 	PutByteContext p;
@@ -689,7 +689,7 @@ int determine_header_offset(ff_global_ptr storage) {
 					break;
 			}
 			else
-				av_free_packet(&packet);
+				av_packet_unref(&packet);
 			int status = formatContext->iformat->read_packet(formatContext, &packet);
 			if(status < 0)
 				break;
@@ -712,7 +712,7 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 	NCStream *ncstr;
 	AVFormatContext *ic;
 	AVStream *stream;
-	AVCodecContext *codec;
+	AVCodecParameters *codec;
 	SampleReference64Ptr sampleRec;
 	int64_t header_offset, offset, duration;
 	short flags;
@@ -734,7 +734,7 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 	for(j = 0; j < ic->nb_streams; j++) {
 		ncstr = &map[j];
 		stream = ncstr->str;
-		codec = stream->codec;
+		codec = stream->codecpar;
 		
 		/* no stream we can read */
 		if(!ncstr->valid)
@@ -832,7 +832,7 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 			TimeValue mediaDuration;
 			TimeScale mediaTimeScale;
 			TimeScale movieTimeScale;
-			int startTime = map[j].str->index_entries[0].timestamp;
+			int64_t startTime = map[j].str->index_entries[0].timestamp;
 
 			mediaDuration = GetMediaDuration(media);
 			mediaTimeScale = GetMediaTimeScale(media);
@@ -854,8 +854,12 @@ int import_using_index(ff_global_ptr storage, int *hadIndex, TimeValue *addedDur
 			// note str.start_time exists but is always 0 for AVI
 			if (startTime) {
 				TimeRecord startTimeRec;
-				startTimeRec.value.hi = 0;
-				startTimeRec.value.lo = startTime * map[j].str->time_base.num;
+				union Wide_Int64Bridge {
+					int64_t i;
+					CompTimeValue s;
+				} newNeumerator;
+				newNeumerator.i = startTime * map[j].str->time_base.num;
+				startTimeRec.value = newNeumerator.s;
 				startTimeRec.scale = map[j].str->time_base.den;
 				startTimeRec.base = NULL;
 				ConvertTimeScale(&startTimeRec, movieTimeScale);
@@ -888,7 +892,7 @@ bail:
 ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outFlags, int minFrames, int maxFrames, bool addSamples) {
 	SampleReference64Record sampleRec;
 	AVFormatContext *formatContext;
-	AVCodecContext *codecContext;
+	AVCodecParameters *codecContext;
 	AVStream *stream;
 	AVPacket packet;
 	NCStream *ncstream;
@@ -938,7 +942,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		int64_t dts = packet.dts;
 		ncstream = &storage->stream_map[packet.stream_index];
 		stream = ncstream->str;
-		codecContext = stream->codec;
+		codecContext = stream->codecpar;
 		flags = 0;
 		
 		if (!ncstream->valid)
@@ -976,7 +980,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		//add any samples waiting to be added
 		if(ncstream->lastSample.numberOfSamples > 0) {
 			//calculate the duration of the sample before adding it
-			ncstream->lastSample.durationPerSample = (dts - ncstream->lastdts) * ncstream->base.num;
+			ncstream->lastSample.durationPerSample = (TimeValue)((dts - ncstream->lastdts) * ncstream->base.num);
 			
 			AddMediaSampleReferences64(ncstream->media, ncstream->sampleHdl, 1, &ncstream->lastSample, NULL);
 		}
@@ -1010,7 +1014,7 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 			if(codecContext->codec_type == AVMEDIA_TYPE_AUDIO && !ncstream->vbr)
 				sampleRec.durationPerSample = 1;
 			else
-				sampleRec.durationPerSample = ncstream->base.num * packet.duration;
+				sampleRec.durationPerSample = (TimeValue)(ncstream->base.num * packet.duration);
 
 			AddMediaSampleReferences64(ncstream->media, ncstream->sampleHdl, 1, &sampleRec, NULL);
 		}
@@ -1022,12 +1026,12 @@ ComponentResult import_with_idle(ff_global_ptr storage, long inFlags, long *outF
 		if(idling && framesProcessed >= minFrames && availableSize > 0 && availableSize < storage->dataSize) {
 			margin = availableSize - (packet.pos + packet.size);
 			if(margin < (storage->largestPacketSize * 8)) { // 8x fudge factor for comfortable margin, could be tweaked.
-				av_free_packet(&packet);
+				av_packet_unref(&packet);
 				break;
 			}
 		}
 		
-		av_free_packet(&packet);
+		av_packet_unref(&packet);
 		
 		//stop processing if we've hit the max frame limit
 		if(maxFrames > 0 && framesProcessed >= maxFrames)
