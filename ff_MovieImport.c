@@ -99,7 +99,7 @@ ComponentResult FFAvi_MovieImportClose(ff_global_ptr storage, ComponentInstance 
 	for(i=0; i<16; i++)
 	{
 		if(storage->firstFrames[i].data != NULL)
-			av_free_packet(storage->firstFrames + i);
+			av_packet_unref(storage->firstFrames + i);
 	}
 	
 	if(storage)

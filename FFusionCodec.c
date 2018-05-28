@@ -60,7 +60,7 @@
 typedef struct
 {
 	AVFrame		*frame;
-	AVPicture	picture;
+	AVPicture	picture __deprecated;
 	int			frameNumber;
 	uint8_t		retainCount;
 	uint8_t		ffmpegUsing;
@@ -68,14 +68,14 @@ typedef struct
 
 typedef CF_ENUM(CFIndex, FFusionPacked)
 {
-	PACKED_QUICKTIME_KNOWS_ORDER, /* This is for non-stupid container formats which actually know the difference between decode and display order */
-	PACKED_ALL_IN_FIRST_FRAME, /* This is for the divx hack which contains a P frame and all subsequent B frames in a single frame. Ex: I, PB, -, PB, -, I...*/
-	PACKED_DELAY_BY_ONE_FRAME /* This is for stupid containers where frames are soley writen in decode order.  Ex: I, P, B, P, B, P, I.... */
+	PACKED_QUICKTIME_KNOWS_ORDER, /*!< This is for non-stupid container formats which actually know the difference between decode and display order */
+	PACKED_ALL_IN_FIRST_FRAME, /*!< This is for the divx hack which contains a P frame and all subsequent B frames in a single frame. Ex: I, PB, -, PB, -, I...*/
+	PACKED_DELAY_BY_ONE_FRAME /*!< This is for stupid containers where frames are soley writen in decode order.  Ex: I, P, B, P, B, P, I.... */
 };
 
 /* Why do these small structs?  It makes the usage of these variables clearer, no other reason */
 
-/* globs used by the BeginBand routine */
+/*! globs used by the BeginBand routine */
 struct begin_glob
 {
 	FFusionParserContext	*parser;
@@ -86,7 +86,7 @@ struct begin_glob
 	uint8_t		futureType;
 };
 
-/* globs used by the DecodeBand routine */
+/*! globs used by the DecodeBand routine */
 struct decode_glob
 {
 	int				lastFrame;
@@ -119,11 +119,11 @@ typedef struct
     AVCodecContext	*avContext;
     OSType			componentType;
 	FILE			*fileLog;
-	AVPicture		*lastDisplayedPicture;
+	AVPicture		*lastDisplayedPicture __deprecated;
 	FFusionPacked	packedType;
-	FFusionBuffer	buffers[FFUSION_MAX_BUFFERS];	// the buffers which the codec has retained
-	int				lastAllocatedBuffer;		// the index of the buffer which was last allocated 
-												// by the codec (and is the latest in decode order)	
+	FFusionBuffer	buffers[FFUSION_MAX_BUFFERS];	//!< the buffers which the codec has retained
+	int				lastAllocatedBuffer;		//!< the index of the buffer which was last allocated
+												//!< by the codec (and is the latest in decode order)
 	struct begin_glob	begin;
 	FFusionData		data;
 	struct decode_glob	decode;
@@ -275,13 +275,17 @@ static enum AVPixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *av
 {
     AVCodecContext *tmpContext;
     AVFrame *tmpFrame;
-    int got_picture;
     enum AVPixelFormat pix_fmt;
-    
+	AVCodecParameters *params;
+	
 	tmpContext = avcodec_alloc_context3(codec);
 	tmpFrame   = av_frame_alloc();
 
-	avcodec_copy_context(tmpContext, avctx);
+	params = avcodec_parameters_alloc();
+	avcodec_parameters_from_context(params, avctx);
+	avcodec_parameters_to_context(tmpContext, params);
+	avcodec_parameters_free(&params);
+	//avcodec_copy_context(tmpContext, avctx);
 	
     if (avcodec_open2(tmpContext, codec, NULL)) {
 		pix_fmt = AV_PIX_FMT_NONE;
@@ -292,14 +296,15 @@ static enum AVPixelFormat FindPixFmtFromVideo(AVCodec *codec, AVCodecContext *av
 	av_init_packet(&pkt);
 	pkt.data = (UInt8*)data;
 	pkt.size = bufferSize;
-    avcodec_decode_video2(tmpContext, tmpFrame, &got_picture, &pkt);
+	avcodec_send_packet(tmpContext, &pkt);
+	avcodec_receive_frame(tmpContext, tmpFrame);
     pix_fmt = tmpContext->pix_fmt;
     avcodec_close(tmpContext);
 	
 bail:
 	
-    av_freep(&tmpContext);
-	av_freep(&tmpFrame);
+	avcodec_free_context(&tmpContext);
+	av_frame_free(&tmpFrame);
 	
     return pix_fmt;
 }
@@ -1358,8 +1363,8 @@ void FFusionFreeBuffer(void *opaque, uint8_t *data)
 		buf->ffmpegUsing = 0;
 		//releaseBuffer(s, pic);
 	}
-	//AVBufferRef *ref = (AVBufferRef *)opaque;
-	//av_buffer_unref(&ref);
+	AVBufferRef *ref = (AVBufferRef *)opaque;
+	av_buffer_unref(&ref);
 	//av_free(data);
 }
 
@@ -1382,6 +1387,9 @@ OSErr FFusionDecompress(FFusionGlobals glob, AVCodecContext *context, UInt8 *dat
 	av_init_packet(&pkt);
 	pkt.data = dataPtr;
 	pkt.size = length;
+	//avcodec_send_packet(tmpContext, &pkt);
+	//avcodec_receive_frame(tmpContext, tmpFrame);
+	//TODO: get len and gotFramePtr from context
 	len = avcodec_decode_video2(context, picture, &got_picture, &pkt);
 	
 	if (len < 0)

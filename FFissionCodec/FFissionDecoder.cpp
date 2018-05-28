@@ -682,6 +682,9 @@ UInt32 FFissionDecoder::ProduceOutputPackets(void* outOutputData,
 			//frame->nb_samples = outBufUsed;
 			// FIXME avcodec_decode_audio4
 			int gotFramePtr = 0;
+			//avcodec_send_packet(avContext, &pkt);
+			//avcodec_receive_frame(avContext, frame);
+			//TODO: get len and gotFramePtr from avContext
 			len = avcodec_decode_audio4(avContext, frame, &gotFramePtr, &pkt);
 			if (gotFramePtr) {
 				int lineSize;
